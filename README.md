@@ -2,7 +2,7 @@
 
 Fastest and cheapest way to get your own Lightning Node running on a Raspberry - with a nice LCD.
 
-INSERT PHOTO HERE
+![RaspiBlitz](images/raspiblitz.jpg)
 
 *This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.* 
 
@@ -69,7 +69,7 @@ https://www.raspberrypi.org/documentation/installation/installing-images/
 
 Connect all hardware like on photo and boot it up by connecting the power.
 
-INSERT PHOTO HERE
+![HardwareSetup](images/hardwaresetup.jpg)
 
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
@@ -93,11 +93,11 @@ If you want to use the option “COPY” to sync the Blockchain you can simply u
 * copy an indexed Blockchain into the root folder "bitcoin"
 * when youre HDD is ready the content of your folder bitcoin should look like this:
 
-INSERT PHOTO HERE
+![BitcoinFolderData](images/seedhdd.png)
 
 To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack, like in this picture:
 
-INSERT PHOTO HERE
+![ExtraPower](images/extrapower.png)
 
 ## Learning and Building
 
