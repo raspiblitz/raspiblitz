@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # name of torrentfile = name of directory in torrent
-torrent="raspiblitz-hdd-2018-6-27"
+torrent="raspiblitz-hdd-2018-07-16"
 
 echo ""
 echo "*** Checking HDD ***"
@@ -19,7 +19,7 @@ if [ ${mountOK} -eq 1 ]; then
     tmpfile=$(mktemp)
     chmod a+x $tmpfile
     echo "killall transmission-cli" > $tmpfile
-    sudo transmission-cli ./download/$torrent.torrent -D -w /mnt/hdd -f $tmpfile
+    sudo transmission-cli ./assets/$torrent.torrent -D -w /mnt/hdd -f $tmpfile
     echo ""
     echo "*** Moving Files ***"
     echo "moving files ..."

@@ -11,7 +11,7 @@ if [ ${mountOK} -eq 1 ]; then
    ###### LINK HDD
    echo ""
    echo "*** Prepare Bitcoin ***"
-   sudo cp /home/admin/templates/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
    sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
    sudo mkdir /mnt/hdd/lnd
    sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd

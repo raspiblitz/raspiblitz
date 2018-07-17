@@ -41,7 +41,7 @@ echo ""
 echo "*** LND Config ***"
 configExists=$( sudo ls /mnt/hdd/lnd/ | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
-  sudo cp /home/admin/templates/lnd.conf /mnt/hdd/lnd/lnd.conf
+  sudo cp /home/admin/assets/lnd.conf /mnt/hdd/lnd/lnd.conf
   sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
   if [ -d /home/bitcoin/.lnd ]; then
     echo "OK - LND config written"
