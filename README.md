@@ -74,9 +74,13 @@ Connect all hardware like on photo and boot it up by connecting the power.
 * Make sure that your laptop and the raspberry are on the same local network.
 * On Mac OSX you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
 
-When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel. So open up a terminal and connect thru SSH:
+When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel. 
 
-ssh admin@[IP] → use password → raspiBlitzA
+
+
+So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH:
+
+ssh admin@[YOURIP] → use password: raspiblitz
 
 Now follow the dialoge in your terminal. This can take some time (prepare some coffee) - but in the end you should have a running Lightning node on your RaspberryPi that you can start to learn and hack on --> see Chapter "Your First Lightning Transaction"
 
