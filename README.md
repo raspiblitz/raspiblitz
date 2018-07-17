@@ -4,7 +4,7 @@
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
-![RaspiBlitz](images/raspiblitz.jpg)
+![RaspiBlitz](pictures/raspiblitz.jpg)
 
 *This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.* 
 
@@ -61,14 +61,14 @@ or try this HTTP-Link for direct download:
 http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
-https://www.raspberrypi.org/documentation/installation/installing-images/
+https://www.raspberrypi.org/documentation/installation/installing-pictures/
 
 
 ## SetUp your RaspiBlitz
 
 Connect all hardware like on photo and boot it up by connecting the power.
 
-![HardwareSetup](images/hardwaresetup.jpg)
+![HardwareSetup](pictures/hardwaresetup.jpg)
 
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
@@ -76,7 +76,9 @@ Connect all hardware like on photo and boot it up by connecting the power.
 
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel. 
 
-So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH:
+![LCD0](pictures/lcd0-welcome.png)
+
+So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
@@ -88,21 +90,122 @@ Now follow the dialoge in your terminal. This can take some time (prepare some c
 
 *The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and help in special edge cases.*
 
-#### Getting the Blockchain
+#### Init
 
-If you want to use the option “COPY” to sync the Blockchain you can simply use the HDD of another RaspiBlitz or you preapre a HDD yourself by:
+Automatically after login per SSH as admin to the RaspiBlitz, the user sees this welcome menu:
+
+![SSH0](pictures/ssh0-welcome.png)
+
+Setting Up the Raspi is the only option at this point, so we go with OK.
+
+*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal promt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
+
+First thing to setup is giving your RaspiBlitz an name:
+
+![SSH1](pictures/ssh1-name.png)
+
+This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
+
+*Background: This and the following setup dialoges are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
+
+Then the user gets requested to write down 4 passwords:
+
+![SSH2](pictures/ssh2-passwords.png)
+
+*Background: The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#write-down-your-passwords)*
+
+Then the user is asked to enter the Password A:
+
+![SSH3a](pictures/ssh3a-password.png)
+
+On the next SSH login to the RaspiBlitz as admin, this new password has to be used. Its also set for the user existing user: root, bitcoin & pi. But only admin can be used to login per SSH.
+
+*Background: The bitcoin and lightning processes will run in the background (as daemon) and use the separate user “bitcoin” for security reasons. This user does not have admin rights and cannot change the system configuration.*
+
+Then the user is asked to enter the Password B:
+
+![SSH3b](pictures/ssh3b-password.png)
+
+*Background: The other passwords C & D get entered by the lightning wallet setup. This can just happen later ... so they will not get requested at this point.*
+
+After this the setup process needs some time and the user will see a lot of console outputs:
+
+![SSH4](pictures/ssh4-scripts.png)
+
+*Background: After the user interaction the following scripts are started to automatically setup the RaspiBlitz:*
+
+* 30initHDD.sh - it checks if the HDD needs to be formatted with Ext4
+* 40addHDD.sh - adds the HDD for permanent mounting on /mnt/hdd
+* 10setupBlitz.sh - now takes care that the HDD contains the blockchain
+
+The following screen is just shown, if the HDD was not prepared with a copy of the Bitcoin blockchain (as part of a ready-2-go set). The following options are offered to get a copy:
+
+![SSH5](pictures/ssh5-blockchain.png)
+
+The third option "SYNC" should just be use as a fallback. So normally you have the following two options:
+
+#### Download the Blockchain
+
+This is the recommended way for users that are making the setup at home without any further assistence but can take quite some time.
+
+*Background: The download is done thru bittorrent. So just it should be possible to stop/shutdown the Raspi and continue later - just in case.* 
+
+#### Copy the Blockchain
+
+To copy the blockchain from another HDD can be faster - if available. If you choose this option the, the console requests you to connect the second HDD and will autmatically detect it:
+
+![SSH6b](pictures/ssh6b-copy.png)
+
+You can simply use the HDD of another RaspiBlitz or you preapre a HDD yourself by:
 
 * format second HDD with exFAT (availbale on Windows and Mac)
 * copy an indexed Blockchain into the root folder "bitcoin"
 * when youre HDD is ready the content of your folder bitcoin should look like this:
 
-![BitcoinFolderData](images/seedhdd.png)
+![BitcoinFolderData](pictures/seedhdd.png)
 
 To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack, like in this picture:
 
-![ExtraPower](images/extrapower.png)
+![ExtraPower](pictures/extrapower.png)
+
+**Background: If the blockchain was already on the HDD or was aquired sucessfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
+
+#### Lightning 
+
+Before the lighting service can be started the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
+
+INSERT PHOTO HERE
+
+The creation of the Lightning Bitcoin Wallet gets done with the command: `lncli create` the RaspiBlitz is calling in the background.
+
+INSERT PHOTO HERE
+
+After the wallet was created the Lightning service needs to scan the Blockchain ... this can take some time. If needed the user can close the SSH session with the RaspiBlitz during that time (progress is displayed on the LCD as status). On SSH back in just continue with the setup process.
+
+*Background: Blockchain synup, LND wallet creation and LND scanning is all done within the script `70initLND.sh`*
+
+Now the setup process is almost done and the RaspiBlitz needs a reboot:
+
+INSERT PHOTO HERE
+
+After reboot the RaspiBlitz is showing that the Wallet needs to be unlocked on the LCD and its ready to SSH back in:
+
+INSERT PHOTO HERE
+
+*Background: The LND wallet needs to get unlocked on every new start of the RaspiBlitz. The status information loop on the LCD is done by the script '00infoBlitz.sh'*
+
+After SSH back in as admin the main menu shows the unlock option:
+
+INSERT PHOTO HERE
+
+Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
+
+
+*Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.* 
 
 ### Features
+
+*Most of the special features of the RaspiBlitz are listed as part of the main menu after connecting per ssh with the admin user.*
 
 #### Status Infoscreen
 
