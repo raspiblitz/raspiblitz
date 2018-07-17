@@ -55,7 +55,7 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 ### Scenario 2 “Start at Home”
 You got all the hardware of the shopping list above and you have no further assistence. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time. 
 
-1. Download SD-Card image with a bittorrent client:
+1. Download SD-Card image with a [bittorrent client](https://www.utorrent.com/intl/en/downloads/):
 https://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.torrent
 or try this HTTP-Link for direct download:
 http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
@@ -75,8 +75,6 @@ Connect all hardware like on photo and boot it up by connecting the power.
 * On Mac OSX you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
 
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel. 
-
-
 
 So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH:
 
