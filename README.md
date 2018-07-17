@@ -1,5 +1,7 @@
-# RaspiBlitz
+[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](setup-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educatiuonal-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
+-----
+# RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
 ![RaspiBlitz](images/raspiblitz.jpg)
