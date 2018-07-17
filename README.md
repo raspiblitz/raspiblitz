@@ -200,12 +200,15 @@ INSERT PHOTO HERE
 
 Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
 
+INSERT PHOTO HERE
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.* 
 
 ### Features
 
-*Most of the special features of the RaspiBlitz are listed as part of the main menu after connecting per ssh with the admin user.*
+But you manually extened your RaspiBlitz with features listed in the RaspiBlot Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
+
+Already integrated features of the RaspiBlitz are/willbe listed as part of the main menu after connecting per ssh with the admin user.
 
 #### Status Infoscreen
 
@@ -213,7 +216,9 @@ INSERT PHOTO HERE
 
 ## Educatiuonal Tutorials
 
-*TODO: Once the SetUp Process is done, the learning and building should begin ... educational content should be added on sub pages in the future - at least "Your first Lightning Transaction"*
+*Once the SetUp Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
+
+A good way to start for now is to get some Testnet coins, connect to other peers and make your first transactions. You find tutorials for this at the original RaspiBolt guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#get-some-testnet-bitcoin
 
 ## Further Development of RaspiBlitz
 
