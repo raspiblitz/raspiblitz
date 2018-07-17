@@ -1,6 +1,6 @@
 # RaspiBlitz
 
-Fastest and cheapest way to get your own Lightning Node running on a Raspberry - with a nice LCD.
+Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
 ![RaspiBlitz](images/raspiblitz.jpg)
 
@@ -11,23 +11,12 @@ Fastest and cheapest way to get your own Lightning Node running on a Raspberry -
 
 *The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.de:* 
 
-RaspBerry Pi 3: 31,99 EUR
-https://www.amazon.de/dp/B01CD5VC92
- 
-Micro SD-Card 16GB: 7,11 EUR
-https://www.amazon.de/dp/B0162YQEIE
-
-Power: 9,29 EUR
-https://www.amazon.de/dp/B01E75SB2C
-
-1TB Hard Drive: 49,99 EUR
-https://www.amazon.de/dp/B00KWHJY7Q
-
-Case: 9,36 EUR
-https://www.amazon.de/dp/B0173GQF8Y
-
-LCD-Display: 19,58 EUR 
-https://www.amazon.de/dp/B01JRUH0CY
+* RaspBerry Pi 3 (31,99 EUR) https://www.amazon.de/dp/B01CD5VC92
+* Micro SD-Card 16GB (7,11 EUR) https://www.amazon.de/dp/B0162YQEIE
+* Power (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
+* 1TB Hard Drive (49,99 EUR) https://www.amazon.de/dp/B00KWHJY7Q
+* Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
+* LCD-Display (19,58 EUR) https://www.amazon.de/dp/B01JRUH0CY
 
 **Total Price: 127,31 EUR** (thats under 150 USD)
 
@@ -38,11 +27,11 @@ Amazon shopping lists for different countries:
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz:*
 
-SD-Card Writer: https://www.amazon.de/dp/B01JWFZWUQ
-LAN Cable: https://www.amazon.de/dp/B004SUEIE2
-USB-LAN-Adapter: https://www.amazon.de/dp/B00NPJV4YY
-Transport Case: https://www.amazon.de/dp/B007Y4NWSW
-Y-Cable: https://www.amazon.de/dp/B00ZJBIHVY
+* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ
+* LAN Cable https://www.amazon.de/dp/B004SUEIE2
+* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY
+* Transport Case https://www.amazon.de/dp/B007Y4NWSW
+* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
 
