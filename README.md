@@ -6,6 +6,13 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 *This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.* 
 
+## Table of Contents
+
+* [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
+* [ [Setup](#setup-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
+* [ [Documentation](#documentation) ] Features and Usecases  
+* [ [Education](#educatiuonal-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
+* [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
 
 ## Hardware Needed (Amazon Shopping List)
 
@@ -70,11 +77,13 @@ ssh admin@[IP] → use password → raspiBlitzA
 
 Now follow the dialoge in your terminal. This can take some time (prepare some coffee) - but in the end you should have a running Lightning node on your RaspberryPi that you can start to learn and hack on --> see Chapter "Your First Lightning Transaction"
 
-## Documentation of Setup Process
+## Documentation
+
+### Setup Process
 
 *The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and help in special edge cases.*
 
-### Getting the Blockchain
+#### Getting the Blockchain
 
 If you want to use the option “COPY” to sync the Blockchain you can simply use the HDD of another RaspiBlitz or you preapre a HDD yourself by:
 
@@ -88,10 +97,17 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ![ExtraPower](images/extrapower.png)
 
-## Learning and Building
+### Features
+
+*TODO*
+
+## Educatiuonal Tutorials
 
 *TODO: Once the SetUp Process is done, the learning and building should begin ... educational content should be added on sub pages in the future - at least "Your first Lightning Transaction"*
 
+## Further Development of RaspiBlitz
+
+*TODO: Documentation of how to improve and extend the RaspiBlitz together"*
 
 
 
