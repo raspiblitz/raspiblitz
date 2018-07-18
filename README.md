@@ -174,13 +174,15 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 Before the lighting service can be started the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
-INSERT PHOTO HERE
+![SSH7](pictures/ssh7-lndinit.png)
 
 The creation of the Lightning Bitcoin Wallet gets done with the command: `lncli create` the RaspiBlitz is calling in the background.
 
-INSERT PHOTO HERE
+![SSH8](pictures/ssh8-wallet.png)
 
 After the wallet was created the Lightning service needs to scan the Blockchain ... this can take some time. If needed the user can close the SSH session with the RaspiBlitz during that time (progress is displayed on the LCD as status). On SSH back in just continue with the setup process.
+
+![SSH9](pictures/ssh9-lndscan.png)
 
 *Background: Blockchain synup, LND wallet creation and LND scanning is all done within the script `70initLND.sh`*
 
