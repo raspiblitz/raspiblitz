@@ -15,6 +15,7 @@ if [ ${mountOK} -eq 1 ]; then
    sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
    sudo mkdir /mnt/hdd/lnd
    sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
    sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd

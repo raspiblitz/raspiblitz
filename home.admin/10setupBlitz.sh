@@ -42,7 +42,7 @@ if [ ${mountOK} -eq 1 ]; then
   if [ -d "/mnt/hdd/bitcoin" ]; then
     echo "UNKOWN STATE"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "This needs manual work (get in contact with RaspiBlitz dev team)"
+    echo "Maybe try --> ./60finishHDD.sh"
     exit 1
   fi
 
