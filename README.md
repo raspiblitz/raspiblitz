@@ -188,21 +188,21 @@ After the wallet was created the Lightning service needs to scan the Blockchain 
 
 Now the setup process is almost done and the RaspiBlitz needs a reboot:
 
-INSERT PHOTO HERE
+![SSH9b](pictures/ssh9b-reboot.png)
 
 After reboot the RaspiBlitz is showing that the Wallet needs to be unlocked on the LCD and its ready to SSH back in:
 
-INSERT PHOTO HERE
+![SSH9c](pictures/ssh9c-unlock.png)
 
 *Background: The LND wallet needs to get unlocked on every new start of the RaspiBlitz. The status information loop on the LCD is done by the script '00infoBlitz.sh'*
 
 After SSH back in as admin the main menu shows the unlock option:
 
-INSERT PHOTO HERE
+![SSH9d](pictures/ssh9d-unlock.png)
 
 Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
 
-INSERT PHOTO HERE
+![SSH9e](pictures/ssh9e-mainmenu.png)
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.* 
 
@@ -214,7 +214,7 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 #### Status Infoscreen
 
-INSERT PHOTO HERE
+![feat-info](pictures/feature-info.png)
 
 ## Educatiuonal Tutorials
 
