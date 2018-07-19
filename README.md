@@ -102,7 +102,7 @@ Setting Up the Raspi is the only option at this point, so we go with OK.
 
 First thing to setup is giving your RaspiBlitz an name:
 
-![SSH1](pictures/ssh1-name.png)
+![SSH2](pictures/ssh2-passwords.png)
 
 This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
 
@@ -110,7 +110,7 @@ This name is given to the RaspiBlitz as hostname in the local network and later 
 
 Then the user gets requested to write down 4 passwords:
 
-![SSH2](pictures/ssh2-passwords.png)
+![SSH1](pictures/ssh1-name.png)
 
 *Background: The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#write-down-your-passwords)*
 
