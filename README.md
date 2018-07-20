@@ -32,6 +32,8 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 Amazon shopping lists for different countries:
 [ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ]
 
+You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
+
 ### Optional Hardware
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz:*
@@ -216,7 +218,7 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 ![feat-info](pictures/feature-info.png)
 
-## Educatiuonal Tutorials
+## Educational Tutorials
 
 *Once the SetUp Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
 
