@@ -8,3 +8,5 @@
 * 1TB Hard Drive ($49.99 USD) http://a.co/eUgVfLd
 * Case ($7.99 USD) http://a.co/1774Hwl
 * LCD-Display ($19.99 USD) https://www.amazon.de/dp/B01JRUH0CY 
+
+**Total Price: $145.85 USD**
