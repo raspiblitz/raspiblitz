@@ -1,3 +1,12 @@
-Your are from the USA? Your help is needed! 
+## Hardware Needed (Amazon.com Shopping List)
 
-It would be great if you can create a shopping list for amazon USA for the RaspiBlitz and test if everything is running with the hardware setup. Thx.
+*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.com:* 
+
+* RaspBerry Pi 3 ($41.00 USD) http://a.co/ahl7RIp
+* Micro SD-Card 16GB ($6.75 USD) http://a.co/6R49HZz
+* Power ($7.89 USD) http://a.co/gGOtk30
+* 1TB Hard Drive ($49.99 USD) http://a.co/eUgVfLd
+* Case ($7.99 USD) http://a.co/1774Hwl
+* LCD-Display ($19.99 USD) https://www.amazon.de/dp/B01JRUH0CY 
+
+**Total Price: $145.85 USD**
