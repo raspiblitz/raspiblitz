@@ -63,7 +63,7 @@ or try this HTTP-Link for direct download:
 http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
-https://www.raspberrypi.org/documentation/installation/installing-pictures/
+https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
 
 ## SetUp your RaspiBlitz
