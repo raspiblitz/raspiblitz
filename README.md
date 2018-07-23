@@ -55,7 +55,7 @@ If you organizing an educational event where you want to support people learning
 If you are at an event, ask for a ready-2-go set or if you have your own hardware ask for assistance to prepare your SD-Card and HDD. Then you are all set and and you can proceed with "SetUp your RaspiBlitz".
 
 ### Scenario 2 “Start at Home”
-You got all the hardware of the shopping list above and you have no further assistence. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
+You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image with [bittorrent](https://www.utorrent.com/intl/en/downloads/):
 https://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.torrent
@@ -74,7 +74,7 @@ Connect all hardware like on photo and boot it up by connecting the power.
 
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
-* On Mac OSX you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
+* On Mac OS X you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
 
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel.
 
@@ -100,7 +100,7 @@ Automatically after login per SSH as admin to the RaspiBlitz, the user sees this
 
 Setting Up the Raspi is the only option at this point, so we go with OK.
 
-*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal promt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
+*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal prompt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
 
 First thing to setup is giving your RaspiBlitz an name:
 
@@ -108,7 +108,7 @@ First thing to setup is giving your RaspiBlitz an name:
 
 This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
 
-*Background: This and the following setup dialoges are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
+*Background: This and the following setup dialogues are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
 
 Then the user gets requested to write down 4 passwords:
 
@@ -148,7 +148,7 @@ The third option "SYNC" should just be use as a fallback. So normally you have t
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistence but can take quite some time.
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time.
 
 *Background: The download is done thru bittorrent. So just it should be possible to stop/shutdown the Raspi and continue later - just in case.*
 
@@ -158,7 +158,7 @@ To copy the blockchain from another HDD can be faster - if available. If you cho
 
 ![SSH6b](pictures/ssh6b-copy.png)
 
-You can simply use the HDD of another RaspiBlitz or you preapre a HDD yourself by:
+You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself by:
 
 * format second HDD with exFAT (availbale on Windows and Mac)
 * copy an indexed Blockchain into the root folder "bitcoin"
@@ -170,7 +170,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ![ExtraPower](pictures/extrapower.png)
 
-**Background: If the blockchain was already on the HDD or was aquired sucessfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
+**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
 
 #### Lightning
 
