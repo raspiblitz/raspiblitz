@@ -235,4 +235,4 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
 
-IRC channel on Freenode <a href="irc://irc.freenode.net/raspiblitz">irc</a>
+IRC channel on Freenode `irc://irc.freenode.net/raspiblitz`
