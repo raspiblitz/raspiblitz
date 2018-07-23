@@ -47,6 +47,7 @@ You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
 
 
+
 ## Prepare your Hardware
 
 *There are two ways to start:*
@@ -233,3 +234,5 @@ The goal of the RaspiBlitz is to provide a out-of-the-box hardware lightning nod
 Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in progress. Check the issues if you wanna help out or add new ideas. You find the scripts used for RaspiBlitz interactions on the device at `/home/admin` or in this git repo in the subfolder `home.admin`. More to come.
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
+
+IRC channel on Freenode <a href="irc://irc.freenode.net/raspiblitz">irc</a>
