@@ -66,7 +66,7 @@ http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
 
-## SetUp your RaspiBlitz
+## Boot your RaspiBlitz
 
 Connect all hardware like on photo and boot it up by connecting the power.
 
