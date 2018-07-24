@@ -6,7 +6,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-*This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.* 
+*This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.*
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 ## Hardware Needed (Amazon Shopping List)
 
-*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.de:* 
+*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.de:*
 
 * RaspBerry Pi 3 (31,99 EUR) https://www.amazon.de/dp/B01CD5VC92
 * Micro SD-Card 16GB (7,11 EUR) https://www.amazon.de/dp/B0162YQEIE
@@ -36,15 +36,16 @@ You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [
 
 ### Optional Hardware
 
-*Some optional goodies to consider to add to your shopping list for your RaspiBlitz:*
+*Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
 
-* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ
-* LAN Cable https://www.amazon.de/dp/B004SUEIE2
-* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY
-* Transport Case https://www.amazon.de/dp/B007Y4NWSW
-* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY
+* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ / http://a.co/6e03D7Z
+* LAN Cable https://www.amazon.de/dp/B004SUEIE2 /http://a.co/g2IJd6i
+* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY / http://a.co/ccb26nF
+* Transport Case https://www.amazon.de/dp/B007Y4NWSW / http://a.co/0c6wyM2
+* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
+
 
 
 ## Prepare your Hardware
@@ -55,7 +56,7 @@ If you organizing an educational event where you want to support people learning
 If you are at an event, ask for a ready-2-go set or if you have your own hardware ask for assistance to prepare your SD-Card and HDD. Then you are all set and and you can proceed with "SetUp your RaspiBlitz".
 
 ### Scenario 2 “Start at Home”
-You got all the hardware of the shopping list above and you have no further assistence. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time. 
+You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image with [bittorrent](https://www.utorrent.com/intl/en/downloads/):
 https://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.torrent
@@ -66,7 +67,7 @@ http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
 
-## SetUp your RaspiBlitz
+## Boot your RaspiBlitz
 
 Connect all hardware like on photo and boot it up by connecting the power.
 
@@ -74,9 +75,9 @@ Connect all hardware like on photo and boot it up by connecting the power.
 
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
-* On Mac OSX you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
+* On Mac OS X you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
 
-When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel. 
+When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel.
 
 ![LCD0](pictures/lcd0-welcome.png)
 
@@ -100,7 +101,7 @@ Automatically after login per SSH as admin to the RaspiBlitz, the user sees this
 
 Setting Up the Raspi is the only option at this point, so we go with OK.
 
-*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal promt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
+*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal prompt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
 
 First thing to setup is giving your RaspiBlitz an name:
 
@@ -108,7 +109,7 @@ First thing to setup is giving your RaspiBlitz an name:
 
 This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
 
-*Background: This and the following setup dialoges are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
+*Background: This and the following setup dialogues are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
 
 Then the user gets requested to write down 4 passwords:
 
@@ -148,9 +149,9 @@ The third option "SYNC" should just be use as a fallback. So normally you have t
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistence but can take quite some time.
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time.
 
-*Background: The download is done thru bittorrent. So just it should be possible to stop/shutdown the Raspi and continue later - just in case.* 
+*Background: The download is done thru bittorrent. So just it should be possible to stop/shutdown the Raspi and continue later - just in case.*
 
 #### Copy the Blockchain
 
@@ -158,7 +159,7 @@ To copy the blockchain from another HDD can be faster - if available. If you cho
 
 ![SSH6b](pictures/ssh6b-copy.png)
 
-You can simply use the HDD of another RaspiBlitz or you preapre a HDD yourself by:
+You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself by:
 
 * format second HDD with exFAT (availbale on Windows and Mac)
 * copy an indexed Blockchain into the root folder "bitcoin"
@@ -170,9 +171,9 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ![ExtraPower](pictures/extrapower.png)
 
-**Background: If the blockchain was already on the HDD or was aquired sucessfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
+**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
 
-#### Lightning 
+#### Lightning
 
 Before the lighting service can be started the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
@@ -206,7 +207,7 @@ Once the wallet is unlocked the setup is finally over and the main menu shows th
 
 ![SSH9e](pictures/ssh9e-mainmenu.png)
 
-*Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.* 
+*Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
 ### Features
 
@@ -233,3 +234,5 @@ The goal of the RaspiBlitz is to provide a out-of-the-box hardware lightning nod
 Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in progress. Check the issues if you wanna help out or add new ideas. You find the scripts used for RaspiBlitz interactions on the device at `/home/admin` or in this git repo in the subfolder `home.admin`. More to come.
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
+
+IRC channel on Freenode `irc://irc.freenode.net/raspiblitz`
