@@ -17,24 +17,45 @@ if [ ${mountOK} -eq 1 ]; then
     # HDD is empty - download HDD content
     echo "OK - HDD is ready."
     echo ""
-    echo "*** Downloading HDD ***"
-    tmpfile=$(mktemp)
-    chmod a+x $tmpfile
-    echo "killall transmission-cli" > $tmpfile
-    sudo transmission-cli ./assets/$torrent.torrent -D -w /mnt/hdd -f $tmpfile
-    echo ""
-    echo "*** Checking Download ***"
-    echo "wait a moment"
-    sleep 5
-    downloadsize=$(sudo du -s /mnt/hdd/$torrent/ | awk '{print $1}' | tr -dc '0-9')
-    if [ ${#downloadsize} -eq 0 ]; then 
-      downloadsize=0
-    fi
-    # add some tolerance for checking 
-    torrentsize="$(($torrentsize-1024000))"
-    echo "download size is(${downloadsize})"
+
+    downloading=1
+    retry=0
+    while [ $downloading -eq 1 ]
+    do
+      echo "*** Downloading HDD ***"
+      tmpfile=$(mktemp)
+      chmod a+x $tmpfile
+      echo "killall transmission-cli" > $tmpfile
+      sudo transmission-cli ./assets/$torrent.torrent -D -et -w /mnt/hdd -f $tmpfile
+      echo ""
+      echo "*** Checking Download ***"
+      echo "wait a moment"
+      sleep 5
+      downloadsize=$(sudo du -s /mnt/hdd/$torrent/ | awk '{print $1}' | tr -dc '0-9')
+      if [ ${#downloadsize} -eq 0 ]; then 
+        downloadsize=0
+      fi
+      # add some tolerance for checking 
+      torrentsize="$(($torrentsize-1024000))"
+      echo "download size is(${downloadsize})"
+      if [ ${downloadsize} -lt ${torrentsize} ]; then
+        echo ""
+        echo "FAIL - download is not ${torrentsize}"
+        retry=$(($retry+1))
+        if [ ${retry} -gt 2 ]; then 
+          echo "All Retry FAILED"
+          downloading=0
+        else
+          echo "--> RETRY(${retry}) in 10 secs"
+          sleep 10
+          echo ""
+        fi  
+      else
+        echo "OK - Download is complete"
+        downloading=0
+      fi
+    done  
     if [ ${downloadsize} -lt ${torrentsize} ]; then
-      echo "FAIL - download is not ${torrentsize}"
       sleep 3
       dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want to clean all download data before you continue?" 6 57
       response=$?
