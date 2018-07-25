@@ -7,7 +7,7 @@ while [ ${#result} -eq 0 ]
   do
     l1="Please enter the name of your new RaspiBlitz:\n"
     l2="one word, keep characters basic & not too long"
-    dialog --backtitle "RaspiBlitz - SetUp" --inputbox "$l1$l2" 11 52 2>$_temp
+    dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
     result=`cat $_temp`
     shred $_temp
   done
@@ -20,7 +20,7 @@ sed -i "7s/.*/alias=$result/" ./assests/lnd.conf
 echo $result >> /home/admin/.hostname
 
 # show password info dialog
-dialog --backtitle "RaspiBlitz - SetUp" --msgbox "RaspiBlitz uses 4 different passwords.
+dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
 Referenced as password A, B, C and D.
 
 A) Master User Password
@@ -33,7 +33,7 @@ Write them down & store them in a safe place.
 " 14 52
 
 # ask user for new password A
-dialog --backtitle "RaspiBlitz - SetUp"\
+dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
 
 # get user input
@@ -62,7 +62,7 @@ dialog --backtitle "RaspiBlitz" --msgbox "OK - password changed to '$result'\nfo
 result=""
 while [ ${#result} -lt 8 ]
   do
-    dialog --backtitle "RaspiBlitz - SetUp"\
+    dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Enter your RPC Password B (min 8 chars):" 9 52 2>$_temp
     result=`cat $_temp`
     shred $_temp

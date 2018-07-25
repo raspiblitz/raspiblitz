@@ -38,7 +38,7 @@ echo "Setting new network hostname '$hostname'"
 sudo hostnamectl set-hostname ${hostname}
 
 # show info to user
-dialog --backtitle "RaspiBlitz - SetUp" --title " RaspiBlitz Setup is done :) " --msgbox "
+dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
     Press OK for a final reboot.
 
     Remember: After every reboot

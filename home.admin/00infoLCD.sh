@@ -60,7 +60,7 @@ if [ "$USER" = "pi" ]; then
           l1="Login to your RaspiBlitz with:\n"
           l2="ssh admin@${localip}\n"
           l3="Use your Password A\n"
-          dialog --backtitle "RaspiBlitz - SetUp Mode" --infobox "$l1$l2$l3" 5 34
+          dialog --backtitle "RaspiBlitz - Setup Mode" --infobox "$l1$l2$l3" 5 34
 	  sleep 10
 
         fi
