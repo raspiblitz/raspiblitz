@@ -53,7 +53,7 @@ If you organizing an educational event where you want to support people learning
 *There are two ways to start:*
 
 ### Scenario 1: “At a Hackathon/Event”
-If you are at an event, ask for a ready-2-go set or if you have your own hardware ask for assistance to prepare your SD-Card and HDD. Then you are all set and and you can proceed with "SetUp your RaspiBlitz".
+If you are at an event, ask for a ready-2-go set or if you have your own hardware ask for assistance to prepare your SD-Card and HDD. Then you are all set and and you can proceed with "Setup your RaspiBlitz".
 
 ### Scenario 2 “Start at Home”
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
@@ -221,7 +221,7 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 ## Educational Tutorials
 
-*Once the SetUp Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
+*Once the Setup Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
 
 A good way to start for now is to get some Testnet coins, connect to other peers and make your first transactions. You find tutorials for this at the original RaspiBolt guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#get-some-testnet-bitcoin
 

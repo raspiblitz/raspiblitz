@@ -175,5 +175,5 @@ fi
 # set SetupState (scan is done - so its 80%)
 echo "80" > /home/admin/.setup
 
-###### finishSetUp
+###### finishSetup
 ./90finishSetup.sh
