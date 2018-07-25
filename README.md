@@ -58,10 +58,8 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 ### Scenario 2 “Start at Home”
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
-1. Download SD-Card image with [bittorrent](https://www.utorrent.com/intl/en/downloads/):
-https://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.torrent
-or try this HTTP-Link for direct download:
-http://wiki.fulmo.org/downloads/raspiblitz-2018-07-17b.img.gz
+1. Download SD-Card image:
+http://wiki.fulmo.org/downloads/raspiblitz-2018-07-25.img.gz
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
