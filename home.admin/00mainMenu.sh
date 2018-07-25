@@ -18,19 +18,19 @@ fi
 if [ ${setupState} -eq 0 ]; then
 
     # start setup
-    BACKTITLE="RaspiBlitz - SetUp"
+    BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
     MENU="\nYou need to setup and init Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Start the SetUp of your RaspiBlitz")
+    OPTIONS+=(1 "Start the Setup of your RaspiBlitz")
     HEIGHT=10
 
 elif [ ${setupState} -lt 100 ]; then
 
     # continue setup
-    BACKTITLE="RaspiBlitz - SetUp"
+    BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
     MENU="\nContinue setup and init of Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Continue SetUp of your RaspiBlitz")
+    OPTIONS+=(1 "Continue Setup of your RaspiBlitz")
     HEIGHT=10
 
 else
