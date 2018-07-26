@@ -104,7 +104,7 @@ fi
 
 # get IP address & port
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-public_ip=$(curl -s ipinfo.io/ip)
+public_ip=$(curl -s http://v4v6.ipv6-test.com/api/myip.php)
 public_port=$(cat ${bitcoin_dir}/bitcoin.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
 if [ "${public_port}" = "" ]; then
   if [ $chain  = "test" ]; then
