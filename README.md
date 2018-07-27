@@ -221,7 +221,9 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 #### Detailed Balances and Channel Info
 
-TODO: Add photo
+<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
+
+<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
 
 ## Educational Tutorials
 
