@@ -15,7 +15,7 @@ if [ ${lndRunning} -eq 1 ]; then
   lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
-    ./unlockLND.sh
+    ./AAunlockLND.sh
     ./10setupBlitz.sh
   elif [ ${lndSyncing} -gt 0 ]; then
     ./70initLND.sh
