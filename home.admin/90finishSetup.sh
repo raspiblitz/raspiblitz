@@ -1,6 +1,9 @@
 #!/bin/sh
 echo ""
 
+# add bonus scripts
+./91addBonus.sh
+
 ###### SWAP
 echo "*** SWAP file ***"
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)

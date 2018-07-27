@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## default menu settings
-HEIGHT=9
+HEIGHT=11
 WIDTH=64
 CHOICE_HEIGHT=4
 BACKTITLE="RaspiBlitz"
@@ -14,7 +14,6 @@ setupState=0;
 if [ -f "/home/admin/.setup" ]; then
   setupState=$( cat /home/admin/.setup )
 fi
-
 if [ ${setupState} -eq 0 ]; then
 
     # start setup
@@ -55,8 +54,9 @@ else
     else
 
      # REGULAR MENU
-      OPTIONS+=(INFO "Show RaspiBlitz Status Screen" \
-		ADD "Add lnbalance and lnchannels command")
+      OPTIONS+=(INFO "RaspiBlitz Status Screen" \
+		lnbalance "Detailed Wallet Balances" \
+        lnchannels "Lightning Channel List")
 
     fi
 
@@ -82,14 +82,23 @@ case $CHOICE in
         INFO)
             ./00infoBlitz.sh
             echo "Screen is not updating ... press ENTER to continue."
-	    read key
-            ./00mainMenu.sh;
+            read key
+            ./00mainMenu.sh
             ;;
-	ADD) # add scripts
-	    ./67addAdditionalScripts.sh	
-	    ;;
+        lnbalance)
+            lnbalance
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        lnchannels)
+            lnchannels
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
         X) # unlock
             ./AAunlockLND.sh
-	    ./00mainMenu.sh
+            ./00mainMenu.sh
             ;;
 esac

@@ -1,3 +1,6 @@
+# https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_67_additional-scripts.md
+
+echo "*** Adding: raspibolt_67_additional-scripts.md"
 echo "Creating the command lnbalance as well as lnchannels which will give you a nicer output"
 cd
 mkdir /home/admin/tmpScriptDL
