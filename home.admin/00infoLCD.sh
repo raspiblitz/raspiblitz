@@ -29,7 +29,8 @@ if [ "$USER" = "pi" ]; then
         l1="Login to your RaspiBlitz with:\n"
         l2="ssh admin@${localip}\n"
         l3="Use password: raspiblitz\n"
-        dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 34
+	boxwidth=$((${#localip} + 20))
+        dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 
       elif [ ${setupStep} -lt 100 ]; then
@@ -45,7 +46,8 @@ if [ "$USER" = "pi" ]; then
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-          dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 36
+	  boxwidth=$((${#localip} + 20))
+          dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 5
 
         elif [ ${lndSyncing} -gt 0 ]; then
@@ -60,7 +62,8 @@ if [ "$USER" = "pi" ]; then
           l1="Login to your RaspiBlitz with:\n"
           l2="ssh admin@${localip}\n"
           l3="Use your Password A\n"
-          dialog --backtitle "RaspiBlitz - Setup Mode" --infobox "$l1$l2$l3" 5 34
+          boxwidth=$((${#localip} + 20))
+          dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
 	  sleep 10
 
         fi
@@ -77,7 +80,8 @@ if [ "$USER" = "pi" ]; then
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-          dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 36
+	  boxwidth=$((${#localip} + 20))
+          dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
 	  sleep 5
 
 	else
