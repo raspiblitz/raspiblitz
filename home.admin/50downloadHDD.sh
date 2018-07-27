@@ -3,7 +3,7 @@
 # name of torrentfile = name of directory in torrent
 torrent="raspiblitz-hdd-2018-07-16"
 # size of a valid download (run on seed directory 'du -s ./[TORRENTDIRECTORY]')
-torrentsize=462470200
+torrentsize=231230512
 
 echo ""
 echo "*** Checking HDD ***"
