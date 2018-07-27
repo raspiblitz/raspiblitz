@@ -55,7 +55,8 @@ else
     else
 
      # REGULAR MENU
-      OPTIONS+=(INFO "Show RaspiBlitz Status Screen")
+      OPTIONS+=(INFO "Show RaspiBlitz Status Screen" \
+		ADD "Add lnbalance and lnchannels command")
 
     fi
 
@@ -84,6 +85,9 @@ case $CHOICE in
 	    read key
             ./00mainMenu.sh;
             ;;
+	ADD) # add scripts
+	    ./67addAdditionalScripts.sh	
+	    ;;
         X) # unlock
             ./AAunlockLND.sh
 	    ./00mainMenu.sh
