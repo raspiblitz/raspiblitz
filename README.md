@@ -213,9 +213,15 @@ But you manually extened your RaspiBlitz with features listed in the RaspiBlot G
 
 Already integrated features of the RaspiBlitz are/willbe listed as part of the main menu after connecting per ssh with the admin user.
 
+*Background: The script `91addBonus.sh` is the place to put your setup of features you want to add to RaspiBlitz. Its run at the end of the automated setup process before final reboot. To make the feature executable for the user, add a new option to the `00mainMenu.sh`*
+
 #### Status Infoscreen
 
 ![feat-info](pictures/feature-info.png)
+
+#### Detailed Balances and Channel Info
+
+TODO: Add photo
 
 ## Educational Tutorials
 
