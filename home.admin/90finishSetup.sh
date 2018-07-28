@@ -35,6 +35,11 @@ fi
 # mark setup is done
 echo "90" > /home/admin/.setup
 
+# expand FS of SD
+echo "*** Expand RootFS ***"
+sudo raspi-config --expand-rootfs
+echo ""
+
 # set the hostname inputed on initDialog
 hostname=`cat .hostname`
 echo "Setting new network hostname '$hostname'"

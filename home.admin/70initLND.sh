@@ -27,7 +27,7 @@ while [ ${ready} -eq 0 ]
       if [ ${ready} -eq 1 ]; then
         echo "${sync_percentage}"
       else
-	echo "waiting to start sync"
+	      echo "waiting to start sync"
         ready=0
       fi
     fi

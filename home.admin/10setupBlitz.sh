@@ -91,7 +91,6 @@ if [ ! -f "home/admin/.setup" ]; then
   sudo apt-get update
   sudo apt-get upgrade -f -y --force-yes
   echo "OK - System is now up to date"
-  sudo raspi-config --expand-rootfs
 fi
 
 # the HDD is already ext4 formated and called blockchain
