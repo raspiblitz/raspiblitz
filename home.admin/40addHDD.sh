@@ -44,7 +44,7 @@ if [ ${existsHDD} -eq 1 ]; then
            echo "40" > /home/admin/.setup
 
            echo "*** Analysing HDD Content ***"
-           if [  -d "/mnt/hdd/bitcoin"  ]; then 
+           if [  -d "/mnt/hdd/${network}"  ]; then 
              echo "Looks like the HDD is prepared with the Blockchain."
              echo "Continuing with finishing the system setup ..."
              ./60finishHDD.sh

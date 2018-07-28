@@ -1,16 +1,30 @@
 #!/bin/sh
 
-# name of torrentfile = name of directory in torrent
-torrent="raspiblitz-hdd-2018-07-16"
-# size of a valid download (run on seed directory 'du -s ./[TORRENTDIRECTORY]')
-torrentsize=231230512
+# *** BITCOIN Torrent ***
+bitcoinTorrent="raspiblitz-hdd-2018-07-16"
+bitcoinTorrentsize=231230512
+
+# *** LITECOIN Torrent ***
+litecoinTorrent="raspiblitz-litecoin-2018-07-28"
+litecoinTorrentsize=100
+
+# load network
+network=`cat .network`
+
+# set torrent based on network
+torrent=$bitcoinTorrent
+torrentsize=$bitcoinTorrentsize
+if [ "$network" = "litecoin" ]; then
+  torrent=$litecoinTorrent
+  torrentsize=$litecoinTorrentsize
+fi
 
 echo ""
 echo "*** Checking HDD ***"
 mountOK=$(df | grep -c /mnt/hdd)
 if [ ${mountOK} -eq 1 ]; then
   # HDD is mounted
-  if [ -d "/mnt/hdd/bitcoin" ]; then
+  if [ -d "/mnt/hdd/${network}" ]; then
     # HDD has already content 
     echo "It seems that HDD has already content. Try to continue with ./finishHDD.sh"
   else
@@ -23,6 +37,7 @@ if [ ${mountOK} -eq 1 ]; then
     while [ $downloading -eq 1 ]
     do
       echo "*** Downloading HDD ***"
+      echo "torrentFile: ${torrent}"
       tmpfile=$(mktemp)
       chmod a+x $tmpfile
       echo "killall transmission-cli" > $tmpfile
@@ -70,7 +85,7 @@ if [ ${mountOK} -eq 1 ]; then
 
     echo "*** Moving Files ***"
     echo "moving files ..."
-    sudo mv /mnt/hdd/$torrent /mnt/hdd/bitcoin
+    sudo mv /mnt/hdd/$torrent /mnt/hdd/${network}
     echo ""
 
     # set SetupState

@@ -1,34 +1,39 @@
 #!/bin/sh
 echo ""
+
+# load network
+network=`cat .network`
+
 echo "*** Checking HDD ***"
 mountOK=$(df | grep -c /mnt/hdd)
 if [ ${mountOK} -eq 1 ]; then
   # HDD is mounted
-  if [ -d "/mnt/hdd/bitcoin" ]; then
+  if [ -d "/mnt/hdd/${network}" ]; then
     # HDD has content - continue 
     echo "OK - HDD is ready."
 
    ###### LINK HDD
    echo ""
-   echo "*** Prepare Bitcoin ***"
-   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-   sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+   echo "*** Prepare ${network} ***"
+   sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+   sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network}
    sudo mkdir /mnt/hdd/lnd
    sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
-   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+   sudo chown -R bitcoin:bitcoin /mnt/hdd/${network}
    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
-   sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+   sudo chown -R bitcoin:bitcoin /home/bitcoin/.${network}
    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
-   echo "OK - Bitcoin setup ready"
+   echo "OK - ${network} setup ready"
 
-   ###### START BITCOIN SERVICE
+   ###### START NETWORK SERVICE
    echo ""
-   echo "*** Start Bitcoin ***"
-   sudo systemctl enable bitcoind.service
-   sudo systemctl start bitcoind.service
-   echo "Giving bitcoind service 180 seconds to init - please wait ..."	
+   echo "*** Start ${network} ***"
+   echo "This can take a while .."
+   sudo systemctl enable ${network}d.service
+   sudo systemctl start ${network}d.service
+   echo "Giving ${network}d service 180 seconds to init - please wait ..."	
    sleep 180
-   echo "OK - bitcoind started"
+   echo "OK - ${network}d started"
    sleep 2 
 
    # set SetupState

@@ -1,6 +1,9 @@
 #!/bin/sh
 _temp="./download/dialog.$$"
 
+# load network
+network=`cat .network`
+
 # welcome and ask for name of RaspiBlitz 
 result=""
 while [ ${#result} -eq 0 ]
@@ -14,6 +17,7 @@ while [ ${#result} -eq 0 ]
 
 # set lightning alias
 sed -i "7s/.*/alias=$result/" ./assests/lnd.conf
+sed -i "7s/.*/alias=$result/" ./assests/lnd.litecoin.conf
 
 # store hostname for later - to be set right before the next reboot
 # work around - because without a reboot the hostname seems not updates in the whole system
@@ -24,7 +28,7 @@ dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different pa
 Referenced as password A, B, C and D.
 
 A) Master User Password
-B) Bitcoin RPC Password
+B) Blockchain RPC Password
 C) LND Wallet Password
 D) LND Seed Password
 
@@ -68,9 +72,10 @@ while [ ${#result} -lt 8 ]
     shred $_temp
   done
 
-# set Bitcoin RPC Password (for admin bitcoin-cli & template for user bitcoin bitcoind)
-sed -i "14s/.*/rpcpassword=$result/" ./assets/bitcoin.conf
-sed -i "6s/.*/rpcpassword=$result/" ./.bitcoin/bitcoin.conf
+# set Blockchain RPC Password (for admin cli & template for user bitcoin)
+sed -i "14s/.*/rpcpassword=$result/" ./assets/${network}.conf
+sed -i "6s/.*/rpcpassword=$result/" ./.${network}/${network}.conf
+
 
 # success info dialog
 dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52

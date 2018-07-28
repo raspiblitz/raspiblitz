@@ -1,16 +1,19 @@
 #!/bin/sh
 echo ""
 
+# load network
+network=`cat .network`
+
 # verify that bitcoin is running
-echo "*** Checking Bitcoin ***"
-bitcoinRunning=$(systemctl status bitcoind.service | grep -c running)
+echo "*** Checking ${network} ***"
+bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
-  echo "FAIL - Bitcoind is not running"
+  echo "FAIL - ${network}d is not running"
   echo "recheck with orignal tutorial -->"
   echo "https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md"
 fi
-echo "OK - Bitcoind is running"
+echo "OK - ${network}d is running"
 echo ""
 
 ###### Wait for Blochain Sync
@@ -18,20 +21,25 @@ echo "*** Syncing Blockchain ***"
 ready=0
 while [ ${ready} -eq 0 ]
   do
-    progress="$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.verificationprogress')"
-    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
+    progress="$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.verificationprogress')"
+    verySmallProgress=$(echo $progress | grep -c 'e-');
+    if [ ${verySmallProgress} -eq 1 ]; then
+     progress="0.00";
+    fi
     ready=$(echo $progress'>0.99' | bc -l)
-    if [ ${ready} -eq 0 ]; then
+    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
+    #echo "progress($progress) verySmallProgress($verySmallProgress) ready($ready) sync_percentage($sync_percentage)"
+    if [ ${#ready} -eq 0 ]; then
+      echo "waiting for init ... can take a while"
+      ready=0
+    elif [ "$sync_percentage" = "0.00%" ]; then  
+      echo "waiting for network ... can take a while"
+      ready=0
+    elif [ ${ready} -eq 0 ]; then
       echo "${sync_percentage}"
     else
-      if [ ${ready} -eq 1 ]; then
-        echo "${sync_percentage}"
-      else
-	      echo "waiting to start sync"
-        ready=0
-      fi
+      echo "finishing sync ... can take a while"
     fi
-    echo "${sync_percentage}"
     sleep 3
   done
 echo "OK - Blockchain is synced"
@@ -41,7 +49,13 @@ echo ""
 echo "*** LND Config ***"
 configExists=$( sudo ls /mnt/hdd/lnd/ | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
-  sudo cp /home/admin/assets/lnd.conf /mnt/hdd/lnd/lnd.conf
+  if [ "$network" = "litecoin" ]; then
+    # litecoin
+    sudo cp /home/admin/assets/lnd.litecoin.conf /mnt/hdd/lnd/lnd.conf
+  else
+    # bitcoin
+    sudo cp /home/admin/assets/lnd.conf /mnt/hdd/lnd/lnd.conf
+  fi
   sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
   if [ -d /home/bitcoin/.lnd ]; then
     echo "OK - LND config written"
@@ -82,7 +96,7 @@ setupStep=$(sudo cat "/home/admin/.setup")
 if [ ${setupStep} -lt 65 ]; then
   # setup state signals, that no wallet has been created yet
   dialog --backtitle "RaspiBlitz - LND Lightning Wallet" --msgbox "
-Bitcoin and Lighthing Services are installed.
+${network} and Lighthing Services are installed.
 You now need to setup your Lightning Wallet:
 
 We will now call the command: lncli create
@@ -139,8 +153,8 @@ fi
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
-chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
+chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
   ./unlockLND.sh
@@ -152,7 +166,7 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-chain="$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')"
+chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
 lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"

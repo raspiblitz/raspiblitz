@@ -9,6 +9,12 @@ TITLE=""
 MENU="Choose one of the following options:"
 OPTIONS=()
 
+# default config values (my get changed later)
+if [ ! -f ./.network ]; then
+  echo "bitcoin" > /home/admin/.network
+fi
+network=`cat .network`
+
 ## get actual setup state
 setupState=0;
 if [ -f "/home/admin/.setup" ]; then
@@ -19,17 +25,18 @@ if [ ${setupState} -eq 0 ]; then
     # start setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nYou need to setup and init Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Start the Setup of your RaspiBlitz")
-    HEIGHT=10
+    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+    HEIGHT=11
 
 elif [ ${setupState} -lt 100 ]; then
 
     # continue setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nContinue setup and init of Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Continue Setup of your RaspiBlitz")
+    MENU="\nThe setup process in snot finished yet: \n "
+    OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
     HEIGHT=10
 
 else
@@ -38,13 +45,13 @@ else
     uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
     waittimesecs=$(expr 150 - $uptimesecs)
     if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for Bitcoin to startup and init ..." 8 58 ${waittimesecs}
+      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
     fi
 
     # MAIN MENU AFTER SETUP
 
-    chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
+    chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
 
       # LOCK SCREEN
@@ -75,7 +82,17 @@ case $CHOICE in
         CLOSE)
             exit 1;
             ;;
-        1)  # SETUP
+        BITCOIN)
+            echo "bitcoin" > /home/admin/.network
+            ./10setupBlitz.sh
+            exit 1;
+            ;;
+        LITECOIN)
+            echo "litecoin" > /home/admin/.network
+            ./10setupBlitz.sh
+            exit 1;
+            ;;
+        CONTINUE)
             ./10setupBlitz.sh
             exit 1;
             ;;

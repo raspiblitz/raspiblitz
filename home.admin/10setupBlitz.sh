@@ -1,6 +1,9 @@
 #!/bin/sh
 echo ""
 
+# load network
+network=`cat .network`
+
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
@@ -10,8 +13,8 @@ echo ""
 lndRunning=$(systemctl status lnd.service | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
 
-  chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
+  chain=$(${network}-cli -datadir=/home/${network}/.${network} getblockchaininfo | jq -r '.chain')
+  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
   lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
@@ -26,20 +29,20 @@ if [ ${lndRunning} -eq 1 ]; then
 fi
 
 # check if bitcoin is running
-bitcoinRunning=$(systemctl status bitcoind.service | grep -c running)
+bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
 if [ ${bitcoinRunning} -eq 1 ]; then
-  echo "OK - Bitcoind is running"
+  echo "OK - ${network}d is running"
   echo "Next step run Lightning"
   ./70initLND.sh
   exit 1
 fi
 
 # check if HDD is mounted
-mountOK=$(df | grep -c /mnt/hdd)
+mountOK=$( df | grep -c /mnt/hdd )
 if [ ${mountOK} -eq 1 ]; then
-
-  # if there are signs of blockchain data
-  if [ -d "/mnt/hdd/bitcoin" ]; then
+  
+  # are there any signs of blockchain data
+  if [ -d "/mnt/hdd/${network}" ]; then
     echo "UNKOWN STATE"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
     echo "Maybe try --> ./60finishHDD.sh"
@@ -47,17 +50,32 @@ if [ ${mountOK} -eq 1 ]; then
   fi
 
   # HDD is empty - ask how to get Blockchain
-  _temp="./download/dialog.$$"
-  dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-  --menu "You need a copy of the Blockchan - you have 3 options:" 13 75 4 \
-  1 "DOWNLOAD --> TESTNET + MAINNET thru torrent (RECOMMENDED 8h)" \
-  2 "COPY     --> TESTNET + MAINNET from another HDD (TRICKY 3h)" \
-  3 "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK)" 2>$_temp
-  opt=${?}
+
+  #Bitcoin
+  if [ ${network} = "bitcoin" ]; then
+    echo "Bitcoin Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
+    --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
+    1 "DOWNLOAD --> TESTNET + MAINNET thru torrent (RECOMMENDED 8h)" \
+    2 "COPY     --> TESTNET + MAINNET from another HDD (TRICKY 3h)" \
+    3 "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK)" 2>&1 >/dev/tty)
+
+  # Litecoin
+  elif [ ${network} = "litecoin" ]; then
+    echo "Litecoin Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
+    --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
+    1 "DOWNLOAD --> MAINNET thru torrent (RECOMMENDED)" \
+    2 "COPY     --> MAINNET from another HDD (TRICKY)" \
+    3 "SYNC     --> MAINNET thru Litecoin Network (FALLBACK)" 2>&1 >/dev/tty)
+
+  # error
+  else
+    echo "FAIL Unkown network(${network})"
+    exit 1
+   fi
+
   clear
-  if [ $opt != 0 ]; then rm $_temp; exit; fi
-  menuitem=`cat $_temp`
-  rm $_temp
   case $menuitem in
           3)
               ./50syncHDD.sh
@@ -72,6 +90,7 @@ if [ ${mountOK} -eq 1 ]; then
   exit 1
 
 fi
+
 
 # the HDD is not mounted --> very early stage of setup
 

@@ -3,7 +3,7 @@
 # /etc/systemd/system/20-raspibolt-welcome.sh
 
 # make executable and copy script to /etc/update-motd.d/
-# root must be able to execute bitcoin-cli and lncli
+# root must be able to execute network cli and lncli
 
 # set colors
 color_red='\033[0;31m'
@@ -11,8 +11,11 @@ color_green='\033[0;32m'
 color_yellow='\033[0;33m'
 color_gray='\033[0;37m'
 
+# load network
+network=`sudo cat /home/admin/.network`
+
 # set datadir
-bitcoin_dir="/home/bitcoin/.bitcoin"
+bitcoin_dir="/home/bitcoin/.${network}"
 lnd_dir="/home/bitcoin/.lnd"
 
 # get uptime & load
@@ -55,19 +58,19 @@ network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[
 network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 
 # Bitcoin blockchain
-btc_path=$(command -v bitcoin-cli)
+btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
-  btc_title="Bitcoin"
-  chain="$(bitcoin-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.chain')"
+  btc_title=$network
+  chain="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.chain')"
   if [ -n $chain ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    block_chain="$(bitcoin-cli -datadir=${bitcoin_dir} getblockcount)"
-    block_verified="$(bitcoin-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.blocks')"
+    block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
+    block_verified="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
 
-    progress="$(bitcoin-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.verificationprogress')"
+    progress="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.verificationprogress')"
     sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
 
     if [ ${block_diff} -eq 0 ]; then    # fully synced
@@ -89,13 +92,13 @@ if [ -n ${btc_path} ]; then
     fi
 
     # get last known block
-    last_block="$(bitcoin-cli -datadir=${bitcoin_dir} getblockcount)"
+    last_block="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
     if [ ! -z "${last_block}" ]; then
       btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
     fi
 
     # get mem pool transactions
-    mempool="$(bitcoin-cli -datadir=${bitcoin_dir} getmempoolinfo | jq -r '.size')"
+    mempool="$(${network}-cli -datadir=${bitcoin_dir} getmempoolinfo | jq -r '.size')"
 
   else
     btc_line2="${color_red}NOT RUNNING\t\t"
@@ -105,7 +108,7 @@ fi
 # get IP address & port
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4v6.ipv6-test.com/api/myip.php)
-public_port=$(cat ${bitcoin_dir}/bitcoin.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
+public_port=$(cat ${bitcoin_dir}/${network}.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
 if [ "${public_port}" = "" ]; then
   if [ $chain  = "test" ]; then
     public_port=18333
@@ -148,13 +151,14 @@ else
   external_color="${color_red}"
 fi
 
+networkVersion = $(${network}-cli -cli -version | cut -d " " -f6)
 
 printf " 
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
-${color_yellow}               ${color_gray}Bitcoin Fullnode + Lightning Network
+${color_yellow}               ${color_gray}$Fullnode + Lightning Network
 ${color_yellow}               ${color_yellow}%s
 ${color_yellow}        ,/     ${color_yellow} 
 ${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
@@ -163,13 +167,13 @@ ${color_yellow}  ,'  /_____,  ${color_gray}
 ${color_yellow} .'____    ,'  ${color_gray}Local  ${color_green}${local_ip}${color_gray}  ▼ ${network_rx} ▲ ${network_tx}  
 ${color_yellow}      /  ,'    ${color_gray}Public ${public_color}${public_addr} ${public}
 ${color_yellow}     / ,'      ${color_gray} 
-${color_yellow}    /,'        ${color_gray}Bitcoin ${color_green}v0.16.1 ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}    /,'        ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}   /'          ${color_gray}LND ${color_green}v0.4.2 ${color_gray}wallet ${ln_walletbalance} sat
 ${color_yellow}               ${color_gray}${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat 
 ${color_yellow}               ${ln_external}
 ${color_yellow}
 " \
-"RaspiBlitz v0.3" \
+"RaspiBlitz v0.4" \
 "-------------------------------------------" \
 "${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
