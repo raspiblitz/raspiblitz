@@ -1,4 +1,4 @@
-[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](setup-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educatiuonal-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
+[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educatiuonal-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
 # RaspiBlitz
@@ -11,9 +11,9 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 ## Table of Contents
 
 * [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
-* [ [Setup](#setup-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
+* [ [Setup](#boot-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
 * [ [Documentation](#documentation) ] Features and Usecases  
-* [ [Education](#educatiuonal-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
+* [ [Education](#educational-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
 * [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
 
 ## Hardware Needed (Amazon Shopping List)
