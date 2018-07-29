@@ -22,7 +22,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 * RaspBerry Pi 3 (31,99 EUR) https://www.amazon.de/dp/B01CD5VC92
 * Micro SD-Card 16GB (7,11 EUR) https://www.amazon.de/dp/B0162YQEIE
-* Power (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
+* Power >=3A (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
 * 1TB Hard Drive (49,99 EUR) https://www.amazon.de/dp/B00KWHJY7Q
 * Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
 * LCD-Display (19,58 EUR) https://www.amazon.de/dp/B01JRUH0CY
