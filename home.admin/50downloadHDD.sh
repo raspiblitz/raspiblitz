@@ -3,7 +3,7 @@ echo ""
 
 # *** BITCOIN ***
 bitcoinList="" # url to list with other sources
-bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-hdd-2018-07-16"
+bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-bitcoin-2018-07-16"
 bitcoinSize=100
 
 # *** LITECOIN ***
@@ -32,6 +32,7 @@ echo "list($list)"
 echo "url($url)"
 echo "size($size)"
 echo "targetPath($targetPath)"
+echo ""
 
 echo "*** Downloading HDD / FTP ***"
 sudo wget -r -P /mnt/hdd/ -q --show-progress ${url}
@@ -58,7 +59,7 @@ fi
 echo ""
 
 echo "*** Moving Files ***"
-sudo mv /mnt/hdd/${targetPath} /mnt/hdd/litecoin
+sudo mv /mnt/hdd/${targetPath} /mnt/hdd/${network}
 echo "OK"
 
 # continue setup

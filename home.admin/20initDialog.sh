@@ -73,8 +73,7 @@ while [ ${#result} -lt 8 ]
   done
 
 # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-sed -i "14s/.*/rpcpassword=$result/" ./assets/${network}.conf
-sed -i "6s/.*/rpcpassword=$result/" ./.${network}/${network}.conf
+sed -i "14s/.*/rpcpassword=$result/" /home/admin/assets/${network}.conf
 
 
 # success info dialog

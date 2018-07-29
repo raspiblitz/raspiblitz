@@ -15,7 +15,17 @@ if [ ${mountOK} -eq 1 ]; then
    ###### LINK HDD
    echo ""
    echo "*** Prepare ${network} ***"
+   sudo killall -u bitcoin
+   sleep 5
+   sudo rm -r /home/bitcoin/.${network}
+   sleep 2
+   if [ -d /home/bitcoin/.${network} ]; then
+     echo "FAIL - /home/bitcoin/.${network} exists and cannot be removed!"
+     exit 1
+   fi
    sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+   sudo mkdir /home/admin/.${network}
+   sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
    sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network}
    sudo mkdir /mnt/hdd/lnd
    sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
