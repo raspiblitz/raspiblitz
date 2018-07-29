@@ -29,6 +29,7 @@ if [ ${mountOK} -eq 1 ]; then
    echo ""
    echo "*** Start ${network} ***"
    echo "This can take a while .."
+   sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service
    echo "Giving ${network}d service 180 seconds to init - please wait ..."	

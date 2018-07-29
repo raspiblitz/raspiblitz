@@ -1,14 +1,17 @@
 #!/bin/sh
 if [ "$USER" = "pi" ]; then
 
+  # load network
+  network=`sudo cat /home/admin/.network`
+
   ### USER PI AUTOSTART (LCD Display)
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
   # check if bitcoin service is configured
-  bitcoinInstalled=$(sudo -u bitcoin ls /mnt/hdd/bitcoin/ | grep -c bitcoin.conf)
+  bitcoinInstalled=$(sudo -u bitcoin ls /mnt/hdd/${network}/ | grep -c ${network}.conf)
   if [ ${bitcoinInstalled} -eq 1 ]; then
     # wait enough secs to let bitcoind init
-    dialog --pause "  Waiting for Bitcoin to startup and init ..." 8 58 130
+    dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 130
   fi
 
   # show updating status in loop
@@ -37,8 +40,8 @@ if [ "$USER" = "pi" ]; then
 
 	# setup process init is done and not finished
 	lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
-        chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
+        chain=$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.chain')
+        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 
        if [ ${locked} -gt 0 ]; then
 
@@ -72,15 +75,14 @@ if [ "$USER" = "pi" ]; then
 
 	# RaspiBlitz is full Setup
 
-        chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock) 
+        chain=$(su -u bitcoin ${network}-cli getblockchaininfo | jq -r '.chain')
+        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock) 
         if [ ${locked} -gt 0 ]; then
-
-	  # special case: LND wallet is locked ---> show unlock info
+	        # special case: LND wallet is locked ---> show unlock info
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-	  boxwidth=$((${#localip} + 20))
+	        boxwidth=$((${#localip} + 20))
           dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
 	  sleep 5
 

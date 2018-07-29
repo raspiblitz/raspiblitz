@@ -56,18 +56,19 @@ if [ ${mountOK} -eq 1 ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
-    1 "DOWNLOAD --> TESTNET + MAINNET thru torrent (RECOMMENDED 8h)" \
-    2 "COPY     --> TESTNET + MAINNET from another HDD (TRICKY 3h)" \
-    3 "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK)" 2>&1 >/dev/tty)
+    T "TORRENT  --> TESTNET + MAINNET per FTP (DEFAULT)" \
+    C "COPY     --> TESTNET + MAINNET from another HDD (TRICKY+FAST)" \
+    D "DOWNLOAD --> TESTNET + MAINNET per FTP (FALLBACK+SLOW)" \
+    S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
     echo "Litecoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
-    1 "DOWNLOAD --> MAINNET thru torrent (RECOMMENDED)" \
-    2 "COPY     --> MAINNET from another HDD (TRICKY)" \
-    3 "SYNC     --> MAINNET thru Litecoin Network (FALLBACK)" 2>&1 >/dev/tty)
+    D "DOWNLOAD --> MAINNET thru torrent (RECOMMENDED)" \
+    C "COPY     --> MAINNET from another HDD (TRICKY+FAST)" \
+    S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # error
   else
@@ -77,14 +78,17 @@ if [ ${mountOK} -eq 1 ]; then
 
   clear
   case $menuitem in
-          3)
+          T)
+              ./50torrentHDD.sh
+              ;;
+          C)
+              ./50copyHDD.sh
+              ;;
+          S)
               ./50syncHDD.sh
               ;;
-          1)
+          D)
               ./50downloadHDD.sh
-              ;;
-          2)
-              ./50copyHDD.sh
               ;;
   esac
   exit 1

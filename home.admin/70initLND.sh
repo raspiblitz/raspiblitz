@@ -72,6 +72,9 @@ echo ""
 echo "*** Starting LND ***"
 lndRunning=$(systemctl status lnd.service | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
+  sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
+  sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
+  sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
   sudo systemctl start lnd
   echo "Started LND .. waiting 30 seconds for init ..."

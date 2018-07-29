@@ -1,5 +1,9 @@
 #!/bin/sh
 echo ""
+
+# load network
+network=`cat .network`
+
 echo "*** Adding HDD to the System ***"
 sleep 5
 existsHDD=$(lsblk | grep -c sda1)
@@ -38,7 +42,7 @@ if [ ${existsHDD} -eq 1 ]; then
          mountOK=$(df | grep -c /mnt/hdd)
          if [ ${mountOK} -eq 1 ]; then
            echo "OK - HDD is mounted"
-	   echo ""
+	         echo ""
 
            # set SetupState
            echo "40" > /home/admin/.setup

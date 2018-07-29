@@ -1,105 +1,67 @@
 #!/bin/sh
+echo ""
 
-# *** BITCOIN Torrent ***
-bitcoinTorrent="raspiblitz-hdd-2018-07-16"
-bitcoinTorrentsize=231230512
+# *** BITCOIN ***
+bitcoinList="" # url to list with other sources
+bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-hdd-2018-07-16"
+bitcoinSize=100
 
-# *** LITECOIN Torrent ***
-litecoinTorrent="raspiblitz-litecoin-2018-07-28"
-litecoinTorrentsize=100
+# *** LITECOIN ***
+litecoinList="" # url to list with other sources
+litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
+litecoinSize=19184980
 
 # load network
 network=`cat .network`
 
-# set torrent based on network
-torrent=$bitcoinTorrent
-torrentsize=$bitcoinTorrentsize
+# settings based on network
+list=$bitcoinList
+url=$bitcoinUrl
+size=$bitcoinSize
 if [ "$network" = "litecoin" ]; then
-  torrent=$litecoinTorrent
-  torrentsize=$litecoinTorrentsize
+  list=$litecoinList
+  url=$litecoinUrl
+  size=$litecoinSize
 fi
 
+# the path wget will download to
+targetPath=$(echo ${url} | cut -d '@' -f2)
+
+echo "network($network)"
+echo "list($list)"
+echo "url($url)"
+echo "size($size)"
+echo "targetPath($targetPath)"
+
+exit 1
+
+echo "*** Downloading HDD / FTP ***"
+sudo wget -r -P /mnt/hdd/ -q --show-progress ${url}
+echo "OK"
 echo ""
-echo "*** Checking HDD ***"
-mountOK=$(df | grep -c /mnt/hdd)
-if [ ${mountOK} -eq 1 ]; then
-  # HDD is mounted
-  if [ -d "/mnt/hdd/${network}" ]; then
-    # HDD has already content 
-    echo "It seems that HDD has already content. Try to continue with ./finishHDD.sh"
-  else
-    # HDD is empty - download HDD content
-    echo "OK - HDD is ready."
-    echo ""
 
-    downloading=1
-    retry=0
-    while [ $downloading -eq 1 ]
-    do
-      echo "*** Downloading HDD ***"
-      echo "torrentFile: ${torrent}"
-      tmpfile=$(mktemp)
-      chmod a+x $tmpfile
-      echo "killall transmission-cli" > $tmpfile
-      sudo transmission-cli ./assets/$torrent.torrent -D -et -w /mnt/hdd -f $tmpfile
-      echo ""
-      echo "*** Checking Download ***"
-      echo "wait a moment"
-      sleep 5
-      downloadsize=$(sudo du -s /mnt/hdd/$torrent/ | awk '{print $1}' | tr -dc '0-9')
-      if [ ${#downloadsize} -eq 0 ]; then 
-        downloadsize=0
-      fi
-      # add some tolerance for checking 
-      torrentsize="$(($torrentsize-1024000))"
-      echo "download size is(${downloadsize})"
-      if [ ${downloadsize} -lt ${torrentsize} ]; then
-        echo ""
-        echo "FAIL - download is not ${torrentsize}"
-        retry=$(($retry+1))
-        if [ ${retry} -gt 2 ]; then 
-          echo "All Retry FAILED"
-          downloading=0
-        else
-          echo "--> RETRY(${retry}) in 10 secs"
-          sleep 10
-          echo ""
-        fi  
-      else
-        echo "OK - Download is complete"
-        downloading=0
-      fi
-    done  
-    if [ ${downloadsize} -lt ${torrentsize} ]; then
-      sleep 3
-      dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want to clean all download data before you continue?" 6 57
-      response=$?
-      case $response in
-        0) sudo rm -rf /mnt/hdd/$torrent ; sudo rm -rf /root/.config/transmission ;;
-      esac
-      # 
-      ./00mainMenu.sh
-      exit 1;
-    fi
-    echo ""
-
-    echo "*** Moving Files ***"
-    echo "moving files ..."
-    sudo mv /mnt/hdd/$torrent /mnt/hdd/${network}
-    echo ""
-
-    # set SetupState
-    echo "50" > /home/admin/.setup
-    
-    echo "*** Next Step  ***"
-    echo "You can now use this HDD as a source to copy the Blockchain during the setup of another RaspiBlitz."
-    sleep 4
-
-    # continue setup
-    ./60finishHDD.sh
-
-  fi
-else
-  # HDD is not available yet
-  echo "*** Mount HDD on /mnt/hdd first ***"
+echo "*** Checking Download ***"
+downloadsize=$(sudo du -s /mnt/hdd/${targetPath} | awk '{print $1}' | tr -dc '0-9')
+if [ ${#downloadsize} -eq 0 ]; then 
+  downloadsize=0
 fi
+echo "download size is(${downloadsize}) needs to be minimum(${size}})"
+if [ ${downloadsize} -lt ${size} ]; then
+  sleep 3
+  echo -ne '\007'
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want keep already downloaded data?" 6 57
+  response=$?
+  case $response in
+    1) sudo rm -rf /mnt/hdd/${targetPath} ;;
+  esac
+  ./00mainMenu.sh
+  exit 1;
+fi
+echo ""
+
+echo "*** Moving Files ***"
+sudo mv /mnt/hdd/${targetPath} /mnt/hdd/litecoin
+echo "OK"
+
+# continue setup
+./60finishHDD.sh
