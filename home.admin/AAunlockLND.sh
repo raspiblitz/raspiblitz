@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load network
-network=`.network`
+network=`cat .network`
 
 echo ""
 echo "****************************************************************************"

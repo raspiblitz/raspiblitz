@@ -18,6 +18,9 @@ if [ "$USER" = "pi" ]; then
   while :
      do
 
+      # refresh network
+      network=`sudo cat /home/admin/.network`
+
       # get the setup state
       setupStepExists=$(sudo -u admin ls -la /home/admin/.setup | grep -c .setup)
       if [ ${setupStepExists} -eq 1 ]; then
@@ -28,19 +31,19 @@ if [ "$USER" = "pi" ]; then
 
       if [ ${setupStep} -eq 0 ]; then
 
-	# setup process has not started yet
+        # setup process has not started yet
         l1="Login to your RaspiBlitz with:\n"
         l2="ssh admin@${localip}\n"
         l3="Use password: raspiblitz\n"
-	boxwidth=$((${#localip} + 20))
+        boxwidth=$((${#localip} + 20))
         dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 
       elif [ ${setupStep} -lt 100 ]; then
 
-	# setup process init is done and not finished
-	lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
-        chain=$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.chain')
+        # setup process init is done and not finished
+        lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
+        chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 
        if [ ${locked} -gt 0 ]; then
@@ -49,7 +52,7 @@ if [ "$USER" = "pi" ]; then
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-	  boxwidth=$((${#localip} + 20))
+          boxwidth=$((${#localip} + 20))
           dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 5
 
@@ -57,7 +60,7 @@ if [ "$USER" = "pi" ]; then
 
           # special case: LND is syncing
           /home/admin/80scanLND.sh
-	  sleep 5
+          sleep 5
 
         else
 
@@ -67,32 +70,33 @@ if [ "$USER" = "pi" ]; then
           l3="Use your Password A\n"
           boxwidth=$((${#localip} + 20))
           dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
-	  sleep 10
+          sleep 10
 
         fi
 
       else
 
-	# RaspiBlitz is full Setup
+        # RaspiBlitz is full Setup
 
-        chain=$(su -u bitcoin ${network}-cli getblockchaininfo | jq -r '.chain')
+        chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock) 
         if [ ${locked} -gt 0 ]; then
-	        # special case: LND wallet is locked ---> show unlock info
+        
+          # special case: LND wallet is locked ---> show unlock info
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-	        boxwidth=$((${#localip} + 20))
+          boxwidth=$((${#localip} + 22))
           dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
-	  sleep 5
+          sleep 5
+        
+        else
 
-	else
-
-	  # no special case - show status display
-	  /home/admin/00infoBlitz.sh
-	  sleep 5
-
-	fi
+          # no special case - show status display
+	        /home/admin/00infoBlitz.sh
+	        sleep 5
+	      
+        fi
 
       fi
     done

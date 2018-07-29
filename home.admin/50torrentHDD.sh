@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # *** BITCOIN Torrent ***
-bitcoinTorrent="raspiblitz-hdd-2018-07-16"
+bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
 bitcoinTorrentsize=231230512
-
+                   
 # *** LITECOIN Torrent ***
-litecoinTorrent="raspiblitz-litecoin-2018-07-28"
-litecoinTorrentsize=100
+litecoinTorrent="raspiblitz-litecoin-2018-07-29"
+litecoinTorrentsize=10240000
 
 # load network
 network=`cat .network`
@@ -17,15 +17,21 @@ torrentsize=$bitcoinTorrentsize
 if [ "$network" = "litecoin" ]; then
   torrent=$litecoinTorrent
   torrentsize=$litecoinTorrentsize
-if 
-
-echo "*** Downloading TORRENT ***"
+fi
+echo ""
 echo "torrentFile: ${torrent}"
+
+echo ""
+echo "*** Downloading TORRENT ***"
+echo "IN CASE DOWNLOAD DOES NOT START OR TOO SLOW:"
+echo "CTRL+z start ./10setupBlitz.sh choose other option"
+echo "***************************"
+echo ""
 tmpfile=$(mktemp)
 chmod a+x $tmpfile
 echo "killall transmission-cli" > $tmpfile
 sudo transmission-cli ./assets/$torrent.torrent -D -et -w /mnt/hdd -f $tmpfile
-echo "OK - Download is complete"
+echo "OK - Download closed"
 echo ""
 
 echo "*** Checking TORRENT ***"
@@ -37,7 +43,7 @@ if [ ${#downloadsize} -eq 0 ]; then
 fi
 # add some tolerance for checking 
 size="$(($size-1024000))"
-echo "download size is(${downloadsize}) needs to be minimum(${size}})"
+echo "download size is(${downloadsize}) needs to be minimum(${size})"
 if [ ${downloadsize} -lt ${size} ]; then
   sleep 3
   echo -ne '\007'

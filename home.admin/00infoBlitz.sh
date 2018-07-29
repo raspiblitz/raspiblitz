@@ -151,14 +151,15 @@ else
   external_color="${color_red}"
 fi
 
-networkVersion = $(${network}-cli -cli -version | cut -d " " -f6)
+networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
+ln_alias=`sudo -u admin cat /home/admin/.hostname`
 
 printf " 
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
-${color_yellow}               ${color_gray}$Fullnode + Lightning Network
+${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network
 ${color_yellow}               ${color_yellow}%s
 ${color_yellow}        ,/     ${color_yellow} 
 ${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C

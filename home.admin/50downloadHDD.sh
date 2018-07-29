@@ -9,7 +9,7 @@ bitcoinSize=100
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
 litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
-litecoinSize=19184980
+litecoinSize=19000000
 
 # load network
 network=`cat .network`
