@@ -33,8 +33,6 @@ echo "url($url)"
 echo "size($size)"
 echo "targetPath($targetPath)"
 
-exit 1
-
 echo "*** Downloading HDD / FTP ***"
 sudo wget -r -P /mnt/hdd/ -q --show-progress ${url}
 echo "OK"
