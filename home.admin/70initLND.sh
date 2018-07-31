@@ -169,14 +169,23 @@ if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"
   while :
     do
+      
       # show sync status
       ./80scanLND.sh
       sleep 3
+      
       # break loop when synced
       lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSyncing} -eq 1 ]; then
         break
       fi
+
+      # break loop when wallet is locked
+      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+      if [ ${locked} -eq 1 ]; then
+        break
+      fi
+
     done
   clear
 else
