@@ -16,12 +16,11 @@ while [ ${#result} -eq 0 ]
   done
 
 # set lightning alias
-sed -i "7s/.*/alias=$result/" ./assests/lnd.conf
-sed -i "7s/.*/alias=$result/" ./assests/lnd.litecoin.conf
+sed -i "7s/.*/alias=${result}/" /home/admin/assets/lnd.${network}.conf
 
 # store hostname for later - to be set right before the next reboot
 # work around - because without a reboot the hostname seems not updates in the whole system
-echo $result >> /home/admin/.hostname
+echo $result > /home/admin/.hostname
 
 # show password info dialog
 dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
