@@ -17,10 +17,18 @@ total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblo
 
 # calculate progress in percent 
 percent=$(awk "BEGIN { pc=100*${item}/${total}; i=int(pc); print (pc-i<0.5)?i:i+1 }") 
-if [ ${percent} -e 100 ]; then
+if [ ${percent} -eq 100 ]; then
   # normally if 100% gets calculated, item parsed the wrong height
   percent=0
 fi
 
+infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time")
+
+# check if blockchain is still syncing
+isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
+if [ ${isWaitingBlockchain} -gt 0 ]; then
+  infoStr=" Waiting for final Blockchain Sync\nplease wait - this can take some time"
+fi
+
 # display progress to user
-dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time" 4 42
+dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42
