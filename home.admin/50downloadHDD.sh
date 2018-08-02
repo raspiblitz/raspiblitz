@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo ""
 
 # *** BITCOIN ***
@@ -38,6 +38,7 @@ isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
 echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
+  sudo mkdir ${targetDir} 2>/dev/null
   screen -S ${name} -dm ${command}
 else
   echo "Continue screen session"
@@ -139,8 +140,8 @@ targetPath=$(echo ${url} | cut -d '@' -f2)
 echo "path to downloaded data is ${targetPath}"
 
 # calculate progress and write it to file for LCD to read
-finalSize=$( du -s ${targetDir} | head -n1 | awk '{print $1;}' )
-if [ ${#actualSize} -eq 0 ]; then
+finalSize=$( du -s ${targetDir} 2>/dev/null | head -n1 | awk '{print $1;}' )
+if [ ${#finalSize} -eq 0 ]; then
   finalSize=0
 fi
 echo "final size is ${finalSize} of targeted size ${targetSize}"
@@ -151,7 +152,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want keep already downloaded data?" 6 57
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 6 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir}${targetPath} ;;

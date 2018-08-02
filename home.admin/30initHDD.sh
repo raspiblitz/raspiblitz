@@ -2,9 +2,32 @@
 echo ""
 echo "*** Checking if HDD is connected ***"
 sleep 5
+device="sda1"
 existsHDD=$(lsblk | grep -c sda1)
 if [ ${existsHDD} -eq 1 ]; then
-  echo "OK - HDD found as sda1"
+  echo "OK - HDD found at sda1"
+
+  # check if there is s sda2
+  existsHDD2=$(lsblk | grep -c sda2)
+  if [ ${existsHDD2} -eq 1 ]; then
+    echo "OK - HDD found at sda2 ... determine which is bigger"
+
+    # get both with size
+    size1=$(lsblk -o NAME,SIZE -b | grep "sda1" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
+    echo "sda1(${size1})"
+    size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
+    echo "sda2(${size2})"
+
+    # chosse to run with the bigger one
+    if [ ${size2} -gt ${size1} ]; then
+      echo "sda2 is BIGGER - run with this one"
+      device="sda2"
+    else
+      echo "sda1 is BIGGER - run with this one"
+    fi
+
+  fi
+
   mountOK=$(df | grep -c /mnt/hdd)
   if [ ${mountOK} -eq 1 ]; then
     echo "FAIL - HDD is mounted"
@@ -12,10 +35,10 @@ if [ ${existsHDD} -eq 1 ]; then
   else  
     echo ""
     echo "*** Formatting the HDD ***"
-    echo "WARNING ALL DATA ON HDD WILL GET DELETED"
+    echo "WARNING ALL DATA ON HDD WILL GET DELETED - CAN TAKE SOME TIME"
     echo "Wait until you get a OK or FAIL"
     sleep 4
-    sudo mkfs.ext4 /dev/sda1 -F -L BLOCKCHAIN
+    sudo mkfs.ext4 /dev/${device} -F -L BLOCKCHAIN
     echo "format ext4 done - wait 6 secs"
     sleep 6
     formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4) 

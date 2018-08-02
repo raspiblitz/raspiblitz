@@ -51,7 +51,7 @@ if [ ${mountOK} -eq 1 ]; then
   fi
 
   # check if there is a download to continue
-  downloadProgressExists=$(sudo ls /home/admin/.Download.progress 2>/dev/null | grep ".Download.progress" -c)
+  downloadProgressExists=$(sudo ls /home/admin/.Download.out 2>/dev/null | grep ".Download.out" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
     echo "found download in progress .."
     ./50downloadHDD.sh

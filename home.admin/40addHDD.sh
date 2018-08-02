@@ -6,9 +6,9 @@ network=`cat .network`
 
 echo "*** Adding HDD to the System ***"
 sleep 5
-existsHDD=$(lsblk | grep -c sda1)
-if [ ${existsHDD} -eq 1 ]; then
-  echo "OK - HDD found as sda1"
+existsHDD=$(lsblk | grep -c sda)
+if [ ${existsHDD} -gt 0 ]; then
+  echo "OK - HDD found as sda"
   mountOK=$(df | grep -c /mnt/hdd)
   if [ ${mountOK} -eq 1 ]; then
     echo "FAIL - HDD is already mounted"
@@ -67,6 +67,6 @@ if [ ${existsHDD} -eq 1 ]; then
     fi
   fi
 else
-  echo "FAIL - no HDD as device sda1 found"
-  echo "check if HDD is properly connected and has enough power - then try again"
+  echo "FAIL - no HDD as device sda found"
+  echo "check if HDD is properly connected and has enough power - then try again with reboot"
 fi
