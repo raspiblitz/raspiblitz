@@ -1,11 +1,35 @@
-# experimental script to let downloads run 
-# in background with screen an monitor
+#!/bin/sh
+echo ""
 
+# *** BITCOIN ***
+bitcoinList="" # url to list with other sources
+bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-bitcoin-2018-07-16"
+bitcoinSize=100
+
+# *** LITECOIN ***
+litecoinList="" # url to list with other sources
+litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
+litecoinSize=19000000
+
+# load network
+network=`cat .network`
+
+# settings based on network
+list=$bitcoinList
+url=$bitcoinUrl
+size=$bitcoinSize
+if [ "$network" = "litecoin" ]; then
+  list=$litecoinList
+  url=$litecoinUrl
+  size=$litecoinSize
+fi
+
+# screen background monitoring settings
 name="Download"
-targetDir="./test/"
-targetSize=2085832
-maxTimeoutLoops=10
-command="wget -P ${targetDir} http://wiki.fulmo.org/downloads/raspiblitz-2018-07-29b.img.gz"
+targetDir="/mnt/hdd/download/"
+targetSize=$size
+maxTimeoutLoops=100
+command="sudo wget -c -r -P ${targetDir} -q --show-progress ${url}"
 
 # starting session if needed
 echo "checking if ${name} has a running screen session"
@@ -32,6 +56,7 @@ while :
     screen -wipe 1>/dev/null
     isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
     if [ ${isRunning} -eq 0 ]; then
+      timeout=0
       echo "OK - session finished"
       break
     fi
@@ -93,9 +118,54 @@ rm -f .${name}.progress
 
 # quit session if still running
 if [ ${isRunning} -eq 1 ]; then
-  echo "killing screen session TODO: KILL PROCESS"
-  screen -S ${name} -X quit
+  # get the PID of screen session
+  sessionPID=$(screen -ls | grep "${name}" | cut -d "." -f1 | xargs)
+  echo "killing screen session PID(${sessionPID})"
+  # kill all child processes of screen sceesion
+  pkill -P ${sessionPID}
+  echo "proccesses klilled"
+  sleep 3
+ # tell the screen session to quit and wait a bit
+  screen -S ${name} -X quit 1>/dev/null
+  sleep 3
+  echo "cleaning screen"
+  screen -wipe 1>/dev/null
   sleep 3
 fi
 
-# decide on how to continue
+# the path wget will download to
+targetPath=$(echo ${url} | cut -d '@' -f2)
+echo "path to downloaded data is ${targetPath}"
+
+# calculate progress and write it to file for LCD to read
+finalSize=$( du -s ${targetDir} | head -n1 | awk '{print $1;}' )
+if [ ${#actualSize} -eq 0 ]; then
+  finalSize=0
+fi
+echo "final size is ${finalSize} of targeted size ${targetSize}"
+
+# check result
+if [ ${finalSize} -lt ${targetSize} ]; then
+ 
+ # Download failed
+  sleep 3
+  echo -ne '\007'
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want keep already downloaded data?" 6 57
+  response=$?
+  case $response in
+    1) sudo rm -rf ${targetDir}${targetPath} ;;
+  esac
+  ./00mainMenu.sh
+  exit 1;
+  
+else
+
+  # Download worked
+  echo "*** Moving Files ***"
+  sudo mv ${targetDir}${targetPath} /mnt/hdd/${network}
+  echo "OK"
+
+  # continue setup
+  ./60finishHDD.sh
+
+fi

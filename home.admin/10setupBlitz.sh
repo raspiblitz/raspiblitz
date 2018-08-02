@@ -13,9 +13,9 @@ network=`cat .network`
 lndRunning=$(systemctl status lnd.service | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
 
-  chain=$(${network}-cli -datadir=/home/${network}/.${network} getblockchaininfo | jq -r '.chain')
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
-  lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
+  chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
+  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+  lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' 2>/dev/null | grep -c false)
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
     ./AAunlockLND.sh
@@ -29,7 +29,7 @@ if [ ${lndRunning} -eq 1 ]; then
 fi
 
 # check if bitcoin is running
-bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
+bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep -c blocks)
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
@@ -43,9 +43,18 @@ if [ ${mountOK} -eq 1 ]; then
   
   # are there any signs of blockchain data
   if [ -d "/mnt/hdd/${network}" ]; then
-    echo "UNKOWN STATE"
+    echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
     echo "Maybe try --> ./60finishHDD.sh"
+    echo "If this sill is not working reboot after running --> sudo rm -r /mnt/hdd/${network}"
+    exit 1
+  fi
+
+  # check if there is a download to continue
+  downloadProgressExists=$(sudo ls /home/admin/.Download.progress 2>/dev/null | grep ".Download.progress" -c)
+  if [ ${downloadProgressExists} -eq 1 ]; then
+    echo "found download in progress .."
+    ./50downloadHDD.sh
     exit 1
   fi
 
@@ -76,6 +85,9 @@ if [ ${mountOK} -eq 1 ]; then
     echo "FAIL Unkown network(${network})"
     exit 1
    fi
+
+  # set SetupState
+  echo "50" > /home/admin/.setup
 
   clear
   case $menuitem in

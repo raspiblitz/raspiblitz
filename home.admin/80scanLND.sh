@@ -1,6 +1,9 @@
 # load network
 network=`sudo cat /home/admin/.network`
 
+### USER PI AUTOSTART (LCD Display)
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
 # parse the actual scanned height progress from LND logs
 item=0
 chain="$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
@@ -20,4 +23,4 @@ if [ ${percent} -e 100 ]; then
 fi
 
 # display progress to user
-dialog --backtitle "RaspiBlitz (${network} / ${chain})" --infobox " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time" 4 42
+dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time" 4 42

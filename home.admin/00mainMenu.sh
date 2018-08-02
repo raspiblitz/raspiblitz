@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ## default menu settings
-HEIGHT=11
+HEIGHT=13
 WIDTH=64
-CHOICE_HEIGHT=4
+CHOICE_HEIGHT=6
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
@@ -62,8 +62,11 @@ else
 
      # REGULAR MENU
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
-		lnbalance "Detailed Wallet Balances" \
-        lnchannels "Lightning Channel List")
+        FUNDING "Fund your Wallet" \
+        CONNECT "Connect to a Peer" \
+        lnbalance "Detailed Wallet Balances" \
+        lnchannels "Lightning Channel List" \
+        RECKLES "Console / Terminal")
 
     fi
 
@@ -114,6 +117,22 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;
+        CONNECT)
+            ./BBconnectPeer.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;      
+        FUNDING)
+            ./BBfundWallet.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        RECKLES)
+            lncli -h
+            echo "SUCH WOW come back with ./00mainMenu.sh"
+            ;;              
         X) # unlock
             ./AAunlockLND.sh
             ./00mainMenu.sh

@@ -8,7 +8,7 @@ if [ "$USER" = "pi" ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
   # check if bitcoin service is configured
-  bitcoinInstalled=$(sudo -u bitcoin ls /mnt/hdd/${network}/ | grep -c ${network}.conf)
+  bitcoinInstalled=$(sudo -u bitcoin ls /mnt/hdd/${network}/ 2>/dev/null | grep -c ${network}.conf)
   if [ ${bitcoinInstalled} -eq 1 ]; then
     # wait enough secs to let bitcoind init
     dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 130
@@ -36,15 +36,15 @@ if [ "$USER" = "pi" ]; then
         l2="ssh admin@${localip}\n"
         l3="Use password: raspiblitz\n"
         boxwidth=$((${#localip} + 20))
-        dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 
       elif [ ${setupStep} -lt 100 ]; then
 
         # setup process init is done and not finished
-        lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
-        chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
-        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+        lndSyncing=$(sudo -u bitcoin lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c false)
+        chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
+        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 
        if [ ${locked} -gt 0 ]; then
 
@@ -69,7 +69,14 @@ if [ "$USER" = "pi" ]; then
           l2="ssh admin@${localip}\n"
           l3="Use your Password A\n"
           boxwidth=$((${#localip} + 20))
-          dialog --backtitle "RaspiBlitz - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+
+          if [ ${setupStep} -eq 50 ]; then
+            l1="Blockhain Setup - monitor progress:\n"
+            boxwidth=45
+          fi
+
+          sleep 3
+          dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 10
 
         fi

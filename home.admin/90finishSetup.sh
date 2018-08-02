@@ -32,18 +32,13 @@ else
   sleep 60
 fi
 
-# mark setup is done
-echo "90" > /home/admin/.setup
-
 # expand FS of SD
 echo "*** Expand RootFS ***"
 sudo raspi-config --expand-rootfs
 echo ""
 
-# set the hostname inputed on initDialog
-hostname=`cat .hostname`
-echo "Setting new network hostname '$hostname'"
-sudo hostnamectl set-hostname ${hostname}
+# mark setup is done
+echo "90" > /home/admin/.setup
 
 # show info to user
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
@@ -52,6 +47,11 @@ dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " 
     Remember: After every reboot
   you need to unlock the LND wallet.
 " 10 42
+
+# set the hostname inputed on initDialog
+hostname=`cat .hostname`
+echo "Setting new network hostname '$hostname'"
+sudo raspi-config nonint do_hostname ${hostname}
 
 # mark setup is done (100%)
 echo "100" > /home/admin/.setup
