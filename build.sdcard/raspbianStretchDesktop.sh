@@ -68,7 +68,7 @@ sudo adduser admin sudo
 sudo chsh admin -s /bin/bash
 
 # configure sudo for usage without password entry
-sudo sed --in-place -i "7s/.*/%sudo  ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
+echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 echo "*** ADDING SERVICE USER bitcoin"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin
