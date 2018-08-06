@@ -36,6 +36,7 @@ if [ "$USER" = "pi" ]; then
         l2="ssh admin@${localip}\n"
         l3="Use password: raspiblitz\n"
         boxwidth=$((${#localip} + 20))
+        sleep 3
         dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 

@@ -24,7 +24,10 @@ echo "pi:raspiblitz" | sudo chpasswd
 
 # set Raspi to boot up automatically with user pi (for the LCD)
 # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-sudo raspi-config nonint do_boot_behaviour B2
+# sudo raspi-config nonint do_boot_behaviour B2
+sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
 # give Raspi a default hostname (optional)
 sudo raspi-config nonint do_hostname "RaspiBlitz"
@@ -306,6 +309,10 @@ sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatic start the LCD info loop' >> /home/pi/.bashrc"
 sudo bash -c "echo '/home/admin/00infoLCD.sh' >> /home/pi/.bashrc"
 
+# on root login - make some finale setup configs
+sudo bash -c "echo '# make LCD screen rotation correct"
+sudo bash -c 'echo "sudo sed --in-place -i \"57s/.*/dtoverlay=tft35a:rotate=270/\" /boot/config.txt" >> /home/admin/.bashrc'
+
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
 echo "**********************************************"
@@ -314,11 +321,11 @@ echo "**********************************************"
 echo ""
 echo "Your SD Card Image for RaspiBlitz is almost ready."
 echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-echo "Dont forget the new default password is now: raspiblitz"
 echo ""
 echo "Maybe take the chance and look thru the output above if you can spot any errror."
 echo ""
-echo "After reboot - your RaspiBlitz SD Card is ready."
+echo "After reboot - please LOGIN ONCE as ROOT:"
+echo "ssh root@[IP-OF-PI] --> with password 'raspiblitz'"
 echo "Press ENTER to install LCD and reboot ..."
 read key
 
@@ -326,7 +333,6 @@ read key
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
 cd /home/admin/
 sudo apt-mark hold raspberrypi-bootloader
-sudo bash -c "echo 'dtoverlay=tft35a:rotate=270' >> /boot/config.txt"
 git clone https://github.com/goodtft/LCD-show.git
 chmod -R 755 LCD-show
 cd LCD-show/
