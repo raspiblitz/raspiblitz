@@ -5,10 +5,17 @@
 # https://www.raspberrypi.org/downloads/raspbian/
 # SHA256: 8636ab9fdd8f58a8ec7dde33b83747696d31711d17ef68267dbbcd6cfb968c24
 ##########################################################################
-# setup fresh SD card with image above - login per SSH and run this script
+# setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
 
-# *** RASPI CONFIG ***
+echo ""
+echo "***************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.5 *"
+echo "***************************************"
+echo ""
+
+echo ""
+echo "*** RASPI CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
 
 # set new default passwort for pi and root user
@@ -33,7 +40,8 @@ pip install -U tzupdate
 sleep 2
 sudo tzupdate
 
-# *** SOFTWARE UPDATE ***
+echo ""
+echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
@@ -46,7 +54,8 @@ sudo apt-get remove -y --purge libreoffice*
 sudo apt-get clean
 sudo apt-get -y autoremove
 
-# *** ADDING MAIN USER "admin" ***
+echo ""
+echo "*** ADDING MAIN USER admin ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-main-user-admin
 # using the default password 'raspiblitz'
 
@@ -58,21 +67,23 @@ sudo chsh admin -s /bin/bash
 # configure sudo for usage without password entry
 sudo sed --in-place -i "7s/.*/%sudo  ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
 
-# *** ADDING SERVICE USER “bitcoin”
+echo "*** ADDING SERVICE USER bitcoin"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin
 
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
 
-# *** SWAP FILE ***
+echo ""
+echo "*** SWAP FILE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#moving-the-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
 
 sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
-# *** HARDENING ***
+echo ""
+echo "*** HARDENING ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
 
 # firewall - just install (not configure)
@@ -81,7 +92,8 @@ sudo apt-get install -y ufw
 # fail2ban (no config required)
 sudo apt-get install -y fail2ban
 
-# *** INCREASE OPEN FILE LIMIT ***
+echo ""
+echo "*** INCREASE OPEN FILE LIMIT ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#increase-your-open-files-limit
 
 sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
@@ -95,7 +107,8 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
-# *** BITCOIN ***
+echo ""
+echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
@@ -142,14 +155,15 @@ fi
 sudo -u admin tar -xvf bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
 sleep 3
-installed=$(sudo -u admin bitcoind --version | grep '${bitcoinVersion}' -c)
+installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
   exit 1
 fi
 
-# *** LITECOIN ***
+echo ""
+echo "*** LITECOIN ***"
 # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
 # set version (change if update is available)
@@ -158,14 +172,15 @@ cd /home/admin/download
 sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo -u admin tar -xvf litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
-installed=$(sudo -u admin litecoind --version | grep '${litecoinVersion}' -c)
+installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
   exit 1
 fi
 
-# *** LND ***
+echo ""
+echo "*** LND ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 
 lndVersion="0.4.2-beta"
@@ -250,14 +265,15 @@ fi
 sudo -u admin tar -xzf lnd-linux-arm-v${lndVersion}.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-arm-v${lndVersion}/*
 sleep 3
-installed=$(sudo -u admin lnd --version | grep '${lndVersion}' -c)
+installed=$(sudo -u admin lnd --version | grep "${lndVersion}" -c)
 if [ ${installed} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> Was not able to install LND version(${lndVersion})"
   exit 1
 fi
 
-# *** RASPIBLITZ EXTRAS ***
+echo ""
+echo "*** RASPIBLITZ EXTRAS ***"
 
 # for setup schell scripts
 sudo apt-get -y install dialog bc
