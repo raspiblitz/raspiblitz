@@ -4,9 +4,11 @@ if [ "$USER" = "pi" ]; then
   # check for after setup script
   afterSetupScriptExists=$(ls /home/pi/setup.sh 2>/dev/null | grep -c setup.sh)
   if [ ${afterSetupScriptExists} -eq 1 ]; then
+    echo "*** SETUP SCRIPT DETECTED ***"
+    sudo cat /home/pi/setup.sh
     sudo /home/pi/setup.sh
     sudo rm /home/pi/setup.sh
-    dialog --pause "  ... one more reboot needed ... " 8 58 6
+    echo "DONE wait 6 secs ... one more reboot needed ... "
     sudo shutdown -r now
   fi
 

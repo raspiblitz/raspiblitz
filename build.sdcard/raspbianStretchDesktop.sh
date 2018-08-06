@@ -190,6 +190,7 @@ lndVersion="0.4.2-beta"
 olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
 
 # setup public ip service
+cat > ./getpublicip.sh <<EOF
 getPubliIPScript='' read -r -d '' String <<"EOF"
 #!/bin/bash
 # RaspiBolt LND Mainnet: script to get public ip address
@@ -202,9 +203,9 @@ while [ 0 ];
     sleep 600
 done;
 EOF
-sudo -u admin echo "" > /usr/local/bin/getpublicip.sh
+sudo mv ./getpublicip.sh /usr/local/bin/getpublicip.sh
 sudo chmod +x /usr/local/bin/getpublicip.sh
-getPubliIPService='' read -r -d '' String <<"EOF"
+cat > ./getpublicip.service <<EOF
 # RaspiBolt LND Mainnet: systemd unit for getpublicip.sh script
 # /etc/systemd/system/getpublicip.service
 
@@ -226,7 +227,7 @@ TimeoutSec=10
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo -u admin echo "" > /etc/systemd/system/getpublicip.service
+sudo mv ./getpublicip.service /etc/systemd/system/getpublicip.service
 sudo systemctl enable getpublicip
 sudo systemctl start getpublicip
 
@@ -310,13 +311,12 @@ sudo bash -c "echo '# automatic start the LCD info loop' >> /home/pi/.bashrc"
 sudo bash -c "echo '/home/admin/00infoLCD.sh' >> /home/pi/.bashrc"
 
 # create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
-afterSetupScript='' read -r -d '' String <<"EOF"
+cat > /home/pi/setup.sh <<EOF
 
 # make LCD screen rotation correct
 sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
-echo '${afterSetupScript}' > /home/pi/setup.sh
 sudo chmod +x /home/pi/setup.sh
 
 # *** RASPIBLITZ IMAGE READY ***
