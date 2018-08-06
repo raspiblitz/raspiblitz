@@ -66,7 +66,8 @@ else
         CONNECT "Connect to a Peer" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
-        RECKLES "Console / Terminal")
+        RECKLES "Console / Terminal"\
+        REKT "Go Reckless! Switch Testnet/Mainnet")
 
     fi
 
@@ -132,6 +133,9 @@ case $CHOICE in
         RECKLES)
             lncli -h
             echo "SUCH WOW come back with ./00mainMenu.sh"
+            ;;
+        REKT) # switch configs
+            sudo ./95switchNetEnv.sh;
             ;;              
         X) # unlock
             ./AAunlockLND.sh
