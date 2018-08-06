@@ -317,8 +317,7 @@ sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
 echo '${afterSetupScript}' > /home/pi/setup.sh
-sudo shmod +x /home/pi/setup.sh
-
+sudo chmod +x /home/pi/setup.sh
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
