@@ -1,6 +1,15 @@
 #!/bin/sh
 if [ "$USER" = "pi" ]; then
 
+  # check for after setup script
+  afterSetupScriptExists=$(ls /home/pi/setup.sh 2>/dev/null | grep -c setup.sh)
+  if [ ${afterSetupScriptExists} -eq 1 ]; then
+    sudo /home/pi/setup.sh
+    sudo rm /home/pi/setup.sh
+    dialog --pause "  ... one more reboot needed ... " 8 58 6
+    sudo shutdown -r now
+  fi
+
   # load network
   network=`sudo cat /home/admin/.network`
 
@@ -22,7 +31,7 @@ if [ "$USER" = "pi" ]; then
       network=`sudo cat /home/admin/.network`
 
       # get the setup state
-      setupStepExists=$(sudo -u admin ls -la /home/admin/.setup | grep -c .setup)
+      setupStepExists=$(sudo -u admin ls -la /home/admin/.setup 2>/dev/null | grep -c .setup)
       if [ ${setupStepExists} -eq 1 ]; then
         setupStep=$(sudo -u admin cat /home/admin/.setup)
       else

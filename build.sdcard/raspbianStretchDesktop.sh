@@ -24,7 +24,7 @@ echo "pi:raspiblitz" | sudo chpasswd
 
 # set Raspi to boot up automatically with user pi (for the LCD)
 # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-# sudo raspi-config nonint do_boot_behaviour B2
+sudo raspi-config nonint do_boot_behaviour B2
 sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
@@ -309,9 +309,16 @@ sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatic start the LCD info loop' >> /home/pi/.bashrc"
 sudo bash -c "echo '/home/admin/00infoLCD.sh' >> /home/pi/.bashrc"
 
-# on root login - make some finale setup configs
-sudo bash -c "echo '# make LCD screen rotation correct"
-sudo bash -c 'echo "sudo sed --in-place -i \"57s/.*/dtoverlay=tft35a:rotate=270/\" /boot/config.txt" >> /home/admin/.bashrc'
+# create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
+afterSetupScript='' read -r -d '' String <<"EOF"
+
+# make LCD screen rotation correct
+sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
+
+EOF
+echo '${afterSetupScript}' > /home/pi/setup.sh
+sudo shmod +x /home/pi/setup.sh
+
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -324,8 +331,7 @@ echo "Last step is to install LCD drivers. This will reboot your Pi when done."
 echo ""
 echo "Maybe take the chance and look thru the output above if you can spot any errror."
 echo ""
-echo "After reboot - please LOGIN ONCE as ROOT:"
-echo "ssh root@[IP-OF-PI] --> with password 'raspiblitz'"
+echo "After final reboot - your SD Card Image is ready."
 echo "Press ENTER to install LCD and reboot ..."
 read key
 
