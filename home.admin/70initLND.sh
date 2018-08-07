@@ -123,18 +123,20 @@ Press OK and follow the 'Helping Instructions'.
   # set SetupState to 75 (mid thru this process)
   echo "65" > /home/admin/.setup
 fi
-echo "--> lets wait 30 seconds for LND to get ready"
-sleep 30
+echo "--> lets wait 60 seconds for LND to get ready"
+sleep 60
 
 ###### Copy LND macaroons to admin
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
-macaroonExists=$(sudo -u bitcoin ls -la /mnt/hdd/lnd/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
+  sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon
   echo ""
   echo "FAIL - LND Macaroons not created"
   echo "Please check the following LND issue:"
   echo "https://github.com/lightningnetwork/lnd/issues/890"
+  echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
 sudo mkdir /home/admin/.lnd
