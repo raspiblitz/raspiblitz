@@ -13,7 +13,7 @@ if [ "$USER" = "pi" ]; then
   fi
 
   # load network
-  network=`sudo cat /home/admin/.network`
+  network=`sudo cat /home/admin/.network 2>/dev/null`
 
   ### USER PI AUTOSTART (LCD Display)
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -30,7 +30,7 @@ if [ "$USER" = "pi" ]; then
      do
 
       # refresh network
-      network=`sudo cat /home/admin/.network`
+      network=`sudo cat /home/admin/.network 2>/dev/null`
 
       # get the setup state
       setupStepExists=$(sudo -u admin ls -la /home/admin/.setup 2>/dev/null | grep -c .setup)
