@@ -4,6 +4,9 @@ echo ""
 # load network
 network=`cat .network`
 
+# get chain
+chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
 bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
@@ -72,8 +75,8 @@ if [ ${lndRunning} -eq 0 ]; then
   sudo chmod +x /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
   sudo systemctl start lnd
-  echo "Started LND .. waiting 30 seconds for init ..."
-  sleep 30
+  echo "Started LND .. waiting 60 seconds for init ..."
+  sleep 60
 fi
 
 ###### Check LND is running
@@ -89,9 +92,8 @@ echo "OK - LND is running"
 echo ""
 
 ###### Instructions on Creating LND Wallet
-setupStep=0
-setupStep=$(sudo cat "/home/admin/.setup")
-if [ ${setupStep} -lt 65 ]; then
+walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${cahin}net/wallet.db 2>/dev/null | grep wallet.db -c)
+if [ ${walletExists} -eq 0 ]; then
   # setup state signals, that no wallet has been created yet
   dialog --backtitle "RaspiBlitz - LND Lightning Wallet" --msgbox "
 ${network} and Lighthing Services are installed.
@@ -123,6 +125,7 @@ Press OK and follow the 'Helping Instructions'.
   # set SetupState to 75 (mid thru this process)
   echo "65" > /home/admin/.setup
 fi
+
 echo "--> lets wait 60 seconds for LND to get ready"
 sleep 60
 
@@ -153,7 +156,6 @@ fi
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
-chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
@@ -166,7 +168,6 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
 lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"

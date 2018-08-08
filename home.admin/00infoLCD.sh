@@ -98,7 +98,7 @@ if [ "$USER" = "pi" ]; then
         # RaspiBlitz is full Setup
 
         chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
-        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock) 
+        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock) 
         if [ ${locked} -gt 0 ]; then
         
           # special case: LND wallet is locked ---> show unlock info
