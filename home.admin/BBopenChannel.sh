@@ -42,8 +42,8 @@ OPTIONS=()
 while IFS= read -r grepLine
 do
   pubKey=$(echo ${grepLine} | cut -d '"' -f4)
-  echo "grepLine(${pubKey})"
-  OPTIONS+=(pubKey "")
+  #echo "grepLine(${pubKey})"
+  OPTIONS+=(${pubKey} "")
 done < <(lncli listpeers | grep pub_key)
 TITLE="Open (Payment) Channel"
 MENU="\nChoose a peer you connected to, to open the channel with: \n "
@@ -71,7 +71,7 @@ if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
 fi
 
 # let user enter a amount
-l1="Enter the amount in SATOSHI you want to fund this channel:"
+l1="Amount in SATOSHI to fund this channel:"
 l2="min required  : ${minSat}"
 l3="max available : ${confirmedBalance}"
 dialog --title "Funding of Channel" \
