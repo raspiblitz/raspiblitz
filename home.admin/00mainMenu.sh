@@ -62,7 +62,7 @@ else
 
       chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
       switchOption="to MAINNET"
-      if [ "${chain}" = "test" ]; then
+      if [ "${chain}" = "main" ]; then
         switchOption="back to TESTNET"
       fi
 
