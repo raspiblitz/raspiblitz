@@ -4,12 +4,12 @@
 network=`cat .network`
 chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 
-command="lncli newaddress np2wkh"
+command="lncli closeallchannels -f"
 
 clear
-echo "******************************"
-echo "Fund your Blockchain Wallet"
-echo "******************************"
+echo "***********************************"
+echo "Closing All Channels (EXPERIMENTAL)"
+echo "***********************************"
 echo ""
 echo "COMMAND LINE: "
 echo $command
@@ -23,12 +23,17 @@ if [ ${chainInSync} -eq 0 ]; then
   result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
 fi
 
+# TODO PRECHECK) are any channels open at all
+
+# TODO PRECHECK) are there INACTIVE channels that would need a force close (and manual YES)
+# remember that for info below
+
 # execute command
 if [ ${#command} -gt 0 ]; then
   result=$($command)
 fi
 
-# on no result
+# on no result TODO: check if there is any result at all
 if [ ${#result} -eq 0 ]; then
   echo "Sorry something went wrong - thats unusual."
   echo ""
@@ -38,26 +43,11 @@ fi
 # when result is available
 echo "$result"
 
-# get address from result
-address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+# TODO parse out closing transactions and monitor those with blockchain for confirmations
 
-# prepare coin info
-coininfo="REAL Bitcoin"
-if [ "$network" = "litecoin" ]; then
-  coininfo="REAL Litecoin"
-fi
-if [ "$chain" = "test" ]; then
-  coininfo="TESTNET Bitcoin"
-fi
-
-# output info
+# TODO give final info - let user know if its now safe to update RaspiBlitz or change test/main
+# ask to make sure user has list for seed words still safe
 echo ""
 echo "******************************"
-echo "TODO"
+echo "INFO"
 echo "******************************"
-echo "Send ${coininfo} to address --> ${address}"
-if [ "$chain" = "test" ]; then
-  echo "get some testnet coins from https://testnet.manu.backend.hamburg/faucet"
-fi
-echo "Whats next? --> Wait for confirmations. You can use lnbalance for main menu or info on LCD to check if funds have arrived."
-echo ""

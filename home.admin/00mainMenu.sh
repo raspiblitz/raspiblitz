@@ -56,18 +56,24 @@ else
 
       # LOCK SCREEN
       MENU="!!! YOUR WALLET IS LOCKED !!!"
-      OPTIONS+=(X "Unlock your Lightning Wallet with 'lncli unlock'")
+      OPTIONS+=(U "Unlock your Lightning Wallet with 'lncli unlock'")
 
     else
 
-     # REGULAR MENU
+      chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+      switchOption="to MAINNET"
+      if [ "${chain}" = "test" ]; then
+        switchOption="back to TESTNET"
+      fi
+
+      # REGULAR MENU
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
         FUNDING "Fund your Wallet" \
         CONNECT "Connect to a Peer" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
-        RECKLES "Console / Terminal"\
-        REKT "Go Reckless! Switch Testnet/Mainnet")
+        SWITCH "Switch ${switchOption}"
+        X "Console / Terminal")
 
     fi
 
@@ -130,14 +136,17 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;  
-        RECKLES)
+        SWITCH)
+            sudo ./95switchMainTest.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        X)
             lncli -h
             echo "SUCH WOW come back with ./00mainMenu.sh"
-            ;;
-        REKT) # switch configs
-            sudo ./95switchNetEnv.sh;
-            ;;              
-        X) # unlock
+            ;;           
+        U) # unlock
             ./AAunlockLND.sh
             ./00mainMenu.sh
             ;;
