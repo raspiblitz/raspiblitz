@@ -84,7 +84,7 @@ if [ ${#amount} -eq 0 ]; then
 fi
 
 # build command
-command="lncli openchannel ${#pubKey} ${amount} 0"
+command="lncli openchannel ${pubKey} ${amount} 0"
 
 # info output
 clear
