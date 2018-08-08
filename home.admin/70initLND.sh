@@ -92,7 +92,7 @@ echo "OK - LND is running"
 echo ""
 
 ###### Instructions on Creating LND Wallet
-walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${cahin}net/wallet.db 2>/dev/null | grep wallet.db -c)
+walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
 if [ ${walletExists} -eq 0 ]; then
   # setup state signals, that no wallet has been created yet
   dialog --backtitle "RaspiBlitz - LND Lightning Wallet" --msgbox "
