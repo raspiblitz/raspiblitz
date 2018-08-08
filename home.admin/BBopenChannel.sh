@@ -61,7 +61,8 @@ if [ ${#pubKey} -eq 0 ]; then
  exit 1
 fi
 
-# find out what is the minimum amount
+# find out what is the minimum amount 
+# TODO find a better way - also consider dust and channel reserve
 minSat=20000
 _error="./.error.out"
 lncli openchannel ${CHOICE} 1 0 2>$_error
@@ -100,64 +101,21 @@ echo "RESULT:"
 # execute command
 result=$($command 2>$_error)
 error=`cat ${_error}`
+
 echo "result(${result})"
 echo "error(${error})"
 
-exit 1
-
-# on no result
-if [ ${#result} -eq 0 ]; then
-
-  # basic error
-  win=0
-  info="No return value. Error not known."
-
-  # try to get error output
-  result=`cat ${_error}`
-  echo "$result"
-
-  # basic cli error
-  cliError=$(echo "${result}" | grep "[lncli]" -c )
-  if [ ${cliError} -gt 0 ]; then
-    info="Its possible that LND daemon is not running, not configured correct or not connected to the lncli."
-  fi
-
-else
-
-  # when result is available
-  echo "$result"
-
-  # check if the node is now in peer list
-  pubkey=$(echo $_input | cut -d '@' -f1)
-  isPeer=$(lncli listpeers 2>/dev/null| grep "${pubkey}" -c)
-  if [ ${isPeer} -eq 0 ]; then
-
-    # basic error message
-    win=0
-    info="Was not able to establish connection to node."
-
-    # TODO: try to find out more details from cli output
-
-  else
-    info="Perfect - a connection to that node got established :)"
-  fi
-
-fi
-
-# output info
-echo ""
-if [ ${win} -eq 1 ]; then
-  echo "******************************"
-  echo "WIN"
-  echo "******************************"
-  echo "${info}"
-  echo ""
-  echo "Whats next? --> Open a channel with that node."
-else
+if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "FAIL"
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "${info}"
+  echo "${error}"
+else
+  echo "******************************"
+  echo "WIN"
+  echo "******************************"
+  echo "${result}"
+  echo ""
+  echo "Whats next? --> You need to wait 6 confirmations, for the channel to be ready."
 fi
-
 echo ""

@@ -70,6 +70,7 @@ else
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
         FUNDING "Fund your Wallet" \
         CONNECT "Connect to a Peer" \
+        CHANNEL "Open a Channel with Peer" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
         SWITCH "Switch ${switchOption}"
@@ -132,6 +133,12 @@ case $CHOICE in
             ;;      
         FUNDING)
             ./BBfundWallet.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        FUNDING)
+            ./BBopenChannel.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
