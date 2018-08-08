@@ -12,3 +12,5 @@ sudo -u admin cp /home/admin/raspiblitz/home.admin/*.sh /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 echo "OK - shell scripts and assests are up to date"
+echo "Reboot recommended"
+echo ""
