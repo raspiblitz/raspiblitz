@@ -9,7 +9,7 @@ TITLE=""
 MENU="Choose one of the following options:"
 OPTIONS=()
 
-# default config values (my get changed later)
+# default config values (might get changed later)
 if [ ! -f ./.network ]; then
   echo "bitcoin" > /home/admin/.network
 fi
