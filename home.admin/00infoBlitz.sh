@@ -117,9 +117,9 @@ if [ "${public_port}" = "" ]; then
   fi
 fi
 
-public_check=$(curl -s https://bitnodes.earn.com/api/v1/nodes/me-${public_port}/ | jq .success)
+public_check=$(timeout 2s nc -z ${public_ip} ${public_port}; echo $?)
 
-if [ $public_check = "true" ]; then
+if [ $public_check = "0" ]; then
   public="Yes"
   public_color="${color_green}"
 else
