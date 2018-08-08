@@ -20,15 +20,11 @@ fi
 
 # check available funding
 confirmedBalance=$(lncli walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
-if [ "${network}" = "bitcoin" ]; then
-  if [ ${confirmedBalance} -lt 100 ]; then
-    
-  fi
-elif [ "${network}" = "litecoin" ]; then
- // 20000 SAT
- // 546
- // 616233 SAT
-
+if [ ${confirmedBalance} -eq 0 ]; then
+  echo "FAIL - You have 0 SATOSHI in your confirmed LND On-Chain Wallet."
+  echo "Please fund your on-chain wallet first and wait until confirmed."
+  echo ""
+  exit 1
 fi
 
 # check number of connected peers
