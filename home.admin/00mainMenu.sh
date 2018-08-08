@@ -137,7 +137,7 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;  
-        FUNDING)
+        CHANNEL)
             ./BBopenChannel.sh
             echo "Press ENTER to return to main menu."
             read key
