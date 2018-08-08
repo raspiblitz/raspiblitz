@@ -102,8 +102,8 @@ echo "RESULT:"
 result=$($command 2>$_error)
 error=`cat ${_error}`
 
-echo "result(${result})"
-echo "error(${error})"
+#echo "result(${result})"
+#echo "error(${error})"
 
 if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
