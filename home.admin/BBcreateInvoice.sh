@@ -20,7 +20,6 @@ if [ ${chainInSync} -eq 0 ]; then
   exit 1
 fi
 
-
 # check number of connected peers
 echo "check for open channels"
 openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
@@ -33,56 +32,31 @@ if [ ${openChannels} -eq 0 ]; then
   exit 1
 fi
 
-paymentRequestStart="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    paymentRequestStart="lnbc"
-  else
-    paymentRequestStart="lntb"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    paymentRequestStart="lnltc"
-fi
-
-testSite="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    testSite="https://satoshis.place"
-  else
-    testSite="https://testnet.satoshis.place"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    testSite="https://millionlitecoinhomepage.net"
-fi
-
 # let user enter the invoice
-l1="Copy the LightningInvoice/PaymentRequest into here:"
-l2="Its a long string starting with '${paymentRequestStart}'"
-l3="To try it out go to: ${testSite}"
+l1="Enter the AMOUNT IN SATOSHI of the invoice:"
+l2="1 ${network} = 100 000 000 SAT"
 dialog --title "Pay thru Lightning Network" \
---inputbox "$l1\n$l2\n$l3" 10 70 2>$_temp
-invoice=$(cat $_temp | xargs)
+--inputbox "$l1\n$l2" 9 40 2>$_temp
+amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
-if [ ${#invoice} -eq 0 ]; then
-  echo "FAIL - not a valid input (${invoice})"
+if [ ${#amount} -eq 0 ]; then
+  echo "FAIL - not a valid input (${amount})"
   exit 1
 fi
 
-# TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
-
 # build command
-command="lncli sendpayment --pay_req=${invoice}"
+command="lncli addinvoice ${amount}"
 
 # info output
 clear
 echo "******************************"
-echo "Pay Invoice / Payment Request"
+echo "Create Invoice / Payment Request"
 echo "******************************"
 echo ""
 echo "COMMAND LINE: "
 echo $command
 echo ""
-echo "RESULT (may wait in case of timeout):"
+echo "RESULT:"
 
 # execute command
 result=$($command 2>$_error)

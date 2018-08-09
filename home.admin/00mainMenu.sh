@@ -162,7 +162,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;  
         RECEIVE)
-            echo "TODO: Implement BBcreateInvoice.sh"
+            ./BBcreateInvoice.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
