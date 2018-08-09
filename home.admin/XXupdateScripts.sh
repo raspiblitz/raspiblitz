@@ -17,6 +17,7 @@ rm -r assets
 sudo -u admin cp /home/admin/raspiblitz/raspiblitz-$vTAG/home.admin/*.sh /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+rm /home/admin/raspiblitz/$vTAG.zip
 echo "******************************************"
 echo "OK - shell scripts and assests are up to date"
 echo "Reboot recommended"
