@@ -36,7 +36,7 @@ fi
 l1="Enter the AMOUNT IN SATOSHI of the invoice:"
 l2="1 ${network} = 100 000 000 SAT"
 dialog --title "Pay thru Lightning Network" \
---inputbox "$l1\n$l2" 9 40 2>$_temp
+--inputbox "$l1\n$l2" 9 50 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
@@ -71,10 +71,17 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-  echo "${result}"
   echo "******************************"
   echo "WIN"
   echo "******************************"
-  echo "It worked :) - check out the service you were paying."
+  echo "${result}"
+  rhash=$(echo "$result" | grep r_hash | cut -d '"'-f4)
+  payReq=$(echo "$result" | grep pay_req | cut -d '"'-f4)
+  echo "Give this Invoice/PaymentRequest to someone to pay it:"
+  echo ${payReq}
+  echo "You can use 'lncli lookupinvoice ${rhash}' to check the payment. "
+
+  # TODO: Offer to go into monitor for incommin payment loop.
+
 fi
 echo ""
