@@ -63,6 +63,7 @@ fi
 
 # find out what is the minimum amount 
 # TODO find a better way - also consider dust and channel reserve
+# details see here: https://github.com/btcontract/lnwallet/issues/52
 minSat=20000
 _error="./.error.out"
 lncli openchannel ${CHOICE} 1 0 2>$_error

@@ -94,6 +94,11 @@ echo ""
 ###### Instructions on Creating LND Wallet
 walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
 if [ ${walletExists} -eq 0 ]; then
+
+  # delete old macaroons if exist
+  sudo rm /mnt/hdd/lnd/*.macaroon 2>/dev/null
+  sudo rm /home/admin/.lnd/*.macaroon 2>/dev/null
+
   # setup state signals, that no wallet has been created yet
   dialog --backtitle "RaspiBlitz - LND Lightning Wallet" --msgbox "
 ${network} and Lighthing Services are installed.
