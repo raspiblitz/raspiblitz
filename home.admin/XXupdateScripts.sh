@@ -1,10 +1,18 @@
 #!/bin/bash
 echo ""
 echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
-echo "justincase, not the final upadte mechanism"
 echo "******************************************"
 cd /home/admin/raspiblitz
-git pull
+get_latest_release_tag() {
+  curl --silent "https://api.github.com/repos/charlesrocket/raspiblitz/releases/latest" |
+    grep '"tag_name":' |
+    sed -E 's/.*"([^"]+)".*/\1/'                                  
+}
+
+vTAG=`get_latest_release_tag`
+
+wget https://github.com/charlesrocket/raspiblitz/archive/$vTAG.zip
+
 cd ..
 rm *.sh
 rm -r assets
