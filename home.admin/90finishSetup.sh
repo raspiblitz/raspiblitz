@@ -4,7 +4,7 @@ echo ""
 # add bonus scripts
 ./91addBonus.sh
 
-###### SWAP
+###### SWAP & FS
 echo "*** SWAP file ***"
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
@@ -20,6 +20,12 @@ else
   sudo dphys-swapfile setup
   sudo chmod 0600 /mnt/hdd/swapfile
   sudo dphys-swapfile swapon
+
+  # expand FS of SD
+  echo "*** Expand RootFS ***"
+  sudo raspi-config --expand-rootfs
+  echo ""
+
 fi
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
@@ -31,11 +37,6 @@ else
   echo "--> will continue in 60 seconds <--"
   sleep 60
 fi
-
-# expand FS of SD
-echo "*** Expand RootFS ***"
-sudo raspi-config --expand-rootfs
-echo ""
 
 # mark setup is done
 echo "90" > /home/admin/.setup
