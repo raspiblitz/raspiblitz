@@ -172,7 +172,7 @@ if [ ${macaroonExists} -eq 0 ]; then
   echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
-sudo mkdir /home/admin/.lnd
+sudo mkdir /home/admin/.lnd 2>/dev/null
 macaroonExists=$(sudo ls -la /home/admin/.lnd/ | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo mkdir /home/admin/.lnd

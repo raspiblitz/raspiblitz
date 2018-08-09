@@ -66,15 +66,21 @@ else
         switchOption="back to TESTNET"
       fi
 
-      # REGULAR MENU
+      # Basic Options
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
         FUNDING "Fund your Wallet" \
         CONNECT "Connect to a Peer" \
         CHANNEL "Open a Channel with Peer" \
         lnbalance "Detailed Wallet Balances" \
-        lnchannels "Lightning Channel List" \
-        SWITCH "Switch ${switchOption}"
-        X "Console / Terminal")
+        lnchannels "Lightning Channel List")
+
+      # Depending Options
+      if [ "${network}" = "bitcoin" ]; then
+        OPTIONS+=(SWITCH "Switch ${switchOption}")  
+      fi
+
+      # final Options
+      OPTIONS+=(X "Console / Terminal")   
 
     fi
 

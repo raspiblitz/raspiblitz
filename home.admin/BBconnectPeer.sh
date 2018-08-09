@@ -40,7 +40,7 @@ echo ""
 echo "COMMAND LINE: "
 echo $command
 echo ""
-echo "RESULT:"
+echo "RESULT (might have to wait for timeout):"
 
 win=1
 info=""
