@@ -4,7 +4,7 @@
 network=`cat .network`
 chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 
-command="lncli closeallchannels -f"
+command="lncli closeallchannels --force"
 
 clear
 echo "***********************************"
