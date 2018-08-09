@@ -71,6 +71,8 @@ else
         FUNDING "Fund your Wallet" \
         CONNECT "Connect to a Peer" \
         CHANNEL "Open a Channel with Peer" \
+        SEND "Pay an Invoice/PaymentRequest" \
+        RECEIVE "Create Invoice/PaymentRequest" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List")
 
@@ -149,6 +151,18 @@ case $CHOICE in
             ;;  
         CHANNEL)
             ./BBopenChannel.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        SEND)
+            ./BBpayInvoice.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        RECEIVE)
+            echo "TODO: Implement BBcreateInvoice.sh"
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh

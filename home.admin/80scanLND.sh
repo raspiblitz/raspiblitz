@@ -31,4 +31,5 @@ if [ ${isWaitingBlockchain} -gt 0 ]; then
 fi
 
 # display progress to user
+sleep 1
 dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42
