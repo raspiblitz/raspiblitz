@@ -4,7 +4,7 @@ echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
 echo "******************************************"
 cd /home/admin/raspiblitz
 get_latest_release_tag() {
-  curl --silent "https://api.github.com/repos/charlesrocket/raspiblitz/releases/latest" |
+  curl --silent "https://api.github.com/repos/rootzoll/raspiblitz/releases/latest" |
     grep '"tag_name":' |
     sed -E 's/.*"([^"]+)".*/\1/'
 }
