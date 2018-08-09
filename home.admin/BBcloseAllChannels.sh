@@ -23,17 +23,25 @@ if [ ${chainInSync} -eq 0 ]; then
   result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
 fi
 
-# TODO PRECHECK) are any channels open at all
-
-# TODO PRECHECK) are there INACTIVE channels that would need a force close (and manual YES)
-# remember that for info below
-
 # execute command
 if [ ${#command} -gt 0 ]; then
   ${command}
 fi
  
 echo ""
-echo "OK your list of channels looks now like this:" 
+echo "OK"
 sleep 2
-lnchannels
+
+openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
+if [ ${openChannels} -gt 0 ]; then
+    echo ""
+    echo "*******************"
+    echo "OK All Channels are closed now."
+    echo "You can now switch test/main or update RaspiBlitz safely, as long as you got your CIPHER WORD LIST SEED."
+    echo "*******************"
+else
+  echo "!! WARNING you still have open channels:" 
+  lnchannels
+fi
+
+

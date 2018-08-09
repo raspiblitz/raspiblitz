@@ -75,6 +75,10 @@ else
         lnchannels "Lightning Channel List")
 
       # Depending Options
+      openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
+      if [ ${openChannels} -gt 0 ]; then
+        OPTIONS+=(CLOSEALL "Close all open Channels")  
+      fi
       if [ "${network}" = "bitcoin" ]; then
         OPTIONS+=(SWITCH "Switch ${switchOption}")  
       fi
@@ -145,6 +149,12 @@ case $CHOICE in
             ;;  
         CHANNEL)
             ./BBopenChannel.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        CLOSEALL)
+            ./BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
