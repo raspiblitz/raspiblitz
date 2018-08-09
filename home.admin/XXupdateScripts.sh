@@ -9,7 +9,7 @@ get_latest_release_tag() {
     sed -E 's/.*"([^"]+)".*/\1/'
 }
 vTAG=`get_latest_release_tag`
-wget https://github.com/charlesrocket/raspiblitz/archive/$vTAG.zip
+wget https://github.com/raspiblitz/raspiblitz/archive/$vTAG.zip
 unzip $vTAG.zip
 cd ..
 rm *.sh
