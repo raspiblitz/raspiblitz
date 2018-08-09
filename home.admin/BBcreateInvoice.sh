@@ -75,8 +75,8 @@ else
   echo "WIN"
   echo "******************************"
   echo "${result}"
-  rhash=$(echo "$result" | grep r_hash | cut -d '"'-f4)
-  payReq=$(echo "$result" | grep pay_req | cut -d '"'-f4)
+  rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
+  payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
   echo ${payReq}
   echo "You can use 'lncli lookupinvoice ${rhash}' to check the payment. "
