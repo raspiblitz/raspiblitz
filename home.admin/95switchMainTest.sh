@@ -61,7 +61,7 @@ lndInstalled=$(systemctl status lnd.service | grep loaded -c)
 if [ ${lndInstalled} -gt 0 ]; then
 
   echo "check for open channels"
-  openChannels=$(lncli listchannels 2>/dev/null | grep chan_id -c)
+  openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
   if [ ${openChannels} -gt 0 ]; then
     echo "FAIL - You have still open channels and could loose funds !! - close those first with lncli closeallchannels"
     exit 1
