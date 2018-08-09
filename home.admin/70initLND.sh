@@ -134,6 +134,7 @@ Press OK and follow the 'Helping Instructions'.
     echo ""
     echo "Press ENTER to retry ... or CTRL-c to EXIT"
     read key
+    echo "Starting RETRY ..."
     ./70initLND.sh
     exit 1
   fi

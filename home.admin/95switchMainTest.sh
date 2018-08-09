@@ -34,6 +34,8 @@ function switchToMainnet {
 	echo "switching to mainnet"
 	sed -i "s/^testnet=1/#testnet=1/g" $NETWORK_CONFIG 
 	sed -i "s/^testnet=1/#testnet=1/g" $NETWORK_TEMPLATE 
+  sed -i "s/^#mainnet=1/mainnet=1/g" $NETWORK_CONFIG 
+	sed -i "s/^#mainnet=1/mainnet=1/g" $NETWORK_TEMPLATE 
 	sed -i "s/^${network}.testnet=1/#${network}.testnet=1/g" $LND_CONFIG 
 	sed -i "s/^#${network}.mainnet=1/${network}.mainnet=1/g" $LND_CONFIG
 	sed -i "s/^${network}.testnet=1/#${network}.testnet=1/g" $LND_TEMPLATE 
@@ -45,6 +47,8 @@ function switchToTestnet {
 	echo "switching to testnet"
 	sed -i "s/^#testnet=1/testnet=1/g" $NETWORK_CONFIG 
 	sed -i "s/^#testnet=1/testnet=1/g" $NETWORK_TEMPLATE 
+  sed -i "s/^mainnet=1/#mainnet=1/g" $NETWORK_CONFIG 
+	sed -i "s/^mainnet=1/#mainnet=1/g" $NETWORK_TEMPLATE 
 	sed -i "s/^#${network}.testnet=1/${network}.testnet=1/g" $LND_CONFIG 
 	sed -i "s/^${network}.mainnet=1/#${network}.mainnet=1/g" $LND_CONFIG
 	sed -i "s/^#${network}.testnet=1/${network}.testnet=1/g" $LND_TEMPLATE 
