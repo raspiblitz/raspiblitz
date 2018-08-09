@@ -174,7 +174,7 @@ ${color_yellow}               ${color_gray}${ln_channels_online}/${ln_channels_t
 ${color_yellow}               ${ln_external}
 ${color_yellow}
 " \
-"RaspiBlitz v0.4" \
+"RaspiBlitz v0.5" \
 "-------------------------------------------" \
 "${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
