@@ -120,7 +120,24 @@ Press OK and follow the 'Helping Instructions'.
   echo "****************************************************************************"
   echo ""
   echo "lncli create"
-  sudo -u bitcoin lncli create
+  
+  # execute command and monitor error
+  _error="./.error.out"
+  sudo -u bitcoin lncli create 2>$_error
+  error=`cat ${_error}`
+
+  if [ ${#error} -gt 0 ]; then
+    echo ""
+    echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+    echo "${error}"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo ""
+    echo "Press ENTER to retry ... or CTRL-c to EXIT"
+    read key
+    ./70initLND.sh
+    exit 1
+  fi
+
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
