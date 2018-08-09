@@ -59,7 +59,7 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-http://wiki.fulmo.org/downloads/raspiblitz-2018-08-02.img.gz (or [build your own](#build-the-sd-card-image))
+http://wiki.fulmo.org/downloads/raspiblitz-2018-08-09.img.gz (or [build your own](#build-the-sd-card-image))
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -201,7 +201,11 @@ After SSH back in as admin the main menu shows the unlock option:
 
 Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
 
-![SSH9e](pictures/ssh9e-mainmenu.png)
+![SSH9e1](pictures/ssh9e-mainmenu1.png)
+
+And if you scroll down .. you see even more feature options:
+
+![SSH9e2](pictures/ssh9e-mainmenu2.png)
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
