@@ -159,7 +159,7 @@ echo ""
 echo "*** Copy LND Macaroons to user admin ***"
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  ./AAunlock.sh
+  ./AAunlockLND.sh
   sleep 3
 fi
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
@@ -189,7 +189,7 @@ echo "*** Check Wallet Lock ***"
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  ./unlockLND.sh
+  ./AAunlockLND.sh
 else
   echo "OK - Wallet is already unlocked"
 fi
