@@ -12,7 +12,7 @@ echo "**************************************************************************
 while :
   do
     chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
-    lncli unlock
+    sudo -u bitcoin lncli unlock
     sleep 4
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -eq 0  ]; then

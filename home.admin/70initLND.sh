@@ -94,7 +94,7 @@ echo ""
 ###### Instructions on Creating LND Wallet
 walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
 echo "walletExists(${walletExists})"
-sleep 6
+sleep 2
 if [ ${walletExists} -eq 0 ]; then
 
   # delete old macaroons if exist
@@ -157,6 +157,11 @@ sleep 60
 ###### Copy LND macaroons to admin
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
+if [ ${macaroonExists} -eq 0 ]; then
+  ./AAunlock.sh
+  sleep 3
+fi
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon
