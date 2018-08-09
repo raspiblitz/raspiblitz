@@ -20,5 +20,7 @@ while :
     fi
 
     echo ""
+    echo "network(${network}) chain(${chain})"
+    sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
     echo "Wallet still locked - please try again or Cancel with CTRL+C"
   done
