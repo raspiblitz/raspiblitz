@@ -65,7 +65,7 @@ if [ ${lndInstalled} -gt 0 ]; then
   if [ ${openChannels} -gt 0 ]; then
     echo ""
     echo "!!!!!!!!!!!!!!!!!!!"
-    echo "FAIL - You have still open channels and could loose funds !! - close those first with lncli closeallchannels"
+    echo "FAIL - You have still open channels and could loose funds !! - close those first with 'lncli closeallchannels' or main menu option."
     echo "!!!!!!!!!!!!!!!!!!!"
     exit 1
   else

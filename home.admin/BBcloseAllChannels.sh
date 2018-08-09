@@ -30,24 +30,10 @@ fi
 
 # execute command
 if [ ${#command} -gt 0 ]; then
-  result=$($command)
-fi
-
-# on no result TODO: check if there is any result at all
-if [ ${#result} -eq 0 ]; then
-  echo "Sorry something went wrong - thats unusual."
-  echo ""
-  exit 1
+  ${command}
 fi
  
-# when result is available
-echo "$result"
-
-# TODO parse out closing transactions and monitor those with blockchain for confirmations
-
-# TODO give final info - let user know if its now safe to update RaspiBlitz or change test/main
-# ask to make sure user has list for seed words still safe
 echo ""
-echo "******************************"
-echo "INFO"
-echo "******************************"
+echo "OK your list of channels looks now like this:" 
+sleep 2
+lnchannels
