@@ -57,6 +57,7 @@ echo "COMMAND LINE: "
 echo $command
 echo ""
 echo "RESULT:"
+sleep 2
 
 # execute command
 result=$($command 2>$_error)
@@ -75,10 +76,12 @@ else
   echo "WIN"
   echo "******************************"
   echo "${result}"
+  echo ""
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
   payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
   echo ${payReq}
+  echo ""
   echo "You can use 'lncli lookupinvoice ${rhash}' to check the payment. "
 
   # TODO: Offer to go into monitor for incommin payment loop.
