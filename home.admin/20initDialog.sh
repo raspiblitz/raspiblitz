@@ -16,7 +16,7 @@ while [ ${#result} -eq 0 ]
   done
 
 # set lightning alias
-sed -i "7s/.*/alias=${result}/" /home/admin/assets/lnd.${network}.conf
+sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 
 # store hostname for later - to be set right before the next reboot
 # work around - because without a reboot the hostname seems not updates in the whole system
@@ -72,7 +72,8 @@ while [ ${#result} -lt 8 ]
   done
 
 # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-sed -i "14s/.*/rpcpassword=$result/" /home/admin/assets/${network}.conf
+sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
+sed -i "s/^${network}d.rpcuser=.*/${network}d.rpcuser=${result}/g" /home/admin/assets/lnd.${network}.conf
 
 
 # success info dialog
