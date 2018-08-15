@@ -49,6 +49,8 @@ if [ ${existsHDD} -gt 0 ]; then
 
            echo "*** Analysing HDD Content ***"
            if [  -d "/mnt/hdd/${network}"  ]; then 
+             sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
+             sudo chown bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
              echo "Looks like the HDD is prepared with the Blockchain."
              echo "Continuing with finishing the system setup ..."
              ./60finishHDD.sh
