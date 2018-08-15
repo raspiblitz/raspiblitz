@@ -32,7 +32,7 @@ function isMainnet(){
 
 function switchToMainnet {
 	echo "switching to mainnet"
-	sed -i "s/^testnet=1/#testnet=1/g" $NETWORK_CONFIG 
+	sed -i "s/^testnet=1/#testnet=1/g" $NETWORK_CONFIG
 	sed -i "s/^testnet=1/#testnet=1/g" $NETWORK_TEMPLATE 
   sed -i "s/^#mainnet=1/mainnet=1/g" $NETWORK_CONFIG 
 	sed -i "s/^#mainnet=1/mainnet=1/g" $NETWORK_TEMPLATE 
@@ -100,9 +100,11 @@ else
 	switchToMainnet
 fi
 
-
-echo "copying over config to bitcoin user"
+echo "copying over config to admin user"
 cp $NETWORK_CONFIG /home/admin/.${network}/
+chown admin:admin /home/admin/.${network}/${network}.conf
+cp $LND_CONFIG /home/admin/.lnd/
+chown admin:admin /home/admin/.lnd/lnd.conf
  
 # restarting network
 if [ ${networkInstalled} -gt 0 ]; then

@@ -117,16 +117,28 @@ if [ "${public_port}" = "" ]; then
   fi
 fi
 
-public_check=$(timeout 2s nc -z ${public_ip} ${public_port}; echo $?)
-
-if [ $public_check = "0" ]; then
-  public="Yes"
+public_addr="??"
+torInfo=""
+# TOR or IP
+onionAddress=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | grep '"address"' | cut -d '"' -f4)
+if [ ${#onionAddress} -gt 0 ]; then
+  # TOR address
+  public_addr="${onionAddress}:${public_port}"
+  public=""
   public_color="${color_green}"
+  torInfo="+ TOR"
 else
-  public="Not reachable"
-  public_color="${color_red}"
+  # IP address
+  public_addr="${public_ip}:${public_port}"
+  public_check=$(timeout 2s nc -z ${public_ip} ${public_port}; echo $?)
+  if [ $public_check = "0" ]; then
+    public="Yes"
+    public_color="${color_green}"
+  else
+    public="Not reachable"
+    public_color="${color_red}"
+  fi
 fi
-public_addr="${public_ip}:${public_port}"
 
 # get LND info
 /usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>&1 | grep "Please unlock" >/dev/null
@@ -154,12 +166,13 @@ fi
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
 ln_alias=`sudo -u admin cat /home/admin/.hostname`
 
+sleep 5
 printf "
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
-${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network
+${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}               ${color_yellow}%s
 ${color_yellow}        ,/     ${color_yellow}
 ${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
@@ -174,7 +187,7 @@ ${color_yellow}               ${color_gray}${ln_channels_online}/${ln_channels_t
 ${color_yellow}               ${ln_external}
 ${color_yellow}
 " \
-"RaspiBlitz v0.5" \
+"RaspiBlitz v0.6" \
 "-------------------------------------------" \
 "${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
