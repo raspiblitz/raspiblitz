@@ -97,7 +97,9 @@ echo "allow: bitcoin testnet"
 ufw allow 18333
 echo "allow: bitcoin mainnet"
 ufw allow 8333
-echo "allow: lightning"
+echo 'allow: lightning testnet'
+ufw allow 19735
+echo "allow: lightning mainnet"
 ufw allow 9735
 echo "deny incoming connection on other ports"
 ufw default deny incoming
