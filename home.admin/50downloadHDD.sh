@@ -3,7 +3,7 @@ echo ""
 
 # *** BITCOIN ***
 bitcoinList="" # url to list with other sources
-bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-bitcoin-2018-07-16"
+bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
 bitcoinSize=231000000 # 231235816-tolerance
 
 # *** LITECOIN ***
