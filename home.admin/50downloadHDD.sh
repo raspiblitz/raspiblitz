@@ -152,7 +152,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 6 57
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir}${targetPath} ;;
