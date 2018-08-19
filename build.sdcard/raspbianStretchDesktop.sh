@@ -10,7 +10,7 @@
 
 echo ""
 echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.6 *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.7 *"
 echo "***************************************"
 echo ""
 
@@ -230,48 +230,76 @@ sudo mv ./getpublicip.service /etc/systemd/system/getpublicip.service
 sudo systemctl enable getpublicip
 sudo systemctl start getpublicip
 
-# get LND resources
-cd /home/admin/download
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/lnd-linux-arm-v${lndVersion}.tar.gz
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
 
-# test checksum
-checksum=$(sha256sum --check manifest-v${lndVersion}.txt --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
-if [ ${checksum} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> LND download checksum not OK"
-  exit 1
-fi
-
-# check gpg finger print
-fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
-if [ ${fingerprint} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-  exit 1
-fi
-gpg --import ./pgp_keys.asc
-verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig manifest-v${lndVersion}.txt 2>&1)
-goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} |  grep "using RSA key ${olaoluwaPGP: -16}" -c)
-echo "correctKey(${correctKey})"
-if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-  exit 1
-fi
-
-# install
-sudo -u admin tar -xzf lnd-linux-arm-v${lndVersion}.tar.gz
-sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-arm-v${lndVersion}/*
-sleep 3
-installed=$(sudo -u admin lnd --version | grep "${lndVersion}" -c)
-if [ ${installed} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Was not able to install LND version(${lndVersion})"
+# WORKAROUND: UNTIL LND 0.4.3 arm binary version is here ... we need to build from source to 
+# have TOR integration ... so the following is commented out for now:
+#
+## get LND resources
+#cd /home/admin/download
+#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/lnd-linux-arm-v${lndVersion}.tar.gz
+#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+#sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
+## test checksum
+#checksum=$(sha256sum --check manifest-v${lndVersion}.txt --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
+#if [ ${checksum} -lt 1 ]; then
+#  echo ""
+#  echo "!!! BUILD FAILED --> LND download checksum not OK"
+#  exit 1
+#fi
+## check gpg finger print
+#fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
+#if [ ${fingerprint} -lt 1 ]; then
+#  echo ""
+#  echo "!!! BUILD FAILED --> LND download author PGP not OK"
+#  exit 1
+#fi
+#gpg --import ./pgp_keys.asc
+#verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig manifest-v${lndVersion}.txt 2>&1)
+#goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+#echo "goodSignature(${goodSignature})"
+#correctKey=$(echo ${verifyResult} |  grep "using RSA key ${olaoluwaPGP: -16}" -c)
+#echo "correctKey(${correctKey})"
+#if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+#  echo ""
+#  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+#  exit 1
+#fi
+## install
+#sudo -u admin tar -xzf lnd-linux-arm-v${lndVersion}.tar.gz
+#sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-arm-v${lndVersion}/*
+#sleep 3
+#installed=$(sudo -u admin lnd --version | grep "${lndVersion}" -c)
+#if [ ${installed} -lt 1 ]; then
+#  echo ""
+#  echo "!!! BUILD FAILED --> Was not able to install LND version(${lndVersion})"
+#  exit 1
+#fi
+## BUILDING LND FROM SOURCE
+echo "*** Installing Go ***"
+wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.10.linux-armv6l.tar.gz
+sudo rm *.gz
+sudo mkdir /usr/local/gocode
+sudo chmod 777 /usr/local/gocode
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/gocode
+export PATH=$PATH:$GOPATH/bin
+echo "*** Build LND from Source ***"
+go get -d github.com/lightningnetwork/lnd
+cd $GOPATH/src/github.com/lightningnetwork/lnd
+make && make install
+sudo chmod 555 /usr/local/gocode/bin/lncli
+sudo chmod 555 /usr/local/gocode/bin/lnd
+sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
+sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
+sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
+lndVersionCheck=$(lncli --version)
+echo "LND VERSION: ${lndVersionCheck}"
+if [ ${#lndVersionCheck} -eq 0 ]; then
+  echo "FAIL - Something went wrong with building LND from source."
+  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
   exit 1
 fi
 

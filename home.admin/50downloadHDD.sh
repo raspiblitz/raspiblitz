@@ -93,6 +93,7 @@ while :
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
     echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
+    echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
     echo "****************************************************"
     screen -S ${name} -X hardcopy .${name}.out
