@@ -139,15 +139,15 @@ echo "Your Onion Address is: ${onionAddress}:${onionPort}"
 echo "TODO: Make LND reachable over TOR when compiled for ARM with TOR support"
 
 # ACTIVATE LND OVER TOR LATER ... see DEV NOTES AT END OF FILE
-#sudo systemctl disable lnd
-#echo "Writing Public Onion Address to /run/publicip"
-#echo "PUBLICIP=${onionAddress}" | sudo tee /run/publicip
-#sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
-#sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
-#sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
-#sudo chmod +x /etc/systemd/system/lnd.service
-#sudo systemctl enable lnd
-#echo "OK"
+sudo systemctl disable lnd
+echo "Writing Public Onion Address to /run/publicip"
+echo "PUBLICIP=${onionAddress}" | sudo tee /run/publicip
+sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
+sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
+sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
+sudo chmod +x /etc/systemd/system/lnd.service
+sudo systemctl enable lnd
+echo "OK"
 
 
 echo "*** Finshing Setup / REBOOT ***"
