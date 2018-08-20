@@ -50,6 +50,7 @@ sudo apt install tor tor-arm -y
 
 echo ""
 echo "*** Tor Config ***"
+sudo rm -r -f /mnt/hdd/tor 2>/dev/null
 sudo mkdir /mnt/hdd/tor
 sudo mkdir /mnt/hdd/tor/sys
 sudo mkdir /mnt/hdd/tor/web80
@@ -96,23 +97,35 @@ echo ""
 # NYX - Tor monitor tool
 # https://nyx.torproject.org/#home
 echo "*** Installing NYX - TOR monitoring Tool ***"
-sudo pip install nyx
+nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
+if [ ${nyxInstalled} -eq 0 ]; then
+  sudo pip install nyx
+else
+  echo "NYX already installed"
+fi
 echo ""
 
 echo "*** Changing ${network} Config ***"
-echo "Only Connect thru TOR"
-echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-echo "Adding some nodes to connect to"
-echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-sudo chown admin:admin /home/admin/.${network}/${network}.conf
+networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
+if [ ${networkIsTor} -eq 0 ]; then
+  echo "Only Connect thru TOR"
+  echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  echo "Adding some nodes to connect to"
+  echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+  sudo chown admin:admin /home/admin/.${network}/${network}.conf
+else
+  echo "Chain network already configured for TOR"
+fi
 echo ""
-
+  
 echo "*** Activating TOR system service ***"
+echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
+systemctl daemon-reload
 sudo systemctl restart tor@default
 echo ""
 
