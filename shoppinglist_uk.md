@@ -1,4 +1,4 @@
-*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.comco.uk:* 
+*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.co.uk:* 
 
 * RaspBerry Pi 3 https://www.amazon.co.uk/Raspberry-Pi-Model-64-Bit-Processor/dp/B07BDR5PDW
 * Micro SD-Card 16GB https://www.amazon.co.uk/Kingston-SDC10G2-16GB-microSDHC-Included/dp/B0162YQEIE
