@@ -125,7 +125,7 @@ echo ""
   
 echo "*** Activating TOR system service ***"
 echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
-systemctl daemon-reload
+sudo systemctl daemon-reload
 sudo systemctl restart tor@default
 echo ""
 
@@ -143,8 +143,8 @@ while [ ${torIsBootstrapped} -eq 0 ]
 do
   echo "--- Checking ---"
   date +%s
-  sudo cat /var/log/tor/notices.log | grep "Bootstrapped" | tail -n 10
-  torIsBootstrapped=$(sudo cat /var/log/tor/notices.log | grep "Bootstrapped 100" -c)
+  sudo cat /var/log/tor/notices.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
+  torIsBootstrapped=$(sudo cat /var/log/tor/notices.log 2>/dev/null | grep "Bootstrapped 100" -c)
   echo "torIsBootstrapped(${torIsBootstrapped})"
   echo "If this takes too long --> CTRL+c, reboot and check manually"
   sleep 5
