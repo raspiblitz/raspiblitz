@@ -1,5 +1,3 @@
-Your are from the UK? Your help is needed! 
-
 *The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.comco.uk:* 
 
 * RaspBerry Pi 3 https://www.amazon.co.uk/Raspberry-Pi-Model-64-Bit-Processor/dp/B07BDR5PDW
