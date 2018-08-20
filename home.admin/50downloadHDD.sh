@@ -156,7 +156,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir}${targetPath} ;;
+    1) sudo rm -rf ${targetDir} ;;
   esac
   ./00mainMenu.sh
   exit 1;
