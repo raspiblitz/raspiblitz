@@ -28,7 +28,7 @@ fi
 name="Download"
 targetDir="/mnt/hdd/download/"
 targetSize=$size
-maxTimeoutLoops=500
+maxTimeoutLoops=10000
 command="sudo wget -c -r -P ${targetDir} -q --show-progress ${url}"
 
 # starting session if needed
