@@ -14,7 +14,7 @@ torrc="/etc/tor/torrc"
 clear
 echo ""
 echo "*** Check if TOR service is functional ***"
-torRunning=$(curl --socks5-hostname 127.0.0.1:9050 https://check.torproject.org | grep "Congratulations. This browser is configured to use Tor." -c)
+torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org | grep "Congratulations. This browser is configured to use Tor." -c)
 if [ ${torRunning} -gt 0 ]; then
   clear
   echo "You are all good - TOR is already running."
