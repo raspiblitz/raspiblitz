@@ -77,7 +77,7 @@ else
         lnchannels "Lightning Channel List")
 
       # Depending Options
-      openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
+      openChannels=$(sudo -u bitcoin /usr/local/gocode/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
       if [ ${openChannels} -gt 0 ]; then
         OPTIONS+=(CLOSEALL "Close all open Channels")  
       fi

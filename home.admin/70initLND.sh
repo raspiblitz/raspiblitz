@@ -84,6 +84,8 @@ lndRunning=$(systemctl status lnd.service | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - LND is not running"
+  echo "check: systemctl status lnd.service"
+  echo "check: sudo journalctl -f"
   echo "recheck with original tutorial -->"
   echo "https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md"
   exit 1
@@ -125,7 +127,7 @@ Press OK and follow the 'Helping Instructions'.
   
   # execute command and monitor error
   _error="./.error.out"
-  sudo -u bitcoin lncli create 2>$_error
+  sudo -u bitcoin /usr/local/gocode/bin/lncli create 2>$_error
   error=`cat ${_error}`
 
   if [ ${#error} -gt 0 ]; then
@@ -198,7 +200,7 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+lndSyncing=$(sudo -u bitcoin /usr/local/gocode/bin/lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"
   while :
@@ -209,7 +211,7 @@ if [ ${lndSyncing} -eq 0 ]; then
       sleep 3
       
       # break loop when synced
-      lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+      lndSyncing=$(sudo -u bitcoin /usr/local/gocode/bin/lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSyncing} -eq 1 ]; then
         break
       fi

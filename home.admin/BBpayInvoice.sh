@@ -23,7 +23,7 @@ fi
 
 # check number of connected peers
 echo "check for open channels"
-openChannels=$(sudo -u bitcoin lncli listchannels 2>/dev/null | grep chan_id -c)
+openChannels=$(sudo -u bitcoin /usr/local/gocode/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
 if [ ${openChannels} -eq 0 ]; then
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!"
