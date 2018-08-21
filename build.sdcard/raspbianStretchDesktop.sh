@@ -260,6 +260,10 @@ if [ ${#lndVersionCheck} -eq 0 ]; then
   echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
   exit 1
 fi
+echo ""
+echo "** Link to /usr/local/bin ***"
+sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
+sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"

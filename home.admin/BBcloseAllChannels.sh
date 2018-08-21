@@ -32,7 +32,7 @@ echo ""
 echo "OK"
 sleep 2
 
-openChannels=$(sudo -u bitcoin /usr/local/gocode/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
+openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
 if [ ${openChannels} -gt 0 ]; then
     echo ""
     echo "*******************"

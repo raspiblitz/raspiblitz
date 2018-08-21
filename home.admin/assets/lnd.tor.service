@@ -12,7 +12,7 @@ After=bitcoind.service
 # get var PUBIP from file
 EnvironmentFile=/run/publicip
 
-ExecStart=/usr/local/gocode/bin/lnd --tor.active --tor.v3 --externalip=${PUBLICIP} --listen=127.0.0.1:9735
+ExecStart=/usr/local/bin/lnd --tor.active --tor.v3 --externalip=${PUBLICIP} --listen=127.0.0.1:9735
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin

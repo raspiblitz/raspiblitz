@@ -26,7 +26,7 @@ if [ ${lndRunning} -eq 1 ]; then
 
   chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
   locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
-  lndSyncing=$(sudo -u bitcoin /usr/local/gocode/bin/lncli getinfo | jq -r '.synced_to_chain' 2>/dev/null | grep -c false)
+  lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo | jq -r '.synced_to_chain' 2>/dev/null | grep -c false)
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
     ./AAunlockLND.sh

@@ -12,7 +12,7 @@ After=bitcoind.service
 # get var PUBIP from file
 EnvironmentFile=/run/publicip
 
-ExecStart=/usr/local/gocode/bin/lnd --externalip=${PUBLICIP}
+ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin

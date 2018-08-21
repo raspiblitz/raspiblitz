@@ -54,7 +54,7 @@ if [ "$USER" = "pi" ]; then
       elif [ ${setupStep} -lt 100 ]; then
 
         # setup process init is done and not finished
-        lndSyncing=$(sudo -u bitcoin /usr/local/gocode/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c false)
+        lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c false)
         chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 
