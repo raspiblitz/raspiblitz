@@ -189,55 +189,6 @@ echo "*** LND ***"
 lndVersion="0.4.2-beta"
 olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
 
-# setup public ip service
-cat > ./getpublicip.sh <<EOF
-#!/bin/bash
-# RaspiBolt LND Mainnet: script to get public ip address
-# /usr/local/bin/getpublicip.sh
-
-echo 'getpublicip.sh started, writing public IP address every 10 minutes into /run/publicip'
-while [ 0 ];
-    do
-    torExists=$(sudo ls /mnt/hdd/tor/lnd9735/hostname 2>/dev/null | grep hostname -c)
-    if [ ${torExists} -eq 1 ]; then
-      # use tor onion address
-      printf "PUBLICIP=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)\n" > /run/publicip;
-    else
-      # get public IP
-      printf "PUBLICIP=$(curl -vv ipinfo.io/ip 2> /run/publicip.log)\n" > /run/publicip;
-    fi
-    sleep 600
-done;
-EOF
-sudo mv ./getpublicip.sh /usr/local/bin/getpublicip.sh
-sudo chmod +x /usr/local/bin/getpublicip.sh
-cat > ./getpublicip.service <<EOF
-# RaspiBolt LND Mainnet: systemd unit for getpublicip.sh script
-# /etc/systemd/system/getpublicip.service
-
-[Unit]
-Description=getpublicip.sh: get public ip address from ipinfo.io
-After=network.target
-
-[Service]
-User=root
-Group=root
-Type=simple
-ExecStart=/usr/local/bin/getpublicip.sh
-ExecStartPost=/bin/sleep 5
-Restart=always
-
-RestartSec=600
-TimeoutSec=10
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo mv ./getpublicip.service /etc/systemd/system/getpublicip.service
-sudo systemctl enable getpublicip
-sudo systemctl start getpublicip
-
-
 # WORKAROUND: UNTIL LND 0.4.3 arm binary version is here ... we need to build from source to 
 # have TOR integration ... so the following is commented out for now:
 #
