@@ -11,6 +11,7 @@ network=`cat .network`
 # location of TOR config
 torrc="/etc/tor/torrc"
 
+# check if TOR was already installed and is funtional
 clear
 echo ""
 echo "*** Check if TOR service is functional ***"
@@ -24,6 +25,13 @@ else
   echo "TOR not running ... proceed with switching to TOR."
   echo ""
 fi
+
+# ask user if to proceed
+dialog --title " WARNING " --yesno "At the moment you just can switch TOR on - YOU CANNOT SWITCH BACK. Do you want to proceed?" 8 57
+response=$?
+case $response in
+  1) exit 1;
+esac
 
 echo "*** Adding Tor Sources to sources.list ***"
 echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list

@@ -84,6 +84,12 @@ else
       if [ "${network}" = "bitcoin" ]; then
         OPTIONS+=(SWITCH "Switch ${switchOption}")  
       fi
+      torInstalled=$(sudo ls /mnt/hdd/tor/lnd9735/hostname 2>/dev/null | grep 'hostname' -c)
+      if [ ${torInstalled} -eq 0 ]; then
+        OPTIONS+=(TOR "Make reachable thru TOR")  
+      else
+        OPTIONS+=(NYX "Monitor TOR")  
+      fi
 
       # final Options
       OPTIONS+=(X "Console / Terminal")   
@@ -131,6 +137,10 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;
+        NYX)
+            sudo nyx
+            ./00mainMenu.sh
+            ;;
         lnchannels)
             lnchannels
             echo "Press ENTER to return to main menu."
@@ -175,6 +185,12 @@ case $CHOICE in
             ;;  
         SWITCH)
             sudo ./95switchMainTest.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        TOR)
+            sudo ./96addTorService.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
