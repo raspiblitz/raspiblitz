@@ -104,24 +104,6 @@ else
   echo "NYX already installed"
 fi
 echo ""
-
-echo "*** Changing ${network} Config ***"
-networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-if [ ${networkIsTor} -eq 0 ]; then
-  echo "Only Connect thru TOR"
-  echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  echo "Adding some nodes to connect to"
-  echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-  sudo chown admin:admin /home/admin/.${network}/${network}.conf
-else
-  echo "Chain network already configured for TOR"
-fi
-echo ""
   
 echo "*** Activating TOR system service ***"
 echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
@@ -143,8 +125,8 @@ while [ ${torIsBootstrapped} -eq 0 ]
 do
   echo "--- Checking ---"
   date +%s
-  sudo cat /var/log/tor/notices.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
-  torIsBootstrapped=$(sudo cat /var/log/tor/notices.log 2>/dev/null | grep "Bootstrapped 100" -c)
+  sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
+  torIsBootstrapped=$(sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped 100" -c)
   echo "torIsBootstrapped(${torIsBootstrapped})"
   echo "If this takes too long --> CTRL+c, reboot and check manually"
   sleep 5
@@ -152,34 +134,57 @@ done
 echo "OK - Tor Bootstrap is ready"
 echo ""
 
-echo "*** ${network} re-init - Waiting for Onion Address ***"
-# restarting bitcoind to start with tor and generare onion.address
-echo "restarting ${network}d ..."
-sudo systemctl restart ${network}d
-sleep 8
-onionAddress=""
-while [ ${#onionAddress} -eq 0 ]
-do
-  echo "--- Checking ---"
-  date +%s
-  sudo cat /mnt/hdd/${network}/debug.log | grep "tor" | tail -n 10
-  onionAddress=$(${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-  echo "If this takes too long --> CTRL+c, reboot and check manually"
-  sleep 5
-done
+if [ "${network}" = "bitcoin" ]; then
+
+  echo "*** Changing ${network} Config ***"
+  networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
+  if [ ${networkIsTor} -eq 0 ]; then
+    echo "Only Connect thru TOR"
+    echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    echo "Adding some nodes to connect to"
+    echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+  else
+    echo "Chain network already configured for TOR"
+  fi
+
+  echo "*** ${network} re-init - Waiting for Onion Address ***"
+  # restarting bitcoind to start with tor and generare onion.address
+  echo "restarting ${network}d ..."
+  sudo systemctl restart ${network}d
+  sleep 8
+  onionAddress=""
+  while [ ${#onionAddress} -eq 0 ]
+  do
+    echo "--- Checking ---"
+    date +%s
+    sudo cat /mnt/hdd/${network}/debug.log | grep "tor" | tail -n 10
+    onionAddress=$(${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
+    echo "If this takes too long --> CTRL+c, reboot and check manually"
+    sleep 5
+  done
+  onionPort=$(${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
+  echo "Your Chain Network Onion Address is: ${onionAddress}:${onionPort}"
+  echo ""
+else
+  echo "Dont run '${network}' behind tor"
+fi  
 echo ""
 
 echo "*** Setting your Onion Address ***"
-onionPort=$(${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
-echo "Your Chain Network Onion Address is: ${onionAddress}:${onionPort}"
 onionLND=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)
 echo "Your Lightning Tor Onion Address is: ${onionLND}:9735"
 echo ""
 
-# ACTIVATE LND OVER TOR LATER ... see DEV NOTES AT END OF FILE
+# ACTIVATE LND OVER TOR
 sudo systemctl disable lnd
 echo "Writing Public Onion Address to /run/publicip"
-printf "PUBLICIP=${onionLND}\n" > /run/publicip;
+echo "PUBLICIP=${onionLND}" | sudo tee /run/publicip
 sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
 sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
 sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
