@@ -125,6 +125,7 @@ if [ "${public_port}" = "" ]; then
   fi
 fi
 
+# CHAIN NETWORK
 public_addr="??"
 torInfo=""
 # TOR or IP
@@ -148,6 +149,15 @@ else
   fi
 fi
 
+# LIGHTNING NETWORK
+ln_external=$(sudo cat /mnt/hdd/tor/lnd9735/hostname 2>/dev/null)
+if [ ${#ln_external} -eq 0 ]; then
+  ln_external="               ${public_ip}:9735"
+else 
+  torInfo="+ TOR"
+fi
+ln_external="${ln_external}:9735"
+
 # get LND info
 /usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>&1 | grep "Please unlock" >/dev/null
 wallet_unlocked=$?
@@ -163,7 +173,6 @@ ln_alias="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --t
 fi
 ln_channels_online="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo | jq -r '.num_active_channels')" 2>/dev/null
 ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-ln_external="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo | jq -r '.uris[0]' | tr "@" " " |  awk '{ print $2 }')" 2>/dev/null
 ln_external_ip="$(echo $ln_external | tr ":" " " | awk '{ print $1 }' )" 2>/dev/null
 if [ "$ln_external_ip" = "$public_ip" ]; then
   external_color="${color_grey}"
@@ -192,7 +201,7 @@ ${color_yellow}     / ,'      ${color_gray}
 ${color_yellow}    /,'        ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}   /'          ${color_gray}LND ${color_green}v0.4.2 ${color_gray}wallet ${ln_walletbalance} sat
 ${color_yellow}               ${color_gray}${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat
-${color_yellow}               ${ln_external}
+${color_yellow}${ln_external}
 ${color_yellow}
 " \
 "RaspiBlitz v0.7" \
