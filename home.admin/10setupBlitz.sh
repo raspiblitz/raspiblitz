@@ -9,17 +9,6 @@ network=`cat .network`
 # and re-enters the setup process at the correct spot
 # in case it got interrupted
 
-getpublicipExists=$(sudo ls /usr/local/bin/getpublicip.sh 2>/dev/null | grep "getpublicip.sh" -c)
-if [ ${getpublicipExists} -eq 0 ]; then
-  echo "*** Installing getPublic ip script and service *** "
-  sudo cp ./assets/getpublicip.sh /usr/local/bin/getpublicip.sh
-  sudo chmod +x /usr/local/bin/getpublicip.sh
-  sudo cp ./assets/getpublicip.service /etc/systemd/system/getpublicip.service
-  sudo systemctl enable getpublicip
-  sudo systemctl start getpublicip
-  echo ""
-fi
-
 # check if lightning is running
 lndRunning=$(systemctl status lnd.service | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
