@@ -188,11 +188,11 @@ ${color_yellow}               ${color_yellow}%s
 ${color_yellow}        ,/     ${color_yellow}
 ${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
-${color_yellow}  ,'  /_____,  ${color_gray}
-${color_yellow} .'____    ,'  ${color_gray}Local  ${color_green}${local_ip}${color_gray}  ▼ ${network_rx} ▲ ${network_tx}
-${color_yellow}      /  ,'    ${color_gray}Public ${public_color}${public_addr} ${public}
-${color_yellow}     / ,'      ${color_gray}
-${color_yellow}    /,'        ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}  ,'  /_____,  ${color_gray}Local  ${color_green}${local_ip}${color_gray}  ▼ ${network_rx} ▲ ${network_tx}
+${color_yellow} .'____    ,'  ${color_gray}
+${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}
+${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}v0.4.2 ${color_gray}wallet ${ln_walletbalance} sat
 ${color_yellow}               ${color_gray}${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat
 ${color_yellow}${ln_external}
