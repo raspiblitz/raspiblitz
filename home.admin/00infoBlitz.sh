@@ -161,8 +161,8 @@ ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
 ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
 
 # get LND info
-wallet_unlocked=$?
-if [ "$wallet_unlocked" -eq 0 ] ; then
+wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else
@@ -182,8 +182,10 @@ else
 fi
 
 ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
+ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
 if [ ${ln_sync} -eq 0 ]; then
-  ln_baseInfo="${color_red} not in sync with chain"
+  ln_baseInfo="${color_red} waiting for chain sync"
+  ln_channelInfo=""
 fi
 
 sleep 5
@@ -202,7 +204,7 @@ ${color_yellow} .'____    ,'  ${color_gray}${network} ${color_green}${networkVer
 ${color_yellow}      /  ,'    ${color_gray}Public ${public_color}${public_addr} ${public}
 ${color_yellow}     / ,'      ${color_gray}
 ${color_yellow}    /,'        ${color_gray}LND ${color_green}v0.4.2 ${ln_baseInfo}
-${color_yellow}   /'          ${color_gray}${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat
+${color_yellow}   /'          ${color_gray}${ln_channelInfo}
 ${color_yellow}               
 ${color_yellow}${ln_external}
 " \
