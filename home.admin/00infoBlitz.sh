@@ -173,7 +173,8 @@ else
  if [ ${ln_sync} -eq 0 ]; then
     item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep height | tail -n1 | awk '{print $9} {print $10} {print $11} {print $12}' | tr -dc '0-9')  
     total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
-    if [ "${item}" = "${total}" ]; then
+    checkItem=$(echo "${item}" | grep '000' -c)
+    if [ ${checkItem} -eq 0 ]; then
       item="?"
     fi
     ln_baseInfo="${color_red} waiting for chain sync"
