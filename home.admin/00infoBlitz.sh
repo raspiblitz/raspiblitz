@@ -167,7 +167,7 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
  ln_alias="Wallet Locked"
 else
  alias_color="${color_grey}"
- ln_alias=$(echo ${ln_getInfo} | grep "alias" | cut -d '"' -f4)
+ ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
  ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
  ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
 
