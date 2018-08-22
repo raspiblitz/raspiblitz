@@ -107,6 +107,7 @@ EOF
 sudo rm $torrc
 sudo mv ./torrc $torrc
 sudo chmod 644 $torrc
+sudo chown -R bitcoin:bitcoin /var/run/tor/
 echo ""
 
 # NYX - Tor monitor tool
@@ -130,7 +131,7 @@ echo "*** Waiting for TOR to boostrap ***"
 torIsBootstrapped=0
 while [ ${torIsBootstrapped} -eq 0 ]
 do
-  echo "--- Checking ---"
+  echo "--- Checking 1 ---"
   date +%s
   sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
   torIsBootstrapped=$(sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped 100" -c)
@@ -172,7 +173,7 @@ sleep 8
 onionAddress=""
 while [ ${#onionAddress} -eq 0 ]
 do
-  echo "--- Checking ---"
+  echo "--- Checking 2 ---"
   date +%s
   testNetAdd=""
   if [ "${chain}" = "test" ];then
@@ -180,7 +181,7 @@ do
   fi
   sudo cat /mnt/hdd/${network}${testNetAdd}/debug.log 2>/dev/null | grep "tor" | tail -n 10
   onionAddress=$(${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-  echo "If this takes too long --> CTRL+c, reboot and check manually"
+  echo "Can take up to 10min - if this takes longer --> CTRL+c, reboot and check manually"
   sleep 5
 done
 onionPort=$(${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
