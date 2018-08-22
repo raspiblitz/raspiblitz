@@ -202,11 +202,10 @@ ${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} 
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}v0.4.2 ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo}
+${color_yellow}
 ${color_yellow}${ln_external}
 " \
 "RaspiBlitz v0.8" \
 "-------------------------------------------" \
 "${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
-
-echo "$(tput -T xterm sgr0)"
