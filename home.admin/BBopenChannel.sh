@@ -65,6 +65,9 @@ fi
 # TODO find a better way - also consider dust and channel reserve
 # details see here: https://github.com/btcontract/lnwallet/issues/52
 minSat=20000
+if [ "${network}" = "bitcoin" ]; then
+  minSat=250000
+fi
 _error="./.error.out"
 lncli openchannel ${CHOICE} 1 0 2>$_error
 error=`cat ${_error}`
