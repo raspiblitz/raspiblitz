@@ -128,6 +128,8 @@ fi
 # CHAIN NETWORK
 public_addr="??"
 torInfo=""
+# Version
+networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
 # TOR or IP
 onionAddress=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | grep '"address"' | cut -d '"' -f4)
 if [ ${#onionAddress} -gt 0 ]; then
@@ -149,8 +151,14 @@ else
   fi
 fi
 
+#IP
+
+
 # LIGHTNING NETWORK
-ln_external=$(lncli getinfo | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
+ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo)
+
+ln_sync=$(echo ${ln_getInfo} | grep "synced_to_chain" | grep "true" -c)
+ln_external=$(echo ${ln_getInfo} | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
 
 # get LND info
 /usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>&1 | grep "Please unlock" >/dev/null
@@ -160,12 +168,12 @@ if [ "$wallet_unlocked" -eq 0 ] ; then
  ln_alias="Wallet Locked"
 else
  alias_color="${color_grey}"
-ln_alias="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo | jq -r '.alias')" 2>/dev/null
+ln_alias=$(echo ${ln_getInfo} | grep "alias" | cut -d '"' -f4)
  ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
  ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
 
 fi
-ln_channels_online="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo | jq -r '.num_active_channels')" 2>/dev/null
+ln_channels_online="$(echo ${ln_getInfo} | jq -r '.num_active_channels')" 2>/dev/null
 ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
 ln_external_ip="$(echo $ln_external | tr ":" " " | awk '{ print $1 }' )" 2>/dev/null
 if [ "$ln_external_ip" = "$public_ip" ]; then
@@ -174,8 +182,10 @@ else
   external_color="${color_red}"
 fi
 
-networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
-ln_alias=`sudo -u admin cat /home/admin/.hostname`
+ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
+if [ ${ln_sync} -eq 0 ]; then
+  ln_baseInfo="${color_red} not in sync with chain"
+fi
 
 sleep 5
 printf "
@@ -192,12 +202,12 @@ ${color_yellow}  ,'  /_____,  ${color_gray}
 ${color_yellow} .'____    ,'  ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}      /  ,'    ${color_gray}Public ${public_color}${public_addr} ${public}
 ${color_yellow}     / ,'      ${color_gray}
-${color_yellow}    /,'        ${color_gray}LND ${color_green}v0.4.2 ${color_gray}wallet ${ln_walletbalance} sat
+${color_yellow}    /,'        ${color_gray}LND ${color_green}v0.4.2 ${ln_baseInfo}
 ${color_yellow}   /'          ${color_gray}${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat
 ${color_yellow}               
 ${color_yellow}${ln_external}
 " \
-"RaspiBlitz v0.75" \
+"RaspiBlitz v0.8" \
 "-------------------------------------------" \
 "${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
