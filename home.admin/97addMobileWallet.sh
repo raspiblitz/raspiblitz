@@ -3,13 +3,8 @@
 # location of lnd.conf
 lnd_config=/home/bitcoin/.lnd/lnd.conf
 
-# we assume usage in LAN -> shango in safe mode
-
-# append config
-echo "rpclisten=0.0.0.0:10009" | sudo tee -a ${lnd_config}
-
 # allow in firewall
-sudo ufw allow from 192.168.0.0/24 to any port 10009 comment 'allow LND grpc from local LAN'
+sudo ufw allow from 0.0.0.0/24 to any port 10009 comment 'allow LND grpc'
 
 # delete certificates as they need to be recreated with correct settings
 sudo rm /home/bitcoin/.lnd/tls.*

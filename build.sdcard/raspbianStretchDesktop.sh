@@ -91,22 +91,30 @@ echo "*** HARDENING ***"
 
 # firewall - just install (not configure)
 sudo apt-get install -y ufw
-echo "allow: ssh"
-ufw allow ssh
-echo "allow: bitcoin testnet"
-ufw allow 18333
-echo "allow: bitcoin mainnet"
-ufw allow 8333
-echo 'allow: lightning testnet'
-ufw allow 19735
-echo "allow: lightning mainnet"
-ufw allow 9735
 echo "deny incoming connection on other ports"
-ufw default deny incoming
+sudo ufw default deny incoming
 echo "allow outgoing connections"
-ufw default allow outgoing
+sudo ufw default allow outgoing
+echo "allow: ssh"
+sudo ufw allow ssh
+echo "allow: bitcoin testnet"
+sudo ufw allow 18333 comment 'bitcoin testnet'
+echo "allow: bitcoin mainnet"
+sudo ufw allow 8333 comment 'bitcoin mainnet'
+echo "allow: litecoin mainnet"
+sudo ufw allow 9333 comment 'litecoin mainnet'
+echo 'allow: lightning testnet'
+sudo ufw allow 19735 comment 'lightning testnet'
+echo "allow: lightning mainnet"
+sudo ufw allow 9735 comment 'lightning mainnet'
+echo "allow: lightning gRPC"
+sudo ufw allow 10009 comment 'lightning gRPC'
+echo "allow: trasmission"
+sudo ufw allow 51413 comment 'transmission'
+echo "allow: local web admin"
+sudo ufw allow from 192.168.0.0/24 to any port 80 comment 'allow local LAN web'
 echo "enable lazy firewall"
-ufw enable
+sudo ufw enable
 
 # fail2ban (no config required)
 sudo apt-get install -y fail2ban
