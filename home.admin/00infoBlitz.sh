@@ -150,13 +150,7 @@ else
 fi
 
 # LIGHTNING NETWORK
-ln_external=$(sudo cat /mnt/hdd/tor/lnd9735/hostname 2>/dev/null)
-if [ ${#ln_external} -eq 0 ]; then
-  ln_external="               ${public_ip}:9735"
-else 
-  torInfo="+ TOR"
-fi
-ln_external="${ln_external}:9735"
+ln_external=$(lncli getinfo | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
 
 # get LND info
 /usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>&1 | grep "Please unlock" >/dev/null

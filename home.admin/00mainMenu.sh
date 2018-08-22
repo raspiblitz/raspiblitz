@@ -60,9 +60,6 @@ else
 
     else
 
-      # set node address as backtitle
-      BACKTITLE=$(lncli getinfo | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
-
       chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
       switchOption="to MAINNET"
       if [ "${chain}" = "main" ]; then
