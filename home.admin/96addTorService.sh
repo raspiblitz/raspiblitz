@@ -64,6 +64,7 @@ sudo mkdir /mnt/hdd/tor
 sudo mkdir /mnt/hdd/tor/sys
 sudo mkdir /mnt/hdd/tor/web80
 sudo mkdir /mnt/hdd/tor/lnd9735
+sudo mkdir /mnt/hdd/tor/lndrpc9735
 sudo chmod -R 700 /mnt/hdd/tor
 sudo chown -R bitcoin:bitcoin /mnt/hdd/tor
 cat > ./torrc <<EOF
@@ -91,7 +92,11 @@ CookieAuthFileGroupReadable 1
 HiddenServiceDir /mnt/hdd/tor/web80/
 HiddenServicePort 80 127.0.0.1:80
 
-# Hidden Service v3 for LND incomming connections
+# Hidden Service v2 for LND RPC
+HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
+HiddenServicePort 80 127.0.0.1:10009
+
+# Hidden Service v3 for LND incomming connections (just in case)
 # https://trac.torproject.org/projects/tor/wiki/doc/NextGenOnions#Howtosetupyourownprop224service
 HiddenServiceDir /mnt/hdd/tor/lnd9735
 HiddenServiceVersion 3
@@ -191,7 +196,7 @@ echo ""
 echo "*** Putting LND behind TOR ***"
 echo "Disable LND again"
 sudo systemctl disable lnd
-echo "Writing Public Onion Address to /run/publicip"
+echo "Writing Public Onion Address to /run/publicip (just in case for TotHiddenServiceV3)"
 echo "PUBLICIP=${onionLND}" | sudo tee /run/publicip
 echo "Configure and Changing to lnd.tor.service"
 sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
