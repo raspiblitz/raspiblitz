@@ -13,7 +13,7 @@ After=bitcoind.service
 EnvironmentFile=/run/publicip
 
 # TOR Hidden Service v2
-# had bad memory performance with raspi with lnd 0.4.2
+# bad memory performance with raspi with lnd 0.4.2
 # ExecStart=/usr/local/bin/lnd --tor.active --tor.v2 --listen=127.0.0.1:9735
 # --tor.V2PrivateKeyPath=/mnt/hdd/bitcoin/[testnet3/]onion_private_key
 
