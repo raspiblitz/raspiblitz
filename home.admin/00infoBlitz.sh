@@ -171,9 +171,9 @@ else
  ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
  if [ ${ln_sync} -eq 0 ]; then
-    if [ ${#ln_sync} -eq 0 ]; then
+    if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not started or ready"
-      ln_channelInfo=""
+      ln_channelInfo="\n"
     else
       item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
