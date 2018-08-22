@@ -185,7 +185,7 @@ else
     ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
     ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-    ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
+    ln_baseInfo="${color_gray}on-chain ${ln_walletbalance} sat"
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
   fi
 fi
