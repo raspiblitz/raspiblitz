@@ -60,6 +60,9 @@ else
 
     else
 
+      # set node address as backtitle
+      BACKTITLE=$(lncli getinfo | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
+
       chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
       switchOption="to MAINNET"
       if [ "${chain}" = "main" ]; then
@@ -86,7 +89,7 @@ else
       fi
       torInstalled=$(sudo ls /mnt/hdd/tor/lnd9735/hostname 2>/dev/null | grep 'hostname' -c)
       if [ ${torInstalled} -eq 0 ]; then
-        OPTIONS+=(TOR "Make reachable thru TOR")  
+        OPTIONS+=(TOR "Make reachable thru TOR")   
       else
         OPTIONS+=(NYX "Monitor TOR")  
       fi

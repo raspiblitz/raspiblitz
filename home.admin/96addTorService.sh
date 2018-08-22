@@ -7,6 +7,7 @@
 
 # load network
 network=`cat .network`
+chain="$(${network}-cli getblockchaininfo | jq -r '.chain')"
 
 # location of TOR config
 torrc="/etc/tor/torrc"
@@ -64,7 +65,7 @@ sudo mkdir /mnt/hdd/tor/sys
 sudo mkdir /mnt/hdd/tor/web80
 sudo mkdir /mnt/hdd/tor/lnd9735
 sudo chmod -R 700 /mnt/hdd/tor
-sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+sudo chown -R bitcoin:bitcoin /mnt/hdd/tor
 cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
@@ -77,8 +78,9 @@ Log notice file /mnt/hdd/tor/notice.log
 Log info file /mnt/hdd/tor/info.log
 
 RunAsDaemon 1
+User bitcoin
 PortForwarding 1
-ControlPort 905
+ControlPort 9051
 SocksPort 9050
 
 CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
@@ -121,11 +123,11 @@ echo ""
 
 echo "*** Setting Permissions ***"
 # so that chain network can create Tor hidden service
-echo "setting bitcoind permissions"
-sudo usermod -a -G debian-tor bitcoin
+#echo "setting bitcoind permissions"
+#sudo usermod -a -G debian-tor bitcoin
 # so that you can run `arm` as user 
-echo "setting pi permissions"
-sudo usermod -a -G debian-tor pi
+#echo "setting pi permissions"
+#sudo usermod -a -G debian-tor pi
 
 echo "*** Waiting for TOR to boostrap ***"
 torIsBootstrapped=0
@@ -171,7 +173,11 @@ if [ "${network}" = "bitcoin" ]; then
   do
     echo "--- Checking ---"
     date +%s
-    sudo cat /mnt/hdd/${network}/debug.log | grep "tor" | tail -n 10
+    testNetAdd=""
+    if [ "${chain}" = "test" ];then
+      testNetAdd="/testnet3"
+    fi
+    sudo cat /mnt/hdd/${network}${testNetAdd}/debug.log 2>/dev/null | grep "tor" | tail -n 10
     onionAddress=$(${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
     echo "If this takes too long --> CTRL+c, reboot and check manually"
     sleep 5
@@ -184,15 +190,14 @@ else
 fi  
 echo ""
 
-echo "*** Setting your Onion Address ***"
-onionLND=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)
-echo "Your Lightning Tor Onion Address is: ${onionLND}:9735"
-echo ""
+#echo "*** Setting your Onion Address ***"
+#onionLND=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)
+#echo "Your Lightning Tor Onion Address is: ${onionLND}:9735"
+#echo ""
 
 # ACTIVATE LND OVER TOR
 sudo systemctl disable lnd
-echo "Writing Public Onion Address to /run/publicip"
-echo "PUBLICIP=${onionLND}" | sudo tee /run/publicip
+
 sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
 sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
 sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
