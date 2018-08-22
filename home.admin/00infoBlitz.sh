@@ -155,37 +155,32 @@ fi
 
 
 # LIGHTNING NETWORK
-ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo)
 
-ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
-ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
+ln_baseInfo="-"
+ln_channelInfo="-"
+ln_external=""
 
-# get LND info
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else
+ ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo)
+ ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
  alias_color="${color_grey}"
  ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
- ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
- ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
-
-fi
-ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-ln_external_ip="$(echo $ln_external | tr ":" " " | awk '{ print $1 }' )" 2>/dev/null
-if [ "$ln_external_ip" = "$public_ip" ]; then
-  external_color="${color_grey}"
-else
-  external_color="${color_red}"
-fi
-
-ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
-ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
-if [ ${ln_sync} -eq 0 ]; then
-  ln_baseInfo="${color_red} waiting for chain sync"
-  ln_channelInfo=""
+ ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
+ if [ ${ln_sync} -eq 0 ]; then
+    ln_baseInfo="${color_red} waiting for chain sync"
+    ln_channelInfo=""
+  else 
+    ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+    ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+    ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+    ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+    ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
+    ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
+  fi
 fi
 
 sleep 5
