@@ -165,7 +165,7 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else
- ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo)
+ ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 2 | tr -d '\n' | cut -d '"' -f4)
  alias_color="${color_grey}"
  ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
