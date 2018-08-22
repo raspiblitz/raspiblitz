@@ -121,5 +121,16 @@ else
   echo "${result}"
   echo ""
   echo "Whats next? --> You need to wait 6 confirmations, for the channel to be ready."
+  fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
+  if [ "${network}" = "bitcoin" ]; then
+    if [ "${chain}" = "main" ]; then
+        echo "https://blockexplorer.com/tx/${fundingTX}"
+    else
+        echo "https://testnet.blockexplorer.com/tx/${fundingTX}"
+    fi
+  fi
+  if [ "${network}" = "litecoin" ]; then
+    echo "https://live.blockcypher.com/ltc/tx/${fundingTX}/"
+  fi
 fi
 echo ""
