@@ -64,7 +64,7 @@ if [ "$USER" = "pi" ]; then
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
-          boxwidth=$((${#localip} + 20))
+          boxwidth=$((${#localip} + 22))
           dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 5
 
