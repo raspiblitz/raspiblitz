@@ -212,7 +212,7 @@ ${color_yellow}${ln_external}
 " \
 "RaspiBlitz v0.8" \
 "-------------------------------------------" \
-"${load##up*,  }" "${temp}" \
+"load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
 if [ ${#onionAddress} -eq 0 ]; then
   # one extra space line at the end if nodeaddress is not TOR
