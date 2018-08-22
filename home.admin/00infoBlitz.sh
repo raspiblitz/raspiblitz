@@ -19,7 +19,7 @@ bitcoin_dir="/home/bitcoin/.${network}"
 lnd_dir="/home/bitcoin/.lnd"
 
 # get uptime & load
-load=$(w | grep "load average:" | cut -c11-)
+load=$(w | head -n 1 | cut -d ':' -f4)
 
 # get CPU temp
 cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
