@@ -157,7 +157,7 @@ fi
 # LIGHTNING NETWORK
 
 ln_baseInfo="-"
-ln_channelInfo="-"
+ln_channelInfo="\n"
 ln_external=""
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
@@ -173,12 +173,13 @@ else
  if [ ${ln_sync} -eq 0 ]; then
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | No Ready Yet"
-      ln_channelInfo="\n"
     else
       item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
-      ln_channelInfo="${item}/${total}"
+      if [ ${#item} -gt 0 ]; then
+        ln_channelInfo="${item}/${total}"
+      fi  
     fi
   else 
     ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
