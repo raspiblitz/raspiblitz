@@ -1,6 +1,9 @@
 # load network
 network=`sudo cat /home/admin/.network`
 
+# load name of Blitz
+name=`sudo cat /home/admin/.hostname`
+
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
@@ -22,7 +25,10 @@ if [ ${percent} -eq 100 ]; then
   percent=0
 fi
 
-infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time")
+infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nssh admin@${localip}\nPassword A")
+if [ "$USER" = "admin" ]; then
+  infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nIts OK to close terminal and ssh back in later.")
+fi
 
 # check if blockchain is still syncing
 isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
@@ -32,4 +38,4 @@ fi
 
 # display progress to user
 sleep 1
-dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42
+dialog --title "${name}" --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42

@@ -201,7 +201,7 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"
   while :
@@ -212,7 +212,7 @@ if [ ${lndSyncing} -eq 0 ]; then
       sleep 3
       
       # break loop when synced
-      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSyncing} -eq 1 ]; then
         break
       fi
