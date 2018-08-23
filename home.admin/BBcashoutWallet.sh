@@ -44,7 +44,7 @@ command="lncli sendcoins ${address} ${amount}"
 
 clear
 echo "******************************"
-echo "Send on-chain funds"
+echo "Send on-chain Funds"
 echo "******************************"
 echo ""
 echo "COMMAND LINE: "
