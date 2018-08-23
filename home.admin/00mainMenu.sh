@@ -68,7 +68,8 @@ else
 
       # Basic Options
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
-        FUNDING "Fund your Wallet" \
+        FUNDING "Fund your on-chain Wallet" \
+        CASHOUT "Remove Funds from on-chain Wallet" \
         CONNECT "Connect to a Peer" \
         CHANNEL "Open a Channel with Peer" \
         SEND "Pay an Invoice/PaymentRequest" \
@@ -160,6 +161,12 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;  
+        CASHOUT)
+            ./BBcashoutWallet.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
         CHANNEL)
             ./BBopenChannel.sh
             echo "Press ENTER to return to main menu."
