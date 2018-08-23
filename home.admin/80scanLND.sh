@@ -40,4 +40,4 @@ fi
 
 # display progress to user
 sleep 1
-dialog --title "${name}" --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" ${heigh} 42
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${name})" --infobox "${infoStr}" ${heigh} 42
