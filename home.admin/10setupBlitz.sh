@@ -10,7 +10,7 @@ network=`cat .network`
 # in case it got interrupted
 
 # check if lightning is running
-lndRunning=$(systemctl status lnd.service | grep -c running)
+lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
 
   chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
