@@ -178,7 +178,7 @@ else
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
-        ln_channelInfo="${item}/${total}"
+        ln_channelInfo="scanning ${item}/${total}"
       fi  
     fi
   else 
