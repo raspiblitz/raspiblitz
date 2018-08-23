@@ -19,7 +19,7 @@ l1="Enter the amount of funds you want to send/remove:"
 l2="You have max available: ${maxAmount} sat"
 l3="If you enter nothing, all funds available will be send."
 dialog --title "Remove Funds from RaspiBlitz" \
---inputbox "$l1\n$l2\n$l3" 10 40 2>$_temp
+--inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
 amount=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
@@ -32,7 +32,7 @@ fi
 l1="Enter the on-chain address to send funds to:"
 l2="You will send: ${amount} sat to that address"
 dialog --title "Where to send funds?" \
---inputbox "$l1" 8 60 2>$_temp
+--inputbox "$l1\n$l2" 8 65 2>$_temp
 address=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#address} -eq 0 ]; then
@@ -42,7 +42,9 @@ fi
 
 # TODO: check address is valid for network and chain
 
-command="lncli sendcoins ${address} ${amount}"
+# TODO: check if fees are getting done right so that transaction will get processed
+
+command="lncli sendcoins --conf_target 3 ${address} ${amount}"
 
 clear
 echo "******************************"
@@ -71,5 +73,5 @@ echo "$result"
 
 # TODO: check if all cashed out (0 funds + 0 channels) -> let user knwo its safe to update/reset RaspiBlitz
 
-echo "Whats next? --> Wait for confirmations. You can use lnbalance for main menu or info on LCD to check if funds have arrived."
+echo "OK. That worked :)"
 echo ""
