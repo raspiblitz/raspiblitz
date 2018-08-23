@@ -1,4 +1,6 @@
 #!/bin/bash
+_temp="./download/dialog.$$"
+_error="./.error.out"
 
 # load network and chain info
 network=`cat .network`
