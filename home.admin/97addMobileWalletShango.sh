@@ -28,7 +28,7 @@ echo "*** STEP 1 ***"
 echo "ENTER into IP & PORT the following:"
 echo "${myip}:10009"
 echo ""
-echo "The following two will be a QR code to scan (press leading qr-code icon)."
+echo "The following two steps, will be a QR code - press scan icon in app next to field."
 echo "PRESS ENTER to make RaspiBlitz displaying the MACAROON QR code ..."
 read key
 
@@ -36,12 +36,13 @@ clear
 echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
 qrencode $(xxd -p -c3000 /home/admin/.lnd/admin.macaroon) -t ANSIUTF8
 echo "Press ENTER to make RaspiBlitz displaying the TLS-CERT QR code ..."
+echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER for next step."
 read key
 
 clear
 echo "*** STEP 3_ SCAN TLS-Cert (make whole QR code fill camera) ***"
 qrencode $(xxd -p -c3000 /home/admin/.lnd/tls.cert) -t ANSIUTF8
-echo "Press ENTER to continue .."
+echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when Done."
 read key
 
 clear
