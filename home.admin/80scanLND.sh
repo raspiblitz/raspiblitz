@@ -25,17 +25,21 @@ if [ ${percent} -eq 100 ]; then
   percent=0
 fi
 
-infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nssh admin@${localip}\nPassword A")
-heigh=4
-if [ "$USER" = "admin" ]; then
-  heigh=6
-  infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nIts OK to close terminal and ssh back in later.")
-fi
-
 # check if blockchain is still syncing
+heigh=6
 isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
 if [ ${isWaitingBlockchain} -gt 0 ]; then
-  infoStr=" Waiting for final Blockchain Sync\nplease wait - this can take some time"
+  infoStr=" Waiting for final Blockchain Sync\nplease wait - this can take some time\nssh admin@${localip}\nPassword A"
+  if [ "$USER" = "admin" ]; then
+    heigh=5
+    infoStr=$(echo " Waiting for final Blockchain Sync\nplease wait - this can take some time\nIts OK to close terminal and ssh back in later.")
+  fi
+else
+  infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nssh admin@${localip}\nPassword A")
+  if [ "$USER" = "admin" ]; then
+    heigh=5
+    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nIts OK to close terminal and ssh back in later.")
+  fi
 fi
 
 # display progress to user
