@@ -24,6 +24,7 @@ echo "Once you have the app running make sure you are on the same local network 
 echo "Then go to --> 'Connect to your LND Server'"
 echo "There you see three 3 form fields to fill out."
 echo ""
+echo "*** STEP 1 ***"
 echo "ENTER into IP & PORT the following:"
 echo "${myip}:10009"
 echo ""
@@ -32,13 +33,13 @@ echo "PRESS ENTER to make RaspiBlitz displaying the MACAROON QR code ..."
 read key
 
 clear
-echo "SCAN MACAROON (make whole QR code fill camera):"
+echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
 qrencode $(xxd -p -c3000 /home/admin/.lnd/admin.macaroon) -t ANSIUTF8
 echo "Press ENTER to make RaspiBlitz displaying the TLS-CERT QR code ..."
 read key
 
 clear
-echo "SCAN TLS-Cert (make whole QR code fill camera):"
+echo "*** STEP 3_ SCAN TLS-Cert (make whole QR code fill camera) ***"
 qrencode $(xxd -p -c3000 /home/admin/.lnd/tls.cert) -t ANSIUTF8
 echo "Press ENTER to continue .."
 read key
