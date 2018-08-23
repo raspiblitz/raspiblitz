@@ -19,34 +19,34 @@ fi
 echo "OK - ${network}d is running"
 echo ""
 
-###### Wait for Blochain Sync
-echo "*** Syncing Blockchain ***"
-ready=0
-while [ ${ready} -eq 0 ]
-  do
-    progress="$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.verificationprogress')"
-    verySmallProgress=$(echo $progress | grep -c 'e-');
-    if [ ${verySmallProgress} -eq 1 ]; then
-     progress="0.00";
-    fi
-    ready=$(echo $progress'>0.99' | bc -l)
-    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
-    #echo "progress($progress) verySmallProgress($verySmallProgress) ready($ready) sync_percentage($sync_percentage)"
-    if [ ${#ready} -eq 0 ]; then
-      echo "waiting for init ... can take a while"
-      ready=0
-    elif [ "$sync_percentage" = "0.00%" ]; then  
-      echo "waiting for network ... can take a while"
-      ready=0
-    elif [ ${ready} -eq 0 ]; then
-      echo "${sync_percentage}"
-    else
-      echo "finishing sync ... can take a while"
-    fi
-    sleep 3
-  done
-echo "OK - Blockchain is synced"
-echo ""
+###### Wait for Blochain Sync --> LET DO THIS LATER ON LND SCAN
+#echo "*** Syncing Blockchain ***"
+#ready=0
+#while [ ${ready} -eq 0 ]
+#  do
+#    progress="$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.verificationprogress')"
+#    verySmallProgress=$(echo $progress | grep -c 'e-');
+#    if [ ${verySmallProgress} -eq 1 ]; then
+#     progress="0.00";
+#    fi
+#    ready=$(echo $progress'>0.99' | bc -l)
+#    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
+#    #echo "progress($progress) verySmallProgress($verySmallProgress) ready($ready) sync_percentage($sync_percentage)"
+#    if [ ${#ready} -eq 0 ]; then
+#      echo "waiting for init ... can take a while"
+#      ready=0
+#    elif [ "$sync_percentage" = "0.00%" ]; then  
+#      echo "waiting for network ... can take a while"
+#      ready=0
+#    elif [ ${ready} -eq 0 ]; then
+#      echo "${sync_percentage}"
+#    else
+#      echo "finishing sync ... can take a while"
+#    fi
+#    sleep 3
+#  done
+#echo "OK - Blockchain is synced"
+#echo ""
 
 ###### LND Config
 echo "*** LND Config ***"
