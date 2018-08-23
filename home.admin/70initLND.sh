@@ -209,7 +209,7 @@ if [ ${lndSyncing} -eq 0 ]; then
       
       # show sync status
       ./80scanLND.sh
-      sleep 3
+      sleep 15
       
       # break loop when synced
       lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
@@ -222,6 +222,8 @@ if [ ${lndSyncing} -eq 0 ]; then
       if [ ${locked} -eq 1 ]; then
         break
       fi
+
+      sleep 15
 
     done
   clear
