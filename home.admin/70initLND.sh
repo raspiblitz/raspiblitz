@@ -75,21 +75,22 @@ if [ ${lndRunning} -eq 0 ]; then
   sudo chmod +x /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
   sudo systemctl start lnd
-  echo "Started LND .. waiting 60 seconds for init ..."
-  sleep 60
+  echo "Starting LND ... give 120 seconds to init."
+  sleep 120
 fi
 
 ###### Check LND is running
-lndRunning=$(systemctl status lnd.service | grep -c running)
-if [ ${lndRunning} -eq 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - LND is not running"
-  echo "check: systemctl status lnd.service"
-  echo "check: sudo journalctl -f"
-  echo "recheck with original tutorial -->"
-  echo "https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md"
-  exit 1
-fi
+lndRunning=0
+while [ ${lndRunning} -eq 0 ]
+do
+  lndRunning=$(systemctl status lnd.service | grep -c running)
+  if [ ${lndRunning} -eq 0 ]; then
+    date +%s
+    echo "LND not ready yet ... waiting another 60 seconds."
+    echo "If this takes too long (more then 10min total) --> CTRL+c and report Problem"
+    sleep 60
+  fi
+done
 echo "OK - LND is running"
 echo ""
 
