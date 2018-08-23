@@ -26,6 +26,7 @@ if [ "$USER" = "pi" ]; then
   fi
 
   # show updating status in loop
+  chain=""
   while :
      do
 
@@ -54,11 +55,14 @@ if [ "$USER" = "pi" ]; then
       elif [ ${setupStep} -lt 100 ]; then
 
         # setup process init is done and not finished
+        if [ ${#chain} -eq 0 ];then
+          # get chain if not available before
+          chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
+        fi
         lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c false)
-        chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 
-       if [ ${locked} -gt 0 ]; then
+        if [ ${locked} -gt 0 ]; then
 
           # special case: LND wallet is locked ---> show unlock info
           l1="!!! LND WALLET IS LOCKED !!!\n"
@@ -72,7 +76,7 @@ if [ "$USER" = "pi" ]; then
 
           # special case: LND is syncing
           /home/admin/80scanLND.sh
-          sleep 5
+          sleep 20
 
         else
 
