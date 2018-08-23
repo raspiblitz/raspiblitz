@@ -29,19 +29,8 @@ if [ ${#command} -gt 0 ]; then
 fi
  
 echo ""
-echo "OK"
-sleep 2
+echo "OK - wait a 5 seconds"
+sleep 5
 
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
-if [ ${openChannels} -gt 0 ]; then
-    echo ""
-    echo "*******************"
-    echo "OK All Channels are closed now."
-    echo "You can now switch test/main or update RaspiBlitz safely, as long as you got your CIPHER WORD LIST SEED."
-    echo "*******************"
-else
-  echo "!! WARNING you still have open channels:" 
-  lnchannels
-fi
-
-
+echo "Your Open Channel List (to check):" 
+lnchannels
