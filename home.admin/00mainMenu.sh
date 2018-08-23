@@ -74,7 +74,8 @@ else
         SEND "Pay an Invoice/PaymentRequest" \
         RECEIVE "Create Invoice/PaymentRequest" \
         lnbalance "Detailed Wallet Balances" \
-        lnchannels "Lightning Channel List")
+        lnchannels "Lightning Channel List" \
+        MOBILE "Connect Mobile Wallet")
 
       # Depending Options
       openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
@@ -185,6 +186,12 @@ case $CHOICE in
             ;;  
         SWITCH)
             sudo ./95switchMainTest.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        MOBILE)
+            sudo ./97addMobileWalletShango.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
