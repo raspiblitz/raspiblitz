@@ -25,8 +25,8 @@ else
   echo "*** Expand RootFS ***"
   sudo raspi-config --expand-rootfs
   echo ""
-
 fi
+
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
   echo "OK - SWAP is working"
@@ -37,6 +37,36 @@ else
   echo "--> will continue in 60 seconds <--"
   sleep 60
 fi
+
+# firewall - just install (not configure)
+echo ""
+echo "*** Setting and Activating Firewall ***"
+sudo apt-get install -y ufw
+echo "deny incoming connection on other ports"
+sudo ufw default deny incoming
+echo "allow outgoing connections"
+sudo ufw default allow outgoing
+echo "allow: ssh"
+sudo ufw allow ssh
+echo "allow: bitcoin testnet"
+sudo ufw allow 18333 comment 'bitcoin testnet'
+echo "allow: bitcoin mainnet"
+sudo ufw allow 8333 comment 'bitcoin mainnet'
+echo "allow: litecoin mainnet"
+sudo ufw allow 9333 comment 'litecoin mainnet'
+echo 'allow: lightning testnet'
+sudo ufw allow 19735 comment 'lightning testnet'
+echo "allow: lightning mainnet"
+sudo ufw allow 9735 comment 'lightning mainnet'
+echo "allow: lightning gRPC"
+sudo ufw allow 10009 comment 'lightning gRPC'
+echo "allow: trasmission"
+sudo ufw allow 51413 comment 'transmission'
+echo "allow: local web admin"
+sudo ufw allow from 192.168.0.0/24 to any port 80 comment 'allow local LAN web'
+echo "enable lazy firewall"
+sudo ufw --force enable
+echo ""
 
 # mark setup is done
 echo "90" > /home/admin/.setup
