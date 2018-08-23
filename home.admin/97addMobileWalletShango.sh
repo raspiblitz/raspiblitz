@@ -28,6 +28,8 @@ echo "*** STEP 1 ***"
 echo "ENTER into IP & PORT the following:"
 echo "${myip}:10009"
 echo ""
+echo "NOTE: You can replace IP with dyndns if available and port forwarding on router."
+echo ""
 echo "The following two steps, will be a QR code - press scan icon in app next to field."
 echo "PRESS ENTER to make RaspiBlitz displaying the MACAROON QR code ..."
 read key
