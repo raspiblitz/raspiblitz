@@ -26,7 +26,9 @@ if [ ${percent} -eq 100 ]; then
 fi
 
 infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nssh admin@${localip}\nPassword A")
+heigh=4
 if [ "$USER" = "admin" ]; then
+  heigh=6
   infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time\nIts OK to close terminal and ssh back in later.")
 fi
 
@@ -38,4 +40,4 @@ fi
 
 # display progress to user
 sleep 1
-dialog --title "${name}" --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42
+dialog --title "${name}" --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" ${heigh} 42
