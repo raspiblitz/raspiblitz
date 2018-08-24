@@ -32,6 +32,8 @@ if [ ${lndRunning} -eq 1 ]; then
   locked=0
   # only when a wallet exists - it can be locked
   if [ ${walletExists} -eq 1 ];then
+    echo "lnd wallet exists ... checking if locked"
+    sleep 2
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
   fi
   if [ ${locked} -gt 0 ]; then
