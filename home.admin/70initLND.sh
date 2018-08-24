@@ -14,6 +14,10 @@ fi
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+[ ${bitcoinRunning} -eq 0 ]; then
+  #doublecheck
+  bitcoinRunning=$(${network}-cli getblockchaininfo  | grep -c verificationprogress)
+fi
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
   echo "FAIL - ${network}d is not running"
