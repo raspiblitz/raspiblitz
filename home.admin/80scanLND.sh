@@ -11,7 +11,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 item=0
 blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
 chain="$(echo "${blockchaininfo}" | jq -r '.chain')"
-item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -ut -d ']' -f2 | tr -dc '0-9')
+item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -n1 | cut -d ']' -f2 | tr -dc '0-9')
 if [ ${#item} -eq 0 ]; then
   # TODO add fallback later here if necessary
   item="?" 
@@ -41,11 +41,12 @@ if [ ${isInitialChainSync} -gt 0 ]; then
     infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 else
-  infoStr=$(echo " Lightning Rescanning Blockchain ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
+  heigh=7
+  infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
   if [ "$USER" = "admin" ]; then
-    heigh=5
+    heigh=6
     width=53
-    infoStr=$(echo " Lightning Rescanning Blockchain ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 fi
 
