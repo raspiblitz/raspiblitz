@@ -11,6 +11,22 @@ if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
 
+# get setup progress
+setupStep=$(sudo -u admin cat /home/admin/.setup)
+if [ ${#setupStep} -eq 0 ];then
+  setupStep=0
+fi
+
+# if setup if ready --> REBOOT
+if [ ${setupStep} -gt 89 ];then
+  echo ""
+  echo "*** SETUP OK ---> REBOOT ***"
+  echo "PRESS ENTER .. to start the final reboot."
+  read key
+  sudo shutdown -r now
+  exit 1
+fi
+
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
