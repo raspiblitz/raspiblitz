@@ -6,7 +6,7 @@ network=`cat .network`
 
 # check chain
 chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "#testnet=1" -c)
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
 if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
