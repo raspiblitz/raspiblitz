@@ -11,21 +11,18 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 item=0
 blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
 chain="$(echo "${blockchaininfo}" | jq -r '.chain')"
-gotData=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c "(height")
-if [ ${gotData} -gt 0 ]; then
-  item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
+item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -ut -d ']' -f2 | tr -dc '0-9')
+if [ ${#item} -eq 0 ]; then
+  # TODO add fallback later here if necessary
+  item="?" 
 fi
-
 # get total number of blocks
 total=$(echo "${blockchaininfo}" | jq -r '.blocks')
-progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+# put scanstate
+scanstate="${item}/${total}"
 
-# calculate progress in percent 
-percent=$(awk "BEGIN { pc=100*${item}/${total}; i=int(pc); print (pc-i<0.5)?i:i+1 }") 
-if [ ${percent} -eq 100 ]; then
-  # normally if 100% gets calculated, item parsed the wrong height
-  percent=0
-fi
+# get blockchain sync progress
+progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
 
 # check if blockchain is still syncing
 heigh=6
@@ -44,11 +41,11 @@ if [ ${isInitialChainSync} -gt 0 ]; then
     infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 else
-  infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
+  infoStr=$(echo " Lightning Rescanning Blockchain ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
   if [ "$USER" = "admin" ]; then
     heigh=5
     width=53
-    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Lightning Rescanning Blockchain ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 fi
 
