@@ -1,9 +1,4 @@
 #!/bin/sh
-# RaspiBolt LND Mainnet: systemd unit for getpublicip.sh script
-# /etc/systemd/system/20-raspibolt-welcome.sh
-
-# make executable and copy script to /etc/update-motd.d/
-# root must be able to execute network cli and lncli
 
 # set colors
 color_red='\033[0;31m'
@@ -186,7 +181,7 @@ else
     ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
     ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-    ln_baseInfo="${color_gray}on-chain ${ln_walletbalance} sat"
+    ln_baseInfo="${color_gray}Wallet (on-chain) ${ln_walletbalance} sat"
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
   fi
 fi
