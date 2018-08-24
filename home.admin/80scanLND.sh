@@ -30,8 +30,12 @@ fi
 # check if blockchain is still syncing
 heigh=6
 width=42
-isWaitingBlockchain=$(echo "${blockchaininfo}" | grep 'initialblockdownload' | grep "true" -c)
+isInitialChainSync=$(echo "${blockchaininfo}" | grep 'initialblockdownload' | grep "true" -c)
+isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
 if [ ${isWaitingBlockchain} -gt 0 ]; then
+  isInitialChainSync=1
+fi
+if [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
   infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A"
   if [ "$USER" = "admin" ]; then
