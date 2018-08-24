@@ -46,7 +46,7 @@ read key
 
 clear
 echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
-qrencode $(xxd -p -c3000 /home/admin/.lnd/data/${network}/${chain}net/admin.macaroon) -t ANSIUTF8
+qrencode $(xxd -p -c3000 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon) -t ANSIUTF8
 echo "Press ENTER to make RaspiBlitz displaying the TLS-CERT QR code ..."
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER for next step."
 read key
