@@ -17,7 +17,6 @@ if [ ${gotData} -gt 0 ]; then
 fi
 
 # get total number of blocks
-
 total=$(echo "${blockchaininfo}" | jq -r '.blocks')
 progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
 
@@ -31,7 +30,7 @@ fi
 # check if blockchain is still syncing
 heigh=6
 width=42
-isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
+isWaitingBlockchain=$(echo "${blockchaininfo}" | grep 'initialblockdownload' | grep "true" -c)
 if [ ${isWaitingBlockchain} -gt 0 ]; then
   heigh=7
   infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A"
@@ -45,7 +44,7 @@ else
   if [ "$USER" = "admin" ]; then
     heigh=5
     width=53
-    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some time\nIts OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some time\n Its OK to close terminal and ssh back in later.")
   fi
 fi
 
