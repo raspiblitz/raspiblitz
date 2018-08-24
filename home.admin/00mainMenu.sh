@@ -9,11 +9,20 @@ TITLE=""
 MENU="Choose one of the following options:"
 OPTIONS=()
 
-# default config values (might get changed later)
-if [ ! -f ./.network ]; then
-  echo "bitcoin" > /home/admin/.network
+## get basic info (its OK if not set yet)
+
+# get name
+name=`sudo cat /home/admin/.hostname`
+
+# get network
+network=`sudo cat /home/admin/.network`
+
+# get chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
 fi
-network=`cat .network`
 
 ## get actual setup state
 setupState=0;
@@ -40,9 +49,9 @@ elif [ ${setupState} -lt 100 ]; then
     fi
 
     # continue setup
-    BACKTITLE="RaspiBlitz - Setup"
+    BACKTITLE="${name} / ${network} / ${chain}"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nThe setup process in snot finished yet: \n "
+    MENU="\nThe setup process is not finished yet: \n "
     OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
     HEIGHT=10
 
@@ -57,7 +66,8 @@ else
 
     # MAIN MENU AFTER SETUP
 
-    chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+    BACKTITLE="${name} / ${network} / ${chain}"
+
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
 
@@ -67,7 +77,6 @@ else
 
     else
 
-      chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
       switchOption="to MAINNET"
       if [ "${chain}" = "main" ]; then
         switchOption="back to TESTNET"
