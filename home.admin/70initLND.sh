@@ -14,7 +14,7 @@ fi
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
-[ ${bitcoinRunning} -eq 0 ]; then
+fi [ ${bitcoinRunning} -eq 0 ]; then
   #doublecheck
   bitcoinRunning=$(${network}-cli getblockchaininfo  | grep -c verificationprogress)
 fi
