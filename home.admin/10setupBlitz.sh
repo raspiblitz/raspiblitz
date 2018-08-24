@@ -11,10 +11,6 @@ if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
 
-echo "network(${network})"
-echo "chain(${chain})"
-sleep 1
-
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
