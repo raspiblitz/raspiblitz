@@ -21,7 +21,12 @@ lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
 
   # check if LND is locked
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
+  locked=0
+  # only when a wallet exists - it can be locked
+  if [ ${walletExists} -eq 1 ];then
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+  fi
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
     ./AAunlockLND.sh
