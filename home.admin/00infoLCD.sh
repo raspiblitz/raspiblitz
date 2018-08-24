@@ -59,7 +59,7 @@ if [ "$USER" = "pi" ]; then
           # get chain if not available before
           chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
         fi
-        lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c false)
+        lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 
         if [ ${locked} -gt 0 ]; then
@@ -72,7 +72,7 @@ if [ "$USER" = "pi" ]; then
           dialog --backtitle "RaspiBlitz - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 5
 
-        elif [ ${lndSyncing} -gt 0 ]; then
+        elif [ ${lndSynced} -eq 0 ]; then
 
           # special case: LND is syncing
           /home/admin/80scanLND.sh

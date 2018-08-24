@@ -4,6 +4,13 @@ echo ""
 # load network
 network=`cat .network`
 
+# check chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
@@ -13,23 +20,51 @@ network=`cat .network`
 lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
 
-  chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
+  # check if LND is locked
   locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
-  lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo | jq -r '.synced_to_chain' 2>/dev/null | grep -c false)
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
     ./AAunlockLND.sh
     ./10setupBlitz.sh
-  elif [ ${lndSyncing} -gt 0 ]; then
-    ./70initLND.sh
-  else
-    ./90finishSetup.sh
+    exit 0
   fi
-  exit 1
+
+  # check if blockchain still syncing
+  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep 'initialblockdownload')
+  chainSyncing=1
+  if [ ${#chainInfo} -gt 0 ];then
+    chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
+  fi
+  if [ ${chainSyncing} -eq 1 ]; then
+    echo "Sync Chain ... PRESS KEY"
+    read key
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # check if lnd is scanning blockchain
+  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli getinfo | grep "synced_to_chain")
+  lndSyncing=1
+  if [ ${#lndInfo} -gt 0 ];then
+    lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
+  fi
+  if [ ${lndSyncing} -eq 1 ]; then
+    echo "Sync LND ... PRESS KEY"
+    read key
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
+  echo "FINSIH ... PRESS KEY"
+  read key
+  ./90finishSetup.sh
+  exit 0
+
 fi
 
 # check if bitcoin is running
-bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep -c blocks)
+bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
