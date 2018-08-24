@@ -89,6 +89,10 @@ fi
 
 # check if bitcoin is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+if [ ${bitcoinRunning} -eq 0 ]; then
+  # double check
+  bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+fi
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
