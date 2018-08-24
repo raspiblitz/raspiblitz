@@ -17,7 +17,7 @@ if [ ${mountOK} -eq 1 ]; then
    echo "*** Prepare ${network} ***"
    sudo killall -u bitcoin
    sleep 5
-   sudo rm -r /home/bitcoin/.${network}
+   sudo rm -r /home/bitcoin/.${network} 2>/dev/null
    sleep 2
    if [ -d /home/bitcoin/.${network} ]; then
      echo "FAIL - /home/bitcoin/.${network} exists and cannot be removed!"

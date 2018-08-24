@@ -9,7 +9,7 @@ chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq
 
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
-bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
+bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
   echo "FAIL - ${network}d is not running"
