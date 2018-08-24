@@ -5,7 +5,11 @@ echo ""
 network=`cat .network`
 
 # get chain
-chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
 
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
