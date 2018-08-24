@@ -46,8 +46,8 @@ if [ ${lndRunning} -eq 1 ]; then
     chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
   fi
   if [ ${chainSyncing} -eq 1 ]; then
-    echo "Sync Chain ... PRESS KEY"
-    read key
+    echo "Sync Chain ..."
+    sleep 3
     ./70initLND.sh
     exit 0
   fi
@@ -59,15 +59,15 @@ if [ ${lndRunning} -eq 1 ]; then
     lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
   fi
   if [ ${lndSyncing} -eq 1 ]; then
-    echo "Sync LND ... PRESS KEY"
-    read key
+    echo "Sync LND ..." 
+    sleep 3
     ./70initLND.sh
     exit 0
   fi
 
   # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
-  echo "FINSIH ... PRESS KEY"
-  read key
+  echo "FINSIH ... "
+  sleep 3
   ./90finishSetup.sh
   exit 0
 
