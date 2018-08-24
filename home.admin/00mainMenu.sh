@@ -32,6 +32,13 @@ if [ ${setupState} -eq 0 ]; then
 
 elif [ ${setupState} -lt 100 ]; then
 
+    # make sure to have a init pause aufter fresh boot
+    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
+    waittimesecs=$(expr 150 - $uptimesecs)
+    if [ ${waittimesecs} -gt 0 ]; then
+      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
+    fi
+
     # continue setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
