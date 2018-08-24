@@ -19,12 +19,10 @@ fi
 
 # if setup if ready --> REBOOT
 if [ ${setupStep} -gt 89 ];then
-  echo ""
-  echo "*** SETUP OK ---> REBOOT ***"
-  echo "PRESS ENTER .. to start the final reboot."
-  read key
-  sudo shutdown -r now
-  exit 1
+  echo "FINISH by setupstep(${setupStep})"
+  sleep 3
+  ./90finishSetup.sh
+  exit 0
 fi
 
 # CHECK WHAT IS ALREADY WORKING
