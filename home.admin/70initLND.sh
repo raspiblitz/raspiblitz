@@ -153,7 +153,7 @@ Press OK and follow the 'Helping Instructions'.
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "If you are ready. Press ENTER."
   read key
-  # set SetupState to 75 (mid thru this process)
+
   echo "65" > /home/admin/.setup
 fi
 

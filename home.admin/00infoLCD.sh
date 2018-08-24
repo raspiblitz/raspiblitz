@@ -52,6 +52,17 @@ if [ "$USER" = "pi" ]; then
         dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 
+      elif [ ${setupStep} -lt 65 ]; then
+
+          # setup process has not started yet
+          l1="Login to your RaspiBlitz with:\n"
+          l2="ssh admin@${localip}\n"
+          l3="Use your password A\n"
+          boxwidth=$((${#localip} + 20))
+        sleep 3
+        dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        sleep 5
+
       elif [ ${setupStep} -lt 100 ]; then
 
         # setup process init is done and not finished
@@ -85,12 +96,6 @@ if [ "$USER" = "pi" ]; then
           l2="ssh admin@${localip}\n"
           l3="Use your Password A\n"
           boxwidth=$((${#localip} + 20))
-
-          if [ ${setupStep} -eq 50 ]; then
-            l1="Blockhain Setup - monitor progress:\n"
-            boxwidth=45
-          fi
-
           sleep 3
           dialog --backtitle "RaspiBlitz - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 10
