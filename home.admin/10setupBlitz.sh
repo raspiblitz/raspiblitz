@@ -108,8 +108,8 @@ if [ ${mountOK} -eq 1 ]; then
   if [ -d "/mnt/hdd/${network}" ]; then
     echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "Maybe try --> ./60finishHDD.sh"
-    echo "If this sill is not working reboot after running --> sudo rm -r /mnt/hdd/${network}"
+    echo "If you want start fresh --> sudo rm -r /mnt/hdd/${network}"
+    echo "Or something with the config is not correct."
     exit 1
   fi
 
