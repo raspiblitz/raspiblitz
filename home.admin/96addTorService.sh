@@ -180,11 +180,11 @@ do
     testNetAdd="/testnet3"
   fi
   sudo cat /mnt/hdd/${network}${testNetAdd}/debug.log 2>/dev/null | grep "tor" | tail -n 10
-  onionAddress=$(${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
+  onionAddress=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
   echo "Can take up to 10min - if this takes longer --> CTRL+c, reboot and check manually"
   sleep 5
 done
-onionPort=$(${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
+onionPort=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
 echo "Your Chain Network Onion Address is: ${onionAddress}:${onionPort}"
 echo ""
 
