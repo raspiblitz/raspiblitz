@@ -29,7 +29,7 @@ fi
 
 # check if blockchain is still syncing
 heigh=6
-width=42
+width=44
 isInitialChainSync=$(echo "${blockchaininfo}" | grep 'initialblockdownload' | grep "true" -c)
 isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
 if [ ${isWaitingBlockchain} -gt 0 ]; then
@@ -37,18 +37,18 @@ if [ ${isWaitingBlockchain} -gt 0 ]; then
 fi
 if [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
-  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A"
+  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
   if [ "$USER" = "admin" ]; then
     heigh=6
     width=53
-    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 else
   infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
   if [ "$USER" = "admin" ]; then
     heigh=5
     width=53
-    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some time\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 fi
 
