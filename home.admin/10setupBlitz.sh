@@ -55,8 +55,8 @@ if [ ${lndRunning} -eq 1 ]; then
     exit 0
   fi
 
-  # check if blockchain still syncing
-  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep 'initialblockdownload')
+  # check if blockchain still syncing (during sync sometimes CLI returns with error at this point)
+  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
   chainSyncing=1
   if [ ${#chainInfo} -gt 0 ];then
     chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
