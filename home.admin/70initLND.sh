@@ -108,10 +108,6 @@ echo "walletExists(${walletExists})"
 sleep 2
 if [ ${walletExists} -eq 0 ]; then
 
-  # delete old macaroons if exist
-  sudo rm /mnt/hdd/lnd/*.macaroon 2>/dev/null
-  sudo rm /home/admin/.lnd/*.macaroon 2>/dev/null
-
   # setup state signals, that no wallet has been created yet
   dialog --backtitle "RaspiBlitz - LND Lightning Wallet (${network}/${chain})" --msgbox "
 ${network} and Lighthing Services are installed.
@@ -168,14 +164,14 @@ sleep 60
 ###### Copy LND macaroons to admin
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
-macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   ./AAunlockLND.sh
   sleep 3
 fi
-macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  sudo -u bitcoin ls -la /home/bitcoin/.lnd/admin.macaroon
+  sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/${network}/${chain}net/admin.macaroon
   echo ""
   echo "FAIL - LND Macaroons not created"
   echo "Please check the following LND issue:"
@@ -184,11 +180,14 @@ if [ ${macaroonExists} -eq 0 ]; then
   exit 1
 fi
 sudo mkdir /home/admin/.lnd 2>/dev/null
-macaroonExists=$(sudo ls -la /home/admin/.lnd/ | grep -c admin.macaroon)
+macaroonExists=$(sudo ls -la /home/admin/data/${network}/${chain}net/.lnd/ | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo mkdir /home/admin/.lnd
+  sudo mkdir /home/admin/.lnd/data
+  sudo mkdir /home/admin/.lnd/${network}
+  sudo mkdir /home/admin/.lnd/${network}/${chain}net
   sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/admin.macaroon /home/admin/.lnd
+  sudo cp /home/bitcoin/.lnd/data/${network}/${chain}net/admin.macaroon /home/admin/data/${network}/${chain}net/.lnd
   sudo chown -R admin:admin /home/admin/.lnd/
   echo "OK - LND Macaroons created"
 else

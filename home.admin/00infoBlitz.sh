@@ -9,9 +9,17 @@ color_gray='\033[0;37m'
 # load network
 network=`sudo cat /home/admin/.network`
 
+# get chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
 # set datadir
 bitcoin_dir="/home/bitcoin/.${network}"
 lnd_dir="/home/bitcoin/.lnd"
+lnd_macaroon_dir="/home/bitcoin/.lnd/data/chain/${network}/${chain}net"
 
 # get uptime & load
 load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
@@ -56,16 +64,16 @@ network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[
 btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
   btc_title=$network
-  chain="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.chain')"
-  if [ -n $chain ]; then
+  blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo)"
+  if [ -n $blockchaininfo ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
     block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
-    block_verified="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.blocks')"
+    block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
 
-    progress="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo | jq -r '.verificationprogress')"
+    progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
 
     if [ ${block_diff} -eq 0 ]; then    # fully synced
@@ -160,7 +168,7 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else
- ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
+ ln_getInfo=$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
  alias_color="${color_grey}"
  ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
@@ -177,10 +185,10 @@ else
       fi  
     fi
   else 
-    ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-    ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+    ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+    ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-    ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+    ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
     ln_baseInfo="${color_gray}Wallet (on-chain) ${ln_walletbalance} sat"
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
   fi
