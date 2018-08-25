@@ -65,7 +65,7 @@ btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
   btc_title=$network
   blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo)"
-  if [ -n ${blockchaininfo} ]; then
+  if [ ${#blockchaininfo} -gt 0 ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
@@ -185,11 +185,11 @@ else
       fi  
     fi
   else 
-    ln_walletbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-    ln_channelbalance="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+    ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+    ln_channelbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-    ln_channels_total="$(/usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-    ln_baseInfo="${color_gray}Wallet (on-chain) ${ln_walletbalance} sat"
+    ln_channels_total="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+    ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
   fi
 fi
@@ -214,7 +214,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
 " \
-"RaspiBlitz v0.8" \
+"RaspiBlitz v0.85" \
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
