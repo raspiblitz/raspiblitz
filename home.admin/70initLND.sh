@@ -187,6 +187,7 @@ if [ ${macaroonExists} -eq 0 ]; then
   sudo mkdir /home/admin/.lnd/data/chain/${network}
   sudo mkdir /home/admin/.lnd//data/chain/${network}/${chain}net
   sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
+  sudo cp /home/bitcoin/.lnd/lnd.conf /home/admin/.lnd
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
   sudo chown -R admin:admin /home/admin/.lnd/
   echo "OK - LND Macaroons created"
