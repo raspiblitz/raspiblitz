@@ -65,7 +65,7 @@ btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
   btc_title=$network
   blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo)"
-  if [ -n $blockchaininfo ]; then
+  if [ -n ${blockchaininfo} ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
