@@ -245,7 +245,7 @@ echo "*** Build LND from Source ***"
 go get -d github.com/lightningnetwork/lnd
 # make sure to always have the same code (commit) to build
 # TODO: To update lnd -> change to latest commit
-sudo git checkout e069dd7f04535ba102095fe3106e80b64553e3f6
+sudo git checkout 26f68da5b2883885fcf6a8e79b3fc9bb12cc9eef
 cd $GOPATH/src/github.com/lightningnetwork/lnd
 make && make install
 sudo chmod 555 /usr/local/gocode/bin/lncli
