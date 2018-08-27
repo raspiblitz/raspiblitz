@@ -310,11 +310,17 @@ sudo -u admin cp /home/admin/raspiblitz/home.admin/*.sh /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 
-# bash aoutstart for admin und pi
+# bash aoutstart for admin
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
-sudo bash -c "echo '# automatic start the LCD info loop' >> /home/pi/.bashrc"
-sudo bash -c "echo '/home/admin/00infoLCD.sh' >> /home/pi/.bashrc"
+
+# bash aoutstart for pi
+# run as exec to dont allow easy physical access by keyboard
+# see https://github.com/rootzoll/raspiblitz/issues/54
+sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 
 # create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
 cat > /home/pi/setup.sh <<EOF
