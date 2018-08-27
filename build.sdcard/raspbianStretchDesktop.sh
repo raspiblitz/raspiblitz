@@ -10,7 +10,7 @@
 
 echo ""
 echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.85*"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.86*"
 echo "***************************************"
 echo ""
 
@@ -243,7 +243,7 @@ go get -d github.com/lightningnetwork/lnd
 # make sure to always have the same code (commit) to build
 # TODO: To update lnd -> change to latest commit
 cd $GOPATH/src/github.com/lightningnetwork/lnd
-sudo git checkout 26f68da5b2883885fcf6a8e79b3fc9bb12cc9eef
+sudo git checkout f1256ba41b033e62de2980b89bc7e278f76a0880
 make && make install
 sudo chmod 555 /usr/local/gocode/bin/lncli
 sudo chmod 555 /usr/local/gocode/bin/lnd

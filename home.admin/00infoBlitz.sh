@@ -214,7 +214,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
 " \
-"RaspiBlitz v0.85" \
+"RaspiBlitz v0.86" \
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
