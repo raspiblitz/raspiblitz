@@ -87,4 +87,6 @@ sudo raspi-config nonint do_hostname ${hostname}
 # mark setup is done (100%)
 echo "100" > /home/admin/.setup
 
+clear
+echo "Setup done. Rebooting now."
 sudo shutdown -r now
