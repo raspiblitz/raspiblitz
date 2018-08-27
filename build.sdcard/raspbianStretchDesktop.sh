@@ -29,9 +29,6 @@ sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autol
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
-# give Raspi a default hostname (optional)
-sudo raspi-config nonint do_hostname "RaspiBlitz"
-
 # do memory split (16MB)
 sudo raspi-config nonint do_memory_split 16
 
@@ -322,6 +319,9 @@ echo ""
 echo "After final reboot - your SD Card Image is ready."
 echo "Press ENTER to install LCD and reboot ..."
 read key
+
+# give Raspi a default hostname (optional)
+sudo raspi-config nonint do_hostname "RaspiBlitz"
 
 # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
