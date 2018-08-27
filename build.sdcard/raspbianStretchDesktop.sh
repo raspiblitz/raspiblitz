@@ -118,8 +118,23 @@ cd /home/admin/download
 
 # download resources
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
+if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
+then
+    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+    exit 1
+fi
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+if [ ! -f "./SHA256SUMS.asc" ]
+then
+    echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
+    exit 1
+fi
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
+if [ ! -f "./laanwj-releases.asc" ]
+then
+    echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+    exit 1
+fi
 
 # test checksum
 checksum=$(sha256sum --check SHA256SUMS.asc --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
@@ -230,6 +245,11 @@ olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
 ## BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
 wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
+if [ ! -f "./go1.10.linux-armv6l.tar.gz" ]
+then
+    echo "!!! FAIL !!! Download not success."
+    exit 1
+fi
 sudo tar -C /usr/local -xzf go1.10.linux-armv6l.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
@@ -328,6 +348,7 @@ sudo raspi-config nonint do_hostname "RaspiBlitz"
 cd /home/admin/
 sudo apt-mark hold raspberrypi-bootloader
 git clone https://github.com/goodtft/LCD-show.git
-chmod -R 755 LCD-show
+sudo chmod -R 755 LCD-show
+sudo chown -R admin:admin LCD-show
 cd LCD-show/
 sudo ./LCD35-show
