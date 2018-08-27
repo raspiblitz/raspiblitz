@@ -188,7 +188,7 @@ if [ ! -f "home/admin/.setup" ]; then
   echo "*** Update System ***"
   sudo apt-mark hold raspberrypi-bootloader
   sudo apt-get update
-  sudo apt-get upgrade -f -y --force-yes
+  sudo apt-get upgrade -f -y --allow-change-held-packages
   echo "OK - System is now up to date"
 fi
 

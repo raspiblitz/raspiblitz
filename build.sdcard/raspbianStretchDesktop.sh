@@ -46,7 +46,7 @@ echo "*** SOFTWARE UPDATE ***"
 
 # installs like on RaspiBolt
 sudo apt-get update
-sudo apt-get upgrade -f -y --force-yes
+sudo apt-get upgrade -f -y --allow-change-held-packages
 sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 
 # extra: remove some big packages not needed
