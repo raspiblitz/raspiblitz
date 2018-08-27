@@ -7,7 +7,7 @@ network=`cat .network`
 chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 
 # get available amount in on-chain wallet
-maxAmount=$(lncli walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+maxAmount=$(lncli --chain=${network} walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
 
 # TODO: pre-check if channels are open or are still in closing 
 # and let user know not all funds are available yet (just info Dialoge)
@@ -44,7 +44,7 @@ fi
 
 # TODO: check if fees are getting done right so that transaction will get processed
 
-command="lncli sendcoins --conf_target 3 ${address} ${amount}"
+command="lncli --chain=${network} --conf_target 3 sendcoins  ${address} ${amount}"
 
 clear
 echo "******************************"

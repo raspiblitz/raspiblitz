@@ -29,7 +29,7 @@ if [ ${#_input} -eq 0 ]; then
 fi
 
 # build command
-command="lncli connect ${_input}"
+command="lncli --chain=${network} connect ${_input}"
 
 # info output
 clear
@@ -88,7 +88,7 @@ else
 
   # check if the node is now in peer list
   pubkey=$(echo $_input | cut -d '@' -f1)
-  isPeer=$(lncli listpeers 2>/dev/null| grep "${pubkey}" -c)
+  isPeer=$(lncli --chain=${network} listpeers 2>/dev/null| grep "${pubkey}" -c)
   if [ ${isPeer} -eq 0 ]; then
 
     # basic error message

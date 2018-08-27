@@ -4,7 +4,7 @@
 network=`cat .network`
 chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 
-command="lncli newaddress np2wkh"
+command="lncli --chain=${network} newaddress np2wkh"
 
 clear
 echo "******************************"
@@ -17,7 +17,7 @@ echo ""
 echo "RESULT:"
 
 # PRECHECK) check if chain is in sync
-chainInSync=$(lncli getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   command=""
   result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "

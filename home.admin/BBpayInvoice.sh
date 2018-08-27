@@ -10,7 +10,7 @@ echo ""
 echo "*** Precheck ***"
 
 # check if chain is in sync
-chainInSync=$(lncli getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
@@ -23,7 +23,7 @@ fi
 
 # check number of connected peers
 echo "check for open channels"
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
+openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} listchannels 2>/dev/null | grep chan_id -c)
 if [ ${openChannels} -eq 0 ]; then
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!"
@@ -71,7 +71,7 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-command="lncli sendpayment --pay_req=${invoice}"
+command="lncli --chain=${network} sendpayment --pay_req=${invoice}"
 
 # info output
 clear

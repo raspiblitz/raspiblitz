@@ -10,7 +10,7 @@ echo ""
 echo "*** Precheck ***"
 
 # check if chain is in sync
-chainInSync=$(lncli getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
   echo "Wait until chain is sync with LND and try again."
@@ -19,7 +19,7 @@ if [ ${chainInSync} -eq 0 ]; then
 fi
 
 # check available funding
-confirmedBalance=$(lncli walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+confirmedBalance=$(lncli --chain=${network} walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
 if [ ${confirmedBalance} -eq 0 ]; then
   echo "FAIL - You have 0 SATOSHI in your confirmed LND On-Chain Wallet."
   echo "Please fund your on-chain wallet first and wait until confirmed."
@@ -28,7 +28,7 @@ if [ ${confirmedBalance} -eq 0 ]; then
 fi
 
 # check number of connected peers
-numConnectedPeers=$(lncli listpeers | grep pub_key -c)
+numConnectedPeers=$(lncli --chain=${network} listpeers | grep pub_key -c)
 if [ ${numConnectedPeers} -eq 0 ]; then
   echo "FAIL - no peers connected on lightning network"
   echo "You can only open channels to peer nodes to connected to first."
@@ -44,7 +44,7 @@ do
   pubKey=$(echo ${grepLine} | cut -d '"' -f4)
   #echo "grepLine(${pubKey})"
   OPTIONS+=(${pubKey} "")
-done < <(lncli listpeers | grep pub_key)
+done < <(lncli --chain=${network} listpeers | grep pub_key)
 TITLE="Open (Payment) Channel"
 MENU="\nChoose a peer you connected to, to open the channel with: \n "
 pubKey=$(dialog --clear \
@@ -69,7 +69,7 @@ if [ "${network}" = "bitcoin" ]; then
   minSat=250000
 fi
 _error="./.error.out"
-lncli openchannel ${CHOICE} 1 0 2>$_error
+lncli --chain=${network} openchannel ${CHOICE} 1 0 2>$_error
 error=`cat ${_error}`
 if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
   minSat=$(echo "${error}" | tr -dc '0-9')
@@ -89,7 +89,7 @@ if [ ${#amount} -eq 0 ]; then
 fi
 
 # build command
-command="lncli openchannel ${pubKey} ${amount} 0"
+command="lncli --chain=${network} openchannel ${pubKey} ${amount} 0"
 
 # info output
 clear

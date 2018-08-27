@@ -127,11 +127,11 @@ Press OK and follow the 'Helping Instructions'.
   echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
   echo "****************************************************************************"
   echo ""
-  echo "lncli create"
+  echo "lncli --chain=${network} create"
   
   # execute command and monitor error
   _error="./.error.out"
-  sudo -u bitcoin /usr/local/bin/lncli create 2>$_error
+  sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create 2>$_error
   error=`cat ${_error}`
 
   if [ ${#error} -gt 0 ]; then
@@ -209,7 +209,7 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"
   while :
@@ -220,7 +220,7 @@ if [ ${lndSyncing} -eq 0 ]; then
       sleep 15
       
       # break loop when synced
-      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSyncing} -eq 1 ]; then
         break
       fi

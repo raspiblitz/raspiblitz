@@ -10,7 +10,7 @@ echo ""
 echo "*** Precheck ***"
 
 # check if chain is in sync
-chainInSync=$(lncli getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
@@ -22,7 +22,7 @@ fi
 
 # check number of connected peers
 echo "check for open channels"
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | grep chan_id -c)
+openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} listchannels 2>/dev/null | grep chan_id -c)
 if [ ${openChannels} -eq 0 ]; then
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!"
@@ -45,7 +45,7 @@ if [ ${#amount} -eq 0 ]; then
 fi
 
 # build command
-command="lncli addinvoice ${amount}"
+command="lncli --chain=${network} addinvoice ${amount}"
 
 # info output
 clear
@@ -83,7 +83,7 @@ else
   echo ""
   echo ${payReq}
   echo ""
-  echo "You can use 'lncli lookupinvoice ${rhash}' to check the payment. "
+  echo "You can use 'lncli --chain=${network} lookupinvoice ${rhash}' to check the payment. "
 
   # TODO: Offer to go into monitor for incommin payment loop.
 
