@@ -59,7 +59,7 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-http://wiki.fulmo.org/downloads/raspiblitz-2018-08-15.img.gz (or [build your own](#build-the-sd-card-image))
+http://wiki.fulmo.org/downloads/raspiblitz-2018-08-28.img.gz (or [build your own](#build-the-sd-card-image))
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -251,6 +251,25 @@ As you can see from the URL you find the build script in this Git repo under `bu
 The whole build process takes a while. And the end the LCD drives get installed and a reboot is needed. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use root: `ssh root@[IP-OF-YOUR-RASPI]` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the actovity LED of the pi starts going dark. You can unplug power and remove the SD card. You have now build your own RaspiBlitz sd card image. 
 
 *Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
+
+## Update to a new SD Card Release
+
+At the beginning of this README you can find the newest SD card we provide. Or you can build the newest SD card image yourself like in the chapter above. The SD card image is used to setup a fresh install of the RaspiBlitz. So what to do if you already have an older version running and you want to upgrade?
+
+Until we reach version 1.0 the update process will be a bit rough .. so what you do is:
+* close all open lightning channels you have (`lncli --force closeallchannels`)
+* wait until all closing transactions are done
+* move all on-chain funds to a wallet outsie raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
+* run the script `./XXcleanHDD.sh` in admin home directory (Blockchain will stay on HDD)
+* shutdown RaspiBlitz (`sudo shutdown now`)
+* flash SD card with new image
+* Redo a fresh setup of RaspiBlitz
+* Move your funds back in
+* Re-Open your channels
+
+We know that this is not optimal yet. But until version 1.0 we will change too much stuff to garantue any other save update mechanism. Also by redoing all the setup you help out on testing the lastest setup process.
+
+From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
 
 ## Further Development of RaspiBlitz
 
