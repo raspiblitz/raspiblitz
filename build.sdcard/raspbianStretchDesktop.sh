@@ -219,6 +219,7 @@ if [ ${fingerprint} -lt 1 ]; then
   exit 1
 fi
 gpg --import ./pgp_keys.asc
+sleep 2
 verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig manifest-v${lndVersion}.txt 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
