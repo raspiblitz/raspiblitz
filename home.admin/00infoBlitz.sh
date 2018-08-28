@@ -209,7 +209,7 @@ ${color_yellow} .'____    ,'  ${color_gray}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}
 ${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}v0.4.2 ${ln_baseInfo}
+${color_yellow}   /'          ${color_gray}LND ${color_green}v0.5-beta ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
