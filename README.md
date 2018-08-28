@@ -229,6 +229,16 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
 
+#### TOR Integration (experimental)
+
+You can use the Switch to TOR option from the main menu to make the node reachable thru TOR. This way you can get thru a NAT without needed to open/forward ports on your router. Bitcoin and LND will have a seperate onion-address displayed on LCD and the Status Info Screen option in menu.
+
+The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
+
+#### Connect to Mobile Wallet
+
+There is now the option to connect and control your LND node with the mobile app called "Shango" - choose option in the main menu.
+
 ## Educational Tutorials
 
 *Once the Setup Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
