@@ -195,7 +195,7 @@ echo ""
 echo "*** LND ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 
-lndVersion="v0.5-beta-rc1"
+lndVersion="0.5-beta-rc1"
 olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
 
 # get LND resources
