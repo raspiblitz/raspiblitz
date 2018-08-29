@@ -36,7 +36,7 @@ sudo apt remove tor tor-arm -y
 echo ""
 
 echo "*** Remove dirmngr ***"
-sudo apt remove dirmngr
+sudo apt remove dirmngr -y
 echo ""
 
 echo "*** Remove NYX ***"
