@@ -17,7 +17,7 @@ sudo systemctl disable tor@default
 echo ""
 
 echo "*** Changing ${network} Config ***"
-sudo cat /home/bitcoin/.${network}/${network}.conf | grep -Ev 'onlynet=onion|.onion'> /home/bitcoin/.${network}/${network}.conf
+sudo cat /home/bitcoin/.${network}/${network}.conf | grep -Ev 'onlynet=onion|.onion' | sudo tee /home/bitcoin/.${network}/${network}.conf
 sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
 sudo chown admin:admin /home/admin/.${network}/${network}.conf
 
@@ -32,15 +32,15 @@ echo "OK"
 echo ""
 
 echo "*** Remove Tor ***"
-sudo apt install tor tor-arm -y
+sudo apt remove tor tor-arm -y
 echo ""
 
 echo "*** Remove dirmngr ***"
-sudo apt install dirmngr
+sudo apt remove dirmngr
 echo ""
 
 echo "*** Remove NYX ***"
-sudo pip uninstall nyx
+sudo pip uninstall nyx -y
 echo ""
 
 echo "*** Remove TOR Files/Config ***"
