@@ -29,32 +29,20 @@ echo "Go to http://www.shangoapp.com/insider sign up with your email (confirmati
 echo "iOS: Read https://developer.apple.com/testflight/testers/"
 echo "Android: https://play.google.com/apps/testing/com.shango (from device, after confirmation email)"
 echo ""
-echo "SETUP"
-echo "Once you have the app running make sure you are on the same local network (WLAN same as LAN)."
-echo "Then go to --> 'Connect to your LND Server'"
-echo "There you see three 3 form fields to fill out."
-echo ""
 echo "*** STEP 1 ***"
-echo "ENTER into IP & PORT the following:"
-echo "${myip}:10009"
+echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
+echo "Then go to --> 'Connect to your LND Server'"
+echo "There you see three 3 form fields to fill out. Skip those and go right to the buttons below."
 echo ""
-echo "NOTE: You can replace IP with dyndns if available and port forwarding on router."
-echo ""
-echo "The following two steps, will be a QR code - press scan icon in app next to field."
-echo "PRESS ENTER to make RaspiBlitz displaying the MACAROON QR code ..."
+echo "Click on the 'Scan OR' button"
+echo "Make the this terminal as big as possible - fullscreen would be best."
+echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it with the app."
 read key
 
 clear
 echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
-qrencode $(xxd -p -c3000 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon) -t ANSIUTF8
-echo "Press ENTER to make RaspiBlitz displaying the TLS-CERT QR code ..."
-echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER for next step."
-read key
-
-clear
-echo "*** STEP 3_ SCAN TLS-Cert (make whole QR code fill camera) ***"
-qrencode $(xxd -p -c3000 /home/admin/.lnd/tls.cert) -t ANSIUTF8
-echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when Done."
+echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/bitcoin/mainnet/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt && qrencode -t ANSIUTF8 < qr.txt
+echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
 read key
 
 clear
