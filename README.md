@@ -1,8 +1,10 @@
-[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](setup-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educatiuonal-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
+[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educational-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
+
+`Latest Version with lnd 0.5-betaRC1 and experimental TOR integration.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -11,9 +13,9 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 ## Table of Contents
 
 * [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
-* [ [Setup](#setup-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
+* [ [Setup](#boot-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
 * [ [Documentation](#documentation) ] Features and Usecases  
-* [ [Education](#educatiuonal-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
+* [ [Education](#educational-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
 * [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
 
 ## Hardware Needed (Amazon Shopping List)
@@ -22,7 +24,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 * RaspBerry Pi 3 (31,99 EUR) https://www.amazon.de/dp/B01CD5VC92
 * Micro SD-Card 16GB (7,11 EUR) https://www.amazon.de/dp/B0162YQEIE
-* Power (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
+* Power >=3A (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
 * 1TB Hard Drive (49,99 EUR) https://www.amazon.de/dp/B00KWHJY7Q
 * Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
 * LCD-Display (19,58 EUR) https://www.amazon.de/dp/B01JRUH0CY
@@ -30,7 +32,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 **Total Price: 127,31 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ]
+[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [FR](shoppinglist_fr.md) ]
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
@@ -59,7 +61,7 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-http://wiki.fulmo.org/downloads/raspiblitz-2018-07-25.img.gz
+http://wiki.fulmo.org/downloads/raspiblitz-2018-08-28.img.gz (or [build your own](#build-the-sd-card-image))
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -93,9 +95,9 @@ So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect
 
 #### Init
 
-Automatically after login per SSH as admin to the RaspiBlitz, the user sees this welcome menu:
+Automatically after login per SSH as admin to the RaspiBlitz, the user can choose if the RaspiBlitz should combine Bitcoin or Litecoin with Lightning:
 
-![SSH0](pictures/ssh0-welcome.png)
+![SSH0](pictures/ssh0-welcome2.png)
 
 Setting Up the Raspi is the only option at this point, so we go with OK.
 
@@ -141,15 +143,13 @@ After this the setup process needs some time and the user will see a lot of cons
 
 The following screen is just shown, if the HDD was not prepared with a copy of the Bitcoin blockchain (as part of a ready-2-go set). The following options are offered to get a copy:
 
-![SSH5](pictures/ssh5-blockchain.png)
+![SSH5](pictures/ssh5-blockchain2.png)
 
-The third option "SYNC" should just be use as a fallback. So normally you have the following two options:
+The option "SYNC" should just be use as a fallback. So normally you have the following two options:
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time.
-
-*Background: The download is done thru bittorrent. So just it should be possible to stop/shutdown the Raspi and continue later - just in case.*
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP is the torrent if not working for you. To stop torrent and choose another option use CTRL+z and then start './10setupBlitz.sh' from terminal.
 
 #### Copy the Blockchain
 
@@ -203,7 +203,11 @@ After SSH back in as admin the main menu shows the unlock option:
 
 Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
 
-![SSH9e](pictures/ssh9e-mainmenu.png)
+![SSH9e1](pictures/ssh9e-mainmenu1.png)
+
+And if you scroll down .. you see even more feature options:
+
+![SSH9e2](pictures/ssh9e-mainmenu2.png)
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
@@ -221,13 +225,67 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 #### Detailed Balances and Channel Info
 
-TODO: Add photo
+<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
+
+<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
+
+#### TOR Integration (experimental)
+
+You can use the Switch to TOR option from the main menu to make the node reachable thru TOR. This way you can get thru a NAT without needed to open/forward ports on your router. Bitcoin and LND will have a seperate onion-address displayed on LCD and the Status Info Screen option in menu.
+
+![tor1](pictures/tor1.png)
+
+The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
+
+#### Connect to Mobile Wallet
+
+There is now the option to connect and control your LND node with the mobile app called "Shango" - choose option in the main menu.
+
+![shango1](pictures/shango1.png)
 
 ## Educational Tutorials
 
 *Once the Setup Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
 
 A good way to start for now is to get some Testnet coins, connect to other peers and make your first transactions. You find tutorials for this at the original RaspiBolt guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#get-some-testnet-bitcoin
+
+## Build the SD Card Image
+
+A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everbody started quickly. But if you want to build that image yourself - here is a quick guide:
+
+* Get a fresh Rasbian RASPBIAN STRETCH WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/)
+* Write image to a SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) 
+* Add a file called `ssh` to the root of the SD card when mounted to enable SSH login
+* Start card in Raspi and login per SSH with `ssh pi@[IP-OF-YOUR-RASPI]` password is `raspberry`
+
+Now you are ready to start the SD card build script - copy the following command into your terminal and execute:
+
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
+
+As you can see from the URL you find the build script in this Git repo under `build.sdcard/raspbianStretchDesktop.sh`- there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
+
+The whole build process takes a while. And the end the LCD drives get installed and a reboot is needed. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use root: `ssh root@[IP-OF-YOUR-RASPI]` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the actovity LED of the pi starts going dark. You can unplug power and remove the SD card. You have now build your own RaspiBlitz sd card image. 
+
+*Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
+
+## Update to a new SD Card Release
+
+At the beginning of this README you can find the newest SD card we provide. Or you can build the newest SD card image yourself like in the chapter above. The SD card image is used to setup a fresh install of the RaspiBlitz. So what to do if you already have an older version running and you want to upgrade?
+
+Until we reach version 1.0 the update process will be a bit rough .. so what you do is:
+* close all open lightning channels you have (`lncli --force closeallchannels`)
+* wait until all closing transactions are done
+* move all on-chain funds to a wallet outsie raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
+* run the script `./XXcleanHDD.sh` in admin home directory (Blockchain will stay on HDD)
+* shutdown RaspiBlitz (`sudo shutdown now`)
+* flash SD card with new image
+* Redo a fresh setup of RaspiBlitz
+* Move your funds back in
+* Re-Open your channels
+
+We know that this is not optimal yet. But until version 1.0 we will change too much stuff to garantue any other save update mechanism. Also by redoing all the setup you help out on testing the lastest setup process.
+
+From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
 
 ## Further Development of RaspiBlitz
 

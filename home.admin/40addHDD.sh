@@ -1,10 +1,14 @@
 #!/bin/sh
 echo ""
+
+# load network
+network=`cat .network`
+
 echo "*** Adding HDD to the System ***"
 sleep 5
-existsHDD=$(lsblk | grep -c sda1)
-if [ ${existsHDD} -eq 1 ]; then
-  echo "OK - HDD found as sda1"
+existsHDD=$(lsblk | grep -c sda)
+if [ ${existsHDD} -gt 0 ]; then
+  echo "OK - HDD found as sda"
   mountOK=$(df | grep -c /mnt/hdd)
   if [ ${mountOK} -eq 1 ]; then
     echo "FAIL - HDD is already mounted"
@@ -38,13 +42,15 @@ if [ ${existsHDD} -eq 1 ]; then
          mountOK=$(df | grep -c /mnt/hdd)
          if [ ${mountOK} -eq 1 ]; then
            echo "OK - HDD is mounted"
-	   echo ""
+	         echo ""
 
            # set SetupState
            echo "40" > /home/admin/.setup
 
            echo "*** Analysing HDD Content ***"
-           if [  -d "/mnt/hdd/bitcoin"  ]; then 
+           if [  -d "/mnt/hdd/${network}"  ]; then 
+             sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
+             sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
              echo "Looks like the HDD is prepared with the Blockchain."
              echo "Continuing with finishing the system setup ..."
              ./60finishHDD.sh
@@ -63,6 +69,6 @@ if [ ${existsHDD} -eq 1 ]; then
     fi
   fi
 else
-  echo "FAIL - no HDD as device sda1 found"
-  echo "check if HDD is properly connected and has enough power - then try again"
+  echo "FAIL - no HDD as device sda found"
+  echo "check if HDD is properly connected and has enough power - then try again with reboot"
 fi

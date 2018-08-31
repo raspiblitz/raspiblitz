@@ -1,15 +1,15 @@
-#!/bin/bash
+#!/bin/sh
 echo ""
 
 # *** BITCOIN ***
 bitcoinList="" # url to list with other sources
-bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
-bitcoinSize=231000000 # 231235816-tolerance
+bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-bitcoin-2018-07-16"
+bitcoinSize=100
 
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
 litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
-litecoinSize=19180000 # 19184960-tolerance 
+litecoinSize=19000000
 
 # load network
 network=`cat .network`
@@ -28,7 +28,7 @@ fi
 name="Download"
 targetDir="/mnt/hdd/download/"
 targetSize=$size
-maxTimeoutLoops=100000
+maxTimeoutLoops=100
 command="sudo wget -c -r -P ${targetDir} -q --show-progress ${url}"
 
 # starting session if needed
@@ -38,7 +38,6 @@ isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
 echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
-  sudo mkdir ${targetDir} 2>/dev/null
   screen -S ${name} -dm ${command}
 else
   echo "Continue screen session"
@@ -88,20 +87,18 @@ while :
 
     # display info screen
     clear
-    echo "****************************************************"
+    echo "****************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
     echo "Timeout: ${timeoutInfo}"
-    echo "If needed press key x to stop ${name}"
-    echo "NOTICE: This can take multiple hours or days !!"
-    echo "Its OK to close terminal now and SSH back in later."
-    echo "****************************************************"
+    echo "Press key x to abort this process"
+    echo "****************************************"
     screen -S ${name} -X hardcopy .${name}.out
-    newScreenDump=$(cat .Download.out | grep . | tail -8)
+    newScreenDump=$(cat .Download.out | grep . | tail -15)
     if [ ${#newScreenDump} -gt 0 ]; then
       screenDump=$newScreenDump
     fi
-    echo "$screenDump"
+    echo $screenDump
 
     # wait 2 seconds for key input
     read -n 1 -t 2 keyPressed
@@ -141,8 +138,8 @@ targetPath=$(echo ${url} | cut -d '@' -f2)
 echo "path to downloaded data is ${targetPath}"
 
 # calculate progress and write it to file for LCD to read
-finalSize=$( du -s ${targetDir} 2>/dev/null | head -n1 | awk '{print $1;}' )
-if [ ${#finalSize} -eq 0 ]; then
+finalSize=$( du -s ${targetDir} | head -n1 | awk '{print $1;}' )
+if [ ${#actualSize} -eq 0 ]; then
   finalSize=0
 fi
 echo "final size is ${finalSize} of targeted size ${targetSize}"
@@ -153,10 +150,10 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Do you want keep already downloaded data?" 6 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir} ;;
+    1) sudo rm -rf ${targetDir}${targetPath} ;;
   esac
   ./00mainMenu.sh
   exit 1;

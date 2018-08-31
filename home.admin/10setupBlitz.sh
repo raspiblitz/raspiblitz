@@ -1,77 +1,176 @@
 #!/bin/sh
 echo ""
 
+# load network
+network=`cat .network`
+
+# check chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
+# get setup progress
+setupStep=$(sudo -u admin cat /home/admin/.setup)
+if [ ${#setupStep} -eq 0 ];then
+  setupStep=0
+fi
+
+# if setup if ready --> REBOOT
+if [ ${setupStep} -gt 89 ];then
+  echo "FINISH by setupstep(${setupStep})"
+  sleep 3
+  ./90finishSetup.sh
+  exit 0
+fi
+
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
 # in case it got interrupted
 
 # check if lightning is running
-lndRunning=$(systemctl status lnd.service | grep -c running)
+lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
+  
+  echo "LND is running ..."
+  sleep 1
 
-  chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
-  lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c false)
+  # check if LND is locked
+  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
+  locked=0
+  # only when a wallet exists - it can be locked
+  if [ ${walletExists} -eq 1 ];then
+    echo "lnd wallet exists ... checking if locked"
+    sleep 2
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+  fi
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
-    ./unlockLND.sh
+    ./AAunlockLND.sh
     ./10setupBlitz.sh
-  elif [ ${lndSyncing} -gt 0 ]; then
-    ./70initLND.sh
-  else
-    ./90finishSetup.sh
+    exit 0
   fi
-  exit 1
+
+  # check if blockchain still syncing (during sync sometimes CLI returns with error at this point)
+  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
+  chainSyncing=1
+  if [ ${#chainInfo} -gt 0 ];then
+    chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
+  fi
+  if [ ${chainSyncing} -eq 1 ]; then
+    echo "Sync Chain ..."
+    sleep 3
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # check if lnd is scanning blockchain
+  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo | grep "synced_to_chain")
+  lndSyncing=1
+  if [ ${#lndInfo} -gt 0 ];then
+    lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
+  fi
+  if [ ${lndSyncing} -eq 1 ]; then
+    echo "Sync LND ..." 
+    sleep 3
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
+  echo "FINSIH ... "
+  sleep 3
+  ./90finishSetup.sh
+  exit 0
+
 fi
 
 # check if bitcoin is running
-bitcoinRunning=$(systemctl status bitcoind.service | grep -c running)
+bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+if [ ${bitcoinRunning} -eq 0 ]; then
+  # double check
+  bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+fi
 if [ ${bitcoinRunning} -eq 1 ]; then
-  echo "OK - Bitcoind is running"
+  echo "OK - ${network}d is running"
   echo "Next step run Lightning"
   ./70initLND.sh
   exit 1
 fi
 
 # check if HDD is mounted
-mountOK=$(df | grep -c /mnt/hdd)
+mountOK=$( df | grep -c /mnt/hdd )
 if [ ${mountOK} -eq 1 ]; then
-
-  # if there are signs of blockchain data
-  if [ -d "/mnt/hdd/bitcoin" ]; then
-    echo "UNKOWN STATE"
+  
+  # are there any signs of blockchain data
+  if [ -d "/mnt/hdd/${network}" ]; then
+    echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "Maybe try --> ./60finishHDD.sh"
+    echo "If you want start fresh --> sudo rm -r /mnt/hdd/${network}"
+    echo "Or something with the config is not correct."
+    exit 1
+  fi
+
+  # check if there is a download to continue
+  downloadProgressExists=$(sudo ls /home/admin/.Download.out 2>/dev/null | grep ".Download.out" -c)
+  if [ ${downloadProgressExists} -eq 1 ]; then
+    echo "found download in progress .."
+    ./50downloadHDD.sh
     exit 1
   fi
 
   # HDD is empty - ask how to get Blockchain
-  _temp="./download/dialog.$$"
-  dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-  --menu "You need a copy of the Blockchan - you have 3 options:" 13 75 4 \
-  1 "DOWNLOAD --> TESTNET + MAINNET thru torrent (RECOMMENDED 8h)" \
-  2 "COPY     --> TESTNET + MAINNET from another HDD (TRICKY 3h)" \
-  3 "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK)" 2>$_temp
-  opt=${?}
+
+  #Bitcoin
+  if [ ${network} = "bitcoin" ]; then
+    echo "Bitcoin Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
+    --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
+    T "TORRENT  --> TESTNET + MAINNET thru Torrent (DEFAULT)" \
+    D "DOWNLOAD --> TESTNET + MAINNET per FTP (FALLBACK)" \
+    C "COPY     --> TESTNET + MAINNET from another HDD (TRICKY+FAST)" \
+    S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+
+  # Litecoin
+  elif [ ${network} = "litecoin" ]; then
+    echo "Litecoin Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
+    --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
+    T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
+    D "DOWNLOAD --> MAINNET per FTP (FALLBACK)" \
+    C "COPY     --> MAINNET from another HDD (TRICKY+FAST)" \
+    S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+
+  # error
+  else
+    echo "FAIL Unkown network(${network})"
+    exit 1
+   fi
+
+  # set SetupState
+  echo "50" > /home/admin/.setup
+
   clear
-  if [ $opt != 0 ]; then rm $_temp; exit; fi
-  menuitem=`cat $_temp`
-  rm $_temp
   case $menuitem in
-          3)
+          T)
+              ./50torrentHDD.sh
+              ;;
+          C)
+              ./50copyHDD.sh
+              ;;
+          S)
               ./50syncHDD.sh
               ;;
-          1)
+          D)
               ./50downloadHDD.sh
-              ;;
-          2)
-              ./50copyHDD.sh
               ;;
   esac
   exit 1
 
 fi
+
 
 # the HDD is not mounted --> very early stage of setup
 
@@ -89,9 +188,8 @@ if [ ! -f "home/admin/.setup" ]; then
   echo "*** Update System ***"
   sudo apt-mark hold raspberrypi-bootloader
   sudo apt-get update
-  sudo apt-get upgrade -f -y --force-yes
+  sudo apt-get upgrade -f -y --allow-change-held-packages
   echo "OK - System is now up to date"
-
 fi
 
 # the HDD is already ext4 formated and called blockchain

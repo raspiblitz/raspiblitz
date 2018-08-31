@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# load network
+network=`cat .network`
+
 echo ""
 echo "*** Check 1st HDD ***"
 sleep 4
@@ -19,7 +23,7 @@ echo "Like this one: https://www.amazon.de/dp/B00ZJBIHVY"
 echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
 echo ""
 echo "You can use the HDD of another RaspiBlitz for this."
-echo "The 2nd HDD needs to be formated Ext4/exFAT and the folder 'bitcoin' is in root of HDD."
+echo "The 2nd HDD needs to be formated Ext4/exFAT and the folder '${network}' is in root of HDD."
 echo ""
 echo "**********************************"
 echo "--> Please connect now the 2nd HDD"
@@ -72,18 +76,18 @@ echo ""
 echo "*** Copy Blockchain ***"
 sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin /mnt/hdd/
 echo "cleaning up - ok if files do not exists"
-sudo rm /mnt/hdd/bitcoin/bitcoin.conf
-sudo rm /mnt/hdd/bitcoin/bitcoin.pid
-sudo rm /mnt/hdd/bitcoin/banlist.dat
-sudo rm /mnt/hdd/bitcoin/debug.log
-sudo rm /mnt/hdd/bitcoin/fee_estimates.dat
-sudo rm /mnt/hdd/bitcoin/mempool.dat
-sudo rm /mnt/hdd/bitcoin/peers.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/banlist.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/debug.log
-sudo rm /mnt/hdd/bitcoin/testnet3/fee_estimates.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/mempool.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/peers.dat
+sudo rm /mnt/hdd/${network}/${network}.conf
+sudo rm /mnt/hdd/${network}/${network}.pid
+sudo rm /mnt/hdd/${network}/banlist.dat
+sudo rm /mnt/hdd/${network}/debug.log
+sudo rm /mnt/hdd/${network}/fee_estimates.dat
+sudo rm /mnt/hdd/${network}/mempool.dat
+sudo rm /mnt/hdd/${network}/peers.dat
+sudo rm /mnt/hdd/${network}/testnet3/banlist.dat
+sudo rm /mnt/hdd/${network}/testnet3/debug.log
+sudo rm /mnt/hdd/${network}/testnet3/fee_estimates.dat
+sudo rm /mnt/hdd/${network}/testnet3/mempool.dat
+sudo rm /mnt/hdd/${network}/testnet3/peers.dat
 sudo umount -l /mnt/genesis
 echo "OK - Copy done :)"
 echo ""

@@ -1,13 +1,28 @@
 #!/bin/bash
 
 ## default menu settings
-HEIGHT=11
+HEIGHT=13
 WIDTH=64
-CHOICE_HEIGHT=4
+CHOICE_HEIGHT=6
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
 OPTIONS=()
+
+## get basic info (its OK if not set yet)
+
+# get name
+name=`sudo cat /home/admin/.hostname`
+
+# get network
+network=`sudo cat /home/admin/.network`
+
+# get chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
 
 ## get actual setup state
 setupState=0;
@@ -19,17 +34,25 @@ if [ ${setupState} -eq 0 ]; then
     # start setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nYou need to setup and init Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Start the Setup of your RaspiBlitz")
-    HEIGHT=10
+    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+    HEIGHT=11
 
 elif [ ${setupState} -lt 100 ]; then
 
+    # make sure to have a init pause aufter fresh boot
+    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
+    waittimesecs=$(expr 150 - $uptimesecs)
+    if [ ${waittimesecs} -gt 0 ]; then
+      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
+    fi
+
     # continue setup
-    BACKTITLE="RaspiBlitz - Setup"
+    BACKTITLE="${name} / ${network} / ${chain}"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nContinue setup and init of Bitcoin and Lightning services: \n "
-    OPTIONS+=(1 "Continue Setup of your RaspiBlitz")
+    MENU="\nThe setup process is not finished yet: \n "
+    OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
     HEIGHT=10
 
 else
@@ -38,25 +61,56 @@ else
     uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
     waittimesecs=$(expr 150 - $uptimesecs)
     if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for Bitcoin to startup and init ..." 8 58 ${waittimesecs}
+      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
     fi
 
     # MAIN MENU AFTER SETUP
 
-    chain=$(bitcoin-cli -datadir=/home/bitcoin/.bitcoin getblockchaininfo | jq -r '.chain')
-    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/bitcoin/${chain}net/lnd.log | grep -c unlock)
+    BACKTITLE="${name} / ${network} / ${chain}"
+
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
 
       # LOCK SCREEN
       MENU="!!! YOUR WALLET IS LOCKED !!!"
-      OPTIONS+=(X "Unlock your Lightning Wallet with 'lncli unlock'")
+      OPTIONS+=(U "Unlock your Lightning Wallet with 'lncli unlock'")
 
     else
 
-     # REGULAR MENU
+      switchOption="to MAINNET"
+      if [ "${chain}" = "main" ]; then
+        switchOption="back to TESTNET"
+      fi
+
+      # Basic Options
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
-		lnbalance "Detailed Wallet Balances" \
-        lnchannels "Lightning Channel List")
+        FUNDING "Fund your on-chain Wallet" \
+        CASHOUT "Remove Funds from on-chain Wallet" \
+        CONNECT "Connect to a Peer" \
+        CHANNEL "Open a Channel with Peer" \
+        SEND "Pay an Invoice/PaymentRequest" \
+        RECEIVE "Create Invoice/PaymentRequest" \
+        lnbalance "Detailed Wallet Balances" \
+        lnchannels "Lightning Channel List" \
+        MOBILE "Connect Mobile Wallet")
+
+      # Depending Options
+      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} listchannels 2>/dev/null | grep chan_id -c)
+      if [ ${openChannels} -gt 0 ]; then
+        OPTIONS+=(CLOSEALL "Close all open Channels")  
+      fi
+      if [ "${network}" = "bitcoin" ]; then
+        OPTIONS+=(SWITCH "Switch ${switchOption}")  
+      fi
+      torInstalled=$(sudo ls /mnt/hdd/tor/lnd9735/hostname 2>/dev/null | grep 'hostname' -c)
+      if [ ${torInstalled} -eq 0 ]; then
+        OPTIONS+=(TOR "Make reachable thru TOR")   
+      else
+        OPTIONS+=(NYX "Monitor TOR")  
+      fi
+
+      # final Options
+      OPTIONS+=(X "Console / Terminal")   
 
     fi
 
@@ -75,7 +129,17 @@ case $CHOICE in
         CLOSE)
             exit 1;
             ;;
-        1)  # SETUP
+        BITCOIN)
+            echo "bitcoin" > /home/admin/.network
+            ./10setupBlitz.sh
+            exit 1;
+            ;;
+        LITECOIN)
+            echo "litecoin" > /home/admin/.network
+            ./10setupBlitz.sh
+            exit 1;
+            ;;
+        CONTINUE)
             ./10setupBlitz.sh
             exit 1;
             ;;
@@ -91,13 +155,81 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;
+        NYX)
+            sudo nyx
+            ./00mainMenu.sh
+            ;;
         lnchannels)
             lnchannels
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
             ;;
-        X) # unlock
+        CONNECT)
+            ./BBconnectPeer.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;      
+        FUNDING)
+            ./BBfundWallet.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        CASHOUT)
+            ./BBcashoutWallet.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        CHANNEL)
+            ./BBopenChannel.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        SEND)
+            ./BBpayInvoice.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        RECEIVE)
+            ./BBcreateInvoice.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        CLOSEALL)
+            ./BBcloseAllChannels.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;  
+        SWITCH)
+            sudo ./95switchMainTest.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        MOBILE)
+            sudo ./97addMobileWalletShango.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        TOR)
+            sudo ./96addTorService.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        X)
+            lncli -h
+            echo "SUCH WOW come back with ./00mainMenu.sh"
+            ;;           
+        U) # unlock
             ./AAunlockLND.sh
             ./00mainMenu.sh
             ;;
