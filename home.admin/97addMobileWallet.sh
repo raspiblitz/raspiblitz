@@ -4,7 +4,7 @@
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
         SHANGO "Shango Wallet (iOS)")
 
-CHOICE=$(dialog --clear --title "Choose Mobile Wallet" 10 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --title "Choose Mobile Wallet" --menu "" 10 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
