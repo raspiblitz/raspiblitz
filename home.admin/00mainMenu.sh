@@ -214,7 +214,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;   
         MOBILE)
-            sudo ./97addMobileWalletShango.sh
+            sudo ./97addMobileWallet.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
