@@ -20,8 +20,8 @@ echo "Getting github.com/LN-Zap/zapconnect ..."
 go get -d github.com/LN-Zap/zapconnect
 echo ""
 echo "Building github.com/LN-Zap/zapconnect ..."
-cd ~/go/src/github.com/LN-Zap/zapconnect/
-go build -o ~/go/src/github.com/LN-Zap/zapconnect/zapconnect
+cd /home/admin/go/src/github.com/LN-Zap/zapconnect/
+go build -o /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect
 
 
 clear
@@ -46,7 +46,7 @@ clear
 echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 # If you drop the -i parameter, zapconnect will use the external IP. 
-~/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
+/home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
 read key
