@@ -251,14 +251,11 @@ BTCPay Server is a solution to be your own payment processor to accept Lightning
 
 Make sure you have these setting in: `<installdir>/NBXplorer/.nbxplorer/Main/settings.config`
 
-`btc.rpc.url=http://[YOUR RASPIBLITZ IP/DOMAIN]:8332/
-
+```btc.rpc.url=http://[YOUR RASPIBLITZ IP/DOMAIN]:8332/
 btc.rpc.user=raspibolt
+btc.rpc.password=[PASSWORD B]```
 
-btc.rpc.password=[PASSWORD B]`
-
-Command to start NBExplorer:
-`./run.sh --datadir /opt/NBXplorer/.nbxplorer --btcnodeendpoint <raspiblitz-ip> &`
+Command to start NBExplorer: `./run.sh --datadir /opt/NBXplorer/.nbxplorer --btcnodeendpoint <raspiblitz-ip> &`
 
 Start btcpayserver as normal, it will connect to raspiblitz thru NBXplorer
 
@@ -266,13 +263,10 @@ Start btcpayserver as normal, it will connect to raspiblitz thru NBXplorer
 
 Make sure you have this in: `/mnt/hdd/bitcoin/bitcoin.conf`
 
-`rpcallowip=[BTCPAYSERVER IP]/255.255.255.0
-
+```rpcallowip=[BTCPAYSERVER IP]/255.255.255.0
 whitelist=[BTCPAYSERVER IP]
-
 rpcuser=raspibolt
-
-rpcpassword=[PASSWORD B]`
+rpcpassword=[PASSWORD B]```
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
