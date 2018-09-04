@@ -2,7 +2,7 @@
 
 # Basic Options
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
-        SHANGO "Shango Wallet (iOS)")
+        SHANGO "Shango Wallet (iOS/Android)")
 
 CHOICE=$(dialog --clear --title "Choose Mobile Wallet" --menu "" 10 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
