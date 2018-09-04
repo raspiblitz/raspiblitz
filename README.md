@@ -169,7 +169,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ![ExtraPower](pictures/extrapower.png)
 
-**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
+**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finishHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
 
 #### Lightning
 
