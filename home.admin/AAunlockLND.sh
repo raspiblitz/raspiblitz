@@ -8,6 +8,7 @@ echo "**************************************************************************
 echo "Unlock LND Wallet --> lncli --chain=${network} unlock"
 echo "****************************************************************************"
 echo "HELP: Enter your PASSWORD C"
+echo "You may wait some seconds until you get asked for password."
 echo "****************************************************************************"
 while :
   do
