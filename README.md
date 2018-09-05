@@ -149,7 +149,7 @@ The option "SYNC" should just be use as a fallback. So normally you have the fol
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP is the torrent if not working for you. To stop torrent and choose another option use CTRL+z and then start './10setupBlitz.sh' from terminal.
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP if the torrent is not working for you. To stop torrent and choose another option use CTRL+z and then start './10setupBlitz.sh' from the terminal.
 
 #### Copy the Blockchain
 
