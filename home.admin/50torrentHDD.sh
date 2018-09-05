@@ -27,6 +27,7 @@ targetSize=$size
 maxTimeoutLoops=100000
 command="sudo lftp -c 'torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye'"
 
+sudo apt-get install lftp -y
 echo "command to execute:"
 echo ${command}
 echo "Press key to continue"
