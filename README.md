@@ -213,9 +213,9 @@ And if you scroll down .. you see even more feature options:
 
 ### Features
 
-But you manually extened your RaspiBlitz with features listed in the RaspiBlot Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
+But you manually extened your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
 
-Already integrated features of the RaspiBlitz are/willbe listed as part of the main menu after connecting per ssh with the admin user.
+Already integrated features of the RaspiBlitz are/will be listed as part of the main menu after connecting via ssh as admin user.
 
 *Background: The script `91addBonus.sh` is the place to put your setup of features you want to add to RaspiBlitz. Its run at the end of the automated setup process before final reboot. To make the feature executable for the user, add a new option to the `00mainMenu.sh`*
 
