@@ -24,7 +24,7 @@ echo ""
 # check if lftp is running in background
 pid=$(pgrep lftp | head -n 1)
 echo "${pid}"
-if [ ${isRunning} -eq 0 ]; then
+if [ ${#pid} -eq 0 ]; then
   echo "Starting lftp"
   sudo mkdir ${targetDir} 2>/dev/null
   sudo lftp -c "torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye"
