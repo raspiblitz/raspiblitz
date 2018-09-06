@@ -35,6 +35,7 @@ echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
   sudo mkdir ${targetDir} 2>/dev/null
+  echo "screen -S ${name} -dm ${command}"
   screen -S ${name} -dm ${command}
 else
   echo "Continue screen session"
