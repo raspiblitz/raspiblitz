@@ -12,6 +12,10 @@ litecoinTorrentsize=10240000
 # load network
 network=`cat .network`
 
+# make sure lftp is available
+sudo apt-get install lftp -y
+echo ""
+
 # settings based on network
 torrent=$bitcoinTorrent
 size=$bitcoinTorrentsize
