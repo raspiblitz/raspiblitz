@@ -25,7 +25,7 @@ name="torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
 maxTimeoutLoops=100000
-command="sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\""
+command="bash -c 'sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\"'"
 
 # starting session if needed
 echo "checking if ${name} has a running screen session"
