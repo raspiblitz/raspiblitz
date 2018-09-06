@@ -21,7 +21,7 @@ if [ "$network" = "litecoin" ]; then
 fi
 
 # screen background monitoring settings
-name="Torrent"
+name="torrent"
 targetDir="/mnt/hdd/torrent/"
 targetSize=$size
 maxTimeoutLoops=100000
