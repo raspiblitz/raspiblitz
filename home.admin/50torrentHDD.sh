@@ -124,7 +124,7 @@ if [ ${isRunning} -eq 1 ]; then
   echo "killing screen session PID(${sessionPID})"
   # kill all child processes of screen sceesion
   sudo pkill -P ${sessionPID}
-  echo "proccesses klilled"
+  echo "proccesses killed"
   sleep 3
  # tell the screen session to quit and wait a bit
   screen -S ${name} -X quit 1>/dev/null
