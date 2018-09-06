@@ -25,7 +25,8 @@ name="torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
 maxTimeoutLoops=100000
-command="bash -c 'sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\"'"
+#command="bash -c 'sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\"'"
+command="bash -c 'sudo ls'"
 
 # starting session if needed
 echo "checking if ${name} has a running screen session"
@@ -94,7 +95,7 @@ while :
     echo "Its OK to close terminal now and SSH back in later."
     echo "****************************************************"
     screen -S ${name} -X hardcopy .${name}.out
-    newScreenDump=$(cat .Download.out | grep . | tail -8)
+    newScreenDump=$(cat .${name}.out | grep . | tail -8)
     if [ ${#newScreenDump} -gt 0 ]; then
       screenDump=$newScreenDump
     fi
