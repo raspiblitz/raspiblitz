@@ -21,12 +21,11 @@ if [ "$network" = "litecoin" ]; then
 fi
 
 # screen background monitoring settings
-name="torrent"
+name="Torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
 maxTimeoutLoops=100000
-#command="bash -c 'sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\"'"
-command="bash -c 'sudo ls'"
+command="sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\""
 
 # starting session if needed
 echo "checking if ${name} has a running screen session"
@@ -36,8 +35,9 @@ echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
   sudo mkdir ${targetDir} 2>/dev/null
-  echo "screen -S ${name} -dm ${command}"
-  screen -S ${name} -dm ${command}
+  screenCommand="screen -S ${name} -L screen.log -dm ${command}"
+  echo "${screenCommand}"
+  bash -c "${screenCommand}"
 else
   echo "Continue screen session"
 fi
@@ -123,7 +123,7 @@ if [ ${isRunning} -eq 1 ]; then
   sessionPID=$(screen -ls | grep "${name}" | cut -d "." -f1 | xargs)
   echo "killing screen session PID(${sessionPID})"
   # kill all child processes of screen sceesion
-  pkill -P ${sessionPID}
+  sudo pkill -P ${sessionPID}
   echo "proccesses klilled"
   sleep 3
  # tell the screen session to quit and wait a bit
