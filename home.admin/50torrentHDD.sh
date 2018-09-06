@@ -22,7 +22,7 @@ fi
 
 # screen background monitoring settings
 name="torrent"
-targetDir="/mnt/hdd/torrent/"
+targetDir="/mnt/hdd/torrent"
 targetSize=$size
 maxTimeoutLoops=100000
 command="sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\""
@@ -134,7 +134,7 @@ if [ ${isRunning} -eq 1 ]; then
 fi
 
 # the path torrent will download to
-targetPath="${targetDir}${torrent}"
+targetPath="${targetDir}/${torrent}"
 echo "path to downloaded data is ${targetPath}"
 
 # calculate progress and write it to file for LCD to read
