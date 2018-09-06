@@ -145,9 +145,6 @@ if [ ${#finalSize} -eq 0 ]; then
 fi
 echo "final size is ${finalSize} of targeted size ${targetSize}"
 
-echo "PRESS KEY TO CONTINUE"
-read key
-
 # check result
 if [ ${finalSize} -lt ${targetSize} ]; then
  
