@@ -179,7 +179,7 @@ echo "*** LITECOIN ***"
 # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
 # set version (change if update is available)
-litecoinVersion="0.16.0"
+litecoinVersion="0.16.2"
 cd /home/admin/download
 sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo -u admin tar -xvf litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
