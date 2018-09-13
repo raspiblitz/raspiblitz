@@ -72,7 +72,7 @@ while :
       freshSize=0
     fi
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > '.${name}.progress'
+    echo $progress > ".${name}.progress"
 
     # detect if since last loop any progress occured
     if [ ${actualSize} -eq ${freshSize} ]; then
