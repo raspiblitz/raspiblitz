@@ -32,7 +32,9 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 **Total Price: 127,31 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [FR](shoppinglist_fr.md) ] [ [China (Taobao/T-Mall](shoppinglist_cn.md) ]
+[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [FR](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ]
+
+Shopping list China refers to Taobao/T-Mall.
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
