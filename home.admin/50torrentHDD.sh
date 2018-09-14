@@ -12,8 +12,8 @@ litecoinTorrentsize=10240000
 # load network
 network=`cat .network`
 
-# make sure lftp is available
-sudo apt-get install lftp -y
+# make sure rtorrent is available
+sudo apt-get install rtorrent -y
 echo ""
 
 # settings based on network
@@ -28,10 +28,10 @@ fi
 name="Torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
-maxTimeoutLoops=100000
-command="sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\""
+sessionDir="/home/admin/.rtorrent.session/"
+command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} ./home/admin/assets/${torrent}.torrent"
 
-# starting session if needed
+# starting screen session if needed
 echo "checking if ${name} has a running screen session"
 screen -wipe 1>/dev/null
 isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
@@ -39,6 +39,7 @@ echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
   sudo mkdir ${targetDir} 2>/dev/null
+  sudo mkdir ${sessionDir} 2>/dev/null
   screenCommand="screen -S ${name} -L screen.log -dm ${command}"
   echo "${screenCommand}"
   bash -c "${screenCommand}"
@@ -47,20 +48,17 @@ else
 fi
 sleep 3
 
-# monitor session
+# monitor screen session
 screenDump="... started ..."
 actualSize=0
-timeout=1
-timeoutInfo="-"
+torrentComplete=0
 while :
   do
 
-    # check if session is still running
-    screen -wipe 1>/dev/null
-    isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
-    if [ ${isRunning} -eq 0 ]; then
-      timeout=0
-      echo "OK - session finished"
+    # check if completed by inspecting rtorrent session files
+    torrentComplete=$(cat /home/admin/.rtorrent.session/*.torrent.libtorrent_resume | grep ':completei1' -c)
+    if [ ${torrentComplete} -eq 1 ]; then
+      echo "OK - torrent finished"
       break
     fi
 
@@ -72,29 +70,13 @@ while :
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
     echo $progress > ".${name}.progress"
 
-    # detect if since last loop any progress occured
-    #if [ ${actualSize} -eq ${freshSize} ]; then
-    #  timeoutInfo="${timeout}/${maxTimeoutLoops}"
-    #  timeout=$(( $timeout + 1 ))
-    #else
-    #  timeout=1
-    #  timeoutInfo="no timeout detected"
-    #fi
-    
     actualSize=$freshSize
-
-    # detect if mx timeout loop limit is reached
-    #if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
-    #  echo "FAIL - download hit timeout"
-    #  break
-    #fi
 
     # display info screen
     clear
     echo "****************************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    #echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
