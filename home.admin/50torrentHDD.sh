@@ -70,30 +70,31 @@ while :
       freshSize=0
     fi
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > '.${name}.progress'
+    echo $progress > ".${name}.progress"
 
     # detect if since last loop any progress occured
-    if [ ${actualSize} -eq ${freshSize} ]; then
-      timeoutInfo="${timeout}/${maxTimeoutLoops}"
-      timeout=$(( $timeout + 1 ))
-    else
-      timeout=1
-      timeoutInfo="no timeout detected"
-    fi
+    #if [ ${actualSize} -eq ${freshSize} ]; then
+    #  timeoutInfo="${timeout}/${maxTimeoutLoops}"
+    #  timeout=$(( $timeout + 1 ))
+    #else
+    #  timeout=1
+    #  timeoutInfo="no timeout detected"
+    #fi
+    
     actualSize=$freshSize
 
     # detect if mx timeout loop limit is reached
-    if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
-      echo "FAIL - download hit timeout"
-      break
-    fi
+    #if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
+    #  echo "FAIL - download hit timeout"
+    #  break
+    #fi
 
     # display info screen
     clear
     echo "****************************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    echo "Timeout: ${timeoutInfo}"
+    #echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
