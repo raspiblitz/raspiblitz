@@ -14,6 +14,10 @@ litecoinSize=19180000 # 19184960-tolerance
 # load network
 network=`cat .network`
 
+# make sure lftp is available
+sudo apt-get install lftp -y
+echo ""
+
 # settings based on network
 list=$bitcoinList
 url=$bitcoinUrl
@@ -68,7 +72,7 @@ while :
       freshSize=0
     fi
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > '.${name}.progress'
+    echo $progress > ".${name}.progress"
 
     # detect if since last loop any progress occured
     if [ ${actualSize} -eq ${freshSize} ]; then
@@ -97,7 +101,7 @@ while :
     echo "Its OK to close terminal now and SSH back in later."
     echo "****************************************************"
     screen -S ${name} -X hardcopy .${name}.out
-    newScreenDump=$(cat .Download.out | grep . | tail -8)
+    newScreenDump=$(cat .${name}.out | grep . | tail -8)
     if [ ${#newScreenDump} -gt 0 ]; then
       screenDump=$newScreenDump
     fi
