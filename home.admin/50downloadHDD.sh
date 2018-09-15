@@ -15,10 +15,6 @@ litecoinSize=19180000 # 19184960-tolerance
 # load network
 network=`cat .network`
 
-# make sure lftp is available
-# sudo apt-get install lftp -y
-# echo ""
-
 # settings based on network
 list=$bitcoinList
 url=$bitcoinUrl
@@ -33,7 +29,6 @@ fi
 name="Download"
 targetDir="/mnt/hdd/download/"
 targetSize=$size
-maxTimeoutLoops=100000
 command="sudo wget -c -r -P ${targetDir} -q --show-progress ${url}"
 
 # starting session if needed
@@ -53,8 +48,6 @@ sleep 3
 # monitor session
 screenDump="... started ..."
 actualSize=0
-timeout=1
-timeoutInfo="-"
 while :
   do
 
@@ -62,7 +55,6 @@ while :
     screen -wipe 1>/dev/null
     isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
     if [ ${isRunning} -eq 0 ]; then
-      timeout=0
       echo "OK - session finished"
       break
     fi
@@ -75,28 +67,13 @@ while :
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
     echo $progress > ".${name}.progress"
 
-    # detect if since last loop any progress occured
-    if [ ${actualSize} -eq ${freshSize} ]; then
-      timeoutInfo="${timeout}/${maxTimeoutLoops}"
-      timeout=$(( $timeout + 1 ))
-    else
-      timeout=1
-      timeoutInfo="no timeout detected"
-    fi
     actualSize=$freshSize
-
-    # detect if mx timeout loop limit is reached
-    if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
-      echo "FAIL - download hit timeout"
-      break
-    fi
 
     # display info screen
     clear
     echo "****************************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
