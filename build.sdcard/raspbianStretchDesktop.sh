@@ -118,7 +118,7 @@ cd /home/admin/download
 
 # download resources
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc3/bitcoin-${bitcoinVersion}rc3-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
+if [ ! -f "./bitcoin-${bitcoinVersion}rc3-arm-linux-gnueabihf.tar.gz" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
