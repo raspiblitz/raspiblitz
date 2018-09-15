@@ -3,7 +3,7 @@ echo ""
 
 # *** BITCOIN Torrent ***
 bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
-bitcoinTorrentsize=231230512
+bitcoinTorrentsize=231230404
                    
 # *** LITECOIN Torrent ***
 litecoinTorrent="raspiblitz-litecoin-2018-07-29"
@@ -152,7 +152,7 @@ else
   echo "*** Moving/Copying Files ***"
   echo "START"
   date +%s
-  sudo cp ${targetPath} /mnt/hdd/${network}
+  sudo cp -r ${targetPath} /mnt/hdd/${network}
   echo "OK"
   date +%s
 
