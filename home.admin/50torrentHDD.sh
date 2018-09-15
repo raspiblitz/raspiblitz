@@ -149,10 +149,10 @@ if [ ${finalSize} -lt ${targetSize} ]; then
 else
 
   # Download worked
-  echo "*** Moving/Copying Files ***"
+  echo "*** Moving Files ***"
   echo "START"
   date +%s
-  sudo cp -r ${targetPath} /mnt/hdd/${network}
+  sudo mv ${targetPath} /mnt/hdd/${network}
   echo "OK"
   date +%s
 
