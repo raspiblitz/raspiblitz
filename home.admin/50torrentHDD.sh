@@ -148,7 +148,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   
 else
 
-  # Download worked
+  # Download worked / just move, copy on USB2 >4h
   echo "*** Moving Files ***"
   echo "START"
   date +%s
