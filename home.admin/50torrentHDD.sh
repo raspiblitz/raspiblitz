@@ -56,7 +56,7 @@ while :
   do
 
     # check if completed by inspecting rtorrent session files
-    torrentComplete=$(cat /home/admin/.rtorrent.session/*.torrent.libtorrent_resume | grep ':completei1' -c)
+    torrentComplete=$(cat /home/admin/.rtorrent.session/*.torrent.rtorrent | grep ':completei1' -c)
     if [ ${torrentComplete} -eq 1 ]; then
       echo "OK - torrent finished"
       break
