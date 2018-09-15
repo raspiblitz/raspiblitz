@@ -29,7 +29,7 @@ name="Torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
 sessionDir="/home/admin/.rtorrent.session/"
-command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} ./home/admin/assets/${torrent}.torrent"
+command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} /home/admin/assets/${torrent}.torrent"
 
 # starting screen session if needed
 echo "checking if ${name} has a running screen session"
