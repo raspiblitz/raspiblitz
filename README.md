@@ -36,6 +36,8 @@ Amazon shopping lists for different countries:
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
+The shopping list for China refers to Taobao/T-Mall.
+
 ### Optional Hardware
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
