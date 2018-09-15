@@ -149,9 +149,12 @@ if [ ${finalSize} -lt ${targetSize} ]; then
 else
 
   # Download worked
-  echo "*** Moving Files ***"
-  sudo mv ${targetPath} /mnt/hdd/${network}
+  echo "*** Moving/Copying Files ***"
+  echo "START"
+  date +%s
+  sudo cp ${targetPath} /mnt/hdd/${network}
   echo "OK"
+  date +%s
 
   # continue setup
   ./60finishHDD.sh
