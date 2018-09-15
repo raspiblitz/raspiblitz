@@ -16,8 +16,8 @@ litecoinSize=19180000 # 19184960-tolerance
 network=`cat .network`
 
 # make sure lftp is available
-sudo apt-get install lftp -y
-echo ""
+# sudo apt-get install lftp -y
+# echo ""
 
 # settings based on network
 list=$bitcoinList
