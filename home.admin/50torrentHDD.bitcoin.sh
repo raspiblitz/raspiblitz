@@ -96,7 +96,7 @@ while :
     torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
     if [ ${torrentComplete1} -eq 0 ]; then
       screen -S blockchain -X hardcopy .blockchain.out
-      newScreenDump=$(cat .blockchain.out | head -6)
+      newScreenDump=$(cat .blockchain.out | head -6 | tail -2 )
       if [ ${#newScreenDump} -gt 0 ]; then
         screenDump1=$newScreenDump
       fi
@@ -111,7 +111,7 @@ while :
     torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
     if [ ${torrentComplete2} -eq 0 ]; then
       screen -S update -X hardcopy .update.out
-      newScreenDump=$(cat .update.out| head -6)
+      newScreenDump=$(cat .update.out| head -6 | tail -2 )
       if [ ${#newScreenDump} -gt 0 ]; then
         screenDump2=$newScreenDump
       fi
