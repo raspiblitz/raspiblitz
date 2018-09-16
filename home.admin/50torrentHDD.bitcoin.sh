@@ -13,6 +13,7 @@ echo ""
 
 targetDir="/mnt/hdd/getbitcoinblockchain"
 sessionDir="/home/admin/.rtorrent.session"
+sudo mkdir ${sessionDir} 2>/dev/null
 
 ##############################
 # CHECK TORRENT 1 "BLOCKCHAIN"
@@ -70,7 +71,7 @@ fi
 # MONITOR PROGRESS
 ##############################
 
-sleep 10
+sleep 3
 
 # monitor screen session
 screenDump1="... started ..."
@@ -95,7 +96,7 @@ while :
     torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
     if [ ${torrentComplete1} -eq 0 ]; then
       screen -S blockchain -X hardcopy .blockchain.out
-      newScreenDump=$(cat .blockchain.out | tail -6)
+      newScreenDump=$(cat .blockchain.out | head -6)
       if [ ${#newScreenDump} -gt 0 ]; then
         screenDump1=$newScreenDump
       fi
@@ -110,7 +111,7 @@ while :
     torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
     if [ ${torrentComplete2} -eq 0 ]; then
       screen -S update -X hardcopy .update.out
-      newScreenDump=$(cat .update.out| tail -6)
+      newScreenDump=$(cat .update.out| head -6)
       if [ ${#newScreenDump} -gt 0 ]; then
         screenDump2=$newScreenDump
       fi
