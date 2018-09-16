@@ -36,6 +36,8 @@ Amazon shopping lists for different countries:
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
+The shopping list for China refers to Taobao/T-Mall.
+
 ### Optional Hardware
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
@@ -310,7 +312,7 @@ The whole build process takes a while. And the end the LCD drives get installed 
 At the beginning of this README you can find the newest SD card we provide. Or you can build the newest SD card image yourself like in the chapter above. The SD card image is used to setup a fresh install of the RaspiBlitz. So what to do if you already have an older version running and you want to upgrade?
 
 Until we reach version 1.0 the update process will be a bit rough .. so what you do is:
-* close all open lightning channels you have (`lncli --force closeallchannels`)
+* close all open lightning channels you have (`lncli closeallchannels --force`)
 * wait until all closing transactions are done
 * move all on-chain funds to a wallet outsie raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
 * run the script `./XXcleanHDD.sh` in admin home directory (Blockchain will stay on HDD)
