@@ -70,7 +70,7 @@ fi
 # MONITOR PROGRESS
 ##############################
 
-sleep 3
+sleep 10
 
 # monitor screen session
 screenDump1="... started ..."
@@ -182,6 +182,30 @@ if [ ${isRunning} -eq 1 ]; then
   echo "cleaning screen"
   screen -wipe 1>/dev/null
   sleep 3
+fi
+
+# check result
+torrentComplete=0
+torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+if [ ${torrentComplete1} -eq 1 ]; then
+  if [ ${torrentComplete2} -eq 1 ]; then
+    torrentComplete=1
+  fi
+fi
+if [ ${torrentComplete} -eq 0 ]; then
+ 
+  # User Cancel --> Torrent incomplete
+  sleep 3
+  echo -ne '\007'
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
+  response=$?
+  case $response in
+    1) sudo rm -rf ${targetDir} ;;
+  esac
+  ./00mainMenu.sh
+  exit 1;
+  
 fi
 
 # the path torrent will download to
