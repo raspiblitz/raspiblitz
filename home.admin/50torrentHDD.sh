@@ -1,6 +1,8 @@
 #!/bin/bash
 echo ""
 
+# --> TODO: Check https://getbitcoinblockchain.com/
+
 # *** BITCOIN Torrent ***
 bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
 bitcoinTorrentsize=231230404
@@ -11,6 +13,13 @@ litecoinTorrentsize=10240000
 
 # load network
 network=`cat .network`
+
+
+# experimental redirect if bitcoin
+if [ "$network" = "bitcoin" ]; then
+  ./50ttorrentHDD.bitcoin.sh
+  exit 1
+fi
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
@@ -30,6 +39,9 @@ targetDir="/mnt/hdd/torrent"
 targetSize=$size
 sessionDir="/home/admin/.rtorrent.session/"
 command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} /home/admin/assets/${torrent}.torrent"
+# 2 screen sessions - differnt rtorrent session dir?
+#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/blockchain.torrent
+#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/update.torrent
 
 # starting screen session if needed
 echo "checking if ${name} has a running screen session"
@@ -105,6 +117,7 @@ rm -f .${name}.out
 rm -f .${name}.progress
 
 # quit session if still running
+isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
 if [ ${isRunning} -eq 1 ]; then
   # get the PID of screen session
   sessionPID=$(screen -ls | grep "${name}" | cut -d "." -f1 | xargs)
