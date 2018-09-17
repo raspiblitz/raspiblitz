@@ -24,7 +24,7 @@ if [ ${mountOK} -eq 1 ]; then
      exit 1
    fi
    sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-   sudo mkdir /home/admin/.${network}
+   sudo mkdir /home/admin/.${network} 2>/dev/null
    sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
    sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network}
    sudo mkdir /mnt/hdd/lnd
