@@ -17,7 +17,7 @@ network=`cat .network`
 
 # experimental redirect if bitcoin
 if [ "$network" = "bitcoin" ]; then
-  ./50torrentHDD.bitcoin.sh
+  ./50torrentHDD.sh
   exit 1
 fi
 

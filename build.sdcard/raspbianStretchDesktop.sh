@@ -244,7 +244,7 @@ echo "*** LND ***"
 ##### Build from Source
 # To quickly catch up get latest patches if needed
 repo="github.com/lightningnetwork/lnd"
-commit="3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
+commit="25145acc46cc5d18e4e348eed097300b1391d2a7"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
 wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
