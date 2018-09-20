@@ -117,13 +117,13 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc3/bitcoin-${bitcoinVersion}rc3-arm-linux-gnueabihf.tar.gz
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/bitcoin-${bitcoinVersion}rc3-arm-linux-gnueabihf.tar.gz
 if [ ! -f "./bitcoin-${bitcoinVersion}rc3-arm-linux-gnueabihf.tar.gz" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc3/SHA256SUMS.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/SHA256SUMS.asc
 if [ ! -f "./SHA256SUMS.asc" ]
 then
     echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
