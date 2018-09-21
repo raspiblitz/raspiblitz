@@ -15,11 +15,11 @@ litecoinTorrentsize=10240000
 network=`cat .network`
 
 
-# experimental redirect if bitcoin
-if [ "$network" = "bitcoin" ]; then
-  ./50torrentHDD.sh
-  exit 1
-fi
+## experimental redirect if bitcoin
+#if [ "$network" = "bitcoin" ]; then
+#  ./50torrentHDD.sh
+#  exit 1
+#fi
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
