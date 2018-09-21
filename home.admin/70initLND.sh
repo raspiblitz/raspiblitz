@@ -40,7 +40,7 @@ while [ ${chainIsReady} -eq 0 ]
     echo "error(${error})"
     if [ ${#error} -gt 0 ]; then
       testnetAdd=""
-      if [ '${chain}' -eq 'test' ]; then
+      if [ "${chain}"  = "test" ]; then
        testnetAdd="testnet3/"
       fi
       sudo tail -n 5 /mnt/hdd/bitcoin/${testnetAdd}debug.log
