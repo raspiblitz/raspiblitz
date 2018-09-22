@@ -150,7 +150,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         lnbalance)
-            lnbalance
+            lnbalance ${network}
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
@@ -160,7 +160,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         lnchannels)
-            lnchannels
+            lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
