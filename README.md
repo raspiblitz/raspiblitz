@@ -314,7 +314,7 @@ At the beginning of this README you can find the newest SD card we provide. Or y
 Until we reach version 1.0 the update process will be a bit rough .. so what you do is:
 * close all open lightning channels you have (`lncli closeallchannels --force`)
 * wait until all closing transactions are done
-* move all on-chain funds to a wallet outsie raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
+* move all on-chain funds to a wallet outside raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
 * run the script `./XXcleanHDD.sh` in admin home directory (Blockchain will stay on HDD)
 * shutdown RaspiBlitz (`sudo shutdown now`)
 * flash SD card with new image
