@@ -43,8 +43,9 @@ fi
 # TODO: check address is valid for network and chain
 
 # TODO: check if fees are getting done right so that transaction will get processed
+amount=$((amount - 10000))
+command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
 
-command="lncli --chain=${network} --conf_target 3 sendcoins  ${address} ${amount}"
 
 clear
 echo "******************************"

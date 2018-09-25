@@ -11,7 +11,7 @@ while [ ${#result} -eq 0 ]
     l1="Please enter the name of your new RaspiBlitz:\n"
     l2="one word, keep characters basic & not too long"
     dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
-    result=$( cat $_temp | tr -d [:space:] )
+    result=$( cat $_temp |  tr -d [:space:] )
     shred $_temp
   done
 
@@ -40,7 +40,7 @@ dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
 
 # get user input
-result=$( cat $_temp | tr -d [:space:] )
+result=$( cat $_temp )
 shred $_temp
 
 # check input (check for more later)
@@ -67,7 +67,7 @@ while [ ${#result} -lt 8 ]
   do
     dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Enter your RPC Password B (min 8 chars):" 9 52 2>$_temp
-    result=$( cat $_temp | tr -d [:space:] )
+    result=$( cat $_temp )
     shred $_temp
   done
 

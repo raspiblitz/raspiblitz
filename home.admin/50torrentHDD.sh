@@ -1,9 +1,11 @@
 #!/bin/bash
 echo ""
 
+# --> TODO: Check https://getbitcoinblockchain.com/
+
 # *** BITCOIN Torrent ***
 bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
-bitcoinTorrentsize=231230512
+bitcoinTorrentsize=231230404
                    
 # *** LITECOIN Torrent ***
 litecoinTorrent="raspiblitz-litecoin-2018-07-29"
@@ -12,8 +14,15 @@ litecoinTorrentsize=10240000
 # load network
 network=`cat .network`
 
-# make sure lftp is available
-sudo apt-get install lftp -y
+
+## experimental redirect if bitcoin
+#if [ "$network" = "bitcoin" ]; then
+#  ./50torrentHDD.sh
+#  exit 1
+#fi
+
+# make sure rtorrent is available
+sudo apt-get install rtorrent -y
 echo ""
 
 # settings based on network
@@ -28,10 +37,13 @@ fi
 name="Torrent"
 targetDir="/mnt/hdd/torrent"
 targetSize=$size
-maxTimeoutLoops=100000
-command="sudo lftp -c \"torrent -O ${targetDir} /home/admin/assets/${torrent}.torrent; bye\""
+sessionDir="/home/admin/.rtorrent.session/"
+command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} /home/admin/assets/${torrent}.torrent"
+# 2 screen sessions - differnt rtorrent session dir?
+#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/blockchain.torrent
+#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/update.torrent
 
-# starting session if needed
+# starting screen session if needed
 echo "checking if ${name} has a running screen session"
 screen -wipe 1>/dev/null
 isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
@@ -39,6 +51,7 @@ echo "isRunning(${isRunning})"
 if [ ${isRunning} -eq 0 ]; then
   echo "Starting screen session"
   sudo mkdir ${targetDir} 2>/dev/null
+  sudo mkdir ${sessionDir} 2>/dev/null
   screenCommand="screen -S ${name} -L screen.log -dm ${command}"
   echo "${screenCommand}"
   bash -c "${screenCommand}"
@@ -47,20 +60,17 @@ else
 fi
 sleep 3
 
-# monitor session
+# monitor screen session
 screenDump="... started ..."
 actualSize=0
-timeout=1
-timeoutInfo="-"
+torrentComplete=0
 while :
   do
 
-    # check if session is still running
-    screen -wipe 1>/dev/null
-    isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
-    if [ ${isRunning} -eq 0 ]; then
-      timeout=0
-      echo "OK - session finished"
+    # check if completed by inspecting rtorrent session files
+    torrentComplete=$(cat /home/admin/.rtorrent.session/*.torrent.rtorrent | grep ':completei1' -c)
+    if [ ${torrentComplete} -eq 1 ]; then
+      echo "OK - torrent finished"
       break
     fi
 
@@ -70,30 +80,15 @@ while :
       freshSize=0
     fi
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > '.${name}.progress'
+    echo $progress > ".${name}.progress"
 
-    # detect if since last loop any progress occured
-    if [ ${actualSize} -eq ${freshSize} ]; then
-      timeoutInfo="${timeout}/${maxTimeoutLoops}"
-      timeout=$(( $timeout + 1 ))
-    else
-      timeout=1
-      timeoutInfo="no timeout detected"
-    fi
     actualSize=$freshSize
-
-    # detect if mx timeout loop limit is reached
-    if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
-      echo "FAIL - download hit timeout"
-      break
-    fi
 
     # display info screen
     clear
     echo "****************************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
@@ -122,6 +117,7 @@ rm -f .${name}.out
 rm -f .${name}.progress
 
 # quit session if still running
+isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
 if [ ${isRunning} -eq 1 ]; then
   # get the PID of screen session
   sessionPID=$(screen -ls | grep "${name}" | cut -d "." -f1 | xargs)
@@ -165,10 +161,13 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   
 else
 
-  # Download worked
+  # Download worked / just move, copy on USB2 >4h
   echo "*** Moving Files ***"
+  echo "START"
+  date +%s
   sudo mv ${targetPath} /mnt/hdd/${network}
   echo "OK"
+  date +%s
 
   # continue setup
   ./60finishHDD.sh

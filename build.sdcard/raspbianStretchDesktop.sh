@@ -10,7 +10,7 @@
 
 echo ""
 echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.9 *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.93*"
 echo "***************************************"
 echo ""
 
@@ -109,7 +109,7 @@ echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.16.2"
+bitcoinVersion="0.17.0"
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
@@ -117,13 +117,13 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
+if [ ! -f "./bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/SHA256SUMS.asc
 if [ ! -f "./SHA256SUMS.asc" ]
 then
     echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
@@ -164,7 +164,7 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # install
-sudo -u admin tar -xvf bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
+sudo -u admin tar -xvf bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
@@ -179,7 +179,7 @@ echo "*** LITECOIN ***"
 # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
 # set version (change if update is available)
-litecoinVersion="0.16.2"
+litecoinVersion="0.16.3"
 cd /home/admin/download
 sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo -u admin tar -xvf litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
@@ -244,7 +244,7 @@ echo "*** LND ***"
 ##### Build from Source
 # To quickly catch up get latest patches if needed
 repo="github.com/lightningnetwork/lnd"
-commit="a1f549754b61c1ba84466f0226997687127f7fc0"
+commit="25145acc46cc5d18e4e348eed097300b1391d2a7"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
 wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
@@ -309,7 +309,7 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 # move files from gitclone
 cd /home/admin/
 sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.sh /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 
