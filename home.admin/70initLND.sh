@@ -31,7 +31,7 @@ echo ""
 chainIsReady=0
 while [ ${chainIsReady} -eq 0 ]
   do
-    echo "*** Test if chaninnetwork is ready ..."
+    echo "*** Test if chainnetwork is ready ..."
     date +%s
     result=$(${network}-cli getblockchaininfo 2>error.out)
     error=`cat error.out`
