@@ -49,10 +49,6 @@ def check_locked(password_file, lnd_cert_file, lnd_macaroon_file, host="localhos
     # check locked
     if verbose:
         print("Checking for lock with the following data:")
-        print("Password File: \033[93m{}\033[00m".format(password_file))
-        print("TLS CERT File: \033[93m{}\033[00m".format(lnd_cert_file))
-        print("Macaroon File: \033[93m{}\033[00m".format(lnd_macaroon_file))
-        print("URL: \033[93mhttps://{}:{}\033[00m".format(host, port))
 
     passwd_b64 = _read_pwd(password_file)
     macaroon_hex_dump = _read_macaroon(lnd_macaroon_file)
@@ -79,10 +75,6 @@ def check_locked(password_file, lnd_cert_file, lnd_macaroon_file, host="localhos
 def unlock(password_file, lnd_cert_file, lnd_macaroon_file, host="localhost", port="8080", verbose=False):
     if verbose:
         print("Trying to unlock with the following data:")
-        print("Password File: \033[93m{}\033[00m".format(password_file))
-        print("TLS CERT File: \033[93m{}\033[00m".format(lnd_cert_file))
-        print("Macaroon File: \033[93m{}\033[00m".format(lnd_macaroon_file))
-        print("URL: \033[93mhttps://{}:{}\033[00m".format(host, port))
 
     passwd_b64 = _read_pwd(password_file)
     macaroon_hex_dump = _read_macaroon(lnd_macaroon_file)
@@ -123,7 +115,7 @@ def main():
                       help="File containing *cleartext* password (default: pwd)")
     parser.add_option("-c", dest="cert", type="string",
                       help="TLS certificate file (e.g. ~/.lnd/tls.cert)"),
-    parser.add_option("-m", dest="macaroon", type="string", default="pwd",
+    parser.add_option("-m", dest="macaroon", type="string",
                       help="Macaroon file (e.g. readonly.macaroon)")
     options, args = parser.parse_args()
 
@@ -141,6 +133,12 @@ def main():
         lnd_macaroon_file = options.macaroon
     else:
         lnd_macaroon_file = "/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon"
+
+    if options.verbose:
+        print("Password File: \033[93m{}\033[00m".format(password_file))
+        print("TLS CERT File: \033[93m{}\033[00m".format(lnd_cert_file))
+        print("Macaroon File: \033[93m{}\033[00m".format(lnd_macaroon_file))
+        print("URL: \033[93mhttps://{}:{}\033[00m".format(options.host, options.port))
 
     if check_locked(password_file, lnd_cert_file, lnd_macaroon_file,
                     host=options.host, port=options.port, verbose=options.verbose):
