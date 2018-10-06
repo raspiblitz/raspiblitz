@@ -63,7 +63,9 @@ def check_locked(password_file, lnd_cert_file, lnd_macaroon_file, host="localhos
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        universal_newlines=True, shell=False, timeout=None)
     if not p.returncode == 0:
-        print("Something went wrong! Returncode\n{}\nStderr: {}".format(p.returncode, p.stderr))
+        print("\033[91mSomething went wrong!\033[00m \033[93mIs lnd running? Wrong credentials?\033[00m")
+        # print("Returncode: {}".format(p.returncode))
+        # print("Stderr: {}".format(p.stderr))
         sys.exit(1)
 
     if p.stdout == "Not Found\n":
@@ -93,7 +95,9 @@ def unlock(password_file, lnd_cert_file, lnd_macaroon_file, host="localhost", po
         return True
     else:
         if verbose:
-            print("Something went wrong! Returncode\n{}\nStderr: {}".format(p.returncode, p.stderr))
+            print("\033[91mSomething went wrong!\033[00m \033[93mIs lnd running? Wrong credentials?\033[00m")
+            # print("Returncode: {}".format(p.returncode))
+            # print("Stderr: {}".format(p.stderr))
         return False
 
 
