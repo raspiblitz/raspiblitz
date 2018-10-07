@@ -4,9 +4,9 @@ echo ""
 # --> TODO: Check https://getbitcoinblockchain.com/
 
 # *** BITCOIN Torrent ***
-bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
-bitcoinTorrentsize=231230404
-                   
+bitcoinTorrent="raspiblitz-bitcoin-2018-10-06"
+bitcoinTorrentsize=259000000
+
 # *** LITECOIN Torrent ***
 litecoinTorrent="raspiblitz-litecoin-2018-07-29"
 litecoinTorrentsize=10240000
