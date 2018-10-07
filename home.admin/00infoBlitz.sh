@@ -135,8 +135,9 @@ torInfo=""
 # Version
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
 # TOR or IP
-onionAddress=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-networkConnections=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | jq -r '.connections')
+networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
+onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
+networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
 if [ ${#onionAddress} -gt 0 ]; then
   # TOR address
