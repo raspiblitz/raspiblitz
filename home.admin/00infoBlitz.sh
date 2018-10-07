@@ -111,22 +111,7 @@ fi
 # get IP address & port
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-public_port=$(cat ${bitcoin_dir}/${network}.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
-if [ "${public_port}" = "" ]; then
-  if [ "${network}" = "litecoin" ]; then
-    if [ "${chain}"  = "test" ]; then
-      public_port=19333
-    else
-      public_port=9333
-    fi
-  else
-    if [ "${chain}"  = "test" ]; then
-      public_port=18333
-    else
-      public_port=8333
-    fi
-  fi
-fi
+public_port="$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | jq -r '.localaddresses [0] .port')"
 
 # CHAIN NETWORK
 public_addr="??"
