@@ -5,6 +5,7 @@ color_red='\033[0;31m'
 color_green='\033[0;32m'
 color_yellow='\033[0;33m'
 color_gray='\033[0;37m'
+color_purple='\033[0;35m'
 
 # load network
 network=`sudo cat /home/admin/.network`
@@ -135,6 +136,8 @@ torInfo=""
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
 # TOR or IP
 onionAddress=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | grep '"address"' | cut -d '"' -f4)
+networkConnections=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | jq -r '.connections')
+networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
 if [ ${#onionAddress} -gt 0 ]; then
   # TOR address
   public_addr="${onionAddress}:${public_port}"
@@ -177,20 +180,22 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
         ln_channelInfo="scanning ${item}/${total}"
-      fi  
+      fi
     fi
-  else 
+  else
     ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
     ln_channelbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
     ln_channels_total="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat"
+    ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
+    ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
   fi
 fi
 
@@ -207,10 +212,10 @@ ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_g
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}
+${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public} ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}v0.5-beta ${ln_baseInfo}
-${color_yellow}               ${color_gray}${ln_channelInfo}
+${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
 " \
