@@ -163,7 +163,7 @@ ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external=""
 
-wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
@@ -177,7 +177,7 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
