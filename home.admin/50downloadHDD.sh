@@ -5,7 +5,7 @@ echo ""
 bitcoinList="" # url to list with other sources
 #bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
 bitcoinUrl="ftp://f00f39c4:download@w0189aba.kasserver.com/"
-bitcoinSize=259000000 # osx kbyte from info - tolerance
+bitcoinSize=253000000 # 253827180-tolerance
 
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
