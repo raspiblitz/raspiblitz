@@ -248,7 +248,7 @@ commit="61e867741926bcb318432a6344b80161fabd1455"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
 wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-if [ ! -f "./go1.10.linux-armv6l.tar.gz" ]
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
