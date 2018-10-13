@@ -14,7 +14,7 @@ updateTorrentFile="raspiblitz-bitcoin1-2018-10-12-update"
 sudo apt-get install rtorrent -y
 echo ""
 
-targetDir="/mnt/hdd/bitcoin"
+targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 sudo mkdir ${sessionDir} 2>/dev/null
 
