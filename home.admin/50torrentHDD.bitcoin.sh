@@ -8,7 +8,7 @@ echo ""
 # in directory /home.admin/assets/
 # WITHOUT THE '.torrent' ENDING
 baseTorrentFile="raspiblitz-bitcoin1-2018-10-12-base"
-updateTorrentFile="raspiblitz-bitcoin1-2018-10-12-update"
+updateTorrentFile="raspiblitz-bitcoin1-2018-10-13-update"
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
