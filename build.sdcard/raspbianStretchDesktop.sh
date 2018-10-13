@@ -10,7 +10,7 @@
 
 echo ""
 echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.93*"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.94*"
 echo "***************************************"
 echo ""
 
@@ -117,13 +117,13 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz" ]
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
+if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/SHA256SUMS.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 if [ ! -f "./SHA256SUMS.asc" ]
 then
     echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
@@ -164,7 +164,7 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # install
-sudo -u admin tar -xvf bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
+sudo -u admin tar -xvf bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
@@ -244,16 +244,16 @@ echo "*** LND ***"
 ##### Build from Source
 # To quickly catch up get latest patches if needed
 repo="github.com/lightningnetwork/lnd"
-commit="25145acc46cc5d18e4e348eed097300b1391d2a7"
+commit="61e867741926bcb318432a6344b80161fabd1455"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
-if [ ! -f "./go1.10.linux-armv6l.tar.gz" ]
+wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.10.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
 sudo chmod 777 /usr/local/gocode

@@ -115,24 +115,10 @@ if [ -n ${btc_path} ]; then
 fi
 
 # get IP address & port
+networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-public_port=$(cat ${bitcoin_dir}/${network}.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
-if [ "${public_port}" = "" ]; then
-  if [ "${network}" = "litecoin" ]; then
-    if [ "${chain}"  = "test" ]; then
-      public_port=19333
-    else
-      public_port=9333
-    fi
-  else
-    if [ "${chain}"  = "test" ]; then
-      public_port=18333
-    else
-      public_port=8333
-    fi
-  fi
-fi
+public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 
 # CHAIN NETWORK
 public_addr="??"
@@ -172,7 +158,7 @@ ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external=""
 
-wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
@@ -186,7 +172,7 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then

@@ -57,7 +57,7 @@ echo "TODO"
 echo "******************************"
 echo "Send ${coininfo} to address --> ${address}"
 if [ "$chain" = "test" ]; then
-  echo "get some testnet coins from https://testnet.manu.backend.hamburg/faucet"
+  echo "get some testnet coins from https://testnet-faucet.mempool.co"
 fi
 echo "Whats next? --> Wait for confirmations. You can use lnbalance for main menu or info on LCD to check if funds have arrived."
 echo ""
