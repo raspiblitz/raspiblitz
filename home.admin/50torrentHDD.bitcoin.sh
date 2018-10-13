@@ -6,8 +6,9 @@ echo ""
 
 # torrent files that are available
 # in directory /home.admin/assets/
-baseTorrentFile="raspiblitz-bitcoin1-2018-10-12-base.torrent"
-updateTorrentFile="raspiblitz-bitcoin1-2018-10-12-update.torrent"
+# WITHOUT THE '.torrent' ENDING
+baseTorrentFile="raspiblitz-bitcoin1-2018-10-12-base"
+updateTorrentFile="raspiblitz-bitcoin1-2018-10-12-update"
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
@@ -33,7 +34,7 @@ if [ ${torrentComplete1} -eq 0 ]; then
 
     # start torrent download in screen session
     echo "starting torrent: blockchain"
-    command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}"
+    command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
     sudo mkdir ${targetDir} 2>/dev/null
     sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
@@ -59,7 +60,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
     
     # start torrent download in screen session
     echo "starting torrent: update"
-    command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}"
+    command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
     sudo mkdir ${targetDir} 2>/dev/null
     sudo mkdir ${sessionDir}/update/ 2>/dev/null
     screenCommand="screen -S update -L screen.log -dm ${command2}"
@@ -212,19 +213,19 @@ if [ ${torrentComplete} -eq 0 ]; then
 fi
 
 # the path torrent will download to
-#targetPath1="${targetDir}/blockchain"
-#targetPath2="${targetDir}/update/blockchain"
+targetPath1="${targetDir}/${baseTorrentFile}"
+targetPath2="${targetDir}/${updateTorrentFile}"
 
 # Download worked / just move, copy on USB2 >4h
-#echo "*** Moving Files ***"
-#echo "can take some minutes ..."
-#date +%s
-#sudo mkdir /mnt/hdd/bitcoin
-#sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
-#sudo cp -r ${targetPath2}/* /mnt/hdd/bitcoin/
-#sudo rm -r ${targetDir}
-#echo "OK"
-#date +%s
+echo "*** Moving Files ***"
+echo "can take some minutes ..."
+date +%s
+sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
+sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
+sudo cp -r ${targetPath2}/* /mnt/hdd/bitcoin/
+sudo rm -r ${targetDir}
+echo "OK"
+date +%s
 
 # continue setup
 ./60finishHDD.sh

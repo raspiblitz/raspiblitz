@@ -102,18 +102,20 @@ scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/indexes
 
-Now create a new torrent-file with your "torrent base directory" as source directory on the packaging computer with a torrent client of your choice (e.g. qTorrent for OSX).
+(Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). For the correct naming see the chapter "Torrent Files Naming Schema" below.
+
+Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
 
 Add this list of trackers to your torrent and start seeding:
 udp://tracker.coppersurfer.tk:6969/announce
 udp://open.demonii.si:1337/announce
 udp://denis.stalker.upeer.me:6969/announce
 
-Name the update torrent file like the naming shema mentioned below.
+Name the new torrent file 
 
 To create the torrent file can take some time. Finally add the generated torrent file to the /home.admin/assets/ of the github and change the name of the updateTorrent varibale file in the script 50torrentHDD.bitcoin.sh
 
-#### Torrent Files Namingschema
+#### Torrent Files Naming Schema
 
 The base torrent file should always have the following naming scheme:
 raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent
