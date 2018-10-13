@@ -9,16 +9,81 @@
 ##########################################################################
 
 echo ""
-echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.94*"
-echo "***************************************"
+echo "****************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.95 *"
+echo "****************************************"
 echo ""
 
 echo ""
-echo "*** RASPI CONFIG ***"
+echo "*** CHECK BASE IMAGE ***"
+
+# armv7=32Bit , armv8=64Bit
+echo "Check if Linux ARM based ..." 
+isARM=$(uname -m | grep -c 'arm')
+if [ ${isARM} -eq 0 ]; then
+  echo "!!! FAIL !!!"
+  echo "Can just build on ARM Linux, not on:"
+  uname -m
+  exit 1
+fi
+echo "OK running on Linux ARM architecture."
+
+# keep in mind thet DietPi for Raspberry is also a stripped down Raspbian
+echo "Detect Base Image ..." 
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+if [ "${baseImage}" = "?" ]; then
+  cat /etc/os-release 2>/dev/null
+  echo "!!! FAIL !!!"
+  echo "Base Image cannot be detected or is not supported."
+  exit 1
+else
+  echo "OK running ${baseImage}"
+fi
+
+# update debian
+echo ""
+echo "*** UPDATE DEBIAN ***"
+sudo apt-get update
+sudo apt-get upgrade -f -y --allow-change-held-packages
+
+# special prepare when DietPi
+if [ "${baseImage}" = "dietpi" ]; then
+  echo ""
+  echo "*** PREPARE DietPi ***"
+  echo "renaming dietpi user ti pi"
+  sudo usermod -l pi dietpi
+  echo "install pip"
+  sudo apt-get update
+  apt-get install -y python-pip
+fi
+
+# special prepare when Raspbian
+if [ "${baseImage}" = "raspbian" ]; then
+  echo ""
+  echo "*** PREPARE Raspbian ***"
+  # do memory split (16MB)
+  sudo raspi-config nonint do_memory_split 16
+  # set to wait until network is available on boot (0 seems to yes)
+  sudo raspi-config nonint do_boot_wait 0
+  # extra: remove some big packages not needed
+  sudo apt-get remove -y --purge libreoffice*
+  sudo apt-get clean
+  sudo apt-get -y autoremove
+fi
+
+echo ""
+echo "*** CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
 
-# set new default passwort for pi and root user
+# set new default passwort for root user
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
@@ -28,12 +93,6 @@ sudo raspi-config nonint do_boot_behaviour B2
 sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-
-# do memory split (16MB)
-sudo raspi-config nonint do_memory_split 16
-
-# set to wait until network is available on boot (0 seems to yes)
-sudo raspi-config nonint do_boot_wait 0
 
 # autodetect and set your timezone
 pip install -U tzupdate
@@ -45,14 +104,7 @@ echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
 sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
-
-# extra: remove some big packages not needed
-sudo apt-get remove -y --purge libreoffice*
-sudo apt-get clean
-sudo apt-get -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
