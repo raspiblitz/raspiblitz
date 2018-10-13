@@ -62,7 +62,9 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo usermod -l pi dietpi
   echo "install pip"
   sudo apt-get update
-  apt-get install -y python-pip
+  sudo apt-get remove -y fail2ban
+  sudo apt-get install -y build-essential
+  sudp apt-get install -y python-pip
 fi
 
 # special prepare when Raspbian
@@ -133,13 +135,6 @@ echo "*** SWAP FILE ***"
 
 sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
-
-echo ""
-echo "*** HARDENING ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
-
-# fail2ban (no config required)
-sudo apt-get install -y fail2ban
 
 echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
@@ -385,6 +380,13 @@ sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
 sudo chmod +x /home/pi/setup.sh
+
+echo ""
+echo "*** HARDENING ***"
+# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
+
+# fail2ban (no config required)
+sudo apt-get install -y fail2ban
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
