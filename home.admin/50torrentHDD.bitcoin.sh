@@ -1,17 +1,19 @@
 #!/bin/bash
 echo ""
 
-# get blockchain from https://getbitcoinblockchain.com torrents.
-# those ore two torrents:
-# 1) "blockchain" = blocks up to last month 
-# 2) "update" = daily block/index update
-# this scripts will download both these torrents
+# see background_downloadBlockchain.md for info
+# why there are two torrent files
+
+# torrent files that are available
+# in directory /home.admin/assets/
+baseTorrentFile="raspiblitz-bitcoin1-2018-10-12-base.torrent"
+updateTorrentFile="raspiblitz-bitcoin1-2018-10-12-update.torrent"
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
 echo ""
 
-targetDir="/mnt/hdd/getbitcoinblockchain"
+targetDir="/mnt/hdd/bitcoin"
 sessionDir="/home/admin/.rtorrent.session"
 sudo mkdir ${sessionDir} 2>/dev/null
 
@@ -19,7 +21,7 @@ sudo mkdir ${sessionDir} 2>/dev/null
 # CHECK TORRENT 1 "BLOCKCHAIN"
 ##############################
 
-echo "*** checking torrent 1: blockchain"
+echo "*** checking torrent 1: base blockchain"
 torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
 echo "torrentComplete1(${torrentComplete1})"
 if [ ${torrentComplete1} -eq 0 ]; then
@@ -31,7 +33,7 @@ if [ ${torrentComplete1} -eq 0 ]; then
 
     # start torrent download in screen session
     echo "starting torrent: blockchain"
-    command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ https://getbitcoinblockchain.com/blockchain.torrent"
+    command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}"
     sudo mkdir ${targetDir} 2>/dev/null
     sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
@@ -45,7 +47,7 @@ fi
 # CHECK TORRENT 2 "UPDATE"
 ##############################
 
-echo "*** checking torrent 2: update"
+echo "*** checking torrent 2: update blockchain"
 torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
 echo "torrentComplete2(${torrentComplete2})"
 if [ ${torrentComplete2} -eq 0 ]; then
@@ -57,7 +59,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
     
     # start torrent download in screen session
     echo "starting torrent: update"
-    command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ https://getbitcoinblockchain.com/update.torrent"
+    command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}"
     sudo mkdir ${targetDir} 2>/dev/null
     sudo mkdir ${sessionDir}/update/ 2>/dev/null
     screenCommand="screen -S update -L screen.log -dm ${command2}"
@@ -84,7 +86,7 @@ while :
     # display info screen
     clear
     echo "****************************************************"
-    echo "Monitoring Screen Session: getbitcoinblockchain.com"
+    echo "Monitoring Screen Session: Torrent base+update"
     echo "If needed press key x to stop TORRENT download"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
@@ -210,19 +212,19 @@ if [ ${torrentComplete} -eq 0 ]; then
 fi
 
 # the path torrent will download to
-targetPath1="${targetDir}/blockchain"
-targetPath2="${targetDir}/update/blockchain"
+#targetPath1="${targetDir}/blockchain"
+#targetPath2="${targetDir}/update/blockchain"
 
 # Download worked / just move, copy on USB2 >4h
-echo "*** Moving Files ***"
-echo "can take some minutes ..."
-date +%s
-sudo mkdir /mnt/hdd/bitcoin
-sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
-sudo cp -r ${targetPath2}/* /mnt/hdd/bitcoin/
-sudo rm -r ${targetDir}
-echo "OK"
-date +%s
+#echo "*** Moving Files ***"
+#echo "can take some minutes ..."
+#date +%s
+#sudo mkdir /mnt/hdd/bitcoin
+#sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
+#sudo cp -r ${targetPath2}/* /mnt/hdd/bitcoin/
+#sudo rm -r ${targetDir}
+#echo "OK"
+#date +%s
 
 # continue setup
 ./60finishHDD.sh
