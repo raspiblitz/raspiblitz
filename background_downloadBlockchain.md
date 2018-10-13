@@ -106,9 +106,12 @@ scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/index
 
 Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
 
-Add this list of trackers to your torrent and start seeding:
+Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
+
 udp://tracker.coppersurfer.tk:6969/announce
+
 udp://open.demonii.si:1337/announce
+
 udp://denis.stalker.upeer.me:6969/announce
 
 Name the new torrent file 
