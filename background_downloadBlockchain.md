@@ -15,10 +15,11 @@ If you have any link to a more detailed discussion of this topic, please add it 
 ## Blockchain Data
 
 The RaspiBlitz needs the following files from a bitcoind (>=0.17.0) that is fully sync and has indexing switched on (txindex=1) - all files from the directories:
-
+```
 /blocks
 /chainstate
 /indexes
+```
 
 Make sure not to add other files like wallet data or lock files to a prepared download.
 
@@ -65,54 +66,68 @@ To create the Update Torrent file, follow the following step ...
 Have a almost 100% synced bitcoind MAINNET with txindex=1 on a RaspiBlitz
 
 Stop bitcoind with: 
+```
 sudo systemctl stop bitcoind
+```
 
 Delete base torrent blk-files with:
-
+```
 sudo rm /mnt/hdd/bitcoin/blocks/blk00*.dat
 sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1390}.dat
+```
 
 Delete base torrent rev-files with:
+```
 sudo rm /mnt/hdd/bitcoin/blocks/rev00*.dat
 sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1390}.dat
+```
 
 Now change to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
-
+```
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blocks
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./chainstate
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/indexes ./indexes
+```
 
 Also have a almost 100% synced bitcoind TESTNET with txindex=1 on a RaspiBlitz
 
-Stop bitcoind with: 
+Stop bitcoind with:
+```
 sudo systemctl stop bitcoind
+```
 
 Delete base torrent blk-files with:
+```
 sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk000*.dat
 sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk00{100..152}.dat
+```
 
 Delete base torrent rev-files with:
+```
 sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev000*.dat
 sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev00{100..152}.dat
+```
 
 Now change again to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
-
+```
 mkdir testnet3
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/indexes
+```
 
 (Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). For the correct naming see the chapter "Torrent Files Naming Schema" below.
 
 Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
 
 Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
-
+```
 udp://tracker.coppersurfer.tk:6969/announce
 
 udp://open.demonii.si:1337/announce
 
 udp://denis.stalker.upeer.me:6969/announce
+```
 
 Name the new torrent file 
 
@@ -121,12 +136,14 @@ To create the torrent file can take some time. Finally add the generated torrent
 #### Torrent Files Naming Schema
 
 The base torrent file should always have the following naming scheme:
-raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent`
 
 So for example the second version of the base torrent for litecoin created on 2018-10-31 would have this name: raspiblitz-litecoin2-2018-10-31-base.torrent
 
 The update torrentfile should always have the following naming schema:
-raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent`
 
 So for exmaple an update torrent created on 2018-12-24 for litecoin that is an update to the second base torrent version would have this name: raspiblitz-litecoin2-2018-12-24-update.torrent
 
