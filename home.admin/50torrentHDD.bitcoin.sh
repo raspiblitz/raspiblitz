@@ -7,7 +7,7 @@ echo ""
 # torrent files that are available
 # in directory /home.admin/assets/
 # WITHOUT THE '.torrent' ENDING
-baseTorrentFile="raspiblitz-bitcoin1-2018-10-12-base"
+baseTorrentFile="raspiblitz-bitcoin1-2018-10-13-base"
 updateTorrentFile="raspiblitz-bitcoin1-2018-10-13-update"
 
 # make sure rtorrent is available
@@ -40,9 +40,9 @@ if [ ${torrentComplete1} -eq 0 ]; then
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
-
   fi
 fi
+sleep 2
 
 ##############################
 # CHECK TORRENT 2 "UPDATE"
@@ -69,6 +69,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
 
   fi
 fi
+sleep 2
 
 ##############################
 # MONITOR PROGRESS
