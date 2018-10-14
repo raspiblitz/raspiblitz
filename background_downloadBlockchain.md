@@ -122,6 +122,8 @@ Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-fi
 
 Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
 ```
+udp://tracker.justseed.it:1337
+
 udp://tracker.coppersurfer.tk:6969/announce
 
 udp://open.demonii.si:1337/announce
