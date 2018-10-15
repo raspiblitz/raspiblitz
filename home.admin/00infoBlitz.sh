@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# load code software version
+source /home/admin/_version.info
+
 # set colors
 color_red='\033[0;31m'
 color_green='\033[0;32m'
@@ -200,7 +203,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
 " \
-"RaspiBlitz v0.93" \
+"RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"

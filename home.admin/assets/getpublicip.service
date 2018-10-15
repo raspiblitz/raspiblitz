@@ -3,7 +3,8 @@
 
 [Unit]
 Description=getpublicip.sh: get public ip address from ipinfo.io
-After=network.target
+Wants=bootstrap.service
+After=bootstrap.service
 
 [Service]
 User=root

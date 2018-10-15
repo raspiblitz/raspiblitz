@@ -388,6 +388,14 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt-get install -y fail2ban
 
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BOOSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
+
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
 echo "**********************************************"
