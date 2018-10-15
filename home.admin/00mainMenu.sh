@@ -90,6 +90,7 @@ else
         CHANNEL "Open a Channel with Peer" \
         SEND "Pay an Invoice/PaymentRequest" \
         RECEIVE "Create Invoice/PaymentRequest" \
+        SERVICES "Activate/Deactivate Services" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
         MOBILE "Connect Mobile Wallet")
@@ -201,6 +202,10 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;  
+        SERVICES)
+            ./00settingsMenuServices.sh
+            ./00mainMenu.sh
+            ;;              
         CLOSEALL)
             ./BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
