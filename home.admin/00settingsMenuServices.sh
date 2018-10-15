@@ -13,10 +13,11 @@ CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
 #3 "RTL Webinterface" ${rtlWebinterface} \
 #4 "Electrum Server" ${electrumServer} \
 #2>&1 >/dev/tty)
+dialogcancel=$?
 clear
 
 # check if user canceled dialog
-if [ ${#CHOICES} -eq 0 ]; then
+if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
   exit 1
 fi
