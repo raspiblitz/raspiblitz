@@ -133,7 +133,7 @@ if [ ${#onionAddress} -gt 0 ]; then
 else
   # IP address
   public_addr="${public_ip}:${public_port}"
-  public_check=$(timeout 2s nc -z ${public_ip} ${public_port}; echo $?)
+  public_check=$(timeout 2s nc -z ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     public="Yes"
     public_color="${color_green}"
