@@ -10,14 +10,23 @@ source /home/admin/_version.info
 
 logfile="/home/admin/raspiblitz.log"
 echo "Writing logs to: ${logfile}"
-echo "" >> $logfile
+echo "" > $logfile
 echo "***********************************************" >> $logfile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logfile
 date >> $logfile
 echo "***********************************************" >> $logfile
 
+################################
+# HDD CHECK / INIT
+################################
+
 # check if the HDD is mounted
-# TODO -> send to basic setup
+hddAvailable=$(ls -la /mnt/hdd 2>/dev/null)
+if [ ${#hddAvailable} -eq 0 ]; then
+  echo "HDD is NOT available" >> $logfile
+  echo "TODO: Try to mount."
+  exit 1
+fi
 
 ################################
 # CONFIGFILE BASICS
@@ -62,25 +71,35 @@ source $configExists
 # AUTOPILOT
 ################################
 
-# check if autopilot is actibe in LND config
+echo "" >> $logfile
 echo "** AUTOPILOT" >> $logfile
-lndAutopilot=$( grep -c "autopilot.active=1" /mnt/hdd/lnd/lnd.conf )
-echo "confAutopilot(${autoPilot})" >> $logfile
-echo "lndAutopilot(${lndAutopilot})" >> $logfile
 
-# switch on
-if [ ${lndAutopilot} -eq 0 ] && [ "${autoPilot}" = "on" ]; then
-  echo "switching the LND autopilot ON" >> $logfile
-  sudo sed -i "s/^autopilot.active=.*/autopilot.active=1/g" /mnt/hdd/lnd/lnd.conf
-fi
+# check if LND is installed
+lndExists=$(ls /mnt/hdd/lnd/lnd.conf >/dev/null | grep -c '.conf')
+if [ ${lndExists} -eq 1 ]; then
 
-# switch off
-if [ ${lndAutopilot} -eq 1 ] && [ "${autoPilot}" = "off" ]; then
-  echo "switching the LND autopilot OFF" >> $logfile
-  sudo sed -i "s/^autopilot.active=.*/autopilot.active=0/g" /mnt/hdd/lnd/lnd.conf
+  # check if autopilot is active in LND config
+  lndAutopilot=$( grep -c "autopilot.active=1" /mnt/hdd/lnd/lnd.conf )
+  echo "confAutopilot(${autoPilot})" >> $logfile
+  echo "lndAutopilot(${lndAutopilot})" >> $logfile
+
+  # switch on
+  if [ ${lndAutopilot} -eq 0 ] && [ "${autoPilot}" = "on" ]; then
+    echo "switching the LND autopilot ON" >> $logfile
+    sudo sed -i "s/^autopilot.active=.*/autopilot.active=1/g" /mnt/hdd/lnd/lnd.conf
+  fi
+
+  # switch off
+  if [ ${lndAutopilot} -eq 1 ] && [ "${autoPilot}" = "off" ]; then
+    echo "switching the LND autopilot OFF" >> $logfile
+    sudo sed -i "s/^autopilot.active=.*/autopilot.active=0/g" /mnt/hdd/lnd/lnd.conf
+  fi
+
+else
+
+ echo "WARNING: /mnt/hdd/lnd/lnd.conf does not exists. Setup needs to run properly first!" >> $logfile
+
 fi
 
 echo "" >> $logfile
 echo "DONE BOOTSTRAP" >> $logfile
-date >> $logfile
-echo "***********************************************" >> $logfile
