@@ -42,6 +42,12 @@ sudo sed -i "s/^autoPilot=.*/autoPilot=${choice}/g" /mnt/hdd/raspiblitz.conf
 #if [ ${check} -eq 1 ]; then choice="on"; fi
 #sudo sed -i "s/^electrumServer=.*/electrumServer=${choice}/g" /mnt/hdd/raspiblitz.conf
 
-# show password info dialog
-dialog --backtitle "Rebooting" --msgbox "To activate the settings a reboot is needed." 6 52
-sudo shutdown -r now
+# confirm reboot to activate new settings with bootstrap.service
+dialog --backtitle "Rebooting" --yesno "To activate the settings a reboot is needed." 6 52
+if [ $? -eq 0 ];then
+  echo "Starting Reboot .."
+  sudo shutdown -r now
+else
+  echo "No Reboot - changes stored, but maybe not active."
+  sleep 3
+fi
