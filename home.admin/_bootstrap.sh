@@ -64,8 +64,9 @@ if [ ${configExists} -eq 0 ]; then
 
   # create new config
   echo "creating config file: ${configFile}" >> $logfile
-  echo "# RASPIBLITZ CONFIG FILE" > $configExists
-  echo "raspiBlitzVersion='${version}'" >> $configExists
+  echo "# RASPIBLITZ CONFIG FILE" > $configFile
+  echo "raspiBlitzVersion='${version}'" >> $configFile
+  sudo chmod 777 ${configFile}
 
 else
 
