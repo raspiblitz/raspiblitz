@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # load code software version
 source /home/admin/_version.info
