@@ -50,7 +50,7 @@ else
   color_sd=${color_green}
 fi
 
-hdd_free_ratio=$(printf "%d" "$(df -h 2>/dev/null | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')")
+hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')" 2>/dev/null)
 hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
 
 if [ ${hdd_free_ratio} -lt 10 ]; then
@@ -67,12 +67,12 @@ network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[
 btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
   btc_title=$network
-  blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo)"
+  blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo 2>/dev/null)"
   if [ ${#blockchaininfo} -gt 0 ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
+    block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
 
@@ -98,13 +98,13 @@ if [ -n ${btc_path} ]; then
     fi
 
     # get last known block
-    last_block="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
+    last_block="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     if [ ! -z "${last_block}" ]; then
       btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
     fi
 
     # get mem pool transactions
-    mempool="$(${network}-cli -datadir=${bitcoin_dir} getmempoolinfo | jq -r '.size')"
+    mempool="$(${network}-cli -datadir=${bitcoin_dir} getmempoolinfo 2>/dev/null | jq -r '.size')"
 
   else
     btc_line2="${color_red}NOT RUNNING\t\t"
@@ -112,7 +112,7 @@ if [ -n ${btc_path} ]; then
 fi
 
 # get IP address & port
-networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
+networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
@@ -121,7 +121,7 @@ public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 public_addr="??"
 torInfo=""
 # Version
-networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
+networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
 onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
 if [ ${#onionAddress} -gt 0 ]; then
