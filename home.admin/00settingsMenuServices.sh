@@ -6,10 +6,13 @@ source /mnt/hdd/raspiblitz.conf
 # show select dialog
 CHOICES=$(dialog --checklist "Choose OS:" 15 40 5 \
 1 "Channel Autopilot" ${autoPilot} \
+2>&1 >/dev/tty)
+#CHOICES=$(dialog --checklist "Choose OS:" 15 40 5 \
+#1 "Channel Autopilot" ${autoPilot} \
 #2 "Seed Torrent Blockchain" ${torrentSeeding} \
 #3 "RTL Webinterface" ${rtlWebinterface} \
 #4 "Electrum Server" ${electrumServer} \
-2>&1 >/dev/tty)
+#2>&1 >/dev/tty)
 clear
 
 # check if user canceled dialog
