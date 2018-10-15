@@ -101,7 +101,7 @@ echo "" >> $logfile
 echo "** AUTOPILOT" >> $logfile
 
 # check if LND is installed
-lndExists=$(ls /mnt/hdd/lnd/lnd.conf >/dev/null | grep -c '.conf')
+lndExists=$(ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c '.conf')
 if [ ${lndExists} -eq 1 ]; then
 
   # check if autopilot is active in LND config
