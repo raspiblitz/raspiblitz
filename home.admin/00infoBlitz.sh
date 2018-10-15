@@ -50,7 +50,7 @@ else
   color_sd=${color_green}
 fi
 
-hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')") 2>/dev/null
+hdd_free_ratio=$(printf "%d" "$(df -h 2>/dev/null | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')")
 hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
 
 if [ ${hdd_free_ratio} -lt 10 ]; then
