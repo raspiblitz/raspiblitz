@@ -4,10 +4,10 @@
 source /mnt/hdd/raspiblitz.conf
 
 # show select dialog
-CHOICES=$(dialog --checklist "Choose OS:" 15 40 5 \
+CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
 1 "Channel Autopilot" ${autoPilot} \
 2>&1 >/dev/tty)
-#CHOICES=$(dialog --checklist "Choose OS:" 15 40 5 \
+#CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
 #1 "Channel Autopilot" ${autoPilot} \
 #2 "Seed Torrent Blockchain" ${torrentSeeding} \
 #3 "RTL Webinterface" ${rtlWebinterface} \
