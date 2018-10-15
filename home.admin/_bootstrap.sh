@@ -59,7 +59,7 @@ fi
 
 # check if there is a config file
 configFile="/mnt/hdd/raspiblitz.conf"
-configExists=$(ls ${configFile} >/dev/null | grep -c '.conf')
+configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
 
   # create new config
