@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# This script runs on every start and makes sure the system
-# is configured like the default values or as in the config
-# file /mnt/hdd/raspiblitz.cfg
+# This script runs on every start calles by boostrap.service
+# It makes sure that the system is configured like the
+# default values or as in the config.
 # For more details see background_raspiblitzSettings.md
 
 # load codeVersion
@@ -16,8 +16,10 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logfile
 date >> $logfile
 echo "***********************************************" >> $logfile
 
+
 ################################
 # HDD CHECK / INIT
+# for the very first setup
 ################################
 
 # check if the HDD is mounted
@@ -26,6 +28,29 @@ if [ ${#hddAvailable} -eq 0 ]; then
   echo "HDD is NOT available" >> $logfile
   echo "TODO: Try to mount."
   exit 1
+fi
+
+
+################################
+# AFTER BOOT SCRIPT
+# when a process needs to 
+# execute stuff after a reboot
+################################
+
+# check for after boot script
+afterSetupScriptExists=$(ls /home/pi/setup.sh 2>/dev/null | grep -c setup.sh)
+if [ ${afterSetupScriptExists} -eq 1 ]; then
+  echo "*** SETUP SCRIPT DETECTED ***"
+  # echo out script to journal logs
+  sudo cat /home/pi/setup.sh
+  # execute the after boot script
+  sudo /home/pi/setup.sh
+  # delete the after boot script
+  sudo rm /home/pi/setup.sh
+  # reboot again
+  echo "DONE wait 6 secs ... one more reboot needed ... "
+  sudo shutdown -r now
+  sleep 100
 fi
 
 ################################
@@ -60,11 +85,11 @@ fi
 # AUTOPILOT
 # autoPilot=off|on
 if [ ${#autoPilot} -eq 0 ]; then
-  echo "autoPilot=off" >> $configExists
+  echo "autoPilot=off" >> $configFile
 fi
 
 # after all default values written to config - reload config
-source $configExists
+source $configFile
 
 
 ################################
