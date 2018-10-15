@@ -71,7 +71,7 @@ if [ ${configExists} -eq 0 ]; then
 else
 
   # load & check config version
-  source $configExists
+  source $configFile
   if [ "${raspiBlitzVersion}" != "${raspiBlitzVersion}" ]; then
       echo "detected version change ... starting migration script" >> $logfile
       /home/admin/_migrateVersion.sh
