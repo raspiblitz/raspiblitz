@@ -22,17 +22,17 @@ After this line all the config values are available and can be worked with. I pr
 
 So see what config parameters are available check the comments in the following script:
 
-`/home/admin/00enforceConfig.sh`
+`/home/admin/_bootstrap.sh`
 
 ## Adding new Config Values
 
 If you extend the RaspiBlitz scripts and you have the need to add a new config key-value add it to the `/home/admin/00enforceConfig.sh` script. There is a section for default values and setting them in the config file, if they dont exist there yet. Because this script runs on every startup, you can be sure that the default value is then available to your extended script - especially if people update their system.
 
-## Enforcing the Config
+## Bootstrap Service: Enforcing the Config
 
-On every start of the RaspiBlitz take the config file and check if the system is running as stated in the config file and when needed make changes to the system. This is done by calling this script on startuo with systemd:
+On every start of the RaspiBlitz take the config file and check if the system is running as stated in the config file and when needed make changes to the system. This is done by calling this script on startup with systemd:
 
-`/home/admin/00enforceConfig.sh`
+`/home/admin/_bootstrap.sh`
 
 So if you change the config by hand or you write a script that changes the config, then simply trigger a restart the RaspiBliz.
 
