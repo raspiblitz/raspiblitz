@@ -197,8 +197,8 @@ echo ""
 echo "*** Putting LND behind TOR ***"
 echo "Disable LND again"
 sudo systemctl disable lnd
-echo "Writing Public Onion Address to /run/publicip (just in case for TotHiddenServiceV3)"
-echo "PUBLICIP=${onionLND}" | sudo tee /run/publicip
+echo "Writing Public Onion Address to /mnt/hdd/tor/v3Address (just in case for TotHiddenServiceV3)"
+echo "V3ADDRESS=${onionLND}" | sudo tee /mnt/hdd/tor/v3Address
 echo "Configure and Changing to lnd.tor.service"
 sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
 sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service

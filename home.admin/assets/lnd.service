@@ -9,10 +9,7 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-# get var PUBIP from file
-EnvironmentFile=/run/publicip
-
-ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}
+ExecStart=/usr/local/bin/lnd
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin
