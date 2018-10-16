@@ -148,6 +148,3 @@ The update torrentfile should always have the following naming schema:
 `raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent`
 
 So for exmaple an update torrent created on 2018-12-24 for litecoin that is an update to the second base torrent version would have this name: raspiblitz-litecoin2-2018-12-24-update.torrent
-
-
-TODO: Adapt files sizes
