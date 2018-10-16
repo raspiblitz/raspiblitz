@@ -372,14 +372,14 @@ sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
 sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
 sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 
-# create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
-cat > /home/pi/setup.sh <<EOF
+# create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
+cat > /home/admin/setup.sh <<EOF
 
 # make LCD screen rotation correct
 sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
-sudo chmod +x /home/pi/setup.sh
+sudo chmod +x /home/admin/setup.sh
 
 echo ""
 echo "*** HARDENING ***"

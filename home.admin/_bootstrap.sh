@@ -18,6 +18,29 @@ echo "***********************************************" >> $logfile
 
 
 ################################
+# AFTER BOOT SCRIPT
+# when a process needs to 
+# execute stuff after a reboot
+# /home/admin/setup.sh
+################################
+
+# check for after boot script
+afterSetupScriptExists=$(ls /home/admin/setup.sh 2>/dev/null | grep -c setup.sh)
+if [ ${afterSetupScriptExists} -eq 1 ]; then
+  echo "*** SETUP SCRIPT DETECTED ***"
+  # echo out script to journal logs
+  sudo cat /home/admin/setup.sh
+  # execute the after boot script
+  sudo /home/admin/setup.sh
+  # delete the after boot script
+  sudo rm /home/admin/setup.sh
+  # reboot again
+  echo "DONE wait 6 secs ... one more reboot needed ... "
+  sudo shutdown -r now
+  sleep 100
+fi
+
+################################
 # HDD CHECK / INIT
 # for the very first setup
 ################################
@@ -28,29 +51,6 @@ if [ ${#hddAvailable} -eq 0 ]; then
   echo "HDD is NOT available" >> $logfile
   echo "TODO: Try to mount."
   exit 1
-fi
-
-
-################################
-# AFTER BOOT SCRIPT
-# when a process needs to 
-# execute stuff after a reboot
-################################
-
-# check for after boot script
-afterSetupScriptExists=$(ls /home/pi/setup.sh 2>/dev/null | grep -c setup.sh)
-if [ ${afterSetupScriptExists} -eq 1 ]; then
-  echo "*** SETUP SCRIPT DETECTED ***"
-  # echo out script to journal logs
-  sudo cat /home/pi/setup.sh
-  # execute the after boot script
-  sudo /home/pi/setup.sh
-  # delete the after boot script
-  sudo rm /home/pi/setup.sh
-  # reboot again
-  echo "DONE wait 6 secs ... one more reboot needed ... "
-  sudo shutdown -r now
-  sleep 100
 fi
 
 ################################
