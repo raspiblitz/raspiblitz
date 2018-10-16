@@ -64,7 +64,7 @@ echo "allow: trasmission"
 sudo ufw allow 51413 comment 'transmission'
 echo "allow: local web admin"
 sudo ufw allow from 192.168.0.0/24 to any port 80 comment 'allow local LAN web'
-echo "open firewall for  auto nat discover"
+echo "open firewall for  auto nat discover (see issue #129)"
 sudo ufw allow proto udp from 192.168.0.0/24 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 echo "enable lazy firewall"
 sudo ufw --force enable
