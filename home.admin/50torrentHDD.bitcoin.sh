@@ -218,9 +218,11 @@ targetPath1="${targetDir}/${baseTorrentFile}"
 targetPath2="${targetDir}/${updateTorrentFile}"
 
 # Download worked / just move, copy on USB2 >4h
+echo ""
 echo "*** Moving Files ***"
-echo "can take some minutes ..."
 date +%s
+echo "can take some minutes ... öease wait"
+
 sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
 sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
 sudo cp -r ${targetPath2}/* /mnt/hdd/bitcoin/
