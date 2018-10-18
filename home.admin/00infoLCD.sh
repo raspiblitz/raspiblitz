@@ -108,13 +108,13 @@ while :
       rm error.tmp
       if [ ${#clienterror} -gt 0 ]; then
         l1="Waiting for ${network}d to get ready.\n"
-        l2="(starting up)\n"
+        l2="---> Starting Up\n"
         l3="Can take longer if devcie was off."
         isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
         if [ ${isVerifying} -gt 0 ]; then
-          l2="(verifying blocks)\n"
+          l2="---> Verifying Blocks\n"
         fi
-        boxwidth=42
+        boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
       else
