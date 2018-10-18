@@ -1,4 +1,4 @@
-[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educational-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
+[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
 # RaspiBlitz
@@ -15,7 +15,6 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 * [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
 * [ [Setup](#boot-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
 * [ [Documentation](#documentation) ] Features and Usecases  
-* [ [Education](#educational-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
 * [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
 
 ## Hardware Needed (Amazon Shopping List)
@@ -157,7 +156,9 @@ The option "SYNC" should just be use as a fallback. So normally you have the fol
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP if the torrent is not working for you. To stop torrent and choose another option use CTRL+z and then start './10setupBlitz.sh' from the terminal.
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP if the torrent is not working for you.
+
+For more details: [Background on Download Blockchain](background_downloadBlockchain.md)
 
 #### Copy the Blockchain
 
@@ -253,46 +254,11 @@ There is now the option to connect and control your LND node with the mobile app
 
 #### RaspiBlitz as Backend for BTCPayServer (experimental)
 
-BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver here is how to connect the RaspiBlitz as your payment node:
+BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver 
 
-##### BTCPayserver config
-
-Make sure you have these setting in: 
-
-`<installdir>/NBXplorer/.nbxplorer/Main/settings.config`
-
-```
-btc.rpc.url=http://[YOUR RASPIBLITZ IP/DOMAIN]:8332/
-btc.rpc.user=raspibolt
-btc.rpc.password=[PASSWORD B]
-```
-
-Command to start NBExplorer: 
-
-`./run.sh --datadir /opt/NBXplorer/.nbxplorer --btcnodeendpoint <raspiblitz-ip> &`
-
-Start btcpayserver as normal, it will connect to raspiblitz thru NBXplorer
-
-##### Raspiblitz config
-
-Make sure you have this in: 
-
-`/mnt/hdd/bitcoin/bitcoin.conf`
-
-```
-rpcallowip=[BTCPAYSERVER IP]/255.255.255.0
-whitelist=[BTCPAYSERVER IP]
-rpcuser=raspibolt
-rpcpassword=[PASSWORD B]
-```
+You can find setup instructions here: https://goo.gl/KnTzLu
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
-
-## Educational Tutorials
-
-*Once the Setup Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
-
-A good way to start for now is to get some Testnet coins, connect to other peers and make your first transactions. You find tutorials for this at the original RaspiBolt guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#get-some-testnet-bitcoin
 
 ## Build the SD Card Image
 
