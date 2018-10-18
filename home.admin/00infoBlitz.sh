@@ -145,7 +145,7 @@ fi
 
 ln_baseInfo="-"
 ln_channelInfo="\n"
-ln_external=""
+ln_external="\n"
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
