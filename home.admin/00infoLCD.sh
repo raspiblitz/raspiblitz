@@ -103,13 +103,19 @@ while :
       # RASPIBLITZ iS FULL SETUP
 
       # check if bitcoin is ready
-      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>>error.tmp
-      clierror=`cat error.tmp`
-      if [ ${#clierror} -gt 0 ]; then
+      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
+      clienterror=`cat error.tmp`
+      rm error.tmp
+      if [ ${#clienterror} -gt 0 ]; then
         l1="Waiting for ${network}d to get ready.\n"
-        l1="Can take some time if devcie was off."
+        l2="(starting up)\n"
+        l3="Can take longer if devcie was off."
+        isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
+        if [ ${isVerifying} -gt 0 ]; then
+          l2="(verifying blocks)\n"
+        fi
         boxwidth=42
-        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 4 ${boxwidth}
+        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
       else
 
