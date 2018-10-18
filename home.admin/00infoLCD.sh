@@ -103,13 +103,12 @@ while :
       # RASPIBLITZ iS FULL SETUP
 
       # check if bitcoin is ready
-      clierror=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>&1)
+      clierror=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>&1)
       if [ ${#clierror} -gt 0 ]; then
-        l1="Waiting for ${network}d to get ready ..\n"
-        l2="Login: ssh admin@${localip}\n"
-        l3="Use your Password A\n"
-        boxwidth=$((${#localip} + 24))
-        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        l1="Waiting for ${network}d to get ready.\n"
+        l1="Can take some time if devcie was off."
+        boxwidth=42
+        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 4 ${boxwidth}
         sleep 5
       else
 
