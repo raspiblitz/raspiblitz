@@ -41,15 +41,7 @@ else
   color_ram=${color_green}
 fi
 
-# get storage
-sd_free_ratio=$(printf "%d" "$(df -h | grep "/$" | awk '{ print $4/$2*100 }')") 2>/dev/null
-sd=$(printf "%s (%s%%)" "$(df -h | grep '/$' | awk '{ print $4 }')" "${sd_free_ratio}")
-if [ ${sd_free_ratio} -lt 10 ]; then
-  color_sd="${color_red}"
-else
-  color_sd=${color_green}
-fi
-
+# get free HDD ratio
 hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')" 2>/dev/null)
 hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
 
