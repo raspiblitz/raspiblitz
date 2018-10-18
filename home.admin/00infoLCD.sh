@@ -103,7 +103,8 @@ while :
       # RASPIBLITZ iS FULL SETUP
 
       # check if bitcoin is ready
-      clierror=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>&1)
+      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>>error.tmp
+      clierror=`cat error.tmp`
       if [ ${#clierror} -gt 0 ]; then
         l1="Waiting for ${network}d to get ready.\n"
         l1="Can take some time if devcie was off."
