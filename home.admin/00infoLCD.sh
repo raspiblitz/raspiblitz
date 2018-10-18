@@ -104,7 +104,7 @@ while :
 
       chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
       locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock) 
-      if [ ${locked} -gt 0 ]; then
+      if [ "${locked}" -gt 0 ]; then
       
         # special case: LND wallet is locked ---> show unlock info
         l1="!!! LND WALLET IS LOCKED !!!\n"
