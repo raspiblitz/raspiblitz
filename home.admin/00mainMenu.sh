@@ -233,7 +233,7 @@ case $CHOICE in
             ;;   
         OFF)
             echo "After Shutdown remove power from RaspiBlitz."
-            echo "Press ENTER to start shutdown - the wait some seconds."
+            echo "Press ENTER to start shutdown - then wait some seconds."
             read key
             sudo shutdown now
             exit 0
