@@ -108,6 +108,9 @@ networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
+if [ "${public_port}" = "null" ]; then
+  public_port="8333"
+fi
 
 # CHAIN NETWORK
 public_addr="??"
@@ -116,7 +119,7 @@ torInfo=""
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
 onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
-if [ ${#onionAddress} -gt 0 ]; then
+if [ "${onionAddress}" != "null" ]; then
   # TOR address
   public_addr="${onionAddress}:${public_port}"
   public=""
