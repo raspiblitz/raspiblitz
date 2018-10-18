@@ -40,6 +40,15 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sleep 100
 fi
 
+
+################################
+# PUBLIC IP
+# for LND on startup
+################################
+printf "PUBLICIP=$(curl -vv ipinfo.io/ip 2> /run/publicip.log)\n" > /run/publicip;
+chmod 774 /run/publicip
+
+
 ################################
 # HDD CHECK / INIT
 # for the very first setup

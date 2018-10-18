@@ -9,7 +9,8 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-ExecStart=/usr/local/bin/lnd
+EnvironmentFile=/run/publicip
+ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin
