@@ -111,7 +111,8 @@ else
       fi
 
       # final Options
-      OPTIONS+=(X "Console / Terminal")   
+      OPTIONS+=(OFF "PowerOff RaspiBlitz")   
+      OPTIONS+=(X "Console / Terminal")
 
     fi
 
@@ -229,6 +230,13 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
+            ;;   
+        OFF)
+            echo "After Shutdown remove power from RaspiBlitz."
+            echo "Press ENTER to start shutdown."
+            read key
+            sudo shutdown now
+            exit 0
             ;;   
         X)
             lncli -h
