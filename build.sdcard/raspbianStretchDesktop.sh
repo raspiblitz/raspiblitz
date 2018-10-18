@@ -96,11 +96,6 @@ sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autol
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
-# autodetect and set your timezone
-pip install -U tzupdate
-sleep 2
-sudo tzupdate
-
 echo ""
 echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
