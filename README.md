@@ -38,7 +38,13 @@ You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [
 
 The shopping list for China refers to Taobao/T-Mall.
 
-### Optional Hardware
+### 3D printed Case (optional)
+
+You can replace the generic case in the shopping lists above with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
+
+https://thecryptocloak.com/product/lightningshell/
+
+### More optional Hardware
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
 
@@ -49,8 +55,6 @@ The shopping list for China refers to Taobao/T-Mall.
 * Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
-
-
 
 ## Prepare your Hardware
 
