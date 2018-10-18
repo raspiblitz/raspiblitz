@@ -38,11 +38,13 @@ You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [
 
 The shopping list for China refers to Taobao/T-Mall.
 
-### 3D printed Case (optional)
+### 3D Printed Case (optional)
 
 You can replace the generic case in the shopping lists above with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
 
 https://thecryptocloak.com/product/lightningshell/
+
+![LightningShell](pictures/lightningshell.png)
 
 ### More optional Hardware
 
