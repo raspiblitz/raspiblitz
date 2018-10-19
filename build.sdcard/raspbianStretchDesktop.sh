@@ -75,6 +75,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
   sudo raspi-config nonint do_boot_wait 0
+  # set WIFI country so boot does not block
+  sudo raspi-config nonint do_wifi_country US
   # extra: remove some big packages not needed
   sudo apt-get remove -y --purge libreoffice*
   sudo apt-get clean
