@@ -298,6 +298,17 @@ We know that this is not optimal yet. But until version 1.0 we will change too m
 
 From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
 
+## Mobile Development: Connect RaspiBlitz without a Router/Switch
+
+To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). In short:
+
+* connect with LAN directly
+* Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
+* Settings > Network > Ethernet-Adapter > set to DHCP
+* in terminal > `ifconfig` there you should the the IP of the bridge100
+* in terminal > `arp -a` and check for an IP of a client to the bridge
+* in terminal > ssh admin@[clientIP] 
+
 ## Further Development of RaspiBlitz
 
 The RaspiBlitz was developed on the basis of the RaspiBolt Guide to run LND on a RaspberryPi: https://github.com/Stadicus/guides/blob/master/raspibolt - the idea was to prepare as much as possible and have it on a SD-card ready to startup quickly. The configuration should be automated by scripts combined with some very basic user interaction thru the terminal for adminstration. The LCD should provide basic information, so that the health and state of the RaspiBlitz could be monitored with ease. The LCD has also basic touch support and could be used for direct and fast daily interactions.
