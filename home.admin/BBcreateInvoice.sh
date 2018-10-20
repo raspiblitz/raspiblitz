@@ -1,6 +1,7 @@
 #!/bin/bash
 _temp="./download/dialog.$$"
 _error="./.error.out"
+sudo chmod 7777 ${_error}
 
 # load network and chain info
 network=`cat .network`
