@@ -11,12 +11,12 @@ while [ ${#result} -eq 0 ]
     l1="Please enter the name of your new RaspiBlitz:\n"
     l2="one word, keep characters basic & not too long"
     dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
-    result=`cat $_temp`
+    result=$( cat $_temp |  tr -d [:space:] )
     shred $_temp
   done
 
 # set lightning alias
-sed -i "7s/.*/alias=${result}/" /home/admin/assets/lnd.${network}.conf
+sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 
 # store hostname for later - to be set right before the next reboot
 # work around - because without a reboot the hostname seems not updates in the whole system
@@ -40,7 +40,7 @@ dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
 
 # get user input
-result=`cat $_temp`
+result=$( cat $_temp )
 shred $_temp
 
 # check input (check for more later)
@@ -67,13 +67,13 @@ while [ ${#result} -lt 8 ]
   do
     dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Enter your RPC Password B (min 8 chars):" 9 52 2>$_temp
-    result=`cat $_temp`
+    result=$( cat $_temp )
     shred $_temp
   done
 
 # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-sed -i "14s/.*/rpcpassword=$result/" /home/admin/assets/${network}.conf
-
+sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
+sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
 
 # success info dialog
 dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52

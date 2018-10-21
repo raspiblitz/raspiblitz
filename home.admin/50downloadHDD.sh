@@ -1,10 +1,11 @@
 #!/bin/bash
 echo ""
 
-# *** BITCOIN ***
+# *** BITCOIN (just mainnet) ***
 bitcoinList="" # url to list with other sources
-bitcoinUrl="ftp://anonymous:anonymous@tll9xsfkjht8j26z.myfritz.net/raspiblitz-bitcoin-2018-07-16"
-bitcoinSize=231000000 # 231235816-tolerance
+#bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
+bitcoinUrl="ftp://f00f39c4:download@w0189aba.kasserver.com/"
+bitcoinSize=253000000 # 253827180-tolerance
 
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
@@ -28,7 +29,6 @@ fi
 name="Download"
 targetDir="/mnt/hdd/download/"
 targetSize=$size
-maxTimeoutLoops=500
 command="sudo wget -c -r -P ${targetDir} -q --show-progress ${url}"
 
 # starting session if needed
@@ -48,8 +48,6 @@ sleep 3
 # monitor session
 screenDump="... started ..."
 actualSize=0
-timeout=1
-timeoutInfo="-"
 while :
   do
 
@@ -57,7 +55,6 @@ while :
     screen -wipe 1>/dev/null
     isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
     if [ ${isRunning} -eq 0 ]; then
-      timeout=0
       echo "OK - session finished"
       break
     fi
@@ -68,35 +65,21 @@ while :
       freshSize=0
     fi
     progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > '.${name}.progress'
+    echo $progress > ".${name}.progress"
 
-    # detect if since last loop any progress occured
-    if [ ${actualSize} -eq ${freshSize} ]; then
-      timeoutInfo="${timeout}/${maxTimeoutLoops}"
-      timeout=$(( $timeout + 1 ))
-    else
-      timeout=1
-      timeoutInfo="no timeout detected"
-    fi
     actualSize=$freshSize
-
-    # detect if mx timeout loop limit is reached
-    if [ ${timeout} -gt ${maxTimeoutLoops} ]; then
-      echo "FAIL - download hit timeout"
-      break
-    fi
 
     # display info screen
     clear
     echo "****************************************************"
     echo "Monitoring Screen Session: ${name}"
     echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    echo "Timeout: ${timeoutInfo}"
     echo "If needed press key x to stop ${name}"
+    echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
     echo "****************************************************"
     screen -S ${name} -X hardcopy .${name}.out
-    newScreenDump=$(cat .Download.out | grep . | tail -10)
+    newScreenDump=$(cat .${name}.out | grep . | tail -8)
     if [ ${#newScreenDump} -gt 0 ]; then
       screenDump=$newScreenDump
     fi
@@ -152,10 +135,10 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 6 57
+  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir}${targetPath} ;;
+    1) sudo rm -rf ${targetDir} ;;
   esac
   ./00mainMenu.sh
   exit 1;

@@ -1,34 +1,66 @@
 # load network
 network=`sudo cat /home/admin/.network`
 
+# load name of Blitz
+name=`sudo cat /home/admin/.hostname`
+
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # parse the actual scanned height progress from LND logs
 item=0
-chain="$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
-gotData=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c height)
-if [ ${gotData} -gt 0 ]; then
-  item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep height | tail -n1 | awk '{print $9} {print $10} {print $11} {print $12}' | tr -dc '0-9')  
+blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
+chain="$(echo "${blockchaininfo}" | jq -r '.chain')"
+
+## TRY to get the actual progress height of scanning
+
+# 1) First try the "Rescanned through block" - it seems to happen if it restarts
+item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Rescanned through block" | tail -n1 | cut -d ']' -f2 | cut -d '(' -f2 | tr -dc '0-9')
+
+# 2) Second try the "Caught up to height" - thats the usual on first scan start
+if [ ${#item} -eq 0 ]; then
+  item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -n1 | cut -d ']' -f2 | tr -dc '0-9')
+fi
+
+# TODO next fallback try later here if necessary
+if [ ${#item} -eq 0 ]; then
+  item="?" 
 fi
 
 # get total number of blocks
-total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
+total=$(echo "${blockchaininfo}" | jq -r '.blocks')
+# put scanstate
+scanstate="${item}/${total}"
 
-# calculate progress in percent 
-percent=$(awk "BEGIN { pc=100*${item}/${total}; i=int(pc); print (pc-i<0.5)?i:i+1 }") 
-if [ ${percent} -eq 100 ]; then
-  # normally if 100% gets calculated, item parsed the wrong height
-  percent=0
-fi
-
-infoStr=$(echo " Lightning Rescanning Blockchain ${percent}%\nplease wait - this can take some time")
+# get blockchain sync progress
+progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
 
 # check if blockchain is still syncing
+heigh=6
+width=44
+isInitialChainSync=$(echo "${blockchaininfo}" | grep 'initialblockdownload' | grep "true" -c)
 isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Waiting for chain backend to finish sync" -c )
 if [ ${isWaitingBlockchain} -gt 0 ]; then
-  infoStr=" Waiting for final Blockchain Sync\nplease wait - this can take some time"
+  isInitialChainSync=1
+fi
+if [ ${isInitialChainSync} -gt 0 ]; then
+  heigh=7
+  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
+  if [ "$USER" = "admin" ]; then
+    heigh=6
+    width=53
+    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+  fi
+else
+  heigh=7
+  infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
+  if [ "$USER" = "admin" ]; then
+    heigh=6
+    width=53
+    infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+  fi
 fi
 
 # display progress to user
-dialog --backtitle "RaspiBlitz (${localip} / ${network} / ${chain})" --infobox "${infoStr}" 4 42
+sleep 3
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${name})" --infobox "${infoStr}" ${heigh} ${width}

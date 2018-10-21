@@ -4,9 +4,20 @@ echo ""
 # load network
 network=`cat .network`
 
+# get chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
-bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep -c blocks)
+bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+if [ ${bitcoinRunning} -eq 0 ]; then
+  #doublecheck
+  bitcoinRunning=$(${network}-cli getblockchaininfo  | grep -c verificationprogress)
+fi
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
   echo "FAIL - ${network}d is not running"
@@ -16,34 +27,32 @@ fi
 echo "OK - ${network}d is running"
 echo ""
 
-###### Wait for Blochain Sync
-echo "*** Syncing Blockchain ***"
-ready=0
-while [ ${ready} -eq 0 ]
+# verify that chainnetwork is ready
+chainIsReady=0
+while [ ${chainIsReady} -eq 0 ]
   do
-    progress="$(sudo -u bitcoin ${network}-cli getblockchaininfo | jq -r '.verificationprogress')"
-    verySmallProgress=$(echo $progress | grep -c 'e-');
-    if [ ${verySmallProgress} -eq 1 ]; then
-     progress="0.00";
-    fi
-    ready=$(echo $progress'>0.99' | bc -l)
-    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
-    #echo "progress($progress) verySmallProgress($verySmallProgress) ready($ready) sync_percentage($sync_percentage)"
-    if [ ${#ready} -eq 0 ]; then
-      echo "waiting for init ... can take a while"
-      ready=0
-    elif [ "$sync_percentage" = "0.00%" ]; then  
-      echo "waiting for network ... can take a while"
-      ready=0
-    elif [ ${ready} -eq 0 ]; then
-      echo "${sync_percentage}"
+    echo "*** Test if chainnetwork is ready ..."
+    date +%s
+    result=$(${network}-cli getblockchaininfo 2>error.out)
+    error=`cat error.out`
+    rm error.out
+    echo "result(${result})"
+    echo "error(${error})"
+    if [ ${#error} -gt 0 ]; then
+      testnetAdd=""
+      if [ "${chain}"  = "test" ]; then
+       testnetAdd="testnet3/"
+      fi
+      sudo tail -n 5 /mnt/hdd/bitcoin/${testnetAdd}debug.log
+      echo "Waiting 1 minute and then trying again ..."
+      sleep 60
+      echo ""
     else
-      echo "finishing sync ... can take a while"
+      echo "OK - chainnetwork is working"
+      chainIsReady=1
+      break
     fi
-    sleep 3
   done
-echo "OK - Blockchain is synced"
-echo ""
 
 ###### LND Config
 echo "*** LND Config ***"
@@ -64,42 +73,47 @@ echo ""
 
 ###### Start LND
 echo "*** Starting LND ***"
-lndRunning=$(systemctl status lnd.service | grep -c running)
+lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
   sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
+  sudo chmod +x /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
   sudo systemctl start lnd
-  echo "Started LND .. waiting 30 seconds for init ..."
-  sleep 30
+  echo "Starting LND ... give 120 seconds to init."
+  sleep 120
 fi
 
 ###### Check LND is running
-lndRunning=$(systemctl status lnd.service | grep -c running)
-if [ ${lndRunning} -eq 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - LND is not running"
-  echo "recheck with original tutorial -->"
-  echo "https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md"
-  exit 1
-fi
+lndRunning=0
+while [ ${lndRunning} -eq 0 ]
+do
+  lndRunning=$(systemctl status lnd.service | grep -c running)
+  if [ ${lndRunning} -eq 0 ]; then
+    date +%s
+    echo "LND not ready yet ... waiting another 60 seconds."
+    echo "If this takes too long (more then 10min total) --> CTRL+c and report Problem"
+    sleep 60
+  fi
+done
 echo "OK - LND is running"
 echo ""
 
 ###### Instructions on Creating LND Wallet
-setupStep=0
-setupStep=$(sudo cat "/home/admin/.setup")
-if [ ${setupStep} -lt 65 ]; then
+walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
+echo "walletExists(${walletExists})"
+sleep 2
+if [ ${walletExists} -eq 0 ]; then
+
   # setup state signals, that no wallet has been created yet
-  dialog --backtitle "RaspiBlitz - LND Lightning Wallet" --msgbox "
+  dialog --backtitle "RaspiBlitz - LND Lightning Wallet (${network}/${chain})" --msgbox "
 ${network} and Lighthing Services are installed.
 You now need to setup your Lightning Wallet:
 
 We will now call the command: lncli create
 lncli = Lightning Network Command Line Interface
 Learn more: https://api.lightning.community
-
 Press OK and follow the 'Helping Instructions'.
 " 14 52
   clear
@@ -111,37 +125,67 @@ Press OK and follow the 'Helping Instructions'.
   echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
   echo "****************************************************************************"
   echo ""
-  echo "lncli create"
-  sudo -u bitcoin lncli create
+  echo "lncli --chain=${network} create"
+  
+  # execute command and monitor error
+  _error="./.error.out"
+  sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create 2>$_error
+  error=`cat ${_error}`
+
+  if [ ${#error} -gt 0 ]; then
+    echo ""
+    echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+    echo "${error}"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo ""
+    echo "Press ENTER to retry ... or CTRL-c to EXIT"
+    read key
+    echo "Starting RETRY ..."
+    ./70initLND.sh
+    exit 1
+  fi
+
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "If you are ready. Press ENTER."
   read key
-  # set SetupState to 75 (mid thru this process)
+
   echo "65" > /home/admin/.setup
 fi
-echo "--> lets wait 30 seconds for LND to get ready"
-sleep 30
+
+echo "--> lets wait 60 seconds for LND to get ready"
+sleep 60
 
 ###### Copy LND macaroons to admin
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
-macaroonExists=$(sudo -u bitcoin ls -la /mnt/hdd/lnd/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
+  ./AAunlockLND.sh
+  sleep 3
+fi
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
+if [ ${macaroonExists} -eq 0 ]; then
+  sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
   echo ""
   echo "FAIL - LND Macaroons not created"
   echo "Please check the following LND issue:"
   echo "https://github.com/lightningnetwork/lnd/issues/890"
+  echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
-sudo mkdir /home/admin/.lnd
-macaroonExists=$(sudo ls -la /home/admin/.lnd/ | grep -c admin.macaroon)
+macaroonExists=$(sudo ls -la /home/admin/.lnd/data/chain/${network}/${chain}net/ | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo mkdir /home/admin/.lnd
+  sudo mkdir /home/admin/.lnd/data
+  sudo mkdir /home/admin/.lnd/data/chain
+  sudo mkdir /home/admin/.lnd/data/chain/${network}
+  sudo mkdir /home/admin/.lnd//data/chain/${network}/${chain}net
   sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/admin.macaroon /home/admin/.lnd
+  sudo cp /home/bitcoin/.lnd/lnd.conf /home/admin/.lnd
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
   sudo chown -R admin:admin /home/admin/.lnd/
   echo "OK - LND Macaroons created"
 else
@@ -150,11 +194,10 @@ fi
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
-chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  ./unlockLND.sh
+  ./AAunlockLND.sh
 else
   echo "OK - Wallet is already unlocked"
 fi
@@ -163,8 +206,7 @@ fi
 echo ""
 echo "*** Check LND Sync ***"
 item=0
-chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
-lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
 if [ ${lndSyncing} -eq 0 ]; then
   echo "OK - wait for LND to be synced"
   while :
@@ -172,10 +214,10 @@ if [ ${lndSyncing} -eq 0 ]; then
       
       # show sync status
       ./80scanLND.sh
-      sleep 3
+      sleep 15
       
       # break loop when synced
-      lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' | grep -c true)
+      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSyncing} -eq 1 ]; then
         break
       fi
@@ -185,6 +227,8 @@ if [ ${lndSyncing} -eq 0 ]; then
       if [ ${locked} -eq 1 ]; then
         break
       fi
+
+      sleep 15
 
     done
   clear

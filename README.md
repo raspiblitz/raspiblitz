@@ -1,8 +1,10 @@
-[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Education](#educational-tutorials) ] -- [ [Development](#further-development-of-raspiblitz) ]
+[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
+
+`Latest Version with lnd 0.5 and bitcoin 0.17.0rc4 & litecoin 0.16.3 (both with dos bugfix).`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -13,28 +15,37 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 * [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
 * [ [Setup](#boot-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
 * [ [Documentation](#documentation) ] Features and Usecases  
-* [ [Education](#educational-tutorials) ] Tutorials with the RaspiBlitz to learn about Lightning
 * [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
 
 ## Hardware Needed (Amazon Shopping List)
 
 *The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.de:*
 
-* RaspBerry Pi 3 (31,99 EUR) https://www.amazon.de/dp/B01CD5VC92
-* Micro SD-Card 16GB (7,11 EUR) https://www.amazon.de/dp/B0162YQEIE
-* Power >=3A (9,29 EUR) https://www.amazon.de/dp/B01E75SB2C
-* 1TB Hard Drive (49,99 EUR) https://www.amazon.de/dp/B00KWHJY7Q
+* RaspBerry Pi 3 (34,99 EUR) https://www.amazon.de/dp/B07BDR5PDW
+* Micro SD-Card 16GB (7,99 EUR) https://www.amazon.de/gp/product/B073K14CVB/
+* Power >=3A (9,99 EUR) https://www.amazon.de/gp/product/B078567K85
+* 1TB Hard Drive (44,98 EUR) https://www.amazon.de/dp/B07997KKSK?th=1
 * Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
-* LCD-Display (19,58 EUR) https://www.amazon.de/dp/B01JRUH0CY
+* LCD-Display (16,88 EUR) https://www.amazon.de/gp/product/B06X191RX7
 
-**Total Price: 127,31 EUR** (thats under 150 USD)
+**Total Price: 124,19 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [FR](shoppinglist_fr.md) ]
+[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [FR](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ]
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
-### Optional Hardware
+The shopping list for China refers to Taobao/T-Mall.
+
+### 3D Printed Case (optional)
+
+You can replace the generic case in the shopping lists above with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
+
+https://thecryptocloak.com/product/lightningshell/
+
+![LightningShell](pictures/lightningshell.png)
+
+### More optional Hardware
 
 *Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
 
@@ -45,8 +56,6 @@ You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [
 * Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
-
-
 
 ## Prepare your Hardware
 
@@ -59,7 +68,7 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-http://wiki.fulmo.org/downloads/raspiblitz-2018-08-02.img.gz
+https://wiki.fulmo.org/downloads/raspiblitz-2018-09-22.img.gz (or [build your own](#build-the-sd-card-image))
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -147,7 +156,9 @@ The option "SYNC" should just be use as a fallback. So normally you have the fol
 
 #### Download the Blockchain
 
-This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP is the torrent if not working for you. To stop torrent and choose another option use CTRL+z and then start './10setupBlitz.sh' from terminal.
+This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP if the torrent is not working for you.
+
+For more details: [Background on Download Blockchain](background_downloadBlockchain.md)
 
 #### Copy the Blockchain
 
@@ -167,7 +178,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ![ExtraPower](pictures/extrapower.png)
 
-**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finsihHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
+**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finishHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
 
 #### Lightning
 
@@ -201,15 +212,19 @@ After SSH back in as admin the main menu shows the unlock option:
 
 Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
 
-![SSH9e](pictures/ssh9e-mainmenu.png)
+![SSH9e1](pictures/ssh9e-mainmenu1.png)
+
+And if you scroll down .. you see even more feature options:
+
+![SSH9e2](pictures/ssh9e-mainmenu2.png)
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
 ### Features
 
-But you manually extened your RaspiBlitz with features listed in the RaspiBlot Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
+But you manually extened your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
 
-Already integrated features of the RaspiBlitz are/willbe listed as part of the main menu after connecting per ssh with the admin user.
+Already integrated features of the RaspiBlitz are/will be listed as part of the main menu after connecting via ssh as admin user.
 
 *Background: The script `91addBonus.sh` is the place to put your setup of features you want to add to RaspiBlitz. Its run at the end of the automated setup process before final reboot. To make the feature executable for the user, add a new option to the `00mainMenu.sh`*
 
@@ -223,11 +238,76 @@ Already integrated features of the RaspiBlitz are/willbe listed as part of the m
 
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
 
-## Educational Tutorials
+#### TOR Integration (experimental)
 
-*Once the Setup Process is done, the learning and building should begin ... more detailed educational content should be added in this section in the future.*
+You can use the Switch to TOR option from the main menu to make the node reachable thru TOR. This way you can get thru a NAT without needed to open/forward ports on your router. Bitcoin and LND will have a seperate onion-address displayed on LCD and the Status Info Screen option in menu.
 
-A good way to start for now is to get some Testnet coins, connect to other peers and make your first transactions. You find tutorials for this at the original RaspiBolt guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#get-some-testnet-bitcoin
+![tor1](pictures/tor1.png)
+
+The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
+
+#### Connect to Mobile Wallet
+
+There is now the option to connect and control your LND node with the mobile app called "Shango" - choose option in the main menu.
+
+![shango1](pictures/shango1.png)
+
+#### RaspiBlitz as Backend for BTCPayServer (experimental)
+
+BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver 
+
+You can find setup instructions here: https://goo.gl/KnTzLu
+
+Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
+
+## Build the SD Card Image
+
+A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everbody started quickly. But if you want to build that image yourself - here is a quick guide:
+
+* Get a fresh Rasbian RASPBIAN STRETCH WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/)
+* Write image to a SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) 
+* Add a file called `ssh` to the root of the SD card when mounted to enable SSH login
+* Start card in Raspi and login per SSH with `ssh pi@[IP-OF-YOUR-RASPI]` password is `raspberry`
+
+Now you are ready to start the SD card build script - copy the following command into your terminal and execute:
+
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
+
+As you can see from the URL you find the build script in this Git repo under `build.sdcard/raspbianStretchDesktop.sh`- there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
+
+The whole build process takes a while. And the end the LCD drives get installed and a reboot is needed. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use root: `ssh root@[IP-OF-YOUR-RASPI]` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the actovity LED of the pi starts going dark. You can unplug power and remove the SD card. You have now build your own RaspiBlitz sd card image. 
+
+*Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
+
+## Update to a new SD Card Release
+
+At the beginning of this README you can find the newest SD card we provide. Or you can build the newest SD card image yourself like in the chapter above. The SD card image is used to setup a fresh install of the RaspiBlitz. So what to do if you already have an older version running and you want to upgrade?
+
+Until we reach version 1.0 the update process will be a bit rough .. so what you do is:
+* close all open lightning channels you have (`lncli closeallchannels --force`)
+* wait until all closing transactions are done
+* move all on-chain funds to a wallet outside raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`)
+* run the script `./XXcleanHDD.sh` in admin home directory (Blockchain will stay on HDD)
+* shutdown RaspiBlitz (`sudo shutdown now`)
+* flash SD card with new image
+* Redo a fresh setup of RaspiBlitz
+* Move your funds back in
+* Re-Open your channels
+
+We know that this is not optimal yet. But until version 1.0 we will change too much stuff to garantue any other save update mechanism. Also by redoing all the setup you help out on testing the lastest setup process.
+
+From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
+
+## Mobile Development: Connect RaspiBlitz without a Router/Switch
+
+To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). In short:
+
+* connect with LAN directly
+* Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
+* Settings > Network > Ethernet-Adapter > set to DHCP
+* in terminal > `ifconfig` there you should the the IP of the bridge100
+* in terminal > `arp -a` and check for an IP of a client to the bridge
+* in terminal > ssh admin@[clientIP] 
 
 ## Further Development of RaspiBlitz
 
@@ -239,4 +319,4 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
 
-IRC channel on Freenode `irc://irc.freenode.net/raspiblitz`
+IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)

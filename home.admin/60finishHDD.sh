@@ -17,14 +17,14 @@ if [ ${mountOK} -eq 1 ]; then
    echo "*** Prepare ${network} ***"
    sudo killall -u bitcoin
    sleep 5
-   sudo rm -r /home/bitcoin/.${network}
+   sudo rm -r /home/bitcoin/.${network} 2>/dev/null
    sleep 2
    if [ -d /home/bitcoin/.${network} ]; then
      echo "FAIL - /home/bitcoin/.${network} exists and cannot be removed!"
      exit 1
    fi
    sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-   sudo mkdir /home/admin/.${network}
+   sudo mkdir /home/admin/.${network} 2>/dev/null
    sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
    sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network}
    sudo mkdir /mnt/hdd/lnd
@@ -40,6 +40,8 @@ if [ ${mountOK} -eq 1 ]; then
    echo "*** Start ${network} ***"
    echo "This can take a while .."
    sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+   sudo chmod +x /etc/systemd/system/${network}d.service
+   sudo systemctl daemon-reload
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service
    echo "Giving ${network}d service 180 seconds to init - please wait ..."	

@@ -2,9 +2,9 @@
 
 # load network and chain info
 network=`cat .network`
-chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
+chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 
-command="lncli newaddress np2wkh"
+command="lncli --chain=${network} newaddress np2wkh"
 
 clear
 echo "******************************"
@@ -16,8 +16,17 @@ echo $command
 echo ""
 echo "RESULT:"
 
+# PRECHECK) check if chain is in sync
+chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
+if [ ${chainInSync} -eq 0 ]; then
+  command=""
+  result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+fi
+
 # execute command
-result=$($command)
+if [ ${#command} -gt 0 ]; then
+  result=$($command)
+fi
 
 # on no result
 if [ ${#result} -eq 0 ]; then
@@ -48,7 +57,8 @@ echo "TODO"
 echo "******************************"
 echo "Send ${coininfo} to address --> ${address}"
 if [ "$chain" = "test" ]; then
-  echo "get some testnet coins from https://testnet.manu.backend.hamburg/faucet"
+  echo "get some testnet coins from https://testnet-faucet.mempool.co"
 fi
 echo "Whats next? --> Wait for confirmations. You can use lnbalance for main menu or info on LCD to check if funds have arrived."
+echo "If you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
 echo ""

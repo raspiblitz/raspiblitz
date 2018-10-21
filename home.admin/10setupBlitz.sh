@@ -4,32 +4,95 @@ echo ""
 # load network
 network=`cat .network`
 
+# check chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
+# get setup progress
+setupStep=$(sudo -u admin cat /home/admin/.setup)
+if [ ${#setupStep} -eq 0 ];then
+  setupStep=0
+fi
+
+# if setup if ready --> REBOOT
+if [ ${setupStep} -gt 89 ];then
+  echo "FINISH by setupstep(${setupStep})"
+  sleep 3
+  ./90finishSetup.sh
+  exit 0
+fi
+
 # CHECK WHAT IS ALREADY WORKING
 # check list from top down - so ./10setupBlitz.sh
 # and re-enters the setup process at the correct spot
 # in case it got interrupted
 
 # check if lightning is running
-lndRunning=$(systemctl status lnd.service | grep -c running)
+lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
+  
+  echo "LND is running ..."
+  sleep 1
 
-  chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
-  lndSyncing=$(sudo -u bitcoin lncli getinfo | jq -r '.synced_to_chain' 2>/dev/null | grep -c false)
+  # check if LND is locked
+  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
+  locked=0
+  # only when a wallet exists - it can be locked
+  if [ ${walletExists} -eq 1 ];then
+    echo "lnd wallet exists ... checking if locked"
+    sleep 2
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+  fi
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
     ./AAunlockLND.sh
     ./10setupBlitz.sh
-  elif [ ${lndSyncing} -gt 0 ]; then
-    ./70initLND.sh
-  else
-    ./90finishSetup.sh
+    exit 0
   fi
-  exit 1
+
+  # check if blockchain still syncing (during sync sometimes CLI returns with error at this point)
+  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
+  chainSyncing=1
+  if [ ${#chainInfo} -gt 0 ];then
+    chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
+  fi
+  if [ ${chainSyncing} -eq 1 ]; then
+    echo "Sync Chain ..."
+    sleep 3
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # check if lnd is scanning blockchain
+  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo | grep "synced_to_chain")
+  lndSyncing=1
+  if [ ${#lndInfo} -gt 0 ];then
+    lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
+  fi
+  if [ ${lndSyncing} -eq 1 ]; then
+    echo "Sync LND ..." 
+    sleep 3
+    ./70initLND.sh
+    exit 0
+  fi
+
+  # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
+  echo "FINSIH ... "
+  sleep 3
+  ./90finishSetup.sh
+  exit 0
+
 fi
 
 # check if bitcoin is running
-bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep -c blocks)
+bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+if [ ${bitcoinRunning} -eq 0 ]; then
+  # double check
+  bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+fi
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
@@ -43,10 +106,15 @@ if [ ${mountOK} -eq 1 ]; then
   
   # are there any signs of blockchain data
   if [ -d "/mnt/hdd/${network}" ]; then
+
+    echo "TAIL Chain Network Log"
+    sudo tail /mnt/hdd/${network}/debug.log
+    echo ""
+
     echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "Maybe try --> ./60finishHDD.sh"
-    echo "If this sill is not working reboot after running --> sudo rm -r /mnt/hdd/${network}"
+    echo "If you want start fresh --> sudo rm -r /mnt/hdd/${network}"
+    echo "Or something with the config is not correct."
     exit 1
   fi
 
@@ -125,7 +193,7 @@ if [ ! -f "home/admin/.setup" ]; then
   echo "*** Update System ***"
   sudo apt-mark hold raspberrypi-bootloader
   sudo apt-get update
-  sudo apt-get upgrade -f -y --force-yes
+  sudo apt-get upgrade -f -y --allow-change-held-packages
   echo "OK - System is now up to date"
 fi
 
