@@ -4,7 +4,7 @@
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
-`Latest Version with lnd 0.5 and bitcoin 0.17.0rc4 & litecoin 0.16.3 (both with dos bugfix).`
+`Latest Version with lnd 0.5 and bitcoin 0.17.0 & litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
