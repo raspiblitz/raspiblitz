@@ -5,7 +5,7 @@
 # https://www.raspberrypi.org/downloads/raspbian/
 # SHA256: 8636ab9fdd8f58a8ec7dde33b83747696d31711d17ef68267dbbcd6cfb968c24
 ##########################################################################
-# setup fresh SD card with image above - login per SSH and run this script: 
+# setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
 echo ""
@@ -299,7 +299,7 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 # move files from gitclone
 cd /home/admin/
 sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.sh /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 

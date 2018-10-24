@@ -14,7 +14,7 @@ unzip ${vtag}.zip
 cd ..
 rm *.sh
 rm -r assets
-sudo -u admin cp /home/admin/raspiblitz/raspiblitz-${vtag}/home.admin/*.sh /home/admin
+sudo -u admin cp /home/admin/raspiblitz/raspiblitz-${vtag}/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 rm /home/admin/raspiblitz/${vtag}.zip
