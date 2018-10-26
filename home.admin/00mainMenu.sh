@@ -24,6 +24,31 @@ if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
 
+# function to use later
+waitUntilChainNetworkIsReady()
+{
+    while :
+    do
+      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
+      clienterror=`cat error.tmp`
+      rm error.tmp
+      if [ ${#clienterror} -gt 0 ]; then
+        l1="Waiting for ${network}d to get ready.\n"
+        l2="---> Starting Up\n"
+        l3="Can take longer if devcie was off."
+        isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
+        if [ ${isVerifying} -gt 0 ]; then
+          l2="---> Verifying Blocks\n"
+        fi
+        boxwidth=40
+        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        sleep 5
+      else
+        return
+      fi  
+    done    
+}
+
 ## get actual setup state
 setupState=0;
 if [ -f "/home/admin/.setup" ]; then
@@ -41,12 +66,8 @@ if [ ${setupState} -eq 0 ]; then
 
 elif [ ${setupState} -lt 100 ]; then
 
-    # make sure to have a init pause aufter fresh boot
-    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
-    waittimesecs=$(expr 150 - $uptimesecs)
-    if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
-    fi
+    # see function above
+    waitUntilChainNetworkIsReady
 
     # continue setup
     BACKTITLE="${name} / ${network} / ${chain}"
@@ -57,12 +78,8 @@ elif [ ${setupState} -lt 100 ]; then
 
 else
 
-    # make sure to have a init pause aufter fresh boot
-    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
-    waittimesecs=$(expr 150 - $uptimesecs)
-    if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
-    fi
+    # see function above
+    waitUntilChainNetworkIsReady
 
     # MAIN MENU AFTER SETUP
 
