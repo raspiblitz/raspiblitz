@@ -7,7 +7,7 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-/usr/bin/node /home/admin/RTL/rtl --lndir /home/admin/.lnd/data/chain/bitcoin/mainnet
+ExecStart=/usr/bin/node /home/admin/RTL/rtl --lndir /home/admin/.lnd/data/chain/bitcoin/mainnet
 User=root
 Restart=always
 TimeoutSec=120
