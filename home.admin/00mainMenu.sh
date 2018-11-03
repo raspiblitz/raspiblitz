@@ -24,6 +24,12 @@ if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
 
+# check if RTL web interface is installed
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
+
+# get the local network IP to be displayed on the lCD
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
 # function to use later
 waitUntilChainNetworkIsReady()
 {
@@ -93,6 +99,10 @@ else
       OPTIONS+=(U "Unlock your Lightning Wallet with 'lncli unlock'")
 
     else
+
+      if [ ${runningRTL} -eq 1 ]; then
+        TITLE="Webinterface: http://${localip}:3000"
+      fi
 
       switchOption="to MAINNET"
       if [ "${chain}" = "main" ]; then

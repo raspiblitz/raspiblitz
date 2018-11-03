@@ -6,6 +6,12 @@
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+dialog --title "Install: Ride The Lightning"  --yesno "This is still experimental and very reckless:\nOnce your wallet is unlocked EVERYBODY in your\nlocal network can control your node with RTL!\nDo you really want to install RTL?" 6 40
+response=$?
+case $response in
+  0) exit 1 ;;
+esac
+
 echo "*** Check if RTL is installed ***"
 isInstalled=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
 if [ ${isInstalled} -eq 1 ]; then
