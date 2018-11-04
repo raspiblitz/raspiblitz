@@ -25,7 +25,7 @@ if [ ${isMainChain} -gt 0 ];then
 fi
 
 # check if RTL web interface is installed
-runningRTL=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')

@@ -7,7 +7,7 @@
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 echo "*** Check if RTL is installed ***"
-isInstalled=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
+isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 if [ ${isInstalled} -eq 1 ]; then
 
   echo "*** Dialog ***"
