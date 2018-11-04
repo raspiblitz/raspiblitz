@@ -139,6 +139,8 @@ else
 
       if [ ${runningRTL} -eq 0 ]; then
         OPTIONS+=(RTL "Install RTL Web Interface")  
+      else
+        OPTIONS+=(RTL "REMOVE RTL Web Interface")  
       fi
 
       # final Options

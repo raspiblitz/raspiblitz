@@ -9,13 +9,21 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 echo "*** Check if RTL is installed ***"
 isInstalled=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
 if [ ${isInstalled} -eq 1 ]; then
-  echo "!! FAIL - RTL Service is already installed."
-  echo "Try to open the following URL in your local webrowser"
-  echo "and unlock your wallet from there with PASSWORD C."
-  echo "---> http://${localip}:3000"
-  echo ""
-  echo "If its still not running, check service with:"
-  echo "sudo systemctl status RTL"
+
+  echo "*** Dialog ***"
+  dialog --title "Deinstall: Ride The Lightning Web Interface"  --yesno "RTL is installed. You you want to remove?" 5 50
+  response=$?
+  case $response in
+    1) exit 1 ;;
+  esac
+  clear
+
+  echo "*** REMOVING RTL ***"
+  sudo systemctl stop RTL
+  sudo systemctl disable RTL
+  sudo rm /etc/systemd/system/RTL.service
+  sudo rm -r /home/admin/RTL
+  echo "OK done."
   exit 1
 fi
 
@@ -25,6 +33,7 @@ response=$?
 case $response in
   1) exit 1 ;;
 esac
+clear
 
 # disable RPC listen
 # to prevent tls cer auth error
