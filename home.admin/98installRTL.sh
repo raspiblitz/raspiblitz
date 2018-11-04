@@ -6,6 +6,16 @@
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+# load network
+network=`sudo cat /home/admin/.network`
+
+# get chain
+chain="test"
+isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+if [ ${isMainChain} -gt 0 ];then
+  chain="main"
+fi
+
 echo "*** Check if RTL is installed ***"
 isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 if [ ${isInstalled} -eq 1 ]; then
@@ -63,8 +73,9 @@ sudo ufw --force enable
 echo ""
 
 # install service
-echo "*** Install RTL as a Boot Service (systemd) ***"
+echo "*** Install RTL systemd for ${network} on ${chain} ***"
 sudo cp /home/admin/assets/RTL.service /etc/systemd/system/RTL.service
+sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
 sudo systemctl enable RTL
 sudo systemctl start RTL
 sleep 2
