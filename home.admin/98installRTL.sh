@@ -6,12 +6,6 @@
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
-dialog --title "Install: Ride The Lightning"  --yesno "This is still experimental and very reckless:\nOnce your wallet is unlocked EVERYBODY in your\nlocal network can control your node with RTL!\nDo you really want to install RTL?" 6 40
-response=$?
-case $response in
-  0) exit 1 ;;
-esac
-
 echo "*** Check if RTL is installed ***"
 isInstalled=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
 if [ ${isInstalled} -eq 1 ]; then
@@ -24,6 +18,13 @@ if [ ${isInstalled} -eq 1 ]; then
   echo "sudo systemctl status RTL"
   exit 1
 fi
+
+echo "*** Dialog ***"
+dialog --title "Install: Ride The Lightning Web Interface"  --yesno "This is still experimental and very reckless:\nOnce your wallet is unlocked EVERYBODY in your\nLOCAL NETWORK can CONTROL YOUR NODE with RTL!\nDo you really want to install RTL?" 6 50
+response=$?
+case $response in
+  1) exit 1 ;;
+esac
 
 # disable RPC listen
 # to prevent tls cer auth error
@@ -70,7 +71,7 @@ echo "---> http://${localip}:3000"
 echo ""
 echo "RTL web server will now start with every new boot."
 echo "Always unlock your wallet from there now."
-echo "Just use RTL from same local network, dont forward"
+echo "Just use RTL from same local network, DONT forward"
 echo "port 3000 on your internet router to the RaspiBlitz."
 echo ""
 echo "Have fun 'Riding the Lightning' (RTL) :D"

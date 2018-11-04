@@ -137,6 +137,10 @@ else
         OPTIONS+=(NYX "Monitor TOR")  
       fi
 
+      if [ ${runningRTL} -eq 0 ]; then
+        OPTIONS+=(RTL "Install RTL Web Interface")  
+      fi
+
       # final Options
       OPTIONS+=(OFF "PowerOff RaspiBlitz")   
       OPTIONS+=(X "Console / Terminal")
@@ -254,6 +258,12 @@ case $CHOICE in
             ;;   
         TOR)
             sudo ./96addTorService.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        RTL)
+            sudo ./98installRTL.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
