@@ -32,7 +32,7 @@ while :
       dialog --backtitle "RaspiBlitz" --infobox "$l1$l2$l3" 5 30
       sleep 3
 
-    elif [ ${localip:0:4} = "169." ]; then
+    elif [ "${localip:0:4}" = "169." ]; then
 
       # waiting for IP in general
       l1="Waiting for DHCP ...\n"
@@ -174,7 +174,7 @@ while :
         fi
 
       fi
-      
+
     fi
 
   done
