@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ### USER PI AUTOSTART (LCD Display)
 # this script gets started by the autologin of the pi user and
@@ -23,7 +23,7 @@ while :
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     dhcpMissing=
 
-    if [ ${#localip} -eq 0 ];then
+    if [ ${#localip} -eq 0 ]; then
 
       # waiting for IP in general
       l1="Waiting for Network ...\n"
