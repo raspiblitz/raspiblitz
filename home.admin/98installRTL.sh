@@ -20,7 +20,7 @@ if [ ${isInstalled} -eq 1 ]; then
 fi
 
 echo "*** Dialog ***"
-dialog --title "Install: Ride The Lightning Web Interface"  --yesno "This is still experimental and very reckless:\nOnce your wallet is unlocked EVERYBODY in your\nLOCAL NETWORK can CONTROL YOUR NODE with RTL!\nDo you really want to install RTL?" 6 50
+dialog --title "Install: Ride The Lightning Web Interface"  --yesno "This is still experimental and very reckless:\nOnce your wallet is unlocked EVERYBODY in your\nLOCAL NETWORK can CONTROL YOUR NODE with RTL!\nDo you really want to install RTL?" 8 50
 response=$?
 case $response in
   1) exit 1 ;;
