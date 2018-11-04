@@ -114,7 +114,7 @@ fi
 
 # check if RTL web interface is installed
 webinterfaceInfo=""
-runningRTL=$(sudo ls /etc/systemd/system/RTL.service | grep -c 'RTL.service')
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 if [ ${runningRTL} -eq 1 ]; then
   webinterfaceInfo="web admin --> ${color_green}http://${local_ip}:3000"
 fi
