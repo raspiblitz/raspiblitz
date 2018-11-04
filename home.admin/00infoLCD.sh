@@ -13,6 +13,9 @@ fi
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+# check if RTL web interface is installed
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+
 # DISPLAY LOOP
 chain=""
 freshstart=1
@@ -75,6 +78,10 @@ while :
         l1="!!! LND WALLET IS LOCKED !!!\n"
         l2="Login: ssh admin@${localip}\n"
         l3="Use your Password A\n"
+        if [ ${runningRTL} -eq 1 ]; then
+            l2="Open: http://${localip}:3000\n"
+            l3="Use Password C to unlock\n"
+        fi
         boxwidth=$((${#localip} + 24))
         dialog --backtitle "RaspiBlitz ${localip} - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
@@ -127,6 +134,10 @@ while :
           l1="!!! LND WALLET IS LOCKED !!!\n"
           l2="Login: ssh admin@${localip}\n"
           l3="Use your Password A\n"
+          if [ ${runningRTL} -eq 1 ]; then
+            l2="Open: http://${localip}:3000\n"
+            l3="Use Password C to unlock\n"
+          fi
           boxwidth=$((${#localip} + 24))
           dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
           sleep 5
