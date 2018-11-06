@@ -43,7 +43,8 @@ while [ ${chainIsReady} -eq 0 ]
       if [ "${chain}"  = "test" ]; then
        testnetAdd="testnet3/"
       fi
-      sudo tail -n 5 /mnt/hdd/bitcoin/${testnetAdd}debug.log
+      sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
+      echo "If you see an error -28 relax, just give it some time."
       echo "Waiting 1 minute and then trying again ..."
       sleep 60
       echo ""

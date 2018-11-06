@@ -1,0 +1,17 @@
+# Raspibolt RTL: systemd unit for RTL
+# /etc/systemd/system/RTL.service
+
+[Unit]
+Description=RTL daemon
+Wants=lnd.service
+After=lnd.service
+
+[Service]
+ExecStart=/usr/bin/node /home/admin/RTL/rtl --lndir /home/admin/.lnd/data/chain/bitcoin/mainnet
+User=root
+Restart=always
+TimeoutSec=120
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
