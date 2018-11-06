@@ -53,13 +53,8 @@ else
 fi
 
 # get network traffic
-if ifconfig | grep -q "eth0"; then
-  network_interface="eth0"
-else
-  network_interface="wlan0"
-fi
-network_rx=$(ifconfig ${network_interface} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-network_tx=$(ifconfig ${network_interface} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
