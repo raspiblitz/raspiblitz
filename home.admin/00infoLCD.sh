@@ -121,8 +121,7 @@ if [ "$USER" = "pi" ]; then
         else
 
           # no special case - show status display
-	        # /home/admin/00infoBlitz.sh
-	        /home/admin/00infoBlitz.py
+	        /home/admin/00infoBlitz.sh
 	        sleep 5
 	      
         fi

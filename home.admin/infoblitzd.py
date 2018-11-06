@@ -1525,8 +1525,6 @@ def main():
 
     usage = "usage: %prog [Options]"
     parser = OptionParser(usage=usage, version="%prog {}".format(BOARD_VERSION))
-    parser.add_option("-l", "--loop", dest="loop", action="store_true",
-                      help="run in a loop (CTRL+c to exit)")
 
     parser.add_option("-H", "--host", dest="host", type="string", default="localhost",
                       help="Host to listen on (default localhost)")
