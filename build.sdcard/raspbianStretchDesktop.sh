@@ -9,16 +9,85 @@
 ##########################################################################
 
 echo ""
-echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.93*"
-echo "***************************************"
+echo "****************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.95 *"
+echo "****************************************"
 echo ""
 
 echo ""
-echo "*** RASPI CONFIG ***"
+echo "*** CHECK BASE IMAGE ***"
+
+# armv7=32Bit , armv8=64Bit
+echo "Check if Linux ARM based ..." 
+isARM=$(uname -m | grep -c 'arm')
+if [ ${isARM} -eq 0 ]; then
+  echo "!!! FAIL !!!"
+  echo "Can just build on ARM Linux, not on:"
+  uname -m
+  exit 1
+fi
+echo "OK running on Linux ARM architecture."
+
+# keep in mind thet DietPi for Raspberry is also a stripped down Raspbian
+echo "Detect Base Image ..." 
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+if [ "${baseImage}" = "?" ]; then
+  cat /etc/os-release 2>/dev/null
+  echo "!!! FAIL !!!"
+  echo "Base Image cannot be detected or is not supported."
+  exit 1
+else
+  echo "OK running ${baseImage}"
+fi
+
+# update debian
+echo ""
+echo "*** UPDATE DEBIAN ***"
+sudo apt-get update
+sudo apt-get upgrade -f -y --allow-change-held-packages
+
+# special prepare when DietPi
+if [ "${baseImage}" = "dietpi" ]; then
+  echo ""
+  echo "*** PREPARE DietPi ***"
+  echo "renaming dietpi user ti pi"
+  sudo usermod -l pi dietpi
+  echo "install pip"
+  sudo apt-get update
+  sudo apt-get remove -y fail2ban
+  sudo apt-get install -y build-essential
+  sudp apt-get install -y python-pip
+fi
+
+# special prepare when Raspbian
+if [ "${baseImage}" = "raspbian" ]; then
+  echo ""
+  echo "*** PREPARE Raspbian ***"
+  # do memory split (16MB)
+  sudo raspi-config nonint do_memory_split 16
+  # set to wait until network is available on boot (0 seems to yes)
+  sudo raspi-config nonint do_boot_wait 0
+  # set WIFI country so boot does not block
+  sudo raspi-config nonint do_wifi_country US
+  # extra: remove some big packages not needed
+  sudo apt-get remove -y --purge libreoffice*
+  sudo apt-get clean
+  sudo apt-get -y autoremove
+fi
+
+echo ""
+echo "*** CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
 
-# set new default passwort for pi and root user
+# set new default passwort for root user
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
@@ -29,30 +98,12 @@ sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autol
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
-# do memory split (16MB)
-sudo raspi-config nonint do_memory_split 16
-
-# set to wait until network is available on boot (0 seems to yes)
-sudo raspi-config nonint do_boot_wait 0
-
-# autodetect and set your timezone
-pip install -U tzupdate
-sleep 2
-sudo tzupdate
-
 echo ""
 echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
 sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
-
-# extra: remove some big packages not needed
-sudo apt-get remove -y --purge libreoffice*
-sudo apt-get clean
-sudo apt-get -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
@@ -83,13 +134,6 @@ sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
 echo ""
-echo "*** HARDENING ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
-
-# fail2ban (no config required)
-sudo apt-get install -y fail2ban
-
-echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#increase-your-open-files-limit
 
@@ -117,13 +161,13 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz" ]
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
+if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/SHA256SUMS.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 if [ ! -f "./SHA256SUMS.asc" ]
 then
     echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
@@ -164,7 +208,7 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # install
-sudo -u admin tar -xvf bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
+sudo -u admin tar -xvf bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
 sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
@@ -244,16 +288,16 @@ echo "*** LND ***"
 ##### Build from Source
 # To quickly catch up get latest patches if needed
 repo="github.com/lightningnetwork/lnd"
-commit="25145acc46cc5d18e4e348eed097300b1391d2a7"
+commit="61e867741926bcb318432a6344b80161fabd1455"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
-if [ ! -f "./go1.10.linux-armv6l.tar.gz" ]
+wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.10.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
 sudo chmod 777 /usr/local/gocode
@@ -325,14 +369,29 @@ sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
 sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
 sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 
-# create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
-cat > /home/pi/setup.sh <<EOF
+# create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
+cat > /home/admin/setup.sh <<EOF
 
 # make LCD screen rotation correct
 sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
-sudo chmod +x /home/pi/setup.sh
+sudo chmod +x /home/admin/setup.sh
+
+echo ""
+echo "*** HARDENING ***"
+# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
+
+# fail2ban (no config required)
+sudo apt-get install -y fail2ban
+
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BOOSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""

@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+# load code software version
+source /home/admin/_version.info
 
 # set colors
 color_red='\033[0;31m'
@@ -38,16 +41,8 @@ else
   color_ram=${color_green}
 fi
 
-# get storage
-sd_free_ratio=$(printf "%d" "$(df -h | grep "/$" | awk '{ print $4/$2*100 }')") 2>/dev/null
-sd=$(printf "%s (%s%%)" "$(df -h | grep '/$' | awk '{ print $4 }')" "${sd_free_ratio}")
-if [ ${sd_free_ratio} -lt 10 ]; then
-  color_sd="${color_red}"
-else
-  color_sd=${color_green}
-fi
-
-hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')") 2>/dev/null
+# get free HDD ratio
+hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')" 2>/dev/null)
 hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
 
 if [ ${hdd_free_ratio} -lt 10 ]; then
@@ -64,12 +59,12 @@ network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[
 btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
   btc_title=$network
-  blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo)"
+  blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo 2>/dev/null)"
   if [ ${#blockchaininfo} -gt 0 ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
+    block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
 
@@ -95,13 +90,13 @@ if [ -n ${btc_path} ]; then
     fi
 
     # get last known block
-    last_block="$(${network}-cli -datadir=${bitcoin_dir} getblockcount)"
+    last_block="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     if [ ! -z "${last_block}" ]; then
       btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
     fi
 
     # get mem pool transactions
-    mempool="$(${network}-cli -datadir=${bitcoin_dir} getmempoolinfo | jq -r '.size')"
+    mempool="$(${network}-cli -datadir=${bitcoin_dir} getmempoolinfo 2>/dev/null | jq -r '.size')"
 
   else
     btc_line2="${color_red}NOT RUNNING\t\t"
@@ -109,33 +104,29 @@ if [ -n ${btc_path} ]; then
 fi
 
 # get IP address & port
+networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-public_port=$(cat ${bitcoin_dir}/${network}.conf 2>/dev/null | grep port= | awk -F"=" '{print $2}')
-if [ "${public_port}" = "" ]; then
-  if [ "${network}" = "litecoin" ]; then
-    if [ "${chain}"  = "test" ]; then
-      public_port=19333
-    else
-      public_port=9333
-    fi
-  else
-    if [ "${chain}"  = "test" ]; then
-      public_port=18333
-    else
-      public_port=8333
-    fi
-  fi
+public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
+if [ "${public_port}" = "null" ]; then
+  public_port="8333"
+fi
+
+# check if RTL web interface is installed
+webinterfaceInfo=""
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+if [ ${runningRTL} -eq 1 ]; then
+  webinterfaceInfo="web admin --> ${color_green}http://${local_ip}:3000"
 fi
 
 # CHAIN NETWORK
 public_addr="??"
 torInfo=""
 # Version
-networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version | cut -d ' ' -f6)
+networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
-onionAddress=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-if [ ${#onionAddress} -gt 0 ]; then
+onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
+if [ "${onionAddress}" != "null" ]; then
   # TOR address
   public_addr="${onionAddress}:${public_port}"
   public=""
@@ -144,7 +135,7 @@ if [ ${#onionAddress} -gt 0 ]; then
 else
   # IP address
   public_addr="${public_ip}:${public_port}"
-  public_check=$(timeout 2s nc -z ${public_ip} ${public_port}; echo $?)
+  public_check=$(timeout 2s nc -z ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     public="Yes"
     public_color="${color_green}"
@@ -154,16 +145,13 @@ else
   fi
 fi
 
-#IP
-
-
 # LIGHTNING NETWORK
 
 ln_baseInfo="-"
 ln_channelInfo="\n"
-ln_external=""
+ln_external="\n"
 
-wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
@@ -177,8 +165,8 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
-      total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.blocks')
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')  
+      total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
         ln_channelInfo="scanning ${item}/${total}"
@@ -205,7 +193,7 @@ ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
-${color_yellow} .'____    ,'  ${color_gray}
+${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}
 ${color_yellow}    /,'        ${color_gray}
@@ -214,7 +202,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
 " \
-"RaspiBlitz v0.93" \
+"RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"

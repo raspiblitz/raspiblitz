@@ -71,7 +71,7 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-command="lncli --chain=${network} sendpayment --pay_req=${invoice}"
+command="lncli --chain=${network} sendpayment --force --pay_req=${invoice}"
 
 # info output
 clear

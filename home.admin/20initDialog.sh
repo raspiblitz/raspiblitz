@@ -78,15 +78,3 @@ sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/a
 # success info dialog
 dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
 clear
-
-# init get publicip service
-getpublicipExists=$(sudo ls /usr/local/bin/getpublicip.sh 2>/dev/null | grep "getpublicip.sh" -c)
-if [ ${getpublicipExists} -eq 0 ]; then
-  echo "*** Installing getPublic ip script and service *** "
-  sudo cp ./assets/getpublicip.sh /usr/local/bin/getpublicip.sh
-  sudo chmod +x /usr/local/bin/getpublicip.sh
-  sudo cp ./assets/getpublicip.service /etc/systemd/system/getpublicip.service
-  sudo systemctl enable getpublicip
-  sudo systemctl start getpublicip
-  echo ""
-fi

@@ -1,7 +1,7 @@
 [Unit]
 Description=Bitcoin daemon
-Wants=getpublicip.service
-After=getpublicip.service
+Wants=bootstrap.service
+After=bootstrap.service
 
 # for use with sendmail alert (coming soon)
 #OnFailure=systemd-sendmail@%n

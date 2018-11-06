@@ -24,6 +24,37 @@ if [ ${isMainChain} -gt 0 ];then
   chain="main"
 fi
 
+# check if RTL web interface is installed
+runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+
+# get the local network IP to be displayed on the lCD
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
+# function to use later
+waitUntilChainNetworkIsReady()
+{
+    while :
+    do
+      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
+      clienterror=`cat error.tmp`
+      rm error.tmp
+      if [ ${#clienterror} -gt 0 ]; then
+        l1="Waiting for ${network}d to get ready.\n"
+        l2="---> Starting Up\n"
+        l3="Can take longer if devcie was off."
+        isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
+        if [ ${isVerifying} -gt 0 ]; then
+          l2="---> Verifying Blocks\n"
+        fi
+        boxwidth=40
+        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        sleep 5
+      else
+        return
+      fi  
+    done    
+}
+
 ## get actual setup state
 setupState=0;
 if [ -f "/home/admin/.setup" ]; then
@@ -41,12 +72,8 @@ if [ ${setupState} -eq 0 ]; then
 
 elif [ ${setupState} -lt 100 ]; then
 
-    # make sure to have a init pause aufter fresh boot
-    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
-    waittimesecs=$(expr 150 - $uptimesecs)
-    if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
-    fi
+    # see function above
+    waitUntilChainNetworkIsReady
 
     # continue setup
     BACKTITLE="${name} / ${network} / ${chain}"
@@ -57,12 +84,8 @@ elif [ ${setupState} -lt 100 ]; then
 
 else
 
-    # make sure to have a init pause aufter fresh boot
-    uptimesecs=$(awk '{print $1}' /proc/uptime | awk '{print int($1)}')
-    waittimesecs=$(expr 150 - $uptimesecs)
-    if [ ${waittimesecs} -gt 0 ]; then
-      dialog --pause "  Waiting for ${network} to startup and init ..." 8 58 ${waittimesecs}
-    fi
+    # see function above
+    waitUntilChainNetworkIsReady
 
     # MAIN MENU AFTER SETUP
 
@@ -77,6 +100,10 @@ else
 
     else
 
+      if [ ${runningRTL} -eq 1 ]; then
+        TITLE="Webinterface: http://${localip}:3000"
+      fi
+
       switchOption="to MAINNET"
       if [ "${chain}" = "main" ]; then
         switchOption="back to TESTNET"
@@ -90,6 +117,7 @@ else
         CHANNEL "Open a Channel with Peer" \
         SEND "Pay an Invoice/PaymentRequest" \
         RECEIVE "Create Invoice/PaymentRequest" \
+        SERVICES "Activate/Deactivate Services" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
         MOBILE "Connect Mobile Wallet")
@@ -109,8 +137,15 @@ else
         OPTIONS+=(NYX "Monitor TOR")  
       fi
 
+      if [ ${runningRTL} -eq 0 ]; then
+        OPTIONS+=(RTL "Install RTL Web Interface")  
+      else
+        OPTIONS+=(RTL "REMOVE RTL Web Interface")  
+      fi
+
       # final Options
-      OPTIONS+=(X "Console / Terminal")   
+      OPTIONS+=(OFF "PowerOff RaspiBlitz")   
+      OPTIONS+=(X "Console / Terminal")
 
     fi
 
@@ -150,7 +185,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         lnbalance)
-            lnbalance
+            lnbalance ${network}
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
@@ -160,7 +195,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         lnchannels)
-            lnchannels
+            lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
@@ -201,6 +236,10 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;  
+        SERVICES)
+            ./00settingsMenuServices.sh
+            ./00mainMenu.sh
+            ;;              
         CLOSEALL)
             ./BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
@@ -224,6 +263,19 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
+            ;;
+        RTL)
+            sudo ./98installRTL.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;   
+        OFF)
+            echo "After Shutdown remove power from RaspiBlitz."
+            echo "Press ENTER to start shutdown - then wait some seconds."
+            read key
+            sudo shutdown now
+            exit 0
             ;;   
         X)
             lncli -h
