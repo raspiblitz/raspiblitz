@@ -28,7 +28,7 @@ if [ ${isARM} -eq 0 ]; then
 fi
 echo "OK running on Linux ARM architecture."
 
-# keep in mind thet DietPi for Raspberry is also a stripped down Raspbian
+# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 echo "Detect Base Image ..." 
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
