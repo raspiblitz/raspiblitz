@@ -50,6 +50,7 @@ while [ ${chainIsReady} -eq 0 ]
       echo ""
     else
       echo "OK - chainnetwork is working"
+      echo ""
       chainIsReady=1
       break
     fi
