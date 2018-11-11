@@ -190,8 +190,10 @@ if [ ${macaroonExists} -eq 0 ]; then
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
   sudo chown -R admin:admin /home/admin/.lnd/
   echo "OK - LND Macaroons created"
+  echo ""
 else
   echo "OK - Macaroons are already copied"
+  echo ""
 fi
 
 ###### Unlock Wallet (if needed)
