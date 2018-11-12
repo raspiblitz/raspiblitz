@@ -41,7 +41,7 @@ waitUntilChainNetworkIsReady()
       if [ ${#clienterror} -gt 0 ]; then
         l1="Waiting for ${network}d to get ready.\n"
         l2="---> Starting Up\n"
-        l3="Can take longer if devcie was off."
+        l3="Can take longer if device was off."
         isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
         if [ ${isVerifying} -gt 0 ]; then
           l2="---> Verifying Blocks\n"
