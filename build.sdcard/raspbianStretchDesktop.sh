@@ -28,7 +28,7 @@ if [ ${isARM} -eq 0 ]; then
 fi
 echo "OK running on Linux ARM architecture."
 
-# keep in mind thet DietPi for Raspberry is also a stripped down Raspbian
+# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 echo "Detect Base Image ..." 
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
@@ -78,7 +78,7 @@ if [ "${baseImage}" = "raspbian" ]; then
   # set WIFI country so boot does not block
   sudo raspi-config nonint do_wifi_country US
   # extra: remove some big packages not needed
-  sudo apt-get remove -y --purge libreoffice*
+  sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
   sudo apt-get clean
   sudo apt-get -y autoremove
 fi

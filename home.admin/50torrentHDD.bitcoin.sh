@@ -223,7 +223,7 @@ targetPath2="${targetDir}/${updateTorrentFile}"
 echo ""
 echo "*** Moving Files ***"
 date +%s
-echo "can take some minutes ... öease wait"
+echo "can take some minutes... please wait"
 
 sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
 sudo mv ${targetPath1}/* /mnt/hdd/bitcoin/
