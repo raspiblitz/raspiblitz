@@ -75,16 +75,16 @@ if [ -n ${btc_path} ]; then
       sync="OK"
       sync_color="${color_green}"
       sync_behind=" "
-    elif [ ${block_diff} -eq 1 ]; then          # fully synced
+    elif [ ${block_diff} -eq 1 ]; then   # fully synced
       sync="OK"
       sync_color="${color_green}"
       sync_behind="-1 block"
-    elif [ ${block_diff} -le 10 ]; then    # <= 2 blocks behind
-      sync="catchup"
+    elif [ ${block_diff} -le 10 ]; then   # <= 2 blocks behind
+      sync=""
       sync_color="${color_red}"
       sync_behind="-${block_diff} blocks"
     else
-      sync="progress"
+      sync=""
       sync_color="${color_red}"
       sync_behind="${sync_percentage}"
     fi
