@@ -288,7 +288,7 @@ echo "*** LND ***"
 ##### Build from Source
 # To quickly catch up get latest patches if needed
 repo="github.com/lightningnetwork/lnd"
-commit="61e867741926bcb318432a6344b80161fabd1455"
+commit="4da1c867c3209dab4e4a824b73d89fc38b616b37"
 # BUILDING LND FROM SOURCE
 echo "*** Installing Go ***"
 wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
@@ -340,6 +340,7 @@ sudo apt-get -y install exfat-fuse
 
 # for blockchain torrent download
 sudo apt-get -y install transmission-cli
+sudo apt-get -y install rtorrent
 
 # for background downloading
 sudo apt-get -y install screen
