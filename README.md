@@ -73,7 +73,6 @@ https://wiki.fulmo.org/downloads/raspiblitz-2018-10-20.img.gz (or [build your ow
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
-
 ## Boot your RaspiBlitz
 
 Connect all hardware like on photo and boot it up by connecting the power.
