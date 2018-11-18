@@ -210,13 +210,13 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # correct versions for install if needed
-if [ "${bitcoinVersion}" = "0.17.0.1"]; then 
+if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
  bitcoinVersion="0.17.0"
 fi 
 
 # install
 sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin/bitcoin-${bitcoinVersion}/bin/*
+sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
@@ -259,95 +259,100 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
-#lndVersion="0.5-beta-rc1"
-#olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
-#
-# get LND resources
-#cd /home/admin/download
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/lnd-linux-arm-v${lndVersion}.tar.gz
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-#sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
-## test checksum
-#checksum=$(sha256sum --check manifest-v${lndVersion}.txt --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
-#if [ ${checksum} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND download checksum not OK"
-#  exit 1
-#fi
-## check gpg finger print
-#fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
-#if [ ${fingerprint} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-#  exit 1
-#fi
-#gpg --import ./pgp_keys.asc
-#sleep 2
-#verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig manifest-v${lndVersion}.txt 2>&1)
-#goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-#echo "goodSignature(${goodSignature})"
-#correctKey=$(echo ${verifyResult} |  grep "using RSA key ${olaoluwaPGP: -16}" -c)
-#echo "correctKey(${correctKey})"
-#if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-#    exit 1
-#fi
-## install
-#sudo -u admin tar -xzf lnd-linux-arm-v${lndVersion}.tar.gz
-#sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-arm-v${lndVersion}/*
-#sleep 3
-#installed=$(sudo -u admin lnd --version | grep "${lndVersion}" -c)
-#if [ ${installed} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> Was not able to install LND version(${lndVersion})"
-#  exit 1
-#fi
+lndVersion="0.5-beta"
+lndSHA256="f3d578e90061541935e0de888a40377d5131bb5008317ff8af11e245fe2c8510"
+olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
-##### Build from Source
-# To quickly catch up get latest patches if needed
-repo="github.com/lightningnetwork/lnd"
-commit="4da1c867c3209dab4e4a824b73d89fc38b616b37"
-# BUILDING LND FROM SOURCE
-echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
-then
-    echo "!!! FAIL !!! Download not success."
+# get LND resources
+cd /home/admin/download
+binaryName="lnd-linux-armv7-v${lndVersion}.tar.gz"
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
+
+# check binary is was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
-sudo rm *.gz
-sudo mkdir /usr/local/gocode
-sudo chmod 777 /usr/local/gocode
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-export GOPATH=/usr/local/gocode
-export PATH=$PATH:$GOPATH/bin
-echo "*** Build LND from Source ***"
-go get -d $repo
-# make sure to always have the same code (commit) to build
-# TODO: To update lnd -> change to latest commit
-cd $GOPATH/src/$repo
-sudo git checkout $commit
-make && make install
-sudo chmod 555 /usr/local/gocode/bin/lncli
-sudo chmod 555 /usr/local/gocode/bin/lnd
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
-lndVersionCheck=$(lncli --version)
-echo "LND VERSION: ${lndVersionCheck}"
-if [ ${#lndVersionCheck} -eq 0 ]; then
-  echo "FAIL - Something went wrong with building LND from source."
-  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
+
+# check gpg finger print
+fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
+if [ ${fingerprint} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> LND download author PGP not OK"
   exit 1
 fi
-echo ""
-echo "** Link to /usr/local/bin ***"
-sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
-sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
+gpg --import ./pgp_keys.asc
+sleep 3
+verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
+goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+echo "goodSignature(${goodSignature})"
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${olaoluwaPGP}" -c)
+echo "correctKey(${correctKey})"
+if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+    exit 1
+fi
+
+# install
+sudo -u admin tar -xzf ${binaryName}
+sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-armv7-v${lndVersion}/*
+sleep 3
+installed=$(sudo -u admin lnd --version)
+if [ ${#installed} -eq 0 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> Was not able to install LND"
+  exit 1
+fi
+
+##### Build from Source
+## To quickly catch up get latest patches if needed
+#repo="github.com/lightningnetwork/lnd"
+#commit="3f57f65bf0cb710159b0182391d1d75e9e3005bc"
+## BUILDING LND FROM SOURCE
+#echo "*** Installing Go ***"
+#wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+#if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+#then
+#    echo "!!! FAIL !!! Download not success."
+#    exit 1
+#fi
+#sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+#sudo rm *.gz
+#sudo mkdir /usr/local/gocode
+#sudo chmod 777 /usr/local/gocode
+#export GOROOT=/usr/local/go
+#export PATH=$PATH:$GOROOT/bin
+#export GOPATH=/usr/local/gocode
+#export PATH=$PATH:$GOPATH/bin
+#echo ""
+#echo "*** Build LND from Source ***"
+#go get -d $repo
+## make sure to always have the same code (commit) to build
+## TODO: To update lnd -> change to latest commit
+#cd $GOPATH/src/$repo
+#sudo git checkout $commit
+#make && make install
+#sudo chmod 555 /usr/local/gocode/bin/lncli
+#sudo chmod 555 /usr/local/gocode/bin/lnd
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
+#lndVersionCheck=$(lncli --version)
+#echo "LND VERSION: ${lndVersionCheck}"
+#if [ ${#lndVersionCheck} -eq 0 ]; then
+#  echo "FAIL - Something went wrong with building LND from source."
+#  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
+#  exit 1
+#fi
+#echo ""
+#echo "** Link to /usr/local/bin ***"
+#sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
+#sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
