@@ -50,7 +50,7 @@ Thats why there are two torrent files now:
 Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - that will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
 
 At the moment this is just the bitcoin blk and rev files up to the number:
-- /blocks : 01385
+- /blocks : 01390
 - /testnet3/blocks: 00152
 
 For litecoin its blk and rev files up to the number:
