@@ -29,8 +29,5 @@ if [ ${#command} -gt 0 ]; then
 fi
  
 echo ""
-echo "OK - wait a 5 seconds"
+echo "OK - please recheck if channels really closed"
 sleep 5
-
-echo "Your Open Channel List (to check):" 
-lnchannels
