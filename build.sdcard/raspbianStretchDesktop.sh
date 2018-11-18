@@ -153,7 +153,13 @@ echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.17.0"
+bitcoinVersion="0.17.0.1"
+
+# needed to make sure download is not changed
+# calulate with sha256sum and also check with SHA256SUMS.asc
+bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
+
+# needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
@@ -161,18 +167,21 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz" ]
+binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-if [ ! -f "./SHA256SUMS.asc" ]
-then
-    echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
+
+# check binary is was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
     exit 1
 fi
+
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
 then
@@ -224,9 +233,22 @@ echo "*** LITECOIN ***"
 
 # set version (change if update is available)
 litecoinVersion="0.16.3"
+litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
 cd /home/admin/download
-sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
-sudo -u admin tar -xvf litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
+
+# download
+binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+
+# check download
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+    exit 1
+fi
+
+# install
+sudo -u admin tar -xvf ${binaryName}
 sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
 installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
