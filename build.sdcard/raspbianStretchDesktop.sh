@@ -209,9 +209,14 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   exit 1
 fi
 
+# correct versions for install if needed
+if [ "${bitcoinVersion}" = "0.17.0.1"]; then 
+ bitcoinVersion="0.17.0"
+fi 
+
 # install
 sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
+sudo install -m 0755 -o root -g root -t /usr/local/bin/bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
