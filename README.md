@@ -73,7 +73,6 @@ https://wiki.fulmo.org/downloads/raspiblitz-2018-10-20.img.gz (or [build your ow
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
-
 ## Boot your RaspiBlitz
 
 Connect all hardware like on photo and boot it up by connecting the power.
@@ -222,7 +221,7 @@ And if you scroll down .. you see even more feature options:
 
 ### Features
 
-But you manually extened your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
+You can manually extend your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
 
 Already integrated features of the RaspiBlitz are/will be listed as part of the main menu after connecting via ssh as admin user.
 
