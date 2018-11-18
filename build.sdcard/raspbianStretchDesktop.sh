@@ -182,22 +182,14 @@ if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
     exit 1
 fi
 
+
+# check gpg finger print
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
 then
     echo "!!! FAIL !!! Download laanwj-releases.asc not success."
     exit 1
 fi
-
-# test checksum
-checksum=$(sha256sum --check SHA256SUMS.asc --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
-if [ ${checksum} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Bitcoin download checksum not OK"
-  exit 1
-fi
-
-# check gpg finger print
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
@@ -217,7 +209,7 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # install
-sudo -u admin tar -xvf bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz
+sudo -u admin tar -xvf ${binaryName}
 sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
