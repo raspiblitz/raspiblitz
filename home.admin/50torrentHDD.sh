@@ -21,8 +21,8 @@ echo "*** Torrent Files ***"
 bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
 bitcoinUpdate="raspiblitz-bitcoin1-2018-10-13-update"
 
-litecoinBase="raspiblitz-bitcoin1-2018-10-13-base"
-litecoinUpdate="raspiblitz-bitcoin1-2018-10-13-update"
+litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
+litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
 
 # set final based on selected network
 baseTorrentFile=bitcoinBase
