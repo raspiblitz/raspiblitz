@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2018-06-27)
+# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 8636ab9fdd8f58a8ec7dde33b83747696d31711d17ef68267dbbcd6cfb968c24
+# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
