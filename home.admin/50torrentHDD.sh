@@ -25,8 +25,8 @@ litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
 litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
 
 # set final based on selected network
-baseTorrentFile=bitcoinBase
-updateTorrentFile=bitcoinUpdate
+baseTorrentFile=${bitcoinBase}
+updateTorrentFile=${bitcoinUpdate}
 if [ "$network" = "litecoin" ]; then
   baseTorrentFile=litecoinBase
   updateTorrentFile=litecoinUpdate
