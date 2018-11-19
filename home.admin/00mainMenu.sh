@@ -73,7 +73,9 @@ if [ ${setupState} -eq 0 ]; then
 elif [ ${setupState} -lt 100 ]; then
 
     # see function above
-    waitUntilChainNetworkIsReady
+    if [ ${setupState} -gt 59 ]; then
+      waitUntilChainNetworkIsReady
+    fi  
 
     # continue setup
     BACKTITLE="${name} / ${network} / ${chain}"
