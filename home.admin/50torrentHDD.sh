@@ -248,7 +248,7 @@ if [ ${torrentError} -gt 0 ]; then
   dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try FTP download next time. Do you want keep already downloaded torrent data?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir} ;;
+    1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;
   esac
   ./00mainMenu.sh
   exit 1;
