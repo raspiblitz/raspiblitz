@@ -28,8 +28,8 @@ litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
 baseTorrentFile=${bitcoinBase}
 updateTorrentFile=${bitcoinUpdate}
 if [ "$network" = "litecoin" ]; then
-  baseTorrentFile=litecoinBase
-  updateTorrentFile=litecoinUpdate
+  baseTorrentFile=${litecoinBase}
+  updateTorrentFile=${litecoinUpdate}
 fi
 echo "base   : ${baseTorrentFile}"
 echo "update : ${updateTorrentFile}"
