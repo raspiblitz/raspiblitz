@@ -113,8 +113,9 @@ if [ ${mountOK} -eq 1 ]; then
 
     echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "If you want start fresh --> sudo rm -r /mnt/hdd/${network}"
     echo "Or something with the config is not correct."
+    echo "Sometimes a reboot helps --> sudo shutdown -r now"
+
     exit 1
   fi
 
