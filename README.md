@@ -161,7 +161,7 @@ For more details: [Background on Download Blockchain](background_downloadBlockch
 
 #### Copy the Blockchain
 
-To copy the blockchain from another HDD can be faster - if available. If you choose this option the, the console requests you to connect the second HDD and will autmatically detect it:
+To copy the blockchain from another HDD can be faster - if available. If you choose this option, the console requests you to connect the second HDD and will autmatically detect it:
 
 ![SSH6b](pictures/ssh6b-copy.png)
 
@@ -181,7 +181,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 #### Lightning
 
-Before the lighting service can be started the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
+Before the lighting service can be started, the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
 ![SSH7](pictures/ssh7-lndinit.png)
 
@@ -261,7 +261,7 @@ Thanks to @RobEdb (ask on twitter for more details) running his demo store with 
 
 ## Build the SD Card Image
 
-A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everbody started quickly. But if you want to build that image yourself - here is a quick guide:
+A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everybody started quickly. But if you want to build that image yourself - here is a quick guide:
 
 * Get a fresh Rasbian RASPBIAN STRETCH WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/)
 * Write image to a SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) 
@@ -274,7 +274,7 @@ Now you are ready to start the SD card build script - copy the following command
 
 As you can see from the URL you find the build script in this Git repo under `build.sdcard/raspbianStretchDesktop.sh`- there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
 
-The whole build process takes a while. And the end the LCD drives get installed and a reboot is needed. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use root: `ssh root@[IP-OF-YOUR-RASPI]` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the actovity LED of the pi starts going dark. You can unplug power and remove the SD card. You have now build your own RaspiBlitz sd card image. 
+The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. An installer of the SD card image should automatically launch. If you do not want to continue with the installation at this moment, click `Cancel` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image. 
 
 *Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
