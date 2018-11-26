@@ -259,6 +259,18 @@ You can find setup instructions here: https://goo.gl/KnTzLu
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
+## Get a Debug Report
+
+If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
+
+- ssh into your raspiblitz as admin user with your password A
+- If you see the menu - use CTRL+C to get to the terminal
+- If your RaspiBlitz is lower then version 0.96 then run: `./XXupdateScripts.sh` first
+- To generate debug report run: `./XXdebugLogs.sh`
+- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+
+PLEASE NOTICE: Its possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.
+
 ## Build the SD Card Image
 
 A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everybody started quickly. But if you want to build that image yourself - here is a quick guide:
