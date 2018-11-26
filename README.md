@@ -309,7 +309,7 @@ We know that this is not optimal yet. But until version 1.0 we will change too m
 
 From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
 
-## Recover your Coins from a failing Blitz
+## Recover your Coins from a failing RaspiBlitz
 
 You might run into a situation where your hardware fails or the software starts to act buggy. So you decide to setup a fresh RaspiBlitz, like in the chapter above "Update to a new SD Card Release" - but the closing channels and cashing out is not working anymore. So whats about the funds you already have on your failing setup?
 
