@@ -161,7 +161,7 @@ For more details: [Background on Download Blockchain](background_downloadBlockch
 
 #### Copy the Blockchain
 
-To copy the blockchain from another HDD can be faster - if available. If you choose this option the, the console requests you to connect the second HDD and will autmatically detect it:
+To copy the blockchain from another HDD can be faster - if available. If you choose this option, the console requests you to connect the second HDD and will autmatically detect it:
 
 ![SSH6b](pictures/ssh6b-copy.png)
 
@@ -181,7 +181,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 #### Lightning
 
-Before the lighting service can be started the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
+Before the lighting service can be started, the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
 ![SSH7](pictures/ssh7-lndinit.png)
 
@@ -259,9 +259,21 @@ You can find setup instructions here: https://goo.gl/KnTzLu
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
+## Get a Debug Report
+
+If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
+
+- ssh into your raspiblitz as admin user with your password A
+- If you see the menu - use CTRL+C to get to the terminal
+- If your RaspiBlitz is lower then version 0.96 then run: `./XXupdateScripts.sh` first
+- To generate debug report run: `./XXdebugLogs.sh`
+- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+
+PLEASE NOTICE: Its possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.
+
 ## Build the SD Card Image
 
-A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everbody started quickly. But if you want to build that image yourself - here is a quick guide:
+A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everybody started quickly. But if you want to build that image yourself - here is a quick guide:
 
 * Get a fresh Rasbian RASPBIAN STRETCH WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/)
 * Write image to a SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) 
@@ -274,7 +286,7 @@ Now you are ready to start the SD card build script - copy the following command
 
 As you can see from the URL you find the build script in this Git repo under `build.sdcard/raspbianStretchDesktop.sh`- there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
 
-The whole build process takes a while. And the end the LCD drives get installed and a reboot is needed. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use root: `ssh root@[IP-OF-YOUR-RASPI]` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the actovity LED of the pi starts going dark. You can unplug power and remove the SD card. You have now build your own RaspiBlitz sd card image. 
+The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. An installer of the SD card image should automatically launch. If you do not want to continue with the installation at this moment, click `Cancel` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image. 
 
 *Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
@@ -296,6 +308,49 @@ Until we reach version 1.0 the update process will be a bit rough .. so what you
 We know that this is not optimal yet. But until version 1.0 we will change too much stuff to garantue any other save update mechanism. Also by redoing all the setup you help out on testing the lastest setup process.
 
 From the upcomming version 1.0 onwards the goal is to make it easier to keep up with the lastest RaspiBlitz updates.
+
+## Recover your Coins from a failing RaspiBlitz
+
+You might run into a situation where your hardware fails or the software starts to act buggy. So you decide to setup a fresh RaspiBlitz, like in the chapter above "Update to a new SD Card Release" - but the closing channels and cashing out is not working anymore. So whats about the funds you already have on your failing setup?
+
+There is not a perfect way yet to backup/recover your coins, but you can try the following to make the best out of the situation:
+
+### 1) Recover from Wallet Seed
+
+Remember those 24 words you were writing down during the setup? Thats your "cipher seed" - now this words are important to recover your wallet. If you dont have them anymore: skip this chapter and read option 2. If you still have the cypher seed: good, but read the following carefully:
+
+With the cypher seed you can recover the bitcoin wallet that LND was managing for you - but it does not contain all the details about the channels you have open - its just the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything is OK and you can go on. If you had open channels with funds in there, the following is to consider:
+
+* You now rely on your channel counter parts to force close the channel at one point. If they do, the coins will be available to use in your funding wallet again at one point in the future - after force close delay.
+* If your channel counter parts never force close the channel (because they are offline too) your channel funds can be frozen forever.
+
+So going this way there is a small risk, that you will not recover your funds. But normally if your channel counter parts are still online, see that you will not come back online and they have themselves some funds on their channel side with you: They have an incentive to force close the channel to make use of their funds again.
+
+So here is what todo if you want to "Recover from Wallet Seed" with RaspiBlitz:
+
+- SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
+- During the new SetUp you get to the point of creating the LND wallet (see image below).
+- When you get asked "do you have an existing cypher wallet" answere `y` this time.
+- Follow the dialog and enter the cypher seed.
+- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
+
+![SSH8](pictures/ssh8-wallet.png)
+
+Then give LND some time to rescan the blockchain. In the end you will have restored your funding wallet. You maybe need to wait for your old channel counter parts to force close the old channels until you see the coins back displayed.
+
+### 2) LND Channel State Backup
+
+This second option is very very risky and can lead to complete loss of funds. And it olny can work, if you can still access the HDD content of your failing RaspiBlitz. It should only be used if you lost your cypher seed for the option above, forgot your cypher seed encryption password or your old channel counter parts are offline, too.
+
+What you do is in priciple:
+- Make a copy of the HDD directory "/mnt/hdd/lnd"
+- Setup a fresh RaspiBlitz
+- Stop LND
+- Replace the new "/mnt/hdd/lnd" with your backuped version
+- Reboot the RaspiBlitz
+
+This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
+
 
 ## Mobile Development: Connect RaspiBlitz without a Router/Switch
 
