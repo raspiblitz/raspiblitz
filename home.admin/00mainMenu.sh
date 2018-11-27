@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # check data from _bootstrap.sh that was running on device setup
-bootstrapInfoExists=$(ls /home/admin/raspiblitz.info | grep -c '.info')
+infoFile='/home/admin/raspiblitz.info'
+bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
 if [ ${bootstrapInfoExists} -eq 1 ]; then
 
   # load the data from the info file
