@@ -46,6 +46,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     else
       # wait 2 sevs and check again
       echo "bootstrap still running - state(${state}) message(${message})"
+      echo "please wait, act or CTRL+c --> Exit to terminal"
       sleep 2
       keepWaiting=1
     fi
