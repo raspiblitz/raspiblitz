@@ -174,13 +174,25 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
   blockchainDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
   if [ ${blockchainDataExists} -eq 1 ]; then
-    // TODO: Pre-Sync Blockchain
-    echo "Found pre-loaded blockchain - TODO start pre-sync!" >> $logFile
+
+    # activating presync
+    # so that on a hackathon you can just connect a RaspiBlitz
+    # to the network and have it up-to-date for setting up
+    echo "Found pre-loaded blockchain - starting pre-sync" >> $logFile
+    sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+    sudo cp /home/admin/assets/bitcoind.service /etc/systemd/system/bitcoind.service
+    sudo chmod +x /etc/systemd/system/bitcoind.service
+    sudo systemctl enable bitcoind.service
+    sudo systemctl start bitcoind.service
+
+    # update info file
     echo "state=presync" > $infoFile
-    echo "message='TODO: start pre-sync'" >> $infoFile
+    echo "message='starting pre-sync'" >> $infoFile
     echo "device=${hddDeviceName}" >> $infoFile
+  
     # after admin login, presync will be stoped and HDD unmounted
     exit 1
+  
   else
     ls /mnt/hdd/bitcoin/blocks/blk00000.dat >> $logFile
     echo "OK - No blockchain data found" >> $logFile

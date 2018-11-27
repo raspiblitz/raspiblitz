@@ -12,10 +12,17 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
 
   # if pre-sync is running - stop it
   if [ "${state}" = "presync" ]; then
-    echo "TODO: Stop pre-sync ... press key to continue"
-    read key
+
+    # stopping the pre-sync
+    echo "Stopping pre-sync ..."
+    sudo systemctl stop bitcoind.service
+    sudo systemctl disable bitcoind.service
+    sudo rm /mnt/hdd/bitcoin/bitcoin.conf
+    sudo rm /etc/systemd/system/bitcoind.service
+
     # unmount the temporary mount
     sudo umount -l /mnt/hdd
+
     # update info file
     state=waitsetup
     echo "state=waitsetup" > $infoFile

@@ -63,6 +63,13 @@ while :
         if [ ${bootstrapInfoExists} -eq 1 ]; then
           # load the data from the info file - overwrite state & message
           source /home/admin/raspiblitz.info
+          if [ "${state}" = "presync" ]; then
+            # get blockchain sync progress
+            blockchaininfo="$(bitcoin-cli -datadir=/mnt/hdd/bitcoin getblockchaininfo 2>/dev/null)"
+            if [ ${#blockchaininfo} -gt 0 ]; then
+              message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+            fi
+          fi
         fi
 
         # setup process has not started yet
