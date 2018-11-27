@@ -113,7 +113,7 @@ if [ ${#hddIsAutoMounted} -eq 0 ]; then
   fi
 
   # check if HDD is formatted EXT4
-  hddExt4=$(df -T /dev/${hddDeviceName} | grep -c "ext4")
+  hddExt4=$(lsblk -o NAME,FSTYPE -b /dev/${hddDeviceName} | grep -c "ext4")
   if [ ${hddExt4} -eq 0 ]; then
     echo "HDD is NOT formatted in ext4." >> $logFile
     # stop the bootstrap here ...
