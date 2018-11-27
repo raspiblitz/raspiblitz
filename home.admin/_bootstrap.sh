@@ -34,6 +34,7 @@ echo "***********************************************" >> $logFile
 
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
+sudo chmod 745 ${infoFile}
 
 ################################
 # AFTER BOOT SCRIPT
@@ -80,6 +81,8 @@ while [ ${hddExists} -eq 0 ]
     echo "state=nohdd" > $infoFile
     echo "message='Connect the Hard Drive'" >> $infoFile
     sleep 5
+    # retry to find HDD
+    hddExists=$(lsblk | grep -c sda1)
   done
 
 # check if the HDD is auto-mounted

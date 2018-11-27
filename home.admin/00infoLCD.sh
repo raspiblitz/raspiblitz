@@ -62,7 +62,7 @@ while :
         bootstrapInfoExists=$(ls /home/admin/raspiblitz.info | grep -c '.info')
         if [ ${bootstrapInfoExists} -eq 1 ]; then
           # load the data from the info file - overwrite state & message
-          sudo -u admin source /home/admin/raspiblitz.info
+          source /home/admin/raspiblitz.info
         fi
 
         # setup process has not started yet
@@ -71,7 +71,7 @@ while :
         l3="Use password: raspiblitz\n"
         boxwidth=$((${#localip} + 24))
         sleep 3
-        dialog --backtitle "RaspiBlitz (${state}) - ${message}" --infobox "$l1$l2$l3" 6 ${boxwidth}
+        dialog --backtitle "RaspiBlitz (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
 
       # during basic setup
