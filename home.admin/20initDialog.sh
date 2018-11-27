@@ -31,7 +31,8 @@ B) Blockchain RPC Password
 C) LND Wallet Password
 D) LND Seed Password
 
-Choose now 4 new passwords - all min 8 chars
+Choose now 4 new passwords - all min 8 chars,
+no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 14 52
 
@@ -42,6 +43,14 @@ dialog --backtitle "RaspiBlitz - Setup"\
 # get user input
 result=$( cat $_temp )
 shred $_temp
+
+clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.')
+if [ ${#clearedResult} != ${#result} ]; then
+  clear
+  echo "FAIL - Password contained not allowed chars"
+  echo "Please restart with ./00mainMenu.sh"
+  exit 1
+fi
 
 # check input (check for more later)
 if [ ${#result} -eq 0 ]; then
