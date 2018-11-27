@@ -26,14 +26,19 @@ fi
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-sudo sed -i "s/^autoPilot=.*/autoPilot=${choice}/g" /mnt/hdd/raspiblitz.conf
-
-# confirm reboot to activate new settings with bootstrap.service
-dialog --backtitle "Rebooting" --yesno "To activate the settings a reboot is needed." 6 52
-if [ $? -eq 0 ];then
-  echo "Starting Reboot .."
-  sudo shutdown -r now
-else
-  echo "No Reboot - changes stored, but maybe not active."
-  sleep 3
+if [ "${autoPilot}" != "${choice}" ]; then
+  echo "Autopilot Setting changed"
+  echo "Stopping Service"
+  sudo systemctl stop lnd
+  echo "Changing raspiblitz.conf"
+  sudo sed -i "s/^autoPilot=.*/autoPilot=${choice}/g" /mnt/hdd/raspiblitz.conf
+  echo "Executing change"
+  sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
+  echo "Restarting Service" 
+  echo "You may need to unlock after restart ..."
+  sudo systemctl start lnd
+  echo "Giving LND 120 seconds to get ready ..."
+  sleep 120
+else 
+  echo "Autopilot Setting unchanged."
 fi

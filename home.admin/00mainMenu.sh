@@ -1,5 +1,58 @@
 #!/bin/bash
 
+# check data from _bootstrap.sh that was running on device setup
+bootstrapInfoExists=$(ls /home/admin/raspiblitz.info | grep -c '.info')
+if [ ${bootstrapInfoExists} -eq 1 ]; then
+
+  # load the data from the info file
+  source /home/admin/raspiblitz.info
+  echo "Found raspiblitz.info from bootstrap - processing ..."
+
+  # if pre-sync is running - stop it
+  if [ "${state}" = "presync" ]; then
+    echo "TODO: Stop pre-sync ... press key to continue"
+    read key
+    # update info file
+    state=waitsetup
+    echo "state=waitsetup" > $infoFile
+    echo "message='Pre-Sync Stopped'" >> $infoFile
+    echo "device=${device}" >> $infoFile
+  fi
+
+  # wait until boostrap process is done
+  keepWaiting=1
+  while [ ${keepWaiting} -eq 1 ] 
+   do
+
+    # 1) when bootstrap on configured device
+    if [ "${state}" = "ready" ]; then
+      echo "detected bootstrap ready"
+      keepWaiting=0
+
+    # 2) when bootstrap on a fresh sd card
+    elif [ "${state}" = "waitsetup" ]; then
+      echo "detected bootstrap waitinmg for setup"
+      
+      # unmount the temporary mount
+      sudo umount -l /mnt/hdd
+
+      # update info file - that setup started
+      echo "state=setup" > $infoFile
+      echo "message='SetUp Started'" >> $infoFile
+      echo "device=${device}" >> $infoFile
+      keepWaiting=0
+
+    # 3) when bootstap is still running 
+    else
+      # wait 2 sevs and check again
+      sleep 2
+      keepWaiting=1
+    fi
+
+   done
+
+fi
+
 ## default menu settings
 HEIGHT=13
 WIDTH=64

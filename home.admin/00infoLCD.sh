@@ -55,13 +55,23 @@ while :
       # before initial setup
       if [ ${setupStep} -eq 0 ]; then
 
+        state="0"
+        message="Welcome"
+
+        # check data from _bootstrap.sh that was running on device setup
+        bootstrapInfoExists=$(ls /home/admin/raspiblitz.info | grep -c '.info')
+        if [ ${bootstrapInfoExists} -eq 1 ]; then
+          # load the data from the info file - overwrite state & message
+          sudo -u admin source /home/admin/raspiblitz.info
+        fi
+
         # setup process has not started yet
         l1="Login to your RaspiBlitz with:\n"
         l2="ssh admin@${localip}\n"
         l3="Use password: raspiblitz\n"
         boxwidth=$((${#localip} + 24))
         sleep 3
-        dialog --backtitle "RaspiBlitz ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+        dialog --backtitle "RaspiBlitz (${state}) - ${message}" --infobox "$l1$l2$l3" 6 ${boxwidth}
         sleep 5
 
       # during basic setup
