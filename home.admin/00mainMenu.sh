@@ -6,7 +6,7 @@ bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
 if [ ${bootstrapInfoExists} -eq 1 ]; then
 
   # load the data from the info file
-  source /home/admin/raspiblitz.info
+  source ${infoFile}
   echo "Found raspiblitz.info from bootstrap - processing ..."
   sleep 2
 
@@ -34,7 +34,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     # 2) when bootstrap on a fresh sd card
     elif [ "${state}" = "waitsetup" ]; then
       echo "detected bootstrap waitinmg for setup"
-      
+
       # unmount the temporary mount
       sudo umount -l /mnt/hdd
 

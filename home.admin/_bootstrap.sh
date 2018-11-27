@@ -34,7 +34,7 @@ echo "***********************************************" >> $logFile
 
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
-sudo chmod 745 ${infoFile}
+sudo chmod 777 ${infoFile}
 
 ################################
 # AFTER BOOT SCRIPT
