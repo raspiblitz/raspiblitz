@@ -14,7 +14,9 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
   if [ "${state}" = "presync" ]; then
 
     # stopping the pre-sync
-    echo "Stopping pre-sync ..."
+    echo "********************************************"
+    echo "Stopping pre-sync ... pls wait (up to 1min)"
+    echo "********************************************"
     sudo systemctl stop bitcoind.service
     sudo systemctl disable bitcoind.service
     sudo rm /mnt/hdd/bitcoin/bitcoin.conf
