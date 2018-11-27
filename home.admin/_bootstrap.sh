@@ -128,7 +128,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   echo "temp-mounting the HDD .." >> $logFile
   sudo mkdir /mnt/hdd
   sudo mount -t ext4 /dev/${hddDeviceName} /mnt/hdd
-  mountOK=$(df | grep -c /mnt/hdd)
+  mountOK=$(lsblk | grep -c '/mnt/hdd')
   if [ ${mountOK} -eq 0 ]; then
     echo "FAIL - not able to temp-mount HDD" >> $logFile
     echo "state=waitsetup" > $infoFile
@@ -168,8 +168,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD contains pre-loaded blockchain data (just bitcoin for now)
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  blockchainDataExists=$(ls /mnt/hdd/bitcoin 2>/dev/null)
-  if [ ${#blockchainDataExist} -gt 0 ]; then
+  blockchainDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  if [ ${blockchainDataExist} -eq 1 ]; then
     // TODO: Pre-Sync Blockchain
     echo "Found pre-loaded blockchain - TODO start pre-sync!" >> $logFile
     echo "state=presync" > $infoFile
@@ -223,7 +223,7 @@ fi
 ##################################
 
 # COIN NETWORK
-# network=bitcoin|litecoin
+# network=bitcoin|litecoin|undefined
 if [ ${#network} -eq 0 ]; then
   oldNetworkConfigExists=$(sudo ls /home/admin/.network | grep -c '.network')
   if [ ${oldNetworkConfigExists} -eq 1 ]; then
@@ -231,7 +231,7 @@ if [ ${#network} -eq 0 ]; then
     echo "importing old network value: ${network}" >> $logFile
     echo "network=${network}" >> $configFile
   else
-    echo "network=" >> $configFile
+    echo "network=undefined" >> $configFile
   fi
 fi
 
@@ -242,29 +242,27 @@ if [ ${#chain} -eq 0 ]; then
   if [ ${networkConfigExists} -eq 1 ]; then
     source /mnt/hdd/${network}/${network}.conf
     if [ ${testnet} -eq 1 ]; then
-        echo "detecting mainchain" >> $logF
-    ile
+        echo "detecting mainchain" >> $logFile
         echo "chain=main" >> $configFile
     else
-        echo "detecting testnet" >> $logF
-    ile
+        echo "detecting testnet" >> $logFile
         echo "chain=test" >> $configFile
     fi
   else
-    echo "chain=" >> $configFile
+    echo "chain=main" >> $configFile
   fi
 fi
 
 # HOSTNAME
 # hostname=ONEWORDSTRING
-if [ ${#setupStep} -eq 0 ]; then
+if [ ${#hostname} -eq 0 ]; then
   oldValueExists=$(sudo ls /home/admin/.hostname | grep -c '.hostname')
   if [ ${oldValueExists} -eq 1 ]; then
     oldValue=`sudo cat /home/admin/.hostname`
     echo "importing old hostname: ${oldValue}" >> $logFile
     echo "hostname=${oldValue}" >> $configFile
   else
-    echo "hostname=" >> $configFile
+    echo "hostname=raspiblitz" >> $configFile
   fi
 fi
 
