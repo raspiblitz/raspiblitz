@@ -142,7 +142,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD contains already a configuration
   echo "Check if HDD contains already a configuration .." >> $logFile
-  configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
+  configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
     // TODO: Migration and Recover
     echo "Found existing configuration - TODO migration and recover!" >> $logFile
@@ -158,7 +158,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD cointains existing LND data (old RaspiBlitz Version)
   echo "Check if HDD contains existing LND data .." >> $logFile
-  lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c '.conf')
+  lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${lndDataExists} -eq 1 ]; then
     echo "Found existing LND data - old RaspiBlitz?" >> $logFile
     echo "state=olddata" > $infoFile
