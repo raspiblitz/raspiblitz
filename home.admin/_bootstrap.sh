@@ -86,8 +86,8 @@ while [ ${hddExists} -eq 0 ]
   done
 
 # check if the HDD is auto-mounted
-hddIsAutoMounted=$(ls -la /mnt/hdd 2>/dev/null)
-if [ ${#hddIsAutoMounted} -eq 0 ]; then
+hddIsAutoMounted=$(lsblk | grep -c '/mnt/hdd')
+if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   echo "HDD is there but not AutoMounted yet." >> $logFile
   echo "Analysing the situation ..." >> $logFile
