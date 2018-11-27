@@ -45,6 +45,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     # 3) when bootstap is still running 
     else
       # wait 2 sevs and check again
+      echo "bootstrap still running - state(${state}) message(${message})"
       sleep 2
       keepWaiting=1
     fi
