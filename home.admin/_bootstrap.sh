@@ -186,7 +186,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "Found pre-loaded blockchain - starting pre-sync in background" >> $logFile
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
-    sudo /home/admin/_bootstrap.presync.sh 2>/home/admin/_bootstrap.presync.error &
+    /home/admin/_bootstrap.presync.sh &
 
     # after admin login, presync will be stoped and HDD unmounted
     exit 1
