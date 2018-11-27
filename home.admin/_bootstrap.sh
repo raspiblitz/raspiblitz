@@ -183,10 +183,22 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # activating presync
     # so that on a hackathon you can just connect a RaspiBlitz
     # to the network and have it up-to-date for setting up
-    echo "Found pre-loaded blockchain - starting pre-sync in background" >> $logFile
-    # starting in background, because this scripts is part of systemd
-    # so to change systemd needs to happen after delay in seperate process
-    /home/admin/_bootstrap.presync.sh &
+    echo "Found pre-loaded blockchain" >> $logFile
+
+    # check if pre-sync was already activated on last power-on
+    presyncActive=$(ls /etc/systemd/system/bitcoind.service | grep -c '.service')
+    if [ ${presyncActive} -eq 0]; then
+        echo "starting pre-sync in background" >> $logFile
+        # starting in background, because this scripts is part of systemd
+        # so to change systemd needs to happen after delay in seperate process
+        /home/admin/_bootstrap.presync.sh &
+    else
+        echo "pre-sync is already active" >> $logFile
+        # update info file
+        echo "state=presync" > $infoFile
+        echo "message='pre-sync active'" >> $infoFile
+        echo "device=${hddDeviceName}" >> $infoFile
+    fi
 
     # after admin login, presync will be stoped and HDD unmounted
     exit 1
