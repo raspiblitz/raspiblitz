@@ -19,6 +19,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     sudo systemctl disable bitcoind.service
     sudo rm /mnt/hdd/bitcoin/bitcoin.conf
     sudo rm /etc/systemd/system/bitcoind.service
+    sudo unlink /home/bitcoin/.bitcoin
 
     # unmount the temporary mount
     sudo umount -l /mnt/hdd
