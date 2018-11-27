@@ -169,7 +169,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   # check if HDD contains pre-loaded blockchain data (just bitcoin for now)
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
   blockchainDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  if [ ${blockchainDataExist} -eq 1 ]; then
+  if [ ${blockchainDataExists} -eq 1 ]; then
     // TODO: Pre-Sync Blockchain
     echo "Found pre-loaded blockchain - TODO start pre-sync!" >> $logFile
     echo "state=presync" > $infoFile
@@ -177,6 +177,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "device=${hddDeviceName}" >> $infoFile
     exit 1
   else
+    ls /mnt/hdd/bitcoin/blocks/blk00000.dat >> $logFile
     echo "OK - No blockchain data found" >> $logFile
   fi
 

@@ -7,6 +7,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
   # load the data from the info file
   source /home/admin/raspiblitz.info
   echo "Found raspiblitz.info from bootstrap - processing ..."
+  sleep 2
 
   # if pre-sync is running - stop it
   if [ "${state}" = "presync" ]; then
