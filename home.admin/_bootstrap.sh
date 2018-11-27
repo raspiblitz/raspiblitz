@@ -134,6 +134,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=waitsetup" > $infoFile
     echo "message='HDD failed Mounting'" >> $infoFile
     echo "device=${hddDeviceName}" >> $infoFile
+    # no need to unmount the HDD, it failed mounting
     exit 1
   else 
      echo "OK - HDD available under /mnt/hdd" >> $logFile
@@ -148,6 +149,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=recovering" > $infoFile
     echo "message='TODO: migration and recover'" >> $infoFile
     echo "device=${hddDeviceName}" >> $infoFile
+    # unmountig the HDD at the end of the process
+    sudo umount -l /mnt/hdd
     exit 1
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
@@ -161,6 +164,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=olddata" > $infoFile
     echo "message='No Auto-Update possible'" >> $infoFile
     echo "device=${hddDeviceName}" >> $infoFile
+    # keep HDD mounted if user wants to copy data
     exit 1
   else 
     echo "OK - No LND data found" >> $logFile
@@ -175,6 +179,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=presync" > $infoFile
     echo "message='TODO: start pre-sync'" >> $infoFile
     echo "device=${hddDeviceName}" >> $infoFile
+    # after admin login, presync will be stoped and HDD unmounted
     exit 1
   else
     ls /mnt/hdd/bitcoin/blocks/blk00000.dat >> $logFile
@@ -186,6 +191,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   echo "state=waitsetup" > $infoFile
   echo "message='HDD needs SetUp (2)'" >> $infoFile
   echo "device=${hddDeviceName}" >> $infoFile
+  # unmount HDD to be ready for auto-mount during setup
+  sudo umount -l /mnt/hdd
   exit 1
 
 fi

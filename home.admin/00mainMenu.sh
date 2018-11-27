@@ -14,6 +14,8 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
   if [ "${state}" = "presync" ]; then
     echo "TODO: Stop pre-sync ... press key to continue"
     read key
+    # unmount the temporary mount
+    sudo umount -l /mnt/hdd
     # update info file
     state=waitsetup
     echo "state=waitsetup" > $infoFile
@@ -21,39 +23,11 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     echo "device=${device}" >> $infoFile
   fi
 
-  # wait until boostrap process is done
-  keepWaiting=1
-  while [ ${keepWaiting} -eq 1 ] 
-   do
-
-    # 1) when bootstrap on configured device
-    if [ "${state}" = "ready" ]; then
-      echo "detected bootstrap ready"
-      keepWaiting=0
-
-    # 2) when bootstrap on a fresh sd card
-    elif [ "${state}" = "waitsetup" ]; then
-      echo "detected bootstrap waitinmg for setup"
-
-      # unmount the temporary mount
-      sudo umount -l /mnt/hdd
-
-      # update info file - that setup started
-      echo "state=setup" > $infoFile
-      echo "message='SetUp Started'" >> $infoFile
-      echo "device=${device}" >> $infoFile
-      keepWaiting=0
-
-    # 3) when bootstap is still running 
-    else
-      # wait 2 sevs and check again
-      echo "bootstrap still running - state(${state}) message(${message})"
-      echo "please wait, act or CTRL+c --> Exit to terminal"
-      sleep 2
-      keepWaiting=1
-    fi
-
-   done
+  # signal if bootstrap is not ready yet
+  if [ "${state}" = "recovering" ]; then
+    echo "WARNING: bootstrap is still updating - please close SSH and login later again"
+    exit 1
+  fi
 
 fi
 
