@@ -22,8 +22,12 @@ sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 # work around - because without a reboot the hostname seems not updates in the whole system
 echo $result > /home/admin/.hostname
 
-# show password info dialog
-dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
+passwordValid=0
+result=""
+while [passwordValid -eq 0]
+  do
+    # show password info dialog
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
 Referenced as password A, B, C and D.
 
 A) Master User Password
@@ -34,31 +38,36 @@ D) LND Seed Password
 Choose now 4 new passwords - all min 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 14 52
+" 15 52
 
-# ask user for new password A
-dialog --backtitle "RaspiBlitz - Setup"\
+    # ask user for new password A
+    dialog --backtitle "RaspiBlitz - Setup"\
        --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
 
-# get user input
-result=$( cat $_temp )
-shred $_temp
+    # get user input
+    result=$( cat $_temp )
+    shred $_temp
+    passwordValid=1
 
-clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.')
-if [ ${#clearedResult} != ${#result} ]; then
-  clear
-  echo "FAIL - Password contained not allowed chars"
-  echo "Please restart with ./00mainMenu.sh"
-  exit 1
-fi
+    clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.')
+    if [ ${#clearedResult} != ${#result} ]; then
+      clear
+      echo "FAIL - Password contained not allowed chars"
+      echo "Press ENTER to continue .."
+      ready key
+      passwordValid=0
+    fi
 
-# check input (check for more later)
-if [ ${#result} -eq 0 ]; then
-  clear
-  echo "FAIL - Password cannot be empty"
-  echo "Please restart with ./00mainMenu.sh"
-  exit 1
-fi
+    # check input (check for more later)
+    if [ ${#result} -eq 0 ]; then
+      clear
+      echo "FAIL - Password cannot be empty"
+      echo "Press ENTER to continue .."
+      ready key
+      passwordValid=0
+    fi
+
+  done
 
 # change user passwords and then change hostname
 echo "pi:$result" | sudo chpasswd
