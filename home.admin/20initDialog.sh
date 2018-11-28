@@ -11,7 +11,7 @@ while [ ${#result} -eq 0 ]
     l1="Please enter the name of your new RaspiBlitz:\n"
     l2="one word, keep characters basic & not too long"
     dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
-    result=$( cat $_temp |  tr -d [:space:] )
+    result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
     shred $_temp
   done
 
@@ -49,21 +49,10 @@ Write them down & store them in a safe place.
     shred $_temp
     passwordValid=1
 
-    clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.' | tr -d ' ')
-    #echo "(${clearedResult}) (${#clearedResult} )"
-    #echo "(${result}) (${#result})"
+    clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#result} ]; then
       clear
-      echo "FAIL - Password contained not allowed chars"
-      echo "Press ENTER to continue .."
-      read key
-      passwordValid=0
-    fi
-
-    # check input (check for more later)
-    if [ ${#result} -eq 0 ]; then
-      clear
-      echo "FAIL - Password cannot be empty"
+      echo "FAIL - Password contained not allowed chars (see next screen)"
       echo "Press ENTER to continue .."
       read key
       passwordValid=0
