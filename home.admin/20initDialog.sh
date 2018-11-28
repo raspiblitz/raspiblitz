@@ -50,48 +50,50 @@ Write them down & store them in a safe place.
     passwordValid=1
 
     clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0]; then
+    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
       clear
       echo "FAIL - Password contained not allowed chars (see next screen)"
       echo "Press ENTER to continue .."
       read key
       passwordValid=0
-    fi
-
-    # change user passwords and then change hostname
-    echo "pi:$result" | sudo chpasswd
-    echo "root:$result" | sudo chpasswd
-    echo "bitcoin:$result" | sudo chpasswd
-    echo "admin:$result" | sudo chpasswd
-    sleep 1
-
-    # sucess info dialog
-    dialog --backtitle "RaspiBlitz" --msgbox "OK - password changed to '$result'\nfor all users pi, admin, root & bitcoin" 6 52
-
-    # repeat until user input is nit length 0
-    result=""
-    dialog --backtitle "RaspiBlitz - Setup"\
-    --inputbox "Enter your RPC Password B:" 9 52 2>$_temp
-    result=$( cat $_temp )
-    shred $_temp
-
-    clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0]; then
-      clear
-      echo "FAIL - Password contained not allowed chars (see next screen)"
-      echo "Press ENTER to continue to start again"
-      read key
-      passwordValid=0
     else
-    
-      # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-      sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
-      sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
 
-      # success info dialog
-      dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
-      clear
+      # change user passwords and then change hostname
+      echo "pi:$result" | sudo chpasswd
+      echo "root:$result" | sudo chpasswd
+      echo "bitcoin:$result" | sudo chpasswd
+      echo "admin:$result" | sudo chpasswd
+      sleep 1
+
+      # sucess info dialog
+      dialog --backtitle "RaspiBlitz" --msgbox "OK - password changed to '$result'\nfor all users pi, admin, root & bitcoin" 6 52
+
+      # repeat until user input is nit length 0
+      result=""
+      dialog --backtitle "RaspiBlitz - Setup"\
+      --inputbox "Enter your RPC Password B:" 9 52 2>$_temp
+      result=$( cat $_temp )
+      shred $_temp
+
+      clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+      if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
+        clear
+        echo "FAIL - Password contained not allowed chars (see next screen)"
+        echo "Press ENTER to continue to start again"
+        read key
+        passwordValid=0
+      else
+
+        # set Blockchain RPC Password (for admin cli & template for user bitcoin)
+        sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
+        sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
+
+        # success info dialog
+        dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
+        clear
   
+      fi
+
     fi
 
   done
