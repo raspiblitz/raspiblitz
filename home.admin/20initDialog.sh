@@ -50,6 +50,8 @@ Write them down & store them in a safe place.
     passwordValid=1
 
     clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.')
+    echo "(${clearedResult}) (${#clearedResult} )"
+    echo "(${result}) (${#result})"
     if [ ${#clearedResult} != ${#result} ]; then
       clear
       echo "FAIL - Password contained not allowed chars"
@@ -57,6 +59,8 @@ Write them down & store them in a safe place.
       ready key
       passwordValid=0
     fi
+
+    exit 1
 
     # check input (check for more later)
     if [ ${#result} -eq 0 ]; then
