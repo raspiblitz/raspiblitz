@@ -186,8 +186,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "Found pre-loaded blockchain" >> $logFile
 
     # check if pre-sync was already activated on last power-on
-    presyncActive=$(ls /etc/systemd/system/bitcoind.service | grep -c '.service')
-    if [ ${presyncActive} -eq 0]; then
+    presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
+    if [ ${presyncActive} -eq 1]; then
         echo "starting pre-sync in background" >> $logFile
         # starting in background, because this scripts is part of systemd
         # so to change systemd needs to happen after delay in seperate process
