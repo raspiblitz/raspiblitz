@@ -24,7 +24,7 @@ echo $result > /home/admin/.hostname
 
 passwordValid=0
 result=""
-while [passwordValid -eq 0]
+while [ ${passwordValid} -eq 0 ]
   do
     # show password info dialog
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
