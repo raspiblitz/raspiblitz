@@ -49,7 +49,7 @@ Write them down & store them in a safe place.
     shred $_temp
     passwordValid=1
 
-    clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.')
+    clearedResult=$(echo '${result}' | tr -dc '[:alnum:]-.' | tr -d ' ')
     #echo "(${clearedResult}) (${#clearedResult} )"
     #echo "(${result}) (${#result})"
     if [ ${#clearedResult} != ${#result} ]; then
