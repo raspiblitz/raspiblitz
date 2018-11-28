@@ -16,6 +16,10 @@ infoFile="/home/admin/raspiblitz.info"
 echo "presync: waiting 2 secs" >> $logFile
 sleep 2
 
+# just in case an old presync did not shutdown properly
+sudo systemctl stop bitcoind.service 2>/dev/null
+sudo systemctl disable bitcoind.service 2>/dev/null
+
 echo "presync: copying files" >> $logFile
 sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
 sudo cp /home/admin/assets/bitcoind.service /etc/systemd/system/bitcoind.service
