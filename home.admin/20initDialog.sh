@@ -50,7 +50,7 @@ Write them down & store them in a safe place.
     passwordValid=1
 
     clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#result} ]; then
+    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0]; then
       clear
       echo "FAIL - Password contained not allowed chars (see next screen)"
       echo "Press ENTER to continue .."
