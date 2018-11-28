@@ -212,6 +212,11 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
 fi
 
+# EXIT on BOOTSTRAP HERE AT THE MOMENT
+echo "DONE BOOTSTRAP (before any configs etc)" >> $logFile
+echo "state=ready" > $infoFile
+exit 0
+
 ################################
 # CONFIGFILE BASICS
 ################################
@@ -223,7 +228,7 @@ if [ ${configExists} -eq 0 ]; then
   # create new config
   echo "creating config file: ${configFile}" >> $logFile
   echo "# RASPIBLITZ CONFIG FILE" > $configFile
-  echo "raspiBlitzVersion='${version}'" >> $configFile
+  echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
   sudo chmod 777 ${configFile}
   # the rest will be set under DEFAULT VALUES
 
@@ -235,7 +240,7 @@ else
   echo "configVersion(${raspiBlitzVersion})" >> $logFile
   if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
       echo "detected version change ... starting migration script" >> $logFile
-      /home/admin/_migrateVersion.sh
+      /home/admin/_bootstrap.update.sh
   fi
 
 fi
