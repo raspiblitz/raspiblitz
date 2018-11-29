@@ -60,6 +60,8 @@ echo "allow: lightning mainnet"
 sudo ufw allow 9735 comment 'lightning mainnet'
 echo "allow: lightning gRPC"
 sudo ufw allow 10009 comment 'lightning gRPC'
+echo "allow: lightning REST API"
+sudo ufw allow 8080 comment 'lightning REST API'
 echo "allow: trasmission"
 sudo ufw allow 51413 comment 'transmission'
 echo "allow: local web admin"
