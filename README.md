@@ -19,16 +19,16 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 
 ## Hardware Needed (Amazon Shopping List)
 
-*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on Amazon.de:*
+*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on GERMAN Amazon:*
 
 * RaspBerry Pi 3 (34,99 EUR) https://www.amazon.de/dp/B07BDR5PDW
 * Micro SD-Card 16GB (7,99 EUR) https://www.amazon.de/gp/product/B073K14CVB/
-* Power >=3A (9,99 EUR) https://www.amazon.de/gp/product/B078567K85
+* Power >=3A (9,91 EUR) https://www.amazon.de/dp/B01E75SB2C
 * 1TB Hard Drive (44,98 EUR) https://www.amazon.de/dp/B07997KKSK?th=1
 * Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
 * LCD-Display (16,88 EUR) https://www.amazon.de/gp/product/B06X191RX7
 
-**Total Price: 124,19 EUR** (thats under 150 USD)
+**Total Price: 124,11 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
 [ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ]
