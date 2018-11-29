@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "presync: background script started" >> $logFile
-
 # This script runs on every start calles by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.

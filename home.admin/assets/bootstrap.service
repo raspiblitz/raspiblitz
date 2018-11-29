@@ -10,6 +10,7 @@ User=root
 Group=root
 Type=oneshot
 ExecStart=/home/admin/_bootstrap.sh
+KillMode=process
 StandardOutput=journal
 
 [Install]
