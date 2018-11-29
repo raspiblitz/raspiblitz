@@ -165,6 +165,7 @@ else
  alias_color="${color_grey}"
  ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
+ ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
  if [ ${ln_sync} -eq 0 ]; then
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
@@ -203,7 +204,7 @@ ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
 ${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public} ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}v0.5-beta ${ln_baseInfo}
+${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
 ${color_yellow}${ln_external}
