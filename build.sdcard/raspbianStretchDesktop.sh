@@ -10,7 +10,7 @@
 
 echo ""
 echo "****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.96 *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.97 *"
 echo "****************************************"
 echo ""
 
@@ -259,8 +259,8 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
-lndVersion="0.5-beta"
-lndSHA256="f3d578e90061541935e0de888a40377d5131bb5008317ff8af11e245fe2c8510"
+lndVersion="0.5.1-beta"
+lndSHA256="c8be77708fe95d5076fa6988229100598c14ae6c54e92a56d5f09f3e17732244"
 olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
