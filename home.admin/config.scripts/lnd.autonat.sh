@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# based on: https://github.com/Stadicus/guides/issues/249
+
+if [ $# -eq 0 ]; then
+ echo "small config script to switch the LND autoNatDiscovery on or off"
+ echo "lnd.autonat.sh [1|0]"
+ exit 1
+fi
+
+# check lnd.conf exits 
+lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c 'lnd.conf')
+if [ ${lndConfExists} -eq 0 ]; then
+  echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"
+  exit 1
+fi
+
+# check if "nat=" exists in lnd config
+valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'nat=')
+if [ ${valueExists} -eq 0 ]; then
+  echo "Adding autonat config defaults to /mnt/hdd/lnd/lnd.conf"
+  sudo sed -i '$ a nat=false' /mnt/hdd/lnd/lnd.conf
+fi
+
+# switch on
+if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
+  echo "switching the LND autonat ON"
+  # editing lnd config
+  sudo sed -i "s/^nat=.*/nat=true/g" /mnt/hdd/lnd/lnd.conf
+  # editing lnd service (removing the static publicip) 
+  sudo sed -i "s/^ExecStart=/usr/local/bin/lnd --externalip=.*/ExecStart=/usr/local/bin/lnd/g" /etc/systemd/system/lnd.service
+  # edit raspi blitz config
+  sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=on/g" /mnt/hdd/raspiblitz.conf
+  echo "OK - autonat is now ON"
+  echo "needs reboot to activate new setting"
+  exit 0
+fi
+
+# switch off
+if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
+  echo "switching the LND autonat OFF"
+  # editing lnd config
+  sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
+  # editing lnd service (adding the static publicip) 
+  sudo sed -i "s/^lnd --externalip=.*/ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}/g" /etc/systemd/system/lnd.service
+  # edit raspi blitz config
+  sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=off/g" /mnt/hdd/raspiblitz.conf
+  echo "OK - autonat is now OFF"
+  echo "needs reboot to activate new setting"
+  exit 0
+fi
+
+echo "FAIL - Unknown Paramter $1"
+exit 1
