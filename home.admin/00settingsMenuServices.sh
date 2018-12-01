@@ -7,6 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
 1 "Channel Autopilot" ${autoPilot} \
 2 "Testnet" ${chain} \
+3 "Router AutoNAT" ${autoNatDiscovery} \
 2>&1 >/dev/tty)
 #CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
 #1 "Channel Autopilot" ${autoPilot} \
@@ -57,6 +58,25 @@ if [ "${chain}" != "${choice}" ]; then
   fi
 else 
   echo "Testnet Setting unchanged."
+fi
+
+# AUTONAT process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${autoNatDiscovery}" != "${choice}" ]; then
+  echo "AutoNAT Setting changed"
+  echo "Stopping Services"
+  sudo systemctl stop lnd
+  sudo systemctl stop ${network}d
+  echo "Disable LND"
+  sudo systemctl disable lnd
+  echo "Executing change"
+  sudo /home/admin/config.scripts/lnd.autonat.sh ${choice}
+  echo "Enable LND"
+  sudo systemctl enable lnd
+  needsReboot=1
+else 
+  echo "Autopilot Setting unchanged."
 fi
 
 if [ ${needsReboot} -eq 1 ]; then
