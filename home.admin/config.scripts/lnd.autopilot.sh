@@ -27,6 +27,9 @@ fi
 if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
   echo "switching the LND autopilot ON"
   sudo sed -i "s/^autopilot.active=.*/autopilot.active=1/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^autoPilot=.*/autoPilot=on/g" /mnt/hdd/raspiblitz.conf
+  echo "OK - autopilot is now ON"
+  echo "needs reboot to activate new setting"
   exit 0
 fi
 
@@ -34,6 +37,9 @@ fi
 if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
   echo "switching the LND autopilot OFF"
   sudo sed -i "s/^autopilot.active=.*/autopilot.active=0/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^autoPilot=.*/autoPilot=off/g" /mnt/hdd/raspiblitz.conf
+  echo "OK - autopilot is now OFF"
+  echo "needs reboot to activate new setting"
   exit 0
 fi
 
