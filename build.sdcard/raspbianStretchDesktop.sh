@@ -48,6 +48,14 @@ else
   echo "OK running ${baseImage}"
 fi
 
+# setting locale
+# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+sudo locale-gen en_US.UTF-8
+sudo dpkg-reconfigure locales
+
 # update debian
 echo ""
 echo "*** UPDATE DEBIAN ***"
