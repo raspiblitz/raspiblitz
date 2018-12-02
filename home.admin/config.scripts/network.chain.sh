@@ -39,26 +39,32 @@ if [ "$1" = "testnet" ]; then
   sudo sed -i "s/^testnet=.*/testnet=1/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^testnet=.*/testnet=1/g" /home/admin/.${network}/${network}.conf
 else
+  echo "editing /mnt/hdd/${network}/${network}.conf"
   sudo sed -i "s/^testnet=.*/testnet=0/g" /mnt/hdd/${network}/${network}.conf
+  echo "editing /home/admin/.${network}/${network}.conf"
   sudo sed -i "s/^testnet=.*/testnet=0/g" /home/admin/.${network}/${network}.conf
 fi
 
 # editing lnd config files (hdd & admin user)
 echo "edit lightning config .."
 if [ "$1" = "testnet" ]; then
+  echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /mnt/hdd/lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=1/g" /mnt/hdd/lnd/lnd.conf
+  echo "editing /home/admin/.lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /home/admin/.lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=1/g" /home/admin/.lnd/lnd.conf
 else
+  echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=1/g" /mnt/hdd/lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=0/g" /mnt/hdd/lnd/lnd.conf
+  echo "editing /home/admin/.lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=1/g" /home/admin/.lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=0/g" /home/admin/.lnd/lnd.conf
 fi
 
 # editing the raspi blitz config file
-echo "edit raspiblitz config .."
+echo "editing /mnt/hdd/raspiblitz.conf"
 if [ "$1" = "testnet" ]; then
   sudo sed -i "s/^chain=.*/chain=test/g" /mnt/hdd/raspiblitz.conf
 else

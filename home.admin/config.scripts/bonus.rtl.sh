@@ -21,7 +21,7 @@ echo "making sure services are not running"
 sudo systemctl stop RTL 2>/dev/null
 
 # switch on
-if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL RTL ***"
 
   # setting value in raspi blitz config
@@ -72,7 +72,7 @@ if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
 fi
 
 # switch off
-if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
+if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** REMOVING RTL ***"
 
   # setting value in raspi blitz config

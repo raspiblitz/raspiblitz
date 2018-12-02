@@ -31,7 +31,7 @@ sudo systemctl stop ${network}d 2>/dev/null
 sudo systemctl stop tor@default 2>/dev/null
 
 # switch on
-if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the TOR ON"
 
   # setting value in raspi blitz config
@@ -232,7 +232,7 @@ EOF
 fi
 
 # switch off
-if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
+if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "switching TOR OFF"
 
   # setting value in raspi blitz config

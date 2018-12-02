@@ -27,17 +27,22 @@ echo "making sure services are not running"
 sudo systemctl stop lnd 2>/dev/null
 
 # switch on
-if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the LND autonat ON"
   # disable lnd service
+  echo "disable lnd"
   sudo systemctl disable lnd
   # editing lnd config
+  echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^nat=.*/nat=true/g" /mnt/hdd/lnd/lnd.conf
   # editing lnd service (removing the static publicip) 
+  echo "editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=/usr/local/bin/lnd --externalip=.*/ExecStart=/usr/local/bin/lnd/g" /etc/systemd/system/lnd.service
   # edit raspi blitz config
+  echo "editing /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=on/g" /mnt/hdd/raspiblitz.conf
   # enable lnd service
+  echo "enable lnd"
   sudo systemctl enable lnd
   echo "OK - autonat is now ON"
   echo "needs reboot to activate new setting"
@@ -45,17 +50,22 @@ if [ $1 -eq 1 ] || [ "$1" = "on" ]; then
 fi
 
 # switch off
-if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
+if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "switching the LND autonat OFF"
   # disable lnd service
+  echo "disable lnd"
   sudo systemctl disable lnd
   # editing lnd config
+  echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
   # editing lnd service (adding the static publicip) 
+  echo "editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^lnd --externalip=.*/ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}/g" /etc/systemd/system/lnd.service
   # edit raspi blitz config
+  echo "editing /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=off/g" /mnt/hdd/raspiblitz.conf
   # enable lnd service
+  echo "enable lnd"
   sudo systemctl enable lnd
   echo "OK - autonat is now OFF"
   echo "needs reboot to activate new setting"
