@@ -35,8 +35,14 @@ sudo systemctl stop ${network}d 2>/dev/null
 
 # editing network config files (hdd & admin user)
 echo "edit ${network} config .."
+# fix old lnd config file (that worked with switching comment)
+sudo sed -i "s/^#testnet=.*/testnet=1/g" /mnt/hdd/${network}/${network}.conf
+sudo sed -i "s/^#testnet=.*/testnet=1/g" /home/admin/.${network}/${network}.conf
+# changes based on parameter
 if [ "$1" = "testnet" ]; then
+  echo "editing /mnt/hdd/${network}/${network}.conf"
   sudo sed -i "s/^testnet=.*/testnet=1/g" /mnt/hdd/${network}/${network}.conf
+  echo "editing /home/admin/.${network}/${network}.conf"
   sudo sed -i "s/^testnet=.*/testnet=1/g" /home/admin/.${network}/${network}.conf
 else
   echo "editing /mnt/hdd/${network}/${network}.conf"
@@ -47,6 +53,10 @@ fi
 
 # editing lnd config files (hdd & admin user)
 echo "edit lightning config .."
+# fix old lnd config file (that worked with switching comment)
+sudo sed -i "s/^#bitcoin.testnet=.*/bitcoin.testnet=1/g" /mnt/hdd/lnd/lnd.conf
+sudo sed -i "s/^#bitcoin.testnet=.*/bitcoin.testnet=1/g" /home/admin/.lnd/lnd.conf
+# changes based on parameter
 if [ "$1" = "testnet" ]; then
   echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /mnt/hdd/lnd/lnd.conf
