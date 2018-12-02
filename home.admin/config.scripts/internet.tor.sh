@@ -21,6 +21,11 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+# add default value to raspi config if needed
+if [ ${#runBehindTor} -eq 0 ]; then
+  echo "runBehindTor=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
 # location of TOR config
 torrc="/etc/tor/torrc"
 

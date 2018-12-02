@@ -16,6 +16,11 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+# add default value to raspi config if needed
+if [ ${#rtlWebinterface} -eq 0 ]; then
+  echo "rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
 # stop services
 echo "making sure services are not running"
 sudo systemctl stop RTL 2>/dev/null

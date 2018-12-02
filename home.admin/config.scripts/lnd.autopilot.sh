@@ -27,6 +27,12 @@ if [ ${valueExists} -eq 0 ]; then
   sudo sed -i '$ a autopilot.maxchannels=5' /mnt/hdd/lnd/lnd.conf
 fi
 
+# add default value to raspi config if needed
+source /mnt/hdd/raspiblitz.conf
+if [ ${#autoPilot} -eq 0 ]; then
+  echo "autoPilot=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the LND autopilot ON"

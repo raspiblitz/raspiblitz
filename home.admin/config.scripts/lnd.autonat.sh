@@ -26,6 +26,12 @@ fi
 echo "making sure services are not running"
 sudo systemctl stop lnd 2>/dev/null
 
+# add default value to raspi config if needed
+source /mnt/hdd/raspiblitz.conf
+if [ ${#autoNatDiscovery} -eq 0 ]; then
+  echo "autoNatDiscovery=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the LND autonat ON"
