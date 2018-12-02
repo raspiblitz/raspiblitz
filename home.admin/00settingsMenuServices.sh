@@ -2,26 +2,26 @@
 
 # get raspiblitz config
 source /mnt/hdd/raspiblitz.conf
+if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
+if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
+if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
+if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
+if [ ${#chain} -eq 0 ]; then chain="main"; fi
+
+# map chain to on/off
+chainValue="off"
+if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
 # show select dialog
-CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
+CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 6 \
 1 "Channel Autopilot" ${autoPilot} \
-2 "Testnet" ${chain} \
+2 "Testnet" ${chainValue} \
 3 "Router AutoNAT" ${autoNatDiscovery} \
 4 "Run behind TOR" ${runBehindTor} \
 5 "RTL Webinterface" ${rtlWebinterface} \
 2>&1 >/dev/tty)
-#CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 5 \
-#1 "Channel Autopilot" ${autoPilot} \
-#2 "UPnP Router-Portforwarding" ${natUPnP} \
-#3 "Auto Unlock on Start" ${autoUnlock} \
-#4 "Seed Torrent Blockchain" ${torrentSeed} \
-#4 "RTL Webinterface" ${rtlWebinterface} \
-#2>&1 >/dev/tty)
 dialogcancel=$?
 clear
-
-rideTheLighthing
 
 # check if user canceled dialog
 if [ ${dialogcancel} -eq 1 ]; then

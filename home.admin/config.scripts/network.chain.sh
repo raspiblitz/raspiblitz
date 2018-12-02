@@ -20,7 +20,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
  exit 1
-fi 
+fi
 
 # testnet on litecoin cannot be set 
 if [ "${network}" = "litecoin" ] && [ "$1" = "testnet" ]; then
