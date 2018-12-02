@@ -93,12 +93,12 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
     dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 25
   fi
   needsReboot=1
-else 
+else
   echo "RTL Webinterface Setting unchanged."
 fi
 
 if [ ${needsReboot} -eq 1 ]; then
    sleep 2
-   dialog --title 'OK' --msgbox 'System will reboot to activate changes.' 5 25
+   dialog --title 'OK' --msgbox 'System will reboot to activate changes.' 6 26
    sudo shutdown -r now
 fi
