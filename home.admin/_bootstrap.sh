@@ -319,6 +319,18 @@ if [ ${#autoNatDiscovery} -eq 0 ]; then
   echo "autoNatDiscovery=off" >> $configFile
 fi
 
+# TOR
+# runBehindTor=off|on
+if [ ${#runBehindTor} -eq 0 ]; then
+  echo "runBehindTor=off" >> $configFile
+fi
+
+# RideTheLightning RTL
+# rtlWebinterface=off|on
+if [ ${#runBehindTor} -eq 0 ]; then
+  echo "rtlWebinterface=off" >> $configFile
+fi
+
 ##################################
 # CHECK CONFIG CONSISTENCY
 ##################################

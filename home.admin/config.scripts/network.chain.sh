@@ -28,6 +28,11 @@ if [ "${network}" = "litecoin" ] && [ "$1" = "testnet" ]; then
   exit 1
 fi
 
+# stop services
+echo "making sure services are not running"
+sudo systemctl stop lnd 2>/dev/null
+sudo systemctl stop ${network}d 2>/dev/null
+
 # editing network config files (hdd & admin user)
 echo "edit ${network} config .."
 if [ "$1" = "testnet" ]; then

@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ]; then
  echo "small config script to switch the LND auto pilot on or off"
- echo "lnd.autopilot.sh [1|0]"
+ echo "lnd.autopilot.sh [on|off]"
  exit 1
 fi
 
@@ -12,6 +12,10 @@ if [ ${lndConfExists} -eq 0 ]; then
   echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"
   exit 1
 fi
+
+# stop services
+echo "making sure services are not running"
+sudo systemctl stop lnd 2>/dev/null
 
 # check if "autopilot.active" exists
 valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=')
@@ -44,4 +48,5 @@ if [ $1 -eq 0 ] || [ "$1" = "off" ]; then
 fi
 
 echo "FAIL - Unknown Paramter $1"
+echo "may needs reboot to run normal again"
 exit 1
