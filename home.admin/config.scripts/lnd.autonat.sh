@@ -37,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^nat=.*/nat=true/g" /mnt/hdd/lnd/lnd.conf
   # editing lnd service (removing the static publicip) 
   echo "editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^ExecStart=/usr/local/bin/lnd --externalip=.*/ExecStart=/usr/local/bin/lnd/g" /etc/systemd/system/lnd.service
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd --externalip=.*/ExecStart=\/usr\/local\/bin\/lnd/g" /etc/systemd/system/lnd.service
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=on/g" /mnt/hdd/raspiblitz.conf
@@ -60,7 +60,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
   # editing lnd service (adding the static publicip) 
   echo "editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^lnd --externalip=.*/ExecStart=/usr/local/bin/lnd --externalip=${PUBLICIP}/g" /etc/systemd/system/lnd.service
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${PUBLICIP}/g" /etc/systemd/system/lnd.service
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=off/g" /mnt/hdd/raspiblitz.conf
