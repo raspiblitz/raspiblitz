@@ -392,6 +392,8 @@ sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
 # bash aoutstart for admin
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
