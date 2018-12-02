@@ -43,8 +43,38 @@ while :
 
     else
 
-      # refresh network (if information is already available)
-      network=`sudo cat /home/admin/.network 2>/dev/null`
+      ## get basic info (its OK if not set yet)
+      source /mnt/hdd/raspiblitz.conf
+
+      # check hostname and get backup if from old config
+      if [ ${#hostname} -eq 0 ]; then
+        echo "backup info: hostname"
+        hostname=`sudo cat /home/admin/.hostname`
+        if [ ${#hostname} -eq 0 ]; then
+          hostname="raspiblitz"
+        fi
+      fi
+
+      # check network and get backup if from old config
+      if [ ${#network} -eq 0 ]; then
+        echo "backup info: network"
+        network="bitcoin"
+        litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
+        if [ ${litecoinActive} -eq 1 ]; then
+          network="litecoin"
+        fi
+        network=`sudo cat /home/admin/.network`
+      fi
+
+      # check chain and get backup if from system
+      if [ ${#chain} -eq 0 ]; then
+        echo "backup info: chain"
+        chain="test"
+        isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+        if [ ${isMainChain} -gt 0 ];then
+          chain="main"
+        fi
+      fi
 
       # get the actual step number of setup process
       setupStep=$(sudo -u admin cat /home/admin/.setup 2>/dev/null)
@@ -102,11 +132,6 @@ while :
           freshstart=0
         fi
 
-        # get state of system
-        if [ ${#chain} -eq 0 ];then
-          # get chain if not available before
-          chain=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.chain')
-        fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 
