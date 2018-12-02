@@ -8,7 +8,6 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
   # load the data from the info file
   source ${infoFile}
   echo "Found raspiblitz.info from bootstrap - processing ..."
-  sleep 2
 
   # if pre-sync is running - stop it
   if [ "${state}" = "presync" ]; then
@@ -51,18 +50,36 @@ MENU="Choose one of the following options:"
 OPTIONS=()
 
 ## get basic info (its OK if not set yet)
+source /mnt/hdd/raspiblitz.conf
 
-# get name
-name=`sudo cat /home/admin/.hostname`
+# check hostname and get backup if from old config
+if [ ${#hostname} -eq 0 ]; then
+  echo "backup info: hostname"
+  hostname=`sudo cat /home/admin/.hostname`
+  if [ ${#hostname} -eq 0 ]; then
+    hostname="raspiblitz"
+  fi
+fi
 
-# get network
-network=`sudo cat /home/admin/.network`
+# check network and get backup if from old config
+if [ ${#network} -eq 0 ]; then
+  echo "backup info: network"
+  network="bitcoin"
+  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
+  if [ ${litecoinActive} -eq 1 ]; then
+    network="litecoin"
+  fi
+  network=`sudo cat /home/admin/.network`
+fi
 
-# get chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# check chain and get backup if from system
+if [ ${#chain} -eq 0 ]; then
+  echo "backup info: chain"
+  chain="test"
+  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+  if [ ${isMainChain} -gt 0 ];then
+    chain="main"
+  fi
 fi
 
 # check if RTL web interface is installed
@@ -119,7 +136,7 @@ elif [ ${setupState} -lt 100 ]; then
     fi  
 
     # continue setup
-    BACKTITLE="${name} / ${network} / ${chain}"
+    BACKTITLE="${hostname} / ${network} / ${chain}"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
     MENU="\nThe setup process is not finished yet: \n "
     OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
@@ -132,7 +149,7 @@ else
 
     # MAIN MENU AFTER SETUP
 
-    BACKTITLE="${name} / ${network} / ${chain}"
+    BACKTITLE="${hostname} / ${network} / ${chain}"
 
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
