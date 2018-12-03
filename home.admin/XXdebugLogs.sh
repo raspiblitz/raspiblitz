@@ -5,14 +5,28 @@
 # load code software version
 source /home/admin/_version.info
 
-# load network
-network=`sudo cat /home/admin/.network`
+## get basic info (its OK if not set yet)
+source /mnt/hdd/raspiblitz.conf
 
-# get chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# check network and get backup if from old config
+if [ ${#network} -eq 0 ]; then
+  echo "backup info: network"
+  network="bitcoin"
+  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
+  if [ ${litecoinActive} -eq 1 ]; then
+    network="litecoin"
+  fi
+  network=`sudo cat /home/admin/.network`
+fi
+
+# check chain and get backup if from system
+if [ ${#chain} -eq 0 ]; then
+  echo "backup info: chain"
+  chain="test"
+  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+  if [ ${isMainChain} -gt 0 ];then
+    chain="main"
+  fi
 fi
 
 echo ""
@@ -29,7 +43,7 @@ echo ""
 echo "*** LAST 20 CHAINNETWORK LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
-  pathAdd="testnet3/"
+  pathAdd="/testnet3"
 fi
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
 echo ""
