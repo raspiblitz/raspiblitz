@@ -12,6 +12,9 @@ litecoinList="" # url to list with other sources
 litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-11-30"
 litecoinSize=19180000 # 19184960-tolerance 
 
+# NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Runf download.
+# When finished the warning comes up and behind WARNING: copy that number
+
 # load network
 network=`cat .network`
 
@@ -135,7 +138,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
+  dialog --title " WARNING (${finalSize}) " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir} ;;
