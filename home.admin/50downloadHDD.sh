@@ -9,7 +9,7 @@ bitcoinSize=253000000 # 253827180-tolerance
 
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
-litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
+litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-11-30"
 litecoinSize=19180000 # 19184960-tolerance 
 
 # load network
