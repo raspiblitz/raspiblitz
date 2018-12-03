@@ -48,7 +48,6 @@ while :
 
       # check hostname and get backup if from old config
       if [ ${#hostname} -eq 0 ]; then
-        echo "backup info: hostname"
         hostname=`sudo cat /home/admin/.hostname`
         if [ ${#hostname} -eq 0 ]; then
           hostname="raspiblitz"
@@ -57,18 +56,20 @@ while :
 
       # check network and get backup if from old config
       if [ ${#network} -eq 0 ]; then
-        echo "backup info: network"
         network="bitcoin"
-        litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
+        litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
         if [ ${litecoinActive} -eq 1 ]; then
           network="litecoin"
+        else
+          network=`sudo cat /home/admin/.network 2>/dev/null`
         fi
-        network=`sudo cat /home/admin/.network`
+        if [ ${#network} -eq 0 ]; then
+          network="bitcoin"
+        fi
       fi
 
       # check chain and get backup if from system
       if [ ${#chain} -eq 0 ]; then
-        echo "backup info: chain"
         chain="test"
         isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
         if [ ${isMainChain} -gt 0 ];then

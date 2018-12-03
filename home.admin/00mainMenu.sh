@@ -63,13 +63,17 @@ fi
 
 # check network and get backup if from old config
 if [ ${#network} -eq 0 ]; then
-  echo "backup info: network"
-  network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  fi
-  network=`sudo cat /home/admin/.network`
+    echo "backup info: network"
+    network="bitcoin"
+    litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
+    if [ ${litecoinActive} -eq 1 ]; then
+      network="litecoin"
+    else
+        network=`sudo cat /home/admin/.network 2>/dev/null`
+    fi
+    if [ ${#network} -eq 0 ]; then
+      network="bitcoin"
+    fi
 fi
 
 # check chain and get backup if from system
