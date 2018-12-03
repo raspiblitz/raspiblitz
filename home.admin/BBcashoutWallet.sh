@@ -90,6 +90,7 @@ while [ ${tryAgain} -eq 1 ]
       echo "FAIL: $error"
       tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
       if [ ${tryAgain} -eq 0 ]; then
+        echo ""
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         echo "FINAL FAIL --> Was not able to send transaction (see error above)"
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -97,6 +98,7 @@ while [ ${tryAgain} -eq 1 ]
     else
       # success
       echo "$result"
+      echo ""
       echo "********************************************************************"
       echo "OK --> send ${amount} sat to address + ${fee} sat fees max"
       echo "********************************************************************"
