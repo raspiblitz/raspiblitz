@@ -3,9 +3,8 @@ echo ""
 # load network
 network=`cat .network`
 
-echo "!!!! This will DELETE your personal data from the HDD !!!!"
-echo "--> use the HDD with just blockchain in a fresh setup"
-echo "Press ENTER to continue - CTRL+c to CANCEL"
+echo "!!!! This will DELETE your data & POSSIBLE FUNDS from the HDD !!!!"
+echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
 read key
 sudo dphys-swapfile swapoff
 sudo systemctl stop ${network}d.service
