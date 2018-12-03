@@ -43,10 +43,10 @@ fi
 
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
-l2="You will send: ${amount}"
+l2="You will send: ${maxAmount} sat"
 l3="Maximal fee: 20000 sat (wil be subtracted)"
 dialog --title "Where to send funds?" \
---inputbox "$l1\n$l2" 8 75 2>$_temp
+--inputbox "$l1\n$l2\n$l3" 8 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"
