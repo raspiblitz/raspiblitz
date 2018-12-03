@@ -86,15 +86,16 @@ clear
 echo "******************************"
 echo "Send on-chain Funds"
 echo "******************************"
-echo ""
 tryAgain=1
 count=1
 while [ ${tryAgain} -eq 1 ]
   do
 
-    fee=$(expr $count * 1000)
-    amount=$(expr $maxAmount - $fee)
-    echo "---> ${count}. try with max fee ${fee} sat:"
+    fee=$(($count * 1000))
+    amount=$(($maxAmount - $fee))
+    echo ""
+    echo "TRY #${count} ---> with max fee ${fee} sat:"
+    echo "$command"
     command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
     #result=$($command 2>$_error)
     #error=`cat ${_error}`
@@ -103,20 +104,29 @@ while [ ${tryAgain} -eq 1 ]
     # on no result
     if [ ${#result} -eq 0 ]; then
       # fail - retry on 'insufficient funds available to construct transaction'
-      echo "FAIL: error"
+      echo "FAIL: $error"
       tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
+      if [ ${tryAgain} -eq 0 ]; then
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "FINAL FAIL --> Was not able to send transaction (see error above)"
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      fi
     else
       # success
-      echo "OK"
       echo "$result"
+      echo "********************************************************************"
+      echo "OK --> send ${amount} sat to address + ${fee} sat fees max"
+      echo "********************************************************************"
       tryAgain=0
     fi
     
     # abort aftzer 20 tries
-    count=$(expr $count + 1)
+    count=$(($count + 1))
     if [ ${count} -gt 20 ]; then
       echo ""
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo "FINAL FAIL --> Was not able to send transaction with max 20000 sat"
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       tryAgain=0
     fi
 
