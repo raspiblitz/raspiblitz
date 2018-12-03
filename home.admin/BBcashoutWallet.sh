@@ -42,6 +42,13 @@ l2="You have max available: ${maxAmount} sat"
 l3="If you enter nothing, all funds available will be send."
 dialog --title "Remove Funds from RaspiBlitz" \
 --inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
+if test $? -eq 0
+then
+   echo "ok pressed"
+else
+   echo "cancel pressed"
+   exit 1
+fi
 amount=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
@@ -55,6 +62,13 @@ l1="Enter the on-chain address to send funds to:"
 l2="You will send: ${amount} sat to that address"
 dialog --title "Where to send funds?" \
 --inputbox "$l1\n$l2" 8 65 2>$_temp
+if test $? -eq 0
+then
+   echo "ok pressed"
+else
+   echo "cancel pressed"
+   exit 1
+fi
 address=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#address} -eq 0 ]; then
@@ -65,9 +79,7 @@ fi
 # TODO: check address is valid for network and chain
 
 # TODO: check if fees are getting done right so that transaction will get processed
-amount=$((amount - 10000))
 command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
-
 
 clear
 echo "******************************"
