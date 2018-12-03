@@ -62,7 +62,8 @@ fi
 
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
-l2="You will send: ${amount} sat to that address"
+l2="You will send: ${amount}"
+l3="Maximal fee: 20000 sat (wil be subtracted)"
 dialog --title "Where to send funds?" \
 --inputbox "$l1\n$l2" 8 75 2>$_temp
 if test $? -eq 0
@@ -80,46 +81,45 @@ if [ ${#address} -eq 0 ]; then
 fi
 
 # TODO: check address is valid for network and chain
-echo "UNDER CONSTRUCTION"
-tryAgain=1
-count=0
-while [ ${tryAgain} -eq 1 ]
-  do
-    echo "amount(${amount}) count(${count})"
-    amount=expr $amount - 1000
-    count=expr $count + 1
-    if [ ${count} -gt 10 ]; then tryAgain=0; fi
-  done
-exit 1
-
-# TODO: check if fees are getting done right so that transaction will get processed
-command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
 
 clear
 echo "******************************"
 echo "Send on-chain Funds"
 echo "******************************"
 echo ""
+tryAgain=1
+count=1
+while [ ${tryAgain} -eq 1 ]
+  do
 
+    fee=$(expr $count * 1000)
+    amount=$(expr $maxAmount - $fee)
+    echo "---> ${count}. try with max fee ${fee} sat:"
+    command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
+    #result=$($command 2>$_error)
+    #error=`cat ${_error}`
+    error="sim error: insufficient funds available to construct transaction"
+    result=1
+    # on no result
+    if [ ${#result} -eq 0 ]; then
+      # fail - retry on 'insufficient funds available to construct transaction'
+      echo "FAIL: error"
+      tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
+    else
+      # success
+      echo "OK"
+      echo "$result"
+      tryAgain=0
+    fi
+    
+    # abort aftzer 20 tries
+    count=$(expr $count + 1)
+    if [ ${count} -gt 20 ]; then
+      echo ""
+      echo "FINAL FAIL --> Was not able to send transaction with max 20000 sat"
+      tryAgain=0
+    fi
 
-# execute command
-if [ ${#command} -gt 0 ]; then
-  result=$($command)
-fi
-
-insufficient funds available to construct transaction
-
-# on no result
-if [ ${#result} -eq 0 ]; then
-  echo "Sorry something went wrong - thats unusual."
-  echo ""
-  exit 1
-fi
- 
-# when result is available
-echo "$result"
-
-# TODO: check if all cashed out (0 funds + 0 channels) -> let user knwo its safe to update/reset RaspiBlitz
-
-echo "OK. That worked :)"
+  done
+exit 1
 echo ""
