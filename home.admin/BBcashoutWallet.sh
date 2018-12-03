@@ -41,25 +41,6 @@ if [ ${maxAmount} -eq 0 ]; then
    exit 1
 fi
 
-# let user enter the amount
-#l1="Enter the amount of funds you want to send/remove:"
-#l2="You have max available: ${maxAmount} sat"
-#l3="If you enter nothing, all funds available will be send."
-#dialog --title "Remove Funds from RaspiBlitz" \
-#--inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
-#if test $? -eq 0
-#then
-#   echo "ok pressed"
-#else
-#   echo "cancel pressed"
-#   exit 1
-#fi
-#amount=$(cat $_temp | xargs)
-#shred $_temp
-#if [ ${#amount} -eq 0 ]; then
-  amount=${maxAmount}
-#fi
-
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
 l2="You will send: ${amount}"
@@ -90,18 +71,20 @@ tryAgain=1
 count=1
 while [ ${tryAgain} -eq 1 ]
   do
-
+    sleep 1
     fee=$(($count * 1000))
     amount=$(($maxAmount - $fee))
     echo ""
     echo "TRY #${count} ---> with max fee ${fee} sat:"
-    echo "$command"
+
+        # execute command
     command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
-    #result=$($command 2>$_error)
-    #error=`cat ${_error}`
-    error="sim error: insufficient funds available to construct transaction"
-    result=1
-    # on no result
+    echo "$command"
+    result=$($command 2>$_error)
+    error=`cat ${_error}`
+    #error="sim error: insufficient funds available to construct transaction"
+    #result=""
+    
     if [ ${#result} -eq 0 ]; then
       # fail - retry on 'insufficient funds available to construct transaction'
       echo "FAIL: $error"
