@@ -48,15 +48,18 @@ else
   echo "OK running ${baseImage}"
 fi
 
-# setting locale
+# fixing locales for build
+# https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
+# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
 echo ""
-echo "*** FIX LOCALE ***"
-export LANGUAGE=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-sudo locale-gen en_US.UTF-8
-sudo dpkg-reconfigure locales
+echo "*** FIXING LOCALES FOR BUILD ***"
+sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+sudo locale-gen
+export LANGUAGE=en_GB.UTF-8
+export LANG=en_GB.UTF-8
+export LC_ALL=en_GB.UTF-8
 
 # update debian
 echo ""
