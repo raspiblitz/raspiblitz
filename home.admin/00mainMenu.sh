@@ -126,14 +126,26 @@ if [ ${setupState} -eq 0 ]; then
 
     # check data from boostrap
     # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
+    source /home/admin/raspiblitz.info
+    if [ "${state}" = "olddata" ]; then
+        # old data setup
+        BACKTITLE="RaspiBlitz - Manual Update"
+        TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
+        MENU="\nChoose how to continue the manual update: \n "
+        OPTIONS+=(MANUAL "read how to recover your old funds" \
+                  DELETE "erase old data, keep blockchain, reboot" )
+        HEIGHT=11
+    else
+        # start setup
+        BACKTITLE="RaspiBlitz - Setup"
+        TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+        MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+        OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+        HEIGHT=11
+    fi
 
-    # start setup
-    BACKTITLE="RaspiBlitz - Setup"
-    TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-    HEIGHT=11
+
 
 elif [ ${setupState} -lt 100 ]; then
 
@@ -342,6 +354,16 @@ case $CHOICE in
             echo "Press ENTER to start shutdown - then wait some seconds."
             read key
             sudo shutdown now
+            exit 0
+            ;;   
+        MANUAL)
+            echo "PLEASE open in browser for more information:"
+            echo "https://github.com/rootzoll/raspiblitz#recover-your-coins-from-a-failing-raspiblitz"
+            exit 0
+            ;;  
+        DELETE)
+            sudo ./XXcleanHDD.sh
+            sudo shutdown -r now
             exit 0
             ;;   
         X)
