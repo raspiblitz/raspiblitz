@@ -1,18 +1,17 @@
 #!/bin/bash
 
-source /mnt/hdd/raspiblitz.conf
-if [ "${autoPilot}" = "on" ]; then
-  echo "*** IMPORTANT **********************************"
-  echo "You need to turn OFF the LND AutoPilot first,"
-  echo "so that closed channels are not opening up again."
-  echo "You find the AutoPilot -----> SERVICES section"
-  echo "************************************************"
-  exit 1
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 fi
 
-# load network and chain info
-network=`cat .network`
-chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+# precheck: AutoPilot
+if [ "${autoPilot}" = "on" ]; then
+  dialog --title 'Info' --msgbox 'You need to turn OFF the LND AutoPilot first,\nso that closed channels are not opening up again.\nYou find the AutoPilot -----> SERVICES section' 7 55
+  exit 1
+fi
 
 command="lncli --chain=${network} closeallchannels --force"
 
