@@ -2,9 +2,11 @@
 
 source /mnt/hdd/raspiblitz.conf
 if [ "${autoPilot}" = "on" ]; then
-  echo "PRECHECK: You need to turn OFF the AutoPilot first,"
+  echo "*** IMPORTANT **********************************"
+  echo "You need to turn OFF the LND AutoPilot first,"
   echo "so that closed channels are not opening up again."
-  echo "You find the AutoPilot under the SERVICES section."
+  echo "You find the AutoPilot -----> SERVICES section"
+  echo "************************************************"
   exit 1
 fi
 
