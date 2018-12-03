@@ -31,7 +31,7 @@ fi
 
 # get available amount in on-chain wallet
 maxAmount=$(lncli --chain=${network} walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
-if [ ${maxAmount} -gt 0 ]; then
+if [ ${maxAmount} -eq 0 ]; then
    dialog --title 'Info' --msgbox "You have 0 moveable funds available.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
    exit 1
 fi
