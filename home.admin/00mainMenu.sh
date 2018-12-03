@@ -365,6 +365,7 @@ case $CHOICE in
             ;;
         DELETE)
             sudo ./XXcleanHDD.sh
+            sudo rm -f .setup
             sudo shutdown -r now
             exit 0
             ;;   

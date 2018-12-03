@@ -42,31 +42,29 @@ if [ ${maxAmount} -eq 0 ]; then
 fi
 
 # let user enter the amount
-l1="Enter the amount of funds you want to send/remove:"
-l2="You have max available: ${maxAmount} sat"
-l3="If you enter nothing, all funds available will be send."
-dialog --title "Remove Funds from RaspiBlitz" \
---inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
-if test $? -eq 0
-then
-   echo "ok pressed"
-else
-   echo "cancel pressed"
-   exit 1
-fi
-amount=$(cat $_temp | xargs)
-shred $_temp
-if [ ${#amount} -eq 0 ]; then
+#l1="Enter the amount of funds you want to send/remove:"
+#l2="You have max available: ${maxAmount} sat"
+#l3="If you enter nothing, all funds available will be send."
+#dialog --title "Remove Funds from RaspiBlitz" \
+#--inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
+#if test $? -eq 0
+#then
+#   echo "ok pressed"
+#else
+#   echo "cancel pressed"
+#   exit 1
+#fi
+#amount=$(cat $_temp | xargs)
+#shred $_temp
+#if [ ${#amount} -eq 0 ]; then
   amount=${maxAmount}
-fi
-
-# TODO: check if amount is in valid range
+#fi
 
 # let user enter the address
-l1="Enter the on-chain address to send funds to:"
+l1="Enter on-chain address to send confirmed funds to:"
 l2="You will send: ${amount} sat to that address"
 dialog --title "Where to send funds?" \
---inputbox "$l1\n$l2" 8 65 2>$_temp
+--inputbox "$l1\n$l2" 8 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"
@@ -82,6 +80,17 @@ if [ ${#address} -eq 0 ]; then
 fi
 
 # TODO: check address is valid for network and chain
+echo "UNDER CONSTRUCTION"
+tryAgain=1
+count=0
+while [ ${tryAgain} -eq 1 ]
+  do
+    echo "amount(${amount}) count(${count})"
+    amount=expr $amount - 1000
+    count=expr $count + 1
+    if [ ${count} -gt 10 ]; then tryAgain=0; fi
+  done
+exit 1
 
 # TODO: check if fees are getting done right so that transaction will get processed
 command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
@@ -91,15 +100,14 @@ echo "******************************"
 echo "Send on-chain Funds"
 echo "******************************"
 echo ""
-echo "COMMAND LINE: "
-echo $command
-echo ""
-echo "RESULT:"
+
 
 # execute command
 if [ ${#command} -gt 0 ]; then
   result=$($command)
 fi
+
+insufficient funds available to construct transaction
 
 # on no result
 if [ ${#result} -eq 0 ]; then
