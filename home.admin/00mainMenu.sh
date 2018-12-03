@@ -113,8 +113,8 @@ waitUntilChainNetworkIsReady()
         sleep 5
       else
         return
-      fi  
-    done    
+      fi
+    done
 }
 
 ## get actual setup state
@@ -131,7 +131,7 @@ if [ ${setupState} -eq 0 ]; then
         # old data setup
         BACKTITLE="RaspiBlitz - Manual Update"
         TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
-        MENU="\nChoose how to continue the manual update: \n "
+        MENU="\n         ATTENTION: OLD DATA COULD COINTAIN FUNDS\n"
         OPTIONS+=(MANUAL "read how to recover your old funds" \
                   DELETE "erase old data, keep blockchain, reboot" )
         HEIGHT=11
@@ -284,13 +284,13 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;      
+            ;;
         FUNDING)
             ./BBfundWallet.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;  
+            ;;
         CASHOUT)
             ./BBcashoutWallet.sh
             echo "Press ENTER to return to main menu."
@@ -302,41 +302,41 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;  
+            ;;
         SEND)
             ./BBpayInvoice.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;  
+            ;;
         RECEIVE)
             ./BBcreateInvoice.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;  
+            ;;
         SERVICES)
             ./00settingsMenuServices.sh
             ./00mainMenu.sh
-            ;;              
+            ;;
         CLOSEALL)
             ./BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;  
+            ;;
         SWITCH)
             sudo ./95switchMainTest.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;   
+            ;;
         MOBILE)
             ./97addMobileWallet.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;   
+            ;;
         TOR)
             sudo ./96addTorService.sh
             echo "Press ENTER to return to main menu."
@@ -348,19 +348,21 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
-            ;;   
+            ;;
         OFF)
             echo "After Shutdown remove power from RaspiBlitz."
             echo "Press ENTER to start shutdown - then wait some seconds."
             read key
             sudo shutdown now
             exit 0
-            ;;   
+            ;;
         MANUAL)
+            echo "************************************************************************************"
             echo "PLEASE open in browser for more information:"
             echo "https://github.com/rootzoll/raspiblitz#recover-your-coins-from-a-failing-raspiblitz"
+            echo "************************************************************************************"
             exit 0
-            ;;  
+            ;;
         DELETE)
             sudo ./XXcleanHDD.sh
             sudo shutdown -r now
@@ -369,7 +371,7 @@ case $CHOICE in
         X)
             lncli -h
             echo "SUCH WOW come back with ./00mainMenu.sh"
-            ;;           
+            ;;
         U) # unlock
             ./AAunlockLND.sh
             ./00mainMenu.sh
