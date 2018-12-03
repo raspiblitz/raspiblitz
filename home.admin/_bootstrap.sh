@@ -327,7 +327,7 @@ fi
 
 # RideTheLightning RTL
 # rtlWebinterface=off|on
-if [ ${#runBehindTor} -eq 0 ]; then
+if [ ${#rtlWebinterface} -eq 0 ]; then
   echo "rtlWebinterface=off" >> $configFile
 fi
 

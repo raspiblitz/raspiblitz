@@ -1,7 +1,11 @@
 #!/bin/sh
 
-# load network
-network=`cat .network`
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
+fi
 
 echo ""
 echo "****************************************************************************"

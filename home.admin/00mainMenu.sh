@@ -173,9 +173,16 @@ else
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
 
-      # LOCK SCREEN
-      MENU="!!! YOUR WALLET IS LOCKED !!!"
-      OPTIONS+=(U "Unlock your Lightning Wallet with 'lncli unlock'")
+      if [ "${rtlWebinterface}" = "on" ]; then
+        # WEBINTERFACE INFO LOCK SCREEN
+        TITLE="Webinterface: http://${localip}:3000"
+        MENU="IMPORTANT: Please unlock thru the RTL Webinterface."
+        OPTIONS+=(U "ONLY BACKUP Unlock with 'lncli unlock'")
+      else
+        # NORMAL LOCK SCREEN
+        MENU="!!! YOUR WALLET IS LOCKED !!!"
+        OPTIONS+=(U "Unlock your Lightning Wallet with 'lncli unlock'")
+      fi
 
     else
 

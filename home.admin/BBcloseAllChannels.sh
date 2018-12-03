@@ -4,7 +4,7 @@
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
 if [ ${#chain} -eq 0 ]; then
-  chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
 # precheck: AutoPilot
