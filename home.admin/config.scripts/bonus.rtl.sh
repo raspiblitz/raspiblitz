@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # command info
@@ -10,7 +9,7 @@ fi
 
 # check and load raspiblitz config
 # to know which network is running
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
  exit 1
