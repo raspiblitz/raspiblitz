@@ -124,6 +124,9 @@ if [ -f "/home/admin/.setup" ]; then
 fi
 if [ ${setupState} -eq 0 ]; then
 
+    # check data from boostrap
+    # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
+
     # start setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"

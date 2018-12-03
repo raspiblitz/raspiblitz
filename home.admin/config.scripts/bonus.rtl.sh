@@ -77,7 +77,6 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  echo "*** REMOVING RTL ***"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf

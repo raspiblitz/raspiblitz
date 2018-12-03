@@ -111,7 +111,7 @@ if [ ${mountOK} -eq 1 ]; then
     sudo tail /mnt/hdd/${network}/debug.log
     echo ""
 
-    echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
+    echo "UNKOWN STATE - there is blockain data folder, but blockchain service is not running"
     echo "It seems that something went wrong during sync/download/copy of the blockchain."
     echo "Or something with the config is not correct."
     echo "Sometimes a reboot helps --> sudo shutdown -r now"
