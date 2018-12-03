@@ -10,14 +10,38 @@ color_yellow='\033[0;33m'
 color_gray='\033[0;37m'
 color_purple='\033[0;35m'
 
-# load network
-network=`sudo cat /home/admin/.network`
+## get basic info (its OK if not set yet)
+source /mnt/hdd/raspiblitz.conf
 
-# get chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# check hostname and get backup if from old config
+if [ ${#hostname} -eq 0 ]; then
+  hostname=`sudo cat /home/admin/.hostname 2>/dev/null`
+  if [ ${#hostname} -eq 0 ]; then
+    hostname="raspiblitz"
+  fi
+fi
+
+# check network and get backup if from old config
+if [ ${#network} -eq 0 ]; then
+  network="bitcoin"
+  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
+  if [ ${litecoinActive} -eq 1 ]; then
+    network="litecoin"
+  else
+    network=`sudo cat /home/admin/.network 2>/dev/null`
+  fi
+  if [ ${#network} -eq 0 ]; then
+    network="bitcoin"
+  fi
+fi
+
+# check chain and get backup if from system
+if [ ${#chain} -eq 0 ]; then
+  chain="test"
+  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+  if [ ${isMainChain} -gt 0 ];then
+    chain="main"
+  fi
 fi
 
 # set datadir
@@ -154,6 +178,7 @@ fi
 ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external="\n"
+ln_alias="${hostname}"
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
@@ -163,7 +188,6 @@ else
  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
  alias_color="${color_grey}"
- ln_alias=$(echo "${ln_getInfo}" | grep "alias" | cut -d '"' -f4)
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
  ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
  if [ ${ln_sync} -eq 0 ]; then
