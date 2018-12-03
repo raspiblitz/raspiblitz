@@ -11,7 +11,7 @@ color_gray='\033[0;37m'
 color_purple='\033[0;35m'
 
 ## get basic info (its OK if not set yet)
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # check hostname and get backup if from old config
 if [ ${#hostname} -eq 0 ]; then
