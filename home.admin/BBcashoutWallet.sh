@@ -2,6 +2,8 @@
 _temp="./download/dialog.$$"
 _error="./.error.out"
 
+echo "please wait ..."
+
 # load raspiblitz config data (with backup from old config)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
@@ -12,6 +14,7 @@ fi
 # check if user has money in lightning channels - info about close all
 openChannels=$(lncli --chain=${network} listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -eq 0 ]; then
+  clear
   echo "*** IMPORTANT **********************************"
   echo "It looks like LND is not responding."
   echo "Still starting up, is locked or is not running?"
@@ -21,12 +24,14 @@ if [ ${#openChannels} -eq 0 ]; then
 fi
 if [ ${openChannels} -gt 0 ]; then
    dialog --title 'Info' --msgbox 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved.' 7 58
+   echo "please wait ..."
 fi
 
 # check if money is waiting to get confirmed
 unconfirmed=$(lncli --chain=${network} walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
 if [ ${unconfirmed} -gt 0 ]; then
    dialog --title 'Info' --msgbox "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
+   echo "please wait ..."
 fi
 
 # get available amount in on-chain wallet
