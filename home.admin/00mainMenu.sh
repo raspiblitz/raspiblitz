@@ -187,7 +187,7 @@ else
         MOBILE "Connect Mobile Wallet")
 
       # Depending Options
-      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} listchannels 2>/dev/null | jq '.[] | length')
+      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
       if [ ${openChannels} -gt 0 ]; then
         OPTIONS+=(CLOSEALL "Close all open Channels")  
       fi
