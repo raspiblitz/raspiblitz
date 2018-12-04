@@ -214,20 +214,8 @@ else
       if [ ${openChannels} -gt 0 ]; then
         OPTIONS+=(CLOSEALL "Close all open Channels")  
       fi
-      if [ "${network}" = "bitcoin" ]; then
-        OPTIONS+=(SWITCH "Switch ${switchOption}")  
-      fi
-      torInstalled=$(sudo ls /mnt/hdd/tor/lnd9735/hostname 2>/dev/null | grep 'hostname' -c)
-      if [ ${torInstalled} -eq 0 ]; then
-        OPTIONS+=(TOR "Make reachable thru TOR")   
-      else
+      if [ "${runBehindTor}" = "on" ]; then
         OPTIONS+=(NYX "Monitor TOR")  
-      fi
-
-      if [ ${runningRTL} -eq 0 ]; then
-        OPTIONS+=(RTL "Install RTL Web Interface")  
-      else
-        OPTIONS+=(RTL "REMOVE RTL Web Interface")  
       fi
 
       # final Options
