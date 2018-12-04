@@ -175,9 +175,10 @@ else
 
       if [ "${rtlWebinterface}" = "on" ]; then
         # WEBINTERFACE INFO LOCK SCREEN
-        TITLE="Webinterface: http://${localip}:3000"
-        MENU="IMPORTANT: Please unlock thru the RTL Webinterface."
-        OPTIONS+=(U "ONLY BACKUP Unlock with 'lncli unlock'")
+        TITLE="SSH UNLOCK"
+        MENU="IMPORTANT: Please unlock thru the RTL Webinterface.\nWebinterface --> http://${localip}:3000\nThen cancel/close terminal and ssh back in again."
+        OPTIONS+=(R "TRY AGAIN - check again if unlocked"  \
+          U "FALLBACK -> Unlock with 'lncli unlock'")
       else
         # NORMAL LOCK SCREEN
         MENU="!!! YOUR WALLET IS LOCKED !!!"
@@ -379,6 +380,9 @@ case $CHOICE in
         X)
             lncli -h
             echo "SUCH WOW come back with ./00mainMenu.sh"
+            ;;
+        R)
+            ./00mainMenu.sh
             ;;
         U) # unlock
             ./AAunlockLND.sh
