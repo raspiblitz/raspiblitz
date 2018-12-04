@@ -176,7 +176,7 @@ else
       if [ "${rtlWebinterface}" = "on" ]; then
         # WEBINTERFACE INFO LOCK SCREEN
         TITLE="SSH UNLOCK"
-        MENU="IMPORTANT: Please unlock thru the RTL Webinterface.\nWebinterface --> http://${localip}:3000\nThen cancel/close terminal and ssh back in again."
+        MENU="IMPORTANT: Please unlock thru the RTL Webinterface.\nWebinterface --> http://${localip}:3000\nThen TRY AGAIN to get to main menu."
         OPTIONS+=(R "TRY AGAIN - check again if unlocked"  \
           U "FALLBACK -> Unlock with 'lncli unlock'")
       else
