@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # load network
 network=`cat .network`

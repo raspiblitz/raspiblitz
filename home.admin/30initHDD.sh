@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo ""
 echo "*** Checking if HDD is connected ***"
 sleep 5

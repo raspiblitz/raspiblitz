@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # load raspiblitz config data (with backup from old config)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
@@ -18,7 +18,6 @@ echo "You may wait some seconds until you get asked for password."
 echo "****************************************************************************"
 while :
   do
-    chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
     sudo -u bitcoin /usr/local/bin/lncli --chain=${network} unlock
     sleep 4
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)

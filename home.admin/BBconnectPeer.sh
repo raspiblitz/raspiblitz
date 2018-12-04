@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 _temp="./download/dialog.$$"
 _error="./.error.out"
 
