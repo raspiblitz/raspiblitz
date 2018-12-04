@@ -81,9 +81,12 @@ if [ "${chain}" != "${choice}" ]; then
           fi
           read key
         done
+      echo "stopping lnd again"
+      sleep 5
       sudo systemctl stop lnd
     fi
     echo "Update Admin Macaroon"
+    sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo chown -R admin:admin /home/admin/.lnd/
