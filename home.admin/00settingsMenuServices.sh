@@ -51,9 +51,9 @@ if [ "${chain}" != "${choice}" ]; then
   else
     echo "Testnet Setting changed .."
     sudo /home/admin/config.scripts/network.chain.sh ${choice}net
-    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db | grep -c 'wallet.db')
+    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
     if [ ${walletExists} -eq 0 ]; then
-      echo "Creating new Wallet"
+      echo "Need to creating a new wallet ..."
       sudo systemctl start lnd
       tryAgain=1
       while [ ${tryAgain} -eq 1 ]
@@ -65,7 +65,6 @@ if [ "${chain}" != "${choice}" ]; then
           echo "B) Answere 'n' because you dont have a 'cipher seed mnemonic' (24 words) yet" 
           echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
           echo "****************************************************************************"
-          lncli create
           sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create 2>error.out
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
