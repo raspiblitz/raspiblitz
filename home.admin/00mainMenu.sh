@@ -204,10 +204,14 @@ else
         SEND "Pay an Invoice/PaymentRequest" \
         RECEIVE "Create Invoice/PaymentRequest" \
         SERVICES "Activate/Deactivate Services" \
-        lnbalance "Detailed Wallet Balances" \
-        lnchannels "Lightning Channel List" \
         MOBILE "Connect Mobile Wallet" \
         CASHOUT "Remove Funds from on-chain Wallet")
+
+      # dont offer lnbalance/lnchannels on testnet
+      if [ "${chain}" = "main" ]; then
+        OPTIONS+=(lnbalance "Detailed Wallet Balances" \
+        lnchannels "Lightning Channel List")  
+      fi
 
       # Depending Options
       openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
