@@ -53,8 +53,9 @@ if [ "${chain}" != "${choice}" ]; then
     sudo /home/admin/config.scripts/network.chain.sh ${choice}net
     walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
     if [ ${walletExists} -eq 0 ]; then
-      echo "Need to creating a new wallet ..."
+      echo "Need to creating a new wallet ... wait 20secs"
       sudo systemctl start lnd
+      sleep 20
       tryAgain=1
       while [ ${tryAgain} -eq 1 ]
         do
