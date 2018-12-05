@@ -134,7 +134,11 @@ local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1
 public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
-  public_port="8333"
+  if [ "${chain}" = "test" ]; then
+    public_port="18333"
+  else
+    public_port="8333"
+  fi
 fi
 
 # check if RTL web interface is installed
@@ -165,10 +169,10 @@ else
   public_addr="${public_ip}:${public_port}"
   public_check=$(timeout 2s nc -z ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
-    public="Yes"
+    public=""
     public_color="${color_green}"
   else
-    public="Not reachable"
+    public=""
     public_color="${color_red}"
   fi
 fi
