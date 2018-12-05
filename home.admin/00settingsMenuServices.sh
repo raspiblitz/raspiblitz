@@ -58,7 +58,6 @@ if [ "${chain}" != "${choice}" ]; then
       tryAgain=1
       while [ ${tryAgain} -eq 1 ]
         do
-          sudo rm -r /home/bitcoin/.lnd/data/chain/${network}/${choice}net/ 2>/dev/null
           echo "****************************************************************************"
           echo "Creating a new LND Wallet for ${network}/${choice}net"
           echo "****************************************************************************"
@@ -70,8 +69,7 @@ if [ "${chain}" != "${choice}" ]; then
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
             sleep 2  
-            macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-            if [ ${macaroonExists} -eq 1 ]; then
+            
               # WIN
               tryAgain=0
               echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
@@ -92,15 +90,31 @@ if [ "${chain}" != "${choice}" ]; then
           fi
           read key
         done
+      echo "Check for Macaroon .."
+      sleep 6
+      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+      if [ ${macaroonExists} -eq 0 ]; then
+        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
+        lncli unlock
+        sleep 6
+      fi
+      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+      if [ ${macaroonExists} -eq 0 ]; then
+        echo "FAIL --> Was not able to create macaroon"
+        echo "Please report problem."
+        exit 1
+      fi
       echo "stopping lnd again"
       sleep 5
       sudo systemctl stop lnd
     fi
+
     echo "Update Admin Macaroon"
     sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo chown -R admin:admin /home/admin/.lnd/
+    
     needsReboot=1
   fi
 else 
