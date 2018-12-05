@@ -168,7 +168,7 @@ else
 
     # MAIN MENU AFTER SETUP
 
-    BACKTITLE="${hostname} / ${network} / ${chain}"
+    BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}"
 
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
@@ -199,7 +199,6 @@ else
       # Basic Options
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
         FUNDING "Fund your on-chain Wallet" \
-        CASHOUT "Remove Funds from on-chain Wallet" \
         CONNECT "Connect to a Peer" \
         CHANNEL "Open a Channel with Peer" \
         SEND "Pay an Invoice/PaymentRequest" \
@@ -207,7 +206,8 @@ else
         SERVICES "Activate/Deactivate Services" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
-        MOBILE "Connect Mobile Wallet")
+        MOBILE "Connect Mobile Wallet") \
+        CASHOUT "Remove Funds from on-chain Wallet"
 
       # Depending Options
       openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
