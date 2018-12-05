@@ -63,6 +63,6 @@ echo "Send ${coininfo} to address --> ${address}"
 if [ "$chain" = "test" ]; then
   echo "get some testnet coins from https://testnet-faucet.mempool.co"
 fi
-echo "Whats next? --> Wait for confirmations. You can use lnbalance for main menu or info on LCD to check if funds have arrived."
+echo "Whats next? --> Wait for confirmations. You can use info on LCD to check if funds have arrived."
 echo "If you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
 echo ""
