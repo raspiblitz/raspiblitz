@@ -58,6 +58,7 @@ if [ "${chain}" != "${choice}" ]; then
       tryAgain=1
       while [ ${tryAgain} -eq 1 ]
         do
+          sudo rm -r /home/bitcoin/.lnd/data/chain/${network}/${choice}net/ 2>/dev/null
           echo "****************************************************************************"
           echo "Creating a new LND Wallet for ${network}/${choice}net"
           echo "****************************************************************************"
