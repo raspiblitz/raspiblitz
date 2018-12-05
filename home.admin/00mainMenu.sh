@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Starting the main menu - please wait ..."
 
 # check data from _bootstrap.sh that was running on device setup
 infoFile='/home/admin/raspiblitz.info'
@@ -7,7 +8,6 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
 
   # load the data from the info file
   source ${infoFile}
-  echo "Found raspiblitz.info from bootstrap - processing ..."
 
   # if pre-sync is running - stop it
   if [ "${state}" = "presync" ]; then

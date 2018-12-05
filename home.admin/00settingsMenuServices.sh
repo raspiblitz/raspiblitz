@@ -83,12 +83,12 @@ if [ "${chain}" != "${choice}" ]; then
           fi
           read key
         done
-      echo "Check for Macaroon .."
-      sleep 6
+      echo "Check for Macaroon .. (10sec)"
+      sleep 10
       macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
       if [ ${macaroonExists} -eq 0 ]; then
         echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
-        lncli unlock
+        lncli unlock 2>/dev/null
         sleep 6
       fi
       macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
