@@ -206,8 +206,8 @@ else
         SERVICES "Activate/Deactivate Services" \
         lnbalance "Detailed Wallet Balances" \
         lnchannels "Lightning Channel List" \
-        MOBILE "Connect Mobile Wallet") \
-        CASHOUT "Remove Funds from on-chain Wallet"
+        MOBILE "Connect Mobile Wallet" \
+        CASHOUT "Remove Funds from on-chain Wallet")
 
       # Depending Options
       openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
