@@ -68,10 +68,20 @@ if [ "${chain}" != "${choice}" ]; then
           sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create 2>error.out
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
-            # WIN
-            tryAgain=0
-            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
-            echo "If you are ready. Press ENTER."
+            sleep 2  
+            macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+            if [ ${macaroonExists} -eq 1 ]; then
+              # WIN
+              tryAgain=0
+              echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
+              echo "If you are ready. Press ENTER."
+            else
+              # FAIL - no macaroon
+              tryAgain=1
+              echo "!!! FAIL ---> No macaroon found:"
+              echo "/home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon"
+              echo "Press ENTER to retry ... or CTRL-c to EXIT"
+            fi
           else
             # FAIL
             tryAgain=1
@@ -86,7 +96,7 @@ if [ "${chain}" != "${choice}" ]; then
       sudo systemctl stop lnd
     fi
     echo "Update Admin Macaroon"
-    sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net
+    sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo chown -R admin:admin /home/admin/.lnd/
