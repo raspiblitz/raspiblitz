@@ -70,18 +70,10 @@ if [ "${chain}" != "${choice}" ]; then
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
             sleep 2  
-            
-              # WIN
-              tryAgain=0
-              echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
-              echo "If you are ready. Press ENTER."
-            else
-              # FAIL - no macaroon
-              tryAgain=1
-              echo "!!! FAIL ---> No macaroon found:"
-              echo "/home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon"
-              echo "Press ENTER to retry ... or CTRL-c to EXIT"
-            fi
+            # WIN
+            tryAgain=0
+            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
+            echo "If you are ready. Press ENTER."
           else
             # FAIL
             tryAgain=1
