@@ -14,6 +14,12 @@ echo "network(${network})"
 echo "chain(${chain})"
 echo "setupStep(${setupStep})"
 
+if [ ${#network} -eq 0 ]; then
+  echo "FAIL: Something is wrong. There is no value for network in ${infoFile}."
+  echo "Should be at least default value. EXIT"
+  exit 1
+fi
+
 # if no setup step in info file init with 0
 if [ ${#setupStep} -eq 0 ];then
   echo "Init setupStep=0"

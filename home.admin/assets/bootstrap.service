@@ -2,7 +2,7 @@
 # /etc/systemd/system/bootstrap.service
 
 [Unit]
-Description=setting up RaspiBlitz and enforcing the config on every startup
+Description=execute on every startup before everything else is starting
 After=network.target
 
 [Service]
