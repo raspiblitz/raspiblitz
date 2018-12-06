@@ -27,9 +27,8 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
 
     # update info file
     state=waitsetup
-    echo "state=waitsetup" > $infoFile
-    echo "message='Pre-Sync Stopped'" >> $infoFile
-    echo "device=${device}" >> $infoFile
+    sudo sed -i "s/^state=.*/state=waitsetup/g" $infoFile
+    sudo sed -i "s/^message=.*/message='Pre-Sync Stopped'/g" $infoFile
   fi
 
   # signal if bootstrap recover is not ready yet
@@ -126,7 +125,7 @@ waitUntilChainNetworkIsReady()
 }
 
 ## get actual setup info
-source /home/admin/raspiblitz.info
+source ${infoFile}
 if [ ${#setupStep} -eq 0 ]; then
   echo "WARN: no setup step found in raspiblitz.info"
   setupStep=0
@@ -144,6 +143,7 @@ if [ ${setupStep} -eq 0 ]; then
                   DELETE "erase old data, keep blockchain, reboot" )
         HEIGHT=11
     else
+    
         # start setup
         BACKTITLE="RaspiBlitz - Setup"
         TITLE="⚡ Welcome to your RaspiBlitz ⚡"
@@ -151,8 +151,18 @@ if [ ${setupStep} -eq 0 ]; then
         OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
                 LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
         HEIGHT=11
-    fi
 
+        # prepare values
+        valueExists=$(sudo cat ${infoFile} | grep -c 'network=')
+        if [ ${valueExists} -eq 0 ]; then
+            echo "network=bitcoin" >> ${infoFile}
+        fi
+        valueExists=$(sudo cat ${infoFile} | grep -c 'chain=')
+        if [ ${valueExists} -eq 0 ]; then
+            echo "chain=main" >> ${infoFile}
+        fi
+
+    fi
 
 
 elif [ ${setupStep} -lt 100 ]; then
@@ -252,14 +262,14 @@ case $CHOICE in
             exit 1;
             ;;
         BITCOIN)
-            sed -i "s/^network=.*/network=bitcoin/g" /home/admin/raspiblitz.info
-            sed -i "s/^chain=.*/chain=main/g" /home/admin/raspiblitz.info
+            sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
+            sed -i "s/^chain=.*/chain=main/g" ${infoFile}
             ./10setupBlitz.sh
             exit 1;
             ;;
         LITECOIN)
-            sed -i "s/^network=.*/network=litecoin/g" /home/admin/raspiblitz.info
-            sed -i "s/^chain=.*/chain=main/g" /home/admin/raspiblitz.info
+            sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
+            sed -i "s/^chain=.*/chain=main/g" ${infoFile}
             ./10setupBlitz.sh
             exit 1;
             ;;
