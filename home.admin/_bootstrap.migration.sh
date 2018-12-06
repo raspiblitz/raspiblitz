@@ -1,14 +1,26 @@
 #!/bin/bash
 
-# LOAD DATA & PRECHECK
+# LOGFILE - store debug logs of bootstrap
+logFile="/home/admin/raspiblitz.log"
 
-# path to old or init configuration of RaspiBlitz
+# INFOFILE - state data from bootstrap
+infoFile="/home/admin/raspiblitz.info"
+
+# CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
+
+# debug info
+echo "STARTED Migration/Init --> see logs in ${logFile}"
+echo "STARTED Migration/Init" >> ${logFile}
+ sudo sed -i "s/^message=.*/message='Running Data Migration'/g" ${infoFile}
+
+# LOAD DATA & PRECHECK
 
 # check if there is a config file
 configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
-  echo "FAIL: no config file (${configFile}) found to init or upgrade!"
+  echo "FAIL see ${logFile}"
+  echo "FAIL: no config file (${configFile}) found to init or upgrade!"  >> ${logFile}
   exit 1
 fi
 
@@ -17,19 +29,22 @@ source ${configFile}
 
 # check if config files contains basic: network
 if [ ${#network} -eq 0 ]; then
+  echo "FAIL see ${logFile}"
   echo "FAIL: missing network in (${configFile})!"
   exit 1
 fi
 
 # check if config files contains basic: chain
 if [ ${#chain} -eq 0 ]; then
-  echo "FAIL: missing chain in (${configFile})!"
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing chain in (${configFile})!" >> ${logFile}
   exit 1
 fi
 
 # check if config files contains basic: hostname
 if [ ${#hostname} -eq 0 ]; then
-  echo "FAIL: missing hostname in (${configFile})!"
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing hostname in (${configFile})!" >> ${logFile}
   exit 1
 fi
 
@@ -38,16 +53,14 @@ source /home/admin/_version.info
 
 # check if code version was loaded
 if [ ${#codeVersion} -eq 0 ]; then
-  echo "FAIL: no code version (/home/admin/_version.info) found!"
+  echo "FAIL see ${logFile}"
+  echo "FAIL: no code version (/home/admin/_version.info) found!" >> ${logFile}
   exit 1
 fi
 
-# DEFAULT VALUES - MISSING data fields on init or upadte
+echo "prechecks OK"  >> ${logFile}
 
-echo ""
-echo "*****************************"
-echo "Default Values"
-echo "*****************************"
+# DEFAULT VALUES - MISSING data fields on init or upadte
 
 # AUTOPILOT
 # autoPilot=off|on
@@ -73,24 +86,23 @@ if [ ${#rtlWebinterface} -eq 0 ]; then
   echo "rtlWebinterface=off" >> $configFile
 fi
 
+echo "default values OK"  >> ${logFile}
+
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
 # a conversion of config data or app data is needed 
 
-echo ""
-echo "*****************************"
-echo "Version Migration Steps"
-echo "*****************************"
-echo "Version Code: ${codeVersion}"
-echo "Version Data: ${raspiBlitzVersion}"
+echo "Version Code: ${codeVersion}" >> ${logFile}
+echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
 
 if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
-  echo "detected version change ... starting migration script"
-  echo "TODO: Update Migration check ... only needed after version 1.0"
+  echo "detected version change ... starting migration script" >> ${logFile}
+  echo "TODO: Update Migration check ... only needed after version 1.0" >> ${logFile}
 else
-  echo "OK - version of config data is up to date"
+  echo "OK - version of config data is up to date" >> ${logFile}
 fi
 
-echo ""
+echo "END Migration/Init"  >> ${logFile}
+
 exit 0
 

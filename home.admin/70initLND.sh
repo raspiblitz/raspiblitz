@@ -238,3 +238,4 @@ sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
 
 ###### finishSetup
 ./90finishSetup.sh
+./95finalSetup.sh

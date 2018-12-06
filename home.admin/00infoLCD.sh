@@ -21,7 +21,6 @@ while :
 
     # get the local network IP to be displayed on the lCD
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    dhcpMissing=
 
     if [ ${#localip} -eq 0 ]; then
 
@@ -34,7 +33,7 @@ while :
 
     elif [ "${localip:0:4}" = "169." ]; then
 
-      # waiting for IP in general
+      # waiting for DHCP in general
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
       l3="Is Router working?\n"

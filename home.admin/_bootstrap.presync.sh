@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# This script runs on every start calles by boostrap.service
-# It makes sure that the system is configured like the
-# default values or as in the config.
-# For more details see background_raspiblitzSettings.md
-
 # LOGFILE - store debug logs of bootstrap
 # resets on every start
 logFile="/home/admin/raspiblitz.log"

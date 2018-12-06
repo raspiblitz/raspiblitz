@@ -115,7 +115,7 @@ First thing to setup is giving your RaspiBlitz an name:
 
 This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
 
-*Background: This and the following setup dialogues are part of the script `20initDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
+*Background: This and the following setup dialogues are part of the script `20setupDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
 
 Then the user gets requested to write down 4 passwords:
 

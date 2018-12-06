@@ -138,16 +138,23 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
      echo "OK - HDD available under /mnt/hdd" >> $logFile
   fi
 
+  # UPDATE MIGRATION & CONFIG PROVISIONING 
   # check if HDD contains already a configuration
   echo "Check if HDD contains already a configuration .." >> $logFile
   configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
-    // TODO: Migration and Recover
-    echo "Found existing configuration - TODO migration and recover!" >> $logFile
+    echo "Found existing configuration" >> $logFile
     echo "state=recovering" > $infoFile
-    echo "message='TODO: migration and recover'" >> $infoFile
-    # unmountig the HDD at the end of the process
-    sudo umount -l /mnt/hdd
+    echo "message='Starting Recover'" > $infoFile
+    echo "Calling Data Migration .." >> $logFile
+    sudo /home/admin/_bootstrap.migration.sh
+    echo "Calling Provisioning .." >> $logFile
+    sudo /home/admin/_bootstrap.provision.sh
+    echo "state=recovered" > $infoFile
+    echo "rebooting" >> $logFile
+    # save log file for inspection before reboot
+    cp $logFile /home/admin/raspiblitz.recover
+    sudo shutdown -r now
     exit 1
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile

@@ -32,11 +32,18 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     echo "device=${device}" >> $infoFile
   fi
 
-  # signal if bootstrap is not ready yet
+  # signal if bootstrap recover is not ready yet
   if [ "${state}" = "recovering" ]; then
     echo "WARNING: bootstrap is still updating - please close SSH and login later again"
     exit 1
   fi
+
+   # signal that after bootstrap recover user dialog is needed
+  if [ "${state}" = "recovered" ]; then
+    echo "System recovered - needs final user settings"
+    ./20recoverDialog.sh 
+    exit 1
+  fi 
 
 fi
 

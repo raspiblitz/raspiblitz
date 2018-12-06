@@ -21,6 +21,7 @@ if [ ${setupStep} -gt 89 ];then
   echo "FINISH by setupstep(${setupStep})"
   sleep 3
   ./90finishSetup.sh
+  ./95finalSetup.sh
   exit 0
 fi
 
@@ -77,6 +78,7 @@ if [ ${lndRunning} -eq 1 ]; then
   echo "FINSIH ... "
   sleep 3
   ./90finishSetup.sh
+  ./95finalSetup.sh
   exit 0
 
 fi #end - when lighting is running
@@ -178,7 +180,7 @@ fi # end HDD is already auto-mountes
 if [ ${setupStep} -eq 0 ]; then
 
   # run initial user dialog
-  ./20initDialog.sh
+  ./20setupDialog.sh
 
   # set SetupState
   sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
