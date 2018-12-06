@@ -143,7 +143,7 @@ if [ ${setupStep} -eq 0 ]; then
                   DELETE "erase old data, keep blockchain, reboot" )
         HEIGHT=11
     else
-    
+
         # start setup
         BACKTITLE="RaspiBlitz - Setup"
         TITLE="⚡ Welcome to your RaspiBlitz ⚡"
@@ -151,16 +151,6 @@ if [ ${setupStep} -eq 0 ]; then
         OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
                 LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
         HEIGHT=11
-
-        # prepare values
-        valueExists=$(sudo cat ${infoFile} | grep -c 'network=')
-        if [ ${valueExists} -eq 0 ]; then
-            echo "network=bitcoin" >> ${infoFile}
-        fi
-        valueExists=$(sudo cat ${infoFile} | grep -c 'chain=')
-        if [ ${valueExists} -eq 0 ]; then
-            echo "chain=main" >> ${infoFile}
-        fi
 
     fi
 

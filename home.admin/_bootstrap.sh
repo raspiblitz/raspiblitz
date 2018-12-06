@@ -220,16 +220,17 @@ fi
 ################################
 
 # init network and chain values if needed with defaults
-valueExists=$(sudo cat /home/admin/raspiblitz.info 2>/dev/null | grep -c "network=")
+valueExists=$(sudo cat ${infoFile} 2>/dev/null | grep -c "network=")
 if [ ${valueExists} -eq 0 ]; then
-  echo "network=bitcoin" >> /home/admin/raspiblitz.info
+  echo "network=bitcoin" >> ${infoFile}
 fi
-valueExists=$(sudo cat /home/admin/raspiblitz.info 2>/dev/null | grep -c "chain=")
+valueExists=$(sudo cat ${infoFile} 2>/dev/null | grep -c "chain=")
 if [ ${valueExists} -eq 0 ]; then
-  echo "chain=main" >> /home/admin/raspiblitz.info
+  echo "chain=main" >> ${infoFile}
 fi
 
 # EXIT on BOOTSTRAP HERE AT THE MOMENT
 echo "DONE BOOTSTRAP (before any configs etc)" >> $logFile
-echo "state=ready" > $infoFile
+sed -i "s/^state=.*/state=ready/g" ${infoFile}
+sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 exit 0
