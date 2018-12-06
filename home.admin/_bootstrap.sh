@@ -120,7 +120,6 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # display will ask user to run setup
     echo "state=waitsetup" > $infoFile
     echo "message='HDD needs SetUp (1)'" >> $infoFile
-    echo "device=${hddDeviceName}" >> $infoFile
     exit 1
   fi
 
@@ -133,7 +132,6 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "FAIL - not able to temp-mount HDD" >> $logFile
     echo "state=waitsetup" > $infoFile
     echo "message='HDD failed Mounting'" >> $infoFile
-    echo "device=${hddDeviceName}" >> $infoFile
     # no need to unmount the HDD, it failed mounting
     exit 1
   else 
@@ -148,7 +146,6 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "Found existing configuration - TODO migration and recover!" >> $logFile
     echo "state=recovering" > $infoFile
     echo "message='TODO: migration and recover'" >> $infoFile
-    echo "device=${hddDeviceName}" >> $infoFile
     # unmountig the HDD at the end of the process
     sudo umount -l /mnt/hdd
     exit 1
@@ -163,22 +160,23 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "Found existing LND data - old RaspiBlitz?" >> $logFile
     echo "state=olddata" > $infoFile
     echo "message='No Auto-Update possible'" >> $infoFile
-    echo "device=${hddDeviceName}" >> $infoFile
     # keep HDD mounted if user wants to copy data
     exit 1
   else 
     echo "OK - No LND data found" >> $logFile
   fi
 
-  # check if HDD contains pre-loaded blockchain data (just bitcoin for now)
+  # check if HDD contains pre-loaded blockchain data
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  blockchainDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  if [ ${blockchainDataExists} -eq 1 ]; then
+  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+
+  # check if node can go into presync (only for bitcoin)
+  if [ ${bitcoinDataExists} -eq 1 ]; then
 
     # update info file
     echo "state=presync" > $infoFile
     echo "message='starting pre-sync'" >> $infoFile
-    echo "device=${hddDeviceName}" >> $infoFile
 
     # activating presync
     # so that on a hackathon you can just connect a RaspiBlitz
@@ -197,15 +195,13 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     exit 1
   
   else
-    ls /mnt/hdd/bitcoin/blocks/blk00000.dat >> $logFile
-    echo "OK - No blockchain data found" >> $logFile
+    echo "OK - No bitcoin blockchain data found" >> $logFile
   fi
 
   # if it got until here: HDD is empty ext4
   echo "Waiting for SetUp." >> $logFile
   echo "state=waitsetup" > $infoFile
   echo "message='HDD needs SetUp (2)'" >> $infoFile
-  echo "device=${hddDeviceName}" >> $infoFile
   # unmount HDD to be ready for auto-mount during setup
   sudo umount -l /mnt/hdd
   exit 1

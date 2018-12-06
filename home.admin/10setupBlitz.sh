@@ -6,20 +6,9 @@
 # in case it got interrupted
 echo "checking setup script"
 
-# CONFIGFILE on HDD - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
 # INFOFILE on SD - state data from bootstrap & setup
 infoFile="/home/admin/raspiblitz.info"
-
-# try to load raspi config from HDD and
-# if not available yet (because HDD not mounted yet) 
-# then try load info file from sd card
-source ${configFile} 2>/dev/null
-if [ ${#network} -eq 0 ]; then 
-  echo "HDD config not found - try SD info file"
-  source ${infoFile} 2>/dev/null
-fi
+source ${infoFile}
 
 # if no setup step in info file init with 0
 if [ ${#setupStep} -eq 0 ];then
@@ -132,7 +121,7 @@ if [ ${mountOK} -eq 1 ]; then
     exit 1
   fi
 
-  # HDD is empty - ask how to get Blockchain
+  # HDD is empty - get Blockchain
 
   #Bitcoin
   if [ ${network} = "bitcoin" ]; then
@@ -194,13 +183,6 @@ if [ ${setupStep} -eq 0 ]; then
   # set SetupState
   sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
 
-  # update system
-  echo ""
-  echo "*** Update System ***"
-  sudo apt-mark hold raspberrypi-bootloader
-  sudo apt-get update
-  sudo apt-get upgrade -f -y --allow-change-held-packages
-  echo "OK - System is now up to date"
 fi
 
 # the HDD is already ext4 formated and called blockchain

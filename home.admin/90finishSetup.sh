@@ -78,6 +78,14 @@ echo "enable lazy firewall"
 sudo ufw --force enable
 echo ""
 
+# update system
+echo ""
+echo "*** Update System ***"
+sudo apt-mark hold raspberrypi-bootloader
+sudo apt-get update
+sudo apt-get upgrade -f -y --allow-change-held-packages
+echo "OK - System is now up to date"
+
 # mark setup is done
 sudo sed -i "s/^setupStep=.*/setupStep=90/g" /home/admin/raspiblitz.info
 
