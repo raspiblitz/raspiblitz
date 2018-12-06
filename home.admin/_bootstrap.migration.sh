@@ -12,7 +12,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # debug info
 echo "STARTED Migration/Init --> see logs in ${logFile}"
 echo "STARTED Migration/Init" >> ${logFile}
- sudo sed -i "s/^message=.*/message='Running Data Migration'/g" ${infoFile}
+sudo sed -i "s/^message=.*/message='Running Data Migration'/g" ${infoFile}
 
 # LOAD DATA & PRECHECK
 
