@@ -26,5 +26,5 @@ sudo rm -f -r /mnt/hdd/download
 sudo rm -f -r /mnt/hdd/tor
 sudo rm -f /mnt/hdd/raspiblitz.conf
 sudo chown admin:admin -R /mnt/hdd/${network}
-echo "1" > /home/admin/.setup
+sudo rm -f /home/admin/raspiblitz.info
 echo "OK - the HDD is now clean"

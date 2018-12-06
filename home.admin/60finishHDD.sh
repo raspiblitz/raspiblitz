@@ -50,7 +50,7 @@ if [ ${mountOK} -eq 1 ]; then
    sleep 2 
 
    # set SetupState
-   echo "60" > /home/admin/.setup
+   sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info
 
    ./10setupBlitz.sh
 

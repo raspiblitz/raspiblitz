@@ -94,7 +94,7 @@ echo ""
 echo "---> You can now disconnect the 2nd HDD"
 
 # set SetupState
-echo "50" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
 
 sleep 5
 ./60finishHDD.sh

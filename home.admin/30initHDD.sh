@@ -48,6 +48,7 @@ if [ ${existsHDD} -eq 1 ]; then
 
       # set SetupState
       echo "30" > /home/admin/.setup
+      sudo sed -i "s/^setupStep=.*/setupStep=30/g" ${infoFile}
 
       # automatically now add the HDD to the system
       ./40addHDD.sh

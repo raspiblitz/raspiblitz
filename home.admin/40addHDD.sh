@@ -45,7 +45,7 @@ if [ ${existsHDD} -gt 0 ]; then
 	         echo ""
 
            # set SetupState
-           echo "40" > /home/admin/.setup
+           sudo sed -i "s/^setupStep=.*/setupStep=40/g" /home/admin/raspiblitz.info
 
            echo "*** Analysing HDD Content ***"
            if [  -d "/mnt/hdd/${network}"  ]; then 

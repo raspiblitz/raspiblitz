@@ -154,7 +154,7 @@ Press OK and follow the 'Helping Instructions'.
   echo "If you are ready. Press ENTER."
   read key
 
-  echo "65" > /home/admin/.setup
+  sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
 fi
 
 echo "--> lets wait 60 seconds for LND to get ready"
@@ -241,7 +241,7 @@ else
 fi
 
 # set SetupState (scan is done - so its 80%)
-echo "80" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
 
 ###### finishSetup
 ./90finishSetup.sh

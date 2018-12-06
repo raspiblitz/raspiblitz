@@ -78,7 +78,7 @@ while :
       fi
 
       # get the actual step number of setup process
-      setupStep=$(sudo -u admin cat /home/admin/.setup 2>/dev/null)
+      source /home/admin/raspiblitz.info
       if [ ${#setupStep} -eq 0 ]; then
        setupStep=0
       fi

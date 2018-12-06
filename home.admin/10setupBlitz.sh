@@ -1,19 +1,29 @@
 #!/bin/bash
-echo ""
 
-# load network
-network=`cat .network`
+# CHECK WHAT IS ALREADY WORKING
+# check list from top down - so ./10setupBlitz.sh
+# and re-enters the setup process at the correct spot
+# in case it got interrupted
+echo "checking setup script"
 
-# check chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# CONFIGFILE on HDD - configuration of RaspiBlitz
+configFile="/mnt/hdd/raspiblitz.conf"
+
+# INFOFILE on SD - state data from bootstrap & setup
+infoFile="/home/admin/raspiblitz.info"
+
+# try to load raspi config from HDD and
+# if not available yet (because HDD not mounted yet) 
+# then try load info file from sd card
+source ${configFile} 2>/dev/null
+if [ ${#network} -eq 0 ]; then 
+  echo "HDD config not found - try SD info file"
+  source ${infoFile} 2>/dev/null
 fi
 
-# get setup progress
-setupStep=$(sudo -u admin cat /home/admin/.setup)
+# if no setup step in info file init with 0
 if [ ${#setupStep} -eq 0 ];then
+  echo "setupStep=0" >> ${infoFile}
   setupStep=0
 fi
 
@@ -25,11 +35,6 @@ if [ ${setupStep} -gt 89 ];then
   exit 0
 fi
 
-# CHECK WHAT IS ALREADY WORKING
-# check list from top down - so ./10setupBlitz.sh
-# and re-enters the setup process at the correct spot
-# in case it got interrupted
-
 # check if lightning is running
 lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
@@ -37,7 +42,7 @@ if [ ${lndRunning} -eq 1 ]; then
   echo "LND is running ..."
   sleep 1
 
-  # check if LND is locked
+  # check if LND wallet exists and if locked
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
   locked=0
   # only when a wallet exists - it can be locked
@@ -85,7 +90,7 @@ if [ ${lndRunning} -eq 1 ]; then
   ./90finishSetup.sh
   exit 0
 
-fi
+fi #end - when lighting is running
 
 # check if bitcoin is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
@@ -98,10 +103,10 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   echo "Next step run Lightning"
   ./70initLND.sh
   exit 1
-fi
+fi #end - when bitcoin is running
 
-# check if HDD is mounted
-mountOK=$( df | grep -c /mnt/hdd )
+# check if HDD is auto-mounted
+mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
   # are there any signs of blockchain data
@@ -156,7 +161,7 @@ if [ ${mountOK} -eq 1 ]; then
    fi
 
   # set SetupState
-  echo "50" > /home/admin/.setup
+  sudo sed -i "s/^setupStep=.*/setupStep=50/g" ${infoFile}
 
   clear
   case $menuitem in
@@ -175,19 +180,19 @@ if [ ${mountOK} -eq 1 ]; then
   esac
   exit 1
 
-fi
+fi # end HDD is already auto-mountes
 
 
-# the HDD is not mounted --> very early stage of setup
+# the HDD is not auto-mounted --> very early stage of setup
 
 # if the script is called for the first time
-if [ ! -f "home/admin/.setup" ]; then
+if [ ${setupStep} -eq 0 ]; then
 
   # run initial user dialog
   ./20initDialog.sh
 
-  # set SetupState to 10
-  echo "20" > /home/admin/.setup
+  # set SetupState
+  sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
 
   # update system
   echo ""

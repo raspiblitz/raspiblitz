@@ -294,18 +294,9 @@ if [ ${#hostname} -eq 0 ]; then
   fi
 fi
 
-# SETUP STEP
+# SETUP STEP (ONLY DO ON SD CARD infofile - not configfile)
 # setupStep=0-100
-if [ ${#setupStep} -eq 0 ]; then
-  oldValueExists=$(sudo ls /home/admin/.setup | grep -c '.setup')
-  if [ ${oldValueExists} -eq 1 ]; then
-    oldValue=`sudo cat /home/admin/.setup`
-    echo "importing old setup value: ${oldValue}" >> $logFile
-    echo "setupStep=${oldValue}" >> $configFile
-  else
-    echo "setupStep=0" >> $configFile
-  fi
-fi
+
 
 # AUTOPILOT
 # autoPilot=off|on

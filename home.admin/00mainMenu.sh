@@ -117,16 +117,16 @@ waitUntilChainNetworkIsReady()
     done
 }
 
-## get actual setup state
-setupState=0;
-if [ -f "/home/admin/.setup" ]; then
-  setupState=$( cat /home/admin/.setup )
+## get actual setup info
+source /home/admin/raspiblitz.info
+if [ ${#setupStep} -eq 0 ]; then
+  echo "WARN: no setup step found in raspiblitz.info"
+  setupStep=0
 fi
-if [ ${setupState} -eq 0 ]; then
+if [ ${setupStep} -eq 0 ]; then
 
     # check data from boostrap
     # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
-    source /home/admin/raspiblitz.info
     if [ "${state}" = "olddata" ]; then
         # old data setup
         BACKTITLE="RaspiBlitz - Manual Update"
@@ -147,10 +147,10 @@ if [ ${setupState} -eq 0 ]; then
 
 
 
-elif [ ${setupState} -lt 100 ]; then
+elif [ ${setupStep} -lt 100 ]; then
 
     # see function above
-    if [ ${setupState} -gt 59 ]; then
+    if [ ${setupStep} -gt 59 ]; then
       waitUntilChainNetworkIsReady
     fi  
 
@@ -365,7 +365,6 @@ case $CHOICE in
             ;;
         DELETE)
             sudo ./XXcleanHDD.sh
-            sudo rm -f .setup
             sudo shutdown -r now
             exit 0
             ;;   

@@ -29,7 +29,7 @@ sudo mkdir /mnt/hdd/${network}
 echo "OK - sync is activated"
 
 # set SetupState
-echo "50" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
 
 # continue setup
 ./60finishHDD.sh

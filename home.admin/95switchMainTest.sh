@@ -115,7 +115,7 @@ if [ ${networkInstalled} -gt 0 ]; then
   sleep 120
 
   # set setup info again
-  echo "60" > /home/admin/.setup
+  sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info
 
   # run again the complete LND init procedure
   ./70initLND.sh

@@ -73,7 +73,7 @@ sudo ufw --force enable
 echo ""
 
 # mark setup is done
-echo "90" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=90/g" /home/admin/raspiblitz.info
 
 # show info to user
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
@@ -89,7 +89,7 @@ echo "Setting new network hostname '$hostname'"
 sudo raspi-config nonint do_hostname ${hostname}
 
 # mark setup is done (100%)
-echo "100" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear
 echo "Setup done. Rebooting now."
