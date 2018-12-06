@@ -1,7 +1,8 @@
 echo ""
 
-# load network
-network=`cat .network`
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
 
 echo "!!!! This will DELETE your data & POSSIBLE FUNDS from the HDD !!!!"
 echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
