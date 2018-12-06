@@ -1,8 +1,8 @@
 #!/bin/bash
 _temp="./download/dialog.$$"
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # welcome and ask for name of RaspiBlitz 
 result=""
@@ -20,7 +20,15 @@ sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 
 # store hostname for later - to be set right before the next reboot
 # work around - because without a reboot the hostname seems not updates in the whole system
-echo $result > /home/admin/.hostname
+valueExistsInInfoFile=$(sudo cat /home/admin/raspiblitz.info | grep -c "hostname=")
+if [ ${valueExistsInInfoFile} -eq 0 ]; then
+  # update
+  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
+else
+  # add
+  echo "hostname=${result}" >> /home/admin/raspiblitz.info
+fi
+
 
 passwordValid=0
 result=""

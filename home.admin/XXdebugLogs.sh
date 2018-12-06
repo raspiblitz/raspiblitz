@@ -8,7 +8,7 @@ source /home/admin/_version.info
 ## get basic info (its OK if not set yet)
 source /mnt/hdd/raspiblitz.conf
 
-# check network and get backup if from old config
+# for old nodes
 if [ ${#network} -eq 0 ]; then
   echo "backup info: network"
   network="bitcoin"
@@ -19,7 +19,7 @@ if [ ${#network} -eq 0 ]; then
   network=`sudo cat /home/admin/.network`
 fi
 
-# check chain and get backup if from system
+# for old nodes
 if [ ${#chain} -eq 0 ]; then
   echo "backup info: chain"
   chain="test"

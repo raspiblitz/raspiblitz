@@ -43,18 +43,20 @@ while :
 
     else
 
-      ## get basic info (its OK if not set yet)
+      ## get basic info
+      source /home/admin/raspiblitz.info 2>/dev/null
       source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
       # check hostname and get backup if from old config
       if [ ${#hostname} -eq 0 ]; then
+        # keep for old nodes
         hostname=`sudo cat /home/admin/.hostname`
         if [ ${#hostname} -eq 0 ]; then
           hostname="raspiblitz"
         fi
       fi
 
-      # check network and get backup if from old config
+      # for old nodes
       if [ ${#network} -eq 0 ]; then
         network="bitcoin"
         litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
@@ -68,7 +70,7 @@ while :
         fi
       fi
 
-      # check chain and get backup if from system
+      # for old nodes
       if [ ${#chain} -eq 0 ]; then
         chain="test"
         isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)

@@ -1,8 +1,8 @@
 #!/bin/bash
 echo ""
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 echo "*** Checking HDD ***"
 mountOK=$(df | grep -c /mnt/hdd)

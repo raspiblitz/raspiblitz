@@ -54,7 +54,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # check hostname and get backup if from old config
 if [ ${#hostname} -eq 0 ]; then
-  echo "backup info: hostname"
+  echo "backup info for old nodes: hostname"
   hostname=`sudo cat /home/admin/.hostname`
   if [ ${#hostname} -eq 0 ]; then
     hostname="raspiblitz"
@@ -63,22 +63,23 @@ fi
 
 # check network and get backup if from old config
 if [ ${#network} -eq 0 ]; then
-    echo "backup info: network"
+    echo "backup info for old nodes: network"
     network="bitcoin"
     litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
     if [ ${litecoinActive} -eq 1 ]; then
       network="litecoin"
     else
-        network=`sudo cat /home/admin/.network 2>/dev/null`
+      # keep for old nodes
+      network=`sudo cat /home/admin/.network 2>/dev/null`
     fi
     if [ ${#network} -eq 0 ]; then
       network="bitcoin"
     fi
 fi
 
-# check chain and get backup if from system
+# for old nodes
 if [ ${#chain} -eq 0 ]; then
-  echo "backup info: chain"
+  echo "backup info for old nodes: chain"
   chain="test"
   isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
   if [ ${isMainChain} -gt 0 ];then
@@ -244,12 +245,14 @@ case $CHOICE in
             exit 1;
             ;;
         BITCOIN)
-            echo "bitcoin" > /home/admin/.network
+            sed -i "s/^network=.*/network=bitcoin/g" /home/admin/raspiblitz.info
+            sed -i "s/^chain=.*/chain=main/g" /home/admin/raspiblitz.info
             ./10setupBlitz.sh
             exit 1;
             ;;
         LITECOIN)
-            echo "litecoin" > /home/admin/.network
+            sed -i "s/^network=.*/network=litecoin/g" /home/admin/raspiblitz.info
+            sed -i "s/^chain=.*/chain=main/g" /home/admin/raspiblitz.info
             ./10setupBlitz.sh
             exit 1;
             ;;

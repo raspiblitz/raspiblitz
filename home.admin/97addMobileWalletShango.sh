@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# load network
-network=`cat .network`
-
-# get chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
 # make sure qrcode-encoder in installed

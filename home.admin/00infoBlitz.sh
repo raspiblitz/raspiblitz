@@ -10,18 +10,14 @@ color_yellow='\033[0;33m'
 color_gray='\033[0;37m'
 color_purple='\033[0;35m'
 
-## get basic info (its OK if not set yet)
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-# check hostname and get backup if from old config
-if [ ${#hostname} -eq 0 ]; then
-  hostname=`sudo cat /home/admin/.hostname 2>/dev/null`
-  if [ ${#hostname} -eq 0 ]; then
-    hostname="raspiblitz"
-  fi
-fi
+# check hostname
+if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 
-# check network and get backup if from old config
+# for oldnodes
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
   litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
@@ -35,7 +31,7 @@ if [ ${#network} -eq 0 ]; then
   fi
 fi
 
-# check chain and get backup if from system
+# for oldnodes
 if [ ${#chain} -eq 0 ]; then
   chain="test"
   isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)

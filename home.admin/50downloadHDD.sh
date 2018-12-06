@@ -15,8 +15,8 @@ litecoinSize=35000000 # 35021940-tolerance
 # NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Runf download.
 # When finished the warning comes up and behind WARNING: copy that number
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # settings based on network
 list=$bitcoinList

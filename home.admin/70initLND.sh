@@ -1,15 +1,8 @@
 #!/bin/bash
 echo ""
 
-# load network
-network=`cat .network`
-
-# get chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
-fi
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"

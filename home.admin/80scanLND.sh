@@ -1,8 +1,5 @@
-# load network
-network=`sudo cat /home/admin/.network`
-
-# load name of Blitz
-name=`sudo cat /home/admin/.hostname`
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')

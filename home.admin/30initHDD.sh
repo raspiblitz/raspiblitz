@@ -47,8 +47,7 @@ if [ ${existsHDD} -eq 1 ]; then
       sleep 1
 
       # set SetupState
-      echo "30" > /home/admin/.setup
-      sudo sed -i "s/^setupStep=.*/setupStep=30/g" ${infoFile}
+      sudo sed -i "s/^setupStep=.*/setupStep=30/g" /home/admin/raspiblitz.info
 
       # automatically now add the HDD to the system
       ./40addHDD.sh

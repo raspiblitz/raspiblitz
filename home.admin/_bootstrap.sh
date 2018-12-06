@@ -212,123 +212,21 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
 fi
 
+################################
+# INFOFILE BASICS
+################################
+
+# init network and chain values if needed with defaults
+valueExists=$(sudo cat /home/admin/raspiblitz.info 2>/dev/null | grep -c "network=")
+if [ ${valueExists} -eq 0 ]; then
+  echo "network=bitcoin" >> /home/admin/raspiblitz.info
+fi
+valueExists=$(sudo cat /home/admin/raspiblitz.info 2>/dev/null | grep -c "chain=")
+if [ ${valueExists} -eq 0 ]; then
+  echo "chain=main" >> /home/admin/raspiblitz.info
+fi
+
 # EXIT on BOOTSTRAP HERE AT THE MOMENT
 echo "DONE BOOTSTRAP (before any configs etc)" >> $logFile
 echo "state=ready" > $infoFile
 exit 0
-
-################################
-# CONFIGFILE BASICS
-################################
-
-# check if there is a config file
-configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
-
-  # create new config
-  echo "creating config file: ${configFile}" >> $logFile
-  echo "# RASPIBLITZ CONFIG FILE" > $configFile
-  echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
-  sudo chmod 777 ${configFile}
-  # the rest will be set under DEFAULT VALUES
-
-else
-
-  # load & check config version
-  source $configFile
-  echo "codeVersion(${codeVersion})" >> $logFile
-  echo "configVersion(${raspiBlitzVersion})" >> $logFile
-  if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
-      echo "detected version change ... starting migration script" >> $logFile
-      /home/admin/_bootstrap.update.sh
-  fi
-
-fi
-
-##################################
-# DEFAULT VALUES
-# check which are not set and add
-##################################
-
-# COIN NETWORK
-# network=bitcoin|litecoin|undefined
-if [ ${#network} -eq 0 ]; then
-  oldNetworkConfigExists=$(sudo ls /home/admin/.network | grep -c '.network')
-  if [ ${oldNetworkConfigExists} -eq 1 ]; then
-    network=`sudo cat /home/admin/.network`
-    echo "importing old network value: ${network}" >> $logFile
-    echo "network=${network}" >> $configFile
-  else
-    echo "network=undefined" >> $configFile
-  fi
-fi
-
-# RUNNING CHAIN
-# chain=test|main
-if [ ${#chain} -eq 0 ]; then
-  networkConfigExists=$(sudo ls /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep -c '.conf')
-  if [ ${networkConfigExists} -eq 1 ]; then
-    source /mnt/hdd/${network}/${network}.conf
-    if [ ${testnet} -eq 1 ]; then
-        echo "detecting mainchain" >> $logFile
-        echo "chain=main" >> $configFile
-    else
-        echo "detecting testnet" >> $logFile
-        echo "chain=test" >> $configFile
-    fi
-  else
-    echo "chain=main" >> $configFile
-  fi
-fi
-
-# HOSTNAME
-# hostname=ONEWORDSTRING
-if [ ${#hostname} -eq 0 ]; then
-  oldValueExists=$(sudo ls /home/admin/.hostname | grep -c '.hostname')
-  if [ ${oldValueExists} -eq 1 ]; then
-    oldValue=`sudo cat /home/admin/.hostname`
-    echo "importing old hostname: ${oldValue}" >> $logFile
-    echo "hostname=${oldValue}" >> $configFile
-  else
-    echo "hostname=raspiblitz" >> $configFile
-  fi
-fi
-
-# SETUP STEP (ONLY DO ON SD CARD infofile - not configfile)
-# setupStep=0-100
-
-
-# AUTOPILOT
-# autoPilot=off|on
-if [ ${#autoPilot} -eq 0 ]; then
-  echo "autoPilot=off" >> $configFile
-fi
-
-# AUTO NAT DISCOVERY
-# autoNatDiscovery=off|on
-if [ ${#autoNatDiscovery} -eq 0 ]; then
-  echo "autoNatDiscovery=off" >> $configFile
-fi
-
-# TOR
-# runBehindTor=off|on
-if [ ${#runBehindTor} -eq 0 ]; then
-  echo "runBehindTor=off" >> $configFile
-fi
-
-# RideTheLightning RTL
-# rtlWebinterface=off|on
-if [ ${#rtlWebinterface} -eq 0 ]; then
-  echo "rtlWebinterface=off" >> $configFile
-fi
-
-##################################
-# CHECK CONFIG CONSISTENCY
-##################################
-
-# after all default values written to config - reload config
-source $configFile
-echo "" >> $logFile
-
-echo "DONE BOOTSTRAP" >> $logFile
-echo "state=ready" > $infoFile

@@ -4,8 +4,8 @@ echo ""
 # see background_downloadBlockchain.md for info
 # why there are two torrent files
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y

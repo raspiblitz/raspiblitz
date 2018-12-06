@@ -11,8 +11,8 @@ bitcoinTorrentsize=259000000
 litecoinTorrent="raspiblitz-litecoin-2018-07-29"
 litecoinTorrentsize=10240000
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 ## experimental redirect if bitcoin
 if [ "$network" = "bitcoin" ]; then

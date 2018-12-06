@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # only show warning when bitcoin
 if [ "$network" = "bitcoin" ]; then
