@@ -10,8 +10,13 @@ echo "checking setup script"
 infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 
+echo "network(${network})"
+echo "chain(${chain})"
+echo "setupStep(${setupStep})"
+
 # if no setup step in info file init with 0
 if [ ${#setupStep} -eq 0 ];then
+  echo "Init setupStep=0"
   echo "setupStep=0" >> ${infoFile}
   setupStep=0
 fi
@@ -100,19 +105,23 @@ fi #end - when bitcoin is running
 mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
-  # are there any signs of blockchain data
-  if [ -d "/mnt/hdd/${network}" ]; then
+  # are there any signs of blockchain data and activity
+  blockchainDataExists=$(ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
-    echo "TAIL Chain Network Log"
-    sudo tail /mnt/hdd/${network}/debug.log
-    echo ""
-
-    echo "UNKOWN STATE - there is blockain data folder, but blockchain service is not running"
-    echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "Or something with the config is not correct."
-    echo "Sometimes a reboot helps --> sudo shutdown -r now"
-
-    exit 1
+  if [ ${blockchainDataExists} -eq 1 ]; then
+    if [ ${configExists} -eq 1 ]; then
+      ./XXdebugLogs.sh
+      echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
+      echo "It seems that something went wrong during sync/download/copy of the blockchain."
+      echo "Or something with the config is not correct."
+      echo "Sometimes a reboot helps --> sudo shutdown -r now"
+      exit 1
+    else 
+      echo "Got mounted blockchain, but no config and runnign service yet --> finish HDD"
+      ./60finishHDD.sh
+      exit 1
+    fi
   fi
 
   # check if there is a download to continue
