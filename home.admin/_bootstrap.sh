@@ -86,7 +86,7 @@ while [ ${hddExists} -eq 0 ]
   done
 
 # check if the HDD is auto-mounted
-hddIsAutoMounted=$(lsblk | grep -c '/mnt/hdd')
+hddIsAutoMounted=$(sudo cat /etc/fstab | grep -c '/mnt/hdd')
 if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   echo "HDD is there but not AutoMounted yet." >> $logFile
