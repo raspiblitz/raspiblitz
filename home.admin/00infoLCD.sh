@@ -49,7 +49,7 @@ while :
       # check hostname and get backup if from old config
       if [ ${#hostname} -eq 0 ]; then
         # keep for old nodes
-        hostname=`sudo cat /home/admin/.hostname`
+        hostname=`sudo cat /home/admin/.hostname` 2>/dev/null
         if [ ${#hostname} -eq 0 ]; then
           hostname="raspiblitz"
         fi
