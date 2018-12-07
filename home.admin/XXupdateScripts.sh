@@ -3,7 +3,7 @@
 cd /home/admin/raspiblitz
 
 # change branch if set as parameter
-wantedBranch=$1
+wantedBranch="$1"
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
 if [ ${#wantedBranch} -gt 0 ]; then
   echo "your wanted branch is: ${wantedBranch}"
@@ -15,6 +15,8 @@ if [ ${#wantedBranch} -gt 0 ]; then
     git checkout ${wantedBranch}
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
   fi
+else
+  echo "USAGE-INFO:./XXupdateScripts.sh '[BRANCHNAME]'"
 fi
 
 echo ""
