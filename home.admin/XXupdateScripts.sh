@@ -16,6 +16,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
   fi
 else
+  echo ""
   echo "USAGE-INFO:./XXupdateScripts.sh '[BRANCHNAME]'"
 fi
 
