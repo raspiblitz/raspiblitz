@@ -17,7 +17,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
   fi
 else
   echo ""
-  echo "USAGE-INFO:./XXupdateScripts.sh '[BRANCHNAME]'"
+  echo "USAGE-INFO: ./XXupdateScripts.sh '[BRANCHNAME]'"
 fi
 
 echo ""
