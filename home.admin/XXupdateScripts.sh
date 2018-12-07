@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /home/admin/raspiblitz
+
 # change branch if set as parameter
 wantedBranch=$1
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
@@ -20,7 +22,6 @@ echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
 echo "justincase, not the final upadte mechanism"
 echo "BRANCH --> ${activeBranch} <---"
 echo "******************************************"
-cd /home/admin/raspiblitz
 git pull
 cd ..
 rm *.sh
