@@ -18,7 +18,7 @@ fi
 echo ""
 echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
 echo "justincase, not the final upadte mechanism"
-echo "BRANCH --> ${activeBranch}"
+echo "BRANCH --> ${activeBranch} <---"
 echo "******************************************"
 cd /home/admin/raspiblitz
 git pull
