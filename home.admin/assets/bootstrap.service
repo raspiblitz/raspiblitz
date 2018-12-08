@@ -12,6 +12,7 @@ Type=oneshot
 ExecStart=/home/admin/_bootstrap.sh
 KillMode=process
 StandardOutput=journal
+Restart=no
 
 [Install]
 WantedBy=multi-user.target

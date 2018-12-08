@@ -124,7 +124,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # display will ask user to run setup
     echo "state=waitsetup" > $infoFile
     echo "message='HDD needs SetUp (1)'" >> $infoFile
-    exit 1
+    exit 0
   fi
 
   # temp-mount the HDD
@@ -137,7 +137,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=waitsetup" > $infoFile
     echo "message='HDD failed Mounting'" >> $infoFile
     # no need to unmount the HDD, it failed mounting
-    exit 1
+    exit 0
   else 
      echo "OK - HDD available under /mnt/hdd" >> $logFile
   fi
@@ -159,7 +159,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover
     sudo shutdown -r now
-    exit 1
+    exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
@@ -172,7 +172,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=olddata" > $infoFile
     echo "message='No Auto-Update possible'" >> $infoFile
     # keep HDD mounted if user wants to copy data
-    exit 1
+    exit 0
   else 
     echo "OK - No LND data found" >> $logFile
   fi
@@ -203,7 +203,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "done" >> $logFile
 
     # after admin login, presync will be stoped and HDD unmounted
-    exit 1
+    exit 0
   
   else
     echo "OK - No bitcoin blockchain data found" >> $logFile
@@ -215,7 +215,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   echo "message='HDD needs SetUp (2)'" >> $infoFile
   # unmount HDD to be ready for auto-mount during setup
   sudo umount -l /mnt/hdd
-  exit 1
+  exit 0
 
 fi
 
