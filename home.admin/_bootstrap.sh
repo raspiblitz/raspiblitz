@@ -5,6 +5,10 @@
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
 
+# unique id
+uid=$(date +%s)
+echo "started" > /home/admin/${uid}.boot
+
 # load codeVersion
 source /home/admin/_version.info
 

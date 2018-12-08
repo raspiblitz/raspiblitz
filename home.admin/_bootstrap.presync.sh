@@ -28,5 +28,4 @@ echo "presync: started" >> $logFile
   
 # update info file
 echo "state=presync" > $infoFile
-echo "message='started pre-sync'" >> $infoFile
-echo "device=${hddDeviceName}" >> $infoFile
+sudo sed -i "s/^message=.*/message='running pre-sync'/g" ${infoFile}
