@@ -2,17 +2,16 @@
 # /etc/systemd/system/bootstrap.service
 
 [Unit]
-Description=execute on every startup before everything else is starting
+Description=execute on every startup before everything else
 After=network.target
 
 [Service]
 User=root
 Group=root
 Type=oneshot
+RemainAfterExit=true
 ExecStart=/home/admin/_bootstrap.sh
-KillMode=process
 StandardOutput=journal
-Restart=no
 
 [Install]
 WantedBy=multi-user.target
