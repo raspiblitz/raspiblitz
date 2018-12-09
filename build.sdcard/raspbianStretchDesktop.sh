@@ -9,10 +9,20 @@
 ##########################################################################
 
 echo ""
-echo "****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.97 *"
-echo "****************************************"
+echo "*****************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.97d *"
+echo "*****************************************"
 echo ""
+
+# 1st optional parameter is the branch to get code from when
+# provisioning sd card with raspiblitz assets/scripts later on
+echo "*** CHECK INPUT PARAMETERS ***"
+wantedBranch="$1"
+if [ ${#wantedBranch} -eq 0 ]; then
+  wantedBranch="master"
+fi
+echo "will use code from branch --> '${wantedBranch}'"
+sleep 3
 
 echo ""
 echo "*** CHECK BASE IMAGE ***"
@@ -391,7 +401,7 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # move files from gitclone
 cd /home/admin/
-sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
+sudo -u admin git clone -b ${wantedBranch} https://github.com/rootzoll/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
