@@ -9,10 +9,12 @@ source /home/admin/_version.info
 
 # show info to user
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
-    Press OK for a final reboot.
+    
+    After reboot RaspiBlitz
+    needs to be unlocked and
+    sync with the network.
 
-    Remember: After every reboot
-  you need to unlock the LND wallet.
+    Press OK for a final reboot.
 " 10 42
 
 # init the RASPIBLITZ Config
