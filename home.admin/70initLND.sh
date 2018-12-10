@@ -206,39 +206,39 @@ else
   echo "OK - Wallet is already unlocked"
 fi
 
-### Show Lighthning Sync
-echo ""
-echo "*** Check LND Sync ***"
-item=0
-lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-if [ ${lndSyncing} -eq 0 ]; then
-  echo "OK - wait for LND to be synced"
-  while :
-    do
-      
-      # show sync status
-      ./80scanLND.sh
-      sleep 15
-      
-      # break loop when synced
-      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-      if [ ${lndSyncing} -eq 1 ]; then
-        break
-      fi
-
-      # break loop when wallet is locked
-      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
-      if [ ${locked} -eq 1 ]; then
-        break
-      fi
-
-      sleep 15
-
-    done
-  clear
-else
-  echo "OK - LND is in sync"
-fi
+#### Show Lighthning Sync
+#echo ""
+#echo "*** Check LND Sync ***"
+#item=0
+#lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+#if [ ${lndSyncing} -eq 0 ]; then
+#  echo "OK - wait for LND to be synced"
+#  while :
+#    do
+#      
+#      # show sync status
+#      ./80scanLND.sh
+#      sleep 15
+#      
+#      # break loop when synced
+#      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+#      if [ ${lndSyncing} -eq 1 ]; then
+#        break
+#      fi
+#
+#      # break loop when wallet is locked
+#      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+#      if [ ${locked} -eq 1 ]; then
+#        break
+#      fi
+#
+#      sleep 15
+#
+#    done
+#  clear
+#else
+#  echo "OK - LND is in sync"
+#fi
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
