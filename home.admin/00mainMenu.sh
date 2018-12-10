@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting the main menu - please wait ..."
+echo "Starting the main menu ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -95,6 +95,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 waitUntilChainNetworkIsReady()
 {
     echo "checking ${network}d - please wait .."
+    echo "can take longer if device was off or first time"
     while :
     do
       sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
@@ -112,7 +113,13 @@ waitUntilChainNetworkIsReady()
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
         sleep 5
       else
-        return
+        lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+        if [ ${lndSynced} -eq 0 ]; then
+          ./80scanLND.sh
+        else
+          # everything is ready - return from loop
+          return
+        fi
       fi
     done
 }
@@ -186,12 +193,6 @@ else
       fi
 
     else
-
-      # if LND is syncing or scanning
-      lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-      if [ ${lndSynced} -eq 0 ]; then
-        dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz is Syncing" --msgbox "Wait until RaspiBlitz is fully synced.\nSee progress on display ..." 3 42
-      fi
 
       if [ ${runningRTL} -eq 1 ]; then
         TITLE="Webinterface: http://${localip}:3000"
