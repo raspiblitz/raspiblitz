@@ -115,7 +115,7 @@ waitUntilChainNetworkIsReady()
         locked=$(lncli --chain=${network} getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
           ./AAunlockLND.sh
-          echo "please wait ..."
+          echo "please wait ... update to next screen can be slow"
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then

@@ -30,6 +30,7 @@ scanstate="${item}/${total}"
 
 # get blockchain sync progress
 progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+progress=$(($progress * 100))
 
 # check if blockchain is still syncing
 heigh=6
@@ -41,11 +42,11 @@ if [ ${isWaitingBlockchain} -gt 0 ]; then
 fi
 if [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
-  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
+  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}%\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
   if [ "$USER" = "admin" ]; then
     heigh=6
     width=53
-    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}%\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 else
   heigh=7
