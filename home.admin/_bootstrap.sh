@@ -5,9 +5,9 @@
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
 
-# unique id
-uid=$(date +%s)
-echo "started" > /home/admin/${uid}.boot
+# use to detect multiple starts of service
+#uid=$(date +%s)
+#echo "started" > /home/admin/${uid}.boot
 
 # load codeVersion
 source /home/admin/_version.info
@@ -38,6 +38,8 @@ echo "***********************************************" >> $logFile
 
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
+echo "network=" >> $infoFile
+echo "chain=" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################
@@ -82,14 +84,14 @@ hddExists=$(lsblk | grep -c sda1)
 while [ ${hddExists} -eq 0 ]
   do
     # display will ask user to connect a HDD
-    echo "state=nohdd" > $infoFile
-    echo "message='Connect the Hard Drive'" >> $infoFile
+    sed -i "s/^state=.*/state=nohdd/g" ${infoFile}
+    sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
     sleep 5
     # retry to find HDD
     hddExists=$(lsblk | grep -c sda1)
   done
 
-# check if the HDD is auto-mounted
+# check if the HDD is auto-mounted ( auto-mounted = setup-done)
 hddIsAutoMounted=$(sudo cat /etc/fstab | grep -c '/mnt/hdd')
 if [ ${hddIsAutoMounted} -eq 0 ]; then
 
@@ -122,8 +124,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "HDD is NOT formatted in ext4." >> $logFile
     # stop the bootstrap here ...
     # display will ask user to run setup
-    echo "state=waitsetup" > $infoFile
-    echo "message='HDD needs SetUp (1)'" >> $infoFile
+    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+    sed -i "s/^message=.*/message='HDD needs SetUp (1)'/g" ${infoFile}
     exit 0
   fi
 
@@ -134,8 +136,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   mountOK=$(lsblk | grep -c '/mnt/hdd')
   if [ ${mountOK} -eq 0 ]; then
     echo "FAIL - not able to temp-mount HDD" >> $logFile
-    echo "state=waitsetup" > $infoFile
-    echo "message='HDD failed Mounting'" >> $infoFile
+    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+    sed -i "s/^message=.*/message='HDD failed Mounting'/g" ${infoFile}
     # no need to unmount the HDD, it failed mounting
     exit 0
   else 
@@ -148,13 +150,14 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
     echo "Found existing configuration" >> $logFile
-    echo "state=recovering" > $infoFile
-    echo "message='Starting Recover'" > $infoFile
+    sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+    sed -i "s/^message=.*/message='Starting Recover'/g" ${infoFile}
     echo "Calling Data Migration .." >> $logFile
     sudo /home/admin/_bootstrap.migration.sh
     echo "Calling Provisioning .." >> $logFile
     sudo /home/admin/_bootstrap.provision.sh
-    echo "state=recovered" > $infoFile
+    sed -i "s/^state=.*/state=recovered/g" ${infoFile}
+    sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover
@@ -169,8 +172,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${lndDataExists} -eq 1 ]; then
     echo "Found existing LND data - old RaspiBlitz?" >> $logFile
-    echo "state=olddata" > $infoFile
-    echo "message='No Auto-Update possible'" >> $infoFile
+    sed -i "s/^state=.*/state=olddata/g" ${infoFile}
+    sed -i "s/^message=.*/message='No Auto-Update possible'/g" ${infoFile}
     # keep HDD mounted if user wants to copy data
     exit 0
   else 
@@ -186,8 +189,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   if [ ${bitcoinDataExists} -eq 1 ]; then
 
     # update info file
-    echo "state=presync" > $infoFile
-    echo "message='starting presync'" >> $infoFile
+    sed -i "s/^state=.*/state=presync/g" ${infoFile}
+    sed -i "s/^message=.*/message='starting presync'/g" ${infoFile}
 
     # activating presync
     # so that on a hackathon you can just connect a RaspiBlitz
@@ -212,8 +215,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # if it got until here: HDD is empty ext4
   echo "Waiting for SetUp." >> $logFile
-  echo "state=waitsetup" > $infoFile
-  echo "message='HDD needs SetUp (2)'" >> $infoFile
+  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+  sed -i "s/^message=.*/message='HDD needs SetUp (2)'/g" ${infoFile}
   # unmount HDD to be ready for auto-mount during setup
   sudo umount -l /mnt/hdd
   exit 0
@@ -223,16 +226,6 @@ fi
 ################################
 # INFOFILE BASICS
 ################################
-
-# init network and chain values if needed with defaults
-valueExists=$(sudo cat ${infoFile} 2>/dev/null | grep -c "network=")
-if [ ${valueExists} -eq 0 ]; then
-  echo "network=bitcoin" >> ${infoFile}
-fi
-valueExists=$(sudo cat ${infoFile} 2>/dev/null | grep -c "chain=")
-if [ ${valueExists} -eq 0 ]; then
-  echo "chain=main" >> ${infoFile}
-fi
 
 # EXIT on BOOTSTRAP HERE AT THE MOMENT
 echo "DONE BOOTSTRAP (before any configs etc)" >> $logFile
