@@ -94,6 +94,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 # function to use later
 waitUntilChainNetworkIsReady()
 {
+    echo "checking ${network}d - please wait .."
     while :
     do
       sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
