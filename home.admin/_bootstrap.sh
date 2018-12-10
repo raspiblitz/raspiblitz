@@ -66,15 +66,6 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sleep 100
 fi
 
-
-################################
-# PUBLIC IP
-# for LND on startup
-################################
-printf "PUBLICIP=$(curl -vv ipinfo.io/ip 2> /run/publicip.log)\n" > /run/publicip;
-chmod 774 /run/publicip
-
-
 ################################
 # HDD CHECK & PRE-INIT
 ################################
@@ -221,14 +212,37 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   sudo umount -l /mnt/hdd
   exit 0
 
+fi # END - no automount
+
+#####################################
+# UPDATE HDD CONFIG FILE (if exists)
+#####################################
+
+echo "Check if HDD contains configuration .." >> $logFile
+configExists=$(ls ${configFile} | grep -c '.conf')
+if [ ${configExists} -eq 1 ]; then
+
+  # load values
+  echo "load and update publicIP" >> $logFile
+  source ${configFile}
+
+  # update public IP on boot
+  freshPublicIP=$(curl -vv ipinfo.io/ip 2>/dev/null)
+  if [ ${#publicIP} -eq 0 ]; then
+    echo "create value (${freshPublicIP})" >> $logFile
+    echo "publicIP=${freshPublicIP}" >> $configFile
+  else
+    echo "update value (${freshPublicIP})" >> $logFile
+    sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
+  fi
+
 fi
 
 ################################
-# INFOFILE BASICS
+# SD INFOFILE BASICS
 ################################
 
-# EXIT on BOOTSTRAP HERE AT THE MOMENT
-echo "DONE BOOTSTRAP (before any configs etc)" >> $logFile
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
+echo "DONE BOOTSTRAP" >> $logFile
 exit 0

@@ -9,15 +9,8 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-# get var PUBIP from file
-EnvironmentFile=/mnt/hdd/tor/v3Address
-
-# TOR Hidden Service v2
+EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStart=/usr/local/bin/lnd --tor.active --tor.v2 --listen=127.0.0.1:9735
-
-# TOR Hidden Service v3
-# ExecStart=/usr/local/bin/lnd --tor.active --tor.v3 --externalip=${V3ADDRESS} --listen=127.0.0.1:9735
-
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin
