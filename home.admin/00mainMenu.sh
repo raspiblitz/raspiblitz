@@ -187,6 +187,12 @@ else
 
     else
 
+      # if LND is syncing or scanning
+      lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+      if [ ${lndSynced} -eq 0 ]; then
+        dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz is Syncing" --msgbox "Wait until RaspiBlitz is fully synced.\nSee progress on display ..." 3 42
+      fi
+
       if [ ${runningRTL} -eq 1 ]; then
         TITLE="Webinterface: http://${localip}:3000"
       fi

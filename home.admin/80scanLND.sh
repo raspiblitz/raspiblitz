@@ -1,5 +1,4 @@
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/raspiblitz.conf
 
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -60,4 +59,4 @@ fi
 
 # display progress to user
 sleep 3
-dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${name})" --infobox "${infoStr}" ${heigh} ${width}
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})" --infobox "${infoStr}" ${heigh} ${width}

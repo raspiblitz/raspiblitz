@@ -17,7 +17,7 @@ if [ "$USER" != "pi" ]; then
 fi
 
 # display a 10s startup time
-dialog --pause "  Starting up & init ..." 8 58 10
+dialog --pause "  Starting services ..." 8 58 12
 
 # DISPLAY LOOP
 chain=""
@@ -152,7 +152,6 @@ while :
     # if LND is syncing or scanning
     lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
-      echo "SYNC"
       /home/admin/80scanLND.sh
       sleep 20
       continue
