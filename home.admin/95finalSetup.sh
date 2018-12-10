@@ -29,6 +29,9 @@ echo "chain=${chain}" >> $configFile
 # let migration/init script do the rest
 ./_bootstrap.migration.sh
 
+# copy logfile to analyse setup
+cp $logFile /home/admin/raspiblitz.setup.log
+
 # set the hostname inputed on initDialog
 if [ ${#hostname} -gt 0 ]; then
   echo "Setting new network hostname '$hostname'"

@@ -160,7 +160,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # save log file for inspection before reboot
-    cp $logFile /home/admin/raspiblitz.recover
+    cp $logFile /home/admin/raspiblitz.recover.log
     sudo shutdown -r now
     exit 0
   else 
