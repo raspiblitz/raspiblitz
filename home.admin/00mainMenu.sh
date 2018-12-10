@@ -360,9 +360,19 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         OFF)
-            echo "After Shutdown remove power from RaspiBlitz."
-            echo "Press ENTER to start shutdown - then wait some seconds."
+            echo ""
+            echo "LCD turns white when shutdown complete."
+            echo "Then wait 5 seconds and disconnect power."
+            echo "-----------------------------------------------"
+            echo "PRESS ENTER to start shutdown (CTRL+C to abort)"
             read key
+            echo "stop lnd"
+            sudo systemctl stop lnd
+            echo "stop bitcoind (1)"
+            sudo -u bitcoin bitcoin-cli stop
+            echo "stop bitcoind (2)"
+            sudo systemctl stop ${network}d
+            echo "starting shutdown"
             sudo shutdown now
             exit 0
             ;;
