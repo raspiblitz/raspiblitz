@@ -31,7 +31,7 @@ while [ ${chainIsReady} -eq 0 ]
     error=`cat error.out`
     rm error.out
     if [ ${#error} -gt 0 ]; then
-      if [ ${loopCount} -gt 33]; then
+      if [ ${loopCount} -gt 33 ]; then
         echo "*** TAKES LONGER THEN EXCEPTED ***"
         date +%s
         echo "result(${result})"
