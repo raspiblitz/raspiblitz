@@ -13,6 +13,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
   if [ "${state}" = "presync" ]; then
 
     # stopping the pre-sync
+    echo ""
     echo "********************************************"
     echo "Stopping pre-sync ... pls wait (up to 1min)"
     echo "********************************************"
