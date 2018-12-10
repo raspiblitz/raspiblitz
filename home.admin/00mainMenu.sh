@@ -18,7 +18,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     echo "********************************************"
     sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
     echo "bitcoind called to stop .."
-    sleep 10
+    sleep 30
 
     # unmount the temporary mount
     echo "Unmount HDD .."
@@ -366,11 +366,12 @@ case $CHOICE in
             echo "-----------------------------------------------"
             echo "PRESS ENTER to start shutdown (CTRL+C to abort)"
             read key
-            echo "stop lnd"
+            echo "stop lnd - please wait .."
             sudo systemctl stop lnd
-            echo "stop bitcoind (1)"
+            echo "stop bitcoind (1) - please wait .."
             sudo -u bitcoin bitcoin-cli stop
-            echo "stop bitcoind (2)"
+            slepp 10
+            echo "stop bitcoind (2) - please wait .."
             sudo systemctl stop ${network}d
             echo "starting shutdown"
             sudo shutdown now
