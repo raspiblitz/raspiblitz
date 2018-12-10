@@ -111,12 +111,11 @@ waitUntilChainNetworkIsReady()
         fi
         boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
-        sleep 5
       else
         locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
-          #return from wait loop, lets unlock and then it will return to this script
-          return
+          ./AAunlockLND.sh
+          echo "please wait ..."
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then
@@ -126,6 +125,7 @@ waitUntilChainNetworkIsReady()
           return
         fi
       fi
+      sleep 5
     done
 }
 
