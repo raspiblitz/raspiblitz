@@ -16,14 +16,14 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     echo "********************************************"
     echo "Stopping pre-sync ... pls wait (up to 1min)"
     echo "********************************************"
-    sudo systemctl stop bitcoind.service
-    sudo systemctl disable bitcoind.service
-    sudo rm /mnt/hdd/bitcoin/bitcoin.conf
-    sudo rm /etc/systemd/system/bitcoind.service
-    sudo unlink /home/bitcoin/.bitcoin
+    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
+    echo "bitcoind called to stop .."
+    sleep 10
 
     # unmount the temporary mount
+    echo "Unmount HDD .."
     sudo umount -l /mnt/hdd
+    sleep 3
 
     # update info file
     state=waitsetup

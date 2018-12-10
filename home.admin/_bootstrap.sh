@@ -187,7 +187,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
     # update info file
     echo "state=presync" > $infoFile
-    echo "message='starting pre-sync'" >> $infoFile
+    echo "message='starting presync'" >> $infoFile
 
     # activating presync
     # so that on a hackathon you can just connect a RaspiBlitz
@@ -199,9 +199,10 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "starting pre-sync in background" >> $logFile
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
-    /home/admin/_bootstrap.presync.sh &
-    echo "done" >> $logFile
-
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
+    sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
+    echo "OK Started bitcoind for presync" >> $logFile
+    sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
     # after admin login, presync will be stoped and HDD unmounted
     exit 0
   
