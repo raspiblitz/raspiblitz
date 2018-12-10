@@ -22,25 +22,32 @@ echo ""
 
 # verify that chainnetwork is ready
 chainIsReady=0
+loopCount=0
+echo "*** Wait until ${network}d is ready ..."
 while [ ${chainIsReady} -eq 0 ]
   do
-    echo "*** Test if chainnetwork is ready ..."
-    date +%s
+    loopCount=$(($loopCount +1))
     result=$(${network}-cli getblockchaininfo 2>error.out)
     error=`cat error.out`
     rm error.out
-    echo "result(${result})"
-    echo "error(${error})"
     if [ ${#error} -gt 0 ]; then
-      testnetAdd=""
-      if [ "${chain}"  = "test" ]; then
-       testnetAdd="testnet3/"
+      if [ ${loopCount} -gt 33]; then
+        echo "*** TAKES LONGER THEN EXCEPTED ***"
+        date +%s
+        echo "result(${result})"
+        echo "error(${error})"
+        testnetAdd=""
+        if [ "${chain}"  = "test" ]; then
+         testnetAdd="testnet3/"
+        fi
+        sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
+        echo "If you see an error -28 relax, just give it some time."
+        echo "Waiting 1 minute and then trying again ..."
+        sleep 60
+      else
+        echo "(${loopCount}/33) still waiting .."
+        sleep 10
       fi
-      sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
-      echo "If you see an error -28 relax, just give it some time."
-      echo "Waiting 1 minute and then trying again ..."
-      sleep 60
-      echo ""
     else
       echo "OK - chainnetwork is working"
       echo ""
