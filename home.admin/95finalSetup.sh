@@ -9,7 +9,6 @@ source /home/admin/_version.info
 
 # show info to user
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
-    
     After reboot RaspiBlitz
     needs to be unlocked and
     sync with the network.
@@ -46,6 +45,7 @@ fi
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear
-echo "Setup done. Rebooting now. PRESS ENTER"
-read key
+echo "Setup done. Rebooting now."
+
+sleep 3
 sudo shutdown -r now
