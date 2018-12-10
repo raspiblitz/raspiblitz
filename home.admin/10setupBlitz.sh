@@ -31,8 +31,8 @@ fi
 if [ ${setupStep} -gt 89 ];then
   echo "FINISH by setupstep(${setupStep})"
   sleep 3
-  ./90finishSetup.sh
-  ./95finalSetup.sh
+  sudo ./90finishSetup.sh
+  sudo ./95finalSetup.sh
   exit 0
 fi
 
@@ -88,8 +88,8 @@ if [ ${lndRunning} -eq 1 ]; then
   # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
   echo "FINSIH ... "
   sleep 3
-  ./90finishSetup.sh
-  ./95finalSetup.sh
+  sudo ./90finishSetup.sh
+  sudo ./95finalSetup.sh
   exit 0
 
 fi #end - when lighting is running

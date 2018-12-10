@@ -44,5 +44,6 @@ fi
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear
-echo "Setup done. Rebooting now."
+echo "Setup done. Rebooting now. PRESS ENTER"
+read key
 sudo shutdown -r now
