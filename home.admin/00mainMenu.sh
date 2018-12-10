@@ -19,7 +19,7 @@ if [ ${bootstrapInfoExists} -eq 1 ]; then
     echo "********************************************"
     sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
     echo "bitcoind called to stop .."
-    sleep 30
+    sleep 50
 
     # unmount the temporary mount
     echo "Unmount HDD .."
