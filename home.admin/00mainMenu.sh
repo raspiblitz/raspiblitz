@@ -112,7 +112,7 @@ waitUntilChainNetworkIsReady()
         boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
       else
-        locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+        locked=$(lncli --chain=${network} getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
           ./AAunlockLND.sh
           echo "please wait ..."
