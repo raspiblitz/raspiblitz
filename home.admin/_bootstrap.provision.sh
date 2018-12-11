@@ -26,6 +26,13 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# check if config files contains basic: version
+if [ ${#raspiBlitzVersion} -eq 0 ]; then
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing raspiBlitzVersion in (${configFile})!" >> ${logFile}
+  exit 1
+fi
+
 # check if config files contains basic: network
 if [ ${#network} -eq 0 ]; then
   echo "FAIL see ${logFile}"
