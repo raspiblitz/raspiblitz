@@ -83,6 +83,7 @@ while :
         if [ ${#blockchaininfo} -gt 0 ]; then
           message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
           message=$(echo "${message}*100" | bc)
+          message="${message}%"
         fi
       fi
       
