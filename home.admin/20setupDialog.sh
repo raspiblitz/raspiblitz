@@ -22,11 +22,11 @@ sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 # work around - because without a reboot the hostname seems not updates in the whole system
 valueExistsInInfoFile=$(sudo cat /home/admin/raspiblitz.info | grep -c "hostname=")
 if [ ${valueExistsInInfoFile} -eq 0 ]; then
-  # update
-  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
-else
   # add
   echo "hostname=${result}" >> /home/admin/raspiblitz.info
+else
+  # update
+  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
 fi
 
 
