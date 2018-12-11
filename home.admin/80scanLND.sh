@@ -18,7 +18,12 @@ if [ ${#item} -eq 0 ]; then
   item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -n1 | cut -d ']' -f2 | tr -dc '0-9')
 fi
 
-# TODO next fallback try later here if necessary
+# 3) Third try the "LNWL: Filtering block" - thats the usual on later starts
+if [ ${#item} -eq 0 ]; then
+  item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "LNWL: Filtering block" | tail -n1 | cut -d ' ' -f7 | tr -dc '0-9')
+fi
+
+# if no progress info
 if [ ${#item} -eq 0 ]; then
   item="?" 
 fi
