@@ -52,13 +52,13 @@ while :
     fi
 
     ## get basic info from SD
-    bootstrapInfoExists=$(ls ${infoFile} | grep -c '.info')
+    bootstrapInfoExists=$(ls ${infoFile} 2>/dev/null | grep -c '.info')
     if [ ${bootstrapInfoExists} -eq 1 ]; then
       source ${infoFile}
     fi
 
     # get final config if already avaulable
-    configExists=$(ls ${configFile} | grep -c '.conf')
+    configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
       setupStep=100
