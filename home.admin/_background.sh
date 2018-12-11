@@ -3,6 +3,7 @@
 # This script runs on after start in background
 # as a service and gets restarted on failure
 # it runs ALMOST every seconds
+# DEBUG: sudo journalctl -f -u background
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -26,7 +27,6 @@ do
 
   # count up
   counter=$(($counter+1))
-  echo "counter($counter)"
 
   ####################################################
   # RECHECK DHCP-SERVER 
@@ -59,7 +59,7 @@ do
 
   # every 15min - not too often
   # because its a ping to external service
-  recheckPublicIP=$((($counter % 60)+1))
+  recheckPublicIP=$((($counter % 900)+1))
   if [ ${recheckPublicIP} -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
 

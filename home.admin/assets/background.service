@@ -12,7 +12,7 @@ After=bootstrap.service
 [Service]
 User=root
 Group=root
-Type=forking
+Type=simple
 ExecStart=/home/admin/_background.sh
 KillMode=process
 Restart=always
