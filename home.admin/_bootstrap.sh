@@ -141,6 +141,26 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
     echo "Found existing configuration" >> $logFile
+    source ${configFile}
+    # check if config files contains basic: version
+    if [ ${#raspiBlitzVersion} -eq 0 ]; then
+      echo "Invalid Config: missing raspiBlitzVersion in (${configFile})!" >> ${logFile}
+      configExists=0
+    fi
+    # check if config files contains basic: network
+    if [ ${#network} -eq 0 ]; then
+      echo "Invalid Config: missing network in (${configFile})!" >> ${logFile}
+      configExists=0
+    fi
+    # check if config files contains basic: chain
+    if [ ${#chain} -eq 0 ]; then
+      echo "Invalid Config: missing chain in (${configFile})!" >> ${logFile}
+      configExists=0
+    fi
+  fi
+  # if config is still valid ...
+  if [ ${configExists} -eq 1 ]; then
+    echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
     sed -i "s/^message=.*/message='Starting Recover'/g" ${infoFile}
     echo "Calling Data Migration .." >> $logFile
