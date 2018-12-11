@@ -86,6 +86,11 @@ while :
           message="${message}%"
         fi
       fi
+
+      # when old data - improve message
+      if [ "${state}" = "olddata" ]; then
+          message="login for manual migration"
+      fi
       
       # setup process has not started yet
       l1="Login to your RaspiBlitz with:\n"
