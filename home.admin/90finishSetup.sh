@@ -5,6 +5,7 @@ echo ""
 ./91addBonus.sh
 
 ###### SWAP & FS
+echo ""
 echo "*** SWAP file ***"
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then

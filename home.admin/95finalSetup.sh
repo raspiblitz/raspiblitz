@@ -1,6 +1,9 @@
 #!/bin/bash
 echo ""
 
+# set raspiblitz config file
+configFile="/mnt/hdd/raspiblitz.conf"
+
 # load setup config
 source /home/admin/raspiblitz.info
 
@@ -17,7 +20,6 @@ dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " 
 " 10 42
 
 # init the RASPIBLITZ Config
-configFile="/mnt/hdd/raspiblitz.conf"
 echo "# RASPIBLITZ CONFIG FILE" > $configFile
 echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
 sudo chmod 777 ${configFile}
@@ -33,7 +35,7 @@ echo "chain=${chain}" >> $configFile
 # set raspi config as environment for lnd service
 sudo systemctl stop lnd
 sudo systemctl disable lnd
-sed -i "s/^EnvironmentFile=.*/EnvironmentFile=${configFile}/g" /etc/systemd/system/lnd.service
+sudo sed -i "s/^EnvironmentFile=.*/EnvironmentFile=\/mnt\/hdd\/raspiblitz.conf/g" /etc/systemd/system/lnd.service
 sudo systemctl enable lnd
 
 # copy logfile to analyse setup
