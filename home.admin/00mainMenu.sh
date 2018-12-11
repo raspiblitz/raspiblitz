@@ -369,7 +369,7 @@ case $CHOICE in
             sudo systemctl stop lnd
             echo "stop bitcoind (1) - please wait .."
             sudo -u bitcoin bitcoin-cli stop
-            slepp 10
+            sleep 10
             echo "stop bitcoind (2) - please wait .."
             sudo systemctl stop ${network}d
             echo "starting shutdown"
