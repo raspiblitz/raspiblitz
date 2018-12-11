@@ -157,6 +157,10 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
       echo "Invalid Config: missing chain in (${configFile})!" >> ${logFile}
       configExists=0
     fi
+    if [ ${configExists} -eq 0 ]; then
+      echo "Moving invalid config to raspiblitz.invalid.conf" >> ${logFile}
+      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf
+    fi
   fi
   # if config is still valid ...
   if [ ${configExists} -eq 1 ]; then
