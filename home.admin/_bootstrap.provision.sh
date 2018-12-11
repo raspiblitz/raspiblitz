@@ -26,6 +26,20 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# check if config files contains basic: network
+if [ ${#network} -eq 0 ]; then
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing network in (${configFile})!" >> ${logFile}
+  exit 1
+fi
+
+# check if config files contains basic: chain
+if [ ${#chain} -eq 0 ]; then
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing chain in (${configFile})!" >> ${logFile}
+  exit 1
+fi
+
 ##########################
 # BASIC SYSTEM SETTINGS
 ##########################
@@ -64,14 +78,14 @@ sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.s
 sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 sudo systemctl daemon-reload >> ${logFile} 2>&1
 sudo systemctl enable ${network}d.service >> ${logFile} 2>&1
-sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service >> ${logFile} 2>&1
-sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service >> ${logFile} 2>&1
+sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
+sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 sudo systemctl enable lnd >> ${logFile} 2>&1
 
 # finish setup (SWAP, Benus, Firewall, Update, ..)
-./90finishSetup.sh >> ${logFile} 2>&1
+/home/admin/90finishSetup.sh >> ${logFile} 2>&1
 
 # set the local network hostname
 if [ ${#hostname} -gt 0 ]; then

@@ -30,13 +30,7 @@ echo "network=${network}" >> $configFile
 echo "chain=${chain}" >> $configFile
 
 # let migration/init script do the rest
-./_bootstrap.migration.sh
-
-# set raspi config as environment for lnd service
-sudo systemctl stop lnd
-sudo systemctl disable lnd
-sudo sed -i "s/^EnvironmentFile=.*/EnvironmentFile=\/mnt\/hdd\/raspiblitz.conf/g" /etc/systemd/system/lnd.service
-sudo systemctl enable lnd
+/home/admin/_bootstrap.migration.sh
 
 # copy logfile to analyse setup
 cp $logFile /home/admin/raspiblitz.setup.log

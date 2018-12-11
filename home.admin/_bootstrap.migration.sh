@@ -30,7 +30,7 @@ source ${configFile}
 # check if config files contains basic: network
 if [ ${#network} -eq 0 ]; then
   echo "FAIL see ${logFile}"
-  echo "FAIL: missing network in (${configFile})!"
+  echo "FAIL: missing network in (${configFile})!" >> ${logFile}
   exit 1
 fi
 
