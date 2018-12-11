@@ -80,6 +80,7 @@ while :
       if [ "${state}" = "presync" ]; then
         # get blockchain sync progress
         blockchaininfo="$(sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
+        message="starting"
         if [ ${#blockchaininfo} -gt 0 ]; then
           message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
           message=$(echo "${message}*100" | bc)
