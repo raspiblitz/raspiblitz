@@ -30,6 +30,12 @@ echo "chain=${chain}" >> $configFile
 # let migration/init script do the rest
 ./_bootstrap.migration.sh
 
+# set raspi config as environment for lnd service
+sudo systemctl stop lnd
+sudo systemctl disable lnd
+sed -i "s/^EnvironmentFile=.*/EnvironmentFile=${configFile}/g" /etc/systemd/system/lnd.service
+sudo systemctl enable lnd
+
 # copy logfile to analyse setup
 cp $logFile /home/admin/raspiblitz.setup.log
 
