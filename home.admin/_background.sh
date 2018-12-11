@@ -34,8 +34,8 @@ do
   ####################################################
 
   # every 5 minutes
-  triggerRecheckDHCP=$(((counter % 300)+1))
-  if [ triggerRecheckDHCP -eq 1 ]; then
+  recheckDHCP=$((($counter % 300)+1))
+  if [ "recheckDHCP" -eq 1 ]; then
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
@@ -59,7 +59,7 @@ do
 
   # every 15min - not too often
   # because its a ping to external service
-  recheckPublicIP=$(((counter % 60)+1))
+  recheckPublicIP=$((($counter % 60)+1))
   if [ recheckPublicIP -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
 

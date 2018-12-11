@@ -444,6 +444,14 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp ./assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
 echo "**********************************************"
