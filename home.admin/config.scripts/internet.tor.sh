@@ -218,14 +218,17 @@ EOF
   echo "*** Putting LND behind TOR ***"
   echo "Make sutre LND is disabled"
   sudo systemctl disable lnd 2>/dev/null
-  echo "Writing Public Onion Address to /mnt/hdd/tor/v3Address (just in case for TotHiddenServiceV3)"
-  echo "V3ADDRESS=${onionLND}" | sudo tee /mnt/hdd/tor/v3Address
-  echo "Configure and Changing to lnd.tor.service"
-  sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
-  sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
-  sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
-  sudo chmod +x /etc/systemd/system/lnd.service
-  echo "System LND again"
+
+  #echo "Configure and Changing to lnd.tor.service"
+  #sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.tor.service
+  #sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.tor.service
+  #sudo cp /home/admin/assets/lnd.tor.service /etc/systemd/system/lnd.service
+  #sudo chmod +x /etc/systemd/system/lnd.service
+
+  echo "editing /etc/systemd/system/lnd.service"
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.v2 --listen=127\.0\.0\.1\:9735/g" /etc/systemd/system/lnd.service
+  
+  echo "Enable LND again"
   sudo systemctl enable lnd
   echo "OK"
   echo ""  
@@ -255,10 +258,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "*** Removing TOR from LND ***"
   sudo systemctl disable lnd
-  sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
-  sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
-  sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
-  sudo chmod +x /etc/systemd/system/lnd.service
+
+  #sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
+  #sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
+  #sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
+  #sudo chmod +x /etc/systemd/system/lnd.service
+  
+  echo "editing /etc/systemd/system/lnd.service"
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}/g" /etc/systemd/system/lnd.service
+
   sudo systemctl enable lnd
   echo "OK"
   echo ""
