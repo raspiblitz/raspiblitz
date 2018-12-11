@@ -45,7 +45,7 @@ while :
     if [ "${localip:0:4}" = "169." ]; then
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
-      l3="Is Router working?\n"
+      l3="Will try reboot every 5min.\n"
       dialog --backtitle "RaspiBlitz (${localip})" --infobox "$l1$l2$l3" 5 30
       sleep 3
       continue

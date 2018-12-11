@@ -216,6 +216,8 @@ fi # END - no automount
 
 #####################################
 # UPDATE HDD CONFIG FILE (if exists)
+# needs to be done before starting LND
+# so that environment info is fresh
 #####################################
 
 echo "Check if HDD contains configuration .." >> $logFile
@@ -227,7 +229,7 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
-  freshPublicIP=$(curl -vv ipinfo.io/ip 2>/dev/null)
+  freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#publicIP} -eq 0 ]; then
     echo "create value (${freshPublicIP})" >> $logFile
     echo "publicIP=${freshPublicIP}" >> $configFile

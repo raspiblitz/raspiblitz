@@ -127,7 +127,7 @@ fi
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+public_ip="${publicIP}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
