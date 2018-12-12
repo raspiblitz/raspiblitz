@@ -147,7 +147,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
     l2="Try to open the following URL in your local webrowser"
     l3="and unlock your wallet from there with PASSWORD C."
     l4="---> http://${localip}:3000"
-    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 25
+    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 45
   fi
   needsReboot=1
 else
