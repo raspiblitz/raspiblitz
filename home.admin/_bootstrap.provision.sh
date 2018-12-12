@@ -64,16 +64,12 @@ sudo mkdir /home/admin/.lnd/data >> ${logFile} 2>&1
 sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
-echo "Enabling Services" >> ${logFile}
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-sudo systemctl daemon-reload >> ${logFile} 2>&1
-sudo systemctl enable ${network}d.service >> ${logFile} 2>&1
 sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-sudo systemctl enable lnd >> ${logFile} 2>&1
 
 # finish setup (SWAP, Benus, Firewall, Update, ..)
 sudo sed -i "s/^message=.*/message='Setup System ..'/g" ${infoFile}
@@ -126,7 +122,7 @@ if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning RTL - keep default" >> ${logFile}
 fi
 
