@@ -122,6 +122,7 @@ if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
+    sudo systemctl disable RTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL - keep default" >> ${logFile}
 fi

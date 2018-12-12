@@ -51,6 +51,9 @@ Write them down & store them in a safe place.
       sudo systemctl daemon-reload
       sudo systemctl enable lnd.service
       sudo systemctl enable ${network}d.service
+      if [ "${rtlWebinterface}" = "on" ]; then
+        sudo systemctl enable RTL
+      fi
 
       # remove flag that freshly recovered
       sudo rm /home/admin/raspiblitz.recover.info
