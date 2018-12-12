@@ -282,7 +282,7 @@ fi
 # SD INFOFILE BASICS
 ################################
 
-sed -i "s/^state=.*/state=recovered/g" ${infoFile}
+sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
