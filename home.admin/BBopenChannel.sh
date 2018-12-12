@@ -128,9 +128,9 @@ else
   fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
   if [ "${network}" = "bitcoin" ]; then
     if [ "${chain}" = "main" ]; then
-        echo "https://blockexplorer.com/tx/${fundingTX}"
+        echo "https://live.blockcypher.com/btc/tx/${fundingTX}"
     else
-        echo "https://testnet.blockexplorer.com/tx/${fundingTX}"
+        echo "https://live.blockcypher.com/btc-testnet/tx/${fundingTX}"
     fi
   fi
   if [ "${network}" = "litecoin" ]; then
