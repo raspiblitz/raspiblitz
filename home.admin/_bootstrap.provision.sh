@@ -28,7 +28,7 @@ fi
 
 # import config values
 sudo chmod 777 ${configFile}
-source ${configExists}
+source ${configFile}
 
 ##########################
 # BASIC SYSTEM SETTINGS
