@@ -31,6 +31,7 @@ source ${infoFile}
 if [ "${state}" = "recovering" ]; then
   echo "***********************************************************"
   echo "WARNING: bootstrap still updating - close SSH, login later"
+  echo "To monitor progress --> tail -n1000 -f raspiblitz.log"
   echo "***********************************************************"
   exit
 fi
