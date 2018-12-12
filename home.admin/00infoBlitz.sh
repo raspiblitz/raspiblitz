@@ -156,12 +156,14 @@ networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
 if [ "${onionAddress}" != "null" ]; then
   # TOR address
+  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
   torInfo="+ TOR"
 else
   # IP address
+  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
   public_addr="${public_ip}:${public_port}"
   public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
@@ -243,7 +245,7 @@ ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_g
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public} ${networkConnectionsInfo}
+${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
