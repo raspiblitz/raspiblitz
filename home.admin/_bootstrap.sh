@@ -175,6 +175,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     sed -i "s/^state=.*/state=recovered/g" ${infoFile}
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
+    # set flag that system is freshly recovered and needs setup dialogs
+    echo "state=recovered" >> /home/admin/raspiblitz.recover.info
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
     sudo shutdown -r now
@@ -266,10 +268,21 @@ if [ ${configExists} -eq 1 ]; then
 fi
 
 ################################
+# DETECT FRESHLY RECOVERED SD
+################################
+
+recoveredInfoExists=$(ls /home/admin/raspiblitz.recover.info | grep -c '.info')
+if [ ${configExists} -eq 1 ]; then
+  sed -i "s/^state=.*/state=recovered/g" ${infoFile}
+  sed -i "s/^message=.*/message='login to finish'/g" ${infoFile}
+  exit 0
+fi
+
+################################
 # SD INFOFILE BASICS
 ################################
 
-sed -i "s/^state=.*/state=ready/g" ${infoFile}
+sed -i "s/^state=.*/state=recovered/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
