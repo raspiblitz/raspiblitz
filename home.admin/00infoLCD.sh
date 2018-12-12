@@ -158,7 +158,7 @@ while :
     fi
 
     # if LND is syncing or scanning
-    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${network}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
       /home/admin/80scanLND.sh
       sleep 20
