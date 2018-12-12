@@ -106,7 +106,7 @@ fi
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning AutoPilot'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup AutoPilot'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
@@ -115,7 +115,7 @@ fi
 # AUTO NAT DISCOVERY
 if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning AUTO NAT DISCOVERY - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning AutoNAT'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
@@ -124,7 +124,7 @@ fi
 # RTL
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning RTL'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning RTL - keep default" >> ${logFile}
@@ -133,7 +133,7 @@ fi
 # TOR
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning TOR'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning TOR - keep default" >> ${logFile}
