@@ -59,7 +59,7 @@ Write them down & store them in a safe place.
       sudo rm /home/admin/raspiblitz.recover.info
 
       # sucess info dialog
-      dialog --backtitle "RaspiBlitz" --msgbox "OK - new SSH passord A is '$result'\nFinal reboot is needed." 6 52
+      dialog --backtitle "RaspiBlitz" --msgbox "New SSH password A is '$result'\nFINAL REBOOT IS NEEDED." 6 52
       sudo shutdown -r now
 
     fi
