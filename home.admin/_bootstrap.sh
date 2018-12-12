@@ -40,6 +40,7 @@ echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
 echo "network=" >> $infoFile
 echo "chain=" >> $infoFile
+echo "message=" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################

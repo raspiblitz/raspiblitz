@@ -69,10 +69,6 @@ while :
      setupStep=0
     fi
 
-    ###########################
-    # DISPLAY DURING SETUP
-    ###########################
-
     # before setup even started
     if [ ${setupStep} -eq 0 ]; then
             
@@ -124,6 +120,20 @@ while :
     ###########################
     # DISPLAY AFTER SETUP
     ###########################
+
+    # check if recovering/upgrade is running
+    if [ "${state}" = "recovering" ]; then
+      if [ ${#message} -eq 0 ]; then
+        message="Setup in Progress"
+      fi
+      l1="Upgrade/Recovering/Provisioning Mode\n"
+      l2="---> ${message}\n"
+      l3="Please keep running until auto-reboot."
+      boxwidth=$((${#localip} + 24))
+      dialog --backtitle "RaspiBlitz (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 5
+      continue
+    fi
 
     # check if bitcoin is ready
     sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp

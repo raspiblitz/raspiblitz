@@ -35,6 +35,7 @@ source ${configExists}
 ##########################
 
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
+sudo sed -i "s/^message=.*/message='Setup System'/g" ${infoFile}
 
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
@@ -75,6 +76,7 @@ sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 sudo systemctl enable lnd >> ${logFile} 2>&1
 
 # finish setup (SWAP, Benus, Firewall, Update, ..)
+sudo sed -i "s/^message=.*/message='Finishing Setup'/g" ${infoFile}
 /home/admin/90finishSetup.sh >> ${logFile} 2>&1
 
 # set the local network hostname
@@ -88,8 +90,9 @@ fi
 ##########################
 # PROVISIONING SERVICES
 ##########################
+sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
 
-  echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
+echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # TESTNET
 if [ "${chain}" = "test" ]; then
@@ -136,4 +139,5 @@ else
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
+sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 echo "END Provisioning" >> ${logFile}
