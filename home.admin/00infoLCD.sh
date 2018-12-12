@@ -17,7 +17,7 @@ if [ "$USER" != "pi" ]; then
 fi
 
 # display a 10s startup time
-dialog --pause "  Starting services ..." 8 58 12
+dialog --pause "  Starting ..." 8 58 12
 
 # DISPLAY LOOP
 chain=""
@@ -126,12 +126,12 @@ while :
       if [ ${#message} -eq 0 ]; then
         message="Setup in Progress"
       fi
-      l1="Upgrade/Recovering/Provisioning Mode\n"
+      l1="Upgrade/Recover/Provision\n"
       l2="---> ${message}\n"
       l3="Please keep running until auto-reboot."
       boxwidth=$((${#localip} + 24))
       dialog --backtitle "RaspiBlitz (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 5
+      sleep 3
       continue
     fi
 
