@@ -55,3 +55,11 @@ echo ""
 echo "*** LAST 20 LND LOGS ***"
 sudo journalctl -u lnd -b --no-pager -n20
 echo ""
+
+if [ "${rtlWebinterface}" = "on" ]; then
+  echo "*** LAST 20 RTL LOGS ***"
+  sudo journalctl -u RTL -b --no-pager -n20
+  echo ""
+else
+  echo "- RTL is OFF by config"
+fi
