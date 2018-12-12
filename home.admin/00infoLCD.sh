@@ -92,6 +92,11 @@ while :
       if [ "${state}" = "olddata" ]; then
           message="login for manual migration"
       fi
+
+      # when no HDD - improve message
+      if [ "${state}" = "nohdd" ]; then
+          message="Connect HHD"
+      fi
       
       # setup process has not started yet
       l1="Login to your RaspiBlitz with:\n"
