@@ -272,7 +272,7 @@ fi
 ################################
 
 recoveredInfoExists=$(ls /home/admin/raspiblitz.recover.info | grep -c '.info')
-if [ ${configExists} -eq 1 ]; then
+if [ ${recoveredInfoExists} -eq 1 ]; then
   sed -i "s/^state=.*/state=recovered/g" ${infoFile}
   sed -i "s/^message=.*/message='login to finish'/g" ${infoFile}
   exit 0
