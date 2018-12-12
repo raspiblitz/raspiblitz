@@ -38,7 +38,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # to prevent tls cer auth error
     echo "*** Modify lnd.conf ***"
     sudo sed -i "s/^rpclisten=0.0.0.0:10009/#rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
-    sudo systemctl restart lnd
     echo ""
 
     # install latest nodejs
