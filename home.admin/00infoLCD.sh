@@ -137,7 +137,7 @@ while :
     
     # if freshly recovered 
     if [ "${state}" = "recovered" ]; then
-      l1="Login to set new passwords:\n"
+      l1="FINAL RECOVER LOGIN NEEDED:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
       boxwidth=$((${#localip} + 28))
