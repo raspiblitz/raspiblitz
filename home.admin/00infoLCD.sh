@@ -17,7 +17,8 @@ if [ "$USER" != "pi" ]; then
 fi
 
 # display a 10s startup time
-dialog --pause "  Starting ..." 8 58 12
+source /home/admin/_version.info
+dialog --pause "  Starting RaspiBlitz v${codeVersion} ..." 8 58 12
 
 # DISPLAY LOOP
 chain=""
@@ -36,7 +37,7 @@ while :
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
       l3="Is LAN cable connected?\n"
-      dialog --backtitle "RaspiBlitz" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 30
       sleep 3
       continue
     fi
@@ -46,7 +47,7 @@ while :
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
       l3="Will try reboot every 5min.\n"
-      dialog --backtitle "RaspiBlitz (${localip})" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 30
       sleep 3
       continue
     fi
@@ -100,7 +101,7 @@ while :
       l3="Use password: raspiblitz\n"
       boxwidth=$((${#localip} + 24))
       sleep 3
-      dialog --backtitle "RaspiBlitz (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
@@ -112,7 +113,7 @@ while :
       l3="Use your Password A\n"
       boxwidth=$((${#localip} + 24))
       sleep 3
-      dialog --backtitle "RaspiBlitz ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 7
       continue
     fi
@@ -130,7 +131,7 @@ while :
       l2="---> ${message}\n"
       l3="Please keep running until reboot."
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
@@ -141,7 +142,7 @@ while :
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
@@ -160,7 +161,7 @@ while :
         l2="---> Verifying Blocks\n"
       fi
       boxwidth=40
-      dialog --backtitle "RaspiBlitz ${localip} - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
@@ -178,7 +179,7 @@ while :
         l3="Use Password C to unlock\n"
       fi
       boxwidth=$((${#localip} + 24))
-      dialog --backtitle "RaspiBlitz ${localip} - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
