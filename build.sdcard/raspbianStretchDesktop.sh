@@ -436,6 +436,20 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt-get install -y fail2ban
 
+# Prepare for TOR service
+echo "*** Adding Tor Sources to sources.list ***"
+echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "OK"
+echo ""
+echo "*** Installing dirmngr ***"
+sudo apt install dirmngr
+echo ""
+echo "*** Fetching GPG key ***"
+gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
+gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+echo ""
+
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""

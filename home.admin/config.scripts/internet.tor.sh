@@ -55,22 +55,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
   fi
 
-  echo "*** Adding Tor Sources to sources.list ***"
-  echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-  echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-  echo "OK"
-  echo ""
-
-  echo "*** Installing dirmngr ***"
-  sudo apt install dirmngr
-  echo ""
-
-  ## lopp: gpg --keyserver keys.gnupg.net --recv 886DDD89
-  echo "*** Fetching GPG key ***"
-  gpg --no-tty --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-  gpg --no-tty --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-  echo ""
-
   echo "*** Updating System ***"
   sudo apt-get update
   echo ""
@@ -263,11 +247,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** Remove Tor ***"
   sudo apt remove tor tor-arm -y
   echo ""
-
-  echo "*** Remove dirmngr ***"
-  sudo apt remove dirmngr -y
-  echo ""
-
+  
   echo "*** Remove NYX ***"
   sudo pip uninstall nyx -y
   echo ""
