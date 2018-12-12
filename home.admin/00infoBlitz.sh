@@ -166,7 +166,8 @@ else
   public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     public=""
-    public_color="${color_green}"
+    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+    public_color="${color_yellow}"
   else
     public=""
     public_color="${color_red}"
@@ -194,7 +195,8 @@ else
  else
    public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
-    ln_publicColor="${color_green}"
+    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+    ln_publicColor="${color_yellow}"
   else
     ln_publicColor="${color_red}"
   fi
