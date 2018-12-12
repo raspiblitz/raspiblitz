@@ -160,7 +160,7 @@ while :
         l2="---> Verifying Blocks\n"
       fi
       boxwidth=40
-      dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${localip} - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
