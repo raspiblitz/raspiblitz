@@ -181,7 +181,11 @@ else
 
     # MAIN MENU AFTER SETUP
 
-    BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}"
+    plus=""
+    if [ "${runBehindTor}" = "on" ]; then
+      plus="/ TOR"
+    fi
+    BACKTITLE="${localip} / ${hostname} / ${network} / ${chain} ${plus}"
 
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
