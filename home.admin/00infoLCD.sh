@@ -128,8 +128,8 @@ while :
       fi
       l1="Upgrade/Recover/Provision\n"
       l2="---> ${message}\n"
-      l3="Please keep running until auto-reboot."
-      boxwidth=$((${#localip} + 24))
+      l3="Please keep running until reboot."
+      boxwidth=$((${#localip} + 28))
       dialog --backtitle "RaspiBlitz (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
