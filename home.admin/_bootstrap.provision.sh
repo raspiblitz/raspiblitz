@@ -26,6 +26,10 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# import config values
+sudo chmod 777 ${configFile}
+source ${configExists}
+
 ##########################
 # BASIC SYSTEM SETTINGS
 ##########################
