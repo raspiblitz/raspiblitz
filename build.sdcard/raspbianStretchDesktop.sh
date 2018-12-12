@@ -436,20 +436,6 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt-get install -y fail2ban
 
-# Prepare for TOR service
-echo "*** Adding Tor Sources to sources.list ***"
-echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "OK"
-echo ""
-echo "*** Installing dirmngr ***"
-sudo apt install dirmngr
-echo ""
-echo "*** Fetching GPG key ***"
-gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-echo ""
-
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""
@@ -465,6 +451,20 @@ echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
+
+# Prepare for TOR service
+echo "*** Adding Tor Sources to sources.list ***"
+echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "OK"
+echo ""
+echo "*** Installing dirmngr ***"
+sudo apt install dirmngr
+echo ""
+echo "*** Fetching GPG key ***"
+sudo gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
+sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
