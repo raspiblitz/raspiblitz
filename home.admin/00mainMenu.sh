@@ -40,8 +40,6 @@ fi
 if [ "${state}" = "recovered" ]; then
   echo "System recovered - needs final user settings"
   ./20recoverDialog.sh 
-  # remove flag that freshly recovered
-  sudo rm /home/admin/raspiblitz.recover.info
   exit 1
 fi 
 

@@ -52,6 +52,9 @@ Write them down & store them in a safe place.
       sudo systemctl enable lnd.service
       sudo systemctl enable ${network}d.service
 
+      # remove flag that freshly recovered
+      sudo rm /home/admin/raspiblitz.recover.info
+
       # sucess info dialog
       dialog --backtitle "RaspiBlitz" --msgbox "OK - new SSH passord A is '$result'\nFinal reboot is needed." 6 52
       sudo shutdown -r now
