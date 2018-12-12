@@ -152,7 +152,7 @@ while :
         l3="Use Password C to unlock\n"
       fi
       boxwidth=$((${#localip} + 24))
-      dialog --backtitle "RaspiBlitz ${localip} - Action Required" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${localip} - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
