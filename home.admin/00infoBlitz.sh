@@ -163,7 +163,7 @@ if [ "${onionAddress}" != "null" ]; then
 else
   # IP address
   public_addr="${public_ip}:${public_port}"
-  public_check=$(timeout 2s nc -z ${public_ip} ${public_port} 2>/dev/null; echo $?)
+  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     public=""
     public_color="${color_green}"
@@ -179,6 +179,7 @@ ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external="\n"
 ln_alias="${hostname}"
+ln_publicColor=""
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
@@ -187,6 +188,17 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
 else
  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+ ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+ if [ ${ln_tor} -eq 1 ]; then
+   ln_publicColor="${color_green}"
+ else
+   public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
+  if [ $public_check = "0" ]; then
+    ln_publicColor="${color_green}"
+  else
+    ln_publicColor="${color_red}"
+  fi
+ fi
  alias_color="${color_grey}"
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
  ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
@@ -234,7 +246,7 @@ ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_external}
+${color_yellow}${ln_publicColor}${ln_external}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
