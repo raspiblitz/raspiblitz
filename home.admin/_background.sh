@@ -100,6 +100,7 @@ do
   ###############################
   # UPDATE DYNAMIC DOMAIN
   # like afraid.org
+  # ! experimental
   ###############################
 
   # if not activated above, update every 6 hours
