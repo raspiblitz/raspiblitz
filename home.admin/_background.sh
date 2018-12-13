@@ -103,7 +103,7 @@ do
   ###############################
 
   # if not activated above, update every hour
-  if [ ${updateDynDomain} -eq 0 ];
+  if [ ${updateDynDomain} -eq 0 ]; then
     # dont +1 so that it gets executed on first loop
     updateDynDomain=$(($counter % 3600))
   fi
