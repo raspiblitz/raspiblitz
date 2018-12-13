@@ -10,7 +10,7 @@ bitcoinSize=253000000 # 253827180-tolerance
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
 litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-11-30"
-litecoinSize=35000000 # 35021940-tolerance 
+litecoinSize=21800000 # 21831548-tolerance
 
 # NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Run download.
 # When finished the warning comes up and behind WARNING: copy that number
