@@ -102,10 +102,10 @@ do
   # like afraid.org
   ###############################
 
-  # if not activated above, update every hour
+  # if not activated above, update every 6 hours
   if [ ${updateDynDomain} -eq 0 ]; then
     # dont +1 so that it gets executed on first loop
-    updateDynDomain=$(($counter % 3600))
+    updateDynDomain=$(($counter % 21600))
   fi
   if [ ${updateDynDomain} -eq 1 ]; then
     echo "*** UPDATE DYNAMIC DOMAIN ***"
@@ -129,7 +129,7 @@ do
 
   # limit counter to max seconds per week:
   # 604800 = 60sec * 60min * 24hours * 7days
-  if [ ${counter} -gt 1000 ]; then
+  if [ ${counter} -gt 604800 ]; then
     counter=0
     echo "counter zero reset"
   fi
