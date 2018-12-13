@@ -60,6 +60,7 @@ do
   # every 15min - not too often
   # because its a ping to external service
   recheckPublicIP=$((($counter % 900)+1))
+  updateDynDomain=0
   if [ ${recheckPublicIP} -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
 
@@ -83,6 +84,9 @@ do
         echo "restart LND with new environment config"
         sudo systemctl restart lnd.service
 
+        # 3) trigger update if dnyamic domain (if set)
+        updateDynDomain=1
+
       else
         echo "public IP has not changed"
       fi
@@ -91,6 +95,29 @@ do
       echo "skip - because setup is still running"
     fi
 
+  fi
+
+  ###############################
+  # UPDATE DYNAMIC DOMAIN
+  # like afraid.org
+  ###############################
+
+  # if not activated above, update every hour
+  if [ ${updateDynDomain} -eq 0 ];
+    # dont +1 so that it gets executed on first loop
+    updateDynDomain=$(($counter % 3600))
+  fi
+  if [ ${updateDynDomain} -eq 1 ]; then
+    echo "*** UPDATE DYNAMIC DOMAIN ***"
+    # check if update URL for dyn Domain is set
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      # calling the update url
+      echo "calling: ${dynUpdateUrl}"
+      echo "to update domain: ${dynDomain}"
+      curl --connect-timeout 6 ${dynUpdateUrl}
+    else
+      echo "'dynUpdateUrl' not set in ${configFile}"
+    fi
   fi
 
   ###############################
