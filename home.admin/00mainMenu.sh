@@ -368,8 +368,6 @@ case $CHOICE in
             echo "LCD turns white when shutdown complete."
             echo "Then wait 5 seconds and disconnect power."
             echo "-----------------------------------------------"
-            echo "PRESS ENTER to start shutdown (CTRL+C to abort)"
-            read key
             echo "stop lnd - please wait .."
             sudo systemctl stop lnd
             echo "stop bitcoind (1) - please wait .."
