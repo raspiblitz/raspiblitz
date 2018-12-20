@@ -76,6 +76,8 @@ sudo systemctl stop lnd 2>/dev/null
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the DynamicDNS ON"
+  echo "dynDomain(${dynDomain})"
+  echo "dynUpdateUrl(${dynUpdateUrl})"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
