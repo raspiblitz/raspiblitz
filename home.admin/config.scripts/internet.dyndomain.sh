@@ -81,6 +81,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
   sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
 
+  echo "changing lnd.conf"
+
   # lnd.conf: uncomment tlsextradomain (just if it is still uncommented)
   sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
 
@@ -98,8 +100,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^dynDomain=.*/dynDomain=/g" /mnt/hdd/raspiblitz.conf
   sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl=/g" /mnt/hdd/raspiblitz.conf
 
+  echo "changing lnd.conf"
+
   # lnd.conf: comment tlsextradomain out
-  sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain='/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
 
   echo "DynamicDNS is now OFF"
 fi
