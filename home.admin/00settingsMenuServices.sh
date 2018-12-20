@@ -12,13 +12,18 @@ if [ ${#chain} -eq 0 ]; then chain="main"; fi
 chainValue="off"
 if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
+# map domain to on/off
+domainValue="off"
+if [ ${#dynDomain} -gt 0 ]; then domainValue="on"; fi
+
 # show select dialog
-CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 6 \
+CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 45 7 \
 1 "Channel Autopilot" ${autoPilot} \
 2 "Testnet" ${chainValue} \
 3 "Router AutoNAT" ${autoNatDiscovery} \
-4 "Run behind TOR" ${runBehindTor} \
-5 "RTL Webinterface" ${rtlWebinterface} \
+4 "DynnamicDNS (domainname)" ${updateDynDomain} \
+5 "Run behind TOR" ${runBehindTor} \
+4 "RTL Webinterface" ${rtlWebinterface} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
@@ -125,8 +130,24 @@ else
   echo "AutoNAT Setting unchanged."
 fi
 
-# TOR process choice
+# Dynamic Domain
 choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${domainValue}" != "${choice}" ]; then
+  echo "Dynamic Domain changed .."
+  if [ "${choice}" =  "on" ]; then
+    # turn on - will ask for more info with dialogs
+    sudo /home/admin/config.scripts/internet.dyndomain.sh on
+  else
+    # turn off
+    sudo /home/admin/config.scripts/internet.dyndomain.sh off
+  fi
+else
+  echo "Dynamic Domain unchanged."
+fi
+
+# TOR process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
@@ -137,7 +158,7 @@ else
 fi
 
 # RTL process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."

@@ -117,6 +117,15 @@ else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
+# DYNAMIC DNS
+if [ "${#dynDomain}" -gt 0 ]; then
+    echo "Provisioning DYNAMIC DNS - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup DynamicDNS'/g" ${infoFile}
+    sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
+else
+    echo "Provisioning DYNAMIC DNS - keep default" >> ${logFile}
+fi
+
 # RTL
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
