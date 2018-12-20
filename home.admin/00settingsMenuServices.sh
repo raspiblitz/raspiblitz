@@ -14,14 +14,18 @@ if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
 # map domain to on/off
 domainValue="off"
-if [ ${#dynDomain} -gt 0 ]; then domainValue="on"; fi
+dynDomainMenu="'DynamicDNS (domainname)'"
+if [ ${#dynDomain} -gt 0 ]; then 
+  domainValue="on"
+  dynDomainMenu="'${dynDomain}'"
+fi
 
 # show select dialog
 CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 'Router AutoNAT' ${autoNatDiscovery} \
-4 'DynamicDNS (domainname)' ${domainValue} \
+4 ${dynDomainMenu} ${domainValue} \
 5 'Run behind TOR' ${runBehindTor} \
 6 'RTL Webinterface' ${rtlWebinterface} \
 2>&1 >/dev/tty)
