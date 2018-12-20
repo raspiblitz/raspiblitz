@@ -82,10 +82,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
 
   # lnd.conf: uncomment tlsextradomain (just if it is still uncommented)
-  sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain='/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
 
   # lnd.conf: domain value
-  sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${dynDomain}/g" /mnt/hdd/lnd/lnd.conf
 
   echo "DynamicDNS is now ON"
 fi
