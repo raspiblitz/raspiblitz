@@ -6,7 +6,7 @@
 source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then
@@ -16,7 +16,6 @@ if [ ${#network} -eq 0 ]; then
   if [ ${litecoinActive} -eq 1 ]; then
     network="litecoin"
   fi
-  network=`sudo cat /home/admin/.network`
 fi
 
 # for old nodes
