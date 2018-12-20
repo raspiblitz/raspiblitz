@@ -17,7 +17,7 @@ domainValue="off"
 dynDomainMenu="'DynamicDNS (domainname)'"
 if [ ${#dynDomain} -gt 0 ]; then 
   domainValue="on"
-  dynDomainMenu="'${dynDomain}'"
+  dynDomainMenu="${dynDomain}"
 fi
 
 # show select dialog
