@@ -113,7 +113,7 @@ waitUntilChainNetworkIsReady()
         boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
       else
-        locked=$(lncli --chain=${network} getinfo 2>&1 | grep -c unlock)
+        locked=$(lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
           ./AAunlockLND.sh
           echo "please wait ... update to next screen can be slow"
@@ -226,7 +226,7 @@ else
       fi
 
       # Depending Options
-      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
+      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
       if [ ${openChannels} -gt 0 ]; then
         OPTIONS+=(CLOSEALL "Close all open Channels")  
       fi

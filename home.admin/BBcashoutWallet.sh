@@ -12,7 +12,7 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 # check if user has money in lightning channels - info about close all
-openChannels=$(lncli --chain=${network} listchannels 2>/dev/null | jq '.[] | length')
+openChannels=$(lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -eq 0 ]; then
   clear
   echo "*** IMPORTANT **********************************"
@@ -28,14 +28,14 @@ if [ ${openChannels} -gt 0 ]; then
 fi
 
 # check if money is waiting to get confirmed
-unconfirmed=$(lncli --chain=${network} walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
+unconfirmed=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
 if [ ${unconfirmed} -gt 0 ]; then
    dialog --title 'Info' --msgbox "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
    echo "please wait ..."
 fi
 
 # get available amount in on-chain wallet
-maxAmount=$(lncli --chain=${network} walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+maxAmount=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
 if [ ${maxAmount} -eq 0 ]; then
    dialog --title 'Info' --msgbox "You have 0 moveable funds available.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
    exit 1
@@ -78,7 +78,7 @@ while [ ${tryAgain} -eq 1 ]
     echo "TRY #${count} ---> with max fee ${fee} sat:"
 
         # execute command
-    command="lncli --chain=${network} sendcoins --addr ${address} --amt ${amount} --conf_target 3"
+    command="lncli --chain=${network} --network=${chain}net sendcoins --addr ${address} --amt ${amount} --conf_target 3"
     echo "$command"
     result=$($command 2>$_error)
     error=`cat ${_error}`

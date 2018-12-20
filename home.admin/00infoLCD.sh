@@ -167,7 +167,7 @@ while :
     fi
 
     # check if locked
-    locked=$(sudo -u admin lncli --chain=${network} getinfo 2>&1 | grep -c unlock) 
+    locked=$(sudo -u admin lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock) 
     if [ "${locked}" -gt 0 ]; then
 
       # special case: LND wallet is locked ---> show unlock info
