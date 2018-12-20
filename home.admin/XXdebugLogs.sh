@@ -18,11 +18,11 @@ if [ ${#network} -eq 0 ]; then
   fi
 fi
 
-# for old nodes
+# for non final config nodes
 if [ ${#chain} -eq 0 ]; then
   echo "backup info: chain"
   chain="test"
-  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "testnet=0" -c)
   if [ ${isMainChain} -gt 0 ];then
     chain="main"
   fi
