@@ -17,13 +17,13 @@ domainValue="off"
 if [ ${#dynDomain} -gt 0 ]; then domainValue="on"; fi
 
 # show select dialog
-CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 45 7 \
-1 "Channel Autopilot" ${autoPilot} \
-2 "Testnet" ${chainValue} \
-3 "Router AutoNAT" ${autoNatDiscovery} \
-4 "DynnamicDNS (domainname)" ${updateDynDomain} \
-5 "Run behind TOR" ${runBehindTor} \
-4 "RTL Webinterface" ${rtlWebinterface} \
+CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
+1 'Channel Autopilot' ${autoPilot} \
+2 'Testnet' ${chainValue} \
+3 'Router AutoNAT' ${autoNatDiscovery} \
+4 'DynamicDNS (domainname)' ${domainValue} \
+5 'Run behind TOR' ${runBehindTor} \
+6 'RTL Webinterface' ${rtlWebinterface} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
@@ -135,13 +135,8 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${domainValue}" != "${choice}" ]; then
   echo "Dynamic Domain changed .."
-  if [ "${choice}" =  "on" ]; then
-    # turn on - will ask for more info with dialogs
-    sudo /home/admin/config.scripts/internet.dyndomain.sh on
-  else
-    # turn off
-    sudo /home/admin/config.scripts/internet.dyndomain.sh off
-  fi
+  sudo /home/admin/config.scripts/internet.dyndomain.sh ${choice}
+  needsReboot=1
 else
   echo "Dynamic Domain unchanged."
 fi
