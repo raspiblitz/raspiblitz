@@ -18,7 +18,7 @@ dynDomain=$2
 updateDynDomain=$3
 
 # run interactive if 'turn on' && no further parameters
-if [ "${turn}"= "on" ] && [ ${#dynDomain} -eq 0 ]; then
+if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
 
   dialog --backtitle "DynamicDNS" --inputbox "ENTER the Dynamic Domain Name:
 
@@ -59,13 +59,13 @@ fi
 
 # make sure entry line for 'dynDomain' exists 
 entryExists=$(cat ${configFile} | grep -c 'dynDomain=')
-if [ ${entryExist} -eq 0 ]; then
+if [ ${entryExists} -eq 0 ]; then
   echo "dynDomain=" >> ${configFile}
 fi
 
 # make sure entry line for 'dynDomain' exists 
 entryExists=$(cat ${configFile} | grep -c 'updateDynDomain')
-if [ ${entryExist} -eq 0 ]; then
+if [ ${entryExists} -eq 0 ]; then
   echo "updateDynDomain=" >> ${configFile}
 fi
 
@@ -115,7 +115,7 @@ while [ ${newCertExists} -eq 0 ]
 do
   count=$(($count + 1))
   if [ ${count} -gt 60 ]; then
-    echo "FAIL - was not able to generate new LND certs""
+    echo "FAIL - was not able to generate new LND certs"
     exit 1
   fi
   newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert | grep -c '.cert')
