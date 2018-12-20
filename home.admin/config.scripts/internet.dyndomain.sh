@@ -63,10 +63,10 @@ if [ ${entryExists} -eq 0 ]; then
   echo "dynDomain=" >> ${configFile}
 fi
 
-# make sure entry line for 'dynDomain' exists 
-entryExists=$(cat ${configFile} | grep -c 'updateDynDomain')
+# make sure entry line for 'dynUpdateUrl' exists 
+entryExists=$(cat ${configFile} | grep -c 'dynUpdateUrl')
 if [ ${entryExists} -eq 0 ]; then
-  echo "updateDynDomain=" >> ${configFile}
+  echo "dynUpdateUrl=" >> ${configFile}
 fi
 
 # stop services
