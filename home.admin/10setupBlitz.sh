@@ -63,7 +63,10 @@ if [ ${lndRunning} -eq 1 ]; then
   chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
   chainSyncing=1
   if [ ${#chainInfo} -gt 0 ];then
+    echo "check chaininfo" 
     chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
+  else 
+    echo "chaininfo is zero" 
   fi
   if [ ${chainSyncing} -eq 1 ]; then
     echo "Sync Chain ..."
@@ -98,13 +101,19 @@ fi #end - when lighting is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # double check
+  echo "${network} is not running - double checking - wait 120secs"
+  sleep 120
   bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+else
+  echo "${network} is running"  
 fi
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
   ./70initLND.sh
   exit 1
+else
+ echo "${network} still not running"  
 fi #end - when bitcoin is running
 
 # check if HDD is auto-mounted
