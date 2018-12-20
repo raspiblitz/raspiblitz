@@ -114,11 +114,12 @@ count=0
 while [ ${newCertExists} -eq 0 ]
 do
   count=$(($count + 1))
+  echo "(${count}/60) check for cert"
   if [ ${count} -gt 60 ]; then
     echo "FAIL - was not able to generate new LND certs"
     exit 1
   fi
-  newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert | grep -c '.cert')
+  newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c '.cert')
   sleep 2
 done
 echo "copy new cert to admin user"
