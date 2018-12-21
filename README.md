@@ -283,8 +283,6 @@ PLEASE NOTICE: Its possible that this logs can contain private information (like
 
 ## Build the SD Card Image
 
-ATTENTION: Please dont build the sd card on your own at the moment. The code is right in the middle in the transition to version 1.0-RC1 and not stable. Use the pre-build sd card image until the next version release. Thx.
-
 A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided as download by us to get everybody started quickly. But if you want to build that image yourself - here is a quick guide:
 
 * Get a fresh Rasbian RASPBIAN STRETCH WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/)
