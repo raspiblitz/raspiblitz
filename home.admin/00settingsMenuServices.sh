@@ -14,7 +14,7 @@ if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
 # map domain to on/off
 domainValue="off"
-dynDomainMenu='"DynamicDNS (domainname)"'
+dynDomainMenu='DynamicDNS'
 if [ ${#dynDomain} -gt 0 ]; then 
   domainValue="on"
   dynDomainMenu="${dynDomain}"
