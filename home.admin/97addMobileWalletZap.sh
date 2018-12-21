@@ -31,7 +31,7 @@ echo "*** STEP 1 ***"
 if [ ${#dynDomain} -eq 0 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
-echo "During Setup of the Zap app you should get to the'Connect Remote-Node Screen'." 
+echo "During Setup of the Zap app you should get to the 'Connect Remote-Node' screen." 
 echo ""
 echo "---> Click on Scan"
 echo "Make the this terminal as big as possible - fullscreen would be best."
