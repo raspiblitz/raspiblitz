@@ -27,7 +27,7 @@ echo "iOS: Read https://testflight.apple.com/join/WwCjFnS8 (open on device)"
 echo "Android: https://play.google.com/apps/testing/com.shango (open on device)"
 echo ""
 echo "*** STEP 1 ***"
-if [ ${#dynDomain} -eg 0 ]; then 
+if [ ${#dynDomain} -eq 0 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi  
 echo "In App go to --> 'Connect to your LND Server'"

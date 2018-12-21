@@ -38,7 +38,7 @@ read key
 clear
 echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
-if [ ${#dynDomain} -gt 0 ]; then 
+if [ ${#dynDomain} -eq 0 ]; then 
   # If you drop the -i parameter, zapconnect will use the external IP. 
   /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
 else
