@@ -115,6 +115,7 @@ sudo rm /mnt/hdd/lnd/tls.* 2>/dev/null
 echo "let lnd generate new TLSCert"
 sudo -u bitcoin /usr/local/bin/lnd &>/dev/null &
 lndPID=$(jobs -l | grep '/usr/local/bin/lnd' | cut -d ' ' -f3)
+sleep 3
 echo "wait until generated lndPID(${lndPID})"
 newCertExists=0
 count=0
