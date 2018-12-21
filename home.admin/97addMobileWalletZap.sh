@@ -8,14 +8,19 @@ clear
 echo "*** Setup ***"
 echo ""
 echo "Installing zapconnect. Please wait..."
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/gocode
+export PATH=$PATH:$GOPATH/bin
 echo ""
-echo "Getting github.com/LN-Zap/zapconnect ..."
+echo "Getting github.com/LN-Zap/zapconnect (please wait) ..."
+cd $GOPATH/src/github.com/LN-Zap/zapconnect
 go get -d github.com/LN-Zap/zapconnect
 echo ""
 echo "Building github.com/LN-Zap/zapconnect ..."
-cd /home/admin/go/src/github.com/LN-Zap/zapconnect/
-go build -o /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect
-
+make
+cd
+sleep 3
 
 clear
 echo "******************************"
@@ -43,10 +48,10 @@ echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then 
   # If you drop the -i parameter, zapconnect will use the external IP. 
-  /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
+  zapconnect -i
 else
   # when dynamic domain is set
-  /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect --host=${dynDomain}
+  zapconnect --host=${dynDomain}
 fi
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."

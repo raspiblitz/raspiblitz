@@ -332,6 +332,24 @@ if [ ${#installed} -eq 0 ]; then
   exit 1
 fi
 
+# Go is needed for ZAP connect later
+echo "*** Installing Go ***"
+wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+then
+    echo "!!! FAIL !!! Download not success."
+    exit 1
+fi
+sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+sudo rm *.gz
+sudo mkdir /usr/local/gocode
+sudo chmod 777 /usr/local/gocode
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/gocode
+export PATH=$PATH:$GOPATH/bin
+echo ""
+
 ##### Build from Source
 ## To quickly catch up get latest patches if needed
 #repo="github.com/lightningnetwork/lnd"
