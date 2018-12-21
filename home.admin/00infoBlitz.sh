@@ -127,7 +127,7 @@ fi
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-public_ip=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+public_ip="${publicIP}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
@@ -156,17 +156,20 @@ networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
 if [ "${onionAddress}" != "null" ]; then
   # TOR address
+  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
   torInfo="+ TOR"
 else
   # IP address
+  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
   public_addr="${public_ip}:${public_port}"
-  public_check=$(timeout 2s nc -z ${public_ip} ${public_port} 2>/dev/null; echo $?)
+  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     public=""
-    public_color="${color_green}"
+    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+    public_color="${color_yellow}"
   else
     public=""
     public_color="${color_red}"
@@ -179,6 +182,7 @@ ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external="\n"
 ln_alias="${hostname}"
+ln_publicColor=""
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
@@ -187,6 +191,18 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
 else
  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+ ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+ if [ ${ln_tor} -eq 1 ]; then
+   ln_publicColor="${color_green}"
+ else
+   public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
+  if [ $public_check = "0" ]; then
+    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+    ln_publicColor="${color_yellow}"
+  else
+    ln_publicColor="${color_red}"
+  fi
+ fi
  alias_color="${color_grey}"
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
  ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
@@ -229,12 +245,13 @@ ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_g
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public} ${networkConnectionsInfo}
+${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_external}
+${color_yellow}${ln_publicColor}${ln_external}
+
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \

@@ -6,7 +6,7 @@
 source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then
@@ -16,14 +16,13 @@ if [ ${#network} -eq 0 ]; then
   if [ ${litecoinActive} -eq 1 ]; then
     network="litecoin"
   fi
-  network=`sudo cat /home/admin/.network`
 fi
 
-# for old nodes
+# for non final config nodes
 if [ ${#chain} -eq 0 ]; then
   echo "backup info: chain"
   chain="test"
-  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
+  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "testnet=0" -c)
   if [ ${isMainChain} -gt 0 ];then
     chain="main"
   fi
@@ -55,3 +54,11 @@ echo ""
 echo "*** LAST 20 LND LOGS ***"
 sudo journalctl -u lnd -b --no-pager -n20
 echo ""
+
+if [ "${rtlWebinterface}" = "on" ]; then
+  echo "*** LAST 20 RTL LOGS ***"
+  sudo journalctl -u RTL -b --no-pager -n20
+  echo ""
+else
+  echo "- RTL is OFF by config"
+fi

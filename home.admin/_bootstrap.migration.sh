@@ -27,20 +27,6 @@ fi
 # load old or init raspiblitz config
 source ${configFile}
 
-# check if config files contains basic: network
-if [ ${#network} -eq 0 ]; then
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing network in (${configFile})!"
-  exit 1
-fi
-
-# check if config files contains basic: chain
-if [ ${#chain} -eq 0 ]; then
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing chain in (${configFile})!" >> ${logFile}
-  exit 1
-fi
-
 # check if config files contains basic: hostname
 if [ ${#hostname} -eq 0 ]; then
   echo "FAIL see ${logFile}"

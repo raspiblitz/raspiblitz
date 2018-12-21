@@ -1,6 +1,9 @@
 #!/bin/bash
 echo ""
 
+# set raspiblitz config file
+configFile="/mnt/hdd/raspiblitz.conf"
+
 # load setup config
 source /home/admin/raspiblitz.info
 
@@ -9,14 +12,14 @@ source /home/admin/_version.info
 
 # show info to user
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
-    Press OK for a final reboot.
+    After reboot RaspiBlitz
+    needs to be unlocked and
+    sync with the network.
 
-    Remember: After every reboot
-  you need to unlock the LND wallet.
+    Press OK for a final reboot.
 " 10 42
 
 # init the RASPIBLITZ Config
-configFile="/mnt/hdd/raspiblitz.conf"
 echo "# RASPIBLITZ CONFIG FILE" > $configFile
 echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
 sudo chmod 777 ${configFile}
@@ -27,7 +30,10 @@ echo "network=${network}" >> $configFile
 echo "chain=${chain}" >> $configFile
 
 # let migration/init script do the rest
-./_bootstrap.migration.sh
+/home/admin/_bootstrap.migration.sh
+
+# copy logfile to analyse setup
+cp $logFile /home/admin/raspiblitz.setup.log
 
 # set the hostname inputed on initDialog
 if [ ${#hostname} -gt 0 ]; then
@@ -42,4 +48,6 @@ sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear
 echo "Setup done. Rebooting now."
+
+sleep 3
 sudo shutdown -r now

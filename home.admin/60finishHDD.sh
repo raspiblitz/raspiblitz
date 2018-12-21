@@ -44,10 +44,8 @@ if [ ${mountOK} -eq 1 ]; then
    sudo systemctl daemon-reload
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service
-   echo "Giving ${network}d service 180 seconds to init - please wait ..."	
-   sleep 180
-   echo "OK - ${network}d started"
-   sleep 2 
+   echo "Started ... wait 10 secs"	
+   sleep 10
 
    # set SetupState
    sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info

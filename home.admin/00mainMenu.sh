@@ -1,49 +1,80 @@
 #!/bin/bash
-echo "Starting the main menu - please wait ..."
+echo "Starting the main menu ..."
+
+# CONFIGFILE - configuration of RaspiBlitz
+configFile="/mnt/hdd/raspiblitz.conf"
+
+# INFOFILE - state data from bootstrap
+infoFile="/home/admin/raspiblitz.info"
+
+# check if HDD is connected
+hddExists=$(lsblk | grep -c sda1)
+if [ ${hddExists} -eq 0 ]; then
+  echo "***********************************************************"
+  echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
+  echo "***********************************************************"
+  exit
+fi
 
 # check data from _bootstrap.sh that was running on device setup
-infoFile='/home/admin/raspiblitz.info'
 bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
-if [ ${bootstrapInfoExists} -eq 1 ]; then
+if [ ${bootstrapInfoExists} -eq 0 ]; then
+  echo "***********************************************************"
+  echo "WARNING: NO raspiblitz.info FOUND -> bootstrap not running?"
+  echo "***********************************************************"
+  exit
+fi
 
-  # load the data from the info file
-  source ${infoFile}
+# load the data from the info file (will get produced on every startup)
+source ${infoFile}
 
-  # if pre-sync is running - stop it
-  if [ "${state}" = "presync" ]; then
+if [ "${state}" = "recovering" ]; then
+  echo "***********************************************************"
+  echo "WARNING: bootstrap still updating - close SSH, login later"
+  echo "To monitor progress --> tail -n1000 -f raspiblitz.log"
+  echo "***********************************************************"
+  exit
+fi
 
-    # stopping the pre-sync
-    echo "********************************************"
-    echo "Stopping pre-sync ... pls wait (up to 1min)"
-    echo "********************************************"
-    sudo systemctl stop bitcoind.service
-    sudo systemctl disable bitcoind.service
-    sudo rm /mnt/hdd/bitcoin/bitcoin.conf
-    sudo rm /etc/systemd/system/bitcoind.service
-    sudo unlink /home/bitcoin/.bitcoin
+# signal that after bootstrap recover user dialog is needed
+if [ "${state}" = "recovered" ]; then
+  echo "System recovered - needs final user settings"
+  ./20recoverDialog.sh 
+  exit 1
+fi 
 
-    # unmount the temporary mount
-    sudo umount -l /mnt/hdd
+# if pre-sync is running - stop it - before continue
+if [ "${state}" = "presync" ]; then
+  # stopping the pre-sync
+  echo ""
+  echo "********************************************"
+  echo "Stopping pre-sync ... pls wait (up to 1min)"
+  echo "********************************************"
+  sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
+  echo "bitcoind called to stop .."
+  sleep 50
 
-    # update info file
-    state=waitsetup
-    sudo sed -i "s/^state=.*/state=waitsetup/g" $infoFile
-    sudo sed -i "s/^message=.*/message='Pre-Sync Stopped'/g" $infoFile
+  # unmount the temporary mount
+  echo "Unmount HDD .."
+  sudo umount -l /mnt/hdd
+  sleep 3
+
+  # update info file
+  state=waitsetup
+  sudo sed -i "s/^state=.*/state=waitsetup/g" $infoFile
+  sudo sed -i "s/^message=.*/message='Pre-Sync Stopped'/g" $infoFile
+fi
+
+# if state=ready -> setup is done or started
+if [ "${state}" = "ready" ]; then
+  configExists=$(ls ${configFile} | grep -c '.conf')
+  if [ ${configExists} -eq 1 ]; then
+    echo "setup is done - loading config data"
+    source ${configFile}
+    setupStep=100
+  else
+    echo "setup still in progress - setupStep(${setupStep})"
   fi
-
-  # signal if bootstrap recover is not ready yet
-  if [ "${state}" = "recovering" ]; then
-    echo "WARNING: bootstrap is still updating - please close SSH and login later again"
-    exit 1
-  fi
-
-   # signal that after bootstrap recover user dialog is needed
-  if [ "${state}" = "recovered" ]; then
-    echo "System recovered - needs final user settings"
-    ./20recoverDialog.sh 
-    exit 1
-  fi 
-
 fi
 
 ## default menu settings
@@ -55,44 +86,6 @@ TITLE=""
 MENU="Choose one of the following options:"
 OPTIONS=()
 
-## get basic info (its OK if not set yet)
-source /mnt/hdd/raspiblitz.conf
-
-# check hostname and get backup if from old config
-if [ ${#hostname} -eq 0 ]; then
-  echo "backup info for old nodes: hostname"
-  hostname=`sudo cat /home/admin/.hostname` 2>/dev/null
-  if [ ${#hostname} -eq 0 ]; then
-    hostname="raspiblitz"
-  fi
-fi
-
-# check network and get backup if from old config
-if [ ${#network} -eq 0 ]; then
-    echo "backup info for old nodes: network"
-    network="bitcoin"
-    litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
-    if [ ${litecoinActive} -eq 1 ]; then
-      network="litecoin"
-    else
-      # keep for old nodes
-      network=`sudo cat /home/admin/.network 2>/dev/null`
-    fi
-    if [ ${#network} -eq 0 ]; then
-      network="bitcoin"
-    fi
-fi
-
-# for old nodes
-if [ ${#chain} -eq 0 ]; then
-  echo "backup info for old nodes: chain"
-  chain="test"
-  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-  if [ ${isMainChain} -gt 0 ];then
-    chain="main"
-  fi
-fi
-
 # check if RTL web interface is installed
 runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 
@@ -102,6 +95,8 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 # function to use later
 waitUntilChainNetworkIsReady()
 {
+    echo "checking ${network}d - please wait .."
+    echo "can take longer if device was off or first time"
     while :
     do
       sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
@@ -117,43 +112,53 @@ waitUntilChainNetworkIsReady()
         fi
         boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
-        sleep 5
       else
-        return
+        locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+        if [ ${locked} -gt 0 ]; then
+          ./AAunlockLND.sh
+          echo "please wait ... update to next screen can be slow"
+        fi
+        lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+        if [ ${lndSynced} -eq 0 ]; then
+          ./80scanLND.sh
+        else
+          # everything is ready - return from loop
+          return
+        fi
       fi
+      sleep 5
     done
 }
 
-## get actual setup info
-source ${infoFile}
 if [ ${#setupStep} -eq 0 ]; then
   echo "WARN: no setup step found in raspiblitz.info"
   setupStep=0
 fi
 if [ ${setupStep} -eq 0 ]; then
 
-    # check data from boostrap
-    # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
-    if [ "${state}" = "olddata" ]; then
-        # old data setup
-        BACKTITLE="RaspiBlitz - Manual Update"
-        TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
-        MENU="\n         ATTENTION: OLD DATA COULD COINTAIN FUNDS\n"
-        OPTIONS+=(MANUAL "read how to recover your old funds" \
-                  DELETE "erase old data, keep blockchain, reboot" )
-        HEIGHT=11
-    else
+  # check data from boostrap
+  # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
+  if [ "${state}" = "olddata" ]; then
 
-        # start setup
-        BACKTITLE="RaspiBlitz - Setup"
-        TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-        MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-        OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-        HEIGHT=11
+    # old data setup
+    BACKTITLE="RaspiBlitz - Manual Update"
+    TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
+    MENU="\n         ATTENTION: OLD DATA COULD COINTAIN FUNDS\n"
+    OPTIONS+=(MANUAL "read how to recover your old funds" \
+              DELETE "erase old data, keep blockchain, reboot" )
+    HEIGHT=11
 
-    fi
+  else
 
+    # start setup
+    BACKTITLE="RaspiBlitz - Setup"
+    TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+    HEIGHT=11
+
+  fi
 
 elif [ ${setupStep} -lt 100 ]; then
 
@@ -176,7 +181,14 @@ else
 
     # MAIN MENU AFTER SETUP
 
-    BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}"
+    plus=""
+    if [ "${runBehindTor}" = "on" ]; then
+      plus=" / TOR"
+    fi
+    if [ ${#dynDomain} -gt 0 ]; then
+      plus="${plus} / ${dynDomain}"
+    fi
+    BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}${plus}"
 
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
     if [ ${locked} -gt 0 ]; then
@@ -199,11 +211,6 @@ else
         TITLE="Webinterface: http://${localip}:3000"
       fi
 
-      switchOption="to MAINNET"
-      if [ "${chain}" = "main" ]; then
-        switchOption="back to TESTNET"
-      fi
-
       # Basic Options
       OPTIONS+=(INFO "RaspiBlitz Status Screen" \
         FUNDING "Fund your on-chain Wallet" \
@@ -222,7 +229,7 @@ else
       fi
 
       # Depending Options
-      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli listchannels 2>/dev/null | jq '.[] | length')
+      openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
       if [ ${openChannels} -gt 0 ]; then
         OPTIONS+=(CLOSEALL "Close all open Channels")  
       fi
@@ -360,9 +367,18 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         OFF)
-            echo "After Shutdown remove power from RaspiBlitz."
-            echo "Press ENTER to start shutdown - then wait some seconds."
-            read key
+            echo ""
+            echo "LCD turns white when shutdown complete."
+            echo "Then wait 5 seconds and disconnect power."
+            echo "-----------------------------------------------"
+            echo "stop lnd - please wait .."
+            sudo systemctl stop lnd
+            echo "stop bitcoind (1) - please wait .."
+            sudo -u bitcoin bitcoin-cli stop
+            sleep 10
+            echo "stop bitcoind (2) - please wait .."
+            sudo systemctl stop ${network}d
+            echo "starting shutdown"
             sudo shutdown now
             exit 0
             ;;

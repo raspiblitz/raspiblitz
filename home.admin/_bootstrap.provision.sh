@@ -26,11 +26,16 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# import config values
+sudo chmod 777 ${configFile}
+source ${configFile}
+
 ##########################
 # BASIC SYSTEM SETTINGS
 ##########################
 
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
+sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
 
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
@@ -59,19 +64,16 @@ sudo mkdir /home/admin/.lnd/data >> ${logFile} 2>&1
 sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
-echo "Enabling Services" >> ${logFile}
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-sudo systemctl daemon-reload >> ${logFile} 2>&1
-sudo systemctl enable ${network}d.service >> ${logFile} 2>&1
-sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service >> ${logFile} 2>&1
-sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service >> ${logFile} 2>&1
+sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
+sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-sudo systemctl enable lnd >> ${logFile} 2>&1
 
 # finish setup (SWAP, Benus, Firewall, Update, ..)
-./90finishSetup.sh >> ${logFile} 2>&1
+sudo sed -i "s/^message=.*/message='Setup System ..'/g" ${infoFile}
+/home/admin/90finishSetup.sh >> ${logFile} 2>&1
 
 # set the local network hostname
 if [ ${#hostname} -gt 0 ]; then
@@ -84,8 +86,9 @@ fi
 ##########################
 # PROVISIONING SERVICES
 ##########################
+sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
 
-  echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
+echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # TESTNET
 if [ "${chain}" = "test" ]; then
@@ -99,7 +102,7 @@ fi
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning AutoPilot'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup AutoPilot'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
@@ -108,28 +111,39 @@ fi
 # AUTO NAT DISCOVERY
 if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning AUTO NAT DISCOVERY - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning AutoNAT'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
+# DYNAMIC DNS
+if [ "${#dynDomain}" -gt 0 ]; then
+    echo "Provisioning DYNAMIC DNS - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup DynamicDNS'/g" ${infoFile}
+    sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
+else
+    echo "Provisioning DYNAMIC DNS - keep default" >> ${logFile}
+fi
+
 # RTL
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning RTL'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
-else 
+    sudo systemctl disable RTL # will get enabled after recover dialog
+else
     echo "Provisioning RTL - keep default" >> ${logFile}
 fi
 
 # TOR
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning TOR'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else 
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
+sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 echo "END Provisioning" >> ${logFile}

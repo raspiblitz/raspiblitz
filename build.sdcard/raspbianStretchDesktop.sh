@@ -9,10 +9,20 @@
 ##########################################################################
 
 echo ""
-echo "****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.97 *"
-echo "****************************************"
+echo "*****************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.97d *"
+echo "*****************************************"
 echo ""
+
+# 1st optional parameter is the branch to get code from when
+# provisioning sd card with raspiblitz assets/scripts later on
+echo "*** CHECK INPUT PARAMETERS ***"
+wantedBranch="$1"
+if [ ${#wantedBranch} -eq 0 ]; then
+  wantedBranch="master"
+fi
+echo "will use code from branch --> '${wantedBranch}'"
+sleep 3
 
 echo ""
 echo "*** CHECK BASE IMAGE ***"
@@ -322,6 +332,24 @@ if [ ${#installed} -eq 0 ]; then
   exit 1
 fi
 
+# Go is needed for ZAP connect later
+echo "*** Installing Go ***"
+wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+then
+    echo "!!! FAIL !!! Download not success."
+    exit 1
+fi
+sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+sudo rm *.gz
+sudo mkdir /usr/local/gocode
+sudo chmod 777 /usr/local/gocode
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/gocode
+export PATH=$PATH:$GOPATH/bin
+echo ""
+
 ##### Build from Source
 ## To quickly catch up get latest patches if needed
 #repo="github.com/lightningnetwork/lnd"
@@ -391,7 +419,7 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # move files from gitclone
 cd /home/admin/
-sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
+sudo -u admin git clone -b ${wantedBranch} https://github.com/rootzoll/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
@@ -433,6 +461,28 @@ echo "*** RASPI BOOSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
+
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp ./assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
+# Prepare for TOR service
+echo "*** Adding Tor Sources to sources.list ***"
+echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "OK"
+echo ""
+echo "*** Installing dirmngr ***"
+sudo apt install dirmngr
+echo ""
+echo "*** Fetching GPG key ***"
+sudo gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
+sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""

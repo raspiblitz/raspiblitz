@@ -13,7 +13,7 @@ if [ "${autoPilot}" = "on" ]; then
   exit 1
 fi
 
-command="lncli --chain=${network} closeallchannels --force"
+command="lncli --chain=${network} --network=${chain}net closeallchannels --force"
 
 clear
 echo "***********************************"
@@ -26,7 +26,7 @@ echo ""
 echo "RESULT:"
 
 # PRECHECK) check if chain is in sync
-chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   command=""
   result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "

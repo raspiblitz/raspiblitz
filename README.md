@@ -259,6 +259,14 @@ You can find setup instructions here: https://goo.gl/KnTzLu
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
+#### Public Domain with DynamicDNS
+
+This is a way to make your RaspiBlitz publicly reachable from the internet so that other nodes can open channels with you and you can connect with the 
+
+To do so you can register at an DynamicDomain service like freedns.afraid.org, forward the TCP ports 8333 (Bitcoin/mainnet),9735 (LND Node) & 10009 (LND RPC) from your internet router to the local IP of your RaspiBlitz and then activate unter "Services" the "DynamicDNS" option.
+
+You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
+
 ## Get a Debug Report
 
 If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
@@ -291,6 +299,10 @@ As you can see from the URL you find the build script in this Git repo under `bu
 The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. An installer of the SD card image should automatically launch. If you do not want to continue with the installation at this moment, click `Cancel` and simply shutdown with `sudo shutdown now`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image. 
 
 *Note: If you plan to use your self build sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way its ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
+
+And if you are a developer - to build a sd card from the dev-branch use this command to execute:
+
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh 'dev'`
 
 ## Update to a new SD Card Release
 

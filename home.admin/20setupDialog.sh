@@ -10,7 +10,7 @@ while [ ${#result} -eq 0 ]
   do
     l1="Please enter the name of your new RaspiBlitz:\n"
     l2="one word, keep characters basic & not too long"
-    dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
+    dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
     shred $_temp
   done
@@ -22,11 +22,11 @@ sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
 # work around - because without a reboot the hostname seems not updates in the whole system
 valueExistsInInfoFile=$(sudo cat /home/admin/raspiblitz.info | grep -c "hostname=")
 if [ ${valueExistsInInfoFile} -eq 0 ]; then
-  # update
-  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
-else
   # add
   echo "hostname=${result}" >> /home/admin/raspiblitz.info
+else
+  # update
+  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
 fi
 
 
@@ -35,7 +35,7 @@ result=""
 while [ ${passwordValid} -eq 0 ]
   do
     # show password info dialog
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
+    dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "RaspiBlitz uses 4 different passwords.
 Referenced as password A, B, C and D.
 
 A) Master User Password
@@ -49,7 +49,7 @@ Write them down & store them in a safe place.
 " 15 52
 
     # ask user for new password A
-    dialog --backtitle "RaspiBlitz - Setup"\
+    dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})"\
        --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
 
     # get user input
@@ -78,7 +78,7 @@ Write them down & store them in a safe place.
 
       # repeat until user input is nit length 0
       result=""
-      dialog --backtitle "RaspiBlitz - Setup"\
+      dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})"\
       --inputbox "Enter your RPC Password B:" 9 52 2>$_temp
       result=$( cat $_temp )
       shred $_temp
@@ -97,7 +97,7 @@ Write them down & store them in a safe place.
         sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
 
         # success info dialog
-        dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
+        dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
         clear
   
       fi

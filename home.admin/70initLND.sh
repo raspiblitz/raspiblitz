@@ -22,25 +22,32 @@ echo ""
 
 # verify that chainnetwork is ready
 chainIsReady=0
+loopCount=0
+echo "*** Wait until ${network}d is ready ..."
 while [ ${chainIsReady} -eq 0 ]
   do
-    echo "*** Test if chainnetwork is ready ..."
-    date +%s
+    loopCount=$(($loopCount +1))
     result=$(${network}-cli getblockchaininfo 2>error.out)
     error=`cat error.out`
     rm error.out
-    echo "result(${result})"
-    echo "error(${error})"
     if [ ${#error} -gt 0 ]; then
-      testnetAdd=""
-      if [ "${chain}"  = "test" ]; then
-       testnetAdd="testnet3/"
+      if [ ${loopCount} -gt 33 ]; then
+        echo "*** TAKES LONGER THEN EXCEPTED ***"
+        date +%s
+        echo "result(${result})"
+        echo "error(${error})"
+        testnetAdd=""
+        if [ "${chain}"  = "test" ]; then
+         testnetAdd="testnet3/"
+        fi
+        sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
+        echo "If you see an error -28 relax, just give it some time."
+        echo "Waiting 1 minute and then trying again ..."
+        sleep 60
+      else
+        echo "(${loopCount}/33) still waiting .."
+        sleep 10
       fi
-      sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
-      echo "If you see an error -28 relax, just give it some time."
-      echo "Waiting 1 minute and then trying again ..."
-      sleep 60
-      echo ""
     else
       echo "OK - chainnetwork is working"
       echo ""
@@ -156,12 +163,12 @@ sleep 60
 ###### Copy LND macaroons to admin
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
-macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   ./AAunlockLND.sh
   sleep 3
 fi
-macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c admin.macaroon)
+macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
   echo ""
@@ -199,43 +206,43 @@ else
   echo "OK - Wallet is already unlocked"
 fi
 
-### Show Lighthning Sync
-echo ""
-echo "*** Check LND Sync ***"
-item=0
-lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-if [ ${lndSyncing} -eq 0 ]; then
-  echo "OK - wait for LND to be synced"
-  while :
-    do
-      
-      # show sync status
-      ./80scanLND.sh
-      sleep 15
-      
-      # break loop when synced
-      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-      if [ ${lndSyncing} -eq 1 ]; then
-        break
-      fi
-
-      # break loop when wallet is locked
-      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
-      if [ ${locked} -eq 1 ]; then
-        break
-      fi
-
-      sleep 15
-
-    done
-  clear
-else
-  echo "OK - LND is in sync"
-fi
+#### Show Lighthning Sync
+#echo ""
+#echo "*** Check LND Sync ***"
+#item=0
+#lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+#if [ ${lndSyncing} -eq 0 ]; then
+#  echo "OK - wait for LND to be synced"
+#  while :
+#    do
+#      
+#      # show sync status
+#      ./80scanLND.sh
+#      sleep 15
+#      
+#      # break loop when synced
+#      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+#      if [ ${lndSyncing} -eq 1 ]; then
+#        break
+#      fi
+#
+#      # break loop when wallet is locked
+#      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+#      if [ ${locked} -eq 1 ]; then
+#        break
+#      fi
+#
+#      sleep 15
+#
+#    done
+#  clear
+#else
+#  echo "OK - LND is in sync"
+#fi
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
 
 ###### finishSetup
-./90finishSetup.sh
-./95finalSetup.sh
+sudo ./90finishSetup.sh
+sudo ./95finalSetup.sh

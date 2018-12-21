@@ -2,25 +2,24 @@
 _temp="./download/dialog.$$"
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 
 
 passwordValid=0
 result=""
 while [ ${passwordValid} -eq 0 ]
   do
     # show password info dialog
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 4 different passwords.
-Referenced as password A, B, C and D.
+    dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
 
+You need to set a new Password A:
 A) Master User Password
-B) Blockchain RPC Password
-C) LND Wallet Password
-D) LND Seed Password
 
-Choose now 4 new passwords - all min 8 chars,
+Passwords B, C & D stay as before.
+
+Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 15 52
+" 14 52
 
     # ask user for new password A
     dialog --backtitle "RaspiBlitz - Setup"\
@@ -47,38 +46,27 @@ Write them down & store them in a safe place.
       echo "admin:$result" | sudo chpasswd
       sleep 1
 
-      # sucess info dialog
-      dialog --backtitle "RaspiBlitz" --msgbox "OK - password changed to '$result'\nfor all users pi, admin, root & bitcoin" 6 52
-
-      # repeat until user input is nit length 0
-      result=""
-      dialog --backtitle "RaspiBlitz - Setup"\
-      --inputbox "Enter your RPC Password B:" 9 52 2>$_temp
-      result=$( cat $_temp )
-      shred $_temp
-
-      clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-      if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
-        clear
-        echo "FAIL - Password contained not allowed chars (see next screen)"
-        echo "Press ENTER to continue to start again"
-        read key
-        passwordValid=0
-      else
-
-        # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-        sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
-        sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
-
-        # success info dialog
-        dialog --backtitle "RaspiBlitz - SetUP" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
-        clear
-  
+      # activate lnd & bitcoin service
+      echo "Enabling Services"
+      sudo systemctl daemon-reload
+      sudo systemctl enable lnd.service
+      sudo systemctl enable ${network}d.service
+      if [ "${rtlWebinterface}" = "on" ]; then
+        sudo systemctl enable RTL
       fi
+
+      # remove flag that freshly recovered
+      sudo rm /home/admin/raspiblitz.recover.info
+
+      # sucess info dialog
+      dialog --backtitle "RaspiBlitz" --msgbox "New SSH password A is '$result'\nFINAL REBOOT IS NEEDED." 6 52
+      sudo shutdown -r now
 
     fi
 
   done
+
+  
 
 
 

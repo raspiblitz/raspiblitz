@@ -12,13 +12,22 @@ if [ ${#chain} -eq 0 ]; then chain="main"; fi
 chainValue="off"
 if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
+# map domain to on/off
+domainValue="off"
+dynDomainMenu='DynamicDNS'
+if [ ${#dynDomain} -gt 0 ]; then 
+  domainValue="on"
+  dynDomainMenu="${dynDomain}"
+fi
+
 # show select dialog
-CHOICES=$(dialog --checklist "Activate/Deactivate Services:" 15 40 6 \
-1 "Channel Autopilot" ${autoPilot} \
-2 "Testnet" ${chainValue} \
-3 "Router AutoNAT" ${autoNatDiscovery} \
-4 "Run behind TOR" ${runBehindTor} \
-5 "RTL Webinterface" ${rtlWebinterface} \
+CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
+1 'Channel Autopilot' ${autoPilot} \
+2 'Testnet' ${chainValue} \
+3 'Router AutoNAT' ${autoNatDiscovery} \
+4 ${dynDomainMenu} ${domainValue} \
+5 'Run behind TOR' ${runBehindTor} \
+6 'RTL Webinterface' ${rtlWebinterface} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
@@ -66,7 +75,7 @@ if [ "${chain}" != "${choice}" ]; then
           echo "B) Answere 'n' because you dont have a 'cipher seed mnemonic' (24 words) yet" 
           echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
           echo "****************************************************************************"
-          sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create 2>error.out
+          sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>error.out
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
             sleep 2  
@@ -125,8 +134,19 @@ else
   echo "AutoNAT Setting unchanged."
 fi
 
-# TOR process choice
+# Dynamic Domain
 choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${domainValue}" != "${choice}" ]; then
+  echo "Dynamic Domain changed .."
+  sudo /home/admin/config.scripts/internet.dyndomain.sh ${choice}
+  needsReboot=1
+else
+  echo "Dynamic Domain unchanged."
+fi
+
+# TOR process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
@@ -137,7 +157,7 @@ else
 fi
 
 # RTL process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
@@ -147,7 +167,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
     l2="Try to open the following URL in your local webrowser"
     l3="and unlock your wallet from there with PASSWORD C."
     l4="---> http://${localip}:3000"
-    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 25
+    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 45
   fi
   needsReboot=1
 else

@@ -2,9 +2,10 @@
 echo ""
 
 # add bonus scripts
-./91addBonus.sh
+/home/admin/91addBonus.sh
 
 ###### SWAP & FS
+echo ""
 echo "*** SWAP file ***"
 swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
@@ -71,6 +72,12 @@ sudo ufw allow proto udp from 192.168.0.0/24 port 1900 to any comment 'allow loc
 echo "enable lazy firewall"
 sudo ufw --force enable
 echo ""
+
+# set raspi config as environment for lnd service
+sudo systemctl stop lnd
+sudo systemctl disable lnd
+sudo sed -i "s/^EnvironmentFile=.*/EnvironmentFile=\/mnt\/hdd\/raspiblitz.conf/g" /etc/systemd/system/lnd.service
+sudo systemctl enable lnd
 
 # update system
 echo ""
