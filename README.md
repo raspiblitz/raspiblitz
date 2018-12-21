@@ -4,7 +4,7 @@
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
-`Latest Version with lnd 0.5 and bitcoin 0.17.0 & litecoin 0.16.3.`
+`Version 0.98 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -68,7 +68,11 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-https://wiki.fulmo.org/downloads/raspiblitz-2018-10-20.img.gz (or [build your own](#build-the-sd-card-image))
+https://wiki.fulmo.org/downloads/raspiblitz-0.98-2018-12-20.img.gz
+
+SHA-256: 746ee516d37d1a2e25a65eff87c7907597ac2a386ed2c1580e8b993fc33819cc
+
+or [build your own SD card image](#build-the-sd-card-image)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
