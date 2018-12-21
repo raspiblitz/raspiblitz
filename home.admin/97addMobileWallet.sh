@@ -13,7 +13,7 @@ For more details see chapter in GitHub README
 'Public Domain with DynamicDNS'
 https://github.com/rootzoll/raspiblitz
 
-Do you JUST want to connect with your mobile,
+Do you JUST want to connect with your mobile
 when your are on the same LOCAL NETWORK?
 " 14 54
   response=$?
