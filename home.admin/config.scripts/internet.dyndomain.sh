@@ -23,7 +23,7 @@ if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
   dialog --backtitle "DynamicDNS" --inputbox "ENTER the Dynamic Domain Name:
 
 For more details see chapter in GitHub README 
-'Public Domain with dynamic IP'
+'Public Domain with DynamicDNS'
 https://github.com/rootzoll/raspiblitz
 
 example: freedns.afraid.org

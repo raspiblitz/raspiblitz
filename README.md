@@ -259,7 +259,7 @@ You can find setup instructions here: https://goo.gl/KnTzLu
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
-#### Public Domain with dynamic IP
+#### Public Domain with DynamicDNS
 
 This is a way to make your RaspiBlitz publicly reachable from the internet so that other nodes can open channels with you and you can connect with the 
 

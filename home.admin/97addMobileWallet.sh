@@ -7,10 +7,10 @@ source /mnt/hdd/raspiblitz.conf
 if [ ${#dynDomain} -eq 0 ]; then
   dialog --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
 also from outside your local network you need to 
-activate 'Services' -> 'Dynamic Domain' FIRST. 
+activate 'Services' -> 'DynamicDNS' FIRST. 
 
 For more details see chapter in GitHub README 
-'Public Domain with dynamic IP'
+'Public Domain with DynamicDNS'
 https://github.com/rootzoll/raspiblitz
 
 Do you JUST want to connect with your mobile,
