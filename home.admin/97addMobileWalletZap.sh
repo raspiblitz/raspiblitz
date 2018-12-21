@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# load raspiblitz config data (with backup from old config)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
-if [ ${#chain} -eq 0 ]; then
-  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
-fi
+# load raspiblitz config data
+source /mnt/hdd/raspiblitz.conf 
 
 # make sure qrcode-encoder in installed
 clear
@@ -42,8 +38,13 @@ read key
 clear
 echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
-# If you drop the -i parameter, zapconnect will use the external IP. 
-/home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
+if [ ${#dynDomain} -gt 0 ]; then 
+  # If you drop the -i parameter, zapconnect will use the external IP. 
+  /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect -i
+else
+  # when dynamic domain is set
+  /home/admin/go/src/github.com/LN-Zap/zapconnect/zapconnect --host=${dynDomain}
+fi
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
 read key
