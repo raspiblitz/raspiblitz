@@ -28,9 +28,12 @@ echo "Go to http://www.zap-ios.jackmallers.com sign up with your email (confirma
 echo "iOS: Read https://developer.apple.com/testflight/testers/"
 echo ""
 echo "*** STEP 1 ***"
-echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
+if [ ${#dynDomain} -eq 0 ]; then 
+  echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
+fi
+echo "During Setup of the Zap app you should get to the'Connect Remote-Node Screen'." 
 echo ""
-echo "Click on Connect remote node"
+echo "---> Click on Scan"
 echo "Make the this terminal as big as possible - fullscreen would be best."
 echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it with the app."
 read key
