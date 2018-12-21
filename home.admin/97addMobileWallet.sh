@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# get raspiblitz config
+source /mnt/hdd/raspiblitz.conf
+
+# check if dynamic domain is set
+if [ ${#dynDomain} -eq 0 ]; then
+  dialog --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
+also from outside your local network you need to 
+activate 'Services' -> 'Dynamic Domain' FIRST. 
+
+For more details see chapter in GitHub README 
+'Public Domain with dynamic IP'
+https://github.com/rootzoll/raspiblitz
+
+Do you JUST want to connect with your mobile,
+when your are on the same LOCAL NETWORK?
+" 14 54
+  response=$?
+  case $response in
+    1) exit ;;
+  esac
+fi
+
 # Basic Options
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
         SHANGO "Shango Wallet (iOS/Android)")
