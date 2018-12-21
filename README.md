@@ -69,9 +69,7 @@ You got all the hardware of the shopping list above and you have no further assi
 
 1. Download SD-Card image:
 https://wiki.fulmo.org/downloads/raspiblitz-0.98-2018-12-20.img.gz
-
 SHA-256: 746ee516d37d1a2e25a65eff87c7907597ac2a386ed2c1580e8b993fc33819cc
-
 or [build your own SD card image](#build-the-sd-card-image)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
