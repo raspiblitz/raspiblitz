@@ -30,7 +30,8 @@ echo "*** STEP 1 ***"
 if [ ${#dynDomain} -eq 0 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi  
-echo "In App go to --> 'Connect to your LND Server'"
+echo "On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'"
+echo "(Or in the App go to --> 'Settings' > 'Connect to your LND Server')"
 echo "There you see three 3 form fields to fill out. Skip those and go right to the buttons below."
 echo ""
 echo "Click on the 'Scan QR' button"
