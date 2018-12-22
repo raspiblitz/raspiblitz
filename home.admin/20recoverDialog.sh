@@ -60,8 +60,22 @@ Write them down & store them in a safe place.
 
       # sucess info dialog
       dialog --backtitle "RaspiBlitz" --msgbox "New SSH password A is '$result'\nFINAL REBOOT IS NEEDED." 6 52
-      sudo shutdown -r now
 
+      # when auto-unlock is activated then Password C is needed to be restored on SD card
+      if [ "${autoUnlock}" = "on" ]; then
+        # ask user for new password C
+        dialog --backtitle "RaspiBlitz - Setup"\
+        --inputbox "Please enter your ACTUAL Password C:\n!!! This is needed for the Auto-Unlock feature" 10 52 2>$_temp
+        result=$( cat $_temp )
+        shred $_temp
+        if [ ${#result} -gt 0 ]; then
+          sudo /home/admin/config.scripts/lnd.autounlock.sh on ${result}
+        else
+          sudo /home/admin/config.scripts/lnd.autounlock.sh off      
+        fi
+      fi
+
+      sudo shutdown -r now
     fi
 
   done

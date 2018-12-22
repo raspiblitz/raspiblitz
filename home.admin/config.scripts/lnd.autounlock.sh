@@ -46,22 +46,30 @@ if [ ${configExists} -eq 0 ]; then
  exit 1
 fi
 
-# make sure entry line for 'lndAutoUnlock' exists 
-entryExists=$(cat ${configFile} | grep -c 'lndAutoUnlock=')
+# make sure entry line for 'autoUnlock' exists 
+entryExists=$(cat ${configFile} | grep -c 'autoUnlock=')
 if [ ${entryExists} -eq 0 ]; then
-  echo "lndAutoUnlock=" >> ${configFile}
+  echo "autoUnlock=" >> ${configFile}
 fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # check if lnd has REST in config
+  restActive=$(sudo cat /mnt/hdd/lnd.lnd.conf | grep -c 'restlisten=0.0.0.0:8080')
+  if [ ${restActive} -eq 0 ]; then
+    echo "FAIL: /mnt/hdd/lnd.lnd.conf needs to include the line 'restlisten=0.0.0.0:8080'"
+    exit 1
+  fi
+
   echo "switching the Auto-Unlock ON"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lndAutoUnlock=.*/lndAutoUnlock=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^autoUnlock=.*/autoUnlock=on/g" /mnt/hdd/raspiblitz.conf
 
   # password C needs to be stored on RaspiBlitz
   echo "storing password for root in /root/lnd.autounlock.pwd"
-  sudo sh -c 'echo "${passwordC}" > /root/lnd.autounlock.pwd'
+  sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
 
   echo "Auto-Unlock is now ON"
 fi
@@ -71,7 +79,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "switching the Auto-Unlock OFF"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lndAutoUnlock=.*/lndAutoUnlock=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
   # delete password C securly
   echo "shredding password on RaspiBlitz"

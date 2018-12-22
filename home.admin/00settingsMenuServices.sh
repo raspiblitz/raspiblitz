@@ -4,6 +4,7 @@
 source /mnt/hdd/raspiblitz.conf
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
+if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
@@ -28,6 +29,7 @@ CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
 4 ${dynDomainMenu} ${domainValue} \
 5 'Run behind TOR' ${runBehindTor} \
 6 'RTL Webinterface' ${rtlWebinterface} \
+7 'LND Auto-Unlock' ${autoUnlock} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
@@ -172,6 +174,17 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   needsReboot=1
 else
   echo "RTL Webinterface Setting unchanged."
+fi
+
+# LND Auto-Unlock
+choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${autoUnlock}" != "${choice}" ]; then
+  echo "LND Autounlock Setting changed .."
+  sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
+  needsReboot=1
+else
+  echo "LND Autounlock Setting unchanged."
 fi
 
 if [ ${needsReboot} -eq 1 ]; then

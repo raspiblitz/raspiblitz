@@ -28,6 +28,9 @@ do
   # count up
   counter=$(($counter+1))
 
+  # gather the uptime seconds
+  upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
+
   ####################################################
   # RECHECK DHCP-SERVER 
   # https://github.com/rootzoll/raspiblitz/issues/160
@@ -80,11 +83,15 @@ do
         sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
         publicIP=${freshPublicIP}
 
-        # 2) restart the LND
-        echo "restart LND with new environment config"
-        sudo systemctl restart lnd.service
+        # 2) only restart LND if dynDNS is activated
+        # because this signals that user wants "public node"
+        if [ ${#dynDomain} -gt 0 ]; then
+          echo "restart LND with new environment config"
+          # restart and let to auto-unlock (if activated) do the rest
+          sudo systemctl restart lnd.service
+        fi
 
-        # 3) trigger update if dnyamic domain (if set)
+        # 2) trigger update if dnyamic domain (if set)
         updateDynDomain=1
 
       else
@@ -95,6 +102,32 @@ do
       echo "skip - because setup is still running"
     fi
 
+  fi
+
+  ###############################
+  # LND AUTO-UNLOCK
+  ###############################
+
+  # check every 10secs
+  recheckAutoUnlock=$((($counter % 10)+1))
+  if [ ${recheckAutoUnlock} -eq 1 ]; then
+
+    # check if auto-unlock feature if activated
+    if [ "${autoUnlock}" = "on" ]; then
+
+      # check if lnd is locked
+      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+      if [ ${locked} -gt 0 ]; then
+
+        # unlock thru REST call
+        curl -s \
+        -H "Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon))" \
+        --cacert /home/bitcoin/.lnd/tls.cert \
+        -X POST -d "{\"wallet_password\": \"$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)\"}" \
+        https://localhost:8080/v1/unlockwallet > /dev/null 2>&1
+      
+      fi
+    fi
   fi
 
   ###############################
