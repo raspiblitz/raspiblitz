@@ -178,6 +178,10 @@ while :
         l2="Open: http://${localip}:3000\n"
         l3="Use Password C to unlock\n"
       fi
+      if [ "${autoUnlock}" = "on" ]; then
+        l3="Waiting for AUTO-UNLOCK .."
+        l2="ssh admin@${localip}"
+      fi
       boxwidth=$((${#localip} + 24))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
