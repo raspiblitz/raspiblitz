@@ -114,9 +114,7 @@ echo "deleting TLSCert"
 sudo rm /mnt/hdd/lnd/tls.* 2>/dev/null
 echo "let lnd generate new TLSCert"
 sudo -u bitcoin /usr/local/bin/lnd &>/dev/null &
-lndPID=$(jobs -l | grep '/usr/local/bin/lnd' | cut -d ' ' -f3)
-sleep 3
-echo "wait until generated lndPID(${lndPID})"
+echo "wait until generated"
 newCertExists=0
 count=0
 while [ ${newCertExists} -eq 0 ]
@@ -130,7 +128,7 @@ do
   newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c '.cert')
   sleep 2
 done
-sudo kill -KILL ${lndPID}
+sudo killall /usr/local/bin/lnd
 echo "copy new cert to admin user"
 sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
 
