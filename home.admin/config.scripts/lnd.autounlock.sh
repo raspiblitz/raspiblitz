@@ -56,9 +56,9 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if lnd has REST in config
-  restActive=$(sudo cat /mnt/hdd/lnd.lnd.conf | grep -c 'restlisten=0.0.0.0:8080')
+  restActive=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=0.0.0.0:8080')
   if [ ${restActive} -eq 0 ]; then
-    echo "FAIL: /mnt/hdd/lnd.lnd.conf needs to include the line 'restlisten=0.0.0.0:8080'"
+    echo "FAIL: /mnt/hdd/lnd/lnd.conf needs to include the line 'restlisten=0.0.0.0:8080'"
     exit 1
   fi
 
