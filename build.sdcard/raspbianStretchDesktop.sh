@@ -14,7 +14,7 @@ echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.98  *"
 echo "*****************************************"
 echo ""
 
-# 1st optional parameter is the branch to get code from when
+# 1st optional parameter is the BRANCH to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
 echo "*** CHECK INPUT PARAMETERS ***"
 wantedBranch="$1"
@@ -22,6 +22,17 @@ if [ ${#wantedBranch} -eq 0 ]; then
   wantedBranch="master"
 fi
 echo "will use code from branch --> '${wantedBranch}'"
+
+# 2nd optional parameter is the GITHUG-USERNAME to get code from when
+# provisioning sd card with raspiblitz assets/scripts later on
+# if 2nd paramter is used - 1st is mandatory
+echo "*** CHECK INPUT PARAMETERS ***"
+githubUser="$2"
+if [ ${#githubUser} -eq 0 ]; then
+  githubUser="rootzoll"
+fi
+echo "will use code from user --> '${githubUser}'"
+
 sleep 3
 
 echo ""
@@ -419,7 +430,7 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # move files from gitclone
 cd /home/admin/
-sudo -u admin git clone -b ${wantedBranch} https://github.com/rootzoll/raspiblitz.git
+sudo -u admin git clone -b ${wantedBranch} https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
