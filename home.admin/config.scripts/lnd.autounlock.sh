@@ -79,5 +79,3 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "Auto-Unlock is now OFF"
 fi
-
-exit 0
