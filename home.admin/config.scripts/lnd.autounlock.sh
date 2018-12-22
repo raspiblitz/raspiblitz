@@ -31,7 +31,7 @@ Password C will be stored on the device.
     exit 1
   fi
   shred ./.tmp
-
+fi
 
 # config file
 configFile="/mnt/hdd/raspiblitz.conf"
