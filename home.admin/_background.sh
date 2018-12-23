@@ -133,7 +133,7 @@ do
         #macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
         echo "macaroonData --> ${MACAROON_HEADER}"
 
-        command="curl -X POST -d '{\"wallet_password\": \"${walletPasswordBase64}\"}' --cacert /mnt/hdd/lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet 2>&1"
+        command="curl -X POST -d '{\"wallet_password\": \"${walletPasswordBase64}\"}' --cacert /mnt/hdd/lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet"
 
         # build curl command
         #command="curl \
@@ -152,8 +152,6 @@ do
     else
       echo "auto-unlock is OFF"
     fi
-  else 
-    echo "no trigger auto-unlock"
   fi
 
   ###############################
