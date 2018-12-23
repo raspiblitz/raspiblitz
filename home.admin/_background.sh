@@ -122,13 +122,15 @@ do
       locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
       if [ ${locked} -gt 0 ]; then
 
+        echo "STARTING AUTO-UNLOCK ..."
+
         # get password c
         walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
-        #echo "walletPasswordBase64 --> ${walletPasswordBase64}"
+        echo "walletPasswordBase64 --> ${walletPasswordBase64}"
         
         # get macaroon data
         macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-        #echo "macaroonData --> ${macaroonData}"
+        echo "macaroonData --> ${macaroonData}"
 
         # unlock thru REST call
         curl -s \
