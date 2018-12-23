@@ -191,5 +191,6 @@ if [ ${needsReboot} -eq 1 ]; then
    sleep 2
    dialog --title 'OK' --msgbox 'System will reboot to activate changes.' 6 26
    echo "rebooting .."
+   sleep 3
    sudo shutdown -r now
 fi
