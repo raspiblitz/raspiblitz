@@ -132,12 +132,16 @@ do
         macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
         echo "macaroonData --> ${macaroonData}"
 
-        # unlock thru REST call
-        curl -s \
-        -H "Grpc-Metadata-macaroon: ${macaroonData})" \
+        # build curl command
+        curlCommand="curl -s \
+        -H \"Grpc-Metadata-macaroon: ${macaroonData})\" \
         --cacert /home/bitcoin/.lnd/tls.cert \
-        -X POST -d "{\"wallet_password\": \"${walletPasswordBase64}\"}" \
-        https://localhost:8080/v1/unlockwallet 2>&1
+        -X POST -d \"{\"wallet_password\": \"${walletPasswordBase64}\"}\" \
+        https://localhost:8080/v1/unlockwallet 2>&1" 
+        
+        # execute REST call
+        echo "running --> ${command}"
+        result=$($command)
       
       else
         echo "lncli says not locked"
