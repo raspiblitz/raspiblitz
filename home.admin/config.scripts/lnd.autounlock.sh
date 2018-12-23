@@ -70,6 +70,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       # add REST config to lnd.conf (for old configs)
       sudo sh -c "echo \"restlisten=0.0.0.0:8080\" >> /mnt/hdd/lnd/lnd.conf"
       echo "LND REST config added -> restlisten=0.0.0.0:8080'"
+      # refresh TLS cert
+      sudo /home/admin/config.scripts/lnd.newtlscert.sh
     fi
   else
     echo "LND REST config OK -> restlisten=0.0.0.0:8080'"
