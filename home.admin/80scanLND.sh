@@ -63,7 +63,7 @@ else
   txlines=$(sudo -u bitcoin lncli listchaintxns 2>/dev/null | wc -l)
   # has just 4 lines if empty
   if [ ${txlines} -eq 4 ]; then
-    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Will rescan every start until funding available. \n ssh admin@${localip}\n Password A")
+    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n re-rescan every start until funding\n ssh admin@${localip}\n Password A")
   else
     infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
     if [ "$USER" = "admin" ]; then
