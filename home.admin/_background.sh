@@ -133,7 +133,7 @@ do
         echo "macaroonData --> ${macaroonData}"
 
         # build curl command
-        curlCommand="curl -s \
+        command="curl -s \
         -H \"Grpc-Metadata-macaroon: ${macaroonData})\" \
         --cacert /home/bitcoin/.lnd/tls.cert \
         -X POST -d \"{\"wallet_password\": \"${walletPasswordBase64}\"}\" \
