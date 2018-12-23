@@ -129,15 +129,18 @@ do
         echo "walletPasswordBase64 --> ${walletPasswordBase64}"
         
         # get macaroon data
-        macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-        echo "macaroonData --> ${macaroonData}"
+        MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
+        #macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
+        echo "macaroonData --> ${MACAROON_HEADER}"
+
+        command="curl -X POST -d \"{\"wallet_password\": \"${walletPasswordBase64}\"}\" --cacert /mnt/hdd/lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet 2>&1"
 
         # build curl command
-        command="curl -s \
-        -H \"Grpc-Metadata-macaroon: ${macaroonData})\" \
-        --cacert /home/bitcoin/.lnd/tls.cert \
-        -X POST -d \"{\"wallet_password\": \"${walletPasswordBase64}\"}\" \
-        https://localhost:8080/v1/unlockwallet 2>&1" 
+        #command="curl \
+#-H \"Grpc-Metadata-macaroon: ${macaroonData})\" \
+#--cacert /home/bitcoin/.lnd/tls.cert \
+#-X POST -d \"{\"wallet_password\": \"${walletPasswordBase64}\"}\" \
+#https://localhost:8080/v1/unlockwallet 2>&1" 
         
         # execute REST call
         echo "running --> ${command}"
