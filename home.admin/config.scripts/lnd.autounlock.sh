@@ -62,11 +62,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # make sure config values exits
   exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
   if [ ${exists} -eq 0 ]; then
-    sudo sh -c "echo \"restlisten=\" >> /mnt/hdd/lnd/lnd.conf"
+    sudo sed -n -i 'p;4a restlisten=' /mnt/hdd/lnd/lnd.conf
   fi
   exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tlsextraip')
   if [ ${exists} -eq 0 ]; then
-    sudo sh -c "echo \"tlsextraip=\" >> /mnt/hdd/lnd/lnd.conf"
+    sudo sed -n -i 'p;5a tlsextraip=' /mnt/hdd/lnd/lnd.conf
   fi
 
   # set needed config values
