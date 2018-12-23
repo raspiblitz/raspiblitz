@@ -132,8 +132,8 @@ do
         # execute REST call
         #echo "${command}"
         #result=$($command)
-        POSTDATA="{'wallet_password': '${walletPasswordBase64}'}"
-        result=$(curl -X POST -d "${POSTDATA}" --cacert /home/bitcoin/.lnd/tls.cert --header "$MACAROON_HEADER" https://localhost:8080/v1/unlockwallet)
+        POSTDATA="'{\"wallet_password\": \"${walletPasswordBase64}\"}'"
+        result=$(curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header "$MACAROON_HEADER" https://localhost:8080/v1/unlockwallet)
         echo "${result}"
       
       else
