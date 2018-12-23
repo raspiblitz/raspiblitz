@@ -127,14 +127,11 @@ do
         # building REST command
         walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
         MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
-        #command="sudo -u bitcoin curl -X POST -d '{\"wallet_password\": \"${walletPasswordBase64}\"}' --cacert /home/bitcoin/.lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet"
-        
-        # execute REST call
-        #echo "${command}"
-        #result=$($command)
-        POSTDATA="'{\"wallet_password\": \"${walletPasswordBase64}\"}'"
+        POSTDATA="'{ \"wallet_password\":\"${walletPasswordBase64}\", }'"
+        echo "MACAROON:${MACAROON_HEADER}"
+        echo "POSTDATA:${POSTDATA}"
         result=$(curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header "$MACAROON_HEADER" https://localhost:8080/v1/unlockwallet)
-        echo "${result}"
+        echo "RESULT:${result}"
       
       else
         echo "lncli says not locked"
