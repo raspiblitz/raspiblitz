@@ -128,7 +128,7 @@ do
         walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
         MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
        # POSTDATA="'{ \"wallet_password\":\"${walletPasswordBase64}\" }'"
-        POSTDATA="{ \\\"wallet_password\\\":\\\"${walletPasswordBase64}\\\" }"
+        POSTDATA="\"{ \\\"wallet_password\\\":\\\"${walletPasswordBase64}\\\" }\""
         echo "MACAROON:${MACAROON_HEADER}"
         echo "POSTDATA:${POSTDATA}"
         result=$(curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header "$MACAROON_HEADER" https://localhost:8080/v1/unlockwallet)
