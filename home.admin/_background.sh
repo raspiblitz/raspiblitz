@@ -132,6 +132,7 @@ do
         # execute REST call
         echo "${command}"
         result=$($command)
+        echo "${result}"
       
       else
         echo "lncli says not locked"
