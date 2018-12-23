@@ -55,27 +55,26 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # make sure REST config of LND is correct
-  restActive=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=0.0.0.0:8080')
-  if [ ${restActive} -eq 0 ]; then
-    restActive=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
-    if [ ${restActive} -eq 1 ]; then
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo "FAIL: /mnt/hdd/lnd/lnd.conf includes REST config NOT 'restlisten=0.0.0.0:8080'"
-      echo "CANNOT ACTIVATE REST like needed for auto-unlock"
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      sleep 5
-      exit 1
-    else
-      # add REST config to lnd.conf (for old configs)
-      sudo sh -c "echo \"restlisten=0.0.0.0:8080\" >> /mnt/hdd/lnd/lnd.conf"
-      echo "LND REST config added -> restlisten=0.0.0.0:8080'"
-      # refresh TLS cert
-      sudo /home/admin/config.scripts/lnd.newtlscert.sh
-    fi
-  else
-    echo "LND REST config OK -> restlisten=0.0.0.0:8080'"
+  # make sure config values are uncommented
+  sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^#tlsextraip=.*/tlsextraip=/g" /mnt/hdd/lnd/lnd.conf
+
+  # make sure config values exits
+  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
+  if [ ${exists} -eq 0 ]; then
+    sudo sh -c "echo \"restlisten=\" >> /mnt/hdd/lnd/lnd.conf"
   fi
+  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tlsextraip')
+  if [ ${exists} -eq 0 ]; then
+    sudo sh -c "echo \"tlsextraip=\" >> /mnt/hdd/lnd/lnd.conf"
+  fi
+
+  # set needed config values
+  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^tlsextraip=.*/tlsextraip=0.0.0.0/g" /mnt/hdd/lnd/lnd.conf
+
+  # refresh TLS cert
+  sudo /home/admin/config.scripts/lnd.newtlscert.sh
 
   echo "switching the Auto-Unlock ON"
 
