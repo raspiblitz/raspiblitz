@@ -140,7 +140,11 @@ do
       else
         echo "lncli says not locked"
       fi
+    else
+      echo "auto-unlock is OFF"
     fi
+  else 
+    echo "no trigger auto-unlock"
   fi
 
   ###############################
