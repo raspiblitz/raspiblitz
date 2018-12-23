@@ -134,7 +134,7 @@ do
 
         # unlock thru REST call
         curl -s \
-        -H "Grpc-Metadata-macaroon: ${macaroonData}" \
+        -H "Grpc-Metadata-macaroon: ${macaroonData})" \
         --cacert /home/bitcoin/.lnd/tls.cert \
         -X POST -d "{\"wallet_password\": \"${walletPasswordBase64}\"}" \
         https://localhost:8080/v1/unlockwallet 2>&1
