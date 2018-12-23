@@ -55,11 +55,24 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # check if lnd has REST in config
+  # make sure REST config of LND is correct
   restActive=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=0.0.0.0:8080')
   if [ ${restActive} -eq 0 ]; then
-    echo "FAIL: /mnt/hdd/lnd/lnd.conf needs to include the line 'restlisten=0.0.0.0:8080'"
-    exit 1
+    restActive=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
+    if [ ${restActive} -eq 1 ]; then
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo "FAIL: /mnt/hdd/lnd/lnd.conf includes REST config NOT 'restlisten=0.0.0.0:8080'"
+      echo "CANNOT ACTIVATE REST like needed for auto-unlock"
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      sleep 5
+      exit 1
+    else
+      # add REST config to lnd.conf (for old configs)
+      sudo sh -c "echo \"restlisten=0.0.0.0:8080\" >> /mnt/hdd/lnd/lnd.conf"
+      echo "LND REST config added -> restlisten=0.0.0.0:8080'"
+    fi
+  else
+    echo "LND REST config OK -> restlisten=0.0.0.0:8080'"
   fi
 
   echo "switching the Auto-Unlock ON"
