@@ -125,15 +125,19 @@ do
         echo "STARTING AUTO-UNLOCK ..."
 
         # building REST command
-        walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
-        MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
-       # POSTDATA="'{ \"wallet_password\":\"${walletPasswordBase64}\" }'"
-        POSTDATA="\"{ \\\"wallet_password\\\":\\\"${walletPasswordBase64}\\\" }\""
-        echo "MACAROON:${MACAROON_HEADER}"
-        echo "POSTDATA:${POSTDATA}"
-        result=$(curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header "$MACAROON_HEADER" https://localhost:8080/v1/unlockwallet)
-        echo "RESULT:${result}"
-      
+        passwordC=$(cat /root/lnd.autounlock.pwd)
+        sudo python /home/admin/config.scripts/lnd.unlock.py $passwordC
+
+        #walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
+        #MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
+        #POSTDATA="'{ \"wallet_password\":\"${walletPasswordBase64}\" }'"
+        #echo "MACAROON:${MACAROON_HEADER}"
+        #echo "POSTDATA:${POSTDATA}"
+        #command="sudo sh -c "curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet"
+        #echo "COMMAND:${command}"
+        #result=$(echo \"restlisten=\" >> /mnt/hdd/lnd/lnd.conf")
+        #echo "RESULT:${result}"
+
       else
         echo "lncli says not locked"
       fi
