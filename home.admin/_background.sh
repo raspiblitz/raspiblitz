@@ -3,13 +3,15 @@
 # This script runs on after start in background
 # as a service and gets restarted on failure
 # it runs ALMOST every seconds
-# DEBUG: sudo journalctl -f -u background
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
+
+# LOGS see: sudo journalctl -f -u background
+echo "_background.sh STARTED"
 
 # Check if HDD contains configuration
 configExists=$(ls ${configFile} | grep -c '.conf')
@@ -126,6 +128,8 @@ do
         -X POST -d "{\"wallet_password\": \"$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)\"}" \
         https://localhost:8080/v1/unlockwallet > /dev/null 2>&1
       
+      else
+        echo "lncli says not locked"
       fi
     fi
   fi

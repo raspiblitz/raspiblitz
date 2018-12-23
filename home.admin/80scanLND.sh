@@ -60,7 +60,7 @@ else
   heigh=7
   # check if wallet has any UTXO
   # reason see: https://github.com/lightningnetwork/lnd/issues/2326
-  txlines=$(sudo -u bitcoin lncli listchaintxns | wc -l)
+  txlines=$(sudo -u bitcoin lncli listchaintxns 2>/dev/null | wc -l)
   # has just 4 lines if empty
   if [ ${txlines} -eq 4 ]; then
     infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Will rescan every start until funding available. \n ssh admin@${localip}\n Password A")

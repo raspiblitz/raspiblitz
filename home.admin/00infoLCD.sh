@@ -179,8 +179,8 @@ while :
         l3="Use Password C to unlock\n"
       fi
       if [ "${autoUnlock}" = "on" ]; then
-        l3="Waiting for AUTO-UNLOCK .."
-        l2="ssh admin@${localip}"
+        l2="ssh admin@${localip}\n"
+        l3="Waiting for AUTO-UNLOCK"
       fi
       boxwidth=$((${#localip} + 24))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
