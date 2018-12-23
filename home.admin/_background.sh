@@ -11,13 +11,14 @@ infoFile="/home/admin/raspiblitz.info"
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGS see: sudo journalctl -f -u background
-echo "_background.sh STARTED"
 
 # Check if HDD contains configuration
 configExists=$(ls ${configFile} | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then
     source ${configFile}
 fi
+
+echo "_background.sh STARTED"
 
 counter=0
 while [ 1 ]
@@ -121,12 +122,18 @@ do
       locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
       if [ ${locked} -gt 0 ]; then
 
+        # get password c
+        walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
+        echo "walletPasswordBase64 --> ${walletPasswordBase64}"
+        macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
+        echo "macaroonData --> ${macaroonData}"
+
         # unlock thru REST call
         curl -s \
-        -H "Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon))" \
+        -H "Grpc-Metadata-macaroon: ${macaroonData})" \
         --cacert /home/bitcoin/.lnd/tls.cert \
-        -X POST -d "{\"wallet_password\": \"$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)\"}" \
-        https://localhost:8080/v1/unlockwallet > /dev/null 2>&1
+        -X POST -d "{\"wallet_password\": \"${walletPasswordBase64}\"}" \
+        https://localhost:8080/v1/unlockwallet 2>&1
       
       else
         echo "lncli says not locked"
