@@ -124,16 +124,18 @@ do
 
         # get password c
         walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
-        echo "walletPasswordBase64 --> ${walletPasswordBase64}"
+        #echo "walletPasswordBase64 --> ${walletPasswordBase64}"
+        
+        # get macaroon data
         macaroonData=$(xxd -ps -u -c 1000 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-        echo "macaroonData --> ${macaroonData}"
+        #echo "macaroonData --> ${macaroonData}"
 
         # unlock thru REST call
         curl -s \
         -H "Grpc-Metadata-macaroon: ${macaroonData})" \
         --cacert /home/bitcoin/.lnd/tls.cert \
         -X POST -d "{\"wallet_password\": \"${walletPasswordBase64}\"}" \
-        https://localhost:8080/v1/unlockwallet 2>&1
+        https://127.0.0.1:8080/v1/unlockwallet 2>&1
       
       else
         echo "lncli says not locked"
