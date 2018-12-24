@@ -3,7 +3,6 @@
 # This script runs on after start in background
 # as a service and gets restarted on failure
 # it runs ALMOST every seconds
-# DEBUG: sudo journalctl -f -u background
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -11,11 +10,15 @@ infoFile="/home/admin/raspiblitz.info"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
+# LOGS see: sudo journalctl -f -u background
+
 # Check if HDD contains configuration
 configExists=$(ls ${configFile} | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then
     source ${configFile}
 fi
+
+echo "_background.sh STARTED"
 
 counter=0
 while [ 1 ]
@@ -27,6 +30,9 @@ do
 
   # count up
   counter=$(($counter+1))
+
+  # gather the uptime seconds
+  upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
   ####################################################
   # RECHECK DHCP-SERVER 
@@ -80,11 +86,15 @@ do
         sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
         publicIP=${freshPublicIP}
 
-        # 2) restart the LND
-        echo "restart LND with new environment config"
-        sudo systemctl restart lnd.service
+        # 2) only restart LND if dynDNS is activated
+        # because this signals that user wants "public node"
+        if [ ${#dynDomain} -gt 0 ]; then
+          echo "restart LND with new environment config"
+          # restart and let to auto-unlock (if activated) do the rest
+          sudo systemctl restart lnd.service
+        fi
 
-        # 3) trigger update if dnyamic domain (if set)
+        # 2) trigger update if dnyamic domain (if set)
         updateDynDomain=1
 
       else
@@ -95,6 +105,45 @@ do
       echo "skip - because setup is still running"
     fi
 
+  fi
+
+  ###############################
+  # LND AUTO-UNLOCK
+  ###############################
+
+  # check every 10secs
+  recheckAutoUnlock=$((($counter % 10)+1))
+  if [ ${recheckAutoUnlock} -eq 1 ]; then
+
+    # check if auto-unlock feature if activated
+    if [ "${autoUnlock}" = "on" ]; then
+
+      # check if lnd is locked
+      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+      if [ ${locked} -gt 0 ]; then
+
+        echo "STARTING AUTO-UNLOCK ..."
+
+        # building REST command
+        passwordC=$(cat /root/lnd.autounlock.pwd)
+        sudo python /home/admin/config.scripts/lnd.unlock.py $passwordC
+
+        #walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
+        #MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
+        #POSTDATA="'{ \"wallet_password\":\"${walletPasswordBase64}\" }'"
+        #echo "MACAROON:${MACAROON_HEADER}"
+        #echo "POSTDATA:${POSTDATA}"
+        #command="sudo sh -c "curl -X POST -d ${POSTDATA} --cacert /home/bitcoin/.lnd/tls.cert --header \"$MACAROON_HEADER\" https://localhost:8080/v1/unlockwallet"
+        #echo "COMMAND:${command}"
+        #result=$(echo \"restlisten=\" >> /mnt/hdd/lnd/lnd.conf")
+        #echo "RESULT:${result}"
+
+      else
+        echo "lncli says not locked"
+      fi
+    else
+      echo "auto-unlock is OFF"
+    fi
   fi
 
   ###############################

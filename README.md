@@ -269,6 +269,14 @@ To do so you can register at an DynamicDomain service like freedns.afraid.org, f
 
 You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
 
+## Auto-unlock LND on startup
+
+This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
+
+It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachbale until you manually unlock it.
+
+But keep in mind that when activated, your Password C will be stored on the RaspiBlitz SD card. That lowers your security in (physical) attack scenarios. On an update you would need to re-enter your password C.
+
 ## Get a Debug Report
 
 If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
@@ -312,7 +320,7 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 
 * The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in `Build the SD Card Image` but in the end run the command:
 
-`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
 
 ## Update to a new SD Card Release
 

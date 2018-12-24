@@ -20,10 +20,13 @@ else
   echo "USAGE-INFO: ./XXupdateScripts.sh '[BRANCHNAME]'"
 fi
 
+origin=$(git remote -v | grep 'origin' | tail -n1)
+
 echo ""
 echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
 echo "justincase, not the final upadte mechanism"
-echo "BRANCH --> ${activeBranch} <---"
+echo "REPO ----> ${origin}"
+echo "BRANCH --> ${activeBranch}"
 echo "******************************************"
 git pull
 cd ..

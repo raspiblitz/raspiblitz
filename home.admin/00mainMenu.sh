@@ -396,7 +396,9 @@ case $CHOICE in
             ;;   
         X)
             lncli -h
-            echo "SUCH WOW come back with ./00mainMenu.sh"
+            echo "OK you now on the command line."
+            echo "You can return to the main menu with the command:"
+            echo "raspiblitz"
             ;;
         R)
             ./00mainMenu.sh

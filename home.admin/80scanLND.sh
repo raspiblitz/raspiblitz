@@ -58,11 +58,19 @@ if [ ${isInitialChainSync} -gt 0 ]; then
   fi
 else
   heigh=7
-  infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
-  if [ "$USER" = "admin" ]; then
-    heigh=6
-    width=53
-    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+  # check if wallet has any UTXO
+  # reason see: https://github.com/lightningnetwork/lnd/issues/2326
+  txlines=$(sudo -u bitcoin lncli listchaintxns 2>/dev/null | wc -l)
+  # has just 4 lines if empty
+  if [ ${txlines} -eq 4 ]; then
+    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n re-rescan every start until funding\n ssh admin@${localip}\n Password A")
+  else
+    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
+    if [ "$USER" = "admin" ]; then
+      heigh=6
+      width=53
+      infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    fi
   fi
 fi
 

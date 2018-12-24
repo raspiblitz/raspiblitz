@@ -10,7 +10,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.98  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
 echo "*****************************************"
 echo ""
 
@@ -438,6 +438,8 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
 # bash aoutstart for admin
+sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 

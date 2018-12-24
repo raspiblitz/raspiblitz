@@ -131,7 +131,7 @@ while :
       l2="---> ${message}\n"
       l3="Please keep running until reboot."
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
@@ -177,6 +177,10 @@ while :
       if [ "${rtlWebinterface}" = "on" ]; then
         l2="Open: http://${localip}:3000\n"
         l3="Use Password C to unlock\n"
+      fi
+      if [ "${autoUnlock}" = "on" ]; then
+        l2="ssh admin@${localip}\n"
+        l3="Waiting for AUTO-UNLOCK"
       fi
       boxwidth=$((${#localip} + 24))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
