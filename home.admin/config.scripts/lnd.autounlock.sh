@@ -26,8 +26,24 @@ https://github.com/rootzoll/raspiblitz
 Password C will be stored on the device.
 " 13 52 2>./.tmp
   passwordC=$( cat ./.tmp )
+  
+  # test if empty
   if [ ${#passwordC} -eq 0 ]; then
-    echo "FAIL input cannot be empty"
+    echo "CANCEL input cannot be empty"
+    sleep 3
+    exit 1
+  fi
+  
+  # test if correct
+  echo "testing password"
+  sudo systemctl restart lnd
+  sleep 4
+  result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
+  invalid=$(echo "${result}" | grep -c 'invalid')
+  if [ ${invalid} -gt 0 ];then
+    echo "PASSWORD C is wrong - try again or cancel"
+    sleep 3
+    sudo /home/admin/config.scripts/lnd.autounlock.sh on
     exit 1
   fi
   shred ./.tmp
