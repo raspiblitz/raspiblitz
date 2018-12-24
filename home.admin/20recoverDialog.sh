@@ -58,21 +58,22 @@ Write them down & store them in a safe place.
       # remove flag that freshly recovered
       sudo rm /home/admin/raspiblitz.recover.info
 
-      # sucess info dialog
-      dialog --backtitle "RaspiBlitz" --msgbox "New SSH password A is '$result'\nFINAL REBOOT IS NEEDED." 6 52
-
       # when auto-unlock is activated then Password C is needed to be restored on SD card
       if [ "${autoUnlock}" = "on" ]; then
-        # ask user for new password C
-        dialog --backtitle "RaspiBlitz - Setup"\
-        --inputbox "Please enter your ACTUAL Password C:\n!!! This is needed for the Auto-Unlock feature" 10 52 2>$_temp
-        result=$( cat $_temp )
-        shred $_temp
-        if [ ${#result} -gt 0 ]; then
-          sudo /home/admin/config.scripts/lnd.autounlock.sh on ${result}
-        else
-          sudo /home/admin/config.scripts/lnd.autounlock.sh off      
-        fi
+
+        # reset auto-unlock feature
+        dialog --backtitle "RaspiBlitz - Setup" --msgbox "You had the Auto-Unlock feature enabled.
+
+In the next dialog you need to re-enter your
+ACTUAL/OLD Password C to re-activate the
+Auto-Unlock feature. Enter a empty password
+to deactivate the Auto-Unlock feature.
+" 10 52
+        sudo /home/admin/config.scripts/lnd.autounlock.sh on
+        dialog --backtitle "RaspiBlitz" --msgbox "FINAL REBOOT IS NEEDED." 6 52
+
+      else
+        dialog --backtitle "RaspiBlitz" --msgbox "New SSH password A is '$result'\nFINAL REBOOT IS NEEDED." 6 52
       fi
 
       sudo shutdown -r now
