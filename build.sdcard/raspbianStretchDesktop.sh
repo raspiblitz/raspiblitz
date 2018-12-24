@@ -23,7 +23,7 @@ if [ ${#wantedBranch} -eq 0 ]; then
 fi
 echo "will use code from branch --> '${wantedBranch}'"
 
-# 2nd optional parameter is the GITHUG-USERNAME to get code from when
+# 2nd optional parameter is the GITHUB-USERNAME to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
 # if 2nd paramter is used - 1st is mandatory
 echo "*** CHECK INPUT PARAMETERS ***"
@@ -212,8 +212,8 @@ fi
 # check binary is was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-    exit 1
+  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  exit 1
 fi
 
 
@@ -221,8 +221,8 @@ fi
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
 then
-    echo "!!! FAIL !!! Download laanwj-releases.asc not success."
-    exit 1
+  echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+  exit 1
 fi
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
@@ -275,8 +275,8 @@ sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/lin
 # check download
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
-    exit 1
+  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+  exit 1
 fi
 
 # install
@@ -308,8 +308,8 @@ sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
 # check binary is was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
-    exit 1
+  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+  exit 1
 fi
 
 # check gpg finger print
@@ -329,7 +329,7 @@ echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-    exit 1
+  exit 1
 fi
 
 # install
@@ -515,12 +515,55 @@ read key
 # give Raspi a default hostname (optional)
 sudo raspi-config nonint do_hostname "RaspiBlitz"
 
-# *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
-# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-cd /home/admin/
-sudo apt-mark hold raspberrypi-bootloader
-git clone https://github.com/goodtft/LCD-show.git
-sudo chmod -R 755 LCD-show
-sudo chown -R admin:admin LCD-show
-cd LCD-show/
-sudo ./LCD35-show
+# *** Display selection ***
+dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
+defaultDisplay=$?
+
+if [[ $defaultDisplay -eq 0 ]]
+then
+  # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
+  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+  cd /home/admin/
+  sudo apt-mark hold raspberrypi-bootloader
+  git clone https://github.com/goodtft/LCD-show.git
+  sudo chmod -R 755 LCD-show
+  sudo chown -R admin:admin LCD-show
+  cd LCD-show/
+  sudo ./LCD35-show
+else
+  # Download and install the driver
+  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+
+  cd /boot
+  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
+  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
+  cat <<EOF >> config.txt
+
+dtparam=spi=off
+dtparam=i2c_arm=off
+
+# Set screen size and any overscan required
+overscan_left=0
+overscan_right=0
+overscan_top=0
+overscan_bottom=0
+framebuffer_width=800
+framebuffer_height=480
+
+
+enable_dpi_lcd=1
+display_default_lcd=1
+dpi_group=2
+dpi_mode=87
+dpi_output_format=0x6f015
+
+# set up the size to 800x480
+hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
+
+#rotate screen
+display_rotate=3
+
+dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
+EOF
+  init 6
+fi
