@@ -35,7 +35,7 @@ Password C will be stored on the device.
   fi
   
   # test if correct
-  echo "testing password"
+  echo "testing password .. please wait"
   sudo systemctl restart lnd
   sleep 4
   result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
