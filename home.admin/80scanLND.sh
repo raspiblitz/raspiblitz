@@ -27,6 +27,7 @@ if [ ${#item} -eq 0 ]; then
 fi
 
 # if no progress info
+online=1
 if [ ${#item} -eq 0 ]; then
   item="?" 
 
