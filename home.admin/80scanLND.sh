@@ -53,7 +53,7 @@ isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${
 if [ ${isWaitingBlockchain} -gt 0 ]; then
   isInitialChainSync=1
 fi
-fi [ ${online} -eq 0 ]; then
+if [ ${online} -eq 0 ]; then
     heigh=7
     width=44
     infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.1.1.1\n Local IP is ${localip}\n Please check cables and router.")
