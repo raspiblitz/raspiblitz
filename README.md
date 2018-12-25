@@ -31,7 +31,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 **Total Price: 124,11 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ]
+[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ] [ [Switzerland](shoppinglist_ch.md) ]
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
@@ -68,8 +68,8 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-https://wiki.fulmo.org/downloads/raspiblitz-0.98-2018-12-20.img.gz
-SHA-256: 746ee516d37d1a2e25a65eff87c7907597ac2a386ed2c1580e8b993fc33819cc
+https://wiki.fulmo.org/downloads/raspiblitz-0.99-2018-12-24.img.gz
+SHA-256: 9c9ee0dea2e892a0e665befc86f6bd2f5a11f4d290bda46ba9203bf9e5d0a3df
 or [build your own SD card image](#build-the-sd-card-image)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
@@ -171,7 +171,7 @@ You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself b
 
 * format second HDD with exFAT (availbale on Windows and Mac)
 * copy an indexed Blockchain into the root folder "bitcoin"
-* when youre HDD is ready the content of your folder bitcoin should look like this:
+* when your HDD is ready the content of your folder bitcoin should look like this:
 
 ![BitcoinFolderData](pictures/seedhdd.png)
 
