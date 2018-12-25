@@ -72,9 +72,15 @@ while :
 
     # before setup even started
     if [ ${setupStep} -eq 0 ]; then
-            
+
+      # check for internet connection
+      # https://en.wikipedia.org/wiki/1.1.1.1
+      online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+      if [ ${online} -eq 0 ]; then
+        message="no internet connection"
+
       # when in presync - get more info on progress
-      if [ "${state}" = "presync" ]; then
+      elif [ "${state}" = "presync" ]; then
         # get blockchain sync progress
         blockchaininfo="$(sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
         message="starting"
@@ -83,15 +89,13 @@ while :
           message=$(echo "${message}*100" | bc)
           message="${message}%"
         fi
-      fi
 
       # when old data - improve message
-      if [ "${state}" = "olddata" ]; then
+      elif [ "${state}" = "olddata" ]; then
           message="login for manual migration"
-      fi
 
       # when no HDD - improve message
-      if [ "${state}" = "nohdd" ]; then
+      elif [ "${state}" = "nohdd" ]; then
           message="Connect HHD"
       fi
       
