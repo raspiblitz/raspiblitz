@@ -31,7 +31,7 @@ Fastest and cheapest way to get your own Lightning Node running - on a Raspberry
 **Total Price: 124,11 EUR** (thats under 150 USD)
 
 Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ]
+[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ] [ [Switzerland](shoppinglist_ch.md) ]
 
 You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
 
@@ -179,7 +179,7 @@ You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself b
 
 * format second HDD with exFAT (availbale on Windows and Mac)
 * copy an indexed Blockchain into the root folder "bitcoin"
-* when youre HDD is ready the content of your folder bitcoin should look like this:
+* when your HDD is ready the content of your folder bitcoin should look like this:
 
 ![BitcoinFolderData](pictures/seedhdd.png)
 
