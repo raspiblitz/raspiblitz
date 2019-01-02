@@ -57,7 +57,17 @@ https://thecryptocloak.com/product/lightningshell/
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
 
-## Prepare your Hardware
+## Assemble your RaspiBlitz
+
+If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case and add the display like in picture below:
+
+![LCD](pictures/lcdassm.png)
+
+Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
+
+![HardwareSetup](pictures/hardwaresetup.jpg)
+
+## Installing the Software
 
 *There are two ways to start:*
 
@@ -77,9 +87,7 @@ https://www.raspberrypi.org/documentation/installation/installing-images/README.
 
 ## Boot your RaspiBlitz
 
-Connect all hardware like on photo and boot it up by connecting the power.
-
-![HardwareSetup](pictures/hardwaresetup.jpg)
+Insert the SD card and connect the power plug.
 
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
