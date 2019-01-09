@@ -126,7 +126,7 @@ do
 
         # building REST command
         passwordC=$(cat /root/lnd.autounlock.pwd)
-        sudo python /home/admin/config.scripts/lnd.unlock.py $passwordC
+        sudo python /home/admin/config.scripts/lnd.unlock.py '$passwordC'
 
         #walletPasswordBase64=$(cat /root/lnd.autounlock.pwd | tr -d '\n' | base64 -w0)
         #MACAROON_HEADER="Grpc-Metadata-macaroon: $(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)"
