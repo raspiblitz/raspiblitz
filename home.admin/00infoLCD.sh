@@ -154,22 +154,11 @@ while :
     if [ ${#clienterror} -gt 0 ]; then
       boxwidth=40
       l1="Waiting for ${network}d to get ready.\n"
-      l2="---> Starting Up\n"
+      l2="---> ${clienterror/error*:/}\n"
       l3="Can take longer if device was off."
-      isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
-      isLoadingBlockIndex=$(echo "${clienterror}" | grep -c 'Loading block index')
-      if [ ${isVerifying} -gt 0 ]; then
-        l2="---> Verifying Blocks\n"
-      elif [ ${isLoadingBlockIndex} -gt 0 ]; then
-        l2="---> Loading Block Index\n"
-      else
-        # when takes longer display error
-        uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-        if [ ${uptimeSeconds} -gt 30 ]; then
-          clienterror=$(echo "${clienterror/error*:/}")
-          l2="---> ${clienterror}\n"
-          boxwidth=70
-        fi
+      uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
+      if [ ${uptimeSeconds} -gt 600 ]; then
+        l3="!!Please login for more details!!"
       fi
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5

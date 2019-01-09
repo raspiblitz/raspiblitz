@@ -105,14 +105,14 @@ waitUntilChainNetworkIsReady()
       if [ ${#clienterror} -gt 0 ]; then
         boxwidth=40
         l1="Waiting for ${network}d to get ready.\n"
-        l2="---> Starting Up\n"
+        l2="---> ${clienterror/error*:/}\n"
         l3="Can take longer if device was off."
-        isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
-        if [ ${isVerifying} -gt 0 ]; then
-          l2="---> Verifying Blocks\n"
-        else
-          l2="---> ${clienterror}\n" 
-          boxwidth=70
+        uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
+        # after 2 min show complete long string (full detail)
+        if [ ${uptimeSeconds} -gt 120 ]; then
+          boxwidth=80
+          l2="${clienterror}\n"
+          l3="CTRL+C => terminal"
         fi
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
       else
