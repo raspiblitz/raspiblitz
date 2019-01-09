@@ -152,15 +152,21 @@ while :
     clienterror=`cat error.tmp`
     rm error.tmp
     if [ ${#clienterror} -gt 0 ]; then
-
+      boxwidth=40
       l1="Waiting for ${network}d to get ready.\n"
       l2="---> Starting Up\n"
       l3="Can take longer if device was off."
       isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
       if [ ${isVerifying} -gt 0 ]; then
         l2="---> Verifying Blocks\n"
+      else
+        # when takes longer display error
+        uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
+        if [ ${uptimeSeconds} -gt 10 ]; then
+          l2="---> Error: ${clienterror}\n" 
+           boxwidth=70
+        fi
       fi
-      boxwidth=40
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
