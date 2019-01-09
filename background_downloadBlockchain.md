@@ -14,12 +14,13 @@ If you have any link to a more detailed discussion of this topic, please add it 
 
 ## Blockchain Data
 
-The RaspiBlitz needs the following files from a bitcoind (>=0.17.0) that is fully sync and has indexing switched on (txindex=1) - all files from the directories:
+The RaspiBlitz needs the following files from a bitcoind (>=0.17.0) that is fully sync and has indexing switched on (has line txindex=1 in bitcoin.conf file) - all files from the directories:
 ```
 /blocks
 /chainstate
 /indexes
 ```
+Notice: If you had your node fully sync but not indexed, once you switch it on you need to start your client and wait for it to verify the chain and index before copying the folders above to your external HDD. This can take a couple of hours.
 
 Make sure not to add other files like wallet data or lock files to a prepared download.
 
