@@ -267,6 +267,12 @@ if [ ${configExists} -eq 1 ]; then
 
 fi
 
+#################################
+# FIX BLOCKCHAINDATA OWNER (just in case)
+# https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
+#################################
+sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
+
 ################################
 # DETECT FRESHLY RECOVERED SD
 ################################
