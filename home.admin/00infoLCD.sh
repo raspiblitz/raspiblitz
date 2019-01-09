@@ -165,8 +165,9 @@ while :
       else
         # when takes longer display error
         uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-        if [ ${uptimeSeconds} -gt 120 ]; then
-          l2="---> ${clienterror}\n" 
+        if [ ${uptimeSeconds} -gt 30 ]; then
+          clienterror=$(echo "${clienterror/error*:/}")
+          l2="---> ${clienterror}\n"
           boxwidth=70
         fi
       fi
