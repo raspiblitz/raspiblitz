@@ -63,6 +63,8 @@ If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case
 
 ![LCD](pictures/lcdassm.png)
 
+NOTE: Some cases from the shopping lists contain a topping for smaller displays - you can ignore that topping.
+
 Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
