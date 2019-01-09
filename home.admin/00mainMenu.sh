@@ -103,14 +103,17 @@ waitUntilChainNetworkIsReady()
       clienterror=`cat error.tmp`
       rm error.tmp
       if [ ${#clienterror} -gt 0 ]; then
+        boxwidth=40
         l1="Waiting for ${network}d to get ready.\n"
         l2="---> Starting Up\n"
         l3="Can take longer if device was off."
         isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
         if [ ${isVerifying} -gt 0 ]; then
           l2="---> Verifying Blocks\n"
+        else
+          l2="---> ${clienterror}\n" 
+          boxwidth=70
         fi
-        boxwidth=40
         dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
       else
         locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)

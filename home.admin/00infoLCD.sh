@@ -157,14 +157,17 @@ while :
       l2="---> Starting Up\n"
       l3="Can take longer if device was off."
       isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
+      isLoadingBlockIndex=$(echo "${clienterror}" | grep -c 'Loading block index')
       if [ ${isVerifying} -gt 0 ]; then
         l2="---> Verifying Blocks\n"
+      elif [ ${isLoadingBlockIndex} -gt 0 ]; then
+        l2="---> Loading Block Index\n"
       else
         # when takes longer display error
         uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-        if [ ${uptimeSeconds} -gt 10 ]; then
+        if [ ${uptimeSeconds} -gt 120 ]; then
           l2="---> Error: ${clienterror}\n" 
-           boxwidth=70
+          boxwidth=70
         fi
       fi
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
