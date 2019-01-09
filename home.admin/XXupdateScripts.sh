@@ -24,7 +24,7 @@ origin=$(git remote -v | grep 'origin' | tail -n1)
 
 echo ""
 echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
-echo "justincase, not the final upadte mechanism"
+echo "just in case, not the final update mechanism"
 echo "REPO ----> ${origin}"
 echo "BRANCH --> ${activeBranch}"
 echo "******************************************"
