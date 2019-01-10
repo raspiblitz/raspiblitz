@@ -14,6 +14,6 @@ Single HDD (Bulk) :
 https://detail.tmall.com/item.htm?id=38476523976&spm=a1z09.2.0.0.46982e8dibAzMc&_u=b110k44d53f4&sku_properties=5919063:6536025
 
 Set LCD Display + Clear case (acrylic) (¥110.00 CNY) :
-https://item.taobao.com/item.htm?spm=a230r.1.14.1.66245df05JM71C&id=579623655270&ns=1&abbucket=3#detail
+https://item.taobao.com/item.htm?spm=a1z0d.6639537.1997196601.60.49a77484QE4kv4&id=577238622706
 
 **Total Price: ¥867.00 CNY** approx. 111 EUR or 128 USD
