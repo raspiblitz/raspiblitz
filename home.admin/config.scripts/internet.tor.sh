@@ -88,6 +88,7 @@ User bitcoin
 PortForwarding 1
 ControlPort 9051
 SocksPort 9050
+ExitRelay 0
 
 CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
 CookieAuthentication 1
