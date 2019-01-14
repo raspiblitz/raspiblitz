@@ -15,6 +15,12 @@ fi
 
 # load raspiblitz config (if available)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then
+  network="bitcoin"
+fi
+if [ ${#chain} -eq 0 ]; then
+  chain="main"
+fi
 
 # 1. parameter [?a|b|c|d]
 abcd=$1
@@ -72,7 +78,7 @@ elif [ "${abcd}" = "c" ]; then
   clear
   echo ""
   echo "****************************************************************************"
-  echo "Change LND Wallet Password --> lncli changepassword"
+  echo "Change LND Wallet Password --> lncli --chain=${network} --network=${chain}net changepassword"
   echo "****************************************************************************"
   echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
   echo "If you had Auto-Unlock active - you need to re-activate after this."
@@ -80,7 +86,7 @@ elif [ "${abcd}" = "c" ]; then
   echo "****************************************************************************"
 
   # let LND-CLI handle the password change
-  result=$(lncli changepassword)
+  result=$(lncli --chain=${network} --network=${chain}net changepassword)
   echo "result(${result})"
 
   # deactivate AUTO-UNLOCK if activated
