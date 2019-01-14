@@ -4,6 +4,7 @@
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
+ echo "exits on 0 = needs reboot"
  exit 1
 fi
 
@@ -131,6 +132,7 @@ if [ "${abcd}" = "a" ]; then
 
   echo ""
   echo "OK - password A changed for user pi, root, admin & bitcoin"
+  exit 0
 
 ############################
 # PASSWORD B
@@ -199,6 +201,7 @@ elif [ "${abcd}" = "b" ]; then
 
   echo "OK -> RPC Password B changed"
   echo "if services are running - reboot is needed to activate new settings"
+  exit 0
 
 ############################
 # PASSWORD C
@@ -231,6 +234,7 @@ elif [ "${abcd}" = "c" ]; then
   # final user output
   echo ""
   echo "OK"
+  exit 0
 
 ############################
 # PASSWORD D
@@ -238,10 +242,10 @@ elif [ "${abcd}" = "d" ]; then
 
   echo "#### NOTICE ####"
   echo "Sorry - the password D cannot be changed. Its the password you set on creating your wallet to protect your seed (the list of words)."
+  exit 1
 
 # everything else
 else
   echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
+  exit 1
 fi
-
-echo ""

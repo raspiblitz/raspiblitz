@@ -378,8 +378,8 @@ case $CHOICE in
             sudo shutdown -r now
             ;;
         PASSWORD)
-            sudo /home/admin/config.scripts/blitz.setpassword.sh
-            echo "Press ENTER to Reboot."
+            result=$(sudo /home/admin/config.scripts/blitz.setpassword.sh)
+            echo "Press ENTER to Reboot. (${result})"
             read key
             sudo shutdown -r now
             ;;
