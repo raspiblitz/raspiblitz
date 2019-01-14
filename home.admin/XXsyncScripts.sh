@@ -53,8 +53,10 @@ if [ ${clean} -eq 1 ]; then
   rm -r assets
   rm -r config.scripts
 else
+  echo "******************************************"
   echo "NOT cleaning/deleting old files"
   echo "use parameter '-clean' if you want that next time"
+  echo "******************************************"
 fi
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
