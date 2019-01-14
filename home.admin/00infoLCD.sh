@@ -177,10 +177,10 @@ while :
       l1="!!! LND WALLET IS LOCKED !!!\n"
       l2="Login: ssh admin@${localip}\n"
       l3="Use your Password A\n"
-      if [ "${rtlWebinterface}" = "on" ]; then
-        l2="Open: http://${localip}:3000\n"
-        l3="Use Password C to unlock\n"
-      fi
+      #if [ "${rtlWebinterface}" = "on" ]; then
+      #  l2="Open: http://${localip}:3000\n"
+      #  l3="Use Password C to unlock\n"
+      #fi
       if [ "${autoUnlock}" = "on" ]; then
         l2="ssh admin@${localip}\n"
         l3="Waiting for AUTO-UNLOCK"
