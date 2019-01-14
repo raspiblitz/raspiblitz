@@ -113,7 +113,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # delete password C securly
   echo "shredding password on for RaspiBlitz Auto-Unlock"
-  sudo shred -u /root/lnd.autounlock.pwd
+  sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 
   echo "Auto-Unlock is now OFF"
 fi
