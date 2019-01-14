@@ -35,13 +35,9 @@ echo "chain=${chain}" >> $configFile
 # copy logfile to analyse setup
 cp $logFile /home/admin/raspiblitz.setup.log
 
-# set the hostname inputed on initDialog
-if [ ${#hostname} -gt 0 ]; then
-  echo "Setting new network hostname '$hostname'"
-  sudo raspi-config nonint do_hostname ${hostname}
-else
-  echo "WARN: hostname not set"
-fi
+# set the name of the node
+echo "Setting the Name/Alias/Hostname .."
+sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
 # mark setup is done (100%)
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info

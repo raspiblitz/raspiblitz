@@ -46,4 +46,4 @@ But you can try to backup at your own risk. All your Lightning Node data is with
 
 ## How do I change the Name/Alias of my lightning node
 
-Exit to terminal (X in manin menu). Then enter `sudo nano /mnt/hdd/lnd/lnd.conf` and change the value of the `alias` parameter. Save the your changes with: `CTRL+O`  Then exit the editor with: `CTRL+X` And restart your RaspiBlitz with: `sudo shutdown -r now`
+Use the "Change Name/Alias of Node" option in main menu. The RaspiBlitz will make a reboot after this.
