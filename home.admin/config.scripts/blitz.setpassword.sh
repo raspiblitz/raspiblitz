@@ -75,7 +75,7 @@ elif [ "${abcd}" = "b" ]; then
 # PASSWORD C
 elif [ "${abcd}" = "c" ]; then
 
-  if [ ${#newPassword} -gt 0]; then
+  if [ ${#newPassword} -gt 0 ]; then
     echo "New password C cannot be set thru paramter .. will start interactive password setting."
     echo "PRESS ENTER to continue"
     read key
@@ -92,7 +92,7 @@ elif [ "${abcd}" = "c" ]; then
   echo "****************************************************************************"
 
   # let LND-CLI handle the password change
-  lncli --chain=${network} --network=${chain}net changepassword
+  sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
 
   # deactivate AUTO-UNLOCK if activated
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
