@@ -34,12 +34,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 0 ]; then
 
-    # disable RPC listen
-    # to prevent tls cer auth error
-    #echo "*** Modify lnd.conf ***"
-    #sudo sed -i "s/^rpclisten=0.0.0.0:10009/#rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
-    #echo ""
-
     # install latest nodejs
     echo "*** Install NodeJS ***"
     cd /home/admin
