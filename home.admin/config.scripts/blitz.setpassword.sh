@@ -16,15 +16,15 @@ newPassword=$2
 
 # run interactive if no further parameters
 if [ ${#abcd} -eq 0 ]; then
-    OPTIONS+=(A "Master User Password / SSH" \
-              B "RPC Password (blockchain/lnd)" \
-              C "LND Wallet Password" \
-              D "LND Seed Password" )
+    OPTIONS=()
+    OPTIONS+=(A "Master User Password / SSH")
+    OPTIONS+=(B "RPC Password (blockchain/lnd)")
+    OPTIONS+=(C "LND Wallet Password")
+    OPTIONS+=(D "LND Seed Password")
     CHOICE=$(dialog --clear \
-                --backtitle "$BACKTITLE" \
-                --title "$TITLE" \
-                --menu "$MENU" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                --backtitle "Set Password" \
+                --title "Choose Password" \
+                8 50 4 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
     clear
