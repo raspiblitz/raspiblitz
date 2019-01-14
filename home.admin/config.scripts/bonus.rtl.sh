@@ -36,22 +36,36 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # disable RPC listen
     # to prevent tls cer auth error
-    echo "*** Modify lnd.conf ***"
-    sudo sed -i "s/^rpclisten=0.0.0.0:10009/#rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
-    echo ""
+    #echo "*** Modify lnd.conf ***"
+    #sudo sed -i "s/^rpclisten=0.0.0.0:10009/#rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
+    #echo ""
 
     # install latest nodejs
     echo "*** Install NodeJS ***"
+    cd /home/admin
     curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
     sudo apt-get install -y nodejs
     echo ""
 
-    # close source code
+    # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     git clone https://github.com/ShahanaFarooqui/RTL.git
     cd RTL
+    git reset --hard v0.1.7-alpha
+
+    # install
+    echo "*** Run: npm install ***"
     npm install
     cd ..
+    echo ""
+
+    # prepare RTL.conf file
+    echo "*** RTL.conf ***"
+    cp ./RTL/sample-RTL.conf ./RTL/RTL.conf
+    sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/${chain}net/g" ./RTL/RTL.conf
+    sudo sed -i "s/^lndConfigPath=.*/lndConfigPath=\/mnt\/hdd\/lnd\/lnd.conf/g" ./RTL/RTL.conf
+    sudo sed -i "s/^nodeAuthType=.*/nodeAuthType=DEFAULT/g" ./RTL/RTL.conf
+    sudo sed -i "s/^rtlPass=.*/rtlPass=/g" ./RTL/RTL.conf
     echo ""
 
     # open firewall

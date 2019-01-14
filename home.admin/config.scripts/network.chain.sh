@@ -80,6 +80,12 @@ else
   sudo sed -i "s/^chain=.*/chain=main/g" /mnt/hdd/raspiblitz.conf
 fi
 
+# edit RTL.conf (if active)
+if [ "${rtlWebinterface}" = "on" ]; then
+  echo "editing /home/admin/RTL/RTL.conf"
+  sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/$1/g" /home/admin/RTL/RTL.conf
+fi
+
 # now a reboot is needed to load all services fresh
 # starting up process will display chain sync
 # ask user todo reboot
