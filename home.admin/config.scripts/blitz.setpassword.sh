@@ -13,6 +13,9 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# tempfile 
+_temp="./dialog.$$"
+
 # load raspiblitz config (if available)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
@@ -65,7 +68,50 @@ echo ""
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then
 
-  echo "TODO: Password A"
+  # if no password given by parameter - ask by dialog
+  if [ ${#newPassword} -eq 0 ]; then
+
+    # ask user for new password A (first time)
+    dialog --backtitle "RaspiBlitz - Setup"\
+       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+
+    # get user input
+    password1=$( cat $_temp )
+    shred $_temp
+
+    # ask user for new password A (second time)
+    dialog --backtitle "RaspiBlitz - Setup"\
+       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+
+    # get user input
+    password2=$( cat $_temp )
+    shred $_temp
+
+    echo "password1(${password1})"
+    echo "password2(${password2})"
+
+    # check if passwords match
+    if [ "${password1}" != "${password2}" ]; then
+      echo "TODO: Paswords dont match"
+    fi
+
+    # check that password does not contain bad characters
+    passwordValid=1
+    clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
+      echo "FAIL - Password contained not allowed chars"
+      echo "Press ENTER to continue .."
+      passwordValid=0
+    fi
+
+    exit 1
+
+    # change user passwords and then change hostname
+    # echo "pi:$result" | sudo chpasswd
+    # echo "root:$result" | sudo chpasswd
+    # echo "bitcoin:$result" | sudo chpasswd
+    # echo "admin:$result" | sudo chpasswd
+    # sleep 1
 
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
