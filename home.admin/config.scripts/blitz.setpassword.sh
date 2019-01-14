@@ -73,7 +73,7 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (first time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 --insecure 2>$_temp
 
     # get user input
     password1=$( cat $_temp )
@@ -81,7 +81,7 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+       --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 --insecure 2>$_temp
 
     # get user input
     password2=$( cat $_temp )
