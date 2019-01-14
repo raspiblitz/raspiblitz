@@ -378,10 +378,15 @@ case $CHOICE in
             sudo shutdown -r now
             ;;
         PASSWORD)
-            result=$(sudo /home/admin/config.scripts/blitz.setpassword.sh)
-            echo "Press ENTER to Reboot. (${result})"
-            read key
-            sudo shutdown -r now
+            sudo /home/admin/config.scripts/blitz.setpassword.sh
+            noreboot=$?
+            if [ "${noreboot}" = "0" ]; then
+              echo "Press ENTER to Reboot .."
+              read key
+              sudo shutdown -r now
+            else
+              ./00mainMenu.sh
+            fi
             ;;
         OFF)
             echo ""
