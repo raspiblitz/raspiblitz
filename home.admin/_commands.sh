@@ -5,5 +5,6 @@
 # command: raspiblitz
 # calls the the raspiblitz mainmenu
 function raspiblitz() {
-  /home/admin/00mainMenu.sh
+  cd /home/admin
+  ./00mainMenu.sh
 }
