@@ -7,6 +7,15 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# check if sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (with sudo)"
+  exit
+fi
+
+# load raspiblitz config (if available)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
 # 1. parameter [?a|b|c|d]
 abcd=$1
 
@@ -60,7 +69,22 @@ elif [ "${abcd}" = "b" ]; then
 # PASSWORD C
 elif [ "${abcd}" = "c" ]; then
 
-  echo "TODO: Password C"
+  clear
+  echo ""
+  echo "****************************************************************************"
+  echo "Change LND Wallet Password --> lncli changepassword"
+  echo "****************************************************************************"
+  echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
+  echo "If you had Auto-Unlock active - you need to re-activate after this."
+  echo "To CANCEL use CTRL+C"
+  echo "****************************************************************************"
+
+  # let LND-CLI handle the password change
+  result=$(lncli changepassword)
+  echo "result(${result})"
+
+  # deactivate AUTO-UNLOCK if activated
+  sudo /home/admin/config.scripts/lnd.autounlock.sh off
 
 # PASSWORD D
 elif [ "${abcd}" = "d" ]; then
