@@ -95,7 +95,13 @@ elif [ "${abcd}" = "c" ]; then
   sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
 
   # deactivate AUTO-UNLOCK if activated
+  echo ""
+  echo "# Make sure Auto-Unlocks off"
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
+
+  # final user output
+  echo ""
+  echo "OK"
 
 # PASSWORD D
 elif [ "${abcd}" = "d" ]; then

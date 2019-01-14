@@ -112,7 +112,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
   # delete password C securly
-  echo "shredding password on RaspiBlitz"
+  echo "shredding password on for RaspiBlitz Auto-Unlock"
   sudo shred -u /root/lnd.autounlock.pwd
 
   echo "Auto-Unlock is now OFF"
