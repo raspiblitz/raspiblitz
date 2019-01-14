@@ -51,7 +51,9 @@ if [ ${clean} -eq 1 ]; then
   echo "Cleaning scripts & assets/config.scripts"
   rm *.sh
   rm -r assets
+  mkdir assets
   rm -r config.scripts
+  mkdir config.scripts
 else
   echo "******************************************"
   echo "NOT cleaning/deleting old files"
@@ -61,8 +63,8 @@ fi
 echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
-sudo -u admin cp -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/
-sudo -u admin cp -f /home/admin/raspiblitz/home.admin/config.scripts/*.* /home/admin/
+sudo -u admin cp -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
+sudo -u admin cp -f /home/admin/raspiblitz/home.admin/config.scripts/*.* /home/admin/config.scripts
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
