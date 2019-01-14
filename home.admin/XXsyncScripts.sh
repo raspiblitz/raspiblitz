@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# This is for developing on your RaspiBlitz.
+# THIS IS NOT THE REGULAR UPDATE MECHANISM
+# and can lead to dirty state of your scripts.
+# IF YOU WANT TO UPDATE YOUR RASPIBLITZ:
+# https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-to-update-my-raspiblitz-after-version-098
+
 cd /home/admin/raspiblitz
 
 # change branch if set as parameter
@@ -17,14 +23,16 @@ if [ ${#wantedBranch} -gt 0 ]; then
   fi
 else
   echo ""
-  echo "USAGE-INFO: ./XXupdateScripts.sh '[BRANCHNAME]'"
+  echo "USAGE-INFO: ./XXsyncScripts.sh '[BRANCHNAME]'"
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
 
 echo ""
-echo "*** UPDATING SHELL SCRIPTS FROM GITHUB ***"
-echo "just in case, not the final update mechanism"
+echo "*** SYCING SHELL SCRIPTS WITH GITHUB ***"
+echo "This is for developing on your RaspiBlitz."
+echo "THIS IS NOT THE REGULAR UPDATE MECHANISM"
+echo "and can lead to dirty state of your scripts."
 echo "REPO ----> ${origin}"
 echo "BRANCH --> ${activeBranch}"
 echo "******************************************"
@@ -38,6 +46,6 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "******************************************"
-echo "OK - shell scripts and assests are up to date"
+echo "OK - shell scripts and assests are synced"
 echo "Reboot recommended"
 echo ""
