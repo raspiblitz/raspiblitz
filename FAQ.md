@@ -43,3 +43,7 @@ Recovering the coins that you have in a active channel is a bit more complicated
 To really have a good backup to rely on such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
 
 But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
+
+## How do I change the Name/Alias of my lightning node
+
+Exit to terminal (X in manin menu). Then enter `sudo nano /mnt/hdd/lnd/lnd.conf` and change the value of the `alias` parameter. Save the your changes with: `CTRL+O`  Then exit the editor with: `CTRL+X` And restart your RaspiBlitz with: `sudo shutdown -r now`
