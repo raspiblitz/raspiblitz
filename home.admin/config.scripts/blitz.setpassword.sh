@@ -21,10 +21,10 @@ if [ ${#abcd} -eq 0 ]; then
     OPTIONS+=(C "LND Wallet Password")
     OPTIONS+=(D "LND Seed Password")
     CHOICE=$(dialog --clear \
-                --backtitle "Set Password" \
-                --title "Which password to change?" \
-                --menu "Choose Password" \
-                8 50 4 \
+                --backtitle "RaspiBlitz" \
+                --title "Set Password" \
+                --menu "Which password to change?" \
+                11 50 7 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
     clear
