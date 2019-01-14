@@ -258,6 +258,12 @@ if [ ${configExists} -eq 1 ]; then
   # update public IP on boot
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
+  if [ ${publicIPValueExists} -gt 1 ]; then
+    # remove one 
+    echo "more then one publiIp entry - removing one" >> $logFile
+    sed -i "s/^publicIP=.*//g" ${configFile}
+    publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
+  fi
   if [ ${publicIPValueExists} -eq 0 ]; then
     echo "create value (${freshPublicIP})" >> $logFile
     echo "publicIP=${freshPublicIP}" >> $configFile
