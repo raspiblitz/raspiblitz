@@ -106,12 +106,14 @@ if [ "${abcd}" = "a" ]; then
 
     exit 1
 
-    # change user passwords and then change hostname
-    # echo "pi:$result" | sudo chpasswd
-    # echo "root:$result" | sudo chpasswd
-    # echo "bitcoin:$result" | sudo chpasswd
-    # echo "admin:$result" | sudo chpasswd
-    # sleep 1
+  fi  
+
+  # change user passwords and then change hostname
+  # echo "pi:$result" | sudo chpasswd
+  # echo "root:$result" | sudo chpasswd
+  # echo "bitcoin:$result" | sudo chpasswd
+  # echo "admin:$result" | sudo chpasswd
+  # sleep 1
 
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
