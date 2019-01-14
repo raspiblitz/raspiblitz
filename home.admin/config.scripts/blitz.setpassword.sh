@@ -103,8 +103,8 @@ if [ "${abcd}" = "a" ]; then
     fi
 
     # check that password does not contain bad characters
-    clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
+    clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+    if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh a
       exit 1
