@@ -9,7 +9,16 @@
 cd /home/admin/raspiblitz
 
 # change branch if set as parameter
+clean=0
 wantedBranch="$1"
+if [ "${wantedBranch}" = "-clean" ]; then
+  clean=1
+  wantedBranch="$2"
+fi
+if [ "$2" = "-clean" ]; then
+  clean=1
+fi
+
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
 if [ ${#wantedBranch} -gt 0 ]; then
   echo "your wanted branch is: ${wantedBranch}"
@@ -38,12 +47,19 @@ echo "BRANCH --> ${activeBranch}"
 echo "******************************************"
 git pull
 cd ..
-rm *.sh
-rm -r assets
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+if [ ${clean} -eq 1 ]; then
+  echo "Cleaning scripts & assets/config.scripts"
+  rm *.sh
+  rm -r assets
+  rm -r config.scripts
+else
+  echo "NOT cleaning/deleting old files"
+  echo "use parameter '-clean' if you want that next time"
+fi
+sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin cp -rf /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp -rf /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
