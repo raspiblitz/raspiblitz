@@ -223,6 +223,7 @@ else
         RECEIVE "Create Invoice/PaymentRequest" \
         SERVICES "Activate/Deactivate Services" \
         MOBILE "Connect Mobile Wallet" \
+        NAME "Change Name/Alias of Node" \
         CASHOUT "Remove Funds from on-chain Wallet")
 
       # dont offer lnbalance/lnchannels on testnet
@@ -368,6 +369,12 @@ case $CHOICE in
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
+            ;;
+        NAME)
+            sudo /home/admin/config.scripts/lnd.setname.sh
+            echo "Press ENTER to Reboot."
+            read key
+            sudo shutdown -r now
             ;;
         OFF)
             echo ""
