@@ -57,11 +57,13 @@ else
   echo "NOT cleaning/deleting old files"
   echo "use parameter '-clean' if you want that next time"
   echo "******************************************"
+
 fi
+echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
-sudo -u admin cp -rf /home/admin/raspiblitz/home.admin/assets /home/admin/
-sudo -u admin cp -rf /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin cp -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/
+sudo -u admin cp -f /home/admin/raspiblitz/home.admin/config.scripts/*.* /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
