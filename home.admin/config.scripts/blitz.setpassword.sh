@@ -105,7 +105,7 @@ if [ "${abcd}" = "a" ]; then
     # check that password does not contain bad characters
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh a
       exit 1
     fi
@@ -136,7 +136,68 @@ if [ "${abcd}" = "a" ]; then
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
 
-  echo "TODO: Password B"
+  # if no password given by parameter - ask by dialog
+  if [ ${#newPassword} -eq 0 ]; then
+    # ask user for new password A (first time)
+    dialog --backtitle "RaspiBlitz - Setup"\
+       --insecure --passwordbox "Please enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+
+    # get user input
+    password1=$( cat $_temp )
+    shred $_temp
+
+    # ask user for new password A (second time)
+    dialog --backtitle "RaspiBlitz - Setup"\
+       --insecure --passwordbox "Re-Enter Password B:\n" 10 52 2>$_temp
+
+    # get user input
+    password2=$( cat $_temp )
+    shred $_temp
+
+    # check if passwords match
+    if [ "${password1}" != "${password2}" ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      exit 1
+    fi
+
+    # password zero
+    if [ ${#password1} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      exit 1
+    fi
+
+    # check that password does not contain bad characters
+    clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+    if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      exit 1
+    fi
+
+    # password longer than 8
+    if [ ${#password1} -lt 8 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      exit 1
+    fi
+
+    # use entred password now as parameter
+    newPassword="${password1}"
+  fi
+
+  # change in assets (just in case this is used on setup)
+  sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
+  sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/assets/lnd.${network}.conf 2>/dev/null
+
+  # change in real configs
+  sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+  sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
+  sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+  sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
+
+  echo "if services are running - reboot is needed to activate new settings"
 
 ############################
 # PASSWORD C
