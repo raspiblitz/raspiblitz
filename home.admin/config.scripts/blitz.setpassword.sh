@@ -197,6 +197,7 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
 
+  echo "OK -> RPC Password B changed"
   echo "if services are running - reboot is needed to activate new settings"
 
 ############################
