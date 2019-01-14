@@ -65,6 +65,7 @@ fi
 echo "Changing Password ${abcd} ..."
 echo ""
 
+############################
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then
 
@@ -73,7 +74,7 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (first time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+       --insecure --passwordbox "Please enter your Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
 
     # get user input
     password1=$( cat $_temp )
@@ -81,45 +82,63 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+       --insecure --passwordbox "Re-Enter Password A:\n(This is new password to login per SSH)" 10 52 2>$_temp
 
     # get user input
     password2=$( cat $_temp )
     shred $_temp
 
-    echo "password1(${password1})"
-    echo "password2(${password2})"
-
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
-      echo "TODO: Paswords dont match"
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      exit 1
+    fi
+
+    # password zero
+    if [ ${#password1} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      exit 1
     fi
 
     # check that password does not contain bad characters
-    passwordValid=1
     clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
-      echo "FAIL - Password contained not allowed chars"
-      echo "Press ENTER to continue .."
-      passwordValid=0
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      exit 1
     fi
 
-    exit 1
+    # password longer than 8
+    if [ ${#password1} -lt 8 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      exit 1
+    fi
+
+    # use entred password now as parameter
+    newPassword="${password1}"
 
   fi  
 
   # change user passwords and then change hostname
-  # echo "pi:$result" | sudo chpasswd
-  # echo "root:$result" | sudo chpasswd
-  # echo "bitcoin:$result" | sudo chpasswd
-  # echo "admin:$result" | sudo chpasswd
-  # sleep 1
+  echo "pi:$newPassword" | sudo chpasswd
+  echo "root:$newPassword" | sudo chpasswd
+  echo "bitcoin:$newPassword" | sudo chpasswd
+  echo "admin:$newPassword" | sudo chpasswd
+  sleep 1
 
+  echo ""
+  echo "OK - password A changed for user pi, root, admin & bitcoin"
+
+############################
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
 
   echo "TODO: Password B"
 
+############################
 # PASSWORD C
 elif [ "${abcd}" = "c" ]; then
 
@@ -151,6 +170,7 @@ elif [ "${abcd}" = "c" ]; then
   echo ""
   echo "OK"
 
+############################
 # PASSWORD D
 elif [ "${abcd}" = "d" ]; then
 
