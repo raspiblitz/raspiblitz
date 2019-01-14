@@ -385,6 +385,8 @@ case $CHOICE in
               read key
               sudo shutdown -r now
             else
+              echo "Press ENTER to return to main menu .."
+              read key
               ./00mainMenu.sh
             fi
             ;;
