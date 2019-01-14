@@ -38,7 +38,7 @@ fi
 origin=$(git remote -v | grep 'origin' | tail -n1)
 
 echo ""
-echo "*** SYCING SHELL SCRIPTS WITH GITHUB ***"
+echo "*** SYNCING SHELL SCRIPTS WITH GITHUB ***"
 echo "This is for developing on your RaspiBlitz."
 echo "THIS IS NOT THE REGULAR UPDATE MECHANISM"
 echo "and can lead to dirty state of your scripts."
@@ -57,7 +57,6 @@ else
   echo "NOT cleaning/deleting old files"
   echo "use parameter '-clean' if you want that next time"
   echo "******************************************"
-
 fi
 echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
