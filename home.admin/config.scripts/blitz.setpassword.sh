@@ -16,8 +16,7 @@ newPassword=$2
 
 # run interactive if no further parameters
 if [ ${#abcd} -eq 0 ]; then
-    OPTIONS=()
-    OPTIONS+=(A "Master User Password / SSH")
+    OPTIONS=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
     OPTIONS+=(C "LND Wallet Password")
     OPTIONS+=(D "LND Seed Password")
