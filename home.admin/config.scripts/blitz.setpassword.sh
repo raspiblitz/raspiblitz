@@ -22,7 +22,8 @@ if [ ${#abcd} -eq 0 ]; then
     OPTIONS+=(D "LND Seed Password")
     CHOICE=$(dialog --clear \
                 --backtitle "Set Password" \
-                --title "Choose Password" \
+                --title "Which password to change?" \
+                --menu "Choose Password" \
                 8 50 4 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
