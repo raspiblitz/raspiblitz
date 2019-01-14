@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
- echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword]"
+ echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
  exit 1
 fi
 
@@ -44,4 +44,33 @@ if [ ${#abcd} -eq 0 ]; then
     esac
 fi
 
-echo "Changing  '${abcd}' ..."
+echo "Changing Password ${abcd} ..."
+echo ""
+
+# PASSWORD A
+if [ "${abcd}" = "a" ]; then
+
+  echo "TODO: Password A"
+
+# PASSWORD B
+elif [ "${abcd}" = "b" ]; then
+
+  echo "TODO: Password B"
+
+# PASSWORD C
+elif [ "${abcd}" = "c" ]; then
+
+  echo "TODO: Password C"
+
+# PASSWORD D
+elif [ "${abcd}" = "d" ]; then
+
+  echo "#### NOTICE ####"
+  echo "Sorry - the password D cannot be changed. Its the password you set on creating your wallet to protect your seed (the list of words)."
+
+# everything else
+else
+  echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
+fi
+
+echo ""
