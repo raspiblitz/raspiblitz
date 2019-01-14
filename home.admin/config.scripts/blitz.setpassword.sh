@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # command info
@@ -15,8 +14,9 @@ abcd=$1
 newPassword=$2
 
 # run interactive if no further parameters
+OPTIONS=()
 if [ ${#abcd} -eq 0 ]; then
-    OPTIONS=(A "Master User Password / SSH")
+    OPTIONS+=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
     OPTIONS+=(C "LND Wallet Password")
     OPTIONS+=(D "LND Seed Password")
