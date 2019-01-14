@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a alias of LND (and hostname of raspi)"
  echo "lnd.setname.sh [?newName]"
  exit 1
