@@ -7,11 +7,38 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ $# -eq 0 ]; then
  exit 1
 fi
 
-# load data from config
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-
 # 1. parameter -> the type of export
 exportType=$1
+
+# interactive choose type of export if not set
+if [ "$1" = "" ] || [ $# -eq 0 ]; then
+    OPTIONS=()
+    OPTIONS+=(HEX "Hex-String (Copy+Paste)")
+    OPTIONS+=(SCP "SSH Download (Commands)")
+    OPTIONS+=(HTTP "Browserdownload (risky)")
+    CHOICE=$(dialog --clear \
+                --backtitle "RaspiBlitz" \
+                --title "Export Macaroons & TLS.cert" \
+                --menu "How do you want to export?" \
+                10 50 6 \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+    clear
+    case $CHOICE in
+        HEX)
+          exportType='hexstring';
+          ;;
+        SCP)
+          exportType='scp';
+          ;;
+        HTTP)
+          exportType='http';
+          ;;
+    esac
+fi
+
+# load data from config
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ########################
 # HEXSTRING
