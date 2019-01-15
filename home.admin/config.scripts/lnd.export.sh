@@ -91,10 +91,12 @@ elif [ ${exportType} = "http" ]; then
   echo "###### DOWNLOAD BY HTTP ######"
   echo ""
   echo "Open in your browser --> http://${local_ip}:${randomPortNumber}"
+  echo ""
   echo "You need to be on the same local network - not reachable from outside."
   echo "In browser click on files or use 'save as' from context menu to download."
   echo ""
   echo "Temp HTTP Server is running - use CTRL+C to stop when you are done"
+  echo ""
   cd 
   randomFolderName=$(shuf -i 100000000-900000000 -n 1)
   mkdir ${randomFolderName}

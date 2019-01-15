@@ -3,8 +3,6 @@
 # get raspiblitz config
 source /mnt/hdd/raspiblitz.conf
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
-# deactivated - see https://github.com/rootzoll/raspiblitz/issues/248
-#if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
@@ -26,8 +24,6 @@ fi
 CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
-# deactivated - see https://github.com/rootzoll/raspiblitz/issues/248
-# 3 'Router AutoNAT' ${autoNatDiscovery} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
@@ -126,18 +122,6 @@ if [ "${chain}" != "${choice}" ]; then
 else 
   echo "Testnet Setting unchanged."
 fi
-
-# deactivated - see https://github.com/rootzoll/raspiblitz/issues/248
-# AUTONAT process choice
-# choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
-# if [ ${check} -eq 1 ]; then choice="on"; fi
-# if [ "${autoNatDiscovery}" != "${choice}" ]; then
-#  echo "AutoNAT Setting changed .."
-#  sudo /home/admin/config.scripts/lnd.autonat.sh ${choice}
-#  needsReboot=1
-# else 
-#  echo "AutoNAT Setting unchanged."
-# fi
 
 # Dynamic Domain
 choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
