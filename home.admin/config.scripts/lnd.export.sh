@@ -66,7 +66,7 @@ elif [ ${exportType} = "scp" ]; then
   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
   echo "###### DOWNLOAD BY SCP ######"
-  echo "Copy, past and execute these commands in your client terminal to download the files."
+  echo "Copy, paste and execute these commands in your client terminal to download the files."
   echo "The password needed during download is your Password A."
   echo ""
   echo "admin.macaroon:"

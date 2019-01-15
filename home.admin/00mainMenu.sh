@@ -238,6 +238,7 @@ else
         RECEIVE "Create Invoice/PaymentRequest" \
         SERVICES "Activate/Deactivate Services" \
         MOBILE "Connect Mobile Wallet" \
+        EXPORT "Macaroons and TLS.cert" \
         NAME "Change Name/Alias of Node" \
         PASSWORD "Change Passwords" \
         CASHOUT "Remove Funds from on-chain Wallet")
@@ -382,6 +383,12 @@ case $CHOICE in
             ;;
         RTL)
             sudo ./98installRTL.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        EXPORT)
+            sudo /home/admin/config.scripts/lnd.export.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
