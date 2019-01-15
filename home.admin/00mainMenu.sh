@@ -10,6 +10,17 @@ infoFile="/home/admin/raspiblitz.info"
 # check if HDD is connected
 hddExists=$(lsblk | grep -c sda1)
 if [ ${hddExists} -eq 0 ]; then
+
+  # check if there is maybe a HDD but woth no partitions
+  noPartition=$(lsblk | grep -c sda)
+  if [ ${hddExists} -eq 0 ]; then
+    echo "***********************************************************"
+    echo "WARNING: HDD HAS NO PARTITIONS -> see FAQ:"
+    echo "https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#what-to-do-if-my-hdd-has-no-partitions"
+    echo "***********************************************************"
+    exit
+  fi
+
   echo "***********************************************************"
   echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
   echo "***********************************************************"
