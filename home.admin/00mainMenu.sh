@@ -16,16 +16,19 @@ if [ ${hddExists} -eq 0 ]; then
   if [ ${noPartition} -eq 1 ]; then
     echo "***********************************************************"
     echo "WARNING: HDD HAS NO PARTITIONS"
+    echo "***********************************************************"
     echo "Press ENTER to create a Partition - or CTRL+C to abort"
     read key
+    echo "Creating Partition ..."
     sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
+    echo "DONE."
     sleep 3
+  else 
+    echo "***********************************************************"
+    echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
+    echo "***********************************************************"
+    exit
   fi
-
-  echo "***********************************************************"
-  echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
-  echo "***********************************************************"
-  exit
 fi
 
 # check data from _bootstrap.sh that was running on device setup
