@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ $# -eq 0 ]; then
+if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
  echo "lnd.export.sh [hexstring|scp|http]"
  exit 1
