@@ -75,7 +75,7 @@ elif [ ${exportType} = "http" ]; then
   cd ${randomNumber}
   python -m SimpleHTTPServer 51413
   cd ..
-  rm -r ${randomNumber}
+  sudo rm -r ${randomNumber}
   echo "OK - temp HTTP server is stopped."
 
 else
