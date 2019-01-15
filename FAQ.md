@@ -63,3 +63,7 @@ After that you should be able to login with SSH again.
 The idea of the "wallet lock" in general is that your privatekey/seed/wallet is stored in a encrypted way on your HDD. On every you restart you have to input the password once manually (unlock your wallet), so that the LND can again read and write to the encrypted wallet. This gives you security if your RaspiBlitz gets stolen or taken away - it looses power and then your wallet is safe - the attacker cannot access your wallet. 
 
 When you activate the "Auto-Unlock" feature of the RaspiBlitz, the password of the wallet gets stored on the RaspiBlitz. So for an attacker stealing the RaspiBlitz physically its now possible to find the password and unlock the wallet.
+
+## What to do if my HDD has no partitions?
+
+TODO
