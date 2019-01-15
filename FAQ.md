@@ -57,3 +57,9 @@ Its OK when happening during an update - when you changed the sd card image. If 
 To fix this and to be able to login with SSH again, you have to remove the old public key for that IP from your local client computer. Just run the following command (with the replaced IP of your RaspiBlitz): `ssh-keygen -R IP-OF-YOUR-RASPIBLITZ` or remove the line for this IP manually from the known_hosts file (path see in warning message).
 
 After that you should be able to login with SSH again.
+
+## When using Auto-Unlock, which security do I loose?
+
+The idea of the "wallet lock" in general is that your privatekey/seed/wallet is stored in a encrypted way on your HDD. On every you restart you have to input the password once manually (unlock your wallet), so that the LND can again read and write to the encrypted wallet. This gives you security if your RaspiBlitz gets stolen or taken away - it looses power and then your wallet is safe - the attacker cannot access your wallet. 
+
+When you activate the "Auto-Unlock" feature of the RaspiBlitz, the password of the wallet gets stored on the RaspiBlitz. So for an attacker stealing the RaspiBlitz physically its now possible to find the password and unlock the wallet.
