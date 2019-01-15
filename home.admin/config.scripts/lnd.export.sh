@@ -58,24 +58,27 @@ elif [ ${exportType} = "scp" ]; then
 elif [ ${exportType} = "http" ]; then
 
   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  randomPortNumber=$(shuf -i 20000-39999 -n 1)
   clear
   echo "###### DOWNLOAD BY HTTP ######"
   echo ""
-  echo "Open in your browser --> http://${local_ip}:51413"
-  echo "You need to be on the same local network."
+  echo "Open in your browser --> http://${local_ip}:${randomPortNumber}"
+  echo "You need to be on the same local network - not reachable from outside."
   echo "In browser click on files or use 'save as' from context menu to download."
   echo ""
   echo "Temp HTTP Server is running - use CTRL+C to stop when you are done"
   cd 
-  randomNumber=$(shuf -i 100000000-900000000 -n 1)
-  mkdir ${randomNumber}
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./${randomNumber}/admin.macaroon
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./${randomNumber}/readonly.macaroon
-  sudo cp /home/bitcoin/.lnd/tls.cert ./${randomNumber}/tls.cert
-  cd ${randomNumber}
-  python -m SimpleHTTPServer 51413
+  randomFolderName=$(shuf -i 100000000-900000000 -n 1)
+  mkdir ${randomFolderName}
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./${randomFolderName}/admin.macaroon
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./${randomFolderName}/readonly.macaroon
+  sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
+  cd ${randomFolderName}
+  sudo ufw allow from 192.168.0.0/24 to any port ${randomPortNumber} comment 'temp http server'
+  python -m SimpleHTTPServer ${randomPortNumber}
+  sudo ufw delete allow from 192.168.0.0/24 to any port ${randomPortNumber} comment 'temp http server'
   cd ..
-  sudo rm -r ${randomNumber}
+  sudo rm -r ${randomFolderName}
   echo "OK - temp HTTP server is stopped."
 
 else
