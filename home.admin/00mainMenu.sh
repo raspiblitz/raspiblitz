@@ -13,11 +13,12 @@ if [ ${hddExists} -eq 0 ]; then
 
   # check if there is maybe a HDD but woth no partitions
   noPartition=$(lsblk | grep -c sda)
-  if [ ${hddExists} -eq 0 ]; then
+  if [ ${noPartition} -eq 1 ]; then
     echo "***********************************************************"
-    echo "WARNING: HDD HAS NO PARTITIONS -> see FAQ:"
-    echo "https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#what-to-do-if-my-hdd-has-no-partitions"
-    echo "***********************************************************"
+    echo "WARNING: HDD HAS NO PARTITIONS"
+    echo "Press ENTER to create a Partition - or CTRL+C to abort"
+    read key
+    sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
     exit
   fi
 
