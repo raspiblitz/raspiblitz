@@ -61,7 +61,7 @@ elif [ ${exportType} = "http" ]; then
   clear
   echo "###### DOWNLOAD BY HTTP ######"
   echo ""
-  echo "Open in your browser --> http://${local_ip}:51413/"
+  echo "Open in your browser --> http://${local_ip}:51413"
   echo "You need to be on the same local network."
   echo "In browser click on files or use 'save as' from context menu to download."
   echo ""
