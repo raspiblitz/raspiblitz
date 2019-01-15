@@ -43,13 +43,13 @@ elif [ ${exportType} = "scp" ]; then
   echo "The password needed during download is your Password A."
   echo ""
   echo "admin.macaroon:"
-  echo "scp bitcoin@{$local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
   echo ""
   echo "readonly.macaroon:"
-  echo "scp bitcoin@{$local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
   echo ""
   echo "tls.cert:"
-  echo "scp bitcoin@{$local_ip}:/home/bitcoin/.lnd/tls.cert ./"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
   echo ""
 
 ###########################
