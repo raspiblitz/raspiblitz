@@ -46,6 +46,17 @@ sudo umount -l /mnt/hdd >> ${logFile} 2>&1
 echo "Auto-Mounting HDD - calling script" >> ${logFile}
 /home/admin/40addHDD.sh >> ${logFile} 2>&1
 
+# link old SSH PubKeys
+# so that client ssh_known_hosts is not complaining after update
+if [ -d "/mnt/hdd/ssh" ]; then
+  echo "Old SSH PubKey exists on HDD > just linking them" >> ${logFile}
+else
+  echo "No SSH PubKey exists on HDD > copy from SD card and linking them" >> ${logFile}
+  sudo cp -r /etc/ssh /mnt/hdd/ssh >> ${logFile} 2>&1
+fi
+sudo rm -rf /etc/ssh >> ${logFile} 2>&1
+sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+
 # link and copy HDD content into new OS
 echo "Link HDD content for user bitcoin" >> ${logFile}
 sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1

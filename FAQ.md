@@ -47,3 +47,13 @@ But you can try to backup at your own risk. All your Lightning Node data is with
 ## How do I change the Name/Alias of my lightning node
 
 Use the "Change Name/Alias of Node" option in main menu. The RaspiBlitz will make a reboot after this.
+
+## What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
+
+This means, that he public ssh key of the RaspiBlitz has changed to the one you logged in the last time under that IP.
+
+Its OK when happening during an update - when you changed the sd card image. If its really happening out of the blue - check your local network setup for a second. Maybe the local IP of your RaspiBlitz changed? Is there a second RaspiBlitz connected? Its a security warning, so at least take some time to check if anything is strange. But also dont get to panic - when its in your local network, normally its some network thing - not an intruder.
+
+To fix this and to be able to login with SSH again, you have to remove the old public key for that IP from your local client computer. Just run the following command (with the replaced IP of your RaspiBlitz): `ssh-keygen -R IP-OF-YOUR-RASPIBLITZ` or remove the line for this IP manually from the known_hosts file (path see in warning message).
+
+After that you should be able to login with SSH again.

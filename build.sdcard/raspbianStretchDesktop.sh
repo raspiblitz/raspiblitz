@@ -509,6 +509,10 @@ echo ""
 echo "Maybe take the chance and look thru the output above if you can spot any errror."
 echo ""
 echo "After final reboot - your SD Card Image is ready."
+echo ""
+echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo ""
 echo "Press ENTER to install LCD and reboot ..."
 read key
 

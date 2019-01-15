@@ -44,6 +44,18 @@ echo "message=" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################
+# GENERATE UNIQUE SSH PUB KEYS
+# on first boot up
+################################
+
+numberOfPubKeys=$(sudo ls /etc/ssh/ | grep -c 'ssh_host_')
+if [ ${numberOfPubKeys} -eq 0 ]; then
+  echo "*** Generating new SSH PubKeys" >> $logFile
+  sudo dpkg-reconfigure openssh-server
+  echo "OK" >> $logFile
+fi
+
+################################
 # AFTER BOOT SCRIPT
 # when a process needs to 
 # execute stuff after a reboot

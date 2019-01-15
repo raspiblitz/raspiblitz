@@ -45,6 +45,14 @@ if [ ${existsHDD} -gt 0 ]; then
           echo "OK - HDD is mounted"
 	        echo ""
 
+          # move SSH pub keys to HDD so that they survive an update
+          echo "moving SSH pub keys to HDD"
+          sudo cp -r /etc/ssh /mnt/hdd/ssh
+          sudo rm -rf /etc/ssh
+          sudo ln -s /mnt/hdd/ssh /etc/ssh
+          echo "OK"
+          echo ""
+
           # set SetupState
           sudo sed -i "s/^setupStep=.*/setupStep=40/g" /home/admin/raspiblitz.info
 
