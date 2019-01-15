@@ -86,6 +86,7 @@ elif [ ${exportType} = "http" ]; then
 
   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
+  sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear
   echo "###### DOWNLOAD BY HTTP ######"
   echo ""
@@ -102,8 +103,7 @@ elif [ ${exportType} = "http" ]; then
   sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
   cd ${randomFolderName}
   sudo chmod 444 *.*
-  sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
-  python -m SimpleHTTPServer ${randomPortNumber}
+  python -m SimpleHTTPServer ${randomPortNumber} 2>/dev/null
   sudo ufw delete allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   cd ..
   sudo rm -r ${randomFolderName}
