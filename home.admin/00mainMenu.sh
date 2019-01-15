@@ -19,7 +19,7 @@ if [ ${hddExists} -eq 0 ]; then
     echo "Press ENTER to create a Partition - or CTRL+C to abort"
     read key
     sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
-    exit
+    sleep 3
   fi
 
   echo "***********************************************************"

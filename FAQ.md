@@ -64,6 +64,6 @@ The idea of the "wallet lock" in general is that your privatekey/seed/wallet is 
 
 When you activate the "Auto-Unlock" feature of the RaspiBlitz, the password of the wallet gets stored on the RaspiBlitz. So for an attacker stealing the RaspiBlitz physically its now possible to find the password and unlock the wallet.
 
-## What to do if my HDD has no partitions?
+## I connected my HDD but it still says 'Connect HDD' on the display?
 
-TODO
+Your HDD may have no partitions yet. SSH into the RaspiBlitz as admin (see command and password on display) and you should get offert the option to create a partition.
