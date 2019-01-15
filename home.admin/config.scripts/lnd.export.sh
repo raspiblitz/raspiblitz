@@ -74,6 +74,7 @@ elif [ ${exportType} = "http" ]; then
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./${randomFolderName}/readonly.macaroon
   sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
   cd ${randomFolderName}
+  sudo chmod 444 *.*
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   python -m SimpleHTTPServer ${randomPortNumber}
   sudo ufw delete allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
