@@ -9,7 +9,7 @@ echo "*** Checking ${network} ***"
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   #doublecheck
-  bitcoinRunning=$(${network}-cli getblockchaininfo  | grep -c verificationprogress)
+  bitcoinRunning=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo  | grep -c verificationprogress)
 fi
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
@@ -27,7 +27,7 @@ echo "*** Wait until ${network}d is ready ..."
 while [ ${chainIsReady} -eq 0 ]
   do
     loopCount=$(($loopCount +1))
-    result=$(${network}-cli getblockchaininfo 2>error.out)
+    result=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>error.out)
     error=`cat error.out`
     rm error.out
     if [ ${#error} -gt 0 ]; then
