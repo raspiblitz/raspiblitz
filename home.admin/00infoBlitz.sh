@@ -145,6 +145,7 @@ if [ ${runningRTL} -eq 1 ]; then
 fi
 
 # CHAIN NETWORK
+public_addr_pre="Public "
 public_addr="??"
 torInfo=""
 # Version
@@ -173,6 +174,14 @@ else
   else
     public=""
     public_color="${color_red}"
+  fi
+  if [ ${#public_addr} -gt 25 ]; then
+    # if a IPv6 address dont show peers to save space
+    networkConnectionsInfo=""
+  fi
+  if [ ${#public_addr} -gt 35 ]; then
+    # if a LONG IPv6 address dont show "Public" in front to save space
+    public_addr_pre=""
   fi
 fi
 
@@ -245,7 +254,7 @@ ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_g
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}     / ,'      ${color_gray}${$public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
