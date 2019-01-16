@@ -7,8 +7,8 @@ sudo systemctl stop bitcoind.service 2>/dev/null
 sudo systemctl stop litecoind.service 2>/dev/null
 sudo systemctl stop lnd.service 2>/dev/null
 sudo rm -f -r /mnt/hdd/lnd
+sudo rm -f -r /mnt/hdd/ssh
 sudo rm -f /mnt/hdd/swapfile
-sudo rm -f /mnt/hdd/ssh
 sudo rm -f /mnt/hdd/bitcoin/bitcoin.conf
 sudo rm -f /mnt/hdd/bitcoin/bitcoin.pid
 sudo rm -f /mnt/hdd/bitcoin/*.dat
