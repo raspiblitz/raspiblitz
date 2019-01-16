@@ -213,7 +213,7 @@ fi
 # the HDD is already ext4 formated and called blockchain
 formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
 if [ ${formatExt4OK} -eq 1 ]; then
-  echo "HDD was already inited or prepared"
+  echo "HDD was already initialized/prepared"
   echo "Now needs to be mounted"
   ./40addHDD.sh
   exit 1
