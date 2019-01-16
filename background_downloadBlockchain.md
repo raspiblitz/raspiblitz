@@ -68,6 +68,7 @@ This way a good balance between good seeding and up-to-date blockchain can be re
 To create the Update Torrent file, follow the following step ...
 
 Have a almost 100% synced bitcoind MAINNET with txindex=1 on a RaspiBlitz
+(remove all funds from this node - because blockchain get messed with)
 
 Stop bitcoind with: 
 ```
