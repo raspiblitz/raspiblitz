@@ -232,7 +232,7 @@ targetPath2="${targetDir}/${updateTorrentFile}"
 
 # check that path exists
 contentPath1=$(sudo ls ${targetPath1} 2>/dev/null)
-contentPath2=$(sudo ls ${targetPath1} 2>/dev/null)
+contentPath2=$(sudo ls ${targetPath2} 2>/dev/null)
 if [ ${#contentPath1} -eq 0 ]; then
   torrentError=3
 fi
