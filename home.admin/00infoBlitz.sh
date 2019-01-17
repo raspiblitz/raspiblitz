@@ -186,7 +186,7 @@ else
   fi
 
   # DynDNS
-  if [ ${#dynDomain} -get 0 ]; then
+  if [ ${#dynDomain} -gt 0 ]; then
 
     #check if dyndns resolves to correct IP
     ipOfDynDNS=$(getent hosts rootzoll.chickenkiller.com | awk '{ print $1 }')
