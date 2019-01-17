@@ -3,6 +3,22 @@
 # load raspiblitz config data
 source /mnt/hdd/raspiblitz.conf 
 
+# precheck if go is installed
+result=$(command -v go >/dev/null 2>/dev/null)
+if [ ${#result} -eq 0 ];then
+  echo "### Installing GO ###"
+  wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+  sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+  sudo rm *.gz
+  sudo mkdir /usr/local/gocode
+  sudo chmod 777 /usr/local/gocode
+  result=$(command -v go >/dev/null 2>/dev/null)
+fi
+if [ ${#result} -eq 0 ];then
+  echo "FAIL: Was not able to install GO (needed to run ZapConnect)"
+  exit 1
+fi
+
 # make sure qrcode-encoder in installed
 clear
 echo "*** Setup ***"
@@ -14,8 +30,8 @@ export GOPATH=/usr/local/gocode
 export PATH=$PATH:$GOPATH/bin
 echo ""
 echo "Getting github.com/LN-Zap/zapconnect (please wait) ..."
-cd $GOPATH/src/github.com/LN-Zap/zapconnect
 go get -d github.com/LN-Zap/zapconnect
+cd $GOPATH/src/github.com/LN-Zap/zapconnect
 echo ""
 echo "Building github.com/LN-Zap/zapconnect ..."
 make
