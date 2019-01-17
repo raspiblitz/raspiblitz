@@ -67,3 +67,7 @@ When you activate the "Auto-Unlock" feature of the RaspiBlitz, the password of t
 ## I connected my HDD but it still says 'Connect HDD' on the display?
 
 Your HDD may have no partitions yet. SSH into the RaspiBlitz as admin (see command and password on display) and you should get offert the option to create a partition.
+
+## How do I shrink the qr code for connecting my Shango/Zap mobile phone?
+
+Make the fonts smaller until the QR code fits into your (fullscreen) terminal. In OSX use `CMD` + `-` key. In LINUX use `CTRL`+ `-` key. On WINDOWS Putty go into the settings and change the font size: https://globedrill.com/change-font-size-putty
