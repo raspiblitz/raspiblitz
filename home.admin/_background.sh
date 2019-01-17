@@ -126,7 +126,8 @@ do
 
         # building REST command
         passwordC=$(cat /root/lnd.autounlock.pwd)
-        sudo python /home/admin/config.scripts/lnd.unlock.py '$passwordC'
+        passinsert="'${passwordC}'"
+        sudo python /home/admin/config.scripts/lnd.unlock.py $passinsert
 
       else
         echo "lncli says not locked"
