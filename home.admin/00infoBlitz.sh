@@ -163,6 +163,7 @@ if [ "${onionAddress}" != "null" ]; then
   public_color="${color_green}"
   torInfo="+ TOR"
 else
+
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
   public_addr="${public_ip}:${public_port}"
@@ -183,6 +184,25 @@ else
     # if a LONG IPv6 address dont show "Public" in front to save space
     public_addr_pre=""
   fi
+
+  # DynDNS
+  if [ ${#dynDomain} -get 0 ]; then
+
+    #check if dyndns resolves to correct IP
+    ipOfDynDNS=$(getent hosts rootzoll.chickenkiller.com | awk '{ print $1 }')
+    if [ "${ipOfDynDNS}" != "${public_addr}" ]; then
+      public_color="${color_red}"
+    else
+      public_color="${color_yellow}"
+    fi
+
+    # replace IP display with dynDNS
+    public_addr_pre="DynDNS "
+    networkConnectionsInfo=""
+    public_addr="${dynDomain}"
+
+  fi
+
 fi
 
 # LIGHTNING NETWORK
