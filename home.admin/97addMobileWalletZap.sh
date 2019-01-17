@@ -13,18 +13,18 @@ if [ ${#GOPATH} -eq 0 ]; then
   export PATH=$PATH:$GOPATH/bin
 fi
 
-# precheck if go is installed
-result=$(command -v go >/dev/null 2>/dev/null)
-if [ ${#result} -eq 0 ];then
+# make sure go is installed
+goInstalled=$(go version 2>/dev/null | grep -c 'go')
+if [ ${goInstalled} -eq 0 ];then
   echo "### Installing GO ###"
   wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
   sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
   sudo rm *.gz
   sudo mkdir /usr/local/gocode
   sudo chmod 777 /usr/local/gocode
-  result=$(command -v go >/dev/null 2>/dev/null)
+  goInstalled=$(go version 2>/dev/null | grep -c 'go')
 fi
-if [ ${#result} -eq 0 ];then
+if [ ${goInstalled} -eq 0 ];then
   echo "FAIL: Was not able to install GO (needed to run ZapConnect)"
   exit 1
 fi
