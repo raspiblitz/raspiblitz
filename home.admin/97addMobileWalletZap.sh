@@ -3,11 +3,15 @@
 # load raspiblitz config data
 source /mnt/hdd/raspiblitz.conf 
 
-# export go vars
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-export GOPATH=/usr/local/gocode
-export PATH=$PATH:$GOPATH/bin
+# export go vars (if needed)
+if [ ${#GOROOT} -eq 0 ]; then
+  export GOROOT=/usr/local/go
+  export PATH=$PATH:$GOROOT/bin
+fi
+if [ ${#GOPATH} -eq 0 ]; then
+  export GOPATH=/usr/local/gocode
+  export PATH=$PATH:$GOPATH/bin
+fi
 
 # precheck if go is installed
 result=$(command -v go >/dev/null 2>/dev/null)

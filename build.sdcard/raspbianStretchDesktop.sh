@@ -440,6 +440,14 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
+
+# prifile path for admin
+sudo bash -c "echo '' >> /home/admin/.profile"
+sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
+sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
+
 # bash aoutstart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
