@@ -3,6 +3,12 @@
 # load raspiblitz config data
 source /mnt/hdd/raspiblitz.conf 
 
+# export go vars
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/gocode
+export PATH=$PATH:$GOPATH/bin
+
 # precheck if go is installed
 result=$(command -v go >/dev/null 2>/dev/null)
 if [ ${#result} -eq 0 ];then
@@ -24,10 +30,6 @@ clear
 echo "*** Setup ***"
 echo ""
 echo "Installing zapconnect. Please wait..."
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-export GOPATH=/usr/local/gocode
-export PATH=$PATH:$GOPATH/bin
 echo ""
 echo "Getting github.com/LN-Zap/zapconnect (please wait) ..."
 go get -d github.com/LN-Zap/zapconnect
