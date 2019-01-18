@@ -102,6 +102,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
 
   echo "Auto-Unlock is now ON"
+  echo "NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
 fi
 
 # switch off

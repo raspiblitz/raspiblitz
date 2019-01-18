@@ -169,6 +169,11 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoUnlock}" != "${choice}" ]; then
   echo "LND Autounlock Setting changed .."
   sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
+  if [ "${choice}" = "on" ]; then
+    l1="Auto-Unlock is now ACTIVE"
+    l2="mobile/external wallets may need reconnect (macaroon/tls)"
+    dialog --title 'OK' --msgbox "${l1}\n${l2}" 9 60
+  fi
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
