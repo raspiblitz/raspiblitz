@@ -454,3 +454,4 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
 esac
+echo "unkown CHOICE(${CHOICE})"
