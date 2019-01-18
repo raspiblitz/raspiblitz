@@ -127,7 +127,7 @@ do
         # building REST command
         passwordC=$(sudo cat /root/lnd.autounlock.pwd)
         command="sudo python /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
-        echo "command(${$command})"
+        echo "command(${command})"
         unlockResult=$($command)
 
       else
