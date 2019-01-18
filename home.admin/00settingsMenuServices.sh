@@ -1,18 +1,20 @@
 #!/bin/bash
 
 # get raspiblitz config
+echo "get raspiblitz config"
 source /mnt/hdd/raspiblitz.conf
+echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 
-# map chain to on/off
+echo "map chain to on/off"
 chainValue="off"
 if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
-# map domain to on/off
+echo "map domain to on/off"
 domainValue="off"
 dynDomainMenu='DynamicDNS'
 if [ ${#dynDomain} -gt 0 ]; then 
@@ -21,6 +23,7 @@ if [ ${#dynDomain} -gt 0 ]; then
 fi
 
 # show select dialog
+echo "run dialog ..."
 CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
@@ -30,9 +33,11 @@ CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
 6 'LND Auto-Unlock' ${autoUnlock} \
 2>&1 >/dev/tty)
 dialogcancel=$?
+echo "done dialog"
 clear
 
 # check if user canceled dialog
+echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
   exit 1
