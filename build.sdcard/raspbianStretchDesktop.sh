@@ -506,6 +506,8 @@ echo ""
 echo "*** Fetching GPG key ***"
 sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
 sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810
+sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
 echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
