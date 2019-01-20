@@ -36,11 +36,21 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# set default values for raspiblitz.info
+network=""
+chain=""
+setupStep=0
+
+# try to load old values if available (overwrites defaults)
+source infoFile 2>/dev/null
+
+# resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
-echo "network=" >> $infoFile
-echo "chain=" >> $infoFile
 echo "message=" >> $infoFile
+echo "network=${network}" >> $infoFile
+echo "chain=${chain}" >> $infoFile
+echo "setupStep=${setupStep}" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################

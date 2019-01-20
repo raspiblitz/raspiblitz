@@ -139,9 +139,17 @@ if [ ${mountOK} -eq 1 ]; then
   fi
 
   # check if there is a download to continue
-  downloadProgressExists=$(sudo ls /home/admin/.Download.out 2>/dev/null | grep ".Download.out" -c)
+  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
+  if [ ${torrentProgressExists} -eq 1 ]; then
+    echo "found torrent data .. resuming"
+    ./50torrentHDD.sh
+    exit 1
+  fi
+
+  # check if there is a download to continue
+  downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
-    echo "found download in progress .."
+    echo "found download in data .. resuming"
     ./50downloadHDD.sh
     exit 1
   fi
