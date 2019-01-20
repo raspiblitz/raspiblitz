@@ -42,7 +42,7 @@ chain=""
 setupStep=0
 
 # try to load old values if available (overwrites defaults)
-source infoFile 2>/dev/null
+source ${infoFile} 2>/dev/null
 
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
