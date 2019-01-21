@@ -63,6 +63,9 @@ elif [ "${exportType}" = "hexstring" ]; then
   echo "admin.macaroon:"
   sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon
   echo ""
+  echo "invoice.macaroon:"
+  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon
+  echo ""
   echo "readonly.macaroon:"
   sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon
   echo ""
@@ -83,6 +86,9 @@ elif [ "${exportType}" = "scp" ]; then
   echo ""
   echo "admin.macaroon:"
   echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
+  echo ""
+  echo "invoice.macaroon:"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon ./"
   echo ""
   echo "readonly.macaroon:"
   echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
@@ -114,6 +120,7 @@ elif [ "${exportType}" = "http" ]; then
   mkdir ${randomFolderName}
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./${randomFolderName}/admin.macaroon
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./${randomFolderName}/readonly.macaroon
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon ./${randomFolderName}/invoice.macaroon
   sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
   cd ${randomFolderName}
   sudo chmod 444 *.*
