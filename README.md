@@ -80,8 +80,8 @@ If you are at an event, ask for a ready-2-go set or if you have your own hardwar
 You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
 
 1. Download SD-Card image:
-https://wiki.fulmo.org/downloads/raspiblitz-0.99-2018-12-24.img.gz
-SHA-256: 9c9ee0dea2e892a0e665befc86f6bd2f5a11f4d290bda46ba9203bf9e5d0a3df
+https://wiki.fulmo.org/downloads/raspiblitz-0.99-2019-01-21.img.gz
+91811c8e5e56130987ff1b9c75edffa3c00e56e94ede27d52ad642a6e4ba40fd
 or [build your own SD card image](#build-the-sd-card-image)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:

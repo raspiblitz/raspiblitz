@@ -131,7 +131,7 @@ elif [ "${exportType}" = "reset" ]; then
   clear
   echo "###### RESET MACAROONS AND TLS.cert ######"
   echo ""
-  echo "All your macaroons and the tls.cert gets gets deleted and recreated."
+  echo "All your macaroons and the tls.cert get deleted and recreated."
   echo ""
   cd
   echo "- deleting old macaroons"
@@ -142,7 +142,7 @@ elif [ "${exportType}" = "reset" ]; then
   echo "- restarting LND ... wait 20 secs"
   sudo systemctl start lnd
   sleep 20
-  lncli unlock
+  sudo -u bitcoin lncli unlock
   echo "- copy new macaroons to admin user"
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/macaroons.db /home/admin/.lnd/data/chain/${network}/${chain}net/

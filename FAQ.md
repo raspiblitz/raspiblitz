@@ -44,6 +44,7 @@ To really have a good backup to rely on such feature needs to be part of the LND
 
 But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
 
+
 ## How do I change the Name/Alias of my lightning node
 
 Use the "Change Name/Alias of Node" option in main menu. The RaspiBlitz will make a reboot after this.
