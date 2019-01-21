@@ -22,6 +22,14 @@ if [ ${#dynDomain} -gt 0 ]; then
   dynDomainMenu="${dynDomain}"
 fi
 
+echo "check autopilot by lnd.conf"
+lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
+if [ ${lndAutoPilotOn} -eq 1 ]; then
+  autoPilot="on"
+else
+  autoPilot="off"
+fi
+
 # show select dialog
 echo "run dialog ..."
 CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
