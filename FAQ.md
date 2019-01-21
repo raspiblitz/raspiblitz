@@ -68,16 +68,18 @@ When you activate the "Auto-Unlock" feature of the RaspiBlitz, the password of t
 
 Your HDD may have no partitions yet. SSH into the RaspiBlitz as admin (see command and password on display) and you should get offert the option to create a partition. If this is not the case:
 
-Check the USB cable. Connect the HDD to another computer and check if it shows up at all .. 
+Check/Exchange the USB cable. Connect the HDD to another computer and check if it shows up at all .. 
 
 OSX: https://www.howtogeek.com/212836/how-to-use-your-macs-disk-utility-to-partition-wipe-repair-restore-and-copy-drives/
 
 Windows:
 https://www.lifewire.com/how-to-open-disk-management-2626080
 
-Linux/Ubuntu:
+Linux/Ubuntu (desktop):
 https://askubuntu.com/questions/86724/how-do-i-open-the-disk-utility-in-unity
 
+Linux/Raspbian (command line):
+https://www.addictivetips.com/ubuntu-linux-tips/manually-partition-a-hard-drive-command-line-linux/
 
 ## How do I shrink the QR code for connecting my Shango/Zap mobile phone?
 
