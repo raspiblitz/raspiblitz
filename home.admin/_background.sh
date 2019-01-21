@@ -78,8 +78,12 @@ do
       echo "freshPublicIP(${freshPublicIP})"
       echo "publicIP(${publicIP})"
 
+      if [ ${#freshPublicIP} -eq 0 ]; then 
+
+        echo "freshPublicIP is ZERO - ignoring"
+
       # check if changed
-      if [ "${freshPublicIP}" != "${publicIP}" ]; then
+      elif [ "${freshPublicIP}" != "${publicIP}" ]; then
 
         # 1) update config file
         echo "update config value"
