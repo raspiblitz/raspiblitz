@@ -139,6 +139,7 @@ elif [ "${exportType}" = "reset" ]; then
   echo "###### RESET MACAROONS AND TLS.cert ######"
   echo ""
   echo "All your macaroons and the tls.cert get deleted and recreated."
+  echo "Use this to invalidate former EXPORTS for example if you loose a device."
   echo ""
   cd
   echo "- deleting old macaroons"
