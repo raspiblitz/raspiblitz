@@ -26,4 +26,5 @@ done
 sudo killall /usr/local/bin/lnd
 echo "copy new cert to admin user"
 sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
+sudo chown admin:admin -R /home/admin/.lnd/*.cert
 echo "OK TLS certs are fresh"

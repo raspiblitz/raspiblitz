@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http]"
+ echo "lnd.export.sh [hexstring|scp|http|reset]"
  exit 1
 fi
 
@@ -15,12 +15,13 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
     OPTIONS+=(HEX "Hex-String (Copy+Paste)")
     OPTIONS+=(SCP "SSH Download (Commands)")
-    OPTIONS+=(HTTP "Browserdownload (risky)")
+    OPTIONS+=(HTTP "Browserdownload (bit risky)")
+    OPTIONS+=(RESET "RENEW MACAROONS & TLS")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Export Macaroons & TLS.cert" \
                 --menu "How do you want to export?" \
-                10 50 6 \
+                11 50 7 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
     clear
@@ -34,6 +35,9 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
         HTTP)
           exportType='http';
           ;;
+        RESET)
+          exportType='reset';
+          ;;
     esac
 fi
 
@@ -41,9 +45,17 @@ fi
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ########################
+# CANCEL
+########################
+if [ ${#exportType} -eq 0 ]; then
+
+  echo "CANCEL"
+  exit 0
+
+########################
 # HEXSTRING
 ########################
-if [ ${exportType} = "hexstring" ]; then
+elif [ "${exportType}" = "hexstring" ]; then
 
   clear
   echo "###### HEXSTRING EXPORT ######"
@@ -61,7 +73,7 @@ if [ ${exportType} = "hexstring" ]; then
 ###########################
 # SHH / SCP File Download
 ###########################
-elif [ ${exportType} = "scp" ]; then
+elif [ "${exportType}" = "scp" ]; then
 
   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
@@ -82,7 +94,7 @@ elif [ ${exportType} = "scp" ]; then
 ###########################
 # HTTP File Download
 ###########################
-elif [ ${exportType} = "http" ]; then
+elif [ "${exportType}" = "http" ]; then
 
   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
@@ -110,6 +122,28 @@ elif [ ${exportType} = "http" ]; then
   cd ..
   sudo rm -r ${randomFolderName}
   echo "OK - temp HTTP server is stopped."
+
+###########################
+# RESET Macaroons and TLS
+###########################
+elif [ "${exportType}" = "reset" ]; then
+
+  clear
+  echo "###### RESET MACAROONS AND TLS.cert ######"
+  echo ""
+  echo "All your macaroons and the tls.cert gets gets deleted and recreated."
+  echo ""
+  cd
+  echo "- deleting old macaroons"
+  sudo rm /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  echo "- resetting TLS cert"
+  sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  echo "- copy new macaroons to admin user"
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
+  sudo chown admin:admin -R /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  echo "- restarting LND"
+  sudo systemctl start lnd 2>/dev/null
+  echo "OK DONE - LND is restarting - you may need to unlock wallet again."
 
 else
   echo "FAIL: unknown '${exportType}' -run-> ./lnd.export.sh -h"
