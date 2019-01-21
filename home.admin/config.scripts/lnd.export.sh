@@ -135,19 +135,20 @@ elif [ "${exportType}" = "reset" ]; then
   echo ""
   cd
   echo "- deleting old macaroons"
+  sudo rm /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
   sudo rm /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon
   sudo rm /home/bitcoin/.lnd/data/chain/${network}/${chain}net/macaroons.db
   echo "- resetting TLS cert"
   sudo /home/admin/config.scripts/lnd.newtlscert.sh
-  echo "- restarting LND ... wait 20 secs"
+  echo "- restarting LND ... wait 10 secs"
   sudo systemctl start lnd
-  sleep 20
+  sleep 10
   sudo -u bitcoin lncli unlock
+  echo "- creating new macaroons ... wait 10 secs"
+  sleep 10
   echo "- copy new macaroons to admin user"
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/macaroons.db /home/admin/.lnd/data/chain/${network}/${chain}net/
   sudo chown admin:admin -R /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/macaroons.db
   echo "OK DONE"
 
 else
