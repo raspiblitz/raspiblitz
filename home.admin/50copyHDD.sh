@@ -7,8 +7,8 @@ source /home/admin/raspiblitz.info 2>/dev/null
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # create bitcoin base directory and link with bitcoin user
-sudo mkdir /mnt/hdd/bitcoin
-sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin
+sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
+sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
 
 echo ""
@@ -25,9 +25,9 @@ echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'inde
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "Copy, Paste and Execute the following commands - line by line:"
-echo "sudo scp -R ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
-echo "sudo scp -R ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
-echo "sudo scp -R ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
+echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
+echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
+echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
 echo ""
 echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
 echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
