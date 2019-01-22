@@ -309,7 +309,7 @@ sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${
 sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
 
 # check binary is was not manipulated (checksum test)
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+binaryChecksum=$(shasum -a 256 ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
   exit 1
