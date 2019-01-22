@@ -53,7 +53,7 @@ if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/chainstate"
    anyDataAtAll=1
 fi
-fi [ ${count} -lt 1400 ]; then
+if [ ${count} -lt 1400 ]; then
   echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
   quickCheckOK=0
 fi
