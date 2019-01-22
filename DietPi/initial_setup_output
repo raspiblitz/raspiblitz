@@ -1,0 +1,131 @@
+<pre><span style="background-color:#3465A4"><font color="#34E2E2"><b> RaspiBlitz</b></font></span>
+<span style="background-color:#3465A4"><font color="#34E2E2"><b> ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</b></font></span>
+
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌──────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐</font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> OK - RPC password changed                        │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">                                                  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> Now starting the Setup of your RaspiBlitz.       │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>├──────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┤</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">                     </font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&lt;</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>O</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>K  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&gt;</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">                     │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">──────────────────────────────────────────────────┘</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                             </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span>
+
+HDD was already initialized/prepared
+Now needs to be mounted
+
+*** Adding HDD to the System ***
+started from state(waitsetup)
+OK - HDD found as sda
+
+*** Check HDD ***
+OK - HDD is formatted with ext4 and is named BLOCKCHAIN
+Adding line to /etc/fstab ...
+UUID=9f95b7b3-d634-4938-9f05-dfab3d662507 /mnt/hdd ext4 noexec,defaults 0 0
+OK - HDD is listed in /etc/fstab
+
+*** Mount HDD ***
+mkdir: cannot create directory ‘/mnt/hdd’: File exists
+OK - HDD is mounted
+
+moving SSH pub keys to HDD
+cp: cannot stat &apos;/etc/ssh&apos;: No such file or directory
+OK
+
+*** Analysing HDD Content ***
+Looks like the HDD is prepared with the Blockchain.
+Continuing with finishing the system setup ...
+
+*** Checking HDD ***
+OK - HDD is ready.
+
+*** Prepare bitcoin ***
+OK - bitcoin setup ready
+
+*** Start bitcoin ***
+This can take a while ..
+Created symlink /etc/systemd/system/multi-user.target.wants/bitcoind.service → /etc/systemd/system/bitcoind.service.
+Started ... wait 10 secs
+checking setup script
+network(bitcoin)
+chain(main)
+setupStep(60)
+
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐</font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">   Double checking for bitcoind - please wait ..        │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌──────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#729FCF"><b>                         0                        </b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">│  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">──────────────────────────────────────────────────┘  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>├────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┤</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">               </font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&lt;</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>O</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>K  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&gt;</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">        &lt;</font></span><span style="background-color:#D3D7CF"><font color="#CC0000">C</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b>ancel</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">&gt;                 │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">────────────────────────────────────────────────────────┘</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                          </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span>
+
+
+OK - bitcoind is running
+Next step run Lightning
+
+*** Checking bitcoin ***
+OK - bitcoind is running
+
+*** Wait until bitcoind is ready ...
+OK - chainnetwork is working
+
+*** LND Config ***
+OK - LND config written
+
+*** Starting LND ***
+Created symlink /etc/systemd/system/multi-user.target.wants/lnd.service → /etc/systemd/system/lnd.service.
+
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐</font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">   Starting LND - please wait ..                        │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌──────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#729FCF"><b>                         0                        </b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">│  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">  </font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">──────────────────────────────────────────────────┘  │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>├────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┤</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">               </font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&lt;</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>O</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>K  </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&gt;</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">        &lt;</font></span><span style="background-color:#D3D7CF"><font color="#CC0000">C</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b>ancel</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">&gt;                 │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                        </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">────────────────────────────────────────────────────────┘</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+<span style="background-color:#3465A4"><font color="#06989A">                                                                          </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span>
+
+
+Failed to connect to bus: No such file or directory
+1548191459
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191519
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191519
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191579
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191639
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191699
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191759
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191819
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191879
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548191939
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+
+...

@@ -301,7 +301,7 @@ lndSHA256="c8be77708fe95d5076fa6988229100598c14ae6c54e92a56d5f09f3e17732244"
 olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
-cd /home/admin/download
+cd /home/admin/downloadcd 
 binaryName="lnd-linux-armv7-v${lndVersion}.tar.gz"
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
