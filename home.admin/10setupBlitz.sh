@@ -161,9 +161,9 @@ if [ ${mountOK} -eq 1 ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
-    T "TORRENT  --> TESTNET + MAINNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> TESTNET + MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> TESTNET + MAINNET from another HDD (TRICKY+FAST)" \
+    T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
+    D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
+    C "COPY     --> USE BLOCKCHAINDATA from another computer" \
     S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
@@ -173,7 +173,6 @@ if [ ${mountOK} -eq 1 ]; then
     --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
     T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> MAINNET from another HDD (TRICKY+FAST)" \
     S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # error

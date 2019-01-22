@@ -3,98 +3,100 @@
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
 
-echo ""
-echo "*** Check 1st HDD ***"
-sleep 4
-hddA=$(lsblk | grep /mnt/hdd | grep -c sda1)
-if [ ${hddA} -eq 0 ]; then
-  echo "FAIL - 1st HDD not found as sda1"
-  echo "Try 'sudo shutdown -r now'"
-  exit 1
-fi
-echo "OK - HDD as sda1 found"
-echo ""
-echo "*** Copy Blockchain form a second HDD ***"
-echo ""
-echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
-echo ""
-echo "You can use a Y cable for the second HDD to inject extra power."
-echo "Like this one: https://www.amazon.de/dp/B00ZJBIHVY"
-echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
-echo ""
-echo "You can use the HDD of another RaspiBlitz for this."
-echo "The 2nd HDD needs to be formated Ext4/exFAT and the folder '${network}' is in root of HDD."
-echo ""
-echo "**********************************"
-echo "--> Please connect now the 2nd HDD"
-echo "**********************************"
-echo ""
-echo "If 2nd HDD is connected but setup does not continue,"
-echo "then cancel (CTRL+c) and reboot."
-ready=0
-while [ ${ready} -eq 0 ]
-  do
-    hddA=$(lsblk | grep /mnt/hdd | grep -c sda1)
-    if [ ${hddA} -eq 0 ]; then
-      echo "FAIL - connection to 1st HDD lost"
-      echo "It seems there was a POWEROUTAGE while connecting the 2nd HDD."
-      echo "Try to avoid this next time by adding extra Power or connect more securely."
-      echo "You need now to reboot with 'sudo shutdown -r now' and then try again."
-      exit 1
-    fi
-    hddB=$(lsblk | grep -c sdb1)
-    if [ ${hddB} -eq 1 ]; then
-      echo "OK - 2nd HDD found"
-      ready=1
-    fi
-  done
+# get local ip
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
+# create bitcoin base directory and link with bitcoin user
+sudo mkdir /mnt/hdd/bitcoin
+sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin
+sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
 
 echo ""
-echo "*** Mounting 2nd HDD ***"
-sudo mkdir /mnt/genesis
-echo "try ext4 .."
-sudo mount -t ext4 /dev/sdb1 /mnt/genesis
-sleep 2
-mountOK=$(lsblk | grep -c /mnt/genesis)
-if [ ${mountOK} -eq 0 ]; then
-  echo "try exfat .."
-  sudo mount -t exfat /dev/sdb1 /mnt/genesis
-  sleep 2
+echo "*** Instructions to COPY BLOCKCHAIN from another computer (only MAINNET) ***"
+echo ""
+echo "You can use the blockchain from another bitcoin-core client with version greater or equal"
+echo "to 0.17.1 with transaction index switched on (`txindex=1` in the `bitcoin.conf`)."
+echo ""
+echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
+echo "to be connected to the same local network."
+echo ""
+echo "Open a terminal on the other computer and change into the directory that constains the"
+echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'indexes'".
+echo "Make sure the bitcoin client on that computer is stopped."
+echo ""
+echo "Copy, Paste and Execute the following commands - line by line:"
+echo "scp -R ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
+echo "scp -R ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
+echo "scp -R ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
+echo ""
+echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
+echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
+read key
+
+# unlink bitcoin user (will created later in setup again)
+sudo unlink /home/bitcoin/.bitcoin 
+
+# make quick check if data is there
+anyDataAtAll=0
+quickCheckOK=1
+count=$(sudo ls /mnt/hdd/bitcoin/blocks | grep -c '.dat')
+if [ ${count} -gt 0 ]; then
+   echo "Found data in /mnt/hdd/bitcoin/blocks"
+   anyDataAtAll=1
+if
+if [ ${count} -lt 3000 ]; then
+  echo "FAIL: transfere seems invalid - less then 3000 .dat files (${count})"
+  quickCheckOK=0
 fi
-mountOK=$(lsblk | grep -c /mnt/genesis)
-if [ ${mountOK} -eq 0 ]; then
-  echo "FAIL - not able to mount the 2nd HDD"
-  echo "only ext4 and exfat possible"
-  sleep 4
-  ./10setupBlitz.sh
-  exit 1
+count=$(sudo ls /mnt/hdd/bitcoin/chainstate | grep -c '.ldb')
+if [ ${count} -gt 0 ]; then
+   echo "Found data in /mnt/hdd/bitcoin/chainstate"
+   anyDataAtAll=1
+fi
+fi [ ${count} -lt 1400 ]; then
+  echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
+  quickCheckOK=0
+fi
+count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex | grep -c '.ldb')
+if [ ${count} -gt 0 ]; then
+   echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
+   anyDataAtAll=1
+fi
+if [ ${count} -lt 5200 ]; then
+  echo "FAIL: less then 5200 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
+  quickCheckOK=0
+fi
+
+# just if any data transferred ..
+if [ ${anyDataAtAll} -eq 1 ]; then
+
+  # data was invalkid - ask user to keep?
+  if [ ${quickCheckOK} -eq 0 ]; then
+    echo "*********************************************"
+    echo "There seems to be a invalid transfere."
+    echo "Wait 5 secs ..."
+    sleep 5
+    dialog --title " INVALID TRANSFER" --yesno "Quickcheck shows the data you transferred is invalid/incomplete.\nThis can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 57
+    response=$?
+    echo "response(${response})"
+    case $response in
+      0) quickCheckOK=1 ;;
+    esac
+  fi
+
+  if [ ${quickCheckOK} -eq 0 ]; then
+    echo "Deleting invalid Data ..."
+    sudo rm -rf /mnt/hdd/bitcoin
+    sudo rm -rf /home/bitcoin/.bitcoin
+    sleep 2
+  fi
+
 else
-  echo "OK - 2nd HDD mounted at /mnt/genesis"
+  
+  # when no data transferred - just delete bitcoin base dir again
+  sudo rm -rf /mnt/hdd/bitcoin
+
 fi
 
-echo ""
-echo "*** Copy Blockchain ***"
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin /mnt/hdd/
-echo "cleaning up - ok if files do not exists"
-sudo rm /mnt/hdd/${network}/${network}.conf
-sudo rm /mnt/hdd/${network}/${network}.pid
-sudo rm /mnt/hdd/${network}/banlist.dat
-sudo rm /mnt/hdd/${network}/debug.log
-sudo rm /mnt/hdd/${network}/fee_estimates.dat
-sudo rm /mnt/hdd/${network}/mempool.dat
-sudo rm /mnt/hdd/${network}/peers.dat
-sudo rm /mnt/hdd/${network}/testnet3/banlist.dat
-sudo rm /mnt/hdd/${network}/testnet3/debug.log
-sudo rm /mnt/hdd/${network}/testnet3/fee_estimates.dat
-sudo rm /mnt/hdd/${network}/testnet3/mempool.dat
-sudo rm /mnt/hdd/${network}/testnet3/peers.dat
-sudo umount -l /mnt/genesis
-echo "OK - Copy done :)"
-echo ""
-echo "---> You can now disconnect the 2nd HDD"
-
-# set SetupState
-sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
-
-sleep 5
-./60finishHDD.sh
+# setup script will decide the next logical step
+./10setupBlitz.sh

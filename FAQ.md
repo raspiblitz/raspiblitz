@@ -32,6 +32,18 @@ Of course people should modify the system, add own scripts, etc ... but if you w
 
 BTW there is a beneficial side effect, when updating with a new SD card: You also get rid of any maleware or system bloat that happend in the past. You start with a fresh system :)
 
+## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
+
+Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
+
+One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1 with transaction index switched on (`txindex=1` in the `bitcoin.conf`). 
+
+But we dont copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writeable by Windows or Mac computers. So I will explain a way to copy the data thru your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
+
+Both computers (your RaspberryPi and the other computer with the full blockchain on) need to be connected to the same local network. Start the setup of the RaspiBlitz with a fresh SD card like explained in the README - its OK that there is no blockchain data on your HDD. At the point of the Setup about `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfere the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data you will execute SCP commands, that will copy the data over to your RaspiBlitz. 
+
+Once you finsihed the transfere the Raspiblitz will make a quick check - but beware that if there is an error during transfere it can result that yo
+
 ## How to backup my Lightning Node?
 
 CAUTION:  Restoring a backup can lead to LOSS OF ALL CHANNEL FUNDS if its not the latest channel state. There is no perfect backup solution for lightning nodes yet - this topic is in development by the community.
@@ -43,7 +55,6 @@ Recovering the coins that you have in a active channel is a bit more complicated
 To really have a good backup to rely on such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
 
 But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
-
 
 ## How do I change the Name/Alias of my lightning node
 
