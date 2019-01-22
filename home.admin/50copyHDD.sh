@@ -39,16 +39,16 @@ sudo unlink /home/bitcoin/.bitcoin
 # make quick check if data is there
 anyDataAtAll=0
 quickCheckOK=1
-count=$(sudo ls /mnt/hdd/bitcoin/blocks | grep -c '.dat')
+count=$(sudo ls /mnt/hdd/bitcoin/blocks 2>/dev/null | grep -c '.dat')
 if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/blocks"
    anyDataAtAll=1
-if
+fi
 if [ ${count} -lt 3000 ]; then
   echo "FAIL: transfere seems invalid - less then 3000 .dat files (${count})"
   quickCheckOK=0
 fi
-count=$(sudo ls /mnt/hdd/bitcoin/chainstate | grep -c '.ldb')
+count=$(sudo ls /mnt/hdd/bitcoin/chainstate 2>/dev/null | grep -c '.ldb')
 if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/chainstate"
    anyDataAtAll=1
@@ -57,7 +57,7 @@ if [ ${count} -lt 1400 ]; then
   echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
   quickCheckOK=0
 fi
-count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex | grep -c '.ldb')
+count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | grep -c '.ldb')
 if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
    anyDataAtAll=1
