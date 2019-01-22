@@ -1,3 +1,5 @@
+Working with the ODroid HC1 and this image: https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
+
 https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9
 
 Login to DietPi
