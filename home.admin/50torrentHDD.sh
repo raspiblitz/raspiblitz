@@ -1,104 +1,160 @@
 #!/bin/bash
 echo ""
 
-# --> TODO: Check https://getbitcoinblockchain.com/
+# see background_downloadBlockchain.md for info
+# why there are two torrent files
 
-# *** BITCOIN Torrent ***
-bitcoinTorrent="raspiblitz-bitcoin-2018-07-16"
-bitcoinTorrentsize=231230404
-                   
-# *** LITECOIN Torrent ***
-litecoinTorrent="raspiblitz-litecoin-2018-07-29"
-litecoinTorrentsize=10240000
-
-# load network
-network=`cat .network`
-
-
-## experimental redirect if bitcoin
-#if [ "$network" = "bitcoin" ]; then
-#  ./50torrentHDD.sh
-#  exit 1
-#fi
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
 echo ""
 
-# settings based on network
-torrent=$bitcoinTorrent
-size=$bitcoinTorrentsize
+echo ""
+echo "*** Torrent Files ***"
+
+# torrent files that are available
+# in directory /home.admin/assets/
+# WITHOUT THE '.torrent' ENDING
+
+bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
+bitcoinUpdate="raspiblitz-bitcoin1-2019-01-16-update"
+
+litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
+litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
+
+# set final based on selected network
+baseTorrentFile=${bitcoinBase}
+updateTorrentFile=${bitcoinUpdate}
 if [ "$network" = "litecoin" ]; then
-  torrent=$litecoinTorrent
-  size=$litecoinTorrentsize
+  baseTorrentFile=${litecoinBase}
+  updateTorrentFile=${litecoinUpdate}
 fi
+echo "base   : ${baseTorrentFile}"
+echo "update : ${updateTorrentFile}"
+sleep 1
 
-# screen background monitoring settings
-name="Torrent"
 targetDir="/mnt/hdd/torrent"
-targetSize=$size
-sessionDir="/home/admin/.rtorrent.session/"
-command="sudo rtorrent -n -d ${targetDir} -s ${sessionDir} /home/admin/assets/${torrent}.torrent"
-# 2 screen sessions - differnt rtorrent session dir?
-#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/blockchain.torrent
-#sudo rtorrent -n -d /mnt/hdd/torrent -s /home/admin/.rtorrent.session/ https://getbitcoinblockchain.com/update.torrent
+sessionDir="/home/admin/.rtorrent.session"
+sudo mkdir ${sessionDir} 2>/dev/null
 
-# starting screen session if needed
-echo "checking if ${name} has a running screen session"
-screen -wipe 1>/dev/null
-isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
-echo "isRunning(${isRunning})"
-if [ ${isRunning} -eq 0 ]; then
-  echo "Starting screen session"
-  sudo mkdir ${targetDir} 2>/dev/null
-  sudo mkdir ${sessionDir} 2>/dev/null
-  screenCommand="screen -S ${name} -L screen.log -dm ${command}"
-  echo "${screenCommand}"
-  bash -c "${screenCommand}"
-else
-  echo "Continue screen session"
+##############################
+# CHECK TORRENT 1 "BLOCKCHAIN"
+##############################
+
+echo "*** checking torrent 1: base blockchain"
+torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+echo "torrentComplete1(${torrentComplete1})"
+if [ ${torrentComplete1} -eq 0 ]; then
+
+  # check if screen session for this torrent
+  isRunning1=$( screen -S blockchain -ls | grep "blockchain" -c )
+  echo "isRunning1(${isRunning1})"
+  if [ ${isRunning1} -eq 0 ]; then
+
+    # start torrent download in screen session
+    echo "starting torrent: blockchain"
+    command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
+    sudo mkdir ${targetDir} 2>/dev/null
+    sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
+    screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
+    echo "${screenCommand}"
+    bash -c "${screenCommand}"
+  fi
 fi
+sleep 2
+
+##############################
+# CHECK TORRENT 2 "UPDATE"
+##############################
+
+echo "*** checking torrent 2: update blockchain"
+torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+echo "torrentComplete2(${torrentComplete2})"
+if [ ${torrentComplete2} -eq 0 ]; then
+
+  # check if screen session for this torrent
+  isRunning2=$( screen -S update -ls | grep "update" -c )
+  echo "isRunning2(${isRunning2})"
+  if [ ${isRunning2} -eq 0 ]; then
+    
+    # start torrent download in screen session
+    echo "starting torrent: update"
+    command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
+    sudo mkdir ${targetDir} 2>/dev/null
+    sudo mkdir ${sessionDir}/update/ 2>/dev/null
+    screenCommand="screen -S update -L screen.log -dm ${command2}"
+    echo "${screenCommand}"
+    bash -c "${screenCommand}"
+
+  fi
+fi
+sleep 2
+
+##############################
+# MONITOR PROGRESS
+##############################
+
 sleep 3
 
 # monitor screen session
-screenDump="... started ..."
-actualSize=0
-torrentComplete=0
+screenDump1="... started ..."
+screenDump2="... started ..."
+torrentComplete1=0
+torrentComplete2=0
 while :
   do
-
-    # check if completed by inspecting rtorrent session files
-    torrentComplete=$(cat /home/admin/.rtorrent.session/*.torrent.rtorrent | grep ':completei1' -c)
-    if [ ${torrentComplete} -eq 1 ]; then
-      echo "OK - torrent finished"
-      break
-    fi
-
-    # calculate progress and write it to file for LCD to read
-    freshSize=$( du -s ${targetDir} | head -n1 | awk '{print $1;}' )
-    if [ ${#actualSize} -eq 0 ]; then
-      freshSize=0
-    fi
-    progress=$(echo "scale=2; $freshSize*100/$targetSize" | bc)
-    echo $progress > ".${name}.progress"
-
-    actualSize=$freshSize
 
     # display info screen
     clear
     echo "****************************************************"
-    echo "Monitoring Screen Session: ${name}"
-    echo "Progress: ${progress}% (${actualSize} of ${targetSize})"
-    echo "If needed press key x to stop ${name}"
+    echo "Monitoring Screen Session: Torrent base+update"
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
+    echo "If u see the torrents 100% downloaded and verified,"
+    echo "press X to continue. Also press x to abort download"
+    echo "before 100% if you want to switch to another option."
     echo "****************************************************"
-    screen -S ${name} -X hardcopy .${name}.out
-    newScreenDump=$(cat .${name}.out | grep . | tail -8)
-    if [ ${#newScreenDump} -gt 0 ]; then
-      screenDump=$newScreenDump
+    echo ""
+
+    # display torrent 1 info
+    echo "*** 1) Status Torrent 'blockchain':"
+    torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+    if [ ${torrentComplete1} -eq 0 ]; then
+      screen -S blockchain -X hardcopy .blockchain.out
+      newScreenDump=$(cat .blockchain.out | head -6 | tail -3 )
+      if [ ${#newScreenDump} -gt 0 ]; then
+        screenDump1=$newScreenDump
+      fi
+      echo "$screenDump1"
+    else
+      echo "Completed"
     fi
-    echo "$screenDump"
+    echo ""
+
+    # display torrent 2 info
+    echo "*** 2) Status Torrent 'update':"
+    torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+    if [ ${torrentComplete2} -eq 0 ]; then
+      screen -S update -X hardcopy .update.out
+      newScreenDump=$(cat .update.out| head -6 | tail -3 )
+      if [ ${#newScreenDump} -gt 0 ]; then
+        screenDump2=$newScreenDump
+      fi
+      echo "$screenDump2"
+    else
+      echo "Completed"
+    fi
+    echo ""
+
+    # check if both torrents completed
+    if [ ${torrentComplete1} -eq 1 ]; then
+      if [ ${torrentComplete2} -eq 1 ]; then
+        echo "OK - all torrents finished"
+        break
+      fi
+    fi
 
     # wait 2 seconds for key input
     read -n 1 -t 2 keyPressed
@@ -106,70 +162,114 @@ while :
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo ""
-      echo "Aborting ${name}"
+      echo "Aborting"
       break
     fi
 
   done
 
 # clean up
-rm -f .${name}.out
-rm -f .${name}.progress
+rm -f .blockchain.out
+rm -f .update.out
 
-# quit session if still running
-isRunning=$( screen -S ${name} -ls | grep "${name}" -c )
+##############################
+# AFTER PARTY & CLEAN UP
+##############################
+
+# quit session1
+isRunning=$( screen -S blockchain -ls | grep "blockchain" -c )
 if [ ${isRunning} -eq 1 ]; then
   # get the PID of screen session
-  sessionPID=$(screen -ls | grep "${name}" | cut -d "." -f1 | xargs)
+  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
   echo "killing screen session PID(${sessionPID})"
   # kill all child processes of screen sceesion
   sudo pkill -P ${sessionPID}
   echo "proccesses killed"
   sleep 3
  # tell the screen session to quit and wait a bit
-  screen -S ${name} -X quit 1>/dev/null
+  screen -S blockchain -X quit 1>/dev/null
   sleep 3
   echo "cleaning screen"
   screen -wipe 1>/dev/null
   sleep 3
 fi
 
-# the path torrent will download to
-targetPath="${targetDir}/${torrent}"
-echo "path to downloaded data is ${targetPath}"
-
-# calculate progress and write it to file for LCD to read
-finalSize=$( du -s ${targetDir} 2>/dev/null | head -n1 | awk '{print $1;}' )
-if [ ${#finalSize} -eq 0 ]; then
-  finalSize=0
+# quit session2
+isRunning=$( screen -S update -ls | grep "update" -c )
+if [ ${isRunning} -eq 1 ]; then
+  # get the PID of screen session
+  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
+  echo "killing screen session PID(${sessionPID})"
+  # kill all child processes of screen sceesion
+  sudo pkill -P ${sessionPID}
+  echo "proccesses killed"
+  sleep 3
+ # tell the screen session to quit and wait a bit
+  screen -S update -X quit 1>/dev/null
+  sleep 3
+  echo "cleaning screen"
+  screen -wipe 1>/dev/null
+  sleep 3
 fi
-echo "final size is ${finalSize} of targeted size ${targetSize}"
 
-# check result
-if [ ${finalSize} -lt ${targetSize} ]; then
+# check torrent success
+echo ""
+echo "*** Torrent Data Check ***"
+
+torrentError=0
+torrentComplete1=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+torrentComplete2=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+if [ ${torrentComplete1} -eq 0 ]; then
+  torrentError=1
+fi
+if [ ${torrentComplete2} -eq 0 ]; then
+  torrentError=2
+fi
+
+# the path torrent was download to
+targetPath1="${targetDir}/${baseTorrentFile}"
+targetPath2="${targetDir}/${updateTorrentFile}"
+
+# check that path exists
+contentPath1=$(sudo ls ${targetPath1} 2>/dev/null)
+contentPath2=$(sudo ls ${targetPath2} 2>/dev/null)
+if [ ${#contentPath1} -eq 0 ]; then
+  torrentError=3
+fi
+if [ ${#contentPath2} -eq 0 ]; then
+  torrentError=4
+fi
+
+if [ ${torrentError} -gt 0 ]; then
  
- # Download failed
+  # User Cancel --> Torrent incomplete
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
+  dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try FTP download next time. Do you want keep already downloaded torrent data?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir} ;;
+    1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;
   esac
   ./00mainMenu.sh
   exit 1;
   
-else
-
-  # Download worked / just move, copy on USB2 >4h
-  echo "*** Moving Files ***"
-  echo "START"
-  date +%s
-  sudo mv ${targetPath} /mnt/hdd/${network}
-  echo "OK"
-  date +%s
-
-  # continue setup
-  ./60finishHDD.sh
-
 fi
+
+# Download worked / just move, copy on USB2 >4h
+echo ""
+echo "*** Moving Files ***"
+date +%s
+echo "can take some minutes... please wait"
+
+sudo mkdir /mnt/hdd/${network} 2>/dev/null
+sudo mv ${targetPath1}/* /mnt/hdd/${network}/
+sudo cp -r ${targetPath2}/* /mnt/hdd/${network}/
+sudo rm -r ${targetDir}
+echo "OK"
+date +%s
+
+# set SetupState
+sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
+
+# continue setup
+./60finishHDD.sh

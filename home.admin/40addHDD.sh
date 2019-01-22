@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 echo ""
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 echo "*** Adding HDD to the System ***"
+echo "started from state(${state})"
 sleep 5
 existsHDD=$(lsblk | grep -c sda)
 if [ ${existsHDD} -gt 0 ]; then
@@ -34,39 +35,61 @@ if [ ${existsHDD} -gt 0 ]; then
       fi
       fstabOK=$(cat /etc/fstab | grep -c ${uuid})
       if [ ${fstabOK} -eq 1 ]; then
-         echo "OK - HDD is listed in /etc/fstab"
-         echo ""
-         echo "*** Mount HDD ***"
-         sudo mkdir /mnt/hdd
-         sudo mount -a
-         mountOK=$(df | grep -c /mnt/hdd)
-         if [ ${mountOK} -eq 1 ]; then
-           echo "OK - HDD is mounted"
-	         echo ""
+        echo "OK - HDD is listed in /etc/fstab"
+        echo ""
+        echo "*** Mount HDD ***"
+        sudo mkdir /mnt/hdd
+        sudo mount -a
+        mountOK=$(df | grep -c /mnt/hdd)
+        if [ ${mountOK} -eq 1 ]; then
+          echo "OK - HDD is mounted"
+	        echo ""
 
-           # set SetupState
-           echo "40" > /home/admin/.setup
+          # move SSH pub keys to HDD so that they survive an update
+          echo "moving SSH pub keys to HDD"
+          sudo cp -r /etc/ssh /mnt/hdd/ssh
+          sudo rm -rf /etc/ssh
+          sudo ln -s /mnt/hdd/ssh /etc/ssh
+          echo "OK"
+          echo ""
 
-           echo "*** Analysing HDD Content ***"
-           if [  -d "/mnt/hdd/${network}"  ]; then 
-             sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
-             sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
-             echo "Looks like the HDD is prepared with the Blockchain."
-             echo "Continuing with finishing the system setup ..."
-             ./60finishHDD.sh
-           else
-             # HDD is empty - let setupBlitz - display next options
-             ./10setupBlitz.sh
-           fi 
-	 else
+          # set SetupState
+          sudo sed -i "s/^setupStep=.*/setupStep=40/g" /home/admin/raspiblitz.info
+
+          echo "*** Analysing HDD Content ***"
+          if [  -d "/mnt/hdd/${network}"  ]; then 
+            sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
+            sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
+            echo "Looks like the HDD is prepared with the Blockchain."
+
+            if [ "${state}" = "recovering" ]; then
+              # when HDD got added on update/provisioning
+              echo "OK HDD got added ... returning to provisioning"
+              exit 1
+            else
+              # when normal setup
+              echo "Continuing with finishing the system setup ..."
+              ./60finishHDD.sh
+            fi
+
+          else
+            # HDD is empty - let setupBlitz - display next options
+            echo "HDD empty --> go setup"
+            ./10setupBlitz.sh
+          fi # END Analysing HDD Content
+
+	      else
            echo "FAIL - was not able to mount"
-	 fi
+	      fi # END Mount check
+
       else
       	echo "FAIL - was not able to edit /etc/fstab"
       fi 
+
     else
       echo "FAIL - the HDD is not in ext4 format AND named 'BLOCKCHAIN'"
     fi
+    
   fi
 else
   echo "FAIL - no HDD as device sda found"

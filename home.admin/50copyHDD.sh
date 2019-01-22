@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 echo ""
 echo "*** Check 1st HDD ***"
@@ -94,7 +94,7 @@ echo ""
 echo "---> You can now disconnect the 2nd HDD"
 
 # set SetupState
-echo "50" > /home/admin/.setup
+sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
 
 sleep 5
 ./60finishHDD.sh

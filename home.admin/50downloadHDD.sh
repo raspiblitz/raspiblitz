@@ -4,16 +4,19 @@ echo ""
 # *** BITCOIN (just mainnet) ***
 bitcoinList="" # url to list with other sources
 #bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
-bitcoinUrl="ftp://f00f278f:download@w0189aba.kasserver.com/"
-bitcoinSize=222000000 # 225096419-tolerance
+bitcoinUrl="ftp://f00f39c4:download@w0189aba.kasserver.com/"
+bitcoinSize=253000000 # 253827180-tolerance
 
 # *** LITECOIN ***
 litecoinList="" # url to list with other sources
-litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-07-29"
-litecoinSize=19180000 # 19184960-tolerance 
+litecoinUrl="ftp://anonymous:anonymous@ftp.rotzoll.de/pub/raspiblitz-litecoin-2018-11-30"
+litecoinSize=22220000 # 22221160-tolerance
 
-# load network
-network=`cat .network`
+# NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Run download.
+# When finished the warning comes up and behind WARNING: copy that number
+
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # settings based on network
 list=$bitcoinList
@@ -135,7 +138,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
  # Download failed
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
+  dialog --title " WARNING (${finalSize}) " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir} ;;
@@ -149,6 +152,9 @@ else
   echo "*** Moving Files ***"
   sudo mv ${targetDir}${targetPath} /mnt/hdd/${network}
   echo "OK"
+
+  # set SetupState
+  sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
 
   # continue setup
   ./60finishHDD.sh

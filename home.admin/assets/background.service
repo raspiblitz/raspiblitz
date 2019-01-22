@@ -1,0 +1,24 @@
+# Monitor the RaspiBlitz
+# /etc/systemd/system/background.service
+
+[Unit]
+Description=RaspiBlitz Background Monitoring Service
+Wants=bootstrap.service
+After=bootstrap.service
+
+# for use with sendmail alert (coming soon)
+#OnFailure=systemd-sendmail@%n
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/home/admin/_background.sh
+KillMode=process
+Restart=always
+TimeoutSec=10
+RestartSec=10
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

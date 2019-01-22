@@ -1,19 +1,29 @@
-#!/bin/sh
-echo ""
+#!/bin/bash
 
-# load network
-network=`cat .network`
+# CHECK WHAT IS ALREADY WORKING
+# check list from top down - so ./10setupBlitz.sh
+# and re-enters the setup process at the correct spot
+# in case it got interrupted
+echo "checking setup script"
 
-# check chain
-chain="test"
-isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-if [ ${isMainChain} -gt 0 ];then
-  chain="main"
+# INFOFILE on SD - state data from bootstrap & setup
+infoFile="/home/admin/raspiblitz.info"
+source ${infoFile}
+
+echo "network(${network})"
+echo "chain(${chain})"
+echo "setupStep(${setupStep})"
+
+if [ ${#network} -eq 0 ]; then
+  echo "FAIL: Something is wrong. There is no value for network in ${infoFile}."
+  echo "Should be at least default value. EXIT"
+  exit 1
 fi
 
-# get setup progress
-setupStep=$(sudo -u admin cat /home/admin/.setup)
+# if no setup step in info file init with 0
 if [ ${#setupStep} -eq 0 ];then
+  echo "Init setupStep=0"
+  echo "setupStep=0" >> ${infoFile}
   setupStep=0
 fi
 
@@ -21,14 +31,10 @@ fi
 if [ ${setupStep} -gt 89 ];then
   echo "FINISH by setupstep(${setupStep})"
   sleep 3
-  ./90finishSetup.sh
+  sudo ./90finishSetup.sh
+  sudo ./95finalSetup.sh
   exit 0
 fi
-
-# CHECK WHAT IS ALREADY WORKING
-# check list from top down - so ./10setupBlitz.sh
-# and re-enters the setup process at the correct spot
-# in case it got interrupted
 
 # check if lightning is running
 lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
@@ -37,7 +43,7 @@ if [ ${lndRunning} -eq 1 ]; then
   echo "LND is running ..."
   sleep 1
 
-  # check if LND is locked
+  # check if LND wallet exists and if locked
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
   locked=0
   # only when a wallet exists - it can be locked
@@ -57,7 +63,10 @@ if [ ${lndRunning} -eq 1 ]; then
   chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
   chainSyncing=1
   if [ ${#chainInfo} -gt 0 ];then
+    echo "check chaininfo" 
     chainSyncing=$(echo "${chainInfo}" | grep "true" -c)
+  else 
+    echo "chaininfo is zero" 
   fi
   if [ ${chainSyncing} -eq 1 ]; then
     echo "Sync Chain ..."
@@ -82,51 +91,70 @@ if [ ${lndRunning} -eq 1 ]; then
   # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
   echo "FINSIH ... "
   sleep 3
-  ./90finishSetup.sh
+  sudo ./90finishSetup.sh
+  sudo ./95finalSetup.sh
   exit 0
 
-fi
+fi #end - when lighting is running
 
 # check if bitcoin is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # double check
+  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 120
   bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+else
+  echo "${network} is running"  
 fi
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
   ./70initLND.sh
   exit 1
-fi
+else
+ echo "${network} still not running"  
+fi #end - when bitcoin is running
 
-# check if HDD is mounted
-mountOK=$( df | grep -c /mnt/hdd )
+# check if HDD is auto-mounted
+mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
-  # are there any signs of blockchain data
-  if [ -d "/mnt/hdd/${network}" ]; then
+  # are there any signs of blockchain data and activity
+  blockchainDataExists=$(ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
-    echo "TAIL Chain Network Log"
-    sudo tail /mnt/hdd/${network}/debug.log
-    echo ""
+  if [ ${blockchainDataExists} -eq 1 ]; then
+    if [ ${configExists} -eq 1 ]; then
+      ./XXdebugLogs.sh
+      echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
+      echo "It seems that something went wrong during sync/download/copy of the blockchain."
+      echo "Or something with the config is not correct."
+      echo "Sometimes a reboot helps --> sudo shutdown -r now"
+      exit 1
+    else 
+      echo "Got mounted blockchain, but no config and runnign service yet --> finish HDD"
+      ./60finishHDD.sh
+      exit 1
+    fi
+  fi
 
-    echo "UNKOWN STATE - there is blockain data folder, but blockchaind is not running"
-    echo "It seems that something went wrong during sync/download/copy of the blockchain."
-    echo "If you want start fresh --> sudo rm -r /mnt/hdd/${network}"
-    echo "Or something with the config is not correct."
+  # check if there is a download to continue
+  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
+  if [ ${torrentProgressExists} -eq 1 ]; then
+    echo "found torrent data .. resuming"
+    ./50torrentHDD.sh
     exit 1
   fi
 
   # check if there is a download to continue
-  downloadProgressExists=$(sudo ls /home/admin/.Download.out 2>/dev/null | grep ".Download.out" -c)
+  downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
-    echo "found download in progress .."
+    echo "found download in data .. resuming"
     ./50downloadHDD.sh
     exit 1
   fi
 
-  # HDD is empty - ask how to get Blockchain
+  # HDD is empty - get Blockchain
 
   #Bitcoin
   if [ ${network} = "bitcoin" ]; then
@@ -155,7 +183,7 @@ if [ ${mountOK} -eq 1 ]; then
    fi
 
   # set SetupState
-  echo "50" > /home/admin/.setup
+  sudo sed -i "s/^setupStep=.*/setupStep=50/g" ${infoFile}
 
   clear
   case $menuitem in
@@ -174,33 +202,26 @@ if [ ${mountOK} -eq 1 ]; then
   esac
   exit 1
 
-fi
+fi # end HDD is already auto-mountes
 
 
-# the HDD is not mounted --> very early stage of setup
+# the HDD is not auto-mounted --> very early stage of setup
 
 # if the script is called for the first time
-if [ ! -f "home/admin/.setup" ]; then
+if [ ${setupStep} -eq 0 ]; then
 
   # run initial user dialog
-  ./20initDialog.sh
+  ./20setupDialog.sh
 
-  # set SetupState to 10
-  echo "20" > /home/admin/.setup
+  # set SetupState
+  sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
 
-  # update system
-  echo ""
-  echo "*** Update System ***"
-  sudo apt-mark hold raspberrypi-bootloader
-  sudo apt-get update
-  sudo apt-get upgrade -f -y --allow-change-held-packages
-  echo "OK - System is now up to date"
 fi
 
 # the HDD is already ext4 formated and called blockchain
 formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
 if [ ${formatExt4OK} -eq 1 ]; then
-  echo "HDD was already inited or prepared"
+  echo "HDD was already initialized/prepared"
   echo "Now needs to be mounted"
   ./40addHDD.sh
   exit 1

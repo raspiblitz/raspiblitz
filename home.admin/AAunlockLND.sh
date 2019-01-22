@@ -1,8 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
-# load network
-network=`cat .network`
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  echo "gathering chain info ... please wait"
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
+fi
 
+clear
 echo ""
 echo "****************************************************************************"
 echo "Unlock LND Wallet --> lncli --chain=${network} unlock"
@@ -12,7 +18,6 @@ echo "You may wait some seconds until you get asked for password."
 echo "****************************************************************************"
 while :
   do
-    chain="$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')"
     sudo -u bitcoin /usr/local/bin/lncli --chain=${network} unlock
     sleep 4
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)

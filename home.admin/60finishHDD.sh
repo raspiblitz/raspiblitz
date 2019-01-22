@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 echo ""
 
-# load network
-network=`cat .network`
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
 
 echo "*** Checking HDD ***"
 mountOK=$(df | grep -c /mnt/hdd)
@@ -44,13 +44,11 @@ if [ ${mountOK} -eq 1 ]; then
    sudo systemctl daemon-reload
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service
-   echo "Giving ${network}d service 180 seconds to init - please wait ..."	
-   sleep 180
-   echo "OK - ${network}d started"
-   sleep 2 
+   echo "Started ... wait 10 secs"	
+   sleep 10
 
    # set SetupState
-   echo "60" > /home/admin/.setup
+   sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info
 
    ./10setupBlitz.sh
 

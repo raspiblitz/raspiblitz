@@ -1,8 +1,4 @@
-# load network
-network=`sudo cat /home/admin/.network`
-
-# load name of Blitz
-name=`sudo cat /home/admin/.hostname`
+source /mnt/hdd/raspiblitz.conf
 
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -16,15 +12,28 @@ chain="$(echo "${blockchaininfo}" | jq -r '.chain')"
 
 # 1) First try the "Rescanned through block" - it seems to happen if it restarts
 item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Rescanned through block" | tail -n1 | cut -d ']' -f2 | cut -d '(' -f2 | tr -dc '0-9')
+action="Rescanning"
 
 # 2) Second try the "Caught up to height" - thats the usual on first scan start
 if [ ${#item} -eq 0 ]; then
   item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "Caught up to height" | tail -n1 | cut -d ']' -f2 | tr -dc '0-9')
+  action="Catching-Up"
 fi
 
-# TODO next fallback try later here if necessary
+# 3) Third try the "LNWL: Filtering block" - thats the usual on later starts
+if [ ${#item} -eq 0 ]; then
+  item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "LNWL: Filtering block" | tail -n1 | cut -d ' ' -f7 | tr -dc '0-9')
+  action="Filtering"
+fi
+
+# if no progress info
+online=1
 if [ ${#item} -eq 0 ]; then
   item="?" 
+
+  # check if offline
+  # https://en.wikipedia.org/wiki/1.1.1.1
+  online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
 fi
 
 # get total number of blocks
@@ -34,6 +43,7 @@ scanstate="${item}/${total}"
 
 # get blockchain sync progress
 progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+progress=$(echo "${progress}*100" | bc)
 
 # check if blockchain is still syncing
 heigh=6
@@ -43,24 +53,36 @@ isWaitingBlockchain=$( sudo -u bitcoin tail -n 2 /mnt/hdd/lnd/logs/${network}/${
 if [ ${isWaitingBlockchain} -gt 0 ]; then
   isInitialChainSync=1
 fi
-if [ ${isInitialChainSync} -gt 0 ]; then
+if [ ${online} -eq 0 ]; then
+    heigh=7
+    width=44
+    infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.1.1.1\n Local IP is ${localip}\n Please check cables and router.")
+elif [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
-  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
+  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress} %\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
   if [ "$USER" = "admin" ]; then
     heigh=6
     width=53
-    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    infoStr=$(echo " Waiting for final Blockchain Sync\n Progress: ${progress} %\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
   fi
 else
   heigh=7
-  infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
-  if [ "$USER" = "admin" ]; then
-    heigh=6
-    width=53
-    infoStr=$(echo " Lightning Rescanning Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+  # check if wallet has any UTXO
+  # reason see: https://github.com/lightningnetwork/lnd/issues/2326
+  txlines=$(sudo -u bitcoin lncli listchaintxns 2>/dev/null | wc -l)
+  # has just 4 lines if empty
+  if [ ${txlines} -eq 4 ]; then
+    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n re-rescan every start until funding\n ssh admin@${localip}\n Password A")
+  else
+    infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some time\n ssh admin@${localip}\n Password A")
+    if [ "$USER" = "admin" ]; then
+      heigh=6
+      width=53
+      infoStr=$(echo " Lightning ${action} Blockchain\n Progress: ${scanstate}\n Please wait - this can take some long time.\n Its OK to close terminal and ssh back in later.")
+    fi
   fi
 fi
 
 # display progress to user
 sleep 3
-dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${name})" --infobox "${infoStr}" ${heigh} ${width}
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})" --infobox "${infoStr}" ${heigh} ${width}

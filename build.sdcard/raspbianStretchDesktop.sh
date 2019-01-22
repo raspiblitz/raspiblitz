@@ -1,24 +1,127 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2018-06-27)
+# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 8636ab9fdd8f58a8ec7dde33b83747696d31711d17ef68267dbbcd6cfb968c24
+# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
 
 echo ""
-echo "***************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.93*"
-echo "***************************************"
+echo "*****************************************"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
+echo "*****************************************"
 echo ""
 
+# 1st optional parameter is the BRANCH to get code from when
+# provisioning sd card with raspiblitz assets/scripts later on
+echo "*** CHECK INPUT PARAMETERS ***"
+wantedBranch="$1"
+if [ ${#wantedBranch} -eq 0 ]; then
+  wantedBranch="master"
+fi
+echo "will use code from branch --> '${wantedBranch}'"
+
+# 2nd optional parameter is the GITHUB-USERNAME to get code from when
+# provisioning sd card with raspiblitz assets/scripts later on
+# if 2nd paramter is used - 1st is mandatory
+echo "*** CHECK INPUT PARAMETERS ***"
+githubUser="$2"
+if [ ${#githubUser} -eq 0 ]; then
+  githubUser="rootzoll"
+fi
+echo "will use code from user --> '${githubUser}'"
+
+sleep 3
+
 echo ""
-echo "*** RASPI CONFIG ***"
+echo "*** CHECK BASE IMAGE ***"
+
+# armv7=32Bit , armv8=64Bit
+echo "Check if Linux ARM based ..." 
+isARM=$(uname -m | grep -c 'arm')
+if [ ${isARM} -eq 0 ]; then
+  echo "!!! FAIL !!!"
+  echo "Can just build on ARM Linux, not on:"
+  uname -m
+  exit 1
+fi
+echo "OK running on Linux ARM architecture."
+
+# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
+echo "Detect Base Image ..." 
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+if [ "${baseImage}" = "?" ]; then
+  cat /etc/os-release 2>/dev/null
+  echo "!!! FAIL !!!"
+  echo "Base Image cannot be detected or is not supported."
+  exit 1
+else
+  echo "OK running ${baseImage}"
+fi
+
+# fixing locales for build
+# https://github.com/rootzoll/raspiblitz/issues/138
+# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
+# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
+echo ""
+echo "*** FIXING LOCALES FOR BUILD ***"
+sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+sudo locale-gen
+export LANGUAGE=en_GB.UTF-8
+export LANG=en_GB.UTF-8
+export LC_ALL=en_GB.UTF-8
+
+# update debian
+echo ""
+echo "*** UPDATE DEBIAN ***"
+sudo apt-get update
+sudo apt-get upgrade -f -y --allow-change-held-packages
+
+# special prepare when DietPi
+if [ "${baseImage}" = "dietpi" ]; then
+  echo ""
+  echo "*** PREPARE DietPi ***"
+  echo "renaming dietpi user ti pi"
+  sudo usermod -l pi dietpi
+  echo "install pip"
+  sudo apt-get update
+  sudo apt-get remove -y fail2ban
+  sudo apt-get install -y build-essential
+  sudp apt-get install -y python-pip
+fi
+
+# special prepare when Raspbian
+if [ "${baseImage}" = "raspbian" ]; then
+  echo ""
+  echo "*** PREPARE Raspbian ***"
+  # do memory split (16MB)
+  sudo raspi-config nonint do_memory_split 16
+  # set to wait until network is available on boot (0 seems to yes)
+  sudo raspi-config nonint do_boot_wait 0
+  # set WIFI country so boot does not block
+  sudo raspi-config nonint do_wifi_country US
+  # extra: remove some big packages not needed
+  sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
+  sudo apt-get clean
+  sudo apt-get -y autoremove
+fi
+
+echo ""
+echo "*** CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
 
-# set new default passwort for pi and root user
+# set new default passwort for root user
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
@@ -29,30 +132,15 @@ sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autol
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
-# do memory split (16MB)
-sudo raspi-config nonint do_memory_split 16
-
-# set to wait until network is available on boot (0 seems to yes)
-sudo raspi-config nonint do_boot_wait 0
-
-# autodetect and set your timezone
-pip install -U tzupdate
-sleep 2
-sudo tzupdate
-
 echo ""
 echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
 sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 
-# extra: remove some big packages not needed
-sudo apt-get remove -y --purge libreoffice*
-sudo apt-get clean
-sudo apt-get -y autoremove
+# installs bandwidth monitoring for future statistics
+sudo apt-get install -y vnstat
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
@@ -83,13 +171,6 @@ sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
 echo ""
-echo "*** HARDENING ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
-
-# fail2ban (no config required)
-sudo apt-get install -y fail2ban
-
-echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#increase-your-open-files-limit
 
@@ -109,7 +190,13 @@ echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.17.0"
+bitcoinVersion="0.17.0.1"
+
+# needed to make sure download is not changed
+# calulate with sha256sum and also check with SHA256SUMS.asc
+bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
+
+# needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
@@ -117,34 +204,29 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
-if [ ! -f "./bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz" ]
+binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]
 then
     echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
 fi
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/test.rc4/SHA256SUMS.asc
-if [ ! -f "./SHA256SUMS.asc" ]
-then
-    echo "!!! FAIL !!! Download SHA256SUMS.asc not success."
-    exit 1
-fi
-sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
-if [ ! -f "./laanwj-releases.asc" ]
-then
-    echo "!!! FAIL !!! Download laanwj-releases.asc not success."
-    exit 1
-fi
 
-# test checksum
-checksum=$(sha256sum --check SHA256SUMS.asc --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
-if [ ${checksum} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Bitcoin download checksum not OK"
+# check binary is was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
   exit 1
 fi
 
+
 # check gpg finger print
+sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
+if [ ! -f "./laanwj-releases.asc" ]
+then
+  echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+  exit 1
+fi
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
@@ -152,6 +234,7 @@ if [ ${fingerprint} -lt 1 ]; then
   exit 1
 fi
 gpg --import ./laanwj-releases.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
@@ -163,9 +246,14 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   exit 1
 fi
 
+# correct versions for install if needed
+if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
+ bitcoinVersion="0.17.0"
+fi 
+
 # install
-sudo -u admin tar -xvf bitcoin-${bitcoinVersion}rc4-arm-linux-gnueabihf.tar.gz
-sudo install -m 0755 -o root -g root -t /usr/local/bin bitcoin-${bitcoinVersion}/bin/*
+sudo -u admin tar -xvf ${binaryName}
+sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
 sleep 3
 installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
@@ -180,9 +268,22 @@ echo "*** LITECOIN ***"
 
 # set version (change if update is available)
 litecoinVersion="0.16.3"
+litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
 cd /home/admin/download
-sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
-sudo -u admin tar -xvf litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz
+
+# download
+binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+
+# check download
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+  exit 1
+fi
+
+# install
+sudo -u admin tar -xvf ${binaryName}
 sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
 installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
 if [ ${installed} -lt 1 ]; then
@@ -195,65 +296,65 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
-#lndVersion="0.5-beta-rc1"
-#olaoluwaPGP="65317176B6857F98834EDBE8964EA263DD637C21"
-#
-# get LND resources
-#cd /home/admin/download
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/lnd-linux-arm-v${lndVersion}.tar.gz
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-#sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-#sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
-## test checksum
-#checksum=$(sha256sum --check manifest-v${lndVersion}.txt --ignore-missing 2>/dev/null | grep '.tar.gz: OK' -c)
-#if [ ${checksum} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND download checksum not OK"
-#  exit 1
-#fi
-## check gpg finger print
-#fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
-#if [ ${fingerprint} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-#  exit 1
-#fi
-#gpg --import ./pgp_keys.asc
-#sleep 2
-#verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig manifest-v${lndVersion}.txt 2>&1)
-#goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-#echo "goodSignature(${goodSignature})"
-#correctKey=$(echo ${verifyResult} |  grep "using RSA key ${olaoluwaPGP: -16}" -c)
-#echo "correctKey(${correctKey})"
-#if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-#    exit 1
-#fi
-## install
-#sudo -u admin tar -xzf lnd-linux-arm-v${lndVersion}.tar.gz
-#sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-arm-v${lndVersion}/*
-#sleep 3
-#installed=$(sudo -u admin lnd --version | grep "${lndVersion}" -c)
-#if [ ${installed} -lt 1 ]; then
-#  echo ""
-#  echo "!!! BUILD FAILED --> Was not able to install LND version(${lndVersion})"
-#  exit 1
-#fi
+lndVersion="0.5.1-beta"
+lndSHA256="c8be77708fe95d5076fa6988229100598c14ae6c54e92a56d5f09f3e17732244"
+olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
-##### Build from Source
-# To quickly catch up get latest patches if needed
-repo="github.com/lightningnetwork/lnd"
-commit="25145acc46cc5d18e4e348eed097300b1391d2a7"
-# BUILDING LND FROM SOURCE
+# get LND resources
+cd /home/admin/download
+binaryName="lnd-linux-armv7-v${lndVersion}.tar.gz"
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget https://keybase.io/roasbeef/pgp_keys.asc
+
+# check binary is was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+  exit 1
+fi
+
+# check gpg finger print
+fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
+if [ ${fingerprint} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> LND download author PGP not OK"
+  exit 1
+fi
+gpg --import ./pgp_keys.asc
+sleep 3
+verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
+goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+echo "goodSignature(${goodSignature})"
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${olaoluwaPGP}" -c)
+echo "correctKey(${correctKey})"
+if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  exit 1
+fi
+
+# install
+sudo -u admin tar -xzf ${binaryName}
+sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-armv7-v${lndVersion}/*
+sleep 3
+installed=$(sudo -u admin lnd --version)
+if [ ${#installed} -eq 0 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> Was not able to install LND"
+  exit 1
+fi
+
+# Go is needed for ZAP connect later
 echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
-if [ ! -f "./go1.10.linux-armv6l.tar.gz" ]
+wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.10.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
 sudo chmod 777 /usr/local/gocode
@@ -261,29 +362,52 @@ export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 export GOPATH=/usr/local/gocode
 export PATH=$PATH:$GOPATH/bin
-echo "*** Build LND from Source ***"
-go get -d $repo
-# make sure to always have the same code (commit) to build
-# TODO: To update lnd -> change to latest commit
-cd $GOPATH/src/$repo
-sudo git checkout $commit
-make && make install
-sudo chmod 555 /usr/local/gocode/bin/lncli
-sudo chmod 555 /usr/local/gocode/bin/lnd
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
-sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
-lndVersionCheck=$(lncli --version)
-echo "LND VERSION: ${lndVersionCheck}"
-if [ ${#lndVersionCheck} -eq 0 ]; then
-  echo "FAIL - Something went wrong with building LND from source."
-  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
-  exit 1
-fi
 echo ""
-echo "** Link to /usr/local/bin ***"
-sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
-sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
+
+##### Build from Source
+## To quickly catch up get latest patches if needed
+#repo="github.com/lightningnetwork/lnd"
+#commit="3f57f65bf0cb710159b0182391d1d75e9e3005bc"
+## BUILDING LND FROM SOURCE
+#echo "*** Installing Go ***"
+#wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+#if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+#then
+#    echo "!!! FAIL !!! Download not success."
+#    exit 1
+#fi
+#sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+#sudo rm *.gz
+#sudo mkdir /usr/local/gocode
+#sudo chmod 777 /usr/local/gocode
+#export GOROOT=/usr/local/go
+#export PATH=$PATH:$GOROOT/bin
+#export GOPATH=/usr/local/gocode
+#export PATH=$PATH:$GOPATH/bin
+#echo ""
+#echo "*** Build LND from Source ***"
+#go get -d $repo
+## make sure to always have the same code (commit) to build
+## TODO: To update lnd -> change to latest commit
+#cd $GOPATH/src/$repo
+#sudo git checkout $commit
+#make && make install
+#sudo chmod 555 /usr/local/gocode/bin/lncli
+#sudo chmod 555 /usr/local/gocode/bin/lnd
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
+#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
+#lndVersionCheck=$(lncli --version)
+#echo "LND VERSION: ${lndVersionCheck}"
+#if [ ${#lndVersionCheck} -eq 0 ]; then
+#  echo "FAIL - Something went wrong with building LND from source."
+#  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
+#  exit 1
+#fi
+#echo ""
+#echo "** Link to /usr/local/bin ***"
+#sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
+#sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
@@ -296,6 +420,7 @@ sudo apt-get -y install exfat-fuse
 
 # for blockchain torrent download
 sudo apt-get -y install transmission-cli
+sudo apt-get -y install rtorrent
 
 # for background downloading
 sudo apt-get -y install screen
@@ -308,12 +433,24 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # move files from gitclone
 cd /home/admin/
-sudo -u admin git clone https://github.com/rootzoll/raspiblitz.git
+sudo -u admin git clone -b ${wantedBranch} https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin chmod +x /home/admin/config.scripts/*.sh
+
+
+# prifile path for admin
+sudo bash -c "echo '' >> /home/admin/.profile"
+sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
+sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 
 # bash aoutstart for admin
+sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 
@@ -325,14 +462,53 @@ sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
 sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
 sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 
-# create /home/pi/setup.sh - which will get executed after reboot by autologin pi user
-cat > /home/pi/setup.sh <<EOF
+# create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
+cat > /home/admin/setup.sh <<EOF
 
 # make LCD screen rotation correct
 sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
-sudo chmod +x /home/pi/setup.sh
+sudo chmod +x /home/admin/setup.sh
+
+echo ""
+echo "*** HARDENING ***"
+# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
+
+# fail2ban (no config required)
+sudo apt-get install -y fail2ban
+
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BOOSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
+
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp ./assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
+# Prepare for TOR service
+echo "*** Adding Tor Sources to sources.list ***"
+echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "OK"
+echo ""
+echo "*** Installing dirmngr ***"
+sudo apt install dirmngr
+echo ""
+echo "*** Fetching GPG key ***"
+sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
+sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810
+sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
+echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -346,18 +522,65 @@ echo ""
 echo "Maybe take the chance and look thru the output above if you can spot any errror."
 echo ""
 echo "After final reboot - your SD Card Image is ready."
+echo ""
+echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo ""
 echo "Press ENTER to install LCD and reboot ..."
 read key
 
 # give Raspi a default hostname (optional)
 sudo raspi-config nonint do_hostname "RaspiBlitz"
 
-# *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
-# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-cd /home/admin/
-sudo apt-mark hold raspberrypi-bootloader
-git clone https://github.com/goodtft/LCD-show.git
-sudo chmod -R 755 LCD-show
-sudo chown -R admin:admin LCD-show
-cd LCD-show/
-sudo ./LCD35-show
+# *** Display selection ***
+dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
+defaultDisplay=$?
+
+if [[ $defaultDisplay -eq 0 ]]
+then
+  # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
+  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+  cd /home/admin/
+  sudo apt-mark hold raspberrypi-bootloader
+  git clone https://github.com/goodtft/LCD-show.git
+  sudo chmod -R 755 LCD-show
+  sudo chown -R admin:admin LCD-show
+  cd LCD-show/
+  sudo ./LCD35-show
+else
+  # Download and install the driver
+  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+
+  cd /boot
+  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
+  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
+  cat <<EOF >> config.txt
+
+dtparam=spi=off
+dtparam=i2c_arm=off
+
+# Set screen size and any overscan required
+overscan_left=0
+overscan_right=0
+overscan_top=0
+overscan_bottom=0
+framebuffer_width=800
+framebuffer_height=480
+
+
+enable_dpi_lcd=1
+display_default_lcd=1
+dpi_group=2
+dpi_mode=87
+dpi_output_format=0x6f015
+
+# set up the size to 800x480
+hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
+
+#rotate screen
+display_rotate=3
+
+dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
+EOF
+  init 6
+fi

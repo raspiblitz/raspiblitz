@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 _temp="./download/dialog.$$"
 _error="./.error.out"
 
-# load network and chain info
-network=`cat .network`
-chain=$(sudo -bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  echo "gathering chain info ... please wait"
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
+fi
 
 # set ntwork map info
 networkMap="https://lnmainnet.gaben.win"
@@ -29,7 +33,7 @@ if [ ${#_input} -eq 0 ]; then
 fi
 
 # build command
-command="lncli --chain=${network} connect ${_input}"
+command="lncli --chain=${network} --network=${chain}net connect ${_input}"
 
 # info output
 clear
@@ -88,7 +92,7 @@ else
 
   # check if the node is now in peer list
   pubkey=$(echo $_input | cut -d '@' -f1)
-  isPeer=$(lncli --chain=${network} listpeers 2>/dev/null| grep "${pubkey}" -c)
+  isPeer=$(lncli --chain=${network} --network=${chain}net listpeers 2>/dev/null| grep "${pubkey}" -c)
   if [ ${isPeer} -eq 0 ]; then
 
     # basic error message

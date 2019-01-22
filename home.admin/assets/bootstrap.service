@@ -1,0 +1,17 @@
+# Boostrap the RaspiBlitz
+# /etc/systemd/system/bootstrap.service
+
+[Unit]
+Description=execute on every startup before everything else
+After=network.target
+
+[Service]
+User=root
+Group=root
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/home/admin/_bootstrap.sh
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

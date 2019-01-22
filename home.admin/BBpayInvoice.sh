@@ -2,15 +2,19 @@
 _temp="./download/dialog.$$"
 _error="./.error.out"
 
-# load network and chain info
-network=`cat .network`
-chain=$(sudo -bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
+# load raspiblitz config data (with backup from old config)
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#chain} -eq 0 ]; then
+  echo "gathering chain info ... please wait"
+  chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
+fi
 
 echo ""
 echo "*** Precheck ***"
 
 # check if chain is in sync
-chainInSync=$(lncli --chain=${network} getinfo | grep '"synced_to_chain": true' -c)
+chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
 if [ ${chainInSync} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
@@ -23,7 +27,7 @@ fi
 
 # check number of connected peers
 echo "check for open channels"
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} listchannels 2>/dev/null | grep chan_id -c)
+openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | grep chan_id -c)
 if [ ${openChannels} -eq 0 ]; then
   echo ""
   echo "!!!!!!!!!!!!!!!!!!!"
@@ -71,7 +75,7 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-command="lncli --chain=${network} sendpayment --pay_req=${invoice}"
+command="lncli --chain=${network} --network=${chain}net sendpayment --force --pay_req=${invoice}"
 
 # info output
 clear
