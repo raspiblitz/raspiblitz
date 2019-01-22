@@ -29,7 +29,7 @@ Now only the bash prompt opens
 
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
 
-see my output: [sdcard_build_output](raspiblitz/DroidBllitz/sdcard_build_output)  
+see my output: [sdcard_build_output](sdcard_build_output.html)  
 The only fault appears to be with `fail2ban`
 
  
@@ -48,6 +48,6 @@ It appeared as `sdb` and as `sda` after reboot:
  ssh admin@[IP-OF-YOUR-DROIDBLITZ]  
 ./60finishHDD.sh 
 
-got the same output here: [initial_setup_output](DietPi/initial_setup_output)
+got the same output here: [initial_setup_output](initial_setup_output.html)
 
 and when restarted and built a fresh sdcard.
