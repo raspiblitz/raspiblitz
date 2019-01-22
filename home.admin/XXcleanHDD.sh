@@ -13,14 +13,12 @@ if [ "${extraParameter}" = "-all" ]; then
     sudo systemctl stop lnd.service 2>/dev/null
 
     # delete plain all on HDD
-    sudo cd /mnt/hdd
-    rm -R -- */
-    cd
+    sudo rm -rfv /mnt/hdd/*
 
 else
 
     echo "!!!! This will DELETE your personal data & POSSIBLE FUNDS from the HDD !!!!"
-    echo "--> It will keep Blockchain data - sou you dont have to download/copy again."
+    echo "--> It will keep Blockchain data - so you dont have to download/copy again."
     echo "--> If you want to delete also blockchain data, please run with '-all' parameter."
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
