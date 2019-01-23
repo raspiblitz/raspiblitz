@@ -67,6 +67,8 @@ else
 
 fi
 
+echo "*************************"
 echo "OK - the HDD is now clean"
+echo "*************************"
 echo "reboot -> sudo shutdown -r now"
 echo "power off -> sudo shutdown now"
