@@ -12,8 +12,10 @@ sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
 
-echo ""
-echo "*** Instructions to COPY BLOCKCHAIN from another computer (only MAINNET) ***"
+clear
+echo "************************************************************************************"
+echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another computer"
+echo "************************************************************************************"
 echo ""
 echo "You can use the blockchain from another bitcoin-core client with version greater or equal"
 echo "to 0.17.1 with transaction index switched on (txindex=1 in the bitcoin.conf)."
@@ -21,17 +23,24 @@ echo ""
 echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
 echo "to be connected to the same local network."
 echo ""
-echo "Open a terminal on the other computer and change into the directory that constains the"
+echo "Open a terminal on the source computer and change into the directory that constains the"
 echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'indexes'".
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
-echo "Copy, Paste and Execute the following commands - line by line:"
-echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
-echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
-echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
+echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
+echo "sudo scp -r ./chainstate ./indexes ./blocks ./testnet3 bitcoin@${localip}:/home/bitcoin/.bitcoin"
 echo ""
-echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
-echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
+echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
+echo "It can take multiple hours until transfer is complete - be patient."
+echo "************************************************************************************"
+echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
+#echo "Copy, Paste and Execute the following commands - line by line:"
+#echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
+#echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
+#echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
+#echo ""
+#echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
+#echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
 read key
 
 # unlink bitcoin user (will created later in setup again)
