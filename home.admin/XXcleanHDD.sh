@@ -7,12 +7,19 @@ if [ "${extraParameter}" = "-all" ]; then
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
 
+    echo "stopping services ... (please wait)"
+    echo "- swap"
     sudo dphys-swapfile swapoff
+    echo "- background"
+    sudo systemctl stop background 2>/dev/null
+    echo "- lnd"
+    sudo systemctl stop lnd.service 2>/dev/null
+    echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
     sudo systemctl stop litecoind.service 2>/dev/null
-    sudo systemctl stop lnd.service 2>/dev/null
 
     # delete plain all on HDD
+    echo "cleaning HDD ... (please wait)"
     sudo rm -rfv /mnt/hdd/*
 
 else
@@ -23,12 +30,19 @@ else
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
 
+    echo "stopping services ... (please wait)"
+    echo "- swap"
     sudo dphys-swapfile swapoff
+    echo "- background"
+    sudo systemctl stop background 2>/dev/null
+    echo "- lnd"
+    sudo systemctl stop lnd.service 2>/dev/null
+    echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
     sudo systemctl stop litecoind.service 2>/dev/null
-    sudo systemctl stop lnd.service 2>/dev/null
 
     # just delete selective
+    echo "selective delete ... (please wait)"
     sudo rm -f -r /mnt/hdd/lnd
     sudo rm -f -r /mnt/hdd/ssh
     sudo rm -f /mnt/hdd/swapfile
