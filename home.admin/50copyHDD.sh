@@ -28,7 +28,7 @@ echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'inde
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
-echo "sudo scp -r ./chainstate ./indexes ./blocks ./testnet3 bitcoin@${localip}:/home/bitcoin/.bitcoin"
+echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin"
 echo ""
 echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
