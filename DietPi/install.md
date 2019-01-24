@@ -2,12 +2,12 @@ Working with the ODroid HC1 and this image: https://dietpi.com/downloads/images/
 
 https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9
 
-Login to DietPi
-username = root
+Login to DietPi  
+username = root  
 password = dietpi  
 DietPi also comes pre-installed with Dropbear SSH Server.
 
-`ssh root@[IP-OF-YOUR-DIETPI]`
+`ssh root@[IP-OF-YOUR-DIETPI]`  
 password: `dietpi`
 
 automatic apt update & apt upgrade on first logon and reboots
@@ -23,7 +23,7 @@ run: `ssh-keygen -f "/home/buidl/.ssh/known_hosts" -R "dietpi.IP"`
 `ssh root@[IP-OF-YOUR-DIETPI]`  
 Ok in the menu  
 "Do you wish to continue with DietPi as a pure minimal image?"  
-Ok
+Ok  
 Reboots again
 
 `ssh root@[IP-OF-YOUR-DIETPI]`
@@ -45,13 +45,13 @@ It appeared as `sdb` and as `sda` after reboot:
 ![](after_reboot_with_2nd_HDD.png)
 
  Copied the blockchain manually on my main computer to the root /bitcoin folder  
- Reinserted the HDDto the ODroid and booted up
+ Reinserted the HDD to the ODroid and booted up
  
  ssh admin@[IP-OF-YOUR-DROIDBLITZ]  
 `./60finishHDD.sh` 
 
 got this output here: [initial_setup_output](initial_setup_output.html)
-and the same when tried again with a fresh sdcard.
+and the same when tried again with a rebuilt sdcard.
 
 Stuck here now: 
 ```
