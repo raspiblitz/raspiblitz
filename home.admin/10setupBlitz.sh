@@ -164,7 +164,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
     C "COPY     --> USE BLOCKCHAINDATA from another computer" \
-    S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    S "SYNC     --> MAINNET thru Bitoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then

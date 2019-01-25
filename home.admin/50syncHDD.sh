@@ -5,23 +5,28 @@ source /home/admin/raspiblitz.info 2>/dev/null
 
 # only show warning when bitcoin
 if [ "$network" = "bitcoin" ]; then
-  msg=""
-  msg="$msg Syncing is just practical for Bitcoin TESTNET!\n"  
-  msg="$msg TESTNET is OK for learning, testing and development.\n"
-  msg="$msg MAINNET is where things get real and fun.\n"
+  msg="The RaspberryPi has very limited CPU power."
+  msg="$msg To sync & validate the complete blockchain\n"
+  msg="$msg can take multiple days - even weeks!\n"
+  msg="$msg Its recommended to use another option.\n"
   msg="$msg \n"
-  msg="$msg Syncing MAINNET on a raspberry is NOT practical.\n"
-  msg="$msg If you want MAINET, go back & try DOWNLOAD.\n"
-  msg="$msg \n" 
-  msg="$msg Do you really want to work with ONLY TESTNET?"
+  msg="$msg So do you really want start syncing now?"
   
-  dialog --title " WARNING " --yesno "${msg}" 12 57
+  dialog --title " WARNING " --yesno "${msg}" 11 57
   response=$?
   case $response in
      0) echo "--> OK";;
      1) ./10setupBlitz.sh; exit 1;;
      255) ./10setupBlitz.sh; exit 1;;
   esac
+
+  clear
+  echo "********************************"
+  echo "This is madness. This is Sparta!"
+  echo "********************************"
+  echo ""
+  sleep 3
+
 fi  
 
 echo "*** Activating Blockain Sync ***"
