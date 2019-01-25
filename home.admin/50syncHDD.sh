@@ -5,7 +5,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 
 # only show warning when bitcoin
 if [ "$network" = "bitcoin" ]; then
-  msg="The RaspberryPi has very limited CPU power."
+  msg=" The RaspberryPi has very limited CPU power.\n"
   msg="$msg To sync & validate the complete blockchain\n"
   msg="$msg can take multiple days - even weeks!\n"
   msg="$msg Its recommended to use another option.\n"
