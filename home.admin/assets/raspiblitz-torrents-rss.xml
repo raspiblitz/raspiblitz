@@ -12,12 +12,15 @@
     <description>Help on seeding the lastest RaspiBlitz Torrent Seeds</description>
     <language>en-en</language>
 
+
     <item>
       <pubDate>Fri, 25 Jan 2019 21:27:31 -0500</pubDate>
       <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
       <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
       <description>please seed</description>
       <torrent:contentLength>2405115</torrent:contentLength>
+      <torrent:infoHash>832c8f29e74e0efb1142a69d84d366caa94b3ad6</torrent:infoHash>
+      <torrent:magnetURI><![CDATA[magnet:?xt=urn:btih:832c8f29e74e0efb1142a69d84d366caa94b3ad6&dn=raspiblitz-bitcoin1-2018-10-13-bas]]></torrent:magnetURI>
       <torrent:seeds>0</torrent:seeds>
       <torrent:peers>0</torrent:peers>
       <torrent:verified>0</torrent:verified>
