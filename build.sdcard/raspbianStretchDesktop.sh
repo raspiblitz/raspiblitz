@@ -92,13 +92,13 @@ sudo apt-get upgrade -f -y --allow-change-held-packages
 if [ "${baseImage}" = "dietpi" ]; then
   echo ""
   echo "*** PREPARE DietPi ***"
-  echo "renaming dietpi user ti pi"
+  echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
   sudo apt-get install -y build-essential
-  sudp apt-get install -y python-pip
+  sudo apt-get install -y python-pip
 fi
 
 # special prepare when Raspbian
