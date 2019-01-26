@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rss version="2.0">
+
+  <channel>
+
+    <!-- Info FEED: check if valid on https://validator.w3.org/feed/check.cgi  -->
+    <!-- Info ITEMS: links http (not https) and get length of .torrent file from 'ls -la' info -->
+
+    <title>RaspiBlitz TorrentSeeds RSS</title>
+    <link>http://github.com/rootzoll/raspiblitz</link>
+    <description>Help on seeding the lastest RaspiBlitz Torrent Seeds</description>
+    <language>en-en</language>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
+      <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
+      <description>please seed</description>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent" 
+        length="2405115"
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent</guid>
+      <title>raspiblitz-bitcoin1-2019-01-16-update.torrent</title>
+      <description>please seed</description>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent" 
+        length="911894"
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+  </channel>
+
+</rss>
