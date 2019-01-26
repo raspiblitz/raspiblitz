@@ -2,6 +2,8 @@
 
 ## How to update my RaspiBlitz (AFTER version 0.98)?
 
+*Notice: Please be sure that your base image you started with was version 0.98 or greater. If you used the now deprecated XXupdateScripts.sh script to update before, you might have started with an older base image. If you never run that script, your good.*
+
 To prepare the RaspiBlitz update:
 
 - main menu > OFF
