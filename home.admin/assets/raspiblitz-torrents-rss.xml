@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<rss version="2.0" xmlns:torrent="http://xmlns.ezrss.it/0.1/">
+<rss version="2.0">
 
   <channel>
 
     <title>RaspiBlitz TorrentSeeds RSS</title>
-    <link>http://github.com/rootzoll/raspiblitz</link>
     <description>Help on seeding the lastest RaspiBlitz Torrent Seeds</description>
     <language>en-en</language>
+
+    <!-- Upload new versions to wiki.fulmo.org -->
+    <link>http://wiki.fulmo.org/downloads/raspiblitz-torrents-rss.xml</link>
 
     <item>
       <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
