@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<rss version="2.0">
+<rss version="2.0" xmlns:torrent="http://xmlns.ezrss.it/0.1/">
 
   <channel>
 
@@ -17,6 +17,11 @@
       <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
       <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
       <description>please seed</description>
+      <torrent:contentLength>2405115</torrent:contentLength>
+      <torrent:seeds>0</torrent:seeds>
+      <torrent:peers>0</torrent:peers>
+      <torrent:verified>0</torrent:verified>
+      <torrent:fileName>raspiblitz-bitcoin1-2018-10-13-base.torrent</torrent:fileName>
       <enclosure 
         url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent" 
         length="2405115"
