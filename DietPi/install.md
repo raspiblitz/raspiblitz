@@ -30,7 +30,7 @@ Reboots again
 Now only the bash prompt opens
 
 # `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
-wget https://github.com/openoms/HardwareNode/blob/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh
+wget https://github.com/openoms/HardwareNode/blob/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh
 
 
 see my output: [sdcard_build_output](sdcard_build_output.html)  
