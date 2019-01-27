@@ -1,0 +1,926 @@
+ ────────────────────────────────────────────────
+ DietPi | Sun 27/01/19 - 10:45
+ ────────────────────────────────────────────────
+ v6.19.7 | Odroid XU3/XU4/HC1/HC2 (armv7l)
+ ────────────────────────────────────────────────
+ eth0 | 192.168.1.175
+ ────────────────────────────────────────────────
+ DietPi Team     : Daniel Knight (founder), MichaIng, K-Plan
+ Image           : DietPi Core Team (pre-image: Meveric)
+ Web             : https://DietPi.com | https://twitter.com/dietpi_
+ Patreon Legends : PINE64 community
+ Donate          : https://DietPi.com/#donate
+ DietPi Hosting  : Powered by https://MyVirtualServer.com
+
+ dietpi-launcher  = All the DietPi programs in one place.
+ dietpi-config    = Feature rich configuration tool for your device.
+ dietpi-software  = Select optimized software for installation.
+ htop             = Resource monitor.
+ cpu              = Shows CPU information and stats.
+
+Starting the main menu ...
+ls: cannot access '/mnt/hdd/raspiblitz.conf': No such file or directory
+setup still in progress - setupStep(60)
+checking bitcoind - please wait ..
+can take longer if device was off or first time
+
+ RaspiBlitz 192.168.1.175 - Welcome
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              ┌──────────────────────────────────────┐
+                              │ Waiting for bitcoind to get ready.   │  
+                              │ --->  Verifying blocks...            │  
+                              │ Can take longer if device was off.   │  
+                              └──────────────────────────────────────┘  
+                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ RaspiBlitz 192.168.1.175 - Welcome
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              ┌──────────────────────────────────────┐
+                              │ Waiting for bitcoind to get ready.   │  
+                              │ --->  Verifying blocks...            │  
+                              │ Can take longer if device was off.   │  
+                              └──────────────────────────────────────┘  
+                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ RaspiBlitz 192.168.1.175 - Welcome
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              ┌──────────────────────────────────────┐
+                              │ Waiting for bitcoind to get ready.   │  
+                              │ --->  Verifying blocks...            │  
+                              │ Can take longer if device was off.   │  
+                              └──────────────────────────────────────┘  
+                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ RaspiBlitz 192.168.1.175 - Welcome
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              ┌──────────────────────────────────────┐
+                              │ Waiting for bitcoind to get ready.   │  
+                              │ --->  Verifying blocks...            │  
+                              │ Can take longer if device was off.   │  
+                              └──────────────────────────────────────┘  
+                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ RaspiBlitz 192.168.1.175 - Welcome
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              ┌──────────────────────────────────────┐
+                              │ Waiting for bitcoind to get ready.   │  
+                              │ --->  Verifying blocks...            │  
+                              │ Can take longer if device was off.   │  
+                              └──────────────────────────────────────┘  
+                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
+ RaspiBlitz ()
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       ┌──────────────────────  /  ────────────────────────┐
+                       │  Lightning Filtering Blockchain                   │  
+                       │  Progress: ?/                                     │  
+                       │  Please wait - this can take some long time.      │  
+                       │  Its OK to close terminal and ssh back in later.  │  
+                       └───────────────────────────────────────────────────┘  
+                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+./80scanLND.sh: line 1: /mnt/hdd/raspiblitz.conf: No such file or directory
+usage: sudo -h | -K | -k | -V
+usage: sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]
+usage: sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]
+usage: sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user]
+            [VAR=value] [-i|-s] [<command>]
+usage: sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p prompt] [-u user] file
+            ...
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+(standard_in) 1: syntax error
+tail: cannot open '/mnt/hdd/lnd/logs//net/lnd.log' for reading: No such file or directory
+
