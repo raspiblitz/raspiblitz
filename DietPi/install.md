@@ -27,13 +27,10 @@ Reboots again
 
 `ssh root@[IP-OF-YOUR-DIETPI]`
 Now only the bash prompt opens
-`userdel dietpi && rm -r dietpi`
-`useradd -m pi`
 `exit`
 
-`ssh pi@[IP-OF-YOUR-DIETPI]`
+`ssh dietpi@[IP-OF-YOUR-DIETPI]`
 password: `dietpi`
-
 
 now at: 
 `dietpi@DietPi:~$` 
@@ -42,15 +39,6 @@ use: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH
 
 `wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms`
 
-```usermod: user dietpi is currently used by process 1340
-chpasswd: (user pi) pam_chauthtok() failed, error:
-Authentication token manipulation error
-chpasswd: (line 1, user pi) password not changed
-```
-user remains dietpi
-need to run as root:  
-`sudo usermod -l pi dietpi`
-
 see my output: [sdcard_build_output](sdcard_build_output.html)  
 The only fault appears to be with `fail2ban`
 
@@ -58,7 +46,7 @@ The only fault appears to be with `fail2ban`
 `ssh admin@[IP-OF-YOUR-DROIDBLITZ]`  
 password: raspiblitz
 
-The raspiblitz GUI and setup worked I until I needed to get the blockchain data.
+The raspiblitz GUI and setup worked until it needed to get the blockchain data.
 
 On the attempt to copy the blockchain from the HDD of a Raspiblitz the ODroid did not mount the 2nd HDD properly.
 It appeared as `sdb` and as `sda` after reboot:
