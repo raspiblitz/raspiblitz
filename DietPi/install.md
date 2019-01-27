@@ -27,6 +27,12 @@ Reboots again
 
 `ssh root@[IP-OF-YOUR-DIETPI]`
 Now only the bash prompt opens
+
+sudo adduser --disabled-password --gecos "" pi
+echo "pi:raspiblitz" | sudo chpasswd
+sudo adduser pi sudo
+
+
 `exit`
 
 `ssh dietpi@[IP-OF-YOUR-DIETPI]`

@@ -92,8 +92,8 @@ sudo apt-get upgrade -f -y --allow-change-held-packages
 if [ "${baseImage}" = "dietpi" ]; then
   echo ""
   echo "*** PREPARE DietPi ***"
-  echo "renaming dietpi user to pi"
-  sudo usermod -l pi dietpi
+  # echo "renaming dietpi user to pi"
+  # sudo usermod -l pi dietpi
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
@@ -457,10 +457,10 @@ sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 # bash aoutstart for pi
 # run as exec to dont allow easy physical access by keyboard
 # see https://github.com/rootzoll/raspiblitz/issues/54
-# sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-# sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-# sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-# sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 
 sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
 sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
