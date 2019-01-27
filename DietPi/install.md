@@ -29,9 +29,9 @@ Reboots again
 `ssh root@[IP-OF-YOUR-DIETPI]`
 Now only the bash prompt opens
 
-# `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
-wget https://github.com/openoms/HardwareNode/blob/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh
+use: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
+`wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms`
 
 see my output: [sdcard_build_output](sdcard_build_output.html)  
 The only fault appears to be with `fail2ban`

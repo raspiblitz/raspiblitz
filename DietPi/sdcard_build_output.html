@@ -1,948 +1,1013 @@
-<pre> <font color="#AFFF00">────────────────────────────────────────────────</font>
-  <b>DietPi</b> <font color="#555753">| Tue 22/01/19 - 19:55</font>
-  <font color="#AFFF00">────────────────────────────────────────────────</font>
-  <b>v6.19.7</b> <font color="#555753">| Odroid XU3/XU4/HC1/HC2 (armv7l)</font>
-  <font color="#AFFF00">────────────────────────────────────────────────</font>
-  <b>eth0</b> <font color="#555753">| 192.168.1.175</font>
-  <font color="#AFFF00">────────────────────────────────────────────────</font>
- <font color="#555753"> DietPi Team     : Daniel Knight (founder), MichaIng, K-Plan</font>
- <font color="#555753"> Image           : DietPi Core Team (pre-image: Meveric)</font>
- <font color="#555753"> Web             : https://DietPi.com | https://twitter.com/dietpi_</font>
- <font color="#555753"> Patreon Legends : PINE64 community</font>
- <font color="#555753"> Donate          : https://DietPi.com/#donate</font>
- <font color="#555753"> DietPi Hosting  : Powered by https://MyVirtualServer.com</font>
- 
- <b> dietpi-launcher</b>  = All the DietPi programs in one place.
- <b> dietpi-config</b>    = Feature rich configuration tool for your device.
- <b> dietpi-software</b>  = Select optimized software for installation.
- <b> htop</b>             = Resource monitor.
- <b> cpu</b>              = Shows CPU information and stats.
- 
- <font color="#8AE234"><b>root@DietPi</b></font>:<font color="#729FCF"><b>~</b></font># wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh &amp;&amp; sudo bash raspbianStretchDesktop.sh
- --2019-01-22 19:55:38--  https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh
- Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.60.133
- Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.60.133|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 20808 (20K) [text/plain]
- Saving to: ‘raspbianStretchDesktop.sh’
- 
- raspbianStretchDesktop.sh 100%[====================================&gt;]  20.32K  --.-KB/s    in 0.03s   
- 
- 2019-01-22 19:55:39 (607 KB/s) - ‘raspbianStretchDesktop.sh’ saved [20808/20808]
- 
- 
- *****************************************
- * RASPIBLITZ SD CARD IMAGE SETUP v0.99  *
- *****************************************
- 
- *** CHECK INPUT PARAMETERS ***
- will use code from branch --&gt; &apos;master&apos;
- *** CHECK INPUT PARAMETERS ***
- will use code from user --&gt; &apos;rootzoll&apos;
- 
- *** CHECK BASE IMAGE ***
- Check if Linux ARM based ...
- OK running on Linux ARM architecture.
- Detect Base Image ...
- OK running dietpi
- 
- *** FIXING LOCALES FOR BUILD ***
- Generating locales (this might take a while)...
-   en_GB.UTF-8... done
-   en_US.ISO-8859-1... done
-   en_US.UTF-8... done
- Generation complete.
- 
- *** UPDATE DEBIAN ***
- Hit:1 http://fuzon.co.uk/meveric all InRelease
- Hit:2 http://fuzon.co.uk/meveric stretch InRelease                                                
- Hit:3 https://oph.mdrjr.net/meveric all InRelease                                                 
- Ign:4 https://cdn-aws.deb.debian.org/debian stretch InRelease
- Hit:5 https://cdn-aws.deb.debian.org/debian stretch-updates InRelease
- Hit:6 https://cdn-aws.deb.debian.org/debian-security stretch/updates InRelease
- Hit:7 https://cdn-aws.deb.debian.org/debian stretch-backports InRelease
- Hit:8 https://cdn-aws.deb.debian.org/debian stretch Release
- Reading package lists... Done
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- Calculating upgrade... Done
- 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
- 
- *** PREPARE DietPi ***
- renaming dietpi user ti pi
- install pip
- Hit:1 http://fuzon.co.uk/meveric all InRelease                                               
- Hit:2 http://fuzon.co.uk/meveric stretch InRelease                                                
- Ign:4 https://cdn-aws.deb.debian.org/debian stretch InRelease                                     
- Hit:5 https://cdn-aws.deb.debian.org/debian stretch-updates InRelease
- Hit:6 https://cdn-aws.deb.debian.org/debian-security stretch/updates InRelease
- Hit:7 https://cdn-aws.deb.debian.org/debian stretch-backports InRelease
- Hit:8 https://cdn-aws.deb.debian.org/debian stretch Release
- Hit:3 https://oph.mdrjr.net/meveric all InRelease
- Reading package lists... Done
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- Package &apos;fail2ban&apos; is not installed, so not removed
- 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- The following additional packages will be installed:
-   binutils cpp cpp-6 dpkg-dev g++ g++-6 gcc gcc-6 libasan3 libatomic1 libc-dev-bin libc6-dev libcc1-0
-   libdpkg-perl libgcc-6-dev libgdbm3 libgomp1 libisl15 libmpc3 libmpfr4 libperl5.24 libstdc++-6-dev
-   libubsan0 linux-libc-dev make patch perl perl-modules-5.24 xz-utils
- Suggested packages:
-   binutils-doc cpp-doc gcc-6-locales debian-keyring gcc-6-doc libstdc++6-6-dbg gcc-multilib
-   manpages-dev autoconf automake libtool flex bison gdb gcc-doc libgcc1-dbg libgomp1-dbg libitm1-dbg
-   libatomic1-dbg libasan3-dbg liblsan0-dbg libtsan0-dbg libubsan0-dbg libcilkrts5-dbg libmpx2-dbg
-   libquadmath0-dbg glibc-doc libstdc++-6-doc make-doc ed diffutils-doc perl-doc
-   libterm-readline-gnu-perl | libterm-readline-perl-perl
- Recommended packages:
-   fakeroot libalgorithm-merge-perl manpages manpages-dev libfile-fcntllock-perl netbase rename
- The following NEW packages will be installed:
-   binutils build-essential cpp cpp-6 dpkg-dev g++ g++-6 gcc gcc-6 libasan3 libatomic1 libc-dev-bin
-   libc6-dev libcc1-0 libdpkg-perl libgcc-6-dev libgdbm3 libgomp1 libisl15 libmpc3 libmpfr4
-   libperl5.24 libstdc++-6-dev libubsan0 linux-libc-dev make patch perl perl-modules-5.24 xz-utils
- 0 upgraded, 30 newly installed, 0 to remove and 0 not upgraded.
- Need to get 36.8 MB of archives.
- After this operation, 138 MB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf perl-modules-5.24 all 5.24.1-3+deb9u5 [2,722 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgdbm3 armhf 1.8.3-14 [28.5 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf libperl5.24 armhf 5.24.1-3+deb9u5 [2,850 kB]
- Get:4 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf perl armhf 5.24.1-3+deb9u5 [219 kB]
- Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf xz-utils armhf 5.2.2-1.2+b1 [263 kB]
- Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf binutils armhf 2.28-5 [3,900 kB]
- Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf libc-dev-bin armhf 2.24-11+deb9u3 [253 kB]
- Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf linux-libc-dev armhf 4.9.130-2 [1,350 kB]
- Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf libc6-dev armhf 2.24-11+deb9u3 [1,995 kB]
- Get:10 https://cdn-aws.deb.debian.org/debian stretch/main armhf libisl15 armhf 0.18-1 [441 kB]        
- Get:11 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpfr4 armhf 3.1.5-1 [536 kB]       
- Get:12 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpc3 armhf 1.0.3-1+b2 [32.6 kB]    
- Get:13 https://cdn-aws.deb.debian.org/debian stretch/main armhf cpp-6 armhf 6.3.0-18+deb9u1 [5,239 kB]
- Get:14 https://cdn-aws.deb.debian.org/debian stretch/main armhf cpp armhf 4:6.3.0-4 [18.7 kB]         
- Get:15 https://cdn-aws.deb.debian.org/debian stretch/main armhf libcc1-0 armhf 6.3.0-18+deb9u1 [25.2 kB]
- Get:16 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgomp1 armhf 6.3.0-18+deb9u1 [64.6 kB]
- Get:17 https://cdn-aws.deb.debian.org/debian stretch/main armhf libatomic1 armhf 6.3.0-18+deb9u1 [6,010 B]
- Get:18 https://cdn-aws.deb.debian.org/debian stretch/main armhf libasan3 armhf 6.3.0-18+deb9u1 [284 kB]
- Get:19 https://cdn-aws.deb.debian.org/debian stretch/main armhf libubsan0 armhf 6.3.0-18+deb9u1 [92.9 kB]
- Get:20 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgcc-6-dev armhf 6.3.0-18+deb9u1 [531 kB]
- Get:21 https://cdn-aws.deb.debian.org/debian stretch/main armhf gcc-6 armhf 6.3.0-18+deb9u1 [5,511 kB]
- Get:22 https://cdn-aws.deb.debian.org/debian stretch/main armhf gcc armhf 4:6.3.0-4 [5,212 B]         
- Get:23 https://cdn-aws.deb.debian.org/debian stretch/main armhf libstdc++-6-dev armhf 6.3.0-18+deb9u1 [1,487 kB]
- Get:24 https://cdn-aws.deb.debian.org/debian stretch/main armhf g++-6 armhf 6.3.0-18+deb9u1 [5,665 kB]
- Get:25 https://cdn-aws.deb.debian.org/debian stretch/main armhf g++ armhf 4:6.3.0-4 [1,520 B]         
- Get:26 https://cdn-aws.deb.debian.org/debian stretch/main armhf make armhf 4.1-9.1 [290 kB]           
- Get:27 https://cdn-aws.deb.debian.org/debian stretch/main armhf libdpkg-perl all 1.18.25 [1,287 kB]   
- Get:28 https://cdn-aws.deb.debian.org/debian stretch/main armhf patch armhf 2.7.5-1+deb9u1 [106 kB]   
- Get:29 https://cdn-aws.deb.debian.org/debian stretch/main armhf dpkg-dev all 1.18.25 [1,595 kB]       
- Get:30 https://cdn-aws.deb.debian.org/debian stretch/main armhf build-essential armhf 12.3 [7,342 B]  
- Fetched 36.8 MB in 25s (1,454 kB/s)                                                                   
- Selecting previously unselected package perl-modules-5.24.
- (Reading database ... 14111 files and directories currently installed.)
- Preparing to unpack .../00-perl-modules-5.24_5.24.1-3+deb9u5_all.deb ...
- Unpacking perl-modules-5.24 (5.24.1-3+deb9u5) ...
- Selecting previously unselected package libgdbm3:armhf.
- Preparing to unpack .../01-libgdbm3_1.8.3-14_armhf.deb ...
- Unpacking libgdbm3:armhf (1.8.3-14) ...
- Selecting previously unselected package libperl5.24:armhf.
- Preparing to unpack .../02-libperl5.24_5.24.1-3+deb9u5_armhf.deb ...
- Unpacking libperl5.24:armhf (5.24.1-3+deb9u5) ...
- Selecting previously unselected package perl.
- Preparing to unpack .../03-perl_5.24.1-3+deb9u5_armhf.deb ...
- Unpacking perl (5.24.1-3+deb9u5) ...
- Selecting previously unselected package xz-utils.
- Preparing to unpack .../04-xz-utils_5.2.2-1.2+b1_armhf.deb ...
- Unpacking xz-utils (5.2.2-1.2+b1) ...
- Selecting previously unselected package binutils.
- Preparing to unpack .../05-binutils_2.28-5_armhf.deb ...
- Unpacking binutils (2.28-5) ...
- Selecting previously unselected package libc-dev-bin.
- Preparing to unpack .../06-libc-dev-bin_2.24-11+deb9u3_armhf.deb ...
- Unpacking libc-dev-bin (2.24-11+deb9u3) ...
- Selecting previously unselected package linux-libc-dev:armhf.
- Preparing to unpack .../07-linux-libc-dev_4.9.130-2_armhf.deb ...
- Unpacking linux-libc-dev:armhf (4.9.130-2) ...
- Selecting previously unselected package libc6-dev:armhf.
- Preparing to unpack .../08-libc6-dev_2.24-11+deb9u3_armhf.deb ...
- Unpacking libc6-dev:armhf (2.24-11+deb9u3) ...
- Selecting previously unselected package libisl15:armhf.
- Preparing to unpack .../09-libisl15_0.18-1_armhf.deb ...
- Unpacking libisl15:armhf (0.18-1) ...
- Selecting previously unselected package libmpfr4:armhf.
- Preparing to unpack .../10-libmpfr4_3.1.5-1_armhf.deb ...
- Unpacking libmpfr4:armhf (3.1.5-1) ...
- Selecting previously unselected package libmpc3:armhf.
- Preparing to unpack .../11-libmpc3_1.0.3-1+b2_armhf.deb ...
- Unpacking libmpc3:armhf (1.0.3-1+b2) ...
- Selecting previously unselected package cpp-6.
- Preparing to unpack .../12-cpp-6_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking cpp-6 (6.3.0-18+deb9u1) ...
- Selecting previously unselected package cpp.
- Preparing to unpack .../13-cpp_4%3a6.3.0-4_armhf.deb ...
- Unpacking cpp (4:6.3.0-4) ...
- Selecting previously unselected package libcc1-0:armhf.
- Preparing to unpack .../14-libcc1-0_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libcc1-0:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package libgomp1:armhf.
- Preparing to unpack .../15-libgomp1_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libgomp1:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package libatomic1:armhf.
- Preparing to unpack .../16-libatomic1_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libatomic1:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package libasan3:armhf.
- Preparing to unpack .../17-libasan3_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libasan3:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package libubsan0:armhf.
- Preparing to unpack .../18-libubsan0_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libubsan0:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package libgcc-6-dev:armhf.
- Preparing to unpack .../19-libgcc-6-dev_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libgcc-6-dev:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package gcc-6.
- Preparing to unpack .../20-gcc-6_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking gcc-6 (6.3.0-18+deb9u1) ...
- Selecting previously unselected package gcc.
- Preparing to unpack .../21-gcc_4%3a6.3.0-4_armhf.deb ...
- Unpacking gcc (4:6.3.0-4) ...
- Selecting previously unselected package libstdc++-6-dev:armhf.
- Preparing to unpack .../22-libstdc++-6-dev_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking libstdc++-6-dev:armhf (6.3.0-18+deb9u1) ...
- Selecting previously unselected package g++-6.
- Preparing to unpack .../23-g++-6_6.3.0-18+deb9u1_armhf.deb ...
- Unpacking g++-6 (6.3.0-18+deb9u1) ...
- Selecting previously unselected package g++.
- Preparing to unpack .../24-g++_4%3a6.3.0-4_armhf.deb ...
- Unpacking g++ (4:6.3.0-4) ...
- Selecting previously unselected package make.
- Preparing to unpack .../25-make_4.1-9.1_armhf.deb ...
- Unpacking make (4.1-9.1) ...
- Selecting previously unselected package libdpkg-perl.
- Preparing to unpack .../26-libdpkg-perl_1.18.25_all.deb ...
- Unpacking libdpkg-perl (1.18.25) ...
- Selecting previously unselected package patch.
- Preparing to unpack .../27-patch_2.7.5-1+deb9u1_armhf.deb ...
- Unpacking patch (2.7.5-1+deb9u1) ...
- Selecting previously unselected package dpkg-dev.
- Preparing to unpack .../28-dpkg-dev_1.18.25_all.deb ...
- Unpacking dpkg-dev (1.18.25) ...
- Selecting previously unselected package build-essential.
- Preparing to unpack .../29-build-essential_12.3_armhf.deb ...
- Unpacking build-essential (12.3) ...
- Setting up libgomp1:armhf (6.3.0-18+deb9u1) ...
- Setting up libatomic1:armhf (6.3.0-18+deb9u1) ...
- Setting up perl-modules-5.24 (5.24.1-3+deb9u5) ...
- Setting up libgdbm3:armhf (1.8.3-14) ...
- Setting up libperl5.24:armhf (5.24.1-3+deb9u5) ...
- Setting up libcc1-0:armhf (6.3.0-18+deb9u1) ...
- Setting up make (4.1-9.1) ...
- Setting up libasan3:armhf (6.3.0-18+deb9u1) ...
- Setting up libubsan0:armhf (6.3.0-18+deb9u1) ...
- Setting up linux-libc-dev:armhf (4.9.130-2) ...
- Setting up perl (5.24.1-3+deb9u5) ...
- update-alternatives: using /usr/bin/prename to provide /usr/bin/rename (rename) in auto mode
- Setting up libisl15:armhf (0.18-1) ...
- Setting up patch (2.7.5-1+deb9u1) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Setting up xz-utils (5.2.2-1.2+b1) ...
- update-alternatives: using /usr/bin/xz to provide /usr/bin/lzma (lzma) in auto mode
- Setting up libmpfr4:armhf (3.1.5-1) ...
- Setting up libmpc3:armhf (1.0.3-1+b2) ...
- Setting up binutils (2.28-5) ...
- Setting up cpp-6 (6.3.0-18+deb9u1) ...
- Setting up libc-dev-bin (2.24-11+deb9u3) ...
- Setting up libc6-dev:armhf (2.24-11+deb9u3) ...
- Setting up cpp (4:6.3.0-4) ...
- Setting up libgcc-6-dev:armhf (6.3.0-18+deb9u1) ...
- Setting up libstdc++-6-dev:armhf (6.3.0-18+deb9u1) ...
- Setting up libdpkg-perl (1.18.25) ...
- Setting up gcc-6 (6.3.0-18+deb9u1) ...
- Setting up g++-6 (6.3.0-18+deb9u1) ...
- Setting up dpkg-dev (1.18.25) ...
- Setting up gcc (4:6.3.0-4) ...
- Setting up g++ (4:6.3.0-4) ...
- update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
- Setting up build-essential (12.3) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- raspbianStretchDesktop.sh: line 101: sudp: command not found
- 
- *** CONFIG ***
- sudo: raspi-config: command not found
- bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
- bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
- bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
- 
- *** SOFTWARE UPDATE ***
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- bash-completion is already the newest version (1:2.1-4.3).
- curl is already the newest version (7.52.1-5+deb9u8).
- htop is already the newest version (2.0.2-1).
- The following additional packages will be installed:
-   dc git-man liberror-perl libexpat1 libjq1 libonig4
- Suggested packages:
-   gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-el git-email git-gui gitk gitweb
-   git-arch git-cvs git-mediawiki git-svn
- Recommended packages:
-   less rsync ssh-client
- The following NEW packages will be installed:
-   dc dphys-swapfile git git-man jq liberror-perl libexpat1 libjq1 libonig4
- 0 upgraded, 9 newly installed, 0 to remove and 0 not upgraded.
- Need to get 5,578 kB of archives.
- After this operation, 23.7 MB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libexpat1 armhf 2.2.0-2+deb9u1 [64.4 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf liberror-perl all 0.17024-1 [26.9 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf git-man all 1:2.11.0-3+deb9u4 [1,433 kB]
- Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf git armhf 1:2.11.0-3+deb9u4 [3,661 kB]
- Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf dc armhf 1.06.95-9+b3 [64.8 kB]
- Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf dphys-swapfile all 20100506-3 [19.7 kB]
- Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf libonig4 armhf 6.1.3-2 [128 kB]
- Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf libjq1 armhf 1.5+dfsg-1.3 [122 kB]
- Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf jq armhf 1.5+dfsg-1.3 [59.2 kB]
- Fetched 5,578 kB in 4s (1,204 kB/s)
- Selecting previously unselected package libexpat1:armhf.
- (Reading database ... 18920 files and directories currently installed.)
- Preparing to unpack .../0-libexpat1_2.2.0-2+deb9u1_armhf.deb ...
- Unpacking libexpat1:armhf (2.2.0-2+deb9u1) ...
- Selecting previously unselected package liberror-perl.
- Preparing to unpack .../1-liberror-perl_0.17024-1_all.deb ...
- Unpacking liberror-perl (0.17024-1) ...
- Selecting previously unselected package git-man.
- Preparing to unpack .../2-git-man_1%3a2.11.0-3+deb9u4_all.deb ...
- Unpacking git-man (1:2.11.0-3+deb9u4) ...
- Selecting previously unselected package git.
- Preparing to unpack .../3-git_1%3a2.11.0-3+deb9u4_armhf.deb ...
- Unpacking git (1:2.11.0-3+deb9u4) ...
- Selecting previously unselected package dc.
- Preparing to unpack .../4-dc_1.06.95-9+b3_armhf.deb ...
- Unpacking dc (1.06.95-9+b3) ...
- Selecting previously unselected package dphys-swapfile.
- Preparing to unpack .../5-dphys-swapfile_20100506-3_all.deb ...
- Unpacking dphys-swapfile (20100506-3) ...
- Selecting previously unselected package libonig4:armhf.
- Preparing to unpack .../6-libonig4_6.1.3-2_armhf.deb ...
- Unpacking libonig4:armhf (6.1.3-2) ...
- Selecting previously unselected package libjq1:armhf.
- Preparing to unpack .../7-libjq1_1.5+dfsg-1.3_armhf.deb ...
- Unpacking libjq1:armhf (1.5+dfsg-1.3) ...
- Selecting previously unselected package jq.
- Preparing to unpack .../8-jq_1.5+dfsg-1.3_armhf.deb ...
- Unpacking jq (1.5+dfsg-1.3) ...
- Setting up git-man (1:2.11.0-3+deb9u4) ...
- Setting up libexpat1:armhf (2.2.0-2+deb9u1) ...
- Setting up liberror-perl (0.17024-1) ...
- Setting up libonig4:armhf (6.1.3-2) ...
- Setting up libjq1:armhf (1.5+dfsg-1.3) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Setting up dc (1.06.95-9+b3) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Setting up git (1:2.11.0-3+deb9u4) ...
- Setting up jq (1.5+dfsg-1.3) ...
- Setting up dphys-swapfile (20100506-3) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- Suggested packages:
-   vnstati
- The following NEW packages will be installed:
-   vnstat
- 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
- Need to get 78.6 kB of archives.
- After this operation, 206 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf vnstat armhf 1.15-2 [78.6 kB]
- Fetched 78.6 kB in 1s (54.2 kB/s)
- Selecting previously unselected package vnstat.
- (Reading database ... 19853 files and directories currently installed.)
- Preparing to unpack .../vnstat_1.15-2_armhf.deb ...
- Unpacking vnstat (1.15-2) ...
- Setting up vnstat (1.15-2) ...
- Created symlink /etc/systemd/system/multi-user.target.wants/vnstat.service → /lib/systemd/system/vnstat.service.
- Processing triggers for systemd (232-25+deb9u8) ...
- 
- *** ADDING MAIN USER admin ***
- Adding user `admin&apos; ...
- Adding new group `admin&apos; (1001) ...
- Adding new user `admin&apos; (1001) with group `admin&apos; ...
- Creating home directory `/home/admin&apos; ...
- Copying files from `/etc/skel&apos; ...
- Adding user `admin&apos; to group `sudo&apos; ...
- Adding user admin to group sudo
- Done.
- %sudo ALL=(ALL) NOPASSWD:ALL
- *** ADDING SERVICE USER bitcoin
- Adding user `bitcoin&apos; ...
- Adding new group `bitcoin&apos; (1002) ...
- Adding new user `bitcoin&apos; (1002) with group `bitcoin&apos; ...
- Creating home directory `/home/bitcoin&apos; ...
- Copying files from `/etc/skel&apos; ...
- 
- *** SWAP FILE ***
- 
- *** INCREASE OPEN FILE LIMIT ***
- 
- *** BITCOIN ***
- --2019-01-22 19:57:16--  https://bitcoin.org/bin/bitcoin-core-0.17.0.1/bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz
- Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
- Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 24306145 (23M) [application/octet-stream]
- Saving to: ‘bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz’
- 
- bitcoin-0.17.0.1-arm-linu 100%[====================================&gt;]  23.18M   213KB/s    in 1m 59s  
- 
- 2019-01-22 19:59:17 (200 KB/s) - ‘bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz’ saved [24306145/24306145]
- 
- --2019-01-22 19:59:17--  https://bitcoin.org/laanwj-releases.asc
- Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
- Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 17940 (18K) [application/octet-stream]
- Saving to: ‘laanwj-releases.asc’
- 
- laanwj-releases.asc       100%[====================================&gt;]  17.52K  --.-KB/s    in 0.009s  
- 
- 2019-01-22 19:59:18 (1.83 MB/s) - ‘laanwj-releases.asc’ saved [17940/17940]
- 
- key 90C8019E36C2E964:
- 25 signatures not checked due to missing keys
- gpg: /root/.gnupg/trustdb.gpg: trustdb created
- gpg: key 90C8019E36C2E964: public key &quot;Wladimir J. van der Laan (Bitcoin Core binary release signing key) &lt;laanwj@gmail.com&gt;&quot; imported
- gpg: Total number processed: 1
- gpg:               imported: 1
- gpg: no ultimately trusted keys found
- --2019-01-22 19:59:19--  https://bitcoin.org/bin/bitcoin-core-0.17.0.1/SHA256SUMS.asc
- Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
- Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 1979 (1.9K) [application/octet-stream]
- Saving to: ‘SHA256SUMS.asc’
- 
- SHA256SUMS.asc            100%[====================================&gt;]   1.93K  --.-KB/s    in 0s      
- 
- 2019-01-22 19:59:20 (25.4 MB/s) - ‘SHA256SUMS.asc’ saved [1979/1979]
- 
- goodSignature(1)
- correctKey(1)
- bitcoin-0.17.0/
- bitcoin-0.17.0/bin/
- bitcoin-0.17.0/bin/bitcoin-cli
- bitcoin-0.17.0/bin/bitcoind
- bitcoin-0.17.0/bin/bitcoin-qt
- bitcoin-0.17.0/bin/bitcoin-tx
- bitcoin-0.17.0/bin/test_bitcoin
- bitcoin-0.17.0/include/
- bitcoin-0.17.0/include/bitcoinconsensus.h
- bitcoin-0.17.0/lib/
- bitcoin-0.17.0/lib/libbitcoinconsensus.so
- bitcoin-0.17.0/lib/libbitcoinconsensus.so.0
- bitcoin-0.17.0/lib/libbitcoinconsensus.so.0.0.0
- bitcoin-0.17.0/share/
- bitcoin-0.17.0/share/man/
- bitcoin-0.17.0/share/man/man1/
- bitcoin-0.17.0/share/man/man1/bitcoin-cli.1
- bitcoin-0.17.0/share/man/man1/bitcoind.1
- bitcoin-0.17.0/share/man/man1/bitcoin-qt.1
- bitcoin-0.17.0/share/man/man1/bitcoin-tx.1
- 
- *** LITECOIN ***
- --2019-01-22 19:59:24--  https://download.litecoin.org/litecoin-0.16.3/linux/litecoin-0.16.3-arm-linux-gnueabihf.tar.gz
- Resolving download.litecoin.org (download.litecoin.org)... 104.27.4.55, 104.27.5.55
- Connecting to download.litecoin.org (download.litecoin.org)|104.27.4.55|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 9568024 (9.1M) [application/octet-stream]
- Saving to: ‘litecoin-0.16.3-arm-linux-gnueabihf.tar.gz’
- 
- litecoin-0.16.3-arm-linux 100%[====================================&gt;]   9.12M  1.66MB/s    in 5.7s    
- 
- 2019-01-22 19:59:31 (1.60 MB/s) - ‘litecoin-0.16.3-arm-linux-gnueabihf.tar.gz’ saved [9568024/9568024]
- 
- litecoin-0.16.3/
- litecoin-0.16.3/bin/
- litecoin-0.16.3/bin/litecoin-cli
- litecoin-0.16.3/bin/litecoind
- litecoin-0.16.3/bin/litecoin-tx
- litecoin-0.16.3/bin/test_litecoin
- litecoin-0.16.3/share/
- litecoin-0.16.3/share/man/
- litecoin-0.16.3/share/man/man1/
- litecoin-0.16.3/share/man/man1/litecoin-cli.1
- litecoin-0.16.3/share/man/man1/litecoind.1
- litecoin-0.16.3/share/man/man1/litecoin-tx.1
- 
- *** LND ***
- --2019-01-22 19:59:32--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/lnd-linux-armv7-v0.5.1-beta.tar.gz
- Resolving github.com (github.com)... 140.82.118.4, 140.82.118.3
- Connecting to github.com (github.com)|140.82.118.4|:443... connected.
- HTTP request sent, awaiting response... 302 Found
- Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fd08b500-f311-11e8-8398-419cca1df903?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195932Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=6f7c14b21be2d0d6256c8c26ffac90d638ee148fdd9fdc82fb44b4b0b0757f3e&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dlnd-linux-armv7-v0.5.1-beta.tar.gz&amp;response-content-type=application%2Foctet-stream [following]
- --2019-01-22 19:59:32--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fd08b500-f311-11e8-8398-419cca1df903?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195932Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=6f7c14b21be2d0d6256c8c26ffac90d638ee148fdd9fdc82fb44b4b0b0757f3e&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dlnd-linux-armv7-v0.5.1-beta.tar.gz&amp;response-content-type=application%2Foctet-stream
- Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.99.43
- Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.99.43|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 19198203 (18M) [application/octet-stream]
- Saving to: ‘lnd-linux-armv7-v0.5.1-beta.tar.gz’
- 
- lnd-linux-armv7-v0.5.1-be 100%[====================================&gt;]  18.31M  1.12MB/s    in 16s     
- 
- 2019-01-22 19:59:49 (1.13 MB/s) - ‘lnd-linux-armv7-v0.5.1-beta.tar.gz’ saved [19198203/19198203]
- 
- --2019-01-22 19:59:49--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/manifest-v0.5.1-beta.txt
- Resolving github.com (github.com)... 140.82.118.3, 140.82.118.4
- Connecting to github.com (github.com)|140.82.118.3|:443... connected.
- HTTP request sent, awaiting response... 302 Found
- Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-9178-5d26551a454e?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195950Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=37b2d2ed4f06560b5276c8437803f8abfb33af46a8c3aad25aa3376e0186d193&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt&amp;response-content-type=application%2Foctet-stream [following]
- --2019-01-22 19:59:50--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-9178-5d26551a454e?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195950Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=37b2d2ed4f06560b5276c8437803f8abfb33af46a8c3aad25aa3376e0186d193&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt&amp;response-content-type=application%2Foctet-stream
- Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.177.171
- Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.177.171|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 2026 (2.0K) [application/octet-stream]
- Saving to: ‘manifest-v0.5.1-beta.txt’
- 
- manifest-v0.5.1-beta.txt  100%[====================================&gt;]   1.98K  --.-KB/s    in 0.002s  
- 
- 2019-01-22 19:59:50 (1.25 MB/s) - ‘manifest-v0.5.1-beta.txt’ saved [2026/2026]
- 
- --2019-01-22 19:59:50--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/manifest-v0.5.1-beta.txt.sig
- Resolving github.com (github.com)... 140.82.118.4, 140.82.118.3
- Connecting to github.com (github.com)|140.82.118.4|:443... connected.
- HTTP request sent, awaiting response... 302 Found
- Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-8fb5-c3aa7d97cb88?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195951Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=430c2fad5705494d21da485ee72cd7432961dfee9b4befad8220ac4c4c68adf7&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt.sig&amp;response-content-type=application%2Foctet-stream [following]
- --2019-01-22 19:59:51--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-8fb5-c3aa7d97cb88?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190122%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190122T195951Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=430c2fad5705494d21da485ee72cd7432961dfee9b4befad8220ac4c4c68adf7&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt.sig&amp;response-content-type=application%2Foctet-stream
- Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.177.171
- Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.177.171|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 566 [application/octet-stream]
- Saving to: ‘manifest-v0.5.1-beta.txt.sig’
- 
- manifest-v0.5.1-beta.txt. 100%[====================================&gt;]     566  --.-KB/s    in 0s      
- 
- 2019-01-22 19:59:51 (6.13 MB/s) - ‘manifest-v0.5.1-beta.txt.sig’ saved [566/566]
- 
- --2019-01-22 19:59:51--  https://keybase.io/roasbeef/pgp_keys.asc
- Resolving keybase.io (keybase.io)... 52.55.1.130, 52.6.136.121
- Connecting to keybase.io (keybase.io)|52.55.1.130|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 6909 (6.7K) [text/plain]
- Saving to: ‘pgp_keys.asc’
- 
- pgp_keys.asc              100%[====================================&gt;]   6.75K  --.-KB/s    in 0s      
- 
- 2019-01-22 19:59:52 (83.5 MB/s) - ‘pgp_keys.asc’ saved [6909/6909]
- 
- gpg: key 8B80CD2BB8BD8132: public key &quot;Olaoluwa Osuntokun &lt;laolu32@gmail.com&gt;&quot; imported
- gpg: Total number processed: 1
- gpg:               imported: 1
- goodSignature(1)
- correctKey(1)
- *** Installing Go ***
- --2019-01-22 19:59:59--  https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
- Resolving storage.googleapis.com (storage.googleapis.com)... 216.58.204.48, 2a00:1450:4009:808::2010
- Connecting to storage.googleapis.com (storage.googleapis.com)|216.58.204.48|:443... connected.
- HTTP request sent, awaiting response... 200 OK
- Length: 101718267 (97M) [application/octet-stream]
- Saving to: ‘go1.11.linux-armv6l.tar.gz’
- 
- go1.11.linux-armv6l.tar.g 100%[====================================&gt;]  97.01M  1.55MB/s    in 64s     
- 
- 2019-01-22 20:01:04 (1.51 MB/s) - ‘go1.11.linux-armv6l.tar.gz’ saved [101718267/101718267]
- 
- 
- 
- *** RASPIBLITZ EXTRAS ***
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- bc is already the newest version (1.06.95-9+b3).
- The following NEW packages will be installed:
-   dialog
- 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
- Need to get 240 kB of archives.
- After this operation, 883 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf dialog armhf 1.3-20160828-2 [240 kB]
- Fetched 240 kB in 1s (214 kB/s)
- Selecting previously unselected package dialog.
- (Reading database ... 19868 files and directories currently installed.)
- Preparing to unpack .../dialog_1.3-20160828-2_armhf.deb ...
- Unpacking dialog (1.3-20160828-2) ...
- Setting up dialog (1.3-20160828-2) ...
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- The following additional packages will be installed:
-   fuse libfuse2
- Recommended packages:
-   exfat-utils
- The following NEW packages will be installed:
-   exfat-fuse fuse libfuse2
- 0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
- Need to get 214 kB of archives.
- After this operation, 426 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libfuse2 armhf 2.9.7-1+deb9u2 [116 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf fuse armhf 2.9.7-1+deb9u2 [70.3 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf exfat-fuse armhf 1.2.5-2 [27.6 kB]
- Fetched 214 kB in 1s (158 kB/s)  
- Selecting previously unselected package libfuse2:armhf.
- (Reading database ... 20026 files and directories currently installed.)
- Preparing to unpack .../libfuse2_2.9.7-1+deb9u2_armhf.deb ...
- Unpacking libfuse2:armhf (2.9.7-1+deb9u2) ...
- Selecting previously unselected package fuse.
- Preparing to unpack .../fuse_2.9.7-1+deb9u2_armhf.deb ...
- Unpacking fuse (2.9.7-1+deb9u2) ...
- Selecting previously unselected package exfat-fuse.
- Preparing to unpack .../exfat-fuse_1.2.5-2_armhf.deb ...
- Unpacking exfat-fuse (1.2.5-2) ...
- Setting up libfuse2:armhf (2.9.7-1+deb9u2) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Setting up fuse (2.9.7-1+deb9u2) ...
- update-initramfs: deferring update (trigger activated)
- Setting up exfat-fuse (1.2.5-2) ...
- Processing triggers for initramfs-tools (0.130) ...
- ln: failed to create hard link &apos;/boot/initrd.img-4.14.66+.dpkg-bak&apos; =&gt; &apos;/boot/initrd.img-4.14.66+&apos;: Operation not permitted
- update-initramfs: Generating /boot/initrd.img-4.14.66+
- Image Name:   uInitrd
- Created:      Tue Jan 22 20:01:28 2019
- Image Type:   ARM Linux RAMDisk Image (uncompressed)
- Data Size:    5715824 Bytes = 5581.86 kB = 5.45 MB
- Load Address: 00000000
- Entry Point:  00000000
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- The following additional packages will be installed:
-   libevent-2.0-5 libminiupnpc10 libnatpmp1 transmission-common
- Suggested packages:
-   minissdpd natpmp-utils transmission-daemon transmission-gtk
- Recommended packages:
-   minissdpd
- The following NEW packages will be installed:
-   libevent-2.0-5 libminiupnpc10 libnatpmp1 transmission-cli transmission-common
- 0 upgraded, 5 newly installed, 0 to remove and 0 not upgraded.
- Need to get 776 kB of archives.
- After this operation, 2,814 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libevent-2.0-5 armhf 2.0.21-stable-3 [134 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libminiupnpc10 armhf 1.9.20140610-4 [25.7 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf libnatpmp1 armhf 20110808-4+b1 [8,338 B]
- Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf transmission-common all 2.92-2+deb9u1 [288 kB]
- Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf transmission-cli armhf 2.92-2+deb9u1 [320 kB]
- Fetched 776 kB in 1s (502 kB/s)       
- Selecting previously unselected package libevent-2.0-5:armhf.
- (Reading database ... 20061 files and directories currently installed.)
- Preparing to unpack .../libevent-2.0-5_2.0.21-stable-3_armhf.deb ...
- Unpacking libevent-2.0-5:armhf (2.0.21-stable-3) ...
- Selecting previously unselected package libminiupnpc10:armhf.
- Preparing to unpack .../libminiupnpc10_1.9.20140610-4_armhf.deb ...
- Unpacking libminiupnpc10:armhf (1.9.20140610-4) ...
- Selecting previously unselected package libnatpmp1:armhf.
- Preparing to unpack .../libnatpmp1_20110808-4+b1_armhf.deb ...
- Unpacking libnatpmp1:armhf (20110808-4+b1) ...
- Selecting previously unselected package transmission-common.
- Preparing to unpack .../transmission-common_2.92-2+deb9u1_all.deb ...
- Unpacking transmission-common (2.92-2+deb9u1) ...
- Selecting previously unselected package transmission-cli.
- Preparing to unpack .../transmission-cli_2.92-2+deb9u1_armhf.deb ...
- Unpacking transmission-cli (2.92-2+deb9u1) ...
- Setting up libminiupnpc10:armhf (1.9.20140610-4) ...
- Setting up libnatpmp1:armhf (20110808-4+b1) ...
- Setting up transmission-common (2.92-2+deb9u1) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Setting up libevent-2.0-5:armhf (2.0.21-stable-3) ...
- Setting up transmission-cli (2.92-2+deb9u1) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- The following additional packages will be installed:
-   libtorrent19 libxmlrpc-core-c3
- Suggested packages:
-   screen | dtach
- The following NEW packages will be installed:
-   libtorrent19 libxmlrpc-core-c3 rtorrent
- 0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
- Need to get 891 kB of archives.
- After this operation, 2,281 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libxmlrpc-core-c3 armhf 1.33.14-4 [128 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libtorrent19 armhf 0.13.6-1.1 [345 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf rtorrent armhf 0.9.6-2+b1 [418 kB]
- Fetched 891 kB in 2s (439 kB/s)
- Selecting previously unselected package libxmlrpc-core-c3.
- (Reading database ... 20202 files and directories currently installed.)
- Preparing to unpack .../libxmlrpc-core-c3_1.33.14-4_armhf.deb ...
- Unpacking libxmlrpc-core-c3 (1.33.14-4) ...
- Selecting previously unselected package libtorrent19:armhf.
- Preparing to unpack .../libtorrent19_0.13.6-1.1_armhf.deb ...
- Unpacking libtorrent19:armhf (0.13.6-1.1) ...
- Selecting previously unselected package rtorrent.
- Preparing to unpack .../rtorrent_0.9.6-2+b1_armhf.deb ...
- Unpacking rtorrent (0.9.6-2+b1) ...
- Setting up libtorrent19:armhf (0.13.6-1.1) ...
- Setting up libxmlrpc-core-c3 (1.33.14-4) ...
- Setting up rtorrent (0.9.6-2+b1) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- Suggested packages:
-   byobu | screenie | iselect ncurses-term
- The following NEW packages will be installed:
-   screen
- 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
- Need to get 568 kB of archives.
- After this operation, 860 kB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf screen armhf 4.5.0-6 [568 kB]
- Fetched 568 kB in 2s (245 kB/s)
- Selecting previously unselected package screen.
- (Reading database ... 20239 files and directories currently installed.)
- Preparing to unpack .../screen_4.5.0-6_armhf.deb ...
- Unpacking screen (4.5.0-6) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Setting up screen (4.5.0-6) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Cloning into &apos;raspiblitz&apos;...
- remote: Enumerating objects: 131, done.
- remote: Counting objects: 100% (131/131), done.
- remote: Compressing objects: 100% (87/87), done.
- remote: Total 4672 (delta 83), reused 85 (delta 44), pack-reused 4541
- Receiving objects: 100% (4672/4672), 16.36 MiB | 1.24 MiB/s, done.
- Resolving deltas: 100% (3286/3286), done.
- cp: -r not specified; omitting directory &apos;/home/admin/raspiblitz/home.admin/config.scripts&apos;
- bash: /home/pi/.bashrc: No such file or directory
- bash: /home/pi/.bashrc: No such file or directory
- bash: /home/pi/.bashrc: No such file or directory
- bash: /home/pi/.bashrc: No such file or directory
- 
- *** HARDENING ***
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- The following additional packages will be installed:
-   dh-python libmpdec2 libpython3-stdlib libpython3.5-minimal libpython3.5-stdlib mime-support python3
-   python3-minimal python3.5 python3.5-minimal
- Suggested packages:
-   mailx system-log-daemon monit python3-doc python3-tk python3-venv python3.5-venv python3.5-doc
-   binfmt-support
- Recommended packages:
-   python iptables whois python3-pyinotify python3-systemd file
- The following NEW packages will be installed:
-   dh-python fail2ban libmpdec2 libpython3-stdlib libpython3.5-minimal libpython3.5-stdlib
-   mime-support python3 python3-minimal python3.5 python3.5-minimal
- 0 upgraded, 11 newly installed, 0 to remove and 0 not upgraded.
- Need to get 4,876 kB of archives.
- After this operation, 22.6 MB of additional disk space will be used.
- Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3.5-minimal armhf 3.5.3-1+deb9u1 [565 kB]
- Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3.5-minimal armhf 3.5.3-1+deb9u1 [1,441 kB]
- Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3-minimal armhf 3.5.3-1 [35.3 kB]
- Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf mime-support all 3.60 [36.7 kB]
- Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpdec2 armhf 2.4.2-1 [69.6 kB]
- Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3.5-stdlib armhf 3.5.3-1+deb9u1 [2,085 kB]
- Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3.5 armhf 3.5.3-1+deb9u1 [229 kB]
- Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3-stdlib armhf 3.5.3-1 [18.6 kB]
- Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf dh-python all 2.20170125 [86.8 kB]
- Get:10 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3 armhf 3.5.3-1 [21.6 kB]
- Get:11 https://cdn-aws.deb.debian.org/debian stretch/main armhf fail2ban all 0.9.6-2 [288 kB]
- Fetched 4,876 kB in 4s (1,079 kB/s)
- Selecting previously unselected package libpython3.5-minimal:armhf.
- (Reading database ... 20299 files and directories currently installed.)
- Preparing to unpack .../0-libpython3.5-minimal_3.5.3-1+deb9u1_armhf.deb ...
- Unpacking libpython3.5-minimal:armhf (3.5.3-1+deb9u1) ...
- Selecting previously unselected package python3.5-minimal.
- Preparing to unpack .../1-python3.5-minimal_3.5.3-1+deb9u1_armhf.deb ...
- Unpacking python3.5-minimal (3.5.3-1+deb9u1) ...
- Selecting previously unselected package python3-minimal.
- Preparing to unpack .../2-python3-minimal_3.5.3-1_armhf.deb ...
- Unpacking python3-minimal (3.5.3-1) ...
- Selecting previously unselected package mime-support.
- Preparing to unpack .../3-mime-support_3.60_all.deb ...
- Unpacking mime-support (3.60) ...
- Selecting previously unselected package libmpdec2:armhf.
- Preparing to unpack .../4-libmpdec2_2.4.2-1_armhf.deb ...
- Unpacking libmpdec2:armhf (2.4.2-1) ...
- Selecting previously unselected package libpython3.5-stdlib:armhf.
- Preparing to unpack .../5-libpython3.5-stdlib_3.5.3-1+deb9u1_armhf.deb ...
- Unpacking libpython3.5-stdlib:armhf (3.5.3-1+deb9u1) ...
- Selecting previously unselected package python3.5.
- Preparing to unpack .../6-python3.5_3.5.3-1+deb9u1_armhf.deb ...
- Unpacking python3.5 (3.5.3-1+deb9u1) ...
- Selecting previously unselected package libpython3-stdlib:armhf.
- Preparing to unpack .../7-libpython3-stdlib_3.5.3-1_armhf.deb ...
- Unpacking libpython3-stdlib:armhf (3.5.3-1) ...
- Selecting previously unselected package dh-python.
- Preparing to unpack .../8-dh-python_2.20170125_all.deb ...
- Unpacking dh-python (2.20170125) ...
- Setting up libpython3.5-minimal:armhf (3.5.3-1+deb9u1) ...
- Setting up python3.5-minimal (3.5.3-1+deb9u1) ...
- Setting up python3-minimal (3.5.3-1) ...
- Selecting previously unselected package python3.
- (Reading database ... 21240 files and directories currently installed.)
- Preparing to unpack .../python3_3.5.3-1_armhf.deb ...
- Unpacking python3 (3.5.3-1) ...
- Selecting previously unselected package fail2ban.
- Preparing to unpack .../fail2ban_0.9.6-2_all.deb ...
- Unpacking fail2ban (0.9.6-2) ...
- Setting up mime-support (3.60) ...
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Setting up libmpdec2:armhf (2.4.2-1) ...
- Setting up libpython3.5-stdlib:armhf (3.5.3-1+deb9u1) ...
- Setting up python3.5 (3.5.3-1+deb9u1) ...
- Setting up libpython3-stdlib:armhf (3.5.3-1) ...
- Setting up python3 (3.5.3-1) ...
- running python rtupdate hooks for python3.5...
- running python post-rtupdate hooks for python3.5...
- Setting up dh-python (2.20170125) ...
- Setting up fail2ban (0.9.6-2) ...
- Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /lib/systemd/system/fail2ban.service.
- Job for fail2ban.service failed because the control process exited with error code.
- See &quot;systemctl status fail2ban.service&quot; and &quot;journalctl -xe&quot; for details.
- invoke-rc.d: initscript fail2ban, action &quot;start&quot; failed.
- ● fail2ban.service - Fail2Ban Service
-    Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; vendor preset: enabled)
-    Active: activating (auto-restart) (Result: exit-code) since Tue 2019-01-22 20:02:32 GMT; 20ms ago
-      Docs: man:fail2ban(1)
-   Process: 5576 ExecStart=/usr/bin/fail2ban-client -x start <font color="#EF2929"><b>(code=exited, status=255)</b></font>
- 
- Jan 22 20:02:32 DietPi systemd[1]: <b>fail2ban.service: Unit entered failed state.</b>
- Jan 22 20:02:32 DietPi systemd[1]: <b>fail2ban.service: Failed with result &apos;exit-code&apos;.</b>
- dpkg: error processing package fail2ban (--configure):
-  subprocess installed post-installation script returned error exit status 1
- Processing triggers for libc-bin (2.24-11+deb9u3) ...
- Processing triggers for systemd (232-25+deb9u8) ...
- Errors were encountered while processing:
-  fail2ban
- E: Sub-process /usr/bin/dpkg returned an error code (1)
- 
- *** RASPI BOOSTRAP SERVICE ***
- Created symlink /etc/systemd/system/multi-user.target.wants/bootstrap.service → /etc/systemd/system/bootstrap.service.
- 
- *** RASPI BACKGROUND SERVICE ***
- Created symlink /etc/systemd/system/multi-user.target.wants/background.service → /etc/systemd/system/background.service.
- *** Adding Tor Sources to sources.list ***
- deb http://deb.torproject.org/torproject.org stretch main
- deb-src http://deb.torproject.org/torproject.org stretch main
- OK
- 
- *** Installing dirmngr ***
- Reading package lists... Done
- Building dependency tree       
- Reading state information... Done
- dirmngr is already the newest version (2.1.18-8~deb9u3).
- 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
- 1 not fully installed or removed.
- After this operation, 0 B of additional disk space will be used.
- Do you want to continue? [Y/n] y
- Setting up fail2ban (0.9.6-2) ...
- Job for fail2ban.service failed because the control process exited with error code.
- See &quot;systemctl status fail2ban.service&quot; and &quot;journalctl -xe&quot; for details.
- invoke-rc.d: initscript fail2ban, action &quot;start&quot; failed.
- ● fail2ban.service - Fail2Ban Service
-    Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; vendor preset: enabled)
-    Active: activating (auto-restart) (Result: exit-code) since Tue 2019-01-22 20:53:28 GMT; 20ms ago
-      Docs: man:fail2ban(1)
-   Process: 7614 ExecStart=/usr/bin/fail2ban-client -x start <font color="#EF2929"><b>(code=exited, status=255)</b></font>
- 
- Jan 22 20:53:28 DietPi systemd[1]: <b>fail2ban.service: Unit entered failed state.</b>
- Jan 22 20:53:28 DietPi systemd[1]: <b>fail2ban.service: Failed with result &apos;exit-code&apos;.</b>
- <b>dpkg:</b> error processing package fail2ban (--configure):
-  subprocess installed post-installation script returned error exit status 1
- Errors were encountered while processing:
-  fail2ban
- E: Sub-process /usr/bin/dpkg returned an error code (1)
- 
- *** Fetching GPG key ***
- gpg: keyserver receive failed: No data
- gpg: WARNING: nothing exported
- gpg: no valid OpenPGP data found.
- gpg: keyserver receive failed: No data
- gpg: WARNING: nothing exported
- gpg: no valid OpenPGP data found.
- !!!!!! Please check if the above really worked!
- 
- **********************************************
- ALMOST READY
- **********************************************
- 
- Your SD Card Image for RaspiBlitz is almost ready.
- Last step is to install LCD drivers. This will reboot your Pi when done.
- 
- Maybe take the chance and look thru the output above if you can spot any errror.
- 
- After final reboot - your SD Card Image is ready.
- 
- IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:
- login once after reboot without HDD and run &apos;XXprepareRelease.sh&apos;
- 
- Press ENTER to install LCD and reboot ...
- 
- sudo: raspi-config: command not found
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌──────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#729FCF"><b>Display</b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>─────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐</font></span>
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> Are you using the default display available from Amazon?                     │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> Select &apos;No&apos; if you are using the Swiss version from play-zone.ch!            │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>├──────────────────────────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┤</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">                         </font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&lt;</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b> </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>Y</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>es </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&gt;</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">             &lt;</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#CC0000">N</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b>o  </b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">&gt;                          │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
- <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">──────────────────────────────────────────────────────────────────────────────┘</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
- <span style="background-color:#3465A4"><font color="#06989A">           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- E: Unable to locate package raspberrypi-bootloader
- E: No packages found
- Cloning into &apos;LCD-show&apos;...
- remote: Enumerating objects: 853, done.
- remote: Total 853 (delta 0), reused 0 (delta 0), pack-reused 853
- Receiving objects: 100% (853/853), 456.73 KiB | 698.00 KiB/s, done.
- Resolving deltas: 100% (547/547), done.
- cp: cannot create regular file &apos;/boot/overlays/&apos;: Not a directory
- cp: cannot create regular file &apos;/boot/overlays/tft35a.dtbo&apos;: No such file or directory
- cp: cannot create regular file &apos;/usr/share/X11/xorg.conf.d/&apos;: Not a directory
- this is not raspberrypi kernel, no need to update touch configure, reboot
- Connection to 192.168.1.175 closed by remote host.
- Connection to 192.168.1.175 closed.
- <font color="#8AE234"><b>openoms@buidl</b></font>:<font color="#729FCF"><b>~</b></font>$ 
- </pre>
+<pre><font color="#8AE234"><b>root@DietPi</b></font>:<font color="#729FCF"><b>~</b></font># wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh &amp;&amp; sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms
+  --2019-01-27 10:18:25--  https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh
+  Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.60.133
+  Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.60.133|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 20808 (20K) [text/plain]
+  Saving to: ‘raspbianStretchDesktop.sh’
+  
+  raspbianStretchDesktop.sh 100%[===================================&gt;]  20.32K  --.-KB/s    in 0.05s   
+  
+  2019-01-27 10:18:26 (411 KB/s) - ‘raspbianStretchDesktop.sh’ saved [20808/20808]
+  
+  
+  *****************************************
+  * RASPIBLITZ SD CARD IMAGE SETUP v0.99  *
+  *****************************************
+  
+  *** CHECK INPUT PARAMETERS ***
+  will use code from branch --&gt; &apos;OdroidHC1Debug&apos;
+  *** CHECK INPUT PARAMETERS ***
+  will use code from user --&gt; &apos;openoms&apos;
+  
+  *** CHECK BASE IMAGE ***
+  Check if Linux ARM based ...
+  OK running on Linux ARM architecture.
+  Detect Base Image ...
+  OK running dietpi
+  
+  *** FIXING LOCALES FOR BUILD ***
+  Generating locales (this might take a while)...
+    en_GB.UTF-8... done
+    en_US.ISO-8859-1... done
+    en_US.UTF-8... done
+  Generation complete.
+  
+  *** UPDATE DEBIAN ***
+  Hit:1 http://fuzon.co.uk/meveric all InRelease
+  Hit:2 http://fuzon.co.uk/meveric stretch InRelease                               
+  Hit:3 https://oph.mdrjr.net/meveric all InRelease                                
+  Ign:4 https://cdn-aws.deb.debian.org/debian stretch InRelease
+  Hit:5 https://cdn-aws.deb.debian.org/debian stretch-updates InRelease
+  Hit:6 https://cdn-aws.deb.debian.org/debian-security stretch/updates InRelease
+  Hit:7 https://cdn-aws.deb.debian.org/debian stretch-backports InRelease
+  Hit:8 https://cdn-aws.deb.debian.org/debian stretch Release
+  Reading package lists... Done
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  Calculating upgrade... Done
+  0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+  
+  *** PREPARE DietPi ***
+  renaming dietpi user to pi
+  install pip
+  Hit:1 http://fuzon.co.uk/meveric all InRelease
+  Hit:2 http://fuzon.co.uk/meveric stretch InRelease                                                
+  Hit:3 https://oph.mdrjr.net/meveric all InRelease                                                 
+  Ign:4 https://cdn-aws.deb.debian.org/debian stretch InRelease
+  Hit:5 https://cdn-aws.deb.debian.org/debian stretch-updates InRelease
+  Hit:6 https://cdn-aws.deb.debian.org/debian-security stretch/updates InRelease
+  Hit:7 https://cdn-aws.deb.debian.org/debian stretch-backports InRelease
+  Hit:8 https://cdn-aws.deb.debian.org/debian stretch Release
+  Reading package lists... Done
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  Package &apos;fail2ban&apos; is not installed, so not removed
+  0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    binutils cpp cpp-6 dpkg-dev g++ g++-6 gcc gcc-6 libasan3 libatomic1 libc-dev-bin libc6-dev
+    libcc1-0 libdpkg-perl libgcc-6-dev libgdbm3 libgomp1 libisl15 libmpc3 libmpfr4 libperl5.24
+    libstdc++-6-dev libubsan0 linux-libc-dev make patch perl perl-modules-5.24 xz-utils
+  Suggested packages:
+    binutils-doc cpp-doc gcc-6-locales debian-keyring gcc-6-doc libstdc++6-6-dbg gcc-multilib
+    manpages-dev autoconf automake libtool flex bison gdb gcc-doc libgcc1-dbg libgomp1-dbg libitm1-dbg
+    libatomic1-dbg libasan3-dbg liblsan0-dbg libtsan0-dbg libubsan0-dbg libcilkrts5-dbg libmpx2-dbg
+    libquadmath0-dbg glibc-doc libstdc++-6-doc make-doc ed diffutils-doc perl-doc
+    libterm-readline-gnu-perl | libterm-readline-perl-perl
+  Recommended packages:
+    fakeroot libalgorithm-merge-perl manpages manpages-dev libfile-fcntllock-perl netbase rename
+  The following NEW packages will be installed:
+    binutils build-essential cpp cpp-6 dpkg-dev g++ g++-6 gcc gcc-6 libasan3 libatomic1 libc-dev-bin
+    libc6-dev libcc1-0 libdpkg-perl libgcc-6-dev libgdbm3 libgomp1 libisl15 libmpc3 libmpfr4
+    libperl5.24 libstdc++-6-dev libubsan0 linux-libc-dev make patch perl perl-modules-5.24 xz-utils
+  0 upgraded, 30 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 36.8 MB of archives.
+  After this operation, 138 MB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf perl-modules-5.24 all 5.24.1-3+deb9u5 [2,722 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgdbm3 armhf 1.8.3-14 [28.5 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf libperl5.24 armhf 5.24.1-3+deb9u5 [2,850 kB]
+  Get:4 https://cdn-aws.deb.debian.org/debian-security stretch/updates/main armhf perl armhf 5.24.1-3+deb9u5 [219 kB]
+  Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf xz-utils armhf 5.2.2-1.2+b1 [263 kB]
+  Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf binutils armhf 2.28-5 [3,900 kB]
+  Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf libc-dev-bin armhf 2.24-11+deb9u3 [253 kB]
+  Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf linux-libc-dev armhf 4.9.130-2 [1,350 kB]
+  Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf libc6-dev armhf 2.24-11+deb9u3 [1,995 kB]
+  Get:10 https://cdn-aws.deb.debian.org/debian stretch/main armhf libisl15 armhf 0.18-1 [441 kB]       
+  Get:11 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpfr4 armhf 3.1.5-1 [536 kB]      
+  Get:12 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpc3 armhf 1.0.3-1+b2 [32.6 kB]   
+  Get:13 https://cdn-aws.deb.debian.org/debian stretch/main armhf cpp-6 armhf 6.3.0-18+deb9u1 [5,239 kB]
+  Get:14 https://cdn-aws.deb.debian.org/debian stretch/main armhf cpp armhf 4:6.3.0-4 [18.7 kB]        
+  Get:15 https://cdn-aws.deb.debian.org/debian stretch/main armhf libcc1-0 armhf 6.3.0-18+deb9u1 [25.2 kB]
+  Get:16 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgomp1 armhf 6.3.0-18+deb9u1 [64.6 kB]
+  Get:17 https://cdn-aws.deb.debian.org/debian stretch/main armhf libatomic1 armhf 6.3.0-18+deb9u1 [6,010 B]
+  Get:18 https://cdn-aws.deb.debian.org/debian stretch/main armhf libasan3 armhf 6.3.0-18+deb9u1 [284 kB]
+  Get:19 https://cdn-aws.deb.debian.org/debian stretch/main armhf libubsan0 armhf 6.3.0-18+deb9u1 [92.9 kB]
+  Get:20 https://cdn-aws.deb.debian.org/debian stretch/main armhf libgcc-6-dev armhf 6.3.0-18+deb9u1 [531 kB]
+  Get:21 https://cdn-aws.deb.debian.org/debian stretch/main armhf gcc-6 armhf 6.3.0-18+deb9u1 [5,511 kB]
+  Get:22 https://cdn-aws.deb.debian.org/debian stretch/main armhf gcc armhf 4:6.3.0-4 [5,212 B]        
+  Get:23 https://cdn-aws.deb.debian.org/debian stretch/main armhf libstdc++-6-dev armhf 6.3.0-18+deb9u1 [1,487 kB]
+  Get:24 https://cdn-aws.deb.debian.org/debian stretch/main armhf g++-6 armhf 6.3.0-18+deb9u1 [5,665 kB]
+  Get:25 https://cdn-aws.deb.debian.org/debian stretch/main armhf g++ armhf 4:6.3.0-4 [1,520 B]        
+  Get:26 https://cdn-aws.deb.debian.org/debian stretch/main armhf make armhf 4.1-9.1 [290 kB]          
+  Get:27 https://cdn-aws.deb.debian.org/debian stretch/main armhf libdpkg-perl all 1.18.25 [1,287 kB]  
+  Get:28 https://cdn-aws.deb.debian.org/debian stretch/main armhf patch armhf 2.7.5-1+deb9u1 [106 kB]  
+  Get:29 https://cdn-aws.deb.debian.org/debian stretch/main armhf dpkg-dev all 1.18.25 [1,595 kB]      
+  Get:30 https://cdn-aws.deb.debian.org/debian stretch/main armhf build-essential armhf 12.3 [7,342 B] 
+  Fetched 36.8 MB in 22s (1,600 kB/s)                                                                  
+  Selecting previously unselected package perl-modules-5.24.
+  (Reading database ... 14111 files and directories currently installed.)
+  Preparing to unpack .../00-perl-modules-5.24_5.24.1-3+deb9u5_all.deb ...
+  Unpacking perl-modules-5.24 (5.24.1-3+deb9u5) ...
+  Selecting previously unselected package libgdbm3:armhf.
+  Preparing to unpack .../01-libgdbm3_1.8.3-14_armhf.deb ...
+  Unpacking libgdbm3:armhf (1.8.3-14) ...
+  Selecting previously unselected package libperl5.24:armhf.
+  Preparing to unpack .../02-libperl5.24_5.24.1-3+deb9u5_armhf.deb ...
+  Unpacking libperl5.24:armhf (5.24.1-3+deb9u5) ...
+  Selecting previously unselected package perl.
+  Preparing to unpack .../03-perl_5.24.1-3+deb9u5_armhf.deb ...
+  Unpacking perl (5.24.1-3+deb9u5) ...
+  Selecting previously unselected package xz-utils.
+  Preparing to unpack .../04-xz-utils_5.2.2-1.2+b1_armhf.deb ...
+  Unpacking xz-utils (5.2.2-1.2+b1) ...
+  Selecting previously unselected package binutils.
+  Preparing to unpack .../05-binutils_2.28-5_armhf.deb ...
+  Unpacking binutils (2.28-5) ...
+  Selecting previously unselected package libc-dev-bin.
+  Preparing to unpack .../06-libc-dev-bin_2.24-11+deb9u3_armhf.deb ...
+  Unpacking libc-dev-bin (2.24-11+deb9u3) ...
+  Selecting previously unselected package linux-libc-dev:armhf.
+  Preparing to unpack .../07-linux-libc-dev_4.9.130-2_armhf.deb ...
+  Unpacking linux-libc-dev:armhf (4.9.130-2) ...
+  Selecting previously unselected package libc6-dev:armhf.
+  Preparing to unpack .../08-libc6-dev_2.24-11+deb9u3_armhf.deb ...
+  Unpacking libc6-dev:armhf (2.24-11+deb9u3) ...
+  Selecting previously unselected package libisl15:armhf.
+  Preparing to unpack .../09-libisl15_0.18-1_armhf.deb ...
+  Unpacking libisl15:armhf (0.18-1) ...
+  Selecting previously unselected package libmpfr4:armhf.
+  Preparing to unpack .../10-libmpfr4_3.1.5-1_armhf.deb ...
+  Unpacking libmpfr4:armhf (3.1.5-1) ...
+  Selecting previously unselected package libmpc3:armhf.
+  Preparing to unpack .../11-libmpc3_1.0.3-1+b2_armhf.deb ...
+  Unpacking libmpc3:armhf (1.0.3-1+b2) ...
+  Selecting previously unselected package cpp-6.
+  Preparing to unpack .../12-cpp-6_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking cpp-6 (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package cpp.
+  Preparing to unpack .../13-cpp_4%3a6.3.0-4_armhf.deb ...
+  Unpacking cpp (4:6.3.0-4) ...
+  Selecting previously unselected package libcc1-0:armhf.
+  Preparing to unpack .../14-libcc1-0_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libcc1-0:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package libgomp1:armhf.
+  Preparing to unpack .../15-libgomp1_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libgomp1:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package libatomic1:armhf.
+  Preparing to unpack .../16-libatomic1_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libatomic1:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package libasan3:armhf.
+  Preparing to unpack .../17-libasan3_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libasan3:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package libubsan0:armhf.
+  Preparing to unpack .../18-libubsan0_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libubsan0:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package libgcc-6-dev:armhf.
+  Preparing to unpack .../19-libgcc-6-dev_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libgcc-6-dev:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package gcc-6.
+  Preparing to unpack .../20-gcc-6_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking gcc-6 (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package gcc.
+  Preparing to unpack .../21-gcc_4%3a6.3.0-4_armhf.deb ...
+  Unpacking gcc (4:6.3.0-4) ...
+  Selecting previously unselected package libstdc++-6-dev:armhf.
+  Preparing to unpack .../22-libstdc++-6-dev_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking libstdc++-6-dev:armhf (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package g++-6.
+  Preparing to unpack .../23-g++-6_6.3.0-18+deb9u1_armhf.deb ...
+  Unpacking g++-6 (6.3.0-18+deb9u1) ...
+  Selecting previously unselected package g++.
+  Preparing to unpack .../24-g++_4%3a6.3.0-4_armhf.deb ...
+  Unpacking g++ (4:6.3.0-4) ...
+  Selecting previously unselected package make.
+  Preparing to unpack .../25-make_4.1-9.1_armhf.deb ...
+  Unpacking make (4.1-9.1) ...
+  Selecting previously unselected package libdpkg-perl.
+  Preparing to unpack .../26-libdpkg-perl_1.18.25_all.deb ...
+  Unpacking libdpkg-perl (1.18.25) ...
+  Selecting previously unselected package patch.
+  Preparing to unpack .../27-patch_2.7.5-1+deb9u1_armhf.deb ...
+  Unpacking patch (2.7.5-1+deb9u1) ...
+  Selecting previously unselected package dpkg-dev.
+  Preparing to unpack .../28-dpkg-dev_1.18.25_all.deb ...
+  Unpacking dpkg-dev (1.18.25) ...
+  Selecting previously unselected package build-essential.
+  Preparing to unpack .../29-build-essential_12.3_armhf.deb ...
+  Unpacking build-essential (12.3) ...
+  Setting up libgomp1:armhf (6.3.0-18+deb9u1) ...
+  Setting up libatomic1:armhf (6.3.0-18+deb9u1) ...
+  Setting up perl-modules-5.24 (5.24.1-3+deb9u5) ...
+  Setting up libgdbm3:armhf (1.8.3-14) ...
+  Setting up libperl5.24:armhf (5.24.1-3+deb9u5) ...
+  Setting up libcc1-0:armhf (6.3.0-18+deb9u1) ...
+  Setting up make (4.1-9.1) ...
+  Setting up libasan3:armhf (6.3.0-18+deb9u1) ...
+  Setting up libubsan0:armhf (6.3.0-18+deb9u1) ...
+  Setting up linux-libc-dev:armhf (4.9.130-2) ...
+  Setting up perl (5.24.1-3+deb9u5) ...
+  update-alternatives: using /usr/bin/prename to provide /usr/bin/rename (rename) in auto mode
+  Setting up libisl15:armhf (0.18-1) ...
+  Setting up patch (2.7.5-1+deb9u1) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Setting up xz-utils (5.2.2-1.2+b1) ...
+  update-alternatives: using /usr/bin/xz to provide /usr/bin/lzma (lzma) in auto mode
+  Setting up libmpfr4:armhf (3.1.5-1) ...
+  Setting up libmpc3:armhf (1.0.3-1+b2) ...
+  Setting up binutils (2.28-5) ...
+  Setting up cpp-6 (6.3.0-18+deb9u1) ...
+  Setting up libc-dev-bin (2.24-11+deb9u3) ...
+  Setting up libc6-dev:armhf (2.24-11+deb9u3) ...
+  Setting up cpp (4:6.3.0-4) ...
+  Setting up libgcc-6-dev:armhf (6.3.0-18+deb9u1) ...
+  Setting up libstdc++-6-dev:armhf (6.3.0-18+deb9u1) ...
+  Setting up libdpkg-perl (1.18.25) ...
+  Setting up gcc-6 (6.3.0-18+deb9u1) ...
+  Setting up g++-6 (6.3.0-18+deb9u1) ...
+  Setting up dpkg-dev (1.18.25) ...
+  Setting up gcc (4:6.3.0-4) ...
+  Setting up g++ (4:6.3.0-4) ...
+  update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+  Setting up build-essential (12.3) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    libexpat1 libpython-stdlib libpython2.7-minimal libpython2.7-stdlib mime-support python
+    python-minimal python-pip-whl python2.7 python2.7-minimal
+  Suggested packages:
+    python-doc python-tk python2.7-doc binfmt-support
+  Recommended packages:
+    file python-all-dev python-setuptools python-wheel
+  The following NEW packages will be installed:
+    libexpat1 libpython-stdlib libpython2.7-minimal libpython2.7-stdlib mime-support python
+    python-minimal python-pip python-pip-whl python2.7 python2.7-minimal
+  0 upgraded, 11 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 5,571 kB of archives.
+  After this operation, 17.5 MB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython2.7-minimal armhf 2.7.13-2+deb9u3 [389 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf python2.7-minimal armhf 2.7.13-2+deb9u3 [1,176 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf python-minimal armhf 2.7.13-2 [40.5 kB]
+  Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf mime-support all 3.60 [36.7 kB]
+  Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf libexpat1 armhf 2.2.0-2+deb9u1 [64.4 kB]
+  Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython2.7-stdlib armhf 2.7.13-2+deb9u3 [1,821 kB]
+  Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf python2.7 armhf 2.7.13-2+deb9u3 [285 kB]
+  Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython-stdlib armhf 2.7.13-2 [20.0 kB]
+  Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf python armhf 2.7.13-2 [154 kB]
+  Get:10 https://cdn-aws.deb.debian.org/debian stretch/main armhf python-pip-whl all 9.0.1-2 [1,406 kB]
+  Get:11 https://cdn-aws.deb.debian.org/debian stretch/main armhf python-pip all 9.0.1-2 [179 kB]
+  Fetched 5,571 kB in 4s (1,162 kB/s)  
+  Selecting previously unselected package libpython2.7-minimal:armhf.
+  (Reading database ... 18920 files and directories currently installed.)
+  Preparing to unpack .../0-libpython2.7-minimal_2.7.13-2+deb9u3_armhf.deb ...
+  Unpacking libpython2.7-minimal:armhf (2.7.13-2+deb9u3) ...
+  Selecting previously unselected package python2.7-minimal.
+  Preparing to unpack .../1-python2.7-minimal_2.7.13-2+deb9u3_armhf.deb ...
+  Unpacking python2.7-minimal (2.7.13-2+deb9u3) ...
+  Selecting previously unselected package python-minimal.
+  Preparing to unpack .../2-python-minimal_2.7.13-2_armhf.deb ...
+  Unpacking python-minimal (2.7.13-2) ...
+  Selecting previously unselected package mime-support.
+  Preparing to unpack .../3-mime-support_3.60_all.deb ...
+  Unpacking mime-support (3.60) ...
+  Selecting previously unselected package libexpat1:armhf.
+  Preparing to unpack .../4-libexpat1_2.2.0-2+deb9u1_armhf.deb ...
+  Unpacking libexpat1:armhf (2.2.0-2+deb9u1) ...
+  Selecting previously unselected package libpython2.7-stdlib:armhf.
+  Preparing to unpack .../5-libpython2.7-stdlib_2.7.13-2+deb9u3_armhf.deb ...
+  Unpacking libpython2.7-stdlib:armhf (2.7.13-2+deb9u3) ...
+  Selecting previously unselected package python2.7.
+  Preparing to unpack .../6-python2.7_2.7.13-2+deb9u3_armhf.deb ...
+  Unpacking python2.7 (2.7.13-2+deb9u3) ...
+  Selecting previously unselected package libpython-stdlib:armhf.
+  Preparing to unpack .../7-libpython-stdlib_2.7.13-2_armhf.deb ...
+  Unpacking libpython-stdlib:armhf (2.7.13-2) ...
+  Setting up libpython2.7-minimal:armhf (2.7.13-2+deb9u3) ...
+  Setting up python2.7-minimal (2.7.13-2+deb9u3) ...
+  Linking and byte-compiling packages for runtime python2.7...
+  Setting up python-minimal (2.7.13-2) ...
+  Selecting previously unselected package python.
+  (Reading database ... 19701 files and directories currently installed.)
+  Preparing to unpack .../python_2.7.13-2_armhf.deb ...
+  Unpacking python (2.7.13-2) ...
+  Selecting previously unselected package python-pip-whl.
+  Preparing to unpack .../python-pip-whl_9.0.1-2_all.deb ...
+  Unpacking python-pip-whl (9.0.1-2) ...
+  Selecting previously unselected package python-pip.
+  Preparing to unpack .../python-pip_9.0.1-2_all.deb ...
+  Unpacking python-pip (9.0.1-2) ...
+  Setting up python-pip-whl (9.0.1-2) ...
+  Setting up libexpat1:armhf (2.2.0-2+deb9u1) ...
+  Setting up mime-support (3.60) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Setting up libpython2.7-stdlib:armhf (2.7.13-2+deb9u3) ...
+  Setting up python2.7 (2.7.13-2+deb9u3) ...
+  Setting up libpython-stdlib:armhf (2.7.13-2) ...
+  Setting up python (2.7.13-2) ...
+  Setting up python-pip (9.0.1-2) ...
+  
+  *** CONFIG ***
+  sudo: raspi-config: command not found
+  bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
+  bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
+  bash: /etc/systemd/system/getty@tty1.service.d/autologin.conf: No such file or directory
+  
+  *** SOFTWARE UPDATE ***
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  bash-completion is already the newest version (1:2.1-4.3).
+  curl is already the newest version (7.52.1-5+deb9u8).
+  htop is already the newest version (2.0.2-1).
+  The following additional packages will be installed:
+    dc git-man liberror-perl libjq1 libonig4
+  Suggested packages:
+    gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-el git-email git-gui gitk gitweb
+    git-arch git-cvs git-mediawiki git-svn
+  Recommended packages:
+    less rsync ssh-client
+  The following NEW packages will be installed:
+    dc dphys-swapfile git git-man jq liberror-perl libjq1 libonig4
+  0 upgraded, 8 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 5,514 kB of archives.
+  After this operation, 23.4 MB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf liberror-perl all 0.17024-1 [26.9 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf git-man all 1:2.11.0-3+deb9u4 [1,433 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf git armhf 1:2.11.0-3+deb9u4 [3,661 kB]
+  Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf dc armhf 1.06.95-9+b3 [64.8 kB]
+  Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf dphys-swapfile all 20100506-3 [19.7 kB]
+  Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf libonig4 armhf 6.1.3-2 [128 kB]
+  Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf libjq1 armhf 1.5+dfsg-1.3 [122 kB]
+  Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf jq armhf 1.5+dfsg-1.3 [59.2 kB]
+  Fetched 5,514 kB in 5s (1,038 kB/s)
+  Selecting previously unselected package liberror-perl.
+  (Reading database ... 19894 files and directories currently installed.)
+  Preparing to unpack .../0-liberror-perl_0.17024-1_all.deb ...
+  Unpacking liberror-perl (0.17024-1) ...
+  Selecting previously unselected package git-man.
+  Preparing to unpack .../1-git-man_1%3a2.11.0-3+deb9u4_all.deb ...
+  Unpacking git-man (1:2.11.0-3+deb9u4) ...
+  Selecting previously unselected package git.
+  Preparing to unpack .../2-git_1%3a2.11.0-3+deb9u4_armhf.deb ...
+  Unpacking git (1:2.11.0-3+deb9u4) ...
+  Selecting previously unselected package dc.
+  Preparing to unpack .../3-dc_1.06.95-9+b3_armhf.deb ...
+  Unpacking dc (1.06.95-9+b3) ...
+  Selecting previously unselected package dphys-swapfile.
+  Preparing to unpack .../4-dphys-swapfile_20100506-3_all.deb ...
+  Unpacking dphys-swapfile (20100506-3) ...
+  Selecting previously unselected package libonig4:armhf.
+  Preparing to unpack .../5-libonig4_6.1.3-2_armhf.deb ...
+  Unpacking libonig4:armhf (6.1.3-2) ...
+  Selecting previously unselected package libjq1:armhf.
+  Preparing to unpack .../6-libjq1_1.5+dfsg-1.3_armhf.deb ...
+  Unpacking libjq1:armhf (1.5+dfsg-1.3) ...
+  Selecting previously unselected package jq.
+  Preparing to unpack .../7-jq_1.5+dfsg-1.3_armhf.deb ...
+  Unpacking jq (1.5+dfsg-1.3) ...
+  Setting up git-man (1:2.11.0-3+deb9u4) ...
+  Setting up liberror-perl (0.17024-1) ...
+  Setting up libonig4:armhf (6.1.3-2) ...
+  Setting up libjq1:armhf (1.5+dfsg-1.3) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Setting up dc (1.06.95-9+b3) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Setting up git (1:2.11.0-3+deb9u4) ...
+  Setting up jq (1.5+dfsg-1.3) ...
+  Setting up dphys-swapfile (20100506-3) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  Suggested packages:
+    vnstati
+  The following NEW packages will be installed:
+    vnstat
+  0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 78.6 kB of archives.
+  After this operation, 206 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf vnstat armhf 1.15-2 [78.6 kB]
+  Fetched 78.6 kB in 1s (51.9 kB/s)
+  Selecting previously unselected package vnstat.
+  (Reading database ... 20819 files and directories currently installed.)
+  Preparing to unpack .../vnstat_1.15-2_armhf.deb ...
+  Unpacking vnstat (1.15-2) ...
+  Setting up vnstat (1.15-2) ...
+  Created symlink /etc/systemd/system/multi-user.target.wants/vnstat.service → /lib/systemd/system/vnstat.service.
+  Processing triggers for systemd (232-25+deb9u8) ...
+  
+  *** ADDING MAIN USER admin ***
+  Adding user `admin&apos; ...
+  Adding new group `admin&apos; (1001) ...
+  Adding new user `admin&apos; (1001) with group `admin&apos; ...
+  Creating home directory `/home/admin&apos; ...
+  Copying files from `/etc/skel&apos; ...
+  Adding user `admin&apos; to group `sudo&apos; ...
+  Adding user admin to group sudo
+  Done.
+  %sudo ALL=(ALL) NOPASSWD:ALL
+  *** ADDING SERVICE USER bitcoin
+  Adding user `bitcoin&apos; ...
+  Adding new group `bitcoin&apos; (1002) ...
+  Adding new user `bitcoin&apos; (1002) with group `bitcoin&apos; ...
+  Creating home directory `/home/bitcoin&apos; ...
+  Copying files from `/etc/skel&apos; ...
+  
+  *** SWAP FILE ***
+  
+  *** INCREASE OPEN FILE LIMIT ***
+  
+  *** BITCOIN ***
+  --2019-01-27 10:20:15--  https://bitcoin.org/bin/bitcoin-core-0.17.0.1/bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz
+  Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
+  Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 24306145 (23M) [application/octet-stream]
+  Saving to: ‘bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz’
+  
+  bitcoin-0.17.0.1-arm-linu 100%[===================================&gt;]  23.18M   209KB/s    in 2m 3s   
+  
+  2019-01-27 10:22:19 (193 KB/s) - ‘bitcoin-0.17.0.1-arm-linux-gnueabihf.tar.gz’ saved [24306145/24306145]
+  
+  --2019-01-27 10:22:19--  https://bitcoin.org/laanwj-releases.asc
+  Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
+  Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 17940 (18K) [application/octet-stream]
+  Saving to: ‘laanwj-releases.asc’
+  
+  laanwj-releases.asc       100%[===================================&gt;]  17.52K  --.-KB/s    in 0.003s  
+  
+  2019-01-27 10:22:20 (5.60 MB/s) - ‘laanwj-releases.asc’ saved [17940/17940]
+  
+  key 90C8019E36C2E964:
+  25 signatures not checked due to missing keys
+  gpg: /root/.gnupg/trustdb.gpg: trustdb created
+  gpg: key 90C8019E36C2E964: public key &quot;Wladimir J. van der Laan (Bitcoin Core binary release signing key) &lt;laanwj@gmail.com&gt;&quot; imported
+  gpg: Total number processed: 1
+  gpg:               imported: 1
+  gpg: no ultimately trusted keys found
+  --2019-01-27 10:22:22--  https://bitcoin.org/bin/bitcoin-core-0.17.0.1/SHA256SUMS.asc
+  Resolving bitcoin.org (bitcoin.org)... 138.68.248.245
+  Connecting to bitcoin.org (bitcoin.org)|138.68.248.245|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 1979 (1.9K) [application/octet-stream]
+  Saving to: ‘SHA256SUMS.asc’
+  
+  SHA256SUMS.asc            100%[===================================&gt;]   1.93K  --.-KB/s    in 0s      
+  
+  2019-01-27 10:22:23 (20.7 MB/s) - ‘SHA256SUMS.asc’ saved [1979/1979]
+  
+  goodSignature(1)
+  correctKey(1)
+  bitcoin-0.17.0/
+  bitcoin-0.17.0/bin/
+  bitcoin-0.17.0/bin/bitcoin-cli
+  bitcoin-0.17.0/bin/bitcoind
+  bitcoin-0.17.0/bin/bitcoin-qt
+  bitcoin-0.17.0/bin/bitcoin-tx
+  bitcoin-0.17.0/bin/test_bitcoin
+  bitcoin-0.17.0/include/
+  bitcoin-0.17.0/include/bitcoinconsensus.h
+  bitcoin-0.17.0/lib/
+  bitcoin-0.17.0/lib/libbitcoinconsensus.so
+  bitcoin-0.17.0/lib/libbitcoinconsensus.so.0
+  bitcoin-0.17.0/lib/libbitcoinconsensus.so.0.0.0
+  bitcoin-0.17.0/share/
+  bitcoin-0.17.0/share/man/
+  bitcoin-0.17.0/share/man/man1/
+  bitcoin-0.17.0/share/man/man1/bitcoin-cli.1
+  bitcoin-0.17.0/share/man/man1/bitcoind.1
+  bitcoin-0.17.0/share/man/man1/bitcoin-qt.1
+  bitcoin-0.17.0/share/man/man1/bitcoin-tx.1
+  
+  *** LITECOIN ***
+  --2019-01-27 10:22:27--  https://download.litecoin.org/litecoin-0.16.3/linux/litecoin-0.16.3-arm-linux-gnueabihf.tar.gz
+  Resolving download.litecoin.org (download.litecoin.org)... 104.27.5.55, 104.27.4.55
+  Connecting to download.litecoin.org (download.litecoin.org)|104.27.5.55|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 9568024 (9.1M) [application/octet-stream]
+  Saving to: ‘litecoin-0.16.3-arm-linux-gnueabihf.tar.gz’
+  
+  litecoin-0.16.3-arm-linux 100%[===================================&gt;]   9.12M  1.21MB/s    in 7.5s    
+  
+  2019-01-27 10:22:35 (1.22 MB/s) - ‘litecoin-0.16.3-arm-linux-gnueabihf.tar.gz’ saved [9568024/9568024]
+  
+  litecoin-0.16.3/
+  litecoin-0.16.3/bin/
+  litecoin-0.16.3/bin/litecoin-cli
+  litecoin-0.16.3/bin/litecoind
+  litecoin-0.16.3/bin/litecoin-tx
+  litecoin-0.16.3/bin/test_litecoin
+  litecoin-0.16.3/share/
+  litecoin-0.16.3/share/man/
+  litecoin-0.16.3/share/man/man1/
+  litecoin-0.16.3/share/man/man1/litecoin-cli.1
+  litecoin-0.16.3/share/man/man1/litecoind.1
+  litecoin-0.16.3/share/man/man1/litecoin-tx.1
+  
+  *** LND ***
+  --2019-01-27 10:22:36--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/lnd-linux-armv7-v0.5.1-beta.tar.gz
+  Resolving github.com (github.com)... 140.82.118.4, 140.82.118.3
+  Connecting to github.com (github.com)|140.82.118.4|:443... connected.
+  HTTP request sent, awaiting response... 302 Found
+  Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fd08b500-f311-11e8-8398-419cca1df903?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102236Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9d363ba0b3deda400d8baa7cbb54ba304bed19ce61ac44ae54c1ef1b1d7ea6f4&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dlnd-linux-armv7-v0.5.1-beta.tar.gz&amp;response-content-type=application%2Foctet-stream [following]
+  --2019-01-27 10:22:37--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fd08b500-f311-11e8-8398-419cca1df903?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102236Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9d363ba0b3deda400d8baa7cbb54ba304bed19ce61ac44ae54c1ef1b1d7ea6f4&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dlnd-linux-armv7-v0.5.1-beta.tar.gz&amp;response-content-type=application%2Foctet-stream
+  Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.227.88
+  Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.227.88|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 19198203 (18M) [application/octet-stream]
+  Saving to: ‘lnd-linux-armv7-v0.5.1-beta.tar.gz’
+  
+  lnd-linux-armv7-v0.5.1-be 100%[===================================&gt;]  18.31M   992KB/s    in 18s     
+  
+  2019-01-27 10:22:55 (1.01 MB/s) - ‘lnd-linux-armv7-v0.5.1-beta.tar.gz’ saved [19198203/19198203]
+  
+  --2019-01-27 10:22:55--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/manifest-v0.5.1-beta.txt
+  Resolving github.com (github.com)... 140.82.118.3, 140.82.118.4
+  Connecting to github.com (github.com)|140.82.118.3|:443... connected.
+  HTTP request sent, awaiting response... 302 Found
+  Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-9178-5d26551a454e?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102256Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=66a130372d8c4a918d3d172cdfb8a75bc39f22efd59179c4f60397c46ae828d1&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt&amp;response-content-type=application%2Foctet-stream [following]
+  --2019-01-27 10:22:56--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-9178-5d26551a454e?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102256Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=66a130372d8c4a918d3d172cdfb8a75bc39f22efd59179c4f60397c46ae828d1&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt&amp;response-content-type=application%2Foctet-stream
+  Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.168.59
+  Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.168.59|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 2026 (2.0K) [application/octet-stream]
+  Saving to: ‘manifest-v0.5.1-beta.txt’
+  
+  manifest-v0.5.1-beta.txt  100%[===================================&gt;]   1.98K  --.-KB/s    in 0.001s  
+  
+  2019-01-27 10:22:56 (2.54 MB/s) - ‘manifest-v0.5.1-beta.txt’ saved [2026/2026]
+  
+  --2019-01-27 10:22:56--  https://github.com/lightningnetwork/lnd/releases/download/v0.5.1-beta/manifest-v0.5.1-beta.txt.sig
+  Resolving github.com (github.com)... 140.82.118.4, 140.82.118.3
+  Connecting to github.com (github.com)|140.82.118.4|:443... connected.
+  HTTP request sent, awaiting response... 302 Found
+  Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-8fb5-c3aa7d97cb88?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102257Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9ad9f66ca4ab461638cf0df6cfc9a8fc9b379deabfb121ef64234f9d8c1cb756&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt.sig&amp;response-content-type=application%2Foctet-stream [following]
+  --2019-01-27 10:22:57--  https://github-production-release-asset-2e65be.s3.amazonaws.com/49765480/fe39e200-f311-11e8-8fb5-c3aa7d97cb88?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20190127%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20190127T102257Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9ad9f66ca4ab461638cf0df6cfc9a8fc9b379deabfb121ef64234f9d8c1cb756&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;response-content-disposition=attachment%3B%20filename%3Dmanifest-v0.5.1-beta.txt.sig&amp;response-content-type=application%2Foctet-stream
+  Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.216.168.59
+  Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.216.168.59|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 566 [application/octet-stream]
+  Saving to: ‘manifest-v0.5.1-beta.txt.sig’
+  
+  manifest-v0.5.1-beta.txt. 100%[===================================&gt;]     566  --.-KB/s    in 0s      
+  
+  2019-01-27 10:22:57 (1.42 MB/s) - ‘manifest-v0.5.1-beta.txt.sig’ saved [566/566]
+  
+  --2019-01-27 10:22:57--  https://keybase.io/roasbeef/pgp_keys.asc
+  Resolving keybase.io (keybase.io)... 52.55.1.130, 52.6.136.121
+  Connecting to keybase.io (keybase.io)|52.55.1.130|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 6909 (6.7K) [text/plain]
+  Saving to: ‘pgp_keys.asc’
+  
+  pgp_keys.asc              100%[===================================&gt;]   6.75K  --.-KB/s    in 0.002s  
+  
+  2019-01-27 10:22:58 (2.65 MB/s) - ‘pgp_keys.asc’ saved [6909/6909]
+  
+  gpg: key 8B80CD2BB8BD8132: public key &quot;Olaoluwa Osuntokun &lt;laolu32@gmail.com&gt;&quot; imported
+  gpg: Total number processed: 1
+  gpg:               imported: 1
+  goodSignature(1)
+  correctKey(1)
+  *** Installing Go ***
+  --2019-01-27 10:23:06--  https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
+  Resolving storage.googleapis.com (storage.googleapis.com)... 216.58.204.48, 2a00:1450:4009:80c::2010
+  Connecting to storage.googleapis.com (storage.googleapis.com)|216.58.204.48|:443... connected.
+  HTTP request sent, awaiting response... 200 OK
+  Length: 101718267 (97M) [application/octet-stream]
+  Saving to: ‘go1.11.linux-armv6l.tar.gz’
+  
+  go1.11.linux-armv6l.tar.g 100%[===================================&gt;]  97.01M  1.53MB/s    in 71s     
+  
+  2019-01-27 10:24:18 (1.36 MB/s) - ‘go1.11.linux-armv6l.tar.gz’ saved [101718267/101718267]
+  
+  
+  
+  *** RASPIBLITZ EXTRAS ***
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  bc is already the newest version (1.06.95-9+b3).
+  The following NEW packages will be installed:
+    dialog
+  0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 240 kB of archives.
+  After this operation, 883 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf dialog armhf 1.3-20160828-2 [240 kB]
+  Fetched 240 kB in 1s (203 kB/s)
+  Selecting previously unselected package dialog.
+  (Reading database ... 20834 files and directories currently installed.)
+  Preparing to unpack .../dialog_1.3-20160828-2_armhf.deb ...
+  Unpacking dialog (1.3-20160828-2) ...
+  Setting up dialog (1.3-20160828-2) ...
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    fuse libfuse2
+  Recommended packages:
+    exfat-utils
+  The following NEW packages will be installed:
+    exfat-fuse fuse libfuse2
+  0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 214 kB of archives.
+  After this operation, 426 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libfuse2 armhf 2.9.7-1+deb9u2 [116 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf fuse armhf 2.9.7-1+deb9u2 [70.3 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf exfat-fuse armhf 1.2.5-2 [27.6 kB]
+  Fetched 214 kB in 2s (104 kB/s)       
+  Selecting previously unselected package libfuse2:armhf.
+  (Reading database ... 20992 files and directories currently installed.)
+  Preparing to unpack .../libfuse2_2.9.7-1+deb9u2_armhf.deb ...
+  Unpacking libfuse2:armhf (2.9.7-1+deb9u2) ...
+  Selecting previously unselected package fuse.
+  Preparing to unpack .../fuse_2.9.7-1+deb9u2_armhf.deb ...
+  Unpacking fuse (2.9.7-1+deb9u2) ...
+  Selecting previously unselected package exfat-fuse.
+  Preparing to unpack .../exfat-fuse_1.2.5-2_armhf.deb ...
+  Unpacking exfat-fuse (1.2.5-2) ...
+  Setting up libfuse2:armhf (2.9.7-1+deb9u2) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Setting up fuse (2.9.7-1+deb9u2) ...
+  update-initramfs: deferring update (trigger activated)
+  Setting up exfat-fuse (1.2.5-2) ...
+  Processing triggers for initramfs-tools (0.130) ...
+  ln: failed to create hard link &apos;/boot/initrd.img-4.14.66+.dpkg-bak&apos; =&gt; &apos;/boot/initrd.img-4.14.66+&apos;: Operation not permitted
+  update-initramfs: Generating /boot/initrd.img-4.14.66+
+  Image Name:   uInitrd
+  Created:      Sun Jan 27 10:24:45 2019
+  Image Type:   ARM Linux RAMDisk Image (uncompressed)
+  Data Size:    5715894 Bytes = 5581.93 kB = 5.45 MB
+  Load Address: 00000000
+  Entry Point:  00000000
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    libevent-2.0-5 libminiupnpc10 libnatpmp1 transmission-common
+  Suggested packages:
+    minissdpd natpmp-utils transmission-daemon transmission-gtk
+  Recommended packages:
+    minissdpd
+  The following NEW packages will be installed:
+    libevent-2.0-5 libminiupnpc10 libnatpmp1 transmission-cli transmission-common
+  0 upgraded, 5 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 776 kB of archives.
+  After this operation, 2,814 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libevent-2.0-5 armhf 2.0.21-stable-3 [134 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libminiupnpc10 armhf 1.9.20140610-4 [25.7 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf libnatpmp1 armhf 20110808-4+b1 [8,338 B]
+  Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf transmission-common all 2.92-2+deb9u1 [288 kB]
+  Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf transmission-cli armhf 2.92-2+deb9u1 [320 kB]
+  Fetched 776 kB in 1s (398 kB/s)       
+  Selecting previously unselected package libevent-2.0-5:armhf.
+  (Reading database ... 21027 files and directories currently installed.)
+  Preparing to unpack .../libevent-2.0-5_2.0.21-stable-3_armhf.deb ...
+  Unpacking libevent-2.0-5:armhf (2.0.21-stable-3) ...
+  Selecting previously unselected package libminiupnpc10:armhf.
+  Preparing to unpack .../libminiupnpc10_1.9.20140610-4_armhf.deb ...
+  Unpacking libminiupnpc10:armhf (1.9.20140610-4) ...
+  Selecting previously unselected package libnatpmp1:armhf.
+  Preparing to unpack .../libnatpmp1_20110808-4+b1_armhf.deb ...
+  Unpacking libnatpmp1:armhf (20110808-4+b1) ...
+  Selecting previously unselected package transmission-common.
+  Preparing to unpack .../transmission-common_2.92-2+deb9u1_all.deb ...
+  Unpacking transmission-common (2.92-2+deb9u1) ...
+  Selecting previously unselected package transmission-cli.
+  Preparing to unpack .../transmission-cli_2.92-2+deb9u1_armhf.deb ...
+  Unpacking transmission-cli (2.92-2+deb9u1) ...
+  Setting up libminiupnpc10:armhf (1.9.20140610-4) ...
+  Setting up libnatpmp1:armhf (20110808-4+b1) ...
+  Setting up transmission-common (2.92-2+deb9u1) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Setting up libevent-2.0-5:armhf (2.0.21-stable-3) ...
+  Setting up transmission-cli (2.92-2+deb9u1) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    libtorrent19 libxmlrpc-core-c3
+  Suggested packages:
+    screen | dtach
+  The following NEW packages will be installed:
+    libtorrent19 libxmlrpc-core-c3 rtorrent
+  0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 891 kB of archives.
+  After this operation, 2,281 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libxmlrpc-core-c3 armhf 1.33.14-4 [128 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf libtorrent19 armhf 0.13.6-1.1 [345 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf rtorrent armhf 0.9.6-2+b1 [418 kB]
+  Fetched 891 kB in 2s (436 kB/s)
+  Selecting previously unselected package libxmlrpc-core-c3.
+  (Reading database ... 21168 files and directories currently installed.)
+  Preparing to unpack .../libxmlrpc-core-c3_1.33.14-4_armhf.deb ...
+  Unpacking libxmlrpc-core-c3 (1.33.14-4) ...
+  Selecting previously unselected package libtorrent19:armhf.
+  Preparing to unpack .../libtorrent19_0.13.6-1.1_armhf.deb ...
+  Unpacking libtorrent19:armhf (0.13.6-1.1) ...
+  Selecting previously unselected package rtorrent.
+  Preparing to unpack .../rtorrent_0.9.6-2+b1_armhf.deb ...
+  Unpacking rtorrent (0.9.6-2+b1) ...
+  Setting up libtorrent19:armhf (0.13.6-1.1) ...
+  Setting up libxmlrpc-core-c3 (1.33.14-4) ...
+  Setting up rtorrent (0.9.6-2+b1) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  Suggested packages:
+    byobu | screenie | iselect ncurses-term
+  The following NEW packages will be installed:
+    screen
+  0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 568 kB of archives.
+  After this operation, 860 kB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf screen armhf 4.5.0-6 [568 kB]
+  Fetched 568 kB in 1s (445 kB/s)
+  Selecting previously unselected package screen.
+  (Reading database ... 21205 files and directories currently installed.)
+  Preparing to unpack .../screen_4.5.0-6_armhf.deb ...
+  Unpacking screen (4.5.0-6) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Setting up screen (4.5.0-6) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Cloning into &apos;raspiblitz&apos;...
+  remote: Enumerating objects: 28, done.
+  remote: Counting objects: 100% (28/28), done.
+  remote: Compressing objects: 100% (21/21), done.
+  remote: Total 4728 (delta 12), reused 21 (delta 7), pack-reused 4700
+  Receiving objects: 100% (4728/4728), 16.47 MiB | 655.00 KiB/s, done.
+  Resolving deltas: 100% (3328/3328), done.
+  cp: -r not specified; omitting directory &apos;/home/admin/raspiblitz/home.admin/config.scripts&apos;
+  bash: /home/pi/.bashrc: No such file or directory
+  bash: /home/pi/.bashrc: No such file or directory
+  bash: /home/pi/.bashrc: No such file or directory
+  bash: /home/pi/.bashrc: No such file or directory
+  
+  *** HARDENING ***
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  The following additional packages will be installed:
+    dh-python libmpdec2 libpython3-stdlib libpython3.5-minimal libpython3.5-stdlib python3
+    python3-minimal python3.5 python3.5-minimal
+  Suggested packages:
+    mailx system-log-daemon monit python3-doc python3-tk python3-venv python3.5-venv python3.5-doc
+    binfmt-support
+  Recommended packages:
+    iptables whois python3-pyinotify python3-systemd
+  The following NEW packages will be installed:
+    dh-python fail2ban libmpdec2 libpython3-stdlib libpython3.5-minimal libpython3.5-stdlib python3
+    python3-minimal python3.5 python3.5-minimal
+  0 upgraded, 10 newly installed, 0 to remove and 0 not upgraded.
+  Need to get 4,840 kB of archives.
+  After this operation, 22.5 MB of additional disk space will be used.
+  Get:1 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3.5-minimal armhf 3.5.3-1+deb9u1 [565 kB]
+  Get:2 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3.5-minimal armhf 3.5.3-1+deb9u1 [1,441 kB]
+  Get:3 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3-minimal armhf 3.5.3-1 [35.3 kB]
+  Get:4 https://cdn-aws.deb.debian.org/debian stretch/main armhf libmpdec2 armhf 2.4.2-1 [69.6 kB]
+  Get:5 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3.5-stdlib armhf 3.5.3-1+deb9u1 [2,085 kB]
+  Get:6 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3.5 armhf 3.5.3-1+deb9u1 [229 kB]
+  Get:7 https://cdn-aws.deb.debian.org/debian stretch/main armhf libpython3-stdlib armhf 3.5.3-1 [18.6 kB]
+  Get:8 https://cdn-aws.deb.debian.org/debian stretch/main armhf dh-python all 2.20170125 [86.8 kB]
+  Get:9 https://cdn-aws.deb.debian.org/debian stretch/main armhf python3 armhf 3.5.3-1 [21.6 kB]
+  Get:10 https://cdn-aws.deb.debian.org/debian stretch/main armhf fail2ban all 0.9.6-2 [288 kB]
+  Fetched 4,840 kB in 5s (948 kB/s)
+  Selecting previously unselected package libpython3.5-minimal:armhf.
+  (Reading database ... 21265 files and directories currently installed.)
+  Preparing to unpack .../0-libpython3.5-minimal_3.5.3-1+deb9u1_armhf.deb ...
+  Unpacking libpython3.5-minimal:armhf (3.5.3-1+deb9u1) ...
+  Selecting previously unselected package python3.5-minimal.
+  Preparing to unpack .../1-python3.5-minimal_3.5.3-1+deb9u1_armhf.deb ...
+  Unpacking python3.5-minimal (3.5.3-1+deb9u1) ...
+  Selecting previously unselected package python3-minimal.
+  Preparing to unpack .../2-python3-minimal_3.5.3-1_armhf.deb ...
+  Unpacking python3-minimal (3.5.3-1) ...
+  Selecting previously unselected package libmpdec2:armhf.
+  Preparing to unpack .../3-libmpdec2_2.4.2-1_armhf.deb ...
+  Unpacking libmpdec2:armhf (2.4.2-1) ...
+  Selecting previously unselected package libpython3.5-stdlib:armhf.
+  Preparing to unpack .../4-libpython3.5-stdlib_3.5.3-1+deb9u1_armhf.deb ...
+  Unpacking libpython3.5-stdlib:armhf (3.5.3-1+deb9u1) ...
+  Selecting previously unselected package python3.5.
+  Preparing to unpack .../5-python3.5_3.5.3-1+deb9u1_armhf.deb ...
+  Unpacking python3.5 (3.5.3-1+deb9u1) ...
+  Selecting previously unselected package libpython3-stdlib:armhf.
+  Preparing to unpack .../6-libpython3-stdlib_3.5.3-1_armhf.deb ...
+  Unpacking libpython3-stdlib:armhf (3.5.3-1) ...
+  Selecting previously unselected package dh-python.
+  Preparing to unpack .../7-dh-python_2.20170125_all.deb ...
+  Unpacking dh-python (2.20170125) ...
+  Setting up libpython3.5-minimal:armhf (3.5.3-1+deb9u1) ...
+  Setting up python3.5-minimal (3.5.3-1+deb9u1) ...
+  Setting up python3-minimal (3.5.3-1) ...
+  Selecting previously unselected package python3.
+  (Reading database ... 22179 files and directories currently installed.)
+  Preparing to unpack .../python3_3.5.3-1_armhf.deb ...
+  Unpacking python3 (3.5.3-1) ...
+  Selecting previously unselected package fail2ban.
+  Preparing to unpack .../fail2ban_0.9.6-2_all.deb ...
+  Unpacking fail2ban (0.9.6-2) ...
+  Processing triggers for mime-support (3.60) ...
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Setting up libmpdec2:armhf (2.4.2-1) ...
+  Setting up libpython3.5-stdlib:armhf (3.5.3-1+deb9u1) ...
+  Setting up python3.5 (3.5.3-1+deb9u1) ...
+  Setting up libpython3-stdlib:armhf (3.5.3-1) ...
+  Setting up python3 (3.5.3-1) ...
+  running python rtupdate hooks for python3.5...
+  running python post-rtupdate hooks for python3.5...
+  Setting up dh-python (2.20170125) ...
+  Setting up fail2ban (0.9.6-2) ...
+  Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /lib/systemd/system/fail2ban.service.
+  Job for fail2ban.service failed because the control process exited with error code.
+  See &quot;systemctl status fail2ban.service&quot; and &quot;journalctl -xe&quot; for details.
+  invoke-rc.d: initscript fail2ban, action &quot;start&quot; failed.
+  ● fail2ban.service - Fail2Ban Service
+     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2019-01-27 10:25:53 GMT; 21ms ago
+       Docs: man:fail2ban(1)
+    Process: 7072 ExecStart=/usr/bin/fail2ban-client -x start <font color="#EF2929"><b>(code=exited, status=255)</b></font>
+  
+  Jan 27 10:25:53 DietPi systemd[1]: <b>fail2ban.service: Unit entered failed state.</b>
+  Jan 27 10:25:53 DietPi systemd[1]: <b>fail2ban.service: Failed with result &apos;exit-code&apos;.</b>
+  dpkg: error processing package fail2ban (--configure):
+   subprocess installed post-installation script returned error exit status 1
+  Processing triggers for libc-bin (2.24-11+deb9u3) ...
+  Processing triggers for systemd (232-25+deb9u8) ...
+  Errors were encountered while processing:
+   fail2ban
+  E: Sub-process /usr/bin/dpkg returned an error code (1)
+  
+  *** RASPI BOOSTRAP SERVICE ***
+  Created symlink /etc/systemd/system/multi-user.target.wants/bootstrap.service → /etc/systemd/system/bootstrap.service.
+  
+  *** RASPI BACKGROUND SERVICE ***
+  Created symlink /etc/systemd/system/multi-user.target.wants/background.service → /etc/systemd/system/background.service.
+  *** Adding Tor Sources to sources.list ***
+  deb http://deb.torproject.org/torproject.org stretch main
+  deb-src http://deb.torproject.org/torproject.org stretch main
+  OK
+  
+  *** Installing dirmngr ***
+  Reading package lists... Done
+  Building dependency tree       
+  Reading state information... Done
+  dirmngr is already the newest version (2.1.18-8~deb9u3).
+  0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+  1 not fully installed or removed.
+  After this operation, 0 B of additional disk space will be used.
+  Do you want to continue? [Y/n] y
+  Setting up fail2ban (0.9.6-2) ...
+  Job for fail2ban.service failed because the control process exited with error code.
+  See &quot;systemctl status fail2ban.service&quot; and &quot;journalctl -xe&quot; for details.
+  invoke-rc.d: initscript fail2ban, action &quot;start&quot; failed.
+  ● fail2ban.service - Fail2Ban Service
+     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2019-01-27 10:26:18 GMT; 20ms ago
+       Docs: man:fail2ban(1)
+    Process: 7234 ExecStart=/usr/bin/fail2ban-client -x start <font color="#EF2929"><b>(code=exited, status=255)</b></font>
+  
+  Jan 27 10:26:18 DietPi systemd[1]: <b>fail2ban.service: Unit entered failed state.</b>
+  Jan 27 10:26:18 DietPi systemd[1]: <b>fail2ban.service: Failed with result &apos;exit-code&apos;.</b>
+  <b>dpkg:</b> error processing package fail2ban (--configure):
+   subprocess installed post-installation script returned error exit status 1
+  Errors were encountered while processing:
+   fail2ban
+  E: Sub-process /usr/bin/dpkg returned an error code (1)
+  
+  *** Fetching GPG key ***
+  gpg: keyserver receive failed: No data
+  gpg: WARNING: nothing exported
+  gpg: no valid OpenPGP data found.
+  uid  deb.torproject.org archive signing key
+  sig!3        EE8CBC9E886DDD89 2012-08-29  [self-signature]
+  sig!3        EE8CBC9E886DDD89 2014-08-31  [self-signature]
+  sig!3        EE8CBC9E886DDD89 2009-09-04  [self-signature]
+  sig!3        EE8CBC9E886DDD89 2018-08-06  [self-signature]
+  sub  74A941BA219EC810
+  sig!         EE8CBC9E886DDD89 2012-08-29  [self-signature]
+  sig!         EE8CBC9E886DDD89 2014-08-31  [self-signature]
+  sig!         EE8CBC9E886DDD89 2009-09-04  [self-signature]
+  sig!         EE8CBC9E886DDD89 2018-08-06  [self-signature]
+  key EE8CBC9E886DDD89:
+  2 duplicate signatures removed
+  82 signatures not checked due to missing keys
+  gpg: key EE8CBC9E886DDD89: public key &quot;deb.torproject.org archive signing key&quot; imported
+  gpg: no ultimately trusted keys found
+  gpg: Total number processed: 1
+  gpg:               imported: 1
+  key EE8CBC9E886DDD89:
+  82 signatures not checked due to missing keys
+  OK
+  !!!!!! Please check if the above really worked!
+  
+  **********************************************
+  ALMOST READY
+  **********************************************
+  
+  Your SD Card Image for RaspiBlitz is almost ready.
+  Last step is to install LCD drivers. This will reboot your Pi when done.
+  
+  Maybe take the chance and look thru the output above if you can spot any errror.
+  
+  After final reboot - your SD Card Image is ready.
+  
+  IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:
+  login once after reboot without HDD and run &apos;XXprepareRelease.sh&apos;
+  
+  Press ENTER to install LCD and reboot ...
+  
+  sudo: raspi-config: command not found
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>┌──────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#729FCF"><b>Display</b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>─────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┐</font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> Are you using the default display available from Amazon?                     │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436"> Select &apos;No&apos; if you are using the Swiss version from play-zone.ch!            │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>├──────────────────────────────────────────────────────────────────────────────</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">┤</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>│</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">                         </font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&lt;</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b> </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>Y</b></font></span><span style="background-color:#3465A4"><font color="#FCE94F"><b>es </b></font></span><span style="background-color:#3465A4"><font color="#EEEEEC"><b>&gt;</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">             &lt;</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#CC0000">N</font></span><span style="background-color:#D3D7CF"><font color="#555753"><b>o  </b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">&gt;                          │</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">         </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span><span style="background-color:#D3D7CF"><font color="#EEEEEC"><b>└</b></font></span><span style="background-color:#D3D7CF"><font color="#2E3436">──────────────────────────────────────────────────────────────────────────────┘</font></span><span style="background-color:#2E3436"><font color="#555753"><b>  </b></font></span>
+  <span style="background-color:#3465A4"><font color="#06989A">           </font></span><span style="background-color:#3465A4"><font color="#34E2E2"><b> </b></font></span>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  E: Unable to locate package raspberrypi-bootloader
+  E: No packages found
+  Cloning into &apos;LCD-show&apos;...
+  remote: Enumerating objects: 8, done.
+  remote: Counting objects: 100% (8/8), done.
+  remote: Compressing objects: 100% (8/8), done.
+  remote: Total 861 (delta 1), reused 0 (delta 0), pack-reused 853
+  Receiving objects: 100% (861/861), 460.67 KiB | 668.00 KiB/s, done.
+  Resolving deltas: 100% (548/548), done.
+  cp: cannot create regular file &apos;/boot/overlays/&apos;: Not a directory
+  cp: cannot create regular file &apos;/boot/overlays/tft35a.dtbo&apos;: No such file or directory
+  cp: cannot create regular file &apos;/usr/share/X11/xorg.conf.d/&apos;: Not a directory
+  this is not raspberrypi kernel, no need to update touch configure, reboot
+  Connection to 192.168.1.175 closed by remote host.
+  Connection to 192.168.1.175 closed.
+  <font color="#8AE234"><b>openoms@buidl</b></font>:<font color="#729FCF"><b>~</b></font>$ 
+  </pre>
