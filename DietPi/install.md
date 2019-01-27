@@ -7,13 +7,13 @@ username = root
 password = dietpi  
 DietPi also comes pre-installed with Dropbear SSH Server.
 
-`ssh root@[IP-OF-YOUR-DIETPI]`  
+`ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`
 Ok > Cancel > Cancel
 automatic apt update & apt upgrade on first logon and reboots
 Opt out of survey > Ok > Ok
 
-`ssh root@[IP-OF-YOUR-DIETPI]`
+`ssh root@[IP-OF-DIETPI]`
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
@@ -21,22 +21,20 @@ Opt out of survey > Ok > Ok
 
 run (copy from the terminal output): `ssh-keygen -f "/home/buidl/.ssh/known_hosts" -R "dietpi.IP"`
 
-`ssh root@[IP-OF-YOUR-DIETPI]`  
+`ssh root@[IP-OF-DIETPI]`  
 Ok > Choose Install > "Do you wish to continue with DietPi as a pure minimal image?" > Ok  
 Reboots again
 
-`ssh root@[IP-OF-YOUR-DIETPI]`
+`ssh root@[IP-OF-DIETPI]`
 Now only the bash prompt opens
 
-sudo adduser --disabled-password --gecos "" pi
+```sudo adduser --disabled-password --gecos "" pi
 echo "pi:raspiblitz" | sudo chpasswd
 sudo adduser pi sudo
-
-
-`exit`
-
-`ssh dietpi@[IP-OF-YOUR-DIETPI]`
-password: `dietpi`
+exit
+```
+`ssh pi@[IP-OF-DIETPI]`
+password: `raspiblitz`
 
 now at: 
 `dietpi@DietPi:~$` 
@@ -45,33 +43,40 @@ use: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH
 
 `wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms`
 
+password: raspiblitz
+
 see my output: [sdcard_build_output](sdcard_build_output.html)  
 The only fault appears to be with `fail2ban`
 
  
-`ssh admin@[IP-OF-YOUR-DROIDBLITZ]`  
+`ssh admin@[IP-OF-DROIDBLITZ]`  
 password: raspiblitz
 
 The raspiblitz GUI and setup worked until it needed to get the blockchain data.
 
-On the attempt to copy the blockchain from the HDD of a Raspiblitz the ODroid did not mount the 2nd HDD properly.
-It appeared as `sdb` and as `sda` after reboot:
+First attempted to connect the HDD of a RaspiBlitz with a powered USB to SATA adapter to the ODorid. 
+The ODroid did not mount the 2nd HDD properly:
+it appeared as `sdb` and as `sda` after reboot:
 ![](after_reboot_with_2nd_HDD.png)
 
- Copied the blockchain manually on my main computer to the root /bitcoin folder  
- Reinserted the HDD to the ODroid and booted up
+So intead just copied the blockchain manually on my main computer to the root /bitcoin folder. Reinserted the HDD to the ODroid and booted up
  
- ssh admin@[IP-OF-YOUR-DROIDBLITZ]  
+`ssh admin@[IP-OF-DROIDBLITZ]  
 `./60finishHDD.sh` 
 
 got this output here: [initial_setup_output](initial_setup_output.html)
 and the same when tried again with a rebuilt sdcard.
 
-Stuck here now: 
+Stuck here now (counting up linux time): 
 ```
 Failed to connect to bus: No such file or directory
-1548191939
+1548604569
 LND not ready yet ... waiting another 60 seconds.
-If this takes too long (more then 10min total) --&gt; CTRL+c and report Problem
+If this takes too long (more then 10min total) --> CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548604629
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --> CTRL+c and report Problem
+
 ```
 

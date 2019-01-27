@@ -1,5 +1,5 @@
 RaspiBlitz
-────────────────────────────────────────────────────────────────────────────────────────────────────
+──────────────────────────────────────────────────────────────────────────────────────────────────────
 
 
 
@@ -12,32 +12,14 @@ RaspiBlitz
 
 
 
-
-
-
-
-
-
-
-
-
-                       ┌──────────────────────────────────────────────────┐
-                       │ OK - RPC password changed                        │  
-                       │                                                  │  
-                       │ Now starting the Setup of your RaspiBlitz.       │  
-                       ├──────────────────────────────────────────────────┤  
-                       │                     <  OK  >                     │  
-                       └──────────────────────────────────────────────────┘  
-                         
-
-
-
-
-
-
-
-
-
+                        ┌──────────────────────────────────────────────────┐
+                        │ OK - RPC password changed                        │  
+                        │                                                  │  
+                        │ Now starting the Setup of your RaspiBlitz.       │  
+                        ├──────────────────────────────────────────────────┤  
+                        │                     <  OK  >                     │  
+                        └──────────────────────────────────────────────────┘  
+                          
 
 
 
@@ -82,7 +64,6 @@ Continuing with finishing the system setup ...
 OK - HDD is ready.
 
 *** Prepare bitcoin ***
-mkdir: cannot create directory ‘/mnt/hdd/lnd’: File exists
 OK - bitcoin setup ready
 
 *** Start bitcoin ***
@@ -93,6 +74,30 @@ checking setup script
 network(bitcoin)
 chain(main)
 setupStep(60)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     ┌────────────────────────────────────────────────────────┐
+                     │   Double checking for bitcoind - please wait ..        │  
+                     │  ┌──────────────────────────────────────────────────┐  │  
+                     │  │                       120                        │  │  
+                     │  └──────────────────────────────────────────────────┘  │  
+                     ├────────────────────────────────────────────────────────┤  
+                     │               <  OK  >        <Cancel>                 │  
+                     └────────────────────────────────────────────────────────┘  
+                       
 
 
 
@@ -138,7 +143,7 @@ setupStep(60)
                     ├────────────────────────────────────────────────────────┤  
                     │               <  OK  >        <Cancel>                 │  
                     └────────────────────────────────────────────────────────┘  
-                      
+
 
 
 
@@ -171,10 +176,47 @@ OK - bitcoind is running
 OK - chainnetwork is working
 
 *** LND Config ***
-OK - exists
+OK - LND config written
 
 *** Starting LND ***
 Created symlink /etc/systemd/system/multi-user.target.wants/lnd.service → /etc/systemd/system/lnd.service.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     ┌────────────────────────────────────────────────────────┐
+                     │   Starting LND - please wait ..                        │  
+                     │  ┌──────────────────────────────────────────────────┐  │  
+                     │  │                        98                        │  │  
+                     │  └─────────────────────────1───────────   ──────────┘  │  
+                     ├────────────────────────────────────────────────────────┤  
+                     │               <  OK  >        <Cancel>                 │  
+                     └────────────────────────────────────────────────────────┘  
+                       
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -203,12 +245,67 @@ Created symlink /etc/systemd/system/multi-user.target.wants/lnd.service → /etc
                     ┌────────────────────────────────────────────────────────┐
                     │   Starting LND - please wait ..                        │  
                     │  ┌──────────────────────────────────────────────────┐  │  
-                    │  │                         0                        │  │  
+                    │  │                        81                        │  │  
                     │  └──────────────────────────────────────────────────┘  │  
                     ├────────────────────────────────────────────────────────┤  
                     │               <  OK  >        <Cancel>                 │  
                     └────────────────────────────────────────────────────────┘  
-                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     ┌────────────────────────────────────────────────────────┐
+                     │   Starting LND - please wait ..                        │  
+                     │  ┌──────────────────────────────────────────────────┐  │  
+                     │  │                         0                        │  │  
+                     │  └──────────────────────────────────────────────────┘  │  
+                     ├────────────────────────────────────────────────────────┤  
+                     │               <  OK  >        <Cancel>                 │  
+                     └────────────────────────────────────────────────────────┘  
+
 
 
 
@@ -232,22 +329,27 @@ Created symlink /etc/systemd/system/multi-user.target.wants/lnd.service → /etc
 
 
 Failed to connect to bus: No such file or directory
-1548585461
+1548603516
 LND not ready yet ... waiting another 60 seconds.
 If this takes too long (more then 10min total) --> CTRL+c and report Problem
 Failed to connect to bus: No such file or directory
-1548585461
+1548603577
 LND not ready yet ... waiting another 60 seconds.
 If this takes too long (more then 10min total) --> CTRL+c and report Problem
 Failed to connect to bus: No such file or directory
-1548585461
+1548603637
 LND not ready yet ... waiting another 60 seconds.
 If this takes too long (more then 10min total) --> CTRL+c and report Problem
 Failed to connect to bus: No such file or directory
-1548585461
+1548603697
 LND not ready yet ... waiting another 60 seconds.
 If this takes too long (more then 10min total) --> CTRL+c and report Problem
 Failed to connect to bus: No such file or directory
-1548585461
+1548603757
 LND not ready yet ... waiting another 60 seconds.
 If this takes too long (more then 10min total) --> CTRL+c and report Problem
+Failed to connect to bus: No such file or directory
+1548603817
+LND not ready yet ... waiting another 60 seconds.
+If this takes too long (more then 10min total) --> CTRL+c and report Problem
+
