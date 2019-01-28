@@ -64,6 +64,18 @@ To really have a good backup to rely on such feature needs to be part of the LND
 
 But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
 
+## What is this mnemonic seed word list?
+
+With the 24 word list given you by LND on wallet creation you can recover your private key. You should write it down and store it at a save place. 
+
+For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
+
+# How does PASSWORD D effects this seed?
+
+On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
+
+To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
+
 ## How do I change the Name/Alias of my lightning node
 
 Use the "Change Name/Alias of Node" option in main menu. The RaspiBlitz will make a reboot after this.
