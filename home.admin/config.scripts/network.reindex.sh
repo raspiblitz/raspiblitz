@@ -47,11 +47,20 @@ while [ ${finished} -eq 0 ]
   echo "*************************"
   echo "REINDEXING BLOCKCHAIN"
   echo "*************************"
+  date
   echo "THIS CAN TAKE SOME LONG TIME"
   echo "If you dont see any progress after 24h keep X pressed to stop."
 
+  progress=0
+  echo ""
+  echo "PROGRESS: ${progress}%"
+  echo ""
+
   #TODO: detect and display progress
   #TODO: determine when finished and then finished=1
+
+  echo "You can close terminal while reindex is running.."
+  echo "But you have to login again to check if ready."
 
   # wait 2 seconds for key input
   read -n 1 -t 2 keyPressed
