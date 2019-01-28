@@ -22,22 +22,13 @@ Opt out of survey > Ok > Ok
 run (copy from the terminal output): `ssh-keygen -f "/home/buidl/.ssh/known_hosts" -R "dietpi.IP"`
 
 `ssh root@[IP-OF-DIETPI]`  
-Ok > Choose Install > "Do you wish to continue with DietPi as a pure minimal image?" > Ok  
+Ok > Install fail2ban > Install > Ok  
 Reboots again
 
 `ssh root@[IP-OF-DIETPI]`
 Now only the bash prompt opens
 
-```sudo adduser --disabled-password --gecos "" pi
-echo "pi:raspiblitz" | sudo chpasswd
-sudo adduser pi sudo
-exit
-```
-`ssh pi@[IP-OF-DIETPI]`
-password: `raspiblitz`
-
-now at: 
-`dietpi@DietPi:~$` 
+sudo apt install rsync
 
 use: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
