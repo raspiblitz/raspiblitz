@@ -151,6 +151,17 @@ while :
       continue
     fi
 
+    # if re-indexing 
+    if [ "${state}" = "reindex" ]; then
+      l1="REINDEXING BLOCKCHAIN\n"
+      l2="To monitor & detect finish:\n"
+      l3="ssh admin@${localip}\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
     # check if bitcoin is ready
     sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
     clienterror=`cat error.tmp`

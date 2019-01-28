@@ -58,6 +58,13 @@ if [ "${state}" = "recovered" ]; then
   exit 1
 fi 
 
+# signal that a reindex was triggered
+if [ "${state}" = "reindex" ]; then
+  echo "Re-Index in progress ... start monitoring:"
+  /home/admin/config.scripts/network.reindex.sh
+  exit 1
+fi 
+
 # if pre-sync is running - stop it - before continue
 if [ "${state}" = "presync" ]; then
   # stopping the pre-sync
@@ -118,6 +125,17 @@ waitUntilChainNetworkIsReady()
       clienterror=`cat error.tmp`
       rm error.tmp
       if [ ${#clienterror} -gt 0 ]; then
+
+        # analyse LOGS for possible reindex
+        reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
+        if [ ${reindex} -gt 0 ]; then
+          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair script."
+          sleep 3
+          sudo /home/admin/config.scripts/network.reindex.sh
+          exit
+        fi
+
+        # normal info
         boxwidth=40
         l1="Waiting for ${network}d to get ready.\n"
         l2="---> ${clienterror/error*:/}\n"
