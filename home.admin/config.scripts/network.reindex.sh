@@ -48,10 +48,19 @@ while [ ${finished} -eq 0 ]
   echo "REINDEXING BLOCKCHAIN"
   echo "*************************"
   echo "THIS CAN TAKE SOME LONG TIME"
-  echo "If you dont see any progress after 24h press X to stop."
+  echo "If you dont see any progress after 24h keep X pressed to stop."
 
   #TODO: detect and display progress
   #TODO: determine when finished and then finished=1
+
+  # wait 2 seconds for key input
+  read -n 1 -t 2 keyPressed
+
+  # check if user wants to abort monitor
+  if [ "${keyPressed}" = "x" ]; then
+    echo "stopped by user ..."
+    break
+  fi
 
 done
 
