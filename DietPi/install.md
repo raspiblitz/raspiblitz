@@ -50,10 +50,16 @@ The ODroid did not mount the 2nd HDD properly:
 it appeared as `sdb` and as `sda` after reboot:
 ![](after_reboot_with_2nd_HDD.png)
 
-So intead just copied the blockchain manually on my main computer to the root /bitcoin folder. Reinserted the HDD to the ODroid and booted up
+So instead just copied the blockchain manually on my main computer to the root /bitcoin folder. Reinserted the HDD to the ODroid and booted up
+
  
 `ssh admin@[IP-OF-DROIDBLITZ]  
 `./60finishHDD.sh` 
+
+alternatively can edit the 50copyHDD.sh
+`sudo nano 50copyHDD.sh`
+change the 3 instances of `sdb1` to `sdb`
+
 
 got this output here: [initial_setup_output](initial_setup_output.html)
 and the same when tried again with a rebuilt sdcard.
