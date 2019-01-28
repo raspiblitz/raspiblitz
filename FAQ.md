@@ -66,7 +66,7 @@ But you can try to backup at your own risk. All your Lightning Node data is with
 
 ## What is this mnemonic seed word list?
 
-With the 24 word list given you by LND on wallet creation you can recover your private key. You should write it down and store it at a save place. 
+With the 24 word list given you by LND on wallet creation you can recover your private key (BIP 39). You should write it down and store it at a save place. 
 
 For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
 
