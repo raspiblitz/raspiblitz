@@ -44,6 +44,7 @@ sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear
 echo "Setup done. Rebooting now."
+sudo -u bitcoin ${network}-cli stop
 
 sleep 3
 sudo shutdown -r now

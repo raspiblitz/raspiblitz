@@ -413,14 +413,21 @@ case $CHOICE in
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh
-            echo "Press ENTER to Reboot."
-            read key
-            sudo shutdown -r now
+            noreboot=$?
+            if [ "${noreboot}" = "0" ]; then
+              sudo -u bitcoin ${network}-cli stop
+              echo "Press ENTER to Reboot."
+              read key
+              sudo shutdown -r now
+            else
+              ./00mainMenu.sh
+            fi
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
             noreboot=$?
             if [ "${noreboot}" = "0" ]; then
+              sudo -u bitcoin ${network}-cli stop
               echo "Press ENTER to Reboot .."
               read key
               sudo shutdown -r now
@@ -437,10 +444,10 @@ case $CHOICE in
             echo "-----------------------------------------------"
             echo "stop lnd - please wait .."
             sudo systemctl stop lnd
-            echo "stop bitcoind (1) - please wait .."
-            sudo -u bitcoin bitcoin-cli stop
+            echo "stop ${network}d (1) - please wait .."
+            sudo -u bitcoin ${network}-cli stop
             sleep 10
-            echo "stop bitcoind (2) - please wait .."
+            echo "stop ${network}d (2) - please wait .."
             sudo systemctl stop ${network}d
             echo "starting shutdown"
             sudo shutdown now

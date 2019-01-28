@@ -201,6 +201,8 @@ if [ ${needsReboot} -eq 1 ]; then
    dialog --pause "OK. System will reboot to activate changes." 8 58 8
    clear
    echo "rebooting .. (please wait)"
-   sleep 3
+   # stop bitcoind
+   sudo -u bitcoin ${network}-cli stop
+   sleep 4
    sudo shutdown -r now
 fi

@@ -78,6 +78,9 @@ echo "*************************"
 echo "Re-Index finished"
 echo "Starting reboot ..."
 echo "*************************"
+# stop bitcoind
+sudo -u bitcoin ${network}-cli stop
+sleep 4
 # clean logs (to prevent a false reindex detection)
 sudo rm /mnt/hdd/${network}/debug.log
 # reboot
