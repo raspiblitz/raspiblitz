@@ -12,7 +12,26 @@ if [ ${hddA} -eq 0 ]; then
   echo "Try 'sudo shutdown -r now'"
   exit 1
 fi
-echo "OK - HDD as sda1 found"
+
+ready=0
+while [ ${ready} -eq 0 ]
+  do
+    hddA=$(lsblk | grep /mnt/hdd | grep -c sda1)
+    if [ ${hddB} -eq 1 ]; then
+      echo "OK - HDD as sda1 found"
+      ready=1
+    if [ ${hddA} -eq 0 ]; then
+      echo "FAIL - 1st HDD not found as sda1 or sda"
+      echo "Try 'sudo shutdown -r now'"
+      exit 1
+    fi
+    hddB=$(lsblk | grep -c sda)
+    if [ ${hddB} -eq 1 ]; then
+      echo "OK - HDD as sda found"
+      ready=1
+    fi
+  done
+
 echo ""
 echo "*** Copy Blockchain form a second HDD ***"
 echo ""
@@ -34,17 +53,14 @@ echo "then cancel (CTRL+c) and reboot."
 ready=0
 while [ ${ready} -eq 0 ]
   do
-    hddA=$(lsblk | grep /mnt/hdd | grep -c sda1)
-    if [ ${hddA} -eq 0 ]; then
-      echo "FAIL - connection to 1st HDD lost"
-      echo "It seems there was a POWEROUTAGE while connecting the 2nd HDD."
-      echo "Try to avoid this next time by adding extra Power or connect more securely."
-      echo "You need now to reboot with 'sudo shutdown -r now' and then try again."
-      exit 1
-    fi
-    hddB=$(lsblk | grep -c sdb1)
+    hddC=$(lsblk | grep -c sdb1)
     if [ ${hddB} -eq 1 ]; then
-      echo "OK - 2nd HDD found"
+      echo "OK - 2nd HDD found as sdb1"
+      ready=1
+    fi
+    hddD=$(lsblk | grep -c sdb)
+    if [ ${hddB} -eq 1 ]; then
+      echo "OK - 2nd HDD found as sdb"
       ready=1
     fi
   done
@@ -52,13 +68,25 @@ while [ ${ready} -eq 0 ]
 echo ""
 echo "*** Mounting 2nd HDD ***"
 sudo mkdir /mnt/genesis
-echo "try ext4 .."
+echo "try ext4 on sdb1 .."
 sudo mount -t ext4 /dev/sdb1 /mnt/genesis
 sleep 2
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
-  echo "try exfat .."
+  echo "try exfat on sdb1 .."
   sudo mount -t exfat /dev/sdb1 /mnt/genesis
+  sleep 2
+fi
+mountOK=$(lsblk | grep -c /mnt/genesis)
+if [ ${mountOK} -eq 0 ]; then
+  echo "try ext4 on sdb .."
+  sudo mount -t ext4 /dev/sdb /mnt/genesis
+  sleep 2
+fi
+mountOK=$(lsblk | grep -c /mnt/genesis)
+if [ ${mountOK} -eq 0 ]; then
+  echo "try exfat on sdb.."
+  sudo mount -t exfat /dev/sdb /mnt/genesis
   sleep 2
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)

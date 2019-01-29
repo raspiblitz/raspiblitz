@@ -1,16 +1,14 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
-# https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
+# DietPi.com
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
+echo "* DROIDLITZ SD CARD IMAGE SETUP v0.1  *"
 echo "*****************************************"
 echo ""
 
@@ -94,12 +92,17 @@ if [ "${baseImage}" = "dietpi" ]; then
   echo "*** PREPARE DietPi ***"
   echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
+  # add pi to the sudo group
   sudo adduser pi sudo
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
   sudo apt-get install -y build-essential
   sudo apt-get install -y python-pip
+  # rsync is needed to copy from HDD
+  sudo apt install -y rsync
+  # install ifconfig
+  sudo apt install -y net-tools
 fi
 
 # special prepare when Raspbian
@@ -442,14 +445,16 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
 
-# prifile path for admin
+# profile path for admin
 sudo bash -c "echo '' >> /home/admin/.profile"
 sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
 sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
 sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
 sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
+# add /sbin to path for admin
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/sbin' >> /home/admin/.profile"
 
-# bash aoutstart for admin
+# bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
@@ -537,7 +542,7 @@ echo "Press ENTER to install LCD and reboot ..."
 read key
 
 # give Raspi a default hostname (optional)
-sudo raspi-config nonint do_hostname "RaspiBlitz"
+sudo raspi-config nonint do_hostname "DroidBlitz"
 
 # *** Display selection ***
 dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80

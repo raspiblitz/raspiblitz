@@ -28,7 +28,7 @@ Reboots again
 `ssh root@[IP-OF-DIETPI]`
 Now only the bash prompt opens
 
-sudo apt install rsync
+sudo apt install -y rsync (now added to the script)
 
 use: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
@@ -38,7 +38,7 @@ password: raspiblitz
 
 see my output: [sdcard_build_output](sdcard_build_output.html)  
 The only fault appears to be with `fail2ban`
-
+(this is solved if fail2ban is intalled from the DietPi software settings during the second boot)
  
 `ssh admin@[IP-OF-DROIDBLITZ]`  
 password: raspiblitz
