@@ -6,6 +6,8 @@
 see: [install_on_DietPi.md](install_on_DietPi.md)
 
 
+![](DietPi/DroidBlitz.jpg)
+
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 

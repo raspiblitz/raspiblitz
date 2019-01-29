@@ -1,15 +1,23 @@
-Working with the ODroid HC1 and this image: https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
+# The ODroid HC1 on DietPi is made to be a lightning node ⚡️
 
-Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9
+![](DietPi/DroidBlitz.jpg)
+
+## Setting up the DietPi OS
+
+Download this image: 
+https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z  
+and burn it to the SD with https://www.balena.io/etcher/
+
+Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9  
 
 
+## On the desktop Linux terminal
 `ssh root@[IP-OF-DIETPI]`  
-yes>
-password: `dietpi`
-`sudo dietpi-update`
-Ok > Cancel the recovery point
-Ok > Cancel > Cancel
-automatic apt update & apt upgrade on first logon and reboots
+password: `dietpi`  
+
+>Ok > Cancel the recovery point  
+Ok > Cancel > Cancel  
+automatic apt update & apt upgrade on first logon and reboots  
 Opt out of survey > Ok > Ok
 
 `ssh root@[IP-OF-DIETPI]`
@@ -18,23 +26,27 @@ Opt out of survey > Ok > Ok
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-run (can be copies from the terminal output): 
-`ssh-keygen -f "/home/buidl/.ssh/known_hosts" -R "dietpi.IP"`
+run (can be copied from the terminal output): 
+`ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
 `ssh root@[IP-OF-DIETPI]` 
 yes >   
 password: `dietpi`  
-Ok > Cancel > Cancel  
-Search `fail2ban` > Space to select > Enter 
-Search `openssh` > Space to select OpenSSH Client > Enter
+>Ok > Cancel > Cancel  
+Search `fail2ban` > Space to select > Enter   
+Search `openssh` > Space to select OpenSSH Client > Enter  
 > Install > Ok  
 Opt out of survey > Ok  
 Reboots again
 
-if it starts the DietPi-Software GUI again >
-Exit with CTRL + C
-run dietpi-update
-and reinstall fail2ban and openssh after the reboot
+Looks like this:
+
+![](DietPi/DietPi-Software.png)
+
+(if it would start the DietPi-Software GUI again >  
+Exit with CTRL + C  
+`run dietpi-update`
+and reinstall fail2ban and openssh after the reboot)
 
 `ssh root@[IP-OF-DIETPI]`  
 Should end up here on version v6.20.5 or higher: 
@@ -42,13 +54,18 @@ Should end up here on version v6.20.5 or higher:
 ![](DietPi/DietPi_v6.20.5.png)
 
 
-now run the SDcard build in this format: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
+run the SDcard build script in this format: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
 `wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms`
 
-see my output: [sdcard_build_output](DietPi/sdcard_build_output)  
+See my example output: [sdcard_build_output](DietPi/sdcard_build_output)  
 
 `ssh admin@[IP-OF-DROIDBLITZ]`  
 password: raspiblitz
 
-now the setup continues as described in the RaspiBlitz setup [README.md](README.md#documentation)
+The setup continues as described in the RaspiBlitz setup [README.md](README.md#documentation)
+
+## Example of setting up a RaspiBlitz HDD to be copied to the ODroid:
+
+![copy the blockchain from a HDD of a Raspiblitz](DietPi/copy_hdd.png)
+![example setup](DietPi/HDD_copy_example.jpg)
