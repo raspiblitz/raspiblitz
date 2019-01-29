@@ -73,8 +73,8 @@ else
 fi
 
 # get network traffic
-network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_rx=$(/sbin/ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_tx=$(/sbin/ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
