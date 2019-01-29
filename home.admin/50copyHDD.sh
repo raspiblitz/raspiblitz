@@ -17,9 +17,10 @@ ready=0
 while [ ${ready} -eq 0 ]
   do
     hddA=$(lsblk | grep /mnt/hdd | grep -c sda1)
-    if [ ${hddB} -eq 1 ]; then
+    if [ ${hddA} -eq 1 ]; then
       echo "OK - HDD as sda1 found"
       ready=1
+    fi
     if [ ${hddA} -eq 0 ]; then
       echo "FAIL - 1st HDD not found as sda1 or sda"
       echo "Try 'sudo shutdown -r now'"
@@ -42,7 +43,7 @@ echo "Like this one: https://www.amazon.de/dp/B00ZJBIHVY"
 echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
 echo ""
 echo "You can use the HDD of another RaspiBlitz for this."
-echo "The 2nd HDD needs to be formated Ext4/exFAT and the folder '${network}' is in root of HDD."
+echo "The 2nd HDD needs to be formatted Ext4/exFAT and the folder '${network}' is in root of HDD."
 echo ""
 echo "**********************************"
 echo "--> Please connect now the 2nd HDD"
@@ -54,12 +55,12 @@ ready=0
 while [ ${ready} -eq 0 ]
   do
     hddC=$(lsblk | grep -c sdb1)
-    if [ ${hddB} -eq 1 ]; then
+    if [ ${hddC} -eq 1 ]; then
       echo "OK - 2nd HDD found as sdb1"
       ready=1
     fi
     hddD=$(lsblk | grep -c sdb)
-    if [ ${hddB} -eq 1 ]; then
+    if [ ${hddD} -eq 1 ]; then
       echo "OK - 2nd HDD found as sdb"
       ready=1
     fi
