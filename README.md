@@ -1,10 +1,15 @@
 [ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
+# DroidBlitz with DietPi
+
+see: [install_on_DietPi.md](install_on_DietPi.md)
+
+
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
-`Version 0.98 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
+`Version 0.99 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -104,6 +109,7 @@ So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
 **Now follow the dialoge in your terminal. This can take some time (prepare some coffee) - but in the end you should have a running Lightning node on your RaspberryPi that you can start to learn and hack on.**
+
 
 ## Documentation
 

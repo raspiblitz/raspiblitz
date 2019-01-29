@@ -75,7 +75,7 @@ echo ""
 
 ###### Start LND
 echo "*** Starting LND ***"
-lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
+lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
   sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
@@ -91,7 +91,7 @@ fi
 lndRunning=0
 while [ ${lndRunning} -eq 0 ]
 do
-  lndRunning=$(systemctl status lnd.service | grep -c running)
+  lndRunning=$(sudo systemctl status lnd.service | grep -c running)
   if [ ${lndRunning} -eq 0 ]; then
     date +%s
     echo "LND not ready yet ... waiting another 60 seconds."
