@@ -103,6 +103,8 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo apt install -y rsync
   # install ifconfig
   sudo apt install -y net-tools
+  #to display hex codes
+  sudo apt install -y xxd
 fi
 
 # special prepare when Raspbian
