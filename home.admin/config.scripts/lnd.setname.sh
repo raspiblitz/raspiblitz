@@ -13,6 +13,7 @@ newName=$1
 # run interactive if 'turn on' && no further parameters
 if [ ${#newName} -eq 0 ]; then
 
+  sudo rm ./.tmp
   dialog --backtitle "Set LND Name/Alias" --inputbox "ENTER the new Name/Alias for LND node:
 (free to choose, one word, use basic characters)
 " 8 52 2>./.tmp

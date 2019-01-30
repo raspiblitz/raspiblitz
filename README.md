@@ -405,6 +405,7 @@ This is highly experimental. And again: If you restore the LND with an backup th
 
 To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). In short:
 
+* make sure all VPN are off (can interfere with local LAN)
 * connect with LAN directly
 * Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
 * Settings > Network > Ethernet-Adapter > set to DHCP

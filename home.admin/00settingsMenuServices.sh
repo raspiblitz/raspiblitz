@@ -165,6 +165,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
   sudo /home/admin/config.scripts/bonus.rtl.sh ${choice}
   if [ "${choice}" =  "on" ]; then
+    localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     l1="RTL web servcie will be ready AFTER NEXT REBOOT:"
     l2="Try to open the following URL in your local webrowser"
     l3="and login with your PASSWORD B."
@@ -200,6 +201,8 @@ if [ ${needsReboot} -eq 1 ]; then
    dialog --pause "OK. System will reboot to activate changes." 8 58 8
    clear
    echo "rebooting .. (please wait)"
-   sleep 3
+   # stop bitcoind
+   sudo -u bitcoin ${network}-cli stop
+   sleep 4
    sudo shutdown -r now
 fi
