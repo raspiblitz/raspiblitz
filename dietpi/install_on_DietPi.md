@@ -1,6 +1,6 @@
 # The ODroid HC1 on DietPi is made to be a lightning node ⚡️
 
-![](DietPi/DroidBlitz.jpg)
+![](pictures/DroidBlitz.jpg)
 
 ## Setting up the DietPi OS
 
@@ -36,12 +36,11 @@ password: `dietpi`
 Search `fail2ban` > Space to select > Enter   
 Search `openssh` > Space to select OpenSSH Client > Enter  
 > Install > Ok  
-Opt out of survey > Ok  
+
+![](pictures/DietPi-Software.png)
+
+>Opt out of survey > Ok  
 Reboots again
-
-Looks like this:
-
-![](DietPi/DietPi-Software.png)
 
 (if it would start the DietPi-Software GUI again >  
 Exit with CTRL + C  
@@ -51,7 +50,7 @@ and reinstall fail2ban and openssh after the reboot)
 `ssh root@[IP-OF-DIETPI]`  
 Should end up here on version v6.20.5 or higher: 
 
-![](DietPi/DietPi_v6.20.5.png)
+![](pictures/DietPi_v6.20.5.png)
 
 
 run the SDcard build script in this format: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
@@ -63,9 +62,9 @@ See my example output: [sdcard_build_output](DietPi/sdcard_build_output)
 `ssh admin@[IP-OF-DROIDBLITZ]`  
 password: raspiblitz
 
-The setup continues as described in the RaspiBlitz setup [README.md](README.md#documentation)
+The setup continues as described in the RaspiBlitz setup [README.md](/README.md#documentation)
 
 ## Example of setting up a RaspiBlitz HDD to be copied to the ODroid:
 
-![copy the blockchain from a HDD of a Raspiblitz](DietPi/copy_hdd.png)
-![example setup](DietPi/HDD_copy_example.jpg)
+![copy the blockchain from a HDD of a Raspiblitz](pictures/copy_hdd.png)
+![example setup](pictures/HDD_copy_example.jpg)
