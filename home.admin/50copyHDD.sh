@@ -23,7 +23,7 @@ echo ""
 echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
 echo "to be connected to the same local network."
 echo ""
-echo "Open a terminal on the source computer and change into the directory that constains the"
+echo "Open a terminal on the source computer and change into the directory that contains the"
 echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'indexes'".
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""

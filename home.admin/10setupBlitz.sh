@@ -132,7 +132,7 @@ if [ ${mountOK} -eq 1 ]; then
       echo "Sometimes a reboot helps --> sudo shutdown -r now"
       exit 1
     else 
-      echo "Got mounted blockchain, but no config and runnign service yet --> finish HDD"
+      echo "Got mounted blockchain, but no config and running service yet --> finish HDD"
       ./60finishHDD.sh
       exit 1
     fi
@@ -163,7 +163,7 @@ if [ ${mountOK} -eq 1 ]; then
     --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
-    C "COPY     --> BLOCKCHAINDATA from another computer with SCP" \
+    C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
     A "ADAPTER  --> BLOCKCHAINDATA from 2nD HDD with a powered adapter cable"\
     S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
