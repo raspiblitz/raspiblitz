@@ -10,7 +10,7 @@ After=bitcoind.service
 
 [Service]
 EnvironmentFile=
-ExecStart=/usr/local/bin/lnd
+ExecStart=/usr/local/bin/lnd --externalip=${publicIP}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin

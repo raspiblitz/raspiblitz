@@ -56,7 +56,7 @@ Should end up here on version v6.20.5 or higher:
 
 run the SDcard build script in this format: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
-`wget https://raw.githubusercontent.com/openoms/HardwareNode/OdroidHC1Debug/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh OdroidHC1Debug openoms`
+`wget https://raw.githubusercontent.com/openoms/HardwareNode/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
 
 See my example output: [sdcard_build_output](DietPi/sdcard_build_output)  
 

@@ -80,10 +80,10 @@ fi
 # just if any data transferred ..
 if [ ${anyDataAtAll} -eq 1 ]; then
 
-  # data was invalkid - ask user to keep?
+  # data was invalid - ask user to keep?
   if [ ${quickCheckOK} -eq 0 ]; then
     echo "*********************************************"
-    echo "There seems to be a invalid transfere."
+    echo "There seems to be an invalid transfer."
     echo "Wait 5 secs ..."
     sleep 5
     dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 60
