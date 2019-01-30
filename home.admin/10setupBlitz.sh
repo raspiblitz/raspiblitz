@@ -160,11 +160,12 @@ if [ ${mountOK} -eq 1 ]; then
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
+    --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
-    C "COPY     --> USE BLOCKCHAINDATA from another computer" \
-    S "SYNC     --> MAINNET thru Bitoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
+    C "COPY     --> BLOCKCHAINDATA from another computer with SCP" \
+    A "ADAPTER  --> BLOCKCHAINDATA from 2nD HDD with a powered adapter cable"\
+    S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -192,6 +193,9 @@ if [ ${mountOK} -eq 1 ]; then
           C)
               ./50copyHDD.sh
               ;;
+          A)
+              ./50adapterHDD.sh
+              ;;              
           S)
               ./50syncHDD.sh
               ;;

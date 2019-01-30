@@ -1,6 +1,8 @@
-# The ODroid HC1 on DietPi is made to be a lightning node ⚡️
-
+# ⚡️ this setup is tested on an ODroid HC1 ⚡️
 ![](pictures/DroidBlitz.jpg)
+
+there is no LCD, but the [hardware specs](hw_comparison.md) are convincing: 
+
 
 ## Setting up the DietPi OS
 
@@ -32,6 +34,12 @@ run (can be copied from the terminal output):
 `ssh root@[IP-OF-DIETPI]` 
 yes >   
 password: `dietpi`  
+
+At this point if the DietPi was not updated from 6.14 it does not manage to save settings going forward.  
+Exit with CTRL + C and run   
+`dietpi-update`  
+update continue after the reboot.
+
 >Ok > Cancel > Cancel  
 Search `fail2ban` > Space to select > Enter   
 Search `openssh` > Space to select OpenSSH Client > Enter  
@@ -42,18 +50,16 @@ Search `openssh` > Space to select OpenSSH Client > Enter
 >Opt out of survey > Ok  
 Reboots again
 
-(if it would start the DietPi-Software GUI again >  
-Exit with CTRL + C  
-`run dietpi-update`
-and reinstall fail2ban and openssh after the reboot)
-
 `ssh root@[IP-OF-DIETPI]`  
-Should end up here on version v6.20.5 or higher: 
+Should end up here on version v6.20.6 or higher: 
 
-![](pictures/DietPi_v6.20.5.png)
+![](pictures/bash_prompt.png)
 
 
-run the SDcard build script in this format: wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
+run the SDcard build script in this format:  
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
+
+if you intend to use @openoms`s forked version:
 
 `wget https://raw.githubusercontent.com/openoms/HardwareNode/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
 
