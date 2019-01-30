@@ -1,7 +1,7 @@
 # ⚡️ this setup is tested on an ODroid HC1 ⚡️
 ![](pictures/DroidBlitz.jpg)
 
-there is no LCD, but the [hardware specs](hw_comparison.md) are convincing: 
+there is no LCD, but the [hardware specs](hw_comparison.md) make up for it.
 
 
 ## Setting up the DietPi OS
@@ -56,12 +56,13 @@ Should end up here on version v6.20.6 or higher:
 ![](pictures/bash_prompt.png)
 
 
-run the SDcard build script in this format:  
+run the SDcard build script in this format:
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
 
+Be aware of that the fork needs to be called `raspiblitz` for the git download to work.
 if you intend to use @openoms`s forked version:
 
-`wget https://raw.githubusercontent.com/openoms/HardwareNode/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
+`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
 
 See my example output: [sdcard_build_output](DietPi/sdcard_build_output)  
 

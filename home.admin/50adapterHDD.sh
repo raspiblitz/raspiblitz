@@ -126,7 +126,10 @@ sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/hdd/bit
 sudo umount -l /mnt/genesis
 echo "OK - Copy done :)"
 echo ""
-echo "---> You can now disconnect the 2nd HDD"
+# echo "---> You can now disconnect the 2nd HDD"
+# If the Odorid HC1 reboots with a HDD attached to the USB it prioritises it over the SATA
+echo "---> Disconnect the 2nd HDD and press a Enter"
+read key
 
 # set SetupState
 # sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
@@ -195,7 +198,7 @@ if [ ${anyDataAtAll} -eq 1 ]; then
   fi
 
 else
-  
+
   # when no data transferred - just delete bitcoin base dir again
   sudo rm -rf /mnt/hdd/bitcoin
 

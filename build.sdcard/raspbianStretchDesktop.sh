@@ -27,7 +27,7 @@ echo "will use code from branch --> '${wantedBranch}'"
 
 # 2nd optional parameter is the GITHUB-USERNAME to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
-# if 2nd paramter is used - 1st is mandatory
+# if 2nd parameter is used - 1st is mandatory
 echo "*** CHECK INPUT PARAMETERS ***"
 githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
