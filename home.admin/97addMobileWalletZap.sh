@@ -70,10 +70,10 @@ echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then 
   # If you drop the -i parameter, lndconnect will use the external IP. 
-  zapconnect -j -i
+  lndconnect -j -i
 else
   # when dynamic domain is set
-  zapconnect -j --host=${dynDomain}
+  lndconnect -j --host=${dynDomain}
 fi
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
