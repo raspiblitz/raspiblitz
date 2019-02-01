@@ -57,17 +57,14 @@ while [ ${finished} -eq 0 ]
   progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   #progress=$(echo "${progress}*100" | bc)
   inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
-  if [ "${inprogress}" = "true" ]; then
+  if [ "${inprogress}" = "false" ]; then
     finished=1
   fi
 
   echo ""
+  echo "RUNNING: ${inprogress}"
   echo "PROGRESS: ${progress}"
-  echo "running: ${inprogress}"
   echo ""
-
-  #TODO: detect and display progress
-  #TODO: determine when finished and then finished=1
 
   echo "You can close terminal while reindex is running.."
   echo "But you have to login again to check if ready."
@@ -83,9 +80,14 @@ while [ ${finished} -eq 0 ]
 
 done
 
+
 # trigger reboot when finished
 echo "*************************"
-echo "Re-Index finished"
+if [ ${finished} -eq 0 ]; then
+  echo "Re-Index CANCELED"
+else 
+  echo "Re-Index finished"
+fi
 echo "Starting reboot ..."
 echo "*************************"
 # stop bitcoind
