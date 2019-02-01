@@ -41,6 +41,7 @@ fi
 
 # while loop to wait to finish
 finished=0
+progress=0
 while [ ${finished} -eq 0 ]
   do
   clear
@@ -51,9 +52,13 @@ while [ ${finished} -eq 0 ]
   echo "THIS CAN TAKE SOME LONG TIME"
   echo "If you dont see any progress after 24h keep X pressed to stop."
 
-  progress=0
+  # get blockchain sync progress
+  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
+  progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+  progress=$(echo "${progress}*100" | bc)
+
   echo ""
-  echo "PROGRESS: ${progress}%"
+  echo "PROGRESS: ${progress}"
   echo ""
 
   #TODO: detect and display progress
