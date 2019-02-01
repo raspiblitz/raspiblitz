@@ -55,7 +55,7 @@ while [ ${finished} -eq 0 ]
   # get blockchain sync progress
   blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
   progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  progress=$(echo "${progress}*100" | bc)
+  #progress=$(echo "${progress}*100" | bc)
   inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
 
   echo ""
