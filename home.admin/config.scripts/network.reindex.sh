@@ -57,6 +57,9 @@ while [ ${finished} -eq 0 ]
   progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   #progress=$(echo "${progress}*100" | bc)
   inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
+  if [ "${inprogress}" = "true" ]; then
+    finished=1
+  fi
 
   echo ""
   echo "PROGRESS: ${progress}"
