@@ -45,7 +45,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Get the RTL Source Code ***"
     git clone https://github.com/ShahanaFarooqui/RTL.git
     cd RTL
-    git reset --hard v0.1.12-alpha
+    git reset --hard v0.1.13-alpha
 
     # install
     echo "*** Run: npm install ***"
