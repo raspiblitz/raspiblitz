@@ -321,7 +321,30 @@ fi
 # SD INFOFILE BASICS
 ################################
 
+# state info
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
+
+# determine network and chain from system
+
+# check for BITCOIN
+loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/chain=bitcoin/g" ${infoFile}
+  source /mnt/hdd/bitcoin/bitcoin.conf
+  if [ ${testnet} -gt 0 ]; then
+    sed -i "s/^chain=.*/chain=test/g" ${infoFile}
+  else
+    sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+  fi
+fi
+
+# check for LITECOIN
+loaded=$(sudo systemctl status litecoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/chain=litecoin/g" ${infoFile}
+  sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+fi
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
