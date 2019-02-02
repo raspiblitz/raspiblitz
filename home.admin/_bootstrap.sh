@@ -330,7 +330,7 @@ sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 # check for BITCOIN
 loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
 if [ ${loaded} -gt 0 ]; then
-  sed -i "s/^network=.*/chain=bitcoin/g" ${infoFile}
+  sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
   source /mnt/hdd/bitcoin/bitcoin.conf
   if [ ${testnet} -gt 0 ]; then
     sed -i "s/^chain=.*/chain=test/g" ${infoFile}
@@ -342,7 +342,7 @@ fi
 # check for LITECOIN
 loaded=$(sudo systemctl status litecoind | grep -c 'loaded')
 if [ ${loaded} -gt 0 ]; then
-  sed -i "s/^network=.*/chain=litecoin/g" ${infoFile}
+  sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
   sed -i "s/^chain=.*/chain=main/g" ${infoFile}
 fi
 
