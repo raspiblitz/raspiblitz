@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# load raspiblitz config data (with backup from old config)
+# load raspiblitz config data
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # make sure qrcode-encoder in installed

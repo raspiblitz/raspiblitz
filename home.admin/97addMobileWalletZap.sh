@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # load raspiblitz config data
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # export go vars (if needed)

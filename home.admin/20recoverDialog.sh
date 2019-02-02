@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## get basic info
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # show password info dialog

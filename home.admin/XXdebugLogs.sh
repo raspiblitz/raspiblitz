@@ -6,7 +6,8 @@
 source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then
