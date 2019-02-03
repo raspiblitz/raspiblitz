@@ -70,8 +70,11 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=44    #will install Bittorrent transmission
 # install fail2ban
 AUTO_SETUP_INSTALL_SOFTWARE_ID=73
-# install openssh client
+# install OpenSSH Client
 AUTO_SETUP_INSTALL_SOFTWARE_ID=0
+# install OpenSSH Server
+AUTO_SETUP_INSTALL_SOFTWARE_ID=105
+
 
 
 #    DietPi-Software Choice System

@@ -110,7 +110,9 @@ if [ "${baseImage}" = "dietpi" ]; then
   #to display hex codes
   sudo apt install -y xxd
   # setuptools needed for Nyx
-   sudo pip install setuptools
+  sudo pip install setuptools
+  # netcat for 00infoBlitz.sh
+  sudo apt install -y netcat
 
 
 fi

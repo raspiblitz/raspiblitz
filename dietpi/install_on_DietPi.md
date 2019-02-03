@@ -97,6 +97,18 @@ DietPi-Automation settings, applied on the 1st boot of DietPi, ONCE
 Sample:
 https://github.com/Fourdee/DietPi/blob/master/dietpi.txt
 
+### DietPi-Software to automatically install.  
+Requires `AUTO_SETUP_AUTOMATED=1  `
+For a list of software index's (ID's), run '/DietPi/dietpi/dietpi-software list'  
+No limit on number entries, add as many as you need and uncomment the line.  
+DietPi will automatically install all pre-reqs (eg: ALSA/XSERVER for desktops etc)  
+>install fail2ban  
+AUTO_SETUP_INSTALL_SOFTWARE_ID=73  
+install OpenSSH Client  
+AUTO_SETUP_INSTALL_SOFTWARE_ID=0  
+install OpenSSH Server  
+AUTO_SETUP_INSTALL_SOFTWARE_ID=105  
+
 
 ### Custom Script (post-networking and post-DietPi install) 
 Runs after DietPi installation is completed
