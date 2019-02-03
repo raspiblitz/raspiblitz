@@ -552,28 +552,30 @@ read key
 sudo raspi-config nonint do_hostname "RaspiBlitz"
 
 # *** Display selection ***
-dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
-defaultDisplay=$?
+#dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
+#defaultDisplay=$?
 
-if [[ $defaultDisplay -eq 0 ]]
-then
+# choosing between LCD-s during install makes dietpi automation stop - procedd with default LCD
+
+#if [[ $defaultDisplay -eq 0 ]]
+#then
   # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
   # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-  cd /home/admin/
-  sudo apt-mark hold raspberrypi-bootloader
-  git clone https://github.com/goodtft/LCD-show.git
-  sudo chmod -R 755 LCD-show
-  sudo chown -R admin:admin LCD-show
-  cd LCD-show/
-  sudo ./LCD35-show
-else
-  # Download and install the driver
-  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
-
-  cd /boot
-  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
-  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
-  cat <<EOF >> config.txt
+cd /home/admin/
+sudo apt-mark hold raspberrypi-bootloader
+git clone https://github.com/goodtft/LCD-show.git
+sudo chmod -R 755 LCD-show
+sudo chown -R admin:admin LCD-show
+cd LCD-show/
+sudo ./LCD35-show
+#else
+#  # Download and install the driver
+#  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+#
+#  cd /boot
+#  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
+#  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
+#  cat <<EOF >> config.txt
 
 dtparam=spi=off
 dtparam=i2c_arm=off
@@ -602,4 +604,4 @@ display_rotate=3
 dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
 EOF
   init 6
-fi
+#fi
