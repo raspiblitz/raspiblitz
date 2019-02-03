@@ -46,6 +46,10 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
+## Why is taking my torrent download of the blockchain so long?
+
+Its a lot of data and torrent seeds can not be garantuued. Normally it should be done within 24 hours. If it takes longer then 2 days consider to abort the torrent download by pressing 'x' and choose FTP download as fallback ... will also take some time, but should be more stable. If even that is not working - choose SYNC option, which will take over a week, but is the classic way to get the blockchain thru the bitcoin peer2peer network.   
+
 ## Why is my "final sync" taking so long?
 
 First of all if you see a final sync over 90% and you can see from time to time small increase - you should be OK ... this can take some looong time to catch up with the network. Only in the case that you activly choose the `SYNC` option in the `Getting the Blockchain` a final sync under 90% is OK. If you did a torrent, a FTP or a copy from another computer and seeing under 90% somthing went wrong and the setup process is ignoring your prepared Blockchain and doing a full sync - which can almost take forever on a raspberryPi.
