@@ -68,6 +68,11 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=23    #will install Desktop LXDE
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=74    #will install LAMP webserver stack
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=44    #will install Bittorrent transmission
+# install fail2ban
+AUTO_SETUP_INSTALL_SOFTWARE_ID=73
+# install openssh client
+AUTO_SETUP_INSTALL_SOFTWARE_ID=0
+
 
 #    DietPi-Software Choice System
 #    SSH Server Selection:
