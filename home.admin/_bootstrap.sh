@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script runs on every start calles by boostrap.service
+# This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
@@ -279,6 +279,8 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
+  # wait otherwise looking for publicIP fails
+  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
    echo "WARNING: Was not able to determine external IP on startup." >> $logFile
