@@ -2,7 +2,7 @@
 echo ""
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 echo "*** Adding HDD to the System ***"
 echo "started from state(${state})"
@@ -14,7 +14,7 @@ if [ ${existsHDD} -gt 0 ]; then
   if [ ${mountOK} -eq 1 ]; then
     echo "FAIL - HDD is already mounted"
     echo "If you want to add HDD freshly to the system, then unmount the HDD first and try again"
-  else  
+  else
     echo ""
     echo "*** Check HDD ***"
     formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4) 
@@ -30,7 +30,7 @@ if [ ${existsHDD} -gt 0 ]; then
         echo ${fstabAdd}
         # adding the new line after line 3 to the /etc/fstab
         sudo sed "3 a ${fstabAdd}" -i /etc/fstab
-      else 
+      else
         echo "UUID is already in /etc/fstab"
       fi
       fstabOK=$(cat /etc/fstab | grep -c ${uuid})
@@ -44,6 +44,16 @@ if [ ${existsHDD} -gt 0 ]; then
         if [ ${mountOK} -eq 1 ]; then
           echo "OK - HDD is mounted"
 	        echo ""
+
+          # init the RASPIBLITZ Config
+          source /home/admin/_version.info
+          configFile="/mnt/hdd/raspiblitz.conf"
+          echo "# RASPIBLITZ CONFIG FILE" > $configFile
+          echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
+          echo "network=${network}" >> $configFile
+          echo "chain=${chain}" >> $configFile
+          echo "hostname=${hostname}" >> $configFile
+          sudo chmod 777 ${configFile}
 
           # move SSH pub keys to HDD so that they survive an update
           echo "moving SSH pub keys to HDD"

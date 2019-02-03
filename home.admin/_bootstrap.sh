@@ -51,6 +51,7 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
+echo "hostname=${hostname}" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################
