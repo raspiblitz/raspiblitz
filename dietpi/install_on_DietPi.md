@@ -77,6 +77,9 @@ The setup continues as described in the RaspiBlitz setup [README.md](/README.md#
 ![example setup](pictures/HDD_copy_example.jpg)
 
 ### Useful commands for debugging:
+To test a new configuration run XXcleanHDD.sh and strictly restart
+(this makes _bootstrap.sh and 00mainMenu.sh run in the right order)
+
 `tail -n1000 -f/var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow startup setup script log  
 `lsblk` see the partitions  
 `tail -n1000 -f raspiblitz.log` - debug logs of bootstrap.sh  
