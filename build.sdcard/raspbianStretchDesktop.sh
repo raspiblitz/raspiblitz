@@ -546,7 +546,8 @@ echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
 echo "Press ENTER to install LCD and reboot ..."
-read key
+# don`t stop automatic install
+# read key
 
 # give Raspi a default hostname (optional)
 sudo raspi-config nonint do_hostname "RaspiBlitz"
