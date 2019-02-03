@@ -75,3 +75,14 @@ The setup continues as described in the RaspiBlitz setup [README.md](/README.md#
 
 ![copy the blockchain from a HDD of a Raspiblitz](pictures/copy_hdd.png)
 ![example setup](pictures/HDD_copy_example.jpg)
+
+Useful commands for debugging:
+`sudo tail -f /mnt/hdd/bitcoin/debug.log` - continuous monitoring
+`sudo tail -n 100 /mnt/hdd/bitcoin/debug.log` - shows the last 100 lines
+`sudo systemctl status lnd`
+`sudo journalctl -f -u lnd`
+`./home/admin/XXdebugLogs.sh` - on the raspiblitz
+`lsblk` see the partitions
+`tail -n1000 -f raspiblitz.log` - debug logs of bootstrap.sh
+
+Samsple dietpi.txt: https://github.com/Fourdee/DietPi/blob/master/dietpi.txt

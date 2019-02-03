@@ -418,7 +418,7 @@ Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#li
 IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
 
 
-# RaspiBlitz on DietPi 
+# RaspiBlitz on DietPi
 
 DietPi is a lightweight operating system based Debian (just like Raspbian).
 It is compatible with a range of ARM based SBC-s.
@@ -427,10 +427,9 @@ Check it out on:  [dietpi.com](https://dietpi.com)
 This guide was tested on:
 
 * Odroid HC1
+* Odroid HC2 (the same board except it accommodates a 3.5" 12V HDD)
 
     see the instructions: [install_on_DietPi.md](install_on_DietPi.md)  
     (after installing DietPi and buliding the SDcard the setup continues from [Documentation](#documentation))
-
-* Odroid HC2 is the same board except it accommodates a 3.5" 12V HDD
 
 * hoping to extend this list with more compatible boards especially the ROCK64

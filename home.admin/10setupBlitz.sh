@@ -120,7 +120,8 @@ mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
   # are there any signs of blockchain data and activity
-  blockchainDataExists=$(ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
+  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
   if [ ${blockchainDataExists} -eq 1 ]; then
@@ -164,7 +165,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
-    A "ADAPTER  --> BLOCKCHAINDATA from 2nD HDD with a powered adapter cable"\
+    A "ADAPTER  --> BLOCKCHAINDATA from 2nd HDD via powered adapter cable"\
     S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
