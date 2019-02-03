@@ -71,9 +71,9 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 # install fail2ban
 AUTO_SETUP_INSTALL_SOFTWARE_ID=73
 # install OpenSSH Client
-AUTO_SETUP_INSTALL_SOFTWARE_ID=0
+# AUTO_SETUP_INSTALL_SOFTWARE_ID=0
 # install OpenSSH Server
-AUTO_SETUP_INSTALL_SOFTWARE_ID=105
+# AUTO_SETUP_INSTALL_SOFTWARE_ID=105
 
 
 
@@ -82,7 +82,7 @@ AUTO_SETUP_INSTALL_SOFTWARE_ID=105
 #        0=none
 #        -1=dropbear
 #        -2=opensshserver
-AUTO_SETUP_SSH_SERVER_INDEX=-2
+AUTO_SETUP_SSH_SERVER_INDEX=-1
 
 #    File Server Selection:
 #        0=none/manual
@@ -173,7 +173,7 @@ CONFIG_PROXY_PASSWORD=
 CONFIG_BOOT_WAIT_FOR_NETWORK=2
 
 #DietPi checks for updates (allows dietpi to check for updates on a daily basis and boot using a <1kb file download.)
-CONFIG_CHECK_DIETPI_UPDATES=1
+CONFIG_CHECK_DIETPI_UPDATES=0
 #	Optional: Automatically update DietPi when updates are available. | requires CONFIG_CHECK_DIETPI_UPDATES=1
 CONFIG_AUTO_DIETPI_UPDATES=0
 

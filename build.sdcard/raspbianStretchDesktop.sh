@@ -113,8 +113,10 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo pip install setuptools
   # netcat for 00infoBlitz.sh
   sudo apt install -y netcat
-  # install OpenSSH server
+  # install OpenSSH client + server
+  sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
+
 
 
 fi
