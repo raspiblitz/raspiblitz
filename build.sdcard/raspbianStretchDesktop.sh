@@ -494,22 +494,6 @@ sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
 
-# Prepare for TOR service
-#echo "*** Adding Tor Sources to sources.list ***"
-#echo "deb https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-#echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-#echo "OK"
-#echo ""
-#echo "*** Installing dirmngr ***"
-sudo apt install dirmngr
-#echo ""
-#echo "*** Fetching GPG key (for TOR install) ***"
-#sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
-#sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-#sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810
-#sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
-#echo "!!!!!! Please check if the above really worked!"
-
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
 echo "**********************************************"

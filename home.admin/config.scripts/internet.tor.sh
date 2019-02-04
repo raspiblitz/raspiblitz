@@ -56,25 +56,61 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
   fi
 
-  echo "*** Updating System ***"
-  sudo apt-get update
-  echo ""
+  # check if TOR package is installed
+  packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
+  if [ ${packageInstalled} -eq 0 ]; then
 
-  echo "*** Install Tor ***"
-  sudo apt-get install tor
-  #sudo apt install tor tor-arm -y
+    # Prepare for TOR service
+    echo "*** Install TOR repo keys ***"
 
-  echo ""
-  echo "*** Tor Config ***"
-  sudo rm -r -f /mnt/hdd/tor 2>/dev/null
-  sudo mkdir /mnt/hdd/tor
-  sudo mkdir /mnt/hdd/tor/sys
-  sudo mkdir /mnt/hdd/tor/web80
-  sudo mkdir /mnt/hdd/tor/lnd9735
-  sudo mkdir /mnt/hdd/tor/lndrpc9735
-  sudo chmod -R 700 /mnt/hdd/tor
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/tor
-  cat > ./torrc <<EOF
+    recvKeyResult=$(sudo gpg --keyserver keys.gnupg.net --recv 886DDD89 2>&1)
+    echo "${recvKeyResult}"
+    recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
+    if [ ${recvKeyFailed} -eq 1 ]; then
+        echo "FAILED: sudo gpg --keyserver keys.gnupg.net --recv 886DDD89"
+        exit 1
+    fi
+    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+    echo ""
+ 
+    recvKeyResult=$(sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810 2>&1)
+    echo "${recvKeyResult}"
+    recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
+    if [ ${recvKeyFailed} -eq 1 ]; then
+        echo "FAILED: sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810"
+        exit 1
+    fi
+    sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
+    echo ""
+
+    echo "*** Adding Tor Sources to sources.list ***"
+    echo "deb https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "OK"
+    echo ""
+
+    echo "*** Updating System ***"
+    sudo apt-get update
+    echo ""
+
+    echo "*** Installing dirmngr ***"
+    sudo apt install dirmngr -y
+    echo ""
+
+    echo "*** Install Tor ***"
+    sudo apt install tor tor-arm -y
+
+    echo ""
+    echo "*** Tor Config ***"
+    #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
+    sudo mkdir /mnt/hdd/tor 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/sys 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
+    sudo chmod -R 700 /mnt/hdd/tor
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+    cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
 DataDirectory /mnt/hdd/tor/sys
@@ -112,51 +148,62 @@ HiddenServicePort 9735 127.0.0.1:9735
 
 # NOTE: bitcoind get tor service automatically - see /mnt/hdd/bitcoin for onion key
 EOF
-  sudo rm $torrc
-  sudo mv ./torrc $torrc
-  sudo chmod 644 $torrc
-  sudo chown -R bitcoin:bitcoin /var/run/tor/
-  echo ""
+    sudo rm $torrc
+    sudo mv ./torrc $torrc
+    sudo chmod 644 $torrc
+    sudo chown -R bitcoin:bitcoin /var/run/tor/
+    echo ""
 
-  # NYX - Tor monitor tool
-  #  https://nyx.torproject.org/#home
-  echo "*** Installing NYX - TOR monitoring Tool ***"
-  nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
-  if [ ${nyxInstalled} -eq 0 ]; then
-    sudo pip install nyx
-  else
-    echo "NYX already installed"
-  fi
-  echo ""
+    # NYX - Tor monitor tool
+    #  https://nyx.torproject.org/#home
+    echo "*** Installing NYX - TOR monitoring Tool ***"
+    nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
+    if [ ${nyxInstalled} -eq 0 ]; then
+      sudo pip install nyx
+    else
+      echo "NYX already installed"
+    fi
+    echo ""
   
-  echo "*** Activating TOR system service ***"
-  echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable tor@default
-  echo ""
+    echo "*** Activating TOR system service ***"
+    echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable tor@default
+    echo ""
 
-  echo "*** Changing ${network} Config ***"
-  networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-  if [ ${networkIsTor} -eq 0 ]; then
+    echo "*** Changing ${network} Config ***"
+    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
+    if [ ${networkIsTor} -eq 0 ]; then
 
-    echo "Only Connect thru TOR"
-    echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      echo "Only Connect thru TOR"
+      echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
 
-    if [ "${network}" = "bitcoin" ]; then
-      echo "Adding some bitcoin onion nodes to connect to"
-      echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      if [ "${network}" = "bitcoin" ]; then
+        echo "Adding some bitcoin onion nodes to connect to"
+        echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      fi
+
+      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+      sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
+    else
+      echo "Chain network already configured for TOR"
     fi
 
-    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-    sudo chown admin:admin /home/admin/.${network}/${network}.conf
-
   else
-    echo "Chain network already configured for TOR"
+    
+    echo "TOR package/service is installed and was prepared earlier .. just activating again"
+
+    echo "*** Enable TOR service ***"
+    sudo systemctl ensable tor@default
+    echo ""
+
   fi
+
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
