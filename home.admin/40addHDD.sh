@@ -42,18 +42,25 @@ if [ ${existsHDD} -gt 0 ]; then
         sudo mount -a
         mountOK=$(df | grep -c /mnt/hdd)
         if [ ${mountOK} -eq 1 ]; then
+
           echo "OK - HDD is mounted"
 	        echo ""
 
-          # init the RASPIBLITZ Config
-          source /home/admin/_version.info
-          configFile="/mnt/hdd/raspiblitz.conf"
-          echo "# RASPIBLITZ CONFIG FILE" > $configFile
-          echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
-          echo "network=${network}" >> $configFile
-          echo "chain=${chain}" >> $configFile
-          echo "hostname=${hostname}" >> $configFile
-          sudo chmod 777 ${configFile}
+          # init the RASPIBLITZ Config (if not exist on provision)
+          configExists=$(sudo ls /mnt/hdd/raspiblitz.conf | grep -c 'raspiblitz.conf')
+          if [ ${configExists} -eq 0 ]; then
+            echo "Creating raspiblitz.conf on HDD"
+            source /home/admin/_version.info
+            configFile="/mnt/hdd/raspiblitz.conf"
+            echo "# RASPIBLITZ CONFIG FILE" > $configFile
+            echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
+            echo "network=${network}" >> $configFile
+            echo "chain=${chain}" >> $configFile
+            echo "hostname=${hostname}" >> $configFile
+            sudo chmod 777 ${configFile}
+            echo "OK"
+            echo ""
+          fi
 
           # move SSH pub keys to HDD so that they survive an update
           echo "moving SSH pub keys to HDD"
