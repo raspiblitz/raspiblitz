@@ -86,7 +86,7 @@ if you intend to use @openoms`s forked version:
 
 `wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
 
-See my example output: [sdcard_build_output](DietPi/sdcard_build_output)  
+See my example output on the Odorid HC1: [HC1_sdcard_build_output](logs/HC1_sdcard_build_output)  
 
 `ssh admin@[IP-OF-DROIDBLITZ]`  
 password: raspiblitz
