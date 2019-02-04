@@ -18,7 +18,8 @@ fi
 _temp="./dialog.$$"
 
 # load raspiblitz config (if available)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
 fi

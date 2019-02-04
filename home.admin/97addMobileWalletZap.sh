@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # load raspiblitz config data
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # export go vars (if needed)
@@ -25,7 +26,7 @@ if [ ${goInstalled} -eq 0 ];then
   goInstalled=$(go version 2>/dev/null | grep -c 'go')
 fi
 if [ ${goInstalled} -eq 0 ];then
-  echo "FAIL: Was not able to install GO (needed to run ZapConnect)"
+  echo "FAIL: Was not able to install GO (needed to run LndConnect)"
   exit 1
 fi
 
@@ -35,11 +36,11 @@ echo "*** Setup ***"
 echo ""
 echo "Installing zapconnect. Please wait..."
 echo ""
-echo "Getting github.com/LN-Zap/zapconnect (please wait) ..."
-go get -d github.com/LN-Zap/zapconnect
-cd $GOPATH/src/github.com/LN-Zap/zapconnect
+echo "Getting github.com/LN-Zap/lndconnect (please wait) ..."
+go get -d github.com/LN-Zap/lndconnect
+cd $GOPATH/src/github.com/LN-Zap/lndconnect
 echo ""
-echo "Building github.com/LN-Zap/zapconnect ..."
+echo "Building github.com/LN-Zap/lndconnect ..."
 make
 cd
 sleep 3
@@ -69,11 +70,11 @@ clear
 echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then 
-  # If you drop the -i parameter, zapconnect will use the external IP. 
-  zapconnect -i
+  # If you drop the -i parameter, lndconnect will use the external IP. 
+  lndconnect -i
 else
   # when dynamic domain is set
-  zapconnect --host=${dynDomain}
+  lndconnect --host=${dynDomain}
 fi
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
@@ -82,5 +83,5 @@ read key
 clear
 echo "If its not working - check issues on GitHub:"
 echo "https://github.com/LN-Zap/zap-iOS/issues"
-echo "https://github.com/LN-Zap/zapconnect/issues"
+echo "https://github.com/LN-Zap/lndconnect/issues"
 echo ""

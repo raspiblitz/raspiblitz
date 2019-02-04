@@ -16,6 +16,8 @@ configFile="/mnt/hdd/raspiblitz.conf"
 configExists=$(ls ${configFile} | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then
     source ${configFile}
+else
+    source ${infoFile}
 fi
 
 echo "_background.sh STARTED"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # get raspiblitz config
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # check if dynamic domain is set

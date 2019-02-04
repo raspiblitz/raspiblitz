@@ -2,7 +2,9 @@
 
 # get raspiblitz config
 echo "get raspiblitz config"
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
+
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi

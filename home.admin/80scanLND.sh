@@ -1,3 +1,6 @@
+#!/bin/bash
+
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 ### USER PI AUTOSTART (LCD Display)

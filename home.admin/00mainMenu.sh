@@ -91,9 +91,8 @@ fi
 if [ "${state}" = "ready" ]; then
   configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
-    echo "setup is done - loading config data"
+    echo "loading config data"
     source ${configFile}
-    setupStep=100
   else
     echo "setup still in progress - setupStep(${setupStep})"
   fi
