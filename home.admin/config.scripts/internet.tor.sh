@@ -61,7 +61,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo ""
 
   echo "*** Install Tor ***"
-  sudo apt install tor tor-arm -y
+  sudo apt-get install tor
+  #sudo apt install tor tor-arm -y
 
   echo ""
   echo "*** Tor Config ***"
@@ -134,21 +135,6 @@ EOF
   sudo systemctl enable tor@default
   echo ""
 
-  #echo "*** Waiting for TOR to boostrap ***"
-  #torIsBootstrapped=0
-  #while [ ${torIsBootstrapped} -eq 0 ]
-  #do
-  #  echo "--- Checking 1 ---"
-  #  date +%s
-  #  sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
-  #  torIsBootstrapped=$(sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped 100" -c)
-  #  echo "torIsBootstrapped(${torIsBootstrapped})"
-  #  echo "If this takes too long --> CTRL+c, reboot and check manually"
-  #  sleep 5
-  #done
-  #echo "OK - Tor Bootstrap is ready"
-  #echo ""
-
   echo "*** Changing ${network} Config ***"
   networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
   if [ ${networkIsTor} -eq 0 ]; then
@@ -171,34 +157,6 @@ EOF
   else
     echo "Chain network already configured for TOR"
   fi
-
-  #echo "*** ${network} re-init - Waiting for Onion Address ***"
-  # restarting bitcoind to start with tor and generare onion.address
-  #echo "restarting ${network}d ..."
-  #sudo systemctl restart ${network}d
-  #sleep 8
-  #onionAddress=""
-  #while [ ${#onionAddress} -eq 0 ]
-  #do
-  #  echo "--- Checking 2 ---"
-  #  date +%s
-  #  testNetAdd=""
-  #  if [ "${chain}" = "test" ];then
-  #    testNetAdd="/testnet3"
-  #  fi
-  #  sudo cat /mnt/hdd/${network}${testNetAdd}/debug.log 2>/dev/null | grep "tor" | tail -n 10
-  #  onionAddress=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-  #  echo "Can take up to 20min - if this takes longer --> CTRL+c, reboot and check manually"
-  #  sleep 5
-  #done
-  #onionPort=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
-  #echo "Your Chain Network Onion Address is: ${onionAddress}:${onionPort}"
-  #echo ""
-
-  #echo "*** Setting your Onion Address ***"
-  #onionLND=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)
-  #echo "Your Lightning Tor Onion Address is: ${onionLND}:9735"
-  #echo ""
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
