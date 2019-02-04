@@ -73,8 +73,8 @@ else
 fi
 
 # get network traffic
-network_rx=$(/sbin/ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-network_tx=$(/sbin/ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
@@ -152,16 +152,19 @@ torInfo=""
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
-onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-if [ "${onionAddress}" != "null" ]; then
+
+if [ "${runBehindTor}" = "on" ]; then
+
   # TOR address
+  onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
   torInfo="+ TOR"
+
 else
 
   # IP address
@@ -286,7 +289,7 @@ ${color_yellow}${ln_publicColor}${ln_external}
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
-if [ ${#onionAddress} -eq 0 ]; then
+if [ "${runBehindTor}" != "on" ]; then
   # one extra space line at the end if nodeaddress is not TOR
   echo ""
 fi

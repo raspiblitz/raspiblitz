@@ -1,14 +1,18 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# DietPi.com
+# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
+# https://www.raspberrypi.org/downloads/raspbian/
+# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
+# 
+# or download the image for your ARM based SBC on https://DietPi.com
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* DROIDLITZ SD CARD IMAGE SETUP v0.1  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
 echo "*****************************************"
 echo ""
 
@@ -23,7 +27,7 @@ echo "will use code from branch --> '${wantedBranch}'"
 
 # 2nd optional parameter is the GITHUB-USERNAME to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
-# if 2nd paramter is used - 1st is mandatory
+# if 2nd parameter is used - 1st is mandatory
 echo "*** CHECK INPUT PARAMETERS ***"
 githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
@@ -105,6 +109,16 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo apt install -y net-tools
   #to display hex codes
   sudo apt install -y xxd
+  # setuptools needed for Nyx
+  sudo pip install setuptools
+  # netcat for 00infoBlitz.sh
+  sudo apt install -y netcat
+  # install OpenSSH client + server
+  sudo apt install -y openssh-client
+  sudo apt install -y openssh-sftp-server
+
+
+
 fi
 
 # special prepare when Raspbian
@@ -446,15 +460,14 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
+# add /sbin to path for all
+sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 # profile path for admin
 sudo bash -c "echo '' >> /home/admin/.profile"
 sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin:' >> /home/admin/.profile"
 sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
-# add /sbin to path for admin
-sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/sbin' >> /home/admin/.profile"
 
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
@@ -462,19 +475,13 @@ sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 
-# bash aoutstart for pi
+# bash autostart for pi
 # run as exec to dont allow easy physical access by keyboard
 # see https://github.com/rootzoll/raspiblitz/issues/54
 sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
 sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
 sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
 sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-
-sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-
 
 # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
 cat > /home/admin/setup.sh <<EOF
@@ -540,61 +547,66 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "Press ENTER to install LCD and reboot ..."
-read key
+echo "to continue reboot with `sudo shutdown -r now` and login with admin"
 
-# give Raspi a default hostname (optional)
-sudo raspi-config nonint do_hostname "DroidBlitz"
+# install LCD only on an rPI running Raspbian
+if [ "${baseImage}" = "raspbian" ]; then
+  echo "Press ENTER to install LCD and reboot ..."
+  read key
 
-# *** Display selection ***
-dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
-defaultDisplay=$?
+  # give Raspi a default hostname (optional)
+  sudo raspi-config nonint do_hostname "RaspiBlitz"
 
-if [[ $defaultDisplay -eq 0 ]]
-then
-  # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
-  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-  cd /home/admin/
-  sudo apt-mark hold raspberrypi-bootloader
-  git clone https://github.com/goodtft/LCD-show.git
-  sudo chmod -R 755 LCD-show
-  sudo chown -R admin:admin LCD-show
-  cd LCD-show/
-  sudo ./LCD35-show
-else
-  # Download and install the driver
-  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+  # *** Display selection ***
+  dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
+  defaultDisplay=$?
 
-  cd /boot
-  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
-  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
-  cat <<EOF >> config.txt
+  if [[ $defaultDisplay -eq 0 ]]
+  then
+    # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
+    # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+    cd /home/admin/
+    sudo apt-mark hold raspberrypi-bootloader
+    git clone https://github.com/goodtft/LCD-show.git
+    sudo chmod -R 755 LCD-show
+    sudo chown -R admin:admin LCD-show
+    cd LCD-show/
+    sudo ./LCD35-show
+  else
+    # Download and install the driver
+    # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
 
-dtparam=spi=off
-dtparam=i2c_arm=off
+    cd /boot
+    sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
+    sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
+    cat <<EOF >> config.txt
 
-# Set screen size and any overscan required
-overscan_left=0
-overscan_right=0
-overscan_top=0
-overscan_bottom=0
-framebuffer_width=800
-framebuffer_height=480
+  dtparam=spi=off
+  dtparam=i2c_arm=off
+
+  # Set screen size and any overscan required
+  overscan_left=0
+  overscan_right=0
+  overscan_top=0
+  overscan_bottom=0
+  framebuffer_width=800
+  framebuffer_height=480
 
 
-enable_dpi_lcd=1
-display_default_lcd=1
-dpi_group=2
-dpi_mode=87
-dpi_output_format=0x6f015
+  enable_dpi_lcd=1
+  display_default_lcd=1
+  dpi_group=2
+  dpi_mode=87
+  dpi_output_format=0x6f015
 
-# set up the size to 800x480
-hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
+  # set up the size to 800x480
+  hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
 
-#rotate screen
-display_rotate=3
+  #rotate screen
+  display_rotate=3
 
-dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
-EOF
-  init 6
+  dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
+  EOF
+    init 6
+  fi
 fi

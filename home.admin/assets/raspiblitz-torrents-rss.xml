@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rss version="2.0">
+
+  <channel>
+
+    <title>RaspiBlitz TorrentSeeds RSS</title>
+    <description>Help on seeding the lastest RaspiBlitz Torrent Seeds</description>
+    <language>en-en</language>
+
+    <!-- Upload new versions to wiki.fulmo.org -->
+    <link>http://wiki.fulmo.org/downloads/raspiblitz-torrents-rss.xml</link>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
+      <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent</guid>
+      <title>raspiblitz-bitcoin1-2019-01-16-update.torrent</title>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-base.torrent</guid>
+      <title>raspiblitz-litecoin1-2018-11-18-base.torrent</title>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-base.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-update.torrent</guid>
+      <title>raspiblitz-litecoin1-2018-11-18-update.torrent</title>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-update.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+  </channel>
+
+</rss>

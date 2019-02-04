@@ -120,7 +120,8 @@ mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
   # are there any signs of blockchain data and activity
-  blockchainDataExists=$(ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
+  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
   if [ ${blockchainDataExists} -eq 1 ]; then
@@ -132,7 +133,7 @@ if [ ${mountOK} -eq 1 ]; then
       echo "Sometimes a reboot helps --> sudo shutdown -r now"
       exit 1
     else 
-      echo "Got mounted blockchain, but no config and runnign service yet --> finish HDD"
+      echo "Got mounted blockchain, but no config and running service yet --> finish HDD"
       ./60finishHDD.sh
       exit 1
     fi
@@ -160,11 +161,12 @@ if [ ${mountOK} -eq 1 ]; then
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
-    T "TORRENT  --> TESTNET + MAINNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> TESTNET + MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> TESTNET + MAINNET from another HDD (TRICKY+FAST)" \
-    S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
+    T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
+    D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
+    C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
+    A "ADAPTER  --> BLOCKCHAINDATA from 2nd HDD via powered adapter cable"\
+    S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -173,7 +175,6 @@ if [ ${mountOK} -eq 1 ]; then
     --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
     T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> MAINNET from another HDD (TRICKY+FAST)" \
     S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # error
@@ -193,6 +194,9 @@ if [ ${mountOK} -eq 1 ]; then
           C)
               ./50copyHDD.sh
               ;;
+          A)
+              ./50adapterHDD.sh
+              ;;              
           S)
               ./50syncHDD.sh
               ;;

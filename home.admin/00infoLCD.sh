@@ -37,7 +37,7 @@ while :
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
       l3="Is LAN cable connected?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
       sleep 3
       continue
     fi
@@ -47,7 +47,7 @@ while :
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
       l3="Will try reboot every 5min.\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
       sleep 3
       continue
     fi
@@ -145,6 +145,17 @@ while :
       l1="FINAL RECOVER LOGIN NEEDED:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    # if re-indexing 
+    if [ "${state}" = "reindex" ]; then
+      l1="REINDEXING BLOCKCHAIN\n"
+      l2="To monitor & detect finish:\n"
+      l3="ssh admin@${localip}\n"
       boxwidth=$((${#localip} + 28))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3

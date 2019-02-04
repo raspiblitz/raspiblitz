@@ -1,17 +1,10 @@
 [ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Development](#further-development-of-raspiblitz) ]
 
 -----
-# DroidBlitz with DietPi
-
-see: [install_on_DietPi.md](install_on_DietPi.md)
-
-
-![](DietPi/DroidBlitz.jpg)
-
 # RaspiBlitz
 Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
 
-`Version 0.99 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
+`Version 0.98 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -111,7 +104,6 @@ So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
 **Now follow the dialoge in your terminal. This can take some time (prepare some coffee) - but in the end you should have a running Lightning node on your RaspberryPi that you can start to learn and hack on.**
-
 
 ## Documentation
 
@@ -405,6 +397,7 @@ This is highly experimental. And again: If you restore the LND with an backup th
 
 To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). In short:
 
+* make sure all VPN are off (can interfere with local LAN)
 * connect with LAN directly
 * Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
 * Settings > Network > Ethernet-Adapter > set to DHCP
@@ -423,3 +416,18 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
 
 IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
+
+
+# RaspiBlitz on DietPi
+
+DietPi is a lightweight operating system based Debian (just like Raspbian).
+It is compatible with a range of ARM based SBC-s.
+Check it out on:  [dietpi.com](https://dietpi.com)
+
+Issues:
+* Setup is not automated yet - more steps required than running on Raspbian.
+* There is no LCD support yet on DietPi.
+
+See the instructions using DietPi for multiple kind of hardware: [dietpi/README.md](dietpi/README.md)
+
+after installing DietPi and buliding the SDcard the setup continues from [Documentation](#documentation))

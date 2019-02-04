@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script runs on every start calles by boostrap.service
+# This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
@@ -222,8 +222,9 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD contains pre-loaded blockchain data
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
+  litecoinDataExists=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  bitcoinDataExists=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
 
   # check if node can go into presync (only for bitcoin)
   if [ ${bitcoinDataExists} -eq 1 ]; then
@@ -246,7 +247,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
     echo "OK Started bitcoind for presync" >> $logFile
     sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
-    # after admin login, presync will be stoped and HDD unmounted
+    # after admin login, presync will be stopped and HDD unmounted
     exit 0
   
   else
@@ -278,6 +279,8 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
+  # wait otherwise looking for publicIP fails
+  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
    echo "WARNING: Was not able to determine external IP on startup." >> $logFile
