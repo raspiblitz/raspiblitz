@@ -424,12 +424,10 @@ DietPi is a lightweight operating system based Debian (just like Raspbian).
 It is compatible with a range of ARM based SBC-s.
 Check it out on:  [dietpi.com](https://dietpi.com)
 
-This guide was tested on:
+Issues:
+* Setup is not automated yet - more steps required than running on Raspbian.
+* There is no LCD support yet on DietPi.
 
-* Odroid HC1
-* Odroid HC2 (the same board except it accommodates a 3.5" 12V HDD)
+See the instructions using DietPi for multiple kind of hardware: [dietpi/README.md](dietpi/README.md)
 
-    see the instructions: [dietpi/README.md](dietpi/README.md)  
-    (after installing DietPi and buliding the SDcard the setup continues from [Documentation](#documentation))
-
-* hoping to extend this list with more compatible boards especially the ROCK64
+after installing DietPi and buliding the SDcard the setup continues from [Documentation](#documentation))

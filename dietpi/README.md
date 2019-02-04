@@ -1,7 +1,16 @@
 # ⚡️ RaspiBlitz on DietPi ⚡️
 #  A hardware agnostic platform
 
-First tested on an Odroid HC1. It has no connection for an LCD, but the [hardware specs](hw_comparison.md) make up for it.
+
+This guide was tested on:
+
+* Odroid HC1
+* Odroid HC2 (the same board except it accommodates a 3.5" 12V HDD)
+* Raspberry Pi 3 B Plus - no LCD support so far
+* hoping to extend this list with more compatible boards especially the ROCK64  
+
+See the hardware specs:  [hardware specs](hw_comparison.md).
+
 
 ![](pictures/DroidBlitz.jpg)
 
@@ -93,8 +102,6 @@ password: raspiblitz
 
 ### The setup continues as described in the RaspiBlitz setup [README.md](/README.md#documentation)
 
-
-
 ### Examples of copying the blockchain data from a HDD using a powered USB to SATA adapter
 
 ![copy the blockchain from a HDD of a Raspiblitz](pictures/5_options_to_copy.png)
@@ -113,6 +120,8 @@ To test a new configuration run XXcleanHDD.sh and strictly restart
 `sudo systemctl status lnd`  
 `sudo journalctl -f -u lnd`  
 `./home/admin/XXdebugLogs.sh` - debug log collection on the raspiblitz 
+
+---
 
 Currently the DietPi update process has a bug causing bootloop if left alone. Will be sorted once the current, >6.2 version is uploaded as the starting image.
 Here find some excerpts from the deafult dietpi.txt (https://github.com/Fourdee/DietPi/blob/master/dietpi.txt) to be used once the automatic install is feasible:
