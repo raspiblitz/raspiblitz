@@ -429,7 +429,7 @@ This guide was tested on:
 * Odroid HC1
 * Odroid HC2 (the same board except it accommodates a 3.5" 12V HDD)
 
-    see the instructions: [install_on_DietPi.md](install_on_DietPi.md)  
+    see the instructions: [dietpi/README.md](dietpi/README.md)  
     (after installing DietPi and buliding the SDcard the setup continues from [Documentation](#documentation))
 
 * hoping to extend this list with more compatible boards especially the ROCK64
