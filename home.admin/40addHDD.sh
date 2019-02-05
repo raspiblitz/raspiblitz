@@ -48,12 +48,13 @@ if [ ${existsHDD} -gt 0 ]; then
           # init the RASPIBLITZ Config
           source /home/admin/_version.info
           configFile="/mnt/hdd/raspiblitz.conf"
+          sudo touch $configFile
+          sudo chmod 777 ${configFile}
           echo "# RASPIBLITZ CONFIG FILE" > $configFile
           echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
           echo "network=${network}" >> $configFile
           echo "chain=${chain}" >> $configFile
           echo "hostname=${hostname}" >> $configFile
-          sudo chmod 777 ${configFile}
 
           # move SSH pub keys to HDD so that they survive an update
           echo "moving SSH pub keys to HDD"
