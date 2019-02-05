@@ -211,6 +211,9 @@ elif [ ${setupStep} -lt 100 ]; then
     OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
     HEIGHT=10
 
+    echo "CONTINUE"
+    reaf key
+
 else
 
     # see function above
