@@ -116,8 +116,7 @@ if [ "${baseImage}" = "dietpi" ]; then
   # install OpenSSH client + server
   sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
-
-
+  sudo apt install -y openssh-server
 
 fi
 
@@ -593,5 +592,5 @@ if [ "${baseImage}" = "raspbian" ]; then
   EOF
     init 6
   fi
-EOF
 fi
+EOF

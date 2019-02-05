@@ -19,6 +19,8 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
+# make raspiblitz.conf if not there
+sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
