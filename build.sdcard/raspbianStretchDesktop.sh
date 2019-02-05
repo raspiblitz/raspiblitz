@@ -593,4 +593,5 @@ if [ "${baseImage}" = "raspbian" ]; then
   EOF
     init 6
   fi
+EOF
 fi
