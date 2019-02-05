@@ -531,7 +531,7 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with `sudo shutdown -r now` and login with admin"
+echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
 # install LCD only on an rPI running Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
