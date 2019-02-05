@@ -199,7 +199,7 @@ elif [ ${setupStep} -lt 100 ]; then
 
     # see function above
     if [ ${setupStep} -lt 80 ]; then
-      70initLND.sh
+      ./70initLND.sh
       exit 0
     fi
 
