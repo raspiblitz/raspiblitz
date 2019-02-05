@@ -155,8 +155,6 @@ waitUntilChainNetworkIsReady()
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then
-           echo "test"
-           read key
           ./80scanLND.sh
         else
           # everything is ready - return from loop
@@ -200,9 +198,15 @@ if [ ${setupStep} -eq 0 ]; then
 elif [ ${setupStep} -lt 100 ]; then
 
     # see function above
+    if [ ${setupStep} -lt 80 ]; then
+      70initLND.sh
+      exit 0
+    fi
+
+    # see function above
     if [ ${setupStep} -gt 59 ]; then
       waitUntilChainNetworkIsReady
-    fi  
+    fi
 
     # continue setup
     BACKTITLE="${hostname} / ${network} / ${chain}"
@@ -210,9 +214,6 @@ elif [ ${setupStep} -lt 100 ]; then
     MENU="\nThe setup process is not finished yet: \n "
     OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
     HEIGHT=10
-
-    echo "CONTINUE"
-    reaf key
 
 else
 
