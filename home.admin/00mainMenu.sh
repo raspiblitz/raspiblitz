@@ -155,6 +155,8 @@ waitUntilChainNetworkIsReady()
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then
+           echo "test"
+           read key
           ./80scanLND.sh
         else
           # everything is ready - return from loop

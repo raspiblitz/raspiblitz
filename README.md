@@ -1,61 +1,45 @@
-[ [Hardware](#hardware-needed-amazon-shopping-list) ] -- [ [Setup](#boot-your-raspiblitz) ] -- [ [Documentation](#documentation) ] -- [ [Development](#further-development-of-raspiblitz) ]
-
------
 # RaspiBlitz
-Fastest and cheapest way to get your own Lightning Node running - on a RaspberryPi with a nice LCD.
+*Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 0.98 (1.0 RC1) with lnd 0.5.1 and bitcoin 0.17.0.1 & litecoin 0.16.3.`
+`Version 1.0 with lnd 0.5.1-beta and bitcoin 0.17.0.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-*This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.*
+*The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode running on a RaspberryPi3 with a 1TB HDD and an nice Display for easy setup and monitoring. Its mainly targeted for learning how to run your own decntralized Node from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a part of it.*
 
-## Table of Contents
+## Time Estimate to Setup a RaspiBlitz
 
-* [ [Hardware](#hardware-needed-amazon-shopping-list) ] Shopping Lists and Putting all together  
-* [ [Setup](#boot-your-raspiblitz) ] Init and Setup your RaspiBlitz Lightning Node
-* [ [Documentation](#documentation) ] Features and Usecases  
-* [ [Development](#further-development-of-raspiblitz) ] Lets work together on the RaspiBlitz
+The RaspiBlitz is optimized for being Setup during a workshop at hackdays or conference. When it comes ready assembled together with a up-to-date synced HDD containing the blockchain its possible to have it ready in about 2 to 3 hours.
 
-## Hardware Needed (Amazon Shopping List)
+If you start at home ordering the parts from Amazon (see shopping list below) then its a weekend project with a lot of download and syncing time where you can do other stuff while checking on the progress from time to time. 
 
-*The RaspiBlitz software is build and tested for the following Hardware set that you can buy cheap on GERMAN Amazon:*
+## Hardware Needed
 
-* RaspBerry Pi 3 (34,99 EUR) https://www.amazon.de/dp/B07BDR5PDW
-* Micro SD-Card 16GB (7,99 EUR) https://www.amazon.de/gp/product/B073K14CVB/
-* Power >=3A (9,91 EUR) https://www.amazon.de/dp/B01E75SB2C
-* 1TB Hard Drive (44,98 EUR) https://www.amazon.de/dp/B07997KKSK?th=1
-* Case (9,36 EUR) https://www.amazon.de/dp/B0173GQF8Y
-* LCD-Display (16,88 EUR) https://www.amazon.de/gp/product/B06X191RX7
+The RaspiBlitz is build from the following parts:
 
-**Total Price: 124,11 EUR** (thats under 150 USD)
+* RaspBerryPi 3 B+
+* Micro SD-Card 16GB
+* Strong USB Powersupply >=3A
+* 1TB Hard Drive
+* Cheap Casing
+* LCD-Display
 
-Amazon shopping lists for different countries:
-[ [USA](shoppinglist_usa.md) ] [ [UK](shoppinglist_uk.md) ] [ [France](shoppinglist_fr.md) ] [ [China](shoppinglist_cn.md) ] [ [Australia](shoppinglist_au.md) ] [ [Czech](shoppinglist_cz.md) ] [ [Switzerland](shoppinglist_ch.md) ]
+**Total Price: Under 150 USD / 130 EUR ** (depending on country & shop thats around) 
 
-You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).
+## Amazon Shopping Lists
 
-The shopping list for China refers to Taobao/T-Mall.
+These are the community currated shopping lists based in country:
 
-### 3D Printed Case (optional)
+* [Germany](shoppinglist_de.md) *(reference shopping list)*
+* [USA](shoppinglist_usa.md)
+* [UK](shoppinglist_uk.md)
+* [Switzerland](shoppinglist_ch.md)
+* [France](shoppinglist_fr.md)
+* [China](shoppinglist_cn.md)
+* [Australia](shoppinglist_au.md)
+* [Czech](shoppinglist_cz.md)
 
-You can replace the generic case in the shopping lists above with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
-
-https://thecryptocloak.com/product/lightningshell/
-
-![LightningShell](pictures/lightningshell.png)
-
-### More optional Hardware
-
-*Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
-
-* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ / http://a.co/6e03D7Z
-* LAN Cable https://www.amazon.de/dp/B004SUEIE2 /http://a.co/g2IJd6i
-* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY / http://a.co/ccb26nF
-* Transport Case https://www.amazon.de/dp/B007Y4NWSW / http://a.co/0c6wyM2
-* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
-
-If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
+*You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
 ## Assemble your RaspiBlitz
 
@@ -63,7 +47,7 @@ If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case
 
 ![LCD](pictures/lcdassm.png)
 
-NOTE: Some cases from the shopping lists contain a topping for smaller displays - you can ignore that topping.
+*Some cases from the shopping lists contain a topping for smaller displays - you can ignore that topping.*
 
 Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
 
@@ -71,18 +55,11 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 ## Installing the Software
 
-*There are two ways to start:*
+Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
-### Scenario 1: “At a Hackathon/Event”
-If you are at an event, ask for a ready-2-go set or if you have your own hardware ask for assistance to prepare your SD-Card and HDD. Then you are all set and and you can proceed with "Setup your RaspiBlitz".
-
-### Scenario 2 “Start at Home”
-You got all the hardware of the shopping list above and you have no further assistance. Then you need to prepare your SD-Card yourself .. this scenario is still experimental, feedback needed and can take some time.
-
-1. Download SD-Card image (version 0.99 - Release Candidate 3 for 1.0):
-https://wiki.fulmo.org/downloads/raspiblitz-0.99-2019-01-22.img.gz
-91ef1e5b4e55a5a90e9faf094756461be841ba02591bb41ccf481755977b191b
-or [build your own SD card image](#build-the-sd-card-image)
+1. Download SD-Card image (version 1.0):
+https://wiki.fulmo.org/downloads/raspiblitz-1.00-2019-02-22.img.gz
+SHA-256: 91ef1e5b4e55a5a90e9faf094756461be841ba02591bb41ccf481755977b191b
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -416,3 +393,27 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
 
 IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
+
+
+------- OLD
+*This tutorial is based on the RaspiBolt project - you can find in detail here: https://github.com/Stadicus/guides/blob/master/raspibolt The RaspiBlitz serves as a shortcut through this setup process with some changes and an additional LCD display so that you can quickly experiment with a Lightning node and start working on your LApps on a hacking event (or at home). This shortcut is fine for testnet usage and maybe trying some small things on mainnet. But if you choose to go full reckless afterwards … please consider taking the time and work thru the original RaspiBolt project. Don’t trust us, verify.*
+
+### 3D Printed Case (optional)
+
+You can replace the generic case in the shopping lists above with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
+
+https://thecryptocloak.com/product/lightningshell/
+
+![LightningShell](pictures/lightningshell.png)
+
+### More optional Hardware
+
+*Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
+
+* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ / http://a.co/6e03D7Z
+* LAN Cable https://www.amazon.de/dp/B004SUEIE2 /http://a.co/g2IJd6i
+* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY / http://a.co/ccb26nF
+* Transport Case https://www.amazon.de/dp/B007Y4NWSW / http://a.co/0c6wyM2
+* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
+
+If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
