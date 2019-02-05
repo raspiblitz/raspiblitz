@@ -27,6 +27,8 @@ if [ ${#runBehindTor} -eq 0 ]; then
 fi
 
 # location of TOR config
+# make sure /etc/tor exists
+sudo mkdir /etc/tor
 torrc="/etc/tor/torrc"
 
 # stop services
