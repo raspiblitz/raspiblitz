@@ -24,7 +24,7 @@ The RaspiBlitz is build from the following parts:
 * Cheap Casing
 * LCD-Display
 
-**Total Price: Under 150 USD / 130 EUR ** (depending on country & shop thats around) 
+**Total Price: Under 150 USD / 130 EUR (depending on country & shop thats around)**
 
 ## Amazon Shopping Lists
 
