@@ -279,7 +279,9 @@ If you have a RaspiBlitz version 0.98 or newer do the following:
 * Remove power
 * Remove SD card
 
-Now download the new RaspiBlitz SD card image and write it to your SD card .. yes you simply overwrite the old one, it's OK, all your personal data is on the HDD (if you haven't done any manual changes to the system). See details about latest SD card image [here](README.md#installing-the-software).
+Now download the new RaspiBlitz SD card image and write it to your SD card .. yes you simply overwrite the old one, it's OK, the RaspiBlitz stores all your personal data on the HDD. See details about latest SD card image [here](README.md#installing-the-software).
+
+*If you have done manual changes to the system (installed packages, added scripts, etc) you might need to do some preparations before overwriting your sd card - see [FAQ](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).*
 
 If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and dont worry, you dont need to re-download the blockchain again.
 
@@ -315,18 +317,6 @@ The goal of the RaspiBlitz is to provide a out-of-the-box hardware lightning nod
 
 Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in progress. Check the issues if you wanna help out or add new ideas. You find the scripts used for RaspiBlitz interactions on the device at `/home/admin` or in this git repo in the subfolder `home.admin`. More to come.
 
-Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) in Berlin or drop by the Bitcoin Assembly at the [#35C3](https://twitter.com/hashtag/35C3).
+Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a upcomming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash)
 
 IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
-
-### More optional Hardware
-
-*Some optional goodies to consider to add to your shopping list for your RaspiBlitz (Amazon DE/US):*
-
-* SD-Card Writer https://www.amazon.de/dp/B01JWFZWUQ / http://a.co/6e03D7Z
-* LAN Cable https://www.amazon.de/dp/B004SUEIE2 /http://a.co/g2IJd6i
-* USB-LAN-Adapter https://www.amazon.de/dp/B00NPJV4YY / http://a.co/ccb26nF
-* Transport Case https://www.amazon.de/dp/B007Y4NWSW / http://a.co/0c6wyM2
-* Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
-
-If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]

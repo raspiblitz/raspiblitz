@@ -49,9 +49,9 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 1. Contribute your changes back to the main project as pull requests so that they become part of the next update - the next SD card release.
 
-2. Make your changes so that they survive an SD card update easily - put all your scripts and extra data onto the HDD AND document for yourself how to activate them again after an update. 
+2. Make your changes so that they survive an SD card update easily - put all your scripts and extra data onto the HDD AND document for yourself how to activate them again after an update .. maybe even write a small shell script (stored on your HDD) that installes & configs all your additional packages, software and scripts.
 
-BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)
+*BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
