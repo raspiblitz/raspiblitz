@@ -96,8 +96,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   echo "*** PREPARE DietPi ***"
   echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
-  # add pi to the sudo group
-  sudo adduser pi sudo
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
@@ -116,7 +114,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   # install OpenSSH client + server
   sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
-  sudo apt install -y openssh-server
 
 fi
 
@@ -465,8 +462,9 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 # profile path for admin
 sudo bash -c "echo '' >> /home/admin/.profile"
 sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin:' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
 sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
@@ -513,6 +511,22 @@ echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
+
+# Prepare for TOR service
+echo "*** Adding Tor Sources to sources.list ***"
+echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+echo "OK"
+echo ""
+echo "*** Installing dirmngr ***"
+sudo apt install dirmngr
+echo ""
+echo "*** Fetching GPG key ***"
+sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
+sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810
+sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
+echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""

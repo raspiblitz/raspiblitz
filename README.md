@@ -417,3 +417,17 @@ https://thecryptocloak.com/product/lightningshell/
 * Y-Cable https://www.amazon.de/dp/B00ZJBIHVY / http://a.co/0WTA7nz
 
 If you organizing an educational event where you want to support people learning on and with multiple RaspiBlitz, here is a package list of useful hardware to have at that event: [ [Event Package List](shoppinglist_event.md) ]
+
+# RaspiBlitz on DietPi
+
+DietPi is a lightweight operating system based Debian (just like Raspbian).
+It is compatible with a range of ARM based SBC-s.
+Check it out on:  [dietpi.com](https://dietpi.com)
+
+Issues:
+* Setup is not automated yet - more steps required than running on Raspbian.
+* There is no LCD support yet on DietPi.
+
+See the instructions using DietPi for multiple kind of hardware: [dietpi/README.md](dietpi/README.md)
+
+after installing DietPi and building the SDcard the setup continues from [Documentation](#documentation))
