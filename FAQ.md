@@ -95,6 +95,48 @@ With the 24 word list given you by LND on wallet creation you can recover your p
 
 For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
 
+## How can I recover my coins from a failing RaspiBlitz?
+
+You might run into a situation where your hardware fails or the software starts to act buggy. So you decide to setup a fresh RaspiBlitz, like in the chapter above "Update to a new SD Card Release" - but the closing channels and cashing out is not working anymore. So whats about the funds you already have on your failing setup?
+
+There is not a perfect way yet to backup/recover your coins, but you can try the following to make the best out of the situation:
+
+### 1) Recover from Wallet Seed
+
+Remember those 24 words you were writing down during the setup? Thats your "cipher seed" - now this words are important to recover your wallet. If you dont have them anymore: skip this chapter and read option 2. If you still have the cypher seed: good, but read the following carefully:
+
+With the cypher seed you can recover the bitcoin wallet that LND was managing for you - but it does not contain all the details about the channels you have open - its just the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything is OK and you can go on. If you had open channels with funds in there, the following is to consider:
+
+* You now rely on your channel counter parts to force close the channel at one point. If they do, the coins will be available to use in your funding wallet again at one point in the future - after force close delay.
+* If your channel counter parts never force close the channel (because they are offline too) your channel funds can be frozen forever.
+
+So going this way there is a small risk, that you will not recover your funds. But normally if your channel counter parts are still online, see that you will not come back online and they have themselves some funds on their channel side with you: They have an incentive to force close the channel to make use of their funds again.
+
+So here is what todo if you want to "Recover from Wallet Seed" with RaspiBlitz:
+
+- SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
+- During the new SetUp you get to the point of creating the LND wallet (see image below).
+- When you get asked "do you have an existing cypher wallet" answere `y` this time.
+- Follow the dialog and enter the cypher seed.
+- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
+
+![SSH8](pictures/ssh8-wallet.png)
+
+Then give LND some time to rescan the blockchain. In the end you will have restored your funding wallet. You maybe need to wait for your old channel counter parts to force close the old channels until you see the coins back displayed.
+
+### 2) LND Channel State Backup
+
+This second option is very very risky and can lead to complete loss of funds. And it olny can work, if you can still access the HDD content of your failing RaspiBlitz. It should only be used if you lost your cypher seed for the option above, forgot your cypher seed encryption password or your old channel counter parts are offline, too.
+
+What you do is in priciple:
+- Make a copy of the HDD directory "/mnt/hdd/lnd"
+- Setup a fresh RaspiBlitz
+- Stop LND
+- Replace the new "/mnt/hdd/lnd" with your backuped version
+- Reboot the RaspiBlitz
+
+This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
+
 # How does PASSWORD D effects this seed?
 
 On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
@@ -161,7 +203,17 @@ Thanks to @RobEdb (ask on twitter for more details) running his demo store with 
 
 ## I dont have an LAN router - how to connect to my RaspiBlitz?
 
-On Mac OS X you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
+To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
+
+In short:
+
+* make sure all VPN are off (can interfere with local LAN)
+* connect with LAN directly
+* Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
+* Settings > Network > Ethernet-Adapter > set to DHCP
+* in terminal > `ifconfig` there you should the the IP of the bridge100
+* in terminal > `arp -a` and check for an IP of a client to the bridge
+* in terminal > ssh admin@[clientIP] 
 
 If anyone has expirence on doing this in Linux/Win, please share.
 
@@ -192,3 +244,11 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - thats OK as long as you dont make changes to the sd card build script - then you would need to build a fresh sd card again from your repo.
+
+## What other case options do I have?
+
+You can replace the generic case in the shopping lists with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
+
+https://thecryptocloak.com/product/lightningshell/
+
+![LightningShell](pictures/lightningshell.png)
