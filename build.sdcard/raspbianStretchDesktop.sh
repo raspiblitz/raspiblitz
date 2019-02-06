@@ -589,8 +589,7 @@ if [ "${baseImage}" = "raspbian" ]; then
   display_rotate=3
 
   dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
-  EOF
-    init 6
   fi
-fi
 EOF
+  init 6
+fi
