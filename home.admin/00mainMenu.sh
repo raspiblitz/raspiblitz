@@ -201,9 +201,15 @@ if [ ${setupStep} -eq 0 ]; then
 elif [ ${setupStep} -lt 100 ]; then
 
     # see function above
+    if [ ${setupStep} -lt 80 ]; then
+      ./70initLND.sh
+      exit 0
+    fi
+
+    # see function above
     if [ ${setupStep} -gt 59 ]; then
       waitUntilChainNetworkIsReady
-    fi  
+    fi
 
     # continue setup
     BACKTITLE="${hostname} / ${network} / ${chain}"
