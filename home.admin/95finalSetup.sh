@@ -29,7 +29,7 @@ cp $logFile /home/admin/raspiblitz.setup.log
 echo "Setting the Name/Alias/Hostname .."
 sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
-# mark setup is done
+# mark setup is done (100%)
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear

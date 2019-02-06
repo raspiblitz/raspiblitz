@@ -53,9 +53,7 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
-if [ "${setupStep}" != "100" ]; then
-  echo "hostname=${hostname}" >> $infoFile
-fi
+echo "hostname=${hostname}" >> $infoFile
 sudo chmod 777 ${infoFile}
 
 ################################
@@ -227,9 +225,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD contains pre-loaded blockchain data
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
-  litecoinDataExists=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  bitcoinDataExists=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
 
   # check if node can go into presync (only for bitcoin)
   if [ ${bitcoinDataExists} -eq 1 ]; then
