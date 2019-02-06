@@ -26,6 +26,8 @@ The RaspiBlitz is build from the following parts:
 
 **Total Price: Under 150 USD / 130 EUR (depending on country & shop)**
 
+* [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
+
 ## Amazon Shopping Lists
 
 These are the community currated shopping lists based in country:

@@ -252,3 +252,5 @@ You can replace the generic case in the shopping lists with a customized 3D prin
 https://thecryptocloak.com/product/lightningshell/
 
 ![LightningShell](pictures/lightningshell.png)
+
+Also there are first free 3D open source files in this repo in the directory `case.3dprint` that you can selfprint. Those are much simpler then the 'Lightning Shell' and are not finished yet. But feel free to try out and improve - PullRequests welcome.   
