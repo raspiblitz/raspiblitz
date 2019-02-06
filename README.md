@@ -24,7 +24,7 @@ The RaspiBlitz is build from the following parts:
 * Cheap Casing
 * LCD-Display
 
-**Total Price: Under 150 USD / 130 EUR (depending on country & shop thats around)**
+**Total Price: Under 150 USD / 130 EUR (depending on country & shop)**
 
 ## Amazon Shopping Lists
 
@@ -281,7 +281,7 @@ Now download the new RaspiBlitz SD card image and write it to your SD card .. ye
 
 If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and dont worry, you dont need to re-download the blockchain again.
 
-FAQ --> [Why do I need to re-burn my SD card for an update?](FAQ.md)
+[Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
 
 ## Build the SD Card Image
 
