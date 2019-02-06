@@ -1,8 +1,17 @@
 # FAQ - Frequently Asked Questions
 
-## How to update my RaspiBlitz (AFTER version 0.98)?
+## How do I generate a Debug Report?
 
-*Notice: Please be sure that your base image you started with was version 0.98 or greater. If you used the now deprecated XXupdateScripts.sh script to update before, you might have started with an older base image. If you never run that script, you're good.*
+If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
+
+- ssh into your raspiblitz as admin user with your password A
+- If you see the menu - use CTRL+C to get to the terminal
+- To generate debug report run: `./XXdebugLogs.sh`
+- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+
+*PLEASE NOTICE: Its possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+
+## How to update my RaspiBlitz (AFTER version 0.98)?
 
 To prepare the RaspiBlitz update:
 
@@ -14,11 +23,21 @@ Now download the new RaspiBlitz SD card image and write it to your SD card .. ye
 
 If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and dont worry, you dont need to re-download the blockchain again.
 
-## How to update my RaspiBlitz (BEFORE version 0.98)?
+## How to update a old RaspiBlitz (BEFORE version 0.98)?
 
-You need to setup a new RaspiBlitz. So close all channels. Remove all funds from your Raspiblitz (cash-out). Go into terminal and run: `sudo /home/admin/XXleanHDD.sh` and then `sudo shutdown now`. This way you keep your blockchain data on the HDD, but your HDD is cleaned. Now follow again: https://github.com/rootzoll/raspiblitz#scenario-2-start-at-home
+If your old RaspiBlitz if version 0.98 or higher, just follow the update instructions in the README.
 
-## Why do I need to re-burn my SD card for an update (AFTER version 0.98)? 
+If you run a version earlier then 0.98 you basically need to setup a new RaspiBlitz to update - but you can keep the blockchain data on the HDD, so you dont need have that long waiting time again:
+
+1. Close all open lightning channels you have (`lncli closeallchannels --force`) or use the menu option 'CLOSE ALL' if available. Wait until all closing transactions are done.
+
+2. Move all on-chain funds to a wallet outside raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`) or use the menu option 'CHASH OUT' if available
+
+3. Prepare the HDD for the new setup by running the script `/home/admin/XXcleanHDD.sh` (Blockchain will stay on HDD)
+
+4. then shutdown RaspiBlitz (`sudo shutdown now`), flash SD card with new image, redo a fresh setup of RaspiBlitz, move your funds back in, Re-Open your channels
+
+## Why do I need to re-burn my SD card for an update?
 
 I know it would be nicer to run just an update script and you are ready to go. But then the scripts would need to be written in a much more complex way to be able to work with any versions of LND and Bitcoind (they are already complex enough with all the edge cases) and testing would become even more time consuming than it is now already. That's nothing a single developer can deliver. 
 
@@ -131,3 +150,45 @@ The node address is red, when the RaspiBlitz detects that it cannot reach the po
 ## Why is my node address on the display yellow (not green)?
 
 Yellow is OK. The RaspiBlitz can detect, that it can reach a service on the port 9735 of your public IP - this is in most cases the LND of your RaspiBlitz. But the RaspiBlitz cannot 100% for sure detect that this is its own LND service on that port - thats why its just yellow, not green. 
+
+#### Can I run the RaspiBlitz as Backend for BTCPayServer?
+
+BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver 
+
+You can find setup instructions for a experimental setup here: https://goo.gl/KnTzLu
+
+Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
+
+## I dont have an LAN router - how to connect to my RaspiBlitz?
+
+On Mac OS X you can also consider to connect the raspberry directly with your laptop and share your WLAN internet connection over ethernet (thats a nice mobile setup): https://mycyberuniverse.com/mac-os/connect-to-raspberry-pi-from-a-mac-using-ethernet.html
+
+If anyone has expirence on doing this in Linux/Win, please share.
+
+## How do I unplug/shutdown safely without SSH
+
+Just removing power from the RaspiBlitz can lead to data corruption if the HDD is right in the middle of a writing process. The safest way is always to SSH into the RaspiBlitz and use the "POWER OFF" option in the main menu.
+
+But if cannot login with SSH and you need to power off at least remove the LAN cable (network connection)first for sometime (around 10-30 secs - until you can see no more blinking lights on the HDD) and then remove the power cable. This should minimize the risk if data corruption in this situations.
+
+## How can I build an SD card other then the master branch?
+
+There might be a new not released features in development that are not yet in the master branch - but you want to try them out. 
+
+To build a sd card image from another branch than master you follow the [Build the SD Card Image](README.md#build-the-sd-card-image) from the README, but execute the build script from the other branch and add the name of that branch as a parameter to the build script.
+
+For example if you want to  make a build from the 'dev' branch you execute the following command:
+
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh 'dev'`
+
+## How can I build an SD card from my forked GitHub Repo?
+
+If you fork the RaspiBlitz repo (much welcome) and you want to run that code on your RaspiBlitz, there are two ways to do that:
+
+* The quick way: For small changes in scripts, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `/home/admin/XXsyncScripts.sh`
+
+* The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
+
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]
+
+If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - thats OK as long as you dont make changes to the sd card build script - then you would need to build a fresh sd card again from your repo.
