@@ -95,6 +95,12 @@ With the 24 word list given you by LND on wallet creation you can recover your p
 
 For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
 
+# How does PASSWORD D effects the word seed?
+
+On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
+
+To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
+
 ## How can I recover my coins from a failing RaspiBlitz?
 
 You might run into a situation where your hardware fails or the software starts to act buggy. So you decide to setup a fresh RaspiBlitz, like in the chapter above "Update to a new SD Card Release" - but the closing channels and cashing out is not working anymore. So whats about the funds you already have on your failing setup?
@@ -129,19 +135,13 @@ Then give LND some time to rescan the blockchain. In the end you will have resto
 This second option is very very risky and can lead to complete loss of funds. And it olny can work, if you can still access the HDD content of your failing RaspiBlitz. It should only be used if you lost your cypher seed for the option above, forgot your cypher seed encryption password or your old channel counter parts are offline, too.
 
 What you do is in priciple:
-- Make a copy of the HDD directory "/mnt/hdd/lnd"
+- Make a copy of the HDD directory `/mnt/hdd/lnd`
 - Setup a fresh RaspiBlitz
-- Stop LND
-- Replace the new "/mnt/hdd/lnd" with your backuped version
+- Stop LND with `sudo systemctl stop lnd`
+- Replace the new `/mnt/hdd/lnd` with your backuped version
 - Reboot the RaspiBlitz
 
 This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
-
-# How does PASSWORD D effects this seed?
-
-On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
-
-To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
 
 ## How do I change the Name/Alias of my lightning node
 
