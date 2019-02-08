@@ -253,6 +253,8 @@ Already integrated features of the RaspiBlitz are/will be listed as part of the 
 
 You can use the Switch to TOR option from the main menu to make the node reachable thru TOR. This way you can get thru a NAT without needed to open/forward ports on your router. Bitcoin and LND will have a seperate onion-address displayed on LCD and the Status Info Screen option in menu.
 
+By using a TOR address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
+
 ![tor1](pictures/tor1.png)
 
 The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
