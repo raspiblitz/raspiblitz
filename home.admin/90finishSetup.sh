@@ -87,4 +87,4 @@ sudo apt-get update
 echo "OK - System is now up to date"
 
 # mark setup is done
-sudo sed -i "s/^setupStep=.*/setupStep=90/g" /home/admin/raspiblitz.info
+sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
