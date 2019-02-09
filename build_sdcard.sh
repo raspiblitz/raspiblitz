@@ -508,6 +508,8 @@ sudo systemctl enable bootstrap
 # *** TOR Prepare ***
 echo "*** Prepare TOR source+keys ***"
 sudo /home/admin/config.scripts/internet.tor.sh prepare
+echo ""
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "If you see fails above .. please run again later on:"
 echo "sudo /home/admin/config.scripts/internet.tor.sh prepare"
 echo ""
