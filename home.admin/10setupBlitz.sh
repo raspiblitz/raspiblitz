@@ -165,7 +165,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
-    A "ADAPTER  --> BLOCKCHAINDATA from 2nd HDD via powered adapter cable"\
+    N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
     S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
@@ -194,8 +194,8 @@ if [ ${mountOK} -eq 1 ]; then
           C)
               ./50copyHDD.sh
               ;;
-          A)
-              ./50adapterHDD.sh
+          N)
+              ./50cloneHDD.sh
               ;;              
           S)
               ./50syncHDD.sh
