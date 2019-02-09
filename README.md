@@ -93,95 +93,87 @@ Fore more details on the setup process see the documentation below. If you run i
 
 3. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
 
-4. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a big with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photios so the community gets more insight into your problem.
+4. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photios so the community gets more insight into your problem.
 
 ## Documentation
 
 ### Setup Process
 
-*The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and point special edge cases.*
+*The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and to mention edge cases.*
 
 #### Init
 
-Automatically after login per SSH as admin to the RaspiBlitz, the user can choose if the RaspiBlitz should combine Bitcoin or Litecoin with Lightning:
+Automatically after login per SSH as admin to the RaspiBlitz, the user can choose if the RaspiBlitz should run Bitcoin or Litecoin with Lightning:
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
 Setting Up the Raspi is the only option at this point, so we go with OK.
 
-*Background: This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal prompt after login, just use CTRL-c. If you press OK in the dialog the script `10setupBlitz.sh` gets started*
+*This menu is displayed by the script `00mainMenu.sh` and started automatically on every login of the admin user by admins `.bashrc`. If you want to get to the normal terminal prompt after login, just use CTRL-c or CANCEL. To return to the main menu from the terminal you can use the command `raspiblitz`.*
 
-First thing to setup is giving your RaspiBlitz an name:
+First thing to setup is giving your RaspiBlitz a name:
 
 ![SSH2](pictures/ssh2-passwords.png)
 
 This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
 
-*Background: This and the following setup dialogues are part of the script `20setupDialog.sh`. The idea is to request much as needed setup information from the user at the start in this dialogs, so after that the setup can just run without many breaks.*
-
-Then the user gets requested to write down 4 passwords:
+Then the user gets requested to think of and write down 4 passwords:
 
 ![SSH1](pictures/ssh1-name.png)
 
-*Background: The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#write-down-your-passwords)*
+*The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#write-down-your-passwords) - check out for more background.*
 
 Then the user is asked to enter the Password A:
 
 ![SSH3a](pictures/ssh3a-password.png)
 
-On the next SSH login to the RaspiBlitz as admin, this new password has to be used. Its also set for the user existing user: root, bitcoin & pi. But only admin can be used to login per SSH.
+This is the new password has to be used for every SSH login after this screen. Its also set for the user existing user: root, bitcoin & pi.
 
-*Background: The bitcoin and lightning processes will run in the background (as daemon) and use the separate user “bitcoin” for security reasons. This user does not have admin rights and cannot change the system configuration.*
+*The bitcoin and lightning services will later run in the background (as daemon) and use the separate user “bitcoin” for security reasons. This user does not have admin rights and cannot change the system configuration.*
 
 Then the user is asked to enter the Password B:
 
 ![SSH3b](pictures/ssh3b-password.png)
 
-*Background: The other passwords C & D get entered by the lightning wallet setup. This can just happen later ... so they will not get requested at this point.*
+*The other passwords C & D will be needed later on. They will be used during the lightning wallet setup.*
 
-After this the setup process needs some time and the user will see a lot of console outputs:
+After this the setup process will need some time and the user will see a lot of console outputs:
 
 ![SSH4](pictures/ssh4-scripts.png)
 
 *Background: After the user interaction the following scripts are started to automatically setup the RaspiBlitz:*
 
-* 30initHDD.sh - it checks if the HDD needs to be formatted with Ext4
-* 40addHDD.sh - adds the HDD for permanent mounting on /mnt/hdd
-* 10setupBlitz.sh - now takes care that the HDD contains the blockchain
+#### Getting the Blockchain
 
-The following screen is just shown, if the HDD was not prepared with a copy of the Bitcoin blockchain (as part of a ready-2-go set). The following options are offered to get a copy:
+The following screen is just shown if the HDD was not prepared with a copy of the Bitcoin blockchain (as part of a ready-2-go set). 
+
+To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
 ![SSH5](pictures/ssh5-blockchain2.png)
 
-The option "SYNC" should just be use as a fallback. So normally you have the following two options:
+The options - and when to choose - will be explained here shortly:
 
-#### Download the Blockchain
+##### Torrent
 
-This is the recommended way for users that are making the setup at home without any further assistance but can take quite some time. You can choose to download over TORRENT or FTP-DOWNLOAD. Choose the FTP if the torrent is not working for you.
+TODO
 
-For more details: [Background on Download Blockchain](background_downloadBlockchain.md)
+##### FTP-Download
 
-#### Copy the Blockchain
+TODO
 
-To copy the blockchain from another HDD can be faster - if available. If you choose this option, the console requests you to connect the second HDD and will autmatically detect it:
+##### Copying from another Computer
 
-![SSH6b](pictures/ssh6b-copy.png)
+TODO
 
-You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself by:
+##### Cloning from a 2nd HDD
 
-* format second HDD with exFAT (availbale on Windows and Mac)
-* copy an indexed Blockchain into the root folder "bitcoin"
-* when your HDD is ready the content of your folder bitcoin should look like this:
+TODO
 
-![BitcoinFolderData](pictures/seedhdd.png)
+##### Sync from Bitcoin-Network
 
-To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack, like in this picture:
+TODO
 
-![ExtraPower](pictures/extrapower.png)
-
-**Background: If the blockchain was already on the HDD or was acquired successfully, the script `60finishHDD.sh` will be called. It will further prepare the HDD and start the bitcoin service.*
-
-#### Lightning
+#### Setup Lightning
 
 Before the lighting service can be started, the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
@@ -298,9 +290,9 @@ A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided 
 
 Now you are ready to start the SD card build script - copy the following command into your terminal and execute:
 
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh`
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`
 
-As you can see from the URL you find the build script in this Git repo under `build.sdcard/raspbianStretchDesktop.sh`- there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
+As you can see from the URL you find the build script in this Git repo under `build_sdcard.sh` - there you can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
 
 The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. An installer of the SD card image should automatically launch. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitze, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image. 
 

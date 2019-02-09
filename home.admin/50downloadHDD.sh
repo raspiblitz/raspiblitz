@@ -111,7 +111,7 @@ if [ ${isRunning} -eq 1 ]; then
   echo "killing screen session PID(${sessionPID})"
   # kill all child processes of screen sceesion
   pkill -P ${sessionPID}
-  echo "proccesses klilled"
+  echo "proccesses killed"
   sleep 3
  # tell the screen session to quit and wait a bit
   screen -S ${name} -X quit 1>/dev/null
@@ -141,7 +141,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   dialog --title " WARNING (${finalSize}) " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir} ;;
+    1) sudo rm -rf /mnt/hdd/download ;;
   esac
   ./00mainMenu.sh
   exit 1;

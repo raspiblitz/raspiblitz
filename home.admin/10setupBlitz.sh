@@ -101,7 +101,11 @@ fi #end - when lighting is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # double check
-  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 120
+  seconds=120
+  if [ ${setupStep} -lt 60 ]; then
+    seconds=10
+  fi
+  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 ${seconds}
   bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
 else
   echo "${network} is running"  
@@ -139,20 +143,28 @@ if [ ${mountOK} -eq 1 ]; then
     fi
   fi
 
-  # check if there is a download to continue
+  # check if there is torrent data to continue
   torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
   if [ ${torrentProgressExists} -eq 1 ]; then
-    echo "found torrent data .. resuming"
-    ./50torrentHDD.sh
-    exit 1
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found torrent data .. resuming"
+      ./50torrentHDD.sh
+      exit 1
+    fi
   fi
 
-  # check if there is a download to continue
+  # check if there is ftp data to continue
   downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
-    echo "found download in data .. resuming"
-    ./50downloadHDD.sh
-    exit 1
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found download in data .. resuming"
+      ./50downloadHDD.sh
+      exit 1
+    fi
   fi
 
   # HDD is empty - get Blockchain
@@ -165,7 +177,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
-    A "ADAPTER  --> BLOCKCHAINDATA from 2nd HDD via powered adapter cable"\
+    N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
     S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
@@ -194,8 +206,8 @@ if [ ${mountOK} -eq 1 ]; then
           C)
               ./50copyHDD.sh
               ;;
-          A)
-              ./50adapterHDD.sh
+          N)
+              ./50cloneHDD.sh
               ;;              
           S)
               ./50syncHDD.sh
@@ -232,6 +244,6 @@ if [ ${formatExt4OK} -eq 1 ]; then
 fi
 
 # the HDD had no init yet
-echo "HDD needs init"
+echo "init HDD ..."
 ./30initHDD.sh
 exit 1

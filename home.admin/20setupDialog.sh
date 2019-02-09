@@ -8,7 +8,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 # ENTER NAME
 ###################
 
-# welcome and ask for name of RaspiBlitz 
+# welcome and ask for name of RaspiBlitz
 result=""
 while [ ${#result} -eq 0 ]
   do
@@ -17,6 +17,8 @@ while [ ${#result} -eq 0 ]
     dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
     shred $_temp
+    echo "processing ..."
+    sleep 3
   done
 
 # set lightning alias

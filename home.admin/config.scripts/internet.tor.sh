@@ -8,8 +8,37 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off]"
+ echo "internet.tor.sh [on|off|prepare]"
  exit 1
+fi
+
+# function: install keys & sources
+prepareTorSources()
+{
+    # Prepare for TOR service
+    echo "*** INSTALL TOR REPO ***"
+    echo ""
+
+    echo "*** Install dirmngr ***"
+    sudo apt install dirmngr -y
+    echo ""
+
+    echo "*** Adding KEYS deb.torproject.org ***"
+    curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+    echo ""
+ 
+    echo "*** Adding Tor Sources to sources.list ***"
+    echo "deb https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "OK"
+    echo ""
+}
+
+# if started with prepare 
+if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
+  prepareTorSources
+  exit 0
 fi
 
 # check and load raspiblitz config
@@ -62,41 +91,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
   if [ ${packageInstalled} -eq 0 ]; then
 
-    # Prepare for TOR service
-    echo "*** Install TOR repo keys ***"
+    # calling function from above
+    prepareTorSources
 
-    recvKeyResult=$(sudo gpg --keyserver keys.gnupg.net --recv 886DDD89 2>&1)
-    echo "${recvKeyResult}"
-    recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
-    if [ ${recvKeyFailed} -eq 1 ]; then
-        echo "FAILED: sudo gpg --keyserver keys.gnupg.net --recv 886DDD89"
-        exit 1
-    fi
-    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-    echo ""
- 
-    recvKeyResult=$(sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810 2>&1)
-    echo "${recvKeyResult}"
-    recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
-    if [ ${recvKeyFailed} -eq 1 ]; then
-        echo "FAILED: sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810"
-        exit 1
-    fi
-    sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
-    echo ""
-
-    echo "*** Adding Tor Sources to sources.list ***"
-    echo "deb https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-    echo "OK"
-    echo ""
-    
     echo "*** Updating System ***"
     sudo apt-get update
-    echo ""
-
-    echo "*** Installing dirmngr ***"
-    sudo apt install dirmngr -y
     echo ""
 
     echo "*** Install Tor ***"
@@ -201,11 +200,10 @@ EOF
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
 
     echo "*** Enable TOR service ***"
-    sudo systemctl ensable tor@default
+    sudo systemctl enable tor@default
     echo ""
 
   fi
-
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
@@ -253,17 +251,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "OK"
   echo ""
 
-  echo "*** Remove Tor ***"
-  sudo apt remove tor tor-arm -y
-  echo ""
+  #echo "*** Remove Tor ***"
+  #sudo apt remove tor tor-arm -y
+  #echo ""
   
-  echo "*** Remove NYX ***"
-  sudo pip uninstall nyx -y
-  echo ""
+  #echo "*** Remove NYX ***"
+  #sudo pip uninstall nyx -y
+  #echo ""
 
-  echo "*** Remove TOR Files/Config ***"
-  sudo rm -r -f /mnt/hdd/tor
-  echo ""
+  #echo "*** Remove TOR Files/Config ***"
+  #sudo rm -r -f /mnt/hdd/tor
+  #echo ""
 
   echo "needs reboot to activate new setting"
   exit 0
