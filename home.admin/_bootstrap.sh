@@ -53,7 +53,9 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
-echo "hostname=${hostname}" >> $infoFile
+if [ "${setupStep}" != "100" ]; then
+  echo "hostname=${hostname}" >> $infoFile
+fi
 sudo chmod 777 ${infoFile}
 
 ################################
