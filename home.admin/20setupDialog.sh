@@ -17,6 +17,8 @@ while [ ${#result} -eq 0 ]
     dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
     shred $_temp
+    echo "processing ..."
+    sleep 3
   done
 
 # set lightning alias
