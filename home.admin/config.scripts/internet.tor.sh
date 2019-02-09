@@ -16,9 +16,10 @@ fi
 prepareTorSources()
 {
     # Prepare for TOR service
-    echo "*** Install TOR repo keys ***"
+    echo "*** INSTALL TOR REPO ***"
+    echo ""
 
-    echo "*** Installing dirmngr ***"
+    echo "*** Install dirmngr ***"
     sudo apt install dirmngr -y
     echo ""
 
