@@ -236,6 +236,6 @@ if [ ${formatExt4OK} -eq 1 ]; then
 fi
 
 # the HDD had no init yet
-echo "HDD needs init"
+echo "init HDD ..."
 ./30initHDD.sh
 exit 1
