@@ -143,20 +143,28 @@ if [ ${mountOK} -eq 1 ]; then
     fi
   fi
 
-  # check if there is a download to continue
+  # check if there is torrent data to continue
   torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
   if [ ${torrentProgressExists} -eq 1 ]; then
-    echo "found torrent data .. resuming"
-    ./50torrentHDD.sh
-    exit 1
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found torrent data .. resuming"
+      ./50torrentHDD.sh
+      exit 1
+    fi
   fi
 
-  # check if there is a download to continue
+  # check if there is ftp data to continue
   downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
-    echo "found download in data .. resuming"
-    ./50downloadHDD.sh
-    exit 1
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found download in data .. resuming"
+      ./50downloadHDD.sh
+      exit 1
+    fi
   fi
 
   # HDD is empty - get Blockchain
