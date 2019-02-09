@@ -23,13 +23,14 @@ prepareTorSources()
     sudo apt install dirmngr -y
     echo ""
 
-    recvKeyResult=$(sudo gpg --keyserver keys.gnupg.net --recv 886DDD89 2>&1)
-    echo "${recvKeyResult}"
-    recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
-    if [ ${recvKeyFailed} -eq 1 ]; then
-        echo "FAILED: sudo gpg --keyserver keys.gnupg.net --recv 886DDD89"
-        exit 1
-    fi
+    #recvKeyResult=$(sudo gpg --keyserver keys.gnupg.net --recv 886DDD89 2>&1)
+    #echo "${recvKeyResult}"
+    #recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
+    #if [ ${recvKeyFailed} -eq 1 ]; then
+    #    echo "FAILED: sudo gpg --keyserver keys.gnupg.net --recv 886DDD89"
+    #    exit 1
+    #fi
+    curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import
     sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
     echo ""
  
