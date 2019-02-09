@@ -8,7 +8,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 # ENTER NAME
 ###################
 
-# welcome and ask for name of RaspiBlitz 
+# welcome and ask for name of RaspiBlitz
 result=""
 while [ ${#result} -eq 0 ]
   do
