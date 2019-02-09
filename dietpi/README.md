@@ -88,7 +88,7 @@ Should end up here on version v6.20.6 or higher:
 ![](pictures/bash_prompt.png)
 
 run the SDcard build script in this format:
-`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
 
 Be aware of that the fork needs to be called `raspiblitz` for the git download to work.
 if you intend to use @openoms`s forked version:

@@ -1,3 +1,4 @@
+
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
@@ -12,7 +13,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.00  *"
 echo "*****************************************"
 echo ""
 
@@ -504,13 +505,12 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
-# *** BOOTSTRAP ***
-# see background README for details
+# *** TOR Prepare ***
+echo "*** Prepare TOR source+keys ***"
+sudo /home/admin/config.scripts/internet.tor.sh prepare
+echo "If you see fails above .. please run again later on:"
+echo "sudo /home/admin/config.scripts/internet.tor.sh prepare"
 echo ""
-echo "*** RASPI BACKGROUND SERVICE ***"
-sudo chmod +x /home/admin/_background.sh
-sudo cp ./assets/background.service /etc/systemd/system/background.service
-sudo systemctl enable background
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
