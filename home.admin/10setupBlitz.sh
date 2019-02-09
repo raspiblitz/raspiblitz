@@ -101,7 +101,11 @@ fi #end - when lighting is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # double check
-  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 120
+  seconds=120
+  if [ ${setupStep} -lt 60 ]; then
+    seconds=10
+  fi
+  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 ${seconds}
   bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
 else
   echo "${network} is running"  
