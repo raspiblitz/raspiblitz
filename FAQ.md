@@ -95,7 +95,7 @@ With the 24 word list given you by LND on wallet creation you can recover your p
 
 For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
 
-# How does PASSWORD D effects the word seed?
+## How does PASSWORD D effects the word seed?
 
 On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
 
