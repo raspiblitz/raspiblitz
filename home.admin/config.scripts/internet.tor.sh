@@ -18,6 +18,10 @@ prepareTorSources()
     # Prepare for TOR service
     echo "*** Install TOR repo keys ***"
 
+    echo "*** Installing dirmngr ***"
+    sudo apt install dirmngr -y
+    echo ""
+
     recvKeyResult=$(sudo gpg --keyserver keys.gnupg.net --recv 886DDD89 2>&1)
     echo "${recvKeyResult}"
     recvKeyFailed=$(echo "${recvKeyResult}" | grep -c 'Total number processed: 0')
@@ -106,10 +110,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "*** Updating System ***"
     sudo apt-get update
-    echo ""
-
-    echo "*** Installing dirmngr ***"
-    sudo apt install dirmngr -y
     echo ""
 
     echo "*** Install Tor ***"
@@ -218,7 +218,6 @@ EOF
     echo ""
 
   fi
-
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
