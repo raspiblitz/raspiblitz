@@ -27,6 +27,8 @@ if [ ${#runBehindTor} -eq 0 ]; then
 fi
 
 # location of TOR config
+# make sure /etc/tor exists
+sudo mkdir /etc/tor
 torrc="/etc/tor/torrc"
 
 # stop services
@@ -88,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
     echo "OK"
     echo ""
-
+    
     echo "*** Updating System ***"
     sudo apt-get update
     echo ""

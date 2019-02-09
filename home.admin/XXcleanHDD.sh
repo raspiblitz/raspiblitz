@@ -64,6 +64,7 @@ else
     sudo rm -f -r /mnt/hdd/tor
     sudo rm -f /mnt/hdd/raspiblitz.conf
     sudo rm -f /home/admin/raspiblitz.info
+    
 
 fi
 

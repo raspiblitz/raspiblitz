@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script runs on every start calles by boostrap.service
+# This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
@@ -19,6 +19,8 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
+# make raspiblitz.conf if not there
+sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
@@ -249,7 +251,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
     echo "OK Started bitcoind for presync" >> $logFile
     sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
-    # after admin login, presync will be stoped and HDD unmounted
+    # after admin login, presync will be stopped and HDD unmounted
     exit 0
   
   else
@@ -281,6 +283,8 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
+  # wait otherwise looking for publicIP fails
+  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
    echo "WARNING: Was not able to determine external IP on startup." >> $logFile
