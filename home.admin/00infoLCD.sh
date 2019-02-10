@@ -175,7 +175,7 @@ while :
       if [ ${uptimeSeconds} -gt 600 ]; then
         l3="!!Please login for more details!!"
       fi
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) ${setupStep} - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
     fi
