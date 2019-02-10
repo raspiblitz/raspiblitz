@@ -419,6 +419,38 @@ After successful crreation of the torrent file:
 * seed at home and at services like justseed.it
 * update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
 
+## What is the process of creating a new sd card image release?
+
+This describes the build process of a new sd card realease like done by the owner of this repo.
+
+* Start `Ubuntu LIVE` from USB stick on Build Computer (press F12 on startup)
+* Connect secure WIFI (hardware switch on)
+* Download latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/) to the NTFS formatted data USB stick
+* Open terminal and compare checksum `shasum -a 256 /media/ubuntu/...[DOWNLOADED-RASPBIAN]`
+* Use in file manager context on NTFS USB stick `extract here` to unzip
+* Connect sd card reader with 8GB sd card
+* Use in file manager context on img-file `write image` write to sd card
+* Use in file manager context on `boot` drive free space `open in terminal`
+* Run command `touch ssh`
+* Close terminal and eject `boot`
+* Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
+* Find IP if RaspiBlitz (arp -a or check router)
+* in terminal `ssh pi@[IP-OF-RASPIBLITZ]`
+* password is `raspberry`
+* `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`
+
+
+* Deconnect Wifi (hardware switch off)
+
+2. Create the RaspiBlitz image from sd card 
+
+
+
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
 There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
+
+## Is it possible to connect over Wifi instead of using a LAN cable?
+
+A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
