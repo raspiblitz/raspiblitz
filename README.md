@@ -151,27 +151,29 @@ To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
 ![SSH5](pictures/ssh5-blockchain2.png)
 
-The options - and when to choose - will be explained here shortly:
+The options - and when to choose which - will be explained here shortly:
 
-##### Torrent
-
-TODO
-
-##### FTP-Download
+##### 1. Torrent
 
 TODO
 
-##### Copying from another Computer
+##### 2. FTP-Download
 
 TODO
 
-##### Cloning from a 2nd HDD
+##### 4. Copying from another Computer
 
-TODO
+If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain (with txindex=1) you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfere). Choose this option and follow the given instructions.
 
-##### Sync from Bitcoin-Network
+This is the best option if you dont like to run your RaspiBlitz with a prepared blockchain by a third party. Then install bitcoin-core in a more powerful computer, sync+validate the blockchain (with txindex=1) there by yourself and copy it over after that thru the local network.
 
-TODO
+##### 5. Cloning from a 2nd HDD
+
+If is a backup way to transfere a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd). 
+
+##### 6. Sync from Bitcoin-Network
+
+This is the fallback of last resort. A RaspberryPi has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - thats why the other options above where invented.
 
 #### Setup Lightning
 
