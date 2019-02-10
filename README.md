@@ -163,19 +163,27 @@ This is the default way to download the blockchain data for the RaspiBlitz. If y
 
 It is safe to close the terminal window (shutdown your laptop) while the RaspiBlitz is doing the torrent download. To check on progress and to continue the setup you need to ssh back in again. 
 
-You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you just need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option continue on torrent if the other option is slower or not working.
+You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on torrent if the other option is slower or not working.
 
-
+* [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
 
 ##### 2. FTP-Download
 
-You should try the FTP download if the torrent option is not working for you. Please beware that the files are hosted on a central server there 
+You should try the FTP download if the torrent option is not working for you. Please be aware that the files are hosted on a central server by us and up-time and bandwidth is not guaranteed. If you start it, you should see the following screen:
+
+![DOWNLOAD1](pictures/download-ftp.png)
+
+It is safe to close the terminal window (shutdown your laptop) while the RaspiBlitz is doing the FTP download. To check on progress and to continue the setup you need to ssh back in again. 
+
+You can cancel the FTP download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on FTP download if the other option is slower or not working.
 
 ##### 4. Copying from another Computer
 
 If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain (with txindex=1) you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfere). Choose this option and follow the given instructions.
 
-This is the best option if you dont like to run your RaspiBlitz with a prepared blockchain by a third party. Then install bitcoin-core in a more powerful computer, sync+validate the blockchain (with txindex=1) there by yourself and copy it over after that thru the local network.
+This is also the best option if you dont like to run your RaspiBlitz with a prepared blockchain by a third party. Then install bitcoin-core in a more powerful computer, sync+validate the blockchain (with txindex=1) there by yourself and copy it over after that thru the local network.
+
+More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
 ##### 5. Cloning from a 2nd HDD
 

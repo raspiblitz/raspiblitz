@@ -53,6 +53,10 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
+## How can I avoid using a prepared blockchain and validate myself?
+
+The torrent and FTP download use a prepared blockchain to kick start the RaspiBlitz. If you want to selft validate you could do this on another more powerful computer and then transfere your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
+
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
 Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
@@ -286,7 +290,3 @@ https://thecryptocloak.com/product/lightningshell/
 ![LightningShell](pictures/lightningshell.png)
 
 Also there are first free 3D open source files in this repo in the directory `case.3dprint` that you can selfprint. Those are much simpler then the 'Lightning Shell' and are not finished yet. But feel free to try out and improve - PullRequests welcome.
-
-## How can I avoid using a prepared blockchain and validate myself?
-
-The torrent and FTP download use a prepared blockchain to kick start the RaspiBlitz. If you want to selft validate you could do this on another more powerful computer and then transfere your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
