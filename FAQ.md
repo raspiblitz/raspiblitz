@@ -85,9 +85,21 @@ You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself b
 * copy an indexed Blockchain into the root folder "bitcoin"
 * when your HDD is ready the content of your folder bitcoin should look like this:
 
-![BitcoinFolderData](pictures/seedhdd.png)
+```
+/bitcoin/blocks
+/bitcoin/chainstate
+/bitcoin/indexes
+```
 
-To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack, like in this picture:
+optional you can add also the testnet data:
+
+```
+/bitcoin/testnet3/blocks
+/bitcoin/testnet3/chainstate
+/bitcoin/testnet3/indexes
+```
+
+To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack (like in picture below) or choose a external HDD with its own power supply.
 
 ![ExtraPower](pictures/extrapower.png)
 
