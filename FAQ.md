@@ -299,6 +299,12 @@ When your USB power adapter for the RaspiBlitz delivers to low power those messa
 
 The RaspiBlitz is powered by the RaspberryPi. The processing power of this SingleBoardComputer is too low to make a fast sync of the blockchain from the bitcoin peer to peer network during setup process (validation). To sync and index the complete blockchain could take weeks or even longer. Thats why the RaspiBlitz needs to download a prepared blockchain from another source.
 
+## Is using the perpared SD card image secure?
+
+Using pre-build software almost always shifts trust to the one how build made the binary. But at least you can check with the SHA checksum after download if the image downloaded is really the one offered by the GitHub Repo. To do so make a quick check if your browser is really in the correct GiutHub page and that your HTTPS of the GitHub page is signed by 'DigiCert'. Then compare the SHA-256 string (always next to the download link of the image on the README) with the result of the command `shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]` (Mac/Linux). Still this is not optimal and if at least some people from the community request it, I will consider signing the download as an author for the future.
+
+The best way would be to build the sd card yourself. You use the script `build_sdcard.sh` for it. Take some minutes to check if you see any suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
+ 
 ## Is downloading the blockchain from a third party secure?
 
 To download a blockchain from a third party (torrent/ftp) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'. 
@@ -412,3 +418,7 @@ After successful crreation of the torrent file:
 * add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120)
 * seed at home and at services like justseed.it
 * update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
+
+## Can I run RaspiBlitz on other computers than RaspberryPi?
+
+There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
