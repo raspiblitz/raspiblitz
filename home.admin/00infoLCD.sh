@@ -52,17 +52,15 @@ while :
       continue
     fi
 
-    ## get basic info from SD
-    bootstrapInfoExists=$(ls ${infoFile} 2>/dev/null | grep -c '.info')
-    if [ ${bootstrapInfoExists} -eq 1 ]; then
-      source ${infoFile}
-    fi
-
-    # get final config if already avaulable
+    # get config info if already available
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
-      setupStep=100
+    fi
+
+    # if setup not marked as done (=100) load boostrap info file
+    if [ "${setupStep}" != "100" ]; then
+      source ${infoFile}
     fi
 
     # if no information available from files - set default
