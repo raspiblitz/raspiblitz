@@ -291,7 +291,7 @@ https://thecryptocloak.com/product/lightningshell/
 
 Also there are first free 3D open source files in this repo in the directory `case.3dprint` that you can selfprint. Those are much simpler then the 'Lightning Shell' and are not finished yet. But feel free to try out and improve - PullRequests welcome.
 
-## Are those "Under-Voltage detected" notices a problem?
+## Are those "Under-Voltage detected" warnings a problem?
 
 When your USB power adapter for the RaspiBlitz delivers to low power those messages with "Under-Voltage detected" (undervoltage) are shortly seen on the display. If you see those just one or two times thats not OK, but can be in a tolerant window. Nevertheless make sure your USB power adapter can deliver at least 3A. If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD thru a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB
 
