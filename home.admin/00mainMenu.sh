@@ -69,12 +69,23 @@ fi
 if [ "${state}" = "presync" ]; then
   # stopping the pre-sync
   echo ""
-  echo "********************************************"
-  echo "Stopping pre-sync ... pls wait (up to 1min)"
-  echo "********************************************"
-  sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
-  echo "bitcoind called to stop .."
-  sleep 50
+  # analyse if blockchain was detected broken by pre-sync
+  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
+  if [ ${blockchainBroken} -eq 1 ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "Detected corrupted blockchain on pre-sync !"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "Deleting blockchain data ..."
+    echo "(needs to get downloaded fresh during setup)"
+    sudo rm -f -r /mnt/hdd/bitcoin
+  else
+    echo "********************************************"
+    echo "Stopping pre-sync ... pls wait (up to 1min)"
+    echo "********************************************"
+    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
+    echo "bitcoind called to stop .."
+    sleep 50
+  fi
 
   # unmount the temporary mount
   echo "Unmount HDD .."
