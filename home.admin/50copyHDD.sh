@@ -34,13 +34,6 @@ echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
-#echo "Copy, Paste and Execute the following commands - line by line:"
-#echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
-#echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
-#echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
-#echo ""
-#echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
-#echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
 read key
 
 # unlink bitcoin user (will created later in setup again)
@@ -103,10 +96,12 @@ if [ ${anyDataAtAll} -eq 1 ]; then
 
 else
   
+  echo "NO DATA ... back to menu .."
   # when no data transferred - just delete bitcoin base dir again
   sudo rm -rf /mnt/hdd/bitcoin
+  sleep 2
 
 fi
 
 # setup script will decide the next logical step
-./10setupBlitz.sh
+/home/admin/10setupBlitz.sh

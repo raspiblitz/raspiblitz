@@ -201,19 +201,19 @@ if [ ${mountOK} -eq 1 ]; then
   clear
   case $menuitem in
           T)
-              ./50torrentHDD.sh
+              /home/admin/50torrentHDD.sh
               ;;
           C)
-              ./50copyHDD.sh
+              /home/admin/50copyHDD.sh
               ;;
           N)
-              ./50cloneHDD.sh
+              /home/admin/50cloneHDD.sh
               ;;              
           S)
-              ./50syncHDD.sh
+              /home/admin/50syncHDD.sh
               ;;
           D)
-              ./50downloadHDD.sh
+              /home/admin/50downloadHDD.sh
               ;;
   esac
   exit 1
