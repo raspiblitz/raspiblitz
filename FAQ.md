@@ -295,3 +295,120 @@ Also there are first free 3D open source files in this repo in the directory `ca
 
 When your USB power adapter for the RaspiBlitz delivers to low power those messages with "Under-Voltage detected" (undervoltage) are shortly seen on the display. If you see those just one or two times thats not OK, but can be in a tolerant window. Nevertheless make sure your USB power adapter can deliver at least 3A. If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD thru a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB
 
+## Why do we need to download the blockchain and not syncing it?
+
+The RaspiBlitz is powered by the RaspberryPi. The processing power of this SingleBoardComputer is too low to make a fast sync of the blockchain from the bitcoin peer to peer network during setup process (validation). To sync and index the complete blockchain could take weeks or even longer. Thats why the RaspiBlitz needs to download a prepared blockchain from another source.
+
+## Is downloading the blockchain from a third party secure?
+
+To download a blockchain from a third party (torrent/ftp) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'. 
+
+The downloaded Blockchain is pre-indexed and pre-validated. That should be practical secure enough, because if the user gets a "manipulated" blockchain it would not work after setup. The beginning of the downloaded blockchain needs to fit the genesis block (in bitcoind software) and the end of the downloaded blockchain needs not match with the rest of the bitcoin network state - hashes of new block distrubuted within the peer-2-peer network need to match the downloaded blockchain head. So if you downloaded a manipulated blockchain it would simply just dont work in practice. As long as you are not in a total hostile environment where someone would be able to fake a whole network of peers and miners around you - this is secure enough for running a small funded full node to try out the lightning network.
+
+If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then dont use the torrent/ftp download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, veryfied and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
+
+## What is the "Base Torrent File"?
+
+Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - that will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
+
+At the moment (Baseiteration=1) this is just the bitcoin blk and rev files up to the number:
+- /blocks : 01390
+- /testnet3/blocks: 00152
+
+For litecoin (Baseiteration=1) its blk and rev files up to the number:
+- /blocks : 00124
+
+The base torrent file should always have the following naming scheme:
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent`
+
+So for example the second version of the base torrent for litecoin created on 2018-10-31 would have this name: raspiblitz-litecoin2-2018-10-31-base.torrent
+
+## What is the "Update Torrent File" and how to create it?
+
+All the rest of the files get packaged into a second torrent file. This file will be updated much more often. The seeding is expected to be not that good and download may be slower, but thats OK because its a much smaller file.
+
+This way a good balance between good seeding and up-to-date blockchain can be reached.
+
+To create the Update Torrent file, follow the following step ...
+
+Have a almost 100% synced bitcoind MAINNET with txindex=1 on a RaspiBlitz
+(remove all funds from this node - because blockchain get messed with)
+
+Stop bitcoind with: 
+```
+sudo systemctl stop bitcoind
+```
+
+Delete base torrent blk-files with:
+```
+sudo rm /mnt/hdd/bitcoin/blocks/blk00*.dat
+sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1390}.dat
+```
+
+Delete base torrent rev-files with:
+```
+sudo rm /mnt/hdd/bitcoin/blocks/rev00*.dat
+sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1390}.dat
+```
+
+Now change to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
+```
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blocks
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./chainstate
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/indexes ./indexes
+```
+
+Also have a almost 100% synced bitcoind TESTNET with txindex=1 on a RaspiBlitz
+
+Stop bitcoind with:
+```
+sudo systemctl stop bitcoind
+```
+
+Delete base torrent blk-files with:
+```
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk000*.dat
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk00{100..152}.dat
+```
+
+Delete base torrent rev-files with:
+```
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev000*.dat
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev00{100..152}.dat
+```
+
+Now change again to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
+```
+mkdir testnet3
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/indexes
+```
+
+(Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). The update torrentfile should always have the following naming schema:
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent`
+
+*So for exmaple an update torrent created on 2018-12-24 for litecoin that is an update to the second base torrent version would have this name: raspiblitz-litecoin2-2018-12-24-update.torrent*
+
+Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
+
+Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
+```
+udp://tracker.justseed.it:1337
+
+udp://tracker.coppersurfer.tk:6969/announce
+
+udp://open.demonii.si:1337/announce
+
+udp://denis.stalker.upeer.me:6969/announce
+```
+
+After successful crreation of the torrent file:
+* copy to `/home.admin/assets`
+* push to master
+* change in `50torrentHDD.sh script`
+* add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120)
+* seed at home and at services like justseed.it
+* update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
