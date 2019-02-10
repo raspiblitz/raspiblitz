@@ -10,7 +10,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
 sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
-sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin 2>/dev/null
 
 clear
 echo "************************************************************************************"
