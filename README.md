@@ -95,13 +95,11 @@ Fore more details on the setup process see the documentation below. If you run i
 
 4. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photios so the community gets more insight into your problem.
 
-## Documentation
-
-### Setup Process
+## Setup Process (Detailed Documentation)
 
 *The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and to mention edge cases.*
 
-#### Init
+### Init
 
 Automatically after login per SSH as admin to the RaspiBlitz, the user can choose if the RaspiBlitz should run Bitcoin or Litecoin with Lightning:
 
@@ -143,9 +141,9 @@ After this the setup process will need some time and the user will see a lot of 
 
 *Background: After the user interaction the following scripts are started to automatically setup the RaspiBlitz:*
 
-#### Getting the Blockchain
+### Getting the Blockchain
 
-*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can kip to the next chapter. If you started with an empty HDD - you will see the following screen:*
+*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can kip to the [next chapter](README.md#setup-lightning). If you started with an empty HDD - you will see the following screen:*
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
@@ -153,7 +151,7 @@ To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
 The options - and when to choose which - will be explained here shortly:
 
-##### 1. Torrent
+#### 1. Torrent
 
 This is the default way to download the blockchain data for the RaspiBlitz. If you choose it will show you the following screen:
 
@@ -167,7 +165,7 @@ You can cancel the torrent download by keeping the key `x` pressed. Then the dow
 
 * [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
 
-##### 2. FTP-Download
+#### 2. FTP-Download
 
 You should try the FTP download if the torrent option is not working for you. Please be aware that the files are hosted on a central server by us and up-time and bandwidth is not guaranteed. If you start it, you should see the following screen:
 
@@ -177,7 +175,7 @@ It is safe to close the terminal window (shutdown your laptop) while the RaspiBl
 
 You can cancel the FTP download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on FTP download if the other option is slower or not working.
 
-##### 4. Copying from another Computer
+#### 4. Copying from another Computer
 
 If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain (with txindex=1) you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfere). Choose this option and follow the given instructions.
 
@@ -185,15 +183,15 @@ This is also the best option if you dont like to run your RaspiBlitz with a prep
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-##### 5. Cloning from a 2nd HDD
+#### 5. Cloning from a 2nd HDD
 
 If is a backup way to transfere a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd). 
 
-##### 6. Sync from Bitcoin-Network
+#### 6. Sync from Bitcoin-Network
 
 This is the fallback of last resort. A RaspberryPi has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - thats why the other options above where invented.
 
-#### Setup Lightning
+### Setup Lightning
 
 Before the lighting service can be started, the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
 
@@ -233,7 +231,7 @@ And if you scroll down .. you see even more feature options:
 
 *Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
-### Features
+### Feature (Detailed Documentation)
 
 You can manually extend your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
 
@@ -273,7 +271,7 @@ To do so you can register at an DynamicDomain service like freedns.afraid.org, f
 
 You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
 
-## Auto-unlock LND on startup
+#### Auto-unlock LND on startup
 
 This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
 
