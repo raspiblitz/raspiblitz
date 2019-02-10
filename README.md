@@ -233,6 +233,8 @@ And if you scroll down .. you see even more feature options:
 
 ### Feature (Detailed Documentation)
 
+TODO: List Features (maybe put the list above SetUp and have descrption down here)
+
 You can manually extend your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
 
 Already integrated features of the RaspiBlitz are/will be listed as part of the main menu after connecting via ssh as admin user.
