@@ -34,6 +34,7 @@ echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
+sleep 2
 read key
 
 # unlink bitcoin user (will created later in setup again)
