@@ -57,7 +57,7 @@ fi
 
 # location of TOR config
 # make sure /etc/tor exists
-sudo mkdir /etc/tor
+sudo mkdir /etc/tor 2>/dev/null
 torrc="/etc/tor/torrc"
 
 # stop services
@@ -250,18 +250,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl enable lnd
   echo "OK"
   echo ""
-
-  #echo "*** Remove Tor ***"
-  #sudo apt remove tor tor-arm -y
-  #echo ""
-  
-  #echo "*** Remove NYX ***"
-  #sudo pip uninstall nyx -y
-  #echo ""
-
-  #echo "*** Remove TOR Files/Config ***"
-  #sudo rm -r -f /mnt/hdd/tor
-  #echo ""
 
   echo "needs reboot to activate new setting"
   exit 0
