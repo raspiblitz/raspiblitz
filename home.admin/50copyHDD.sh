@@ -10,7 +10,18 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
 sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
-sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin 2>/dev/null
+sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+
+# check setup
+sudo touch /home/bitcoin/.bitcoin/test.txt
+createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
+sudo rm /home/bitcoin/.bitcoin/test.txt
+if [ ${createdCorerct} -eq 0 ]; then
+  sudo rm -rf /mnt/hdd/bitcoin
+  echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
+  echo "Press ENTER to get back to menu ..."
+  read key
+fi
 
 clear
 echo "************************************************************************************"
@@ -97,7 +108,7 @@ if [ ${anyDataAtAll} -eq 1 ]; then
 
 else
   
-  echo "NO DATA ... back to menu .."
+  echo "back to menu ..."
   # when no data transferred - just delete bitcoin base dir again
   sudo rm -rf /mnt/hdd/bitcoin
   sleep 2
