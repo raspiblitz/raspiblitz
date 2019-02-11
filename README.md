@@ -165,7 +165,7 @@ After this the setup process will need some time and the user will see a lot of 
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
-<img src="pictures/pictures/ssh5-blockchain2.png" alt="blockchain-options" width="600">
+<img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="600">
 
 The options - and when to choose which - will be explained here shortly:
 
