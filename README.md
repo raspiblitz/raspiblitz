@@ -311,13 +311,35 @@ So lets take a look at the SSH main menu (3 pages to scroll down):
 
 #### FUNDING: Fund your on-chain Wallet
 
+Before you can open channels with other nodes you need to put some coins onto your LND on-chain wallet. Use this option to generate an address to send funds to.
+
+*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences.*
+
 #### CONNECT: Connect to a Peer
+
+Before you can open a channel with another node on the network you need to connect this node as a peer to your node. 
+
+Opening a channel with a peer is just optional. Having another node a peer helps your node to receive information about the network thru the gossip protocol. It will help your node to find better routes thru the network.
 
 #### CHANNEL: Open a Channel with Peer
 
+To open a payment channel with another node you can use this option.
+
+Find interessting nodes to open channels with on online directories like [1ML.com](https://1ml.com/). 
+
+*This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
+
 #### SEND: Pay an Invoice/PaymentRequest
 
+Pay an invoice thru lightning.
+
+*This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
+
 #### RECEIVE: Create Invoice/PaymentRequest
+
+Create an invoice to send to someone or a service to be payed thru lightnig.
+
+*This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
 #### SERVICES: Activate/Deactivate Services
 
@@ -325,13 +347,25 @@ So lets take a look at the SSH main menu (3 pages to scroll down):
 
 ##### Channel Autopilot
 
+The autopilot is a feature of LND that you can switch on. It automatically uses around half of your your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
+
 ##### Testnet
+
+You can switch from mainnet to testnet of your blockchain if you want to try things out and play with free test coins.
+
+Please beware that to might take some time to sync the test blockchain and you need to setup a new lnd testnet wallet during the process.
 
 ##### DynamicDNS
 
-This is a way to make your RaspiBlitz publicly reachable from the internet so that other nodes can open channels with you and you can connect with the 
+This is a way to make your RaspiBlitz publicly reachable from the internet so that other nodes can open channels with you and you can connect with your mobile wallet from outside your local network.
 
-To do so you can register at an DynamicDomain service like freedns.afraid.org, forward the TCP ports 8333 (Bitcoin/mainnet),9735 (LND Node) & 10009 (LND RPC) from your internet router to the local IP of your RaspiBlitz and then activate unter "Services" the "DynamicDNS" option.
+To do so you can register at an DynamicDomain service like freedns.afraid.org and forward the TCP ports ...
+
+* 8333 (Bitcoin/mainnet)
+* 9735 (LND Node)
+* 10009 (LND RPC) 
+
+... from your internet router to the local IP of your RaspiBlitz and then activate unter "Services" the "DynamicDNS" option.
 
 You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
 
@@ -447,7 +481,20 @@ With the command `raspiblitz` its possible to return to the main menu.
 
 ## Interface / APIs
 
-TODO
+To develop your own scripts/apps and to connect other servcies/apps to your RaspiBlitz you have multiple interfaces/APIs available:
+
+### Bitcoin
+
+* `bitcoin-cli` command line interface on the terminal
+* `bitcoind` running on port 8333 (public)
+* `JSON-RPC` running on port 8332 (local) [DOC](https://en.bitcoin.it/wiki/API_reference_%28JSON-RPC%29)
+
+### LND-Lightning
+
+* `lncli` command line interface on the terminal [DOC](https://api.lightning.community/)
+* `lnd` running on port 9735 (public)
+* `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
+* `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
 
 ## Updating to new Version
 
