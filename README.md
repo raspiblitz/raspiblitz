@@ -101,9 +101,9 @@ So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect
 
 ## Support
 
-Fore more details on the setup process see the documentation below. If you run into a problem or you have still a question, follow these steps to get support:
+If you run into a problem or you have still a question, follow the steps below to get support. Also check the [setup documentation](#setup-process-detailed-documentation) for details.
 
-1. Check the [FAQ](FAQ.md) if you can find an answere to this question/problem.
+1. Lookup the [FAQ](FAQ.md) if you can find an answere to this question/problem.
 
 2. Please determine if your problem/question is about RaspiBlitz or for example with LND. For example if you cant route a payment or get an error when opening a channel that is an LND question/problem an is best answered by the LND dev community: https://dev.lightning.community  
 
