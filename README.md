@@ -193,35 +193,59 @@ This is the fallback of last resort. A RaspberryPi has a very low power CPU and 
 
 ### Setup Lightning
 
-Before the lighting service can be started, the Bitcoin service needs to make sure that the blockchain is up to date. The downloaded blockchain data could be several weeks old - this could take some minutes. Then the Lightning Service gets started and a wallet can be created:
+Lightning is installed and waiting for your setup if you see this screen.
 
 ![SSH7](pictures/ssh7-lndinit.png)
 
-The creation of the Lightning Bitcoin Wallet gets done with the command: `lncli create` the RaspiBlitz is calling in the background.
+The RaspiBlitz calling the LND wallet creation command for you:
 
 ![SSH8](pictures/ssh8-wallet.png)
 
-After the wallet was created the Lightning service needs to scan the Blockchain ... this can take some time. If needed the user can close the SSH session with the RaspiBlitz during that time (progress is displayed on the LCD as status). On SSH back in just continue with the setup process.
+First it will ask you to set your wallet unlock password - use your choosen PASSWORD C here and confirm it by inputting it a second time. 
 
-![SSH9](pictures/ssh9-lndscan.png)
+Second it will ask you if you have an existing "cipher seed mnemonic" - if this is your first RaspiBlitz/LND just ansere `n`.
 
-*Background: Blockchain synup, LND wallet creation and LND scanning is all done within the script `70initLND.sh`*
+*The "cipher seed mnemonic" is the word list that contains the backup of your private key. If you dont have one from a former RaspiBlitz setup it will be created for you. If you want to recovcer on old LND wallet, thats the point in the setup to enter it.*
 
-Now the setup process is almost done and the RaspiBlitz needs a reboot:
+Third it will ask you if you want to protect your backup word list with an additional password. You can simple keep this empty and just press ENTER to continue. If you want to go for this extra protection use your chossen PASSWORD D here.
 
-![SSH9b](pictures/ssh9b-reboot.png)
+LND will now generate a fresh cipher seed (word list) for you. WRITE THIS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe. Hit ENTER once your done.
 
-After reboot the RaspiBlitz is showing that the Wallet needs to be unlocked on the LCD and its ready to SSH back in:
+It will now make sure your wallet is initialized correctly and may ask you to unlock it with your just set PASSWORD C.
 
 ![SSH9c](pictures/ssh9c-unlock.png)
 
-*Background: The LND wallet needs to get unlocked on every new start of the RaspiBlitz. The status information loop on the LCD is done by the script '00infoBlitz.sh'*
+*The LND wallet needs to get unlocked on every new start/reboot of the RaspiBlitz.*
 
-After SSH back in as admin the main menu shows the unlock option:
+The RaspiBlitz will now do final setup configuration like installing tools, moving the SWAP file to the HDD or activating the firewall. You will see some text moving across the screen until this screen:
 
-![SSH9d](pictures/ssh9d-unlock.png)
+![SSH9b](pictures/ssh9b-reboot.png)
 
-Once the wallet is unlocked the setup is finally over and the main menu shows the option and features of the RaspiBlitz:
+The basic setup is done - hooray ... but still prepare for some waiting time after this before you can play around with your new RaspiBlitz. Press OK to make a reboot. Your terminal session will get disconnected and the raspberry pi restarts.
+
+After the reboot is done it takes a while for all services to start up - wait until you see on the LCD/display that LND wallet needs to get unlocked. Then SSH in again with the same command like in the beginning (check LCD/display) but this time (and every following login) use your PASSWORD A. 
+
+After terminal login LND will ask you (like on every start/reboot) to unlock the wallet again - use PASSWORD C:
+
+![SSH9c](pictures/ssh9c-unlock.png)
+
+Now you will habe a longer waiting time (between 1 hour and 2-3 days, depending on your initial setup) ... but thats OK you just leave the RaspiBlitz running until its done. You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready, when the blue backgound screen is gone and you see the status screen like further below.
+
+To understand what is taking so long .. its two things:
+
+1. Blockchain Sync
+
+![SSH9d1](pictures/ssh9d-blockchainsync.png)
+
+The blockchain on you HDD is not absolutly up-to-date. Depending how you got it transferred to your RaspiBlitz it will be some hours, days or even weeks behind. Now the RaspiBlitz needs to catch-up the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. But even if you see in the beginning a 99.8% this can take time - gaining 1% can be up to 4 hours (depending on network speed). So be patient here.
+
+2. LND Scanning
+
+![SSH9d2](pictures/ssh9d-lndscan.png)
+
+Automatically if the Blockchain Sync is done LND will start to scan the blockchain and collect information. If you reached this point it should normally just take a round 1 hour until the waiting time is over.
+
+Once all is done you should see this status screen on the RaspiBlitz LCD/display:
 
 ![SSH9e1](pictures/ssh9e-mainmenu1.png)
 
@@ -229,7 +253,6 @@ And if you scroll down .. you see even more feature options:
 
 ![SSH9e2](pictures/ssh9e-mainmenu2.png)
 
-*Background: The script `00mainMenu.sh` is now the place to offer further features und extend the possibilities of the RaspiBlitz. Feel free to come up with ideas. Check out the developer section at the end of this page.*
 
 ### Feature (Detailed Documentation)
 
