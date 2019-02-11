@@ -17,7 +17,7 @@ There are additional services that can be switched on:
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
-As an parallel alternative to the SSH menu there is also the RTL WebUI available: 
+As an parallel alternative to the SSH menu there is also the RTL WebUI available (LND API Coverage at 57%): 
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
