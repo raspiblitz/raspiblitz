@@ -221,7 +221,9 @@ The RaspiBlitz will now do final setup configuration like installing tools, movi
 
 ![SSH9b](pictures/ssh9b-reboot.png)
 
-The basic setup is done - hooray ... but still prepare for some waiting time after this before you can play around with your new RaspiBlitz. Press OK to make a reboot. Your terminal session will get disconnected and the raspberry pi restarts.
+The basic setup is done - hooray ... but still prepare for some long waiting time after this before you can play around with your new RaspiBlitz. Press OK to make a reboot. Your terminal session will get disconnected and the raspberry pi restarts.
+
+### First Start: Syncing & Scanning
 
 After the reboot is done it takes a while for all services to start up - wait until you see on the LCD/display that LND wallet needs to get unlocked. Then SSH in again with the same command like in the beginning (check LCD/display) but this time (and every following login) use your PASSWORD A. 
 
@@ -229,7 +231,7 @@ After terminal login LND will ask you (like on every start/reboot) to unlock the
 
 ![SSH9c](pictures/ssh9c-unlock.png)
 
-Now you will habe a longer waiting time (between 1 hour and 2-3 days, depending on your initial setup) ... but thats OK you just leave the RaspiBlitz running until its done. You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready, when the blue backgound screen is gone and you see the status screen like further below.
+Now on first start you will habe a longer waiting time (between 1 hour and 2-3 days, depending on your initial setup) ... but thats OK, just leave the RaspiBlitz running until its done. You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready, when the blue backgound screen is gone and you see the status screen like further below.
 
 To understand what is taking so long .. its two things:
 
@@ -243,9 +245,13 @@ The blockchain on you HDD is not absolutly up-to-date. Depending how you got it 
 
 ![SSH9d2](pictures/ssh9d-lndscan.png)
 
-Automatically if the Blockchain Sync is done LND will start to scan the blockchain and collect information. If you reached this point it should normally just take a round 1 hour until the waiting time is over.
+Automatically if the Blockchain Sync is done LND will start to scan the blockchain and collect information. If you reached this point it should normally just take around 1 hour until the waiting time is over.
 
 Once all is done you should see this status screen on the RaspiBlitz LCD/display:
+
+### Main Menu
+
+If you now login by SSH in your RaspiBlitz (or you are still logged in) you will the the Main Menu:
 
 ![SSH9e1](pictures/ssh9e-mainmenu1.png)
 
@@ -253,6 +259,20 @@ And if you scroll down .. you see even more feature options:
 
 ![SSH9e2](pictures/ssh9e-mainmenu2.png)
 
+OK .. so from here on your RaspiBlitz is ready to play with.
+
+All options of the main menu will be explained below in the feature documentation. But if you need an idea what the most basic next steps to experience Lightning would be:
+
+* Fund on-chain Wallet
+* Connect a Peer
+* Open a channel
+* Make a payment
+
+So have fun and riding the lightning :D
+
+*BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll*
+
+* [How can I get further help/support?](README.md#support)
 
 ### Feature (Detailed Documentation)
 
