@@ -23,7 +23,7 @@ As an parallel alternative to the SSH menu there is also the RTL WebUI available
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
-See more details in the [Feature Documentation](#feature-documentation) & of course you have all the [Fullnode API](#interface--apis)s.
+See more details in the [Feature Documentation](#feature-documentation) & of course you have all the [Fullnode APIs](#interface--apis).
 
 ## Time Estimate to Setup a RaspiBlitz
 
