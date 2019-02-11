@@ -297,47 +297,37 @@ Have fun and riding the lightning :D
 
 These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
+So lets take a look at the SSH main menu (3 pages to scroll down):
+
 ![MainMenu-A](pictures/mainmenu1.png)
 
 ![MainMenu-B](pictures/mainmenu2.png)
 
 ![MainMenu-C](pictures/mainmenu3.png)
 
-![MainMenu-Services](pictures/mainmenu-services.png)
-
-TODO: List Features (maybe put the list above SetUp and have descrption down here)
-
-You can manually extend your RaspiBlitz with features listed in the RaspiBolt Guide: https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_60_bonus.md
-
-Already integrated features of the RaspiBlitz are/will be listed as part of the main menu after connecting via ssh as admin user.
-
-*Background: The script `91addBonus.sh` is the place to put your setup of features you want to add to RaspiBlitz. Its run at the end of the automated setup process before final reboot. To make the feature executable for the user, add a new option to the `00mainMenu.sh`*
-
-#### Status Infoscreen
+#### INFO: Raspiblitz Status Screen
 
 ![feat-info](pictures/feature-info.png)
 
-#### Detailed Balances and Channel Info
+#### FUNDING: Fund your on-chain Wallet
 
-<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
+#### CONNECT: Connect to a Peer
 
-<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
+#### CHANNEL: Open a Channel with Peer
 
-#### TOR Integration (experimental)
+#### SEND: Pay an Invoice/PaymentRequest
 
-You can use the Switch to TOR option from the main menu to make the node reachable thru TOR. This way you can get thru a NAT without needed to open/forward ports on your router. Bitcoin and LND will have a seperate onion-address displayed on LCD and the Status Info Screen option in menu.
+#### RECEIVE: Create Invoice/PaymentRequest
 
-![tor1](pictures/tor1.png)
+#### SERVICES: Activate/Deactivate Services
 
-The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
+![MainMenu-Services](pictures/mainmenu-services.png)
 
-#### Connect to Mobile Wallet
+##### Channel Autopilot
 
-There is now the option to connect and control your LND node with the mobile app called "Shango" - choose option in the main menu.
+##### Testnet
 
-![shango1](pictures/shango1.png)
-
-#### Public Domain with DynamicDNS
+##### DynamicDNS
 
 This is a way to make your RaspiBlitz publicly reachable from the internet so that other nodes can open channels with you and you can connect with the 
 
@@ -345,13 +335,115 @@ To do so you can register at an DynamicDomain service like freedns.afraid.org, f
 
 You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
 
-#### Auto-unlock LND on startup
+##### Run behind TOR
+
+You can run your Bitcoin- and Lightning-Node as a TOR hidden service - replacing your IP with an .onion-address
+
+![tor1](pictures/tor1.png)
+
+This has some benefits:
+
+* You dont publish your IP running a node so its much harder to resolve your real name and location.
+* You tunnel thru the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes
+
+But this also comes with the following side effects:
+
+* Mobile wallets dont support connecting over TOR yet
+* Lightning nodes that dont run TOR cannot reach you (like behind NAT)
+
+To try it out just switch on the service - you can deactivate later on if its not working for you.
+
+The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
+
+##### RTL Webinterface
+
+The RTL Webinterface is a LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitu SSH menus. Its recommended to give it a try.
+
+![RTL](pictures/RTL-dashboard.png)
+
+Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RTL
+
+##### LND Auto-Unlock
 
 This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
 
 It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachbale until you manually unlock it.
 
-But keep in mind that when activated, your Password C will be stored on the RaspiBlitz SD card. That lowers your security in (physical) attack scenarios. On an update you would need to re-enter your password C.
+*But keep in mind that when activated, your Password C will be stored on the RaspiBlitz SD card. That lowers your security in (physical) attack scenarios. On an update you would need to re-enter your password C.*
+
+#### MOBILE: Connect Mobile Wallet
+
+This feature should support you in connecting your RaspiBlitz to a mobile wallet on your smartphone.
+
+[mobile](pictures/mainmenu-mobile.png)
+
+At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS) and [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet) are available.
+
+Please keep in mind that if you also want to connect to your smartphone also from the outside (thru LTE, 3G, ..) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changeing IP of our Home-DSL.
+
+#### EXPORT: Macaroons and TLS.cert
+
+Offers the following options to get the Macaroon and TLS files to be used in other apps and wallets.
+
+*Macaroons: Access Tokens that allow certain command executions on the LND node.*
+
+*TLS: Certificate to secure/encrypt the communication with the LND node.*
+
+[export](pictures/mainmenu-export.png)
+
+##### Hex-String
+
+The Macaroons and TLS.cert files can be copy+pasted as Hex-Strings from RaspiBlitz to any other app that supports that. If you choose this option RaspiBlitz will all files print for you as Hex-String to do so.
+
+This method is recommended to export to:
+* [Joule Browser Wallet](https://lightningjoule.com)
+
+##### SSH Download
+
+SCP is a SSH like command to transfer files. If were able to SSH into the RaspiBlitz also the SCP to transfere the files should work. If you choose these option, RaspiBlitz will print prepared SCP commands you can copy+paste to run in a second terminal.
+
+This method is recommended to export to:
+* [Zap Desktop Wallet](https://github.com/LN-Zap/zap-desktop)
+
+##### Browserdownload
+
+Opens an ad-hoc webserver so that you can download the files in your local network thru the browser.
+
+*This is a least secure way to transfere those file - everybody in your local network has access to those file during download. Remember with the Admin-Macaroon somebody could takeover your node and spend all your funds. Just use as last fallback.*
+
+##### Renew Macaroons & TLS
+
+Use if you want to invalidate earlier exported Macaroons & TLS files - e.g. lost mobile wallet.
+
+#### NAME: Change Name/Alias of Node
+
+Change the name of your node.
+
+#### PASSWORD: Change Passwords
+
+Change you passwords for security.
+
+#### CHASHOUT: Remove Funds fro, on-chain Wallet
+
+Use if the want to remove all funds from the RaspiBlitz.
+
+#### lnbalance: Detailed Wallet Balances
+
+<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
+
+#### lnchannels: Lightning Channel List
+
+<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
+
+#### OFF: PowerOff RaspiBlitz
+
+A saf way to shutdown the RaspiBlitz. If then a reboot/restart is needed - un/replug the power. 
+
+#### X: Console Terminal
+
+Closes the SSH main menu and exits tothe terminal - where the user can make use of the CLI clients `bitcoin-cli` & `lncli` directly to make use of the Bitcoin- and Lightningnode. 
+
+With the command `raspiblitz` its possible to return to the main menu.
 
 ## Interface / APIs
 
