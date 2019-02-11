@@ -42,8 +42,6 @@ The RaspiBlitz is build from the following parts:
 
 **All together under 150 USD / 130 EUR (depending on country & shop)**
 
-* [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
-
 ## Amazon Shopping Lists
 
 These are the community currated shopping lists based in country:
@@ -58,6 +56,8 @@ These are the community currated shopping lists based in country:
 * [Czech](shoppinglist_cz.md)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
+
+* [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
 
 ## Assemble your RaspiBlitz
 
