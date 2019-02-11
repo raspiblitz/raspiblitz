@@ -83,17 +83,17 @@ Reboots again
 In the desktop terminal in Linux / MacOS or Putty in Windows:
 
 `ssh root@[IP-OF-DIETPI]`  
-password: `dietpi` 
+password: `dietpi`  
 Should end up here on version v6.20.6 or higher: 
 ![](pictures/bash_prompt.png)
 
 run the SDcard build script in this format:
-`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh [BRANCH] [GITHUB-USERNAME]`
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`
 
 Be aware of that the fork needs to be called `raspiblitz` for the git download to work.
 if you intend to use @openoms`s forked version:
 
-`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms`
+`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`
 
 See my example output on the Odorid HC1: [HC1_sdcard_build_output](logs/HC1_sdcard_build_output)  
 
@@ -123,8 +123,10 @@ To test a new configuration run XXcleanHDD.sh and strictly restart
 
 ---
 
-Currently the DietPi update process has a bug causing bootloop if left alone. Will be sorted once the current, >6.2 version is uploaded as the starting image.
-Here find some excerpts from the deafult dietpi.txt (https://github.com/Fourdee/DietPi/blob/master/dietpi.txt) to be used once the automatic install is feasible:
+Currently the DietPi update process has a bug causing bootloop if left alone. Will be sorted once the current, >6.2 version is uploaded as the starting image.  
+
+## Excerpts from the default dietpi.txt  
+(https://github.com/Fourdee/DietPi/blob/master/dietpi.txt) to be used once the automatic install is feasible.
 
 ### Automate installation with the dietpi.txt
 Need to copy to SDcard /boot/dietpi.txt after burning the image with Etcher.
