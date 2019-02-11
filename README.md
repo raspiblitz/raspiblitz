@@ -307,7 +307,11 @@ So lets take a look at the SSH main menu (3 pages to scroll down):
 
 #### INFO: Raspiblitz Status Screen
 
-![feat-info](pictures/feature-info.png)
+This is the screen that gets displayed on the LCD/display. Its useful to call in a remote situation from SSH if you dont have your RaspiBlitz next to you or to make a screenshot.
+
+![SSH9dz](pictures/ssh9z-ready.png)
+
+*Its not automatically updating. Its just for one-time info.*
 
 #### FUNDING: Fund your on-chain Wallet
 
