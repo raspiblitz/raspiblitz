@@ -11,11 +11,7 @@
 
 This is a quick look at the SSH main menu and services (once RaspiBlitz is SetUp):
 
-![MainMenu-A](pictures/mainmenu1.png)
-
-![MainMenu-B](pictures/mainmenu2.png)
-
-![MainMenu-C](pictures/mainmenu3.png)
+![MainMenu-A](pictures/mainmenu.png)
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
