@@ -143,7 +143,7 @@ After this the setup process will need some time and the user will see a lot of 
 
 ### Getting the Blockchain
 
-*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can kip to the [next chapter](README.md#setup-lightning). If you started with an empty HDD - you will see the following screen:*
+*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can skip to the [next chapter](README.md#setup-lightning). If you started with an empty HDD - you will see the following screen:*
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
