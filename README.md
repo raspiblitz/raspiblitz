@@ -7,6 +7,24 @@
 
 *The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode running on a RaspberryPi3 with a 1TB HDD and an nice Display for easy setup and monitoring. Its mainly targeted for learning how to run your own decntralized Node from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a part of it.*
 
+## Feature Overview
+
+This is a quick look at the SSH main menu and services (once RaspiBlitz is SetUp):
+
+![MainMenu-A](pictures/mainmenu1.png)
+
+![MainMenu-B](pictures/mainmenu2.png)
+
+![MainMenu-C](pictures/mainmenu3.png)
+
+![MainMenu-Services](pictures/mainmenu-services.png)
+
+As an alternative to the SSH menu there is also the RTL WebUI available: 
+
+![RTL-preview](pictures/mainmenu-services.png)
+
+See more details in the Feature Documentation chapter.
+
 ## Time Estimate to Setup a RaspiBlitz
 
 The RaspiBlitz is optimized for being Setup during a workshop at hackdays or conference. When it comes ready assembled together with a up-to-date synced HDD containing the blockchain its possible to have it ready in about 2 to 3 hours.
@@ -249,32 +267,43 @@ Automatically if the Blockchain Sync is done LND will start to scan the blockcha
 
 Once all is done you should see this status screen on the RaspiBlitz LCD/display:
 
+![SSH9dz](pictures/ssh9z-ready.png)
+
 ### Main Menu
 
 If you now login by SSH in your RaspiBlitz (or you are still logged in) you will the the Main Menu:
 
-![SSH9e1](pictures/ssh9e-mainmenu1.png)
+![SSH9e1](pictures/mainmenu1.png)
 
-And if you scroll down .. you see even more feature options:
+And if you scroll down .. you see even more options. All options of the main menu will be explained below in the feature documentation. 
 
-![SSH9e2](pictures/ssh9e-mainmenu2.png)
+*OK .. so from here on your RaspiBlitz is ready to play with.*
 
-OK .. so from here on your RaspiBlitz is ready to play with.
-
-All options of the main menu will be explained below in the feature documentation. But if you need an idea what the most basic next steps to experience Lightning would be:
+If you need an idea what the most basic next steps to experience Lightning would be:
 
 * Fund on-chain Wallet
-* Connect a Peer
 * Open a channel
 * Make a payment
 
-So have fun and riding the lightning :D
+If you like to do this all from a webbrowser with a dashboard UI instead from an SSH terminal, go to `SERVICES`, activate the `RTL Webinterface` and after the reboot open in your webbrowser: http://[LOCAL-IP-OF-YOU-NODE]:3000 (PASSWORD B is your RPC password).
+
+Have fun and riding the lightning :D
 
 *BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll*
 
 * [How can I get further help/support?](README.md#support)
 
-### Feature (Detailed Documentation)
+### Feature Documentation
+
+These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs]() - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
+
+![MainMenu-A](pictures/mainmenu1.png)
+
+![MainMenu-B](pictures/mainmenu2.png)
+
+![MainMenu-C](pictures/mainmenu3.png)
+
+![MainMenu-Services](pictures/mainmenu-services.png)
 
 TODO: List Features (maybe put the list above SetUp and have descrption down here)
 
@@ -323,6 +352,10 @@ This feature is based on https://github.com/Stadicus/guides/blob/master/raspibol
 It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachbale until you manually unlock it.
 
 But keep in mind that when activated, your Password C will be stored on the RaspiBlitz SD card. That lowers your security in (physical) attack scenarios. On an update you would need to re-enter your password C.
+
+## Interface / APIs
+
+TODO
 
 ## Updating to new Version
 
