@@ -34,7 +34,7 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --title "spacebar => check/uncheck" --checklist 'Activate/Deactivate Services:' 15 45 7 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' spacebar => activate/de-activate :' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -204,8 +204,9 @@ else
   echo "LND Autounlock Setting unchanged."
 fi
 
-if [ ${anychange} -eq 1 ]; then
+if [ ${anychange} -eq 0 ]; then
      dialog --pause "Use Spacebar to check/uncheck services." 8 58 5
+     exit 0
 fi
 
 if [ ${needsReboot} -eq 1 ]; then
