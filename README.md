@@ -19,7 +19,7 @@ This is a quick look at the SSH main menu and services (once RaspiBlitz is SetUp
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
-As an alternative to the SSH menu there is also the RTL WebUI available: 
+As an parallel alternative to the SSH menu there is also the RTL WebUI available: 
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
