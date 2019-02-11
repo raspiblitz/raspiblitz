@@ -545,4 +545,6 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a upcomming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by on of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 
+* [How can I get further help/support?](#support)
+
 IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
