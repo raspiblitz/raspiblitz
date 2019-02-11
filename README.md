@@ -23,7 +23,7 @@ As an parallel alternative to the SSH menu there is also the RTL WebUI available
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
-See more details in the [Feature Documentation](#feature-documentation) chapter.
+See more details in the [Feature Documentation](#feature-documentation) & of course you have all the [Fullnode API](#interface--apis)s.
 
 ## Time Estimate to Setup a RaspiBlitz
 
@@ -161,7 +161,7 @@ After this the setup process will need some time and the user will see a lot of 
 
 ### Getting the Blockchain
 
-*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can skip to the [next chapter](README.md#setup-lightning). If you started with an empty HDD - you will see the following screen:*
+*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screen:*
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
@@ -291,11 +291,11 @@ Have fun and riding the lightning :D
 
 *BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll*
 
-* [How can I get further help/support?](README.md#support)
+* [How can I get further help/support?](#support)
 
 ### Feature Documentation
 
-These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](README.md#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
+These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
 ![MainMenu-A](pictures/mainmenu1.png)
 
@@ -367,7 +367,7 @@ If you have a RaspiBlitz version 0.98 or newer do the following:
 * Remove power
 * Remove SD card
 
-Now download the new RaspiBlitz SD card image and write it to your SD card .. yes you simply overwrite the old one, it's OK, the RaspiBlitz stores all your personal data on the HDD. See details about latest SD card image [here](README.md#installing-the-software).
+Now download the new RaspiBlitz SD card image and write it to your SD card .. yes you simply overwrite the old one, it's OK, the RaspiBlitz stores all your personal data on the HDD. See details about latest SD card image [here](#installing-the-software).
 
 *If you have done manual changes to the system (installed packages, added scripts, etc) you might need to do some preparations before overwriting your sd card - see [FAQ](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).*
 
