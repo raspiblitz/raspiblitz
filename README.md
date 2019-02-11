@@ -9,9 +9,11 @@
 
 ## Feature Overview
 
-This is a quick look at the SSH main menu and services (once RaspiBlitz is SetUp):
+This is a quick look at the SSH main menu (once RaspiBlitz is SetUp):
 
 ![MainMenu-A](pictures/mainmenu.png)
+
+There are additional services that can be switched on:
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
