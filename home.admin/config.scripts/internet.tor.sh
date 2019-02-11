@@ -207,7 +207,7 @@ EOF
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
-  echo "Make sutre LND is disabled"
+  echo "Make sure LND is disabled"
   sudo systemctl disable lnd 2>/dev/null
 
   echo "editing /etc/systemd/system/lnd.service"

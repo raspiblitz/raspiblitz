@@ -421,7 +421,7 @@ After successful crreation of the torrent file:
 
 ## What is the process of creating a new sd card image release?
 
-This describes the build process of a new sd card realease like done by the owner of this repo.
+Work Nodes for the process of producing a new sd card image release:
 
 * Start `Ubuntu LIVE` from USB stick on Build Computer (press F12 on startup)
 * Connect secure WIFI (hardware switch on)
@@ -435,16 +435,27 @@ This describes the build process of a new sd card realease like done by the owne
 * Close terminal and eject `boot`
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
 * Find IP if RaspiBlitz (arp -a or check router)
-* in terminal `ssh pi@[IP-OF-RASPIBLITZ]`
-* password is `raspberry`
+* In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
+* Password is `raspberry`
 * `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`
-
-
-* Deconnect Wifi (hardware switch off)
-
-2. Create the RaspiBlitz image from sd card 
-
-
+* Check output for warnings/errors - install LCD
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw:raspiblitz) and run `./XXprepareRelease.sh`
+* Deconnect Wifi on build laptop (hardware switch off) and shutdown
+* Remove `Ubuntu LIVE` USB stick and replace with `Ubuntu AIRGAP`
+* PowerOn Build Laptop (press F12 for boot menu)
+* Cut Power of RaspiBlitz, remove sd card and connect with sd card reader to build laptop
+* Open `Disks` manager, select sd card and choose `Create Disk Image` (right upper corner window)
+* Store image to NTFS USB stick (click to start can take a while - enter password)
+* Open in File Manager the NTFS USB Stick, context menu the created IMG file `compress`
+* Name it: `raspiblitz-vX.X-YEAR-MONTH-DAY.img.zip`
+* Delete all IMG files from NTFS (just keep zips)
+* Context on white space, `Open in Terminal`, run `shasum -a 256 [NEW-ZIP] > sha256.txt`
+* [Do future author signing here with tools from airgap build machine]
+* Shutdown build computer
+* Connect NTFS USB stick to MacOS (its just readonly)
+* Run tests with new image
+* Upload new image to Download Server 
+* Copy SHA256-String into GutHub README and update downloadlink 
 
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
