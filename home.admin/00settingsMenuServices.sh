@@ -34,7 +34,7 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' spacebar => activate/de-activate :' 15 45 7 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -205,7 +205,7 @@ else
 fi
 
 if [ ${anychange} -eq 0 ]; then
-     dialog --pause "Use Spacebar to check/uncheck services." 8 58 5
+     dialog --pause "Hint: Use Spacebar to check/uncheck services." 8 58 5
      exit 0
 fi
 
