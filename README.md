@@ -299,10 +299,6 @@ So lets take a look at the SSH main menu (3 pages to scroll down):
 
 ![MainMenu-A](pictures/mainmenu1.png)
 
-![MainMenu-B](pictures/mainmenu2.png)
-
-![MainMenu-C](pictures/mainmenu3.png)
-
 #### INFO: Raspiblitz Status Screen
 
 This is the screen that gets displayed on the LCD/display. Its useful to call in a remote situation from SSH if you dont have your RaspiBlitz next to you or to make a screenshot.
@@ -342,6 +338,8 @@ Pay an invoice thru lightning.
 Create an invoice to send to someone or a service to be payed thru lightnig.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
+
+![MainMenu-B](pictures/mainmenu2.png)
 
 #### SERVICES: Activate/Deactivate Services
 
@@ -458,6 +456,8 @@ Change the name of your node.
 #### PASSWORD: Change Passwords
 
 Change you passwords for security.
+
+![MainMenu-C](pictures/mainmenu3.png)
 
 #### CHASHOUT: Remove Funds fro, on-chain Wallet
 
