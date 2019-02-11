@@ -21,7 +21,7 @@ This is a quick look at the SSH main menu and services (once RaspiBlitz is SetUp
 
 As an alternative to the SSH menu there is also the RTL WebUI available: 
 
-![RTL-preview](pictures/mainmenu-services.png)
+![RTL-preview](pictures/RTL-dashboard.png)
 
 See more details in the [Feature Documentation](#feature-documentation) chapter.
 
@@ -295,7 +295,7 @@ Have fun and riding the lightning :D
 
 ### Feature Documentation
 
-These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
+These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](README.md#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
 ![MainMenu-A](pictures/mainmenu1.png)
 
