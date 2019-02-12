@@ -245,6 +245,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # check if pre-sync was already activated on last power-on
     #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
     echo "starting pre-sync in background" >> $logFile
+    # make sure that debug file is clean, so just pre-sync gets analysed on stop
+    sudo rm /mnt/hdd/bitcoin/debug.log
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
@@ -283,6 +285,8 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
+  # wait otherwise looking for publicIP fails
+  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
     # prevent having no publicIP set at all and LND getting stuck
@@ -290,7 +294,7 @@ if [ ${configExists} -eq 1 ]; then
     if [ ${#publicIP} -eq 0 ]; then
       localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
-      sed -i "s/^publicIP=.*/publicIP=${local_ip}/g" ${configFile}
+      freshPublicIP="${localIP}"
     fi
   fi
   if [ ${#freshPublicIP} -eq 0 ]; then
@@ -299,7 +303,7 @@ if [ ${configExists} -eq 1 ]; then
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     if [ ${publicIPValueExists} -gt 1 ]; then
       # remove one 
-      echo "more then one publicIp entry - removing one" >> $logFile
+      echo "more then one publiIp entry - removing one" >> $logFile
       sed -i "s/^publicIP=.*//g" ${configFile}
       publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     fi
