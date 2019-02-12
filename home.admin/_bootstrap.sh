@@ -289,6 +289,15 @@ if [ ${configExists} -eq 1 ]; then
   sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
+    # prevent having no publicIP set at all and LND getting stuck
+    # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+    if [ ${#publicIP} -eq 0 ]; then
+      localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
+      freshPublicIP="${localIP}"
+    fi
+  fi
+  if [ ${#freshPublicIP} -eq 0 ]; then
    echo "WARNING: Was not able to determine external IP on startup." >> $logFile
   else
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
