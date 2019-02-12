@@ -283,16 +283,16 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
-  # wait otherwise looking for publicIP fails
-  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
-   echo "WARNING: Was not able to determine external IP on startup." >> $logFile
+   echo "WARNING: Was not able to determine external IP on startup. Setting publicIP to local_ip" >> $logFile
+   local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+   sed -i "s/^publicIP=.*/publicIP=${local_ip}/g" ${configFile}
   else
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     if [ ${publicIPValueExists} -gt 1 ]; then
       # remove one 
-      echo "more then one publiIp entry - removing one" >> $logFile
+      echo "more then one publicIp entry - removing one" >> $logFile
       sed -i "s/^publicIP=.*//g" ${configFile}
       publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     fi

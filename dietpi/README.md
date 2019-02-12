@@ -158,3 +158,6 @@ Allows you to automatically execute a custom script at the end of DietPi install
 Option 1 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.  
 Option 2 = Host your script online, then use AUTO_SETUP_CUSTOM_SCRIPT_EXEC=http://myweb.com/myscript.sh, it will be downloaded and executed automatically. | 0=disabled  
 NB: Executed script log /var/tmp/dietpi/logs/dietpi-automation_custom_script.log
+
+### Guide to clone your SD-cards and shrink the image in linux:
+https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
