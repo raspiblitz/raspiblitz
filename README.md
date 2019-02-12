@@ -73,7 +73,7 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
-* [How to fix the RaspberryPi on the HDD?](FAQ.md#how-to-fix-the-raspberrypi-on-the-hdd)
+* [How to attach the RaspberryPi to the HDD?](FAQ.md#how-to-attach-the-raspberrypi-to-the-hdd)
 
 ## Installing the Software
 
@@ -94,13 +94,16 @@ Insert the SD card and connect the power plug.
 
 **Troubleshoot:**
 
+* [I dont have a LAN port on my Laptop - how to connect to my RaspiBlitz?](FAQ.md#i-dont-have-a-lan-port-on-my-laptop---how-to-connect-to-my-raspiblitz)
+* [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](FAQ.md#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
+* [Can I directly connect the RaspiBlitz with my laptop?](FAQ.md#can-i-directly-connect-the-raspiblitz-with-my-laptop)
 * [I connected my HDD but it still says 'Connect HDD' on the display?](FAQ.md#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
 
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel.
 
 ![LCD0](pictures/lcd0-welcome.png)
 
-So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
+Now open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
@@ -424,7 +427,7 @@ It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be
 
 This feature should support you in connecting your RaspiBlitz to a mobile wallet on your smartphone.
 
-[mobile](pictures/mainmenu-mobile.png)
+<img src="pictures/mainmenu-mobile.png" alt="mobile-wallets">
 
 At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS) and [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet) are available.
 
@@ -440,7 +443,7 @@ Offers the following options to get the Macaroon and TLS files to be used in oth
 
 *TLS: Certificate to secure/encrypt the communication with the LND node.*
 
-[export](pictures/mainmenu-export.png)
+<img src="pictures/mainmenu-export.png" alt="export">
 
 ##### Hex-String
 
@@ -558,12 +561,14 @@ The whole build process takes a while. At the end the LCD drivers get installed 
 
 ## FAQ
 
-You have still some questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
-
 Here is a just a short selection of the very frequently asked questions:
 
 * [How to backup my Lightning Node?](FAQ.md#how-to-backup-my-lightning-node)
 * [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+* [Are those "Under-Voltage detected" warnings a problem?](FAQ.md#are-those-under-voltage-detected-warnings-a-problem)
+* [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+
+You have still more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
 ## Community Development
 
