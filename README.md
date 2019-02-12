@@ -80,7 +80,7 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
 1. Download SD-Card image - **Version 1.0**:
-(PLEASE BE PATIENT - IMGAGE 1.0 IS COMING SOON)
+(PLEASE BE PATIENT - IMAGE v1.0 IS COMING SOON)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
