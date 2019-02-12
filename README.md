@@ -59,7 +59,6 @@ These are the community currated shopping lists based on country:
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
-* [How to fix the RaspberryPi on the HDD?](FAQ.md#how-to-fix-the-raspberrypi-on-the-hdd)
 * [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
 
 ## Assemble your RaspiBlitz
@@ -73,6 +72,8 @@ If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case
 Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
+
+* [How to fix the RaspberryPi on the HDD?](FAQ.md#how-to-fix-the-raspberrypi-on-the-hdd)
 
 ## Installing the Software
 
