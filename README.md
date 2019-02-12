@@ -566,7 +566,7 @@ Here is a just a short selection of the very frequently asked questions:
 * [How to backup my Lightning Node?](FAQ.md#how-to-backup-my-lightning-node)
 * [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
 * [Are those "Under-Voltage detected" warnings a problem?](FAQ.md#are-those-under-voltage-detected-warnings-a-problem)
-* [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+* [Can I run RaspiBlitz on other computer boards than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 
 You have still more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
