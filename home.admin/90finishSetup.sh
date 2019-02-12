@@ -73,12 +73,6 @@ echo "enable lazy firewall"
 sudo ufw --force enable
 echo ""
 
-# set raspi config as environment for lnd service
-sudo systemctl stop lnd
-sudo systemctl disable lnd
-sudo sed -i "s/^EnvironmentFile=.*/EnvironmentFile=\/mnt\/hdd\/raspiblitz.conf/g" /etc/systemd/system/lnd.service
-sudo systemctl enable lnd
-
 # update system
 echo ""
 echo "*** Update System ***"

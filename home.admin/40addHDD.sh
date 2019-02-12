@@ -50,6 +50,8 @@ if [ ${existsHDD} -gt 0 ]; then
           configFile="/mnt/hdd/raspiblitz.conf"
           configExists=$(sudo ls ${configFile} | grep -c 'raspiblitz.conf')
           if [ ${configExists} -eq 0 ]; then
+     
+            # create file and use init values from raspiblitz.info
             source /home/admin/_version.info
             sudo touch $configFile
             sudo chmod 777 ${configFile}
@@ -58,6 +60,17 @@ if [ ${existsHDD} -gt 0 ]; then
             echo "network=${network}" >> $configFile
             echo "chain=${chain}" >> $configFile
             echo "hostname=${hostname}" >> $configFile
+
+            # try to determine publicIP and if not possible use localIP as placeholder 
+            # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+            freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+            if [ ${#freshPublicIP} -eq 0 ]; then
+              localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+              echo "WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
+              freshPublicIP="${localIP}"
+            fi
+            echo "publicIP=${freshPublicIP}" >> $configFile
+
           fi
 
           # move SSH pub keys to HDD so that they survive an update

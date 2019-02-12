@@ -53,6 +53,10 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
+## How can I avoid using a prepared blockchain and validate myself?
+
+The torrent and FTP download use a prepared blockchain to kick start the RaspiBlitz. If you want to selft validate you could do this on another more powerful computer and then transfere your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
+
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
 Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
@@ -85,9 +89,21 @@ You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself b
 * copy an indexed Blockchain into the root folder "bitcoin"
 * when your HDD is ready the content of your folder bitcoin should look like this:
 
-![BitcoinFolderData](pictures/seedhdd.png)
+```
+/bitcoin/blocks
+/bitcoin/chainstate
+/bitcoin/indexes
+```
 
-To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack, like in this picture:
+optional you can add also the testnet data:
+
+```
+/bitcoin/testnet3/blocks
+/bitcoin/testnet3/chainstate
+/bitcoin/testnet3/indexes
+```
+
+To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack (like in picture below) or choose a external HDD with its own power supply.
 
 ![ExtraPower](pictures/extrapower.png)
 
@@ -273,4 +289,187 @@ https://thecryptocloak.com/product/lightningshell/
 
 ![LightningShell](pictures/lightningshell.png)
 
-Also there are first free 3D open source files in this repo in the directory `case.3dprint` that you can selfprint. Those are much simpler then the 'Lightning Shell' and are not finished yet. But feel free to try out and improve - PullRequests welcome.   
+Also there are first free 3D open source files in this repo in the directory `case.3dprint` that you can selfprint. Those are much simpler then the 'Lightning Shell' and are not finished yet. But feel free to try out and improve - PullRequests welcome.
+
+## Are those "Under-Voltage detected" warnings a problem?
+
+When your USB power adapter for the RaspiBlitz delivers to low power those messages with "Under-Voltage detected" (undervoltage) are shortly seen on the display. If you see those just one or two times thats not OK, but can be in a tolerant window. Nevertheless make sure your USB power adapter can deliver at least 3A. If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD thru a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB
+
+## Why do we need to download the blockchain and not syncing it?
+
+The RaspiBlitz is powered by the RaspberryPi. The processing power of this SingleBoardComputer is too low to make a fast sync of the blockchain from the bitcoin peer to peer network during setup process (validation). To sync and index the complete blockchain could take weeks or even longer. Thats why the RaspiBlitz needs to download a prepared blockchain from another source.
+
+## Is using the perpared SD card image secure?
+
+Using pre-build software almost always shifts trust to the one how build made the binary. But at least you can check with the SHA checksum after download if the image downloaded is really the one offered by the GitHub Repo. To do so make a quick check if your browser is really in the correct GiutHub page and that your HTTPS of the GitHub page is signed by 'DigiCert'. Then compare the SHA-256 string (always next to the download link of the image on the README) with the result of the command `shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]` (Mac/Linux). Still this is not optimal and if at least some people from the community request it, I will consider signing the download as an author for the future.
+
+The best way would be to build the sd card yourself. You use the script `build_sdcard.sh` for it. Take some minutes to check if you see any suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
+ 
+## Is downloading the blockchain from a third party secure?
+
+To download a blockchain from a third party (torrent/ftp) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'. 
+
+The downloaded Blockchain is pre-indexed and pre-validated. That should be practical secure enough, because if the user gets a "manipulated" blockchain it would not work after setup. The beginning of the downloaded blockchain needs to fit the genesis block (in bitcoind software) and the end of the downloaded blockchain needs not match with the rest of the bitcoin network state - hashes of new block distrubuted within the peer-2-peer network need to match the downloaded blockchain head. So if you downloaded a manipulated blockchain it would simply just dont work in practice. As long as you are not in a total hostile environment where someone would be able to fake a whole network of peers and miners around you - this is secure enough for running a small funded full node to try out the lightning network.
+
+If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then dont use the torrent/ftp download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, veryfied and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
+
+## What is the "Base Torrent File"?
+
+Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - that will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
+
+At the moment (Baseiteration=1) this is just the bitcoin blk and rev files up to the number:
+- /blocks : 01390
+- /testnet3/blocks: 00152
+
+For litecoin (Baseiteration=1) its blk and rev files up to the number:
+- /blocks : 00124
+
+The base torrent file should always have the following naming scheme:
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent`
+
+So for example the second version of the base torrent for litecoin created on 2018-10-31 would have this name: raspiblitz-litecoin2-2018-10-31-base.torrent
+
+## What is the "Update Torrent File" and how to create it?
+
+All the rest of the files get packaged into a second torrent file. This file will be updated much more often. The seeding is expected to be not that good and download may be slower, but thats OK because its a much smaller file.
+
+This way a good balance between good seeding and up-to-date blockchain can be reached.
+
+To create the Update Torrent file, follow the following step ...
+
+Have a almost 100% synced bitcoind MAINNET with txindex=1 on a RaspiBlitz
+(remove all funds from this node - because blockchain get messed with)
+
+Stop bitcoind with: 
+```
+sudo systemctl stop bitcoind
+```
+
+Delete base torrent blk-files with:
+```
+sudo rm /mnt/hdd/bitcoin/blocks/blk00*.dat
+sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1390}.dat
+```
+
+Delete base torrent rev-files with:
+```
+sudo rm /mnt/hdd/bitcoin/blocks/rev00*.dat
+sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1390}.dat
+```
+
+Now change to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
+```
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blocks
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./chainstate
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/indexes ./indexes
+```
+
+Also have a almost 100% synced bitcoind TESTNET with txindex=1 on a RaspiBlitz
+
+Stop bitcoind with:
+```
+sudo systemctl stop bitcoind
+```
+
+Delete base torrent blk-files with:
+```
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk000*.dat
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk00{100..152}.dat
+```
+
+Delete base torrent rev-files with:
+```
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev000*.dat
+sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev00{100..152}.dat
+```
+
+Now change again to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
+```
+mkdir testnet3
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/indexes
+```
+
+(Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). The update torrentfile should always have the following naming schema:
+
+`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent`
+
+*So for exmaple an update torrent created on 2018-12-24 for litecoin that is an update to the second base torrent version would have this name: raspiblitz-litecoin2-2018-12-24-update.torrent*
+
+Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
+
+Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
+```
+udp://tracker.justseed.it:1337
+
+udp://tracker.coppersurfer.tk:6969/announce
+
+udp://open.demonii.si:1337/announce
+
+udp://denis.stalker.upeer.me:6969/announce
+```
+
+After successful crreation of the torrent file:
+* copy to `/home.admin/assets`
+* push to master
+* change in `50torrentHDD.sh script`
+* add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120)
+* seed at home and at services like justseed.it
+* update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
+
+## What is the process of creating a new sd card image release?
+
+Work Nodes for the process of producing a new sd card image release:
+
+* Start `Ubuntu LIVE` from USB stick on Build Computer (press F12 on startup)
+* Connect secure WIFI (hardware switch on)
+* Download latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/) to the NTFS formatted data USB stick
+* Open terminal and compare checksum `shasum -a 256 /media/ubuntu/...[DOWNLOADED-RASPBIAN]`
+* Use in file manager context on NTFS USB stick `extract here` to unzip
+* Connect sd card reader with 8GB sd card
+* Use in file manager context on img-file `write image` write to sd card
+* Use in file manager context on `boot` drive free space `open in terminal`
+* Run command `touch ssh`
+* Close terminal and eject `boot`
+* Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
+* Find IP if RaspiBlitz (arp -a or check router)
+* In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
+* Password is `raspberry`
+* `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`
+* Check output for warnings/errors - install LCD
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw:raspiblitz) and run `./XXprepareRelease.sh`
+* Deconnect Wifi on build laptop (hardware switch off) and shutdown
+* Remove `Ubuntu LIVE` USB stick and replace with `Ubuntu AIRGAP`
+* PowerOn Build Laptop (press F12 for boot menu)
+* Cut Power of RaspiBlitz, remove sd card and connect with sd card reader to build laptop
+* Open `Disks` manager, select sd card and choose `Create Disk Image` (right upper corner window)
+* Store image to NTFS USB stick (click to start can take a while - enter password)
+* Open in File Manager the NTFS USB Stick, context menu the created IMG file `compress`
+* Name it: `raspiblitz-vX.X-YEAR-MONTH-DAY.img.zip`
+* Delete all IMG files from NTFS (just keep zips)
+* Context on white space, `Open in Terminal`, run `shasum -a 256 [NEW-ZIP] > sha256.txt`
+* [Do future author signing here with tools from airgap build machine]
+* Shutdown build computer
+* Connect NTFS USB stick to MacOS (its just readonly)
+* Run tests with new image
+* Upload new image to Download Server 
+* Copy SHA256-String into GutHub README and update downloadlink 
+
+## Can I run RaspiBlitz on other computers than RaspberryPi?
+
+There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
+
+## Is it possible to connect over Wifi instead of using a LAN cable?
+
+A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
+
+## How to setup fresh/clean/reset and not getting into recovery mode?
+
+When you put in a sd card with a new/clean RaspiBlitz image the RaspiBlitz will get into recovery mode because it detects the old data on your HDD and assumes you just want to continue to work with this data. 
+
+But there might be cases where you want to start a totally fresh/clean RaspiBlitz from the beginning. To do so you need to delete the old data from the HDD. You can do so by formating it on another computer (for example with FAT and name it "NEW"). Or when you can run the script "/home/admin/XXcleanHD.sh -all" on the terminal.
+
+When the HDD is clean, then flash a new RaspiBlitz sd card and your setup should start fresh. 

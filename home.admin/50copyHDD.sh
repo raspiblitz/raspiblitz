@@ -12,6 +12,17 @@ sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
 
+# check setup
+sudo touch /home/bitcoin/.bitcoin/test.txt
+createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
+sudo rm /home/bitcoin/.bitcoin/test.txt
+if [ ${createdCorerct} -eq 0 ]; then
+  sudo rm -rf /mnt/hdd/bitcoin
+  echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
+  echo "Press ENTER to get back to menu ..."
+  read key
+fi
+
 clear
 echo "************************************************************************************"
 echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another computer"
@@ -34,13 +45,7 @@ echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
-#echo "Copy, Paste and Execute the following commands - line by line:"
-#echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
-#echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
-#echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
-#echo ""
-#echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
-#echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
+sleep 2
 read key
 
 # unlink bitcoin user (will created later in setup again)
@@ -103,10 +108,12 @@ if [ ${anyDataAtAll} -eq 1 ]; then
 
 else
   
+  echo "back to menu ..."
   # when no data transferred - just delete bitcoin base dir again
   sudo rm -rf /mnt/hdd/bitcoin
+  sleep 2
 
 fi
 
 # setup script will decide the next logical step
-./10setupBlitz.sh
+/home/admin/10setupBlitz.sh

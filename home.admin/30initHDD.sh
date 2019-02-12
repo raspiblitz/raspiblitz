@@ -1,9 +1,11 @@
 #!/bin/bash
+
 echo ""
 echo "*** Checking if HDD is connected ***"
 sleep 5
 device="sda1"
 existsHDD=$(lsblk | grep -c sda1)
+
 if [ ${existsHDD} -eq 1 ]; then
   echo "OK - HDD found at sda1"
 
@@ -27,6 +29,38 @@ if [ ${existsHDD} -eq 1 ]; then
     fi
 
   fi
+
+  # quick basic size check
+  echo ""
+  echo "*** HDD Size Check ***"
+  # bitcoin  > 450 GB
+  min1kblocks=450000000
+  # litecoin > 190 GB
+  if [ "${network}" = "litecoin" ]; then
+    min1kblocks=190000000
+  fi
+  num1Kblocks=$(df | grep "dev/${device}" | awk '$1=$1' | cut -d " " -f 2)
+  if [ ${num1Kblocks} -lt ${min1kblocks} ]; then
+    if [ ${num1Kblocks} -gt 1 ]; then
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo "WARNING: HDD might be too small"
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo "You HDD was detected with the size of ${num1Kblocks}000 bytes"
+      echo "For ${network} at least ${min1kblocks}000 bytes is recommended"
+      echo "If you want to change to a bigger HDD:"
+      echo "* Unplug power of RaspiBlitz"
+      echo "* Make a fresh SD card again"
+      echo "* Start again with bigger HDD"
+      echo "If you want to try with HDD connected, press ENTER to continue."
+      read key
+    else
+      echo "WARN: Was not able to get size of HDD ... skipping"
+      sleep 3
+    fi
+  else
+    echo "OK: HDD seems big enough"
+  fi
+  echo ""
 
   mountOK=$(df | grep -c /mnt/hdd)
   if [ ${mountOK} -eq 1 ]; then

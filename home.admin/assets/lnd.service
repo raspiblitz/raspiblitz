@@ -9,7 +9,7 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-EnvironmentFile=
+EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStart=/usr/local/bin/lnd --externalip=${publicIP}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin

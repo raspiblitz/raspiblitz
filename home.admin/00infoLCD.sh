@@ -52,17 +52,15 @@ while :
       continue
     fi
 
-    ## get basic info from SD
-    bootstrapInfoExists=$(ls ${infoFile} 2>/dev/null | grep -c '.info')
-    if [ ${bootstrapInfoExists} -eq 1 ]; then
-      source ${infoFile}
-    fi
-
-    # get final config if already avaulable
+    # get config info if already available
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
-      setupStep=100
+    fi
+
+    # if setup not marked as done (=100) load boostrap info file
+    if [ "${setupStep}" != "100" ]; then
+      source ${infoFile}
     fi
 
     # if no information available from files - set default
@@ -110,22 +108,6 @@ while :
       continue
     fi
 
-    # when setup is in progress - password has been changed
-    if [ ${setupStep} -lt 100 ]; then
-      l1="Login to your RaspiBlitz with:\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use your Password A\n"
-      boxwidth=$((${#localip} + 24))
-      sleep 3
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 7
-      continue
-    fi
-
-    ###########################
-    # DISPLAY AFTER SETUP
-    ###########################
-
     # check if recovering/upgrade is running
     if [ "${state}" = "recovering" ]; then
       if [ ${#message} -eq 0 ]; then
@@ -135,7 +117,7 @@ while :
       l2="---> ${message}\n"
       l3="Please keep running until reboot."
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
@@ -162,6 +144,22 @@ while :
       continue
     fi
 
+    # when setup is in progress - password has been changed
+    if [ ${setupStep} -lt 100 ]; then
+      l1="Login to your RaspiBlitz with:\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use your Password A\n"
+      boxwidth=$((${#localip} + 24))
+      sleep 3
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 7
+      continue
+    fi
+
+    ###########################
+    # DISPLAY AFTER SETUP
+    ###########################
+
     # check if bitcoin is ready
     sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
     clienterror=`cat error.tmp`
@@ -185,19 +183,23 @@ while :
     if [ "${locked}" -gt 0 ]; then
 
       # special case: LND wallet is locked ---> show unlock info
+      h=5
       l1="!!! LND WALLET IS LOCKED !!!\n"
       l2="Login: ssh admin@${localip}\n"
       l3="Use your Password A\n"
-      #if [ "${rtlWebinterface}" = "on" ]; then
-      #  l2="Open: http://${localip}:3000\n"
-      #  l3="Use Password C to unlock\n"
-      #fi
+      l4=""
+      if [ "${rtlWebinterface}" = "on" ]; then
+        l2="Browser: http://${localip}:3000\n"
+        l3="PasswordB=login / PasswordC=unlock\n"
+        l4="PasswordA: ssh admin@${localip}"
+        h=6
+      fi
       if [ "${autoUnlock}" = "on" ]; then
         l2="ssh admin@${localip}\n"
         l3="Waiting for AUTO-UNLOCK"
       fi
       boxwidth=$((${#localip} + 24))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3$l4" ${h} ${boxwidth}
       sleep 5
       continue
     fi
