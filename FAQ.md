@@ -237,9 +237,12 @@ Thanks to @RobEdb (ask on twitter for more details) running his demo store with 
 
 You dont need a LAN port on your laptop as long as you can connect over WLAN to the same LAN router/switch the RaspiBlitz is connected to .. and you are on the same local network.
 
-## I just have WLAN - how to connect to my RaspiBlitz?
+## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
 
-##
+A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
+
+## Can I directly connect the RaspiBlitz with my laptop? 
 
 If you have a LAN port on your laptop - or you have a USB-LAN adapter, you can connect the RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection. You can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
 
@@ -470,11 +473,6 @@ Work Nodes for the process of producing a new sd card image release:
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
 There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
-
-## Is it possible to connect over Wifi instead of using a LAN cable?
-
-A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
-https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
 
 ## How to setup fresh/clean/reset and not getting into recovery mode?
 
