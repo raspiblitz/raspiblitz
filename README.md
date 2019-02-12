@@ -380,7 +380,8 @@ You can run your Bitcoin- and Lightning-Node as a TOR hidden service - replacing
 This has some benefits:
 
 * You dont publish your IP running a node so its much harder to resolve your real name and location.
-* You tunnel thru the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes
+* You tunnel thru the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes.
+* By using a TOR address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
 
 But this also comes with the following side effects:
 
