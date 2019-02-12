@@ -427,7 +427,7 @@ It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be
 
 This feature should support you in connecting your RaspiBlitz to a mobile wallet on your smartphone.
 
-<img src="pictures/mainmenu-mobile.png" alt="mobile-wallets">
+<img src="pictures/mobile.png" alt="mobile-wallets">
 
 At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS) and [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet) are available.
 
@@ -443,7 +443,7 @@ Offers the following options to get the Macaroon and TLS files to be used in oth
 
 *TLS: Certificate to secure/encrypt the communication with the LND node.*
 
-<img src="pictures/mainmenu-export.png" alt="export">
+<img src="pictures/export.png" alt="export">
 
 ##### Hex-String
 
