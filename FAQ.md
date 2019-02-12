@@ -281,6 +281,14 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - thats OK as long as you dont make changes to the sd card build script - then you would need to build a fresh sd card again from your repo.
 
+## How to fix the RaspberryPi on the HDD?
+
+There are multiple ways to do it - just remember it should ne easy to get to the SD card slot for remove and replace the card.
+
+Here is an example to use [Hook-and-loop fastener](https://en.wikipedia.org/wiki/Hook-and-loop_fastener) Tape:
+
+![ExtraPower](pictures/befestigung.jpg)
+
 ## What other case options do I have?
 
 You can replace the generic case in the shopping lists with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
