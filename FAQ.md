@@ -71,10 +71,6 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-## Why is taking my torrent download of the blockchain so long?
-
-Its a lot of data and torrent seeds can not be garantuued. Normally it should be done within 24 hours. If it takes longer then 2 days consider to abort the torrent download by pressing 'x' and choose FTP download as fallback ... will also take some time, but should be more stable. If even that is not working - choose SYNC option, which will take over a week, but is the classic way to get the blockchain thru the bitcoin peer2peer network.   
-
 ## How do I clone the Blockchain from a 2nd HDD?
 
 During setup, when you start with an empty HDD you need to get a copy of the blockchain. One option available is to connect a 2nd HDD to the RaspiBlitz that contains already the blockchain data and start to copy/clone.
@@ -229,7 +225,7 @@ The node address is red, when the RaspiBlitz detects that it cannot reach the po
 
 Yellow is OK. The RaspiBlitz can detect, that it can reach a service on the port 9735 of your public IP - this is in most cases the LND of your RaspiBlitz. But the RaspiBlitz cannot 100% for sure detect that this is its own LND service on that port - thats why its just yellow, not green. 
 
-#### Can I run the RaspiBlitz as Backend for BTCPayServer?
+## Can I run the RaspiBlitz as Backend for BTCPayServer?
 
 BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver 
 
@@ -237,11 +233,17 @@ You can find setup instructions for a experimental setup here: https://goo.gl/Kn
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
-## I dont have an LAN router - how to connect to my RaspiBlitz?
+## I dont have a LAN port on my Laptop - how to connect to my RaspiBlitz?
 
-To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
+You dont need a LAN port on your laptop as long as you can connect over WLAN to the same LAN router/switch the RaspiBlitz is connected to .. and you are on the same local network.
 
-In short:
+## I just have WLAN - how to connect to my RaspiBlitz?
+
+##
+
+If you have a LAN port on your laptop - or you have a USB-LAN adapter, you can connect the RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection. You can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
+
+In short for OSX:
 
 * make sure all VPN are off (can interfere with local LAN)
 * connect with LAN directly
