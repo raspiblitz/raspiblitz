@@ -35,9 +35,9 @@ if [ ${existsHDD} -eq 1 ]; then
   echo "*** HDD Size Check ***"
   # bitcoin  > 450 GB
   min1kblocks=450000000
-  # litecoin > 190 GB
+  # litecoin > 31 GB
   if [ "${network}" = "litecoin" ]; then
-    min1kblocks=190000000
+    min1kblocks=31000000
   fi
   num1Kblocks=$(df | grep "dev/${device}" | awk '$1=$1' | cut -d " " -f 2)
   echo "num1Kblocks(${num1Kblocks})"
