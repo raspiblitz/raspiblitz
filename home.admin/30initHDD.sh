@@ -40,6 +40,7 @@ if [ ${existsHDD} -eq 1 ]; then
     min1kblocks=190000000
   fi
   num1Kblocks=$(df | grep "dev/${device}" | awk '$1=$1' | cut -d " " -f 2)
+  echo "num1Kblocks(${num1Kblocks})"
   if [ ${num1Kblocks} -lt ${min1kblocks} ]; then
     if [ ${num1Kblocks} -gt 1 ]; then
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
