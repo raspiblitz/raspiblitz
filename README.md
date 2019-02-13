@@ -73,13 +73,14 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
+* [How to attach the RaspberryPi to the HDD?](FAQ.md#how-to-attach-the-raspberrypi-to-the-hdd)
+
 ## Installing the Software
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
 1. Download SD-Card image - **Version 1.0**:
-https://wiki.fulmo.org/downloads/raspiblitz-1.00-2019-02-22.img.gz
-SHA-256: 91ef1e5b4e55a5a90e9faf094756461be841ba02591bb41ccf481755977b191b
+(PLEASE BE PATIENT - IMAGE v1.0 IS COMING SOON)
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -91,11 +92,18 @@ Insert the SD card and connect the power plug.
 * Make sure to connect the raspberry with a LAN cable to the internet at this point.
 * Make sure that your laptop and the raspberry are on the same local network.
 
+**Troubleshoot:**
+
+* [I dont have a LAN port on my Laptop - how to connect to my RaspiBlitz?](FAQ.md#i-dont-have-a-lan-port-on-my-laptop---how-to-connect-to-my-raspiblitz)
+* [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](FAQ.md#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
+* [Can I directly connect the RaspiBlitz with my laptop?](FAQ.md#can-i-directly-connect-the-raspiblitz-with-my-laptop)
+* [I connected my HDD but it still says 'Connect HDD' on the display?](FAQ.md#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
+
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel.
 
 ![LCD0](pictures/lcd0-welcome.png)
 
-So open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
+Now open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
@@ -182,6 +190,7 @@ It is safe to close the terminal window (shutdown your laptop) while the RaspiBl
 You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on torrent if the other option is slower or not working.
 
 * [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
+* [Why is taking my torrent download of the blockchain so long?]()
 
 #### 2. FTP-Download
 
@@ -259,6 +268,8 @@ To understand what is taking so long .. its two things:
 
 The blockchain on you HDD is not absolutly up-to-date. Depending how you got it transferred to your RaspiBlitz it will be some hours, days or even weeks behind. Now the RaspiBlitz needs to catch-up the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. But even if you see in the beginning a 99.8% this can take time - gaining 1% can be up to 4 hours (depending on network speed). So be patient here.
 
+* [Why is my "final sync" taking so long?](FAQ.md#why-is-my-final-sync-taking-so-long)
+
 2. LND Scanning
 
 ![SSH9d2](pictures/ssh9d-lndscan.png)
@@ -303,11 +314,15 @@ So lets take a look at the SSH main menu (3 pages to scroll down):
 
 #### INFO: Raspiblitz Status Screen
 
-This is the screen that gets displayed on the LCD/display. Its useful to call in a remote situation from SSH if you dont have your RaspiBlitz next to you or to make a screenshot.
+This is the screen that gets displayed on the LCD/display. Its useful to call in a remote situation from SSH if you dont have your RaspiBlitz next to you. But also if you want to copy+paste your nodeID or make a screenshot.
 
 ![SSH9dz](pictures/ssh9z-ready.png)
 
 *Its not automatically updating. Its just for one-time info.*
+
+* [Why is my bitcoin IP on the display red?](FAQ.md#why-is-my-bitcoin-ip-on-the-display-red)
+* [Why is my node address on the display red?](FAQ.md#why-is-my-node-address-on-the-display-red)
+* [Why is my node address on the display yellow (not green)?](FAQ.md#why-is-my-node-address-on-the-display-yellow-not-green)
 
 #### FUNDING: Fund your on-chain Wallet
 
@@ -380,7 +395,8 @@ You can run your Bitcoin- and Lightning-Node as a TOR hidden service - replacing
 This has some benefits:
 
 * You dont publish your IP running a node so its much harder to resolve your real name and location.
-* You tunnel thru the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes
+* You tunnel thru the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes.
+* By using a TOR address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
 
 But this also comes with the following side effects:
 
@@ -405,17 +421,19 @@ This feature is based on https://github.com/Stadicus/guides/blob/master/raspibol
 
 It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachbale until you manually unlock it.
 
-*But keep in mind that when activated, your Password C will be stored on the RaspiBlitz SD card. That lowers your security in (physical) attack scenarios. On an update you would need to re-enter your password C.*
+* [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
 
 #### MOBILE: Connect Mobile Wallet
 
 This feature should support you in connecting your RaspiBlitz to a mobile wallet on your smartphone.
 
-[mobile](pictures/mainmenu-mobile.png)
+<img src="pictures/mobile.png" alt="mobile-wallets">
 
 At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS) and [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet) are available.
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (thru LTE, 3G, ..) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changeing IP of our Home-DSL.
+
+* [How do I shrink the QR code for connecting my Shango/Zap mobile phone?](FAQ.md#how-do-i-shrink-the-qr-code-for-connecting-my-shangozap-mobile-phone)
 
 #### EXPORT: Macaroons and TLS.cert
 
@@ -425,7 +443,7 @@ Offers the following options to get the Macaroon and TLS files to be used in oth
 
 *TLS: Certificate to secure/encrypt the communication with the LND node.*
 
-[export](pictures/mainmenu-export.png)
+<img src="pictures/export.png" alt="export">
 
 ##### Hex-String
 
@@ -540,6 +558,17 @@ The whole build process takes a while. At the end the LCD drivers get installed 
 * [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 * [How can I build an SD card other then the master branch?](FAQ.md#how-can-i-build-an-sd-card-other-then-the-master-branch)
 * [How can I build an SD card from my forked GitHub Repo?](FAQ.md#how-can-i-build-an-sd-card-from-my-forked-github-repo)
+
+## FAQ
+
+Here is a just a short selection of the very frequently asked questions:
+
+* [How to backup my Lightning Node?](FAQ.md#how-to-backup-my-lightning-node)
+* [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+* [Are those "Under-Voltage detected" warnings a problem?](FAQ.md#are-those-under-voltage-detected-warnings-a-problem)
+* [Can I run RaspiBlitz on other computer boards than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+
+You have still more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
 ## Community Development
 

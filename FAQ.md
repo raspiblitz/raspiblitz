@@ -59,7 +59,7 @@ The torrent and FTP download use a prepared blockchain to kick start the RaspiBl
 
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
-Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
+Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
 
 One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1 with transaction index switched on (`txindex=1` in the `bitcoin.conf`). 
 
@@ -71,9 +71,7 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-## Why is taking my torrent download of the blockchain so long?
-
-Its a lot of data and torrent seeds can not be garantuued. Normally it should be done within 24 hours. If it takes longer then 2 days consider to abort the torrent download by pressing 'x' and choose FTP download as fallback ... will also take some time, but should be more stable. If even that is not working - choose SYNC option, which will take over a week, but is the classic way to get the blockchain thru the bitcoin peer2peer network.   
+**If you want to replace a corrupted blockchain this way:**  *Go to terminal. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain but in the end (when copy is done) use the CTRL-C to stop script and make a reboot with `sudo shutdown -r now`.*
 
 ## How do I clone the Blockchain from a 2nd HDD?
 
@@ -175,6 +173,7 @@ What you do is in priciple:
 - Setup a fresh RaspiBlitz
 - Stop LND with `sudo systemctl stop lnd`
 - Replace the new `/mnt/hdd/lnd` with your backuped version
+- Make sure everything in `/mnt/hdd/lnd` is owned by bitcoin:bitcoin
 - Reboot the RaspiBlitz
 
 This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
@@ -229,7 +228,7 @@ The node address is red, when the RaspiBlitz detects that it cannot reach the po
 
 Yellow is OK. The RaspiBlitz can detect, that it can reach a service on the port 9735 of your public IP - this is in most cases the LND of your RaspiBlitz. But the RaspiBlitz cannot 100% for sure detect that this is its own LND service on that port - thats why its just yellow, not green. 
 
-#### Can I run the RaspiBlitz as Backend for BTCPayServer?
+## Can I run the RaspiBlitz as Backend for BTCPayServer?
 
 BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver 
 
@@ -237,11 +236,20 @@ You can find setup instructions for a experimental setup here: https://goo.gl/Kn
 
 Thanks to @RobEdb (ask on twitter for more details) running his demo store with RaspiBlitz: https://store.edberg.eu - buy a picture of [him and Andreas](https://store.edberg.eu/produkt/jag-andreas/) :)
 
-## I dont have an LAN router - how to connect to my RaspiBlitz?
+## I dont have a LAN port on my Laptop - how to connect to my RaspiBlitz?
 
-To connect a RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection, you can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
+You dont need a LAN port on your laptop as long as you can connect over WLAN to the same LAN router/switch the RaspiBlitz is connected to .. and you are on the same local network.
 
-In short:
+## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
+
+A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
+
+## Can I directly connect the RaspiBlitz with my laptop? 
+
+If you have a LAN port on your laptop - or you have a USB-LAN adapter, you can connect the RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection. You can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055). 
+
+In short for OSX:
 
 * make sure all VPN are off (can interfere with local LAN)
 * connect with LAN directly
@@ -280,6 +288,14 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - thats OK as long as you dont make changes to the sd card build script - then you would need to build a fresh sd card again from your repo.
+
+## How to attach the RaspberryPi to the HDD?
+
+There are multiple ways to do it - just remember it should ne easy to get to the SD card slot for remove and replace the card.
+
+Here is an example to use [Hook-and-loop fastener](https://en.wikipedia.org/wiki/Hook-and-loop_fastener) Tape:
+
+![ExtraPower](pictures/befestigung.jpg)
 
 ## What other case options do I have?
 
@@ -460,11 +476,6 @@ Work Nodes for the process of producing a new sd card image release:
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
 There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
-
-## Is it possible to connect over Wifi instead of using a LAN cable?
-
-A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here: 
-https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
 
 ## How to setup fresh/clean/reset and not getting into recovery mode?
 

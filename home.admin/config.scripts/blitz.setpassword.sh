@@ -76,7 +76,7 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (first time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+       --insecure --passwordbox "Set new Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
 
     # get user input
     password1=$( cat $_temp )
@@ -221,7 +221,7 @@ elif [ "${abcd}" = "c" ]; then
   echo "****************************************************************************"
   echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
   echo "If you had Auto-Unlock active - you need to re-activate after this."
-  echo "To CANCEL use CTRL+C"
+  echo "To CANCEL use CTRL+C  - use command 'raspiblitz' to get back to main menu"
   echo "****************************************************************************"
 
   # let LND-CLI handle the password change

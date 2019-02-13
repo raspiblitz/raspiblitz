@@ -5,7 +5,7 @@ echo ""
 # why there are two torrent files
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y

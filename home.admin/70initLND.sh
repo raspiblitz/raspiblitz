@@ -1,19 +1,6 @@
 #!/bin/bash
 echo ""
 
-# check if raspiblitz.conf is available
-configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
-  echo ""
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL: /mnt/hdd/raspiblitz.conf should exists at this point, but not found!"
-  echo "Please report to: https://github.com/rootzoll/raspiblitz/issues/293"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "Press ENTER to EXIT."
-  read key
-  exit 1
-fi
-
 ## get basic info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
