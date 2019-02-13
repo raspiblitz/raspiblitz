@@ -171,6 +171,7 @@ What you do is in priciple:
 - Setup a fresh RaspiBlitz
 - Stop LND with `sudo systemctl stop lnd`
 - Replace the new `/mnt/hdd/lnd` with your backuped version
+- Make sure everything in `/mnt/hdd/lnd` is owned by bitcoin:bitcoin
 - Reboot the RaspiBlitz
 
 This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
