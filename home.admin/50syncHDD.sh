@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 # only show warning when bitcoin
 if [ "$network" = "bitcoin" ]; then

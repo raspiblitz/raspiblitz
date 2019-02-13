@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 # get local ip
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')

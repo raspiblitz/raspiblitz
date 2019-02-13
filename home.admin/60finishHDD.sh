@@ -2,7 +2,7 @@
 echo ""
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 echo "*** Checking HDD ***"
 mountOK=$(df | grep -c /mnt/hdd)

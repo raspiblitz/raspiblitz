@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## get basic info
+source /home/admin/raspiblitz.info 2>/dev/null
+
 echo ""
 echo "*** Checking if HDD is connected ***"
 sleep 5
@@ -40,7 +43,6 @@ if [ ${existsHDD} -eq 1 ]; then
     minSize=31000000000
   fi
   isSize=$(lsblk -o NAME,SIZE -b | grep "${device}" | awk '$1=$1' | cut -d " " -f 2)
-  echo "isSize(${num1Kblocks})"
   if [ ${isSize} -lt ${minSize} ]; then
     if [ ${isSize} -gt 1 ]; then
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"

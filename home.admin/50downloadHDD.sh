@@ -1,6 +1,9 @@
 #!/bin/bash
 echo ""
 
+## get basic info
+source /home/admin/raspiblitz.info
+
 # *** BITCOIN (just mainnet) ***
 bitcoinList="" # url to list with other sources
 #bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
@@ -14,9 +17,6 @@ litecoinSize=22220000 # 22221160-tolerance
 
 # NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Run download.
 # When finished the warning comes up and behind WARNING: copy that number
-
-## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
 
 # settings based on network
 list=$bitcoinList
