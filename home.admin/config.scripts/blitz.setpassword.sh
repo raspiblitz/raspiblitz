@@ -221,7 +221,7 @@ elif [ "${abcd}" = "c" ]; then
   echo "****************************************************************************"
   echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
   echo "If you had Auto-Unlock active - you need to re-activate after this."
-  echo "To CANCEL use CTRL+C"
+  echo "To CANCEL use CTRL+C  - use command 'raspiblitz' to get back to main menu"
   echo "****************************************************************************"
 
   # let LND-CLI handle the password change
