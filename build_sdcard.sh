@@ -504,6 +504,13 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
+# *** BACKGROUND ***
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp ./assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
 # *** TOR Prepare ***
 echo "*** Prepare TOR source+keys ***"
 sudo /home/admin/config.scripts/internet.tor.sh prepare
