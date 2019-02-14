@@ -204,5 +204,7 @@ else
 
 fi
 
-# setup script will decide the next logical step
-./10setupBlitz.sh
+if [ ${setupStep} -lt 100 ]; then
+  # setup script will decide the next logical step
+  /home/admin/10setupBlitz.sh
+fi
