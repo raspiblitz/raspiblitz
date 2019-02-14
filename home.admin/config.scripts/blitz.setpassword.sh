@@ -223,7 +223,7 @@ elif [ "${abcd}" = "c" ]; then
   echo "If you had Auto-Unlock active - you need to re-activate after this."
   echo "****************************************************************************"
 
-  echo "LND needs to restarted to lock wallet first .. (please wait)"
+  echo "LND needs to be restarted to lock wallet first .. (please wait)"
   sudo systemctl restart lnd
   sleep 6
 
