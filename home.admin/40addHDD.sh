@@ -38,7 +38,7 @@ if [ ${existsHDD} -gt 0 ]; then
         echo "OK - HDD is listed in /etc/fstab"
         echo ""
         echo "*** Mount HDD ***"
-        sudo mkdir /mnt/hdd
+        sudo mkdir /mnt/hdd 2>/dev/null
         sudo mount -a
         mountOK=$(df | grep -c /mnt/hdd)
         if [ ${mountOK} -eq 1 ]; then
