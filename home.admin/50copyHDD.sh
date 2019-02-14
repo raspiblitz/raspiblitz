@@ -19,6 +19,7 @@ createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
 sudo rm /home/bitcoin/.bitcoin/test.txt
 if [ ${createdCorerct} -eq 0 ]; then
   sudo rm -rf /mnt/hdd/bitcoin
+  sudo rm -rf /home/bitcoin/.bitcoin
   echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
   echo "Press ENTER to get back to menu ..."
   read key
