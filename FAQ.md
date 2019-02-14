@@ -71,7 +71,7 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain but in the end (when copy is done) use the CTRL+c to stop script and make a reboot with `sudo shutdown -r now`.*
+**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data and set the correct permissions. Then make a reboot `sudo shutdown -r now`*
 
 ## How do I clone the Blockchain from a 2nd HDD?
 
