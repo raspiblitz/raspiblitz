@@ -224,6 +224,9 @@ elif [ "${abcd}" = "c" ]; then
   echo "To CANCEL use CTRL+C  - use command 'raspiblitz' to get back to main menu"
   echo "****************************************************************************"
 
+  echo "LND needs to restarted to lock wallet first .. (please wait)"
+  sudo systemctl restart lnd
+
   # let LND-CLI handle the password change
   sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
 
