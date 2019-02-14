@@ -156,15 +156,17 @@ So here is what todo if you want to "Recover from Wallet Seed" with RaspiBlitz:
 
 - SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
 - During the new SetUp you get to the point of creating the LND wallet (see image below).
-- When you get asked "do you have an existing cypher wallet" answere `y` this time.
-- Follow the dialog and enter the cypher seed.
-- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
 
-![SSH8](pictures/ssh8-wallet.png)
+![SSH8](pictures/wallet-recover.png)
+
+- When you get asked "do you have an existing cypher wallet" answere `y` this time.
+- Enter the cypher seed - all words in one line seperated by spaces
+- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
+- When asked about the "address look-ahead" number - use `250000` instead of the default!
 
 Then give LND some time to rescan the blockchain. In the end you will have restored your funding wallet. You maybe need to wait for your old channel counter parts to force close the old channels until you see the coins back displayed.
 
-*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278)*
+*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
 
 ### 2) LND Channel State Backup
 
