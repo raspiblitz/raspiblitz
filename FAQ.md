@@ -71,7 +71,7 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-**If you want to replace a corrupted blockchain this way:**  *Go to terminal. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain but in the end (when copy is done) use the CTRL-C to stop script and make a reboot with `sudo shutdown -r now`.*
+**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data and set the correct permissions. Then make a reboot `sudo shutdown -r now`*
 
 ## How do I clone the Blockchain from a 2nd HDD?
 
@@ -156,13 +156,17 @@ So here is what todo if you want to "Recover from Wallet Seed" with RaspiBlitz:
 
 - SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
 - During the new SetUp you get to the point of creating the LND wallet (see image below).
-- When you get asked "do you have an existing cypher wallet" answere `y` this time.
-- Follow the dialog and enter the cypher seed.
-- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
 
-![SSH8](pictures/ssh8-wallet.png)
+![SSH8](pictures/wallet-recover.png)
+
+- When you get asked "do you have an existing cypher wallet" answere `y` this time.
+- Enter the cypher seed - all words in one line seperated by spaces
+- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
+- When asked about the "address look-ahead" number - use `250000` instead of the default!
 
 Then give LND some time to rescan the blockchain. In the end you will have restored your funding wallet. You maybe need to wait for your old channel counter parts to force close the old channels until you see the coins back displayed.
+
+*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
 
 ### 2) LND Channel State Backup
 

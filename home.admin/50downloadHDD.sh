@@ -153,10 +153,11 @@ else
   sudo mv ${targetDir}${targetPath} /mnt/hdd/${network}
   echo "OK"
 
-  # set SetupState
-  sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
-
-  # continue setup
-  ./60finishHDD.sh
+  if [ ${setupStep} -lt 100 ]; then
+    # set SetupState
+    sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
+    # continue setup
+    ./60finishHDD.sh
+  fi
 
 fi

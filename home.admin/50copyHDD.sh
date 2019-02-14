@@ -8,6 +8,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 
 # create bitcoin base directory and link with bitcoin user
 sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
+sudo rm -rf /home/bitcoin/.bitcoin 2>/dev/null
 sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
@@ -18,6 +19,7 @@ createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
 sudo rm /home/bitcoin/.bitcoin/test.txt
 if [ ${createdCorerct} -eq 0 ]; then
   sudo rm -rf /mnt/hdd/bitcoin
+  sudo rm -rf /home/bitcoin/.bitcoin
   echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
   echo "Press ENTER to get back to menu ..."
   read key
@@ -40,8 +42,9 @@ echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
 echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin"
-echo ""
-echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
+echo "" 
+echo "This command may ask you first about the admin password of the other computer (because sudo)."
+echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
@@ -115,5 +118,7 @@ else
 
 fi
 
-# setup script will decide the next logical step
-/home/admin/10setupBlitz.sh
+if [ ${setupStep} -lt 100 ]; then
+  # setup script will decide the next logical step
+  /home/admin/10setupBlitz.sh
+fi
