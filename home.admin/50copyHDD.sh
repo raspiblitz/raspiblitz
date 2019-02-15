@@ -136,4 +136,6 @@ fi
 if [ ${setupStep} -lt 100 ]; then
   # setup script will decide the next logical step
   /home/admin/10setupBlitz.sh
+else
+  "DONE - reboot is needed: sudo shutdown -r now"
 fi
