@@ -493,13 +493,13 @@ Use if the want to remove all funds from the RaspiBlitz.
 
 #### OFF: PowerOff RaspiBlitz
 
-A saf way to shutdown the RaspiBlitz. If then a reboot/restart is needed - un/replug the power. 
+A safe way to shutdown the RaspiBlitz. If then a reboot/restart is needed - un/replug the power. 
 
 #### X: Console Terminal
 
-Closes the SSH main menu and exits tothe terminal - where the user can make use of the CLI clients `bitcoin-cli` & `lncli` directly to make use of the Bitcoin- and Lightningnode. 
+Closes the SSH main menu and exits to the terminal - where the user can make use of the CLI clients `bitcoin-cli` & `lncli` directly to make use of the Bitcoin- and Lightningnode. 
 
-With the command `raspiblitz` its possible to return to the main menu.
+With the command `raspiblitz` it's possible to return to the main menu.
 
 ## Interface / APIs
 
