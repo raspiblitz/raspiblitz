@@ -103,7 +103,7 @@ When everything boots up correctly, you should see the local IP address of your 
 
 ![LCD0](pictures/lcd0-welcome.png)
 
-Now open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
+Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win10](https://www.youtube.com/watch?v=xIfzZXHaCzQ)) and connect thru SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
