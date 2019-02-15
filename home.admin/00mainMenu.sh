@@ -192,7 +192,7 @@ if [ ${setupStep} -eq 0 ]; then
     # old data setup
     BACKTITLE="RaspiBlitz - Manual Update"
     TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
-    MENU="\n         ATTENTION: OLD DATA COULD COINTAIN FUNDS\n"
+    MENU="\n         ATTENTION: OLD DATA COULD CONTAIN FUNDS\n"
     OPTIONS+=(MANUAL "read how to recover your old funds" \
               DELETE "erase old data, keep blockchain, reboot" )
     HEIGHT=11
@@ -469,7 +469,7 @@ case $CHOICE in
         MANUAL)
             echo "************************************************************************************"
             echo "PLEASE open in browser for more information:"
-            echo "https://github.com/rootzoll/raspiblitz#recover-your-coins-from-a-failing-raspiblitz"
+            echo "https://bit.ly/RaspiblitzRecover"
             echo "************************************************************************************"
             exit 0
             ;;
