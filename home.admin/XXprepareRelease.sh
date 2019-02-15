@@ -11,6 +11,6 @@ echo "OK"
 
 echo " "
 echo "Will shutdown now."
-echo "Wait until Respebarry LEDs show now activity anymore."
+echo "Wait until Raspberry LEDs show no activity anymore."
 echo "Then remove SD card and make an release image from it."
 sudo shutdown now
