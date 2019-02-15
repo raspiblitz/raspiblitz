@@ -469,7 +469,7 @@ case $CHOICE in
         MANUAL)
             echo "************************************************************************************"
             echo "PLEASE open in browser for more information:"
-            echo "https://github.com/rootzoll/raspiblitz#recover-your-coins-from-a-failing-raspiblitz"
+            echo "https://bit.ly/RaspiblitzRecover"
             echo "************************************************************************************"
             exit 0
             ;;
