@@ -50,7 +50,9 @@ while [ ${finished} -eq 0 ]
   echo "REINDEXING BLOCKCHAIN"
   echo "*************************"
   date
-  echo "THIS CAN TAKE SOME LONG TIME"
+  echo "THIS CAN TAKE SOME VERY LONG TIME"
+  echo "See Raspiblitz FAQ: https://github.com/rootzoll/raspiblitz"
+  echo "On question: My blockchain data is corrupted - what can I do?"
   echo "If you dont see any progress after 24h keep X pressed to stop."
 
   # get blockchain sync progress

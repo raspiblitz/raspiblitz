@@ -14,7 +14,8 @@ if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
-  sudo systemctl stop bitcoind 
+  sudo systemctl stop bitcoind
+  sudo systemctl disable bitcoind 
 fi
 
 # delete all IN bitcoin directory but not itself if it exists
@@ -115,6 +116,7 @@ echo "*********************************************"
 
 # if started after intial setup - quit here
 if [ "${setupStep}" = "100" ]; then
+   sudo systemctl enable bitcoind
   "DONE - reboot is needed: sudo shutdown -r now"
   exit 0
 fi
