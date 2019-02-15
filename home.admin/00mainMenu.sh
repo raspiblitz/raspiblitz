@@ -468,8 +468,9 @@ case $CHOICE in
             ;;
         MANUAL)
             echo "************************************************************************************"
-            echo "PLEASE open in browser for more information:"
-            echo "https://bit.ly/RaspiblitzRecover"
+            echo "PLEASE go to RaspiBlitz FAQ:"
+            echo "https://github.com/rootzoll/raspiblitz"
+            echo "And check: How can I recover my coins from a failing RaspiBlitz?"
             echo "************************************************************************************"
             exit 0
             ;;
