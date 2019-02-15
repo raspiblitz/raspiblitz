@@ -6,7 +6,20 @@ source /home/admin/raspiblitz.info
 # get local ip
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+# additional prep if this is used to replace corrupted blockchain
+if [ "${setupStep}" = "100" ]; then
+  # warn user
+  echo "!! Press ENTER to delete the old blockchain .. CTRL+C to CANCEL"
+  read key
+  # make sure services are not running
+  echo "stopping servcies ..."
+  sudo systemctl stop lnd 
+  sudo systemctl stop bitcoind 
+fi
+
+
 # create bitcoin base directory and link with bitcoin user
+echo "delete and create new blockchain directory ..."
 sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
 sudo rm -rf /home/bitcoin/.bitcoin 2>/dev/null
 sudo mkdir /mnt/hdd/bitcoin
@@ -14,6 +27,7 @@ sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
 
 # check setup
+echo "checking setup ..."
 sudo touch /home/bitcoin/.bitcoin/test.txt
 createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
 sudo rm /home/bitcoin/.bitcoin/test.txt
@@ -23,6 +37,7 @@ if [ ${createdCorerct} -eq 0 ]; then
   echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
   echo "Press ENTER to get back to menu ..."
   read key
+  exit 1
 fi
 
 clear
