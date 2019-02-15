@@ -212,7 +212,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
-  # check if HDD cointains existing LND data (old RaspiBlitz Version)
+  # check if HDD contains existing LND data (old RaspiBlitz Version)
   echo "Check if HDD contains existing LND data .." >> $logFile
   lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${lndDataExists} -eq 1 ]; then
