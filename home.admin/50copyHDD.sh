@@ -80,8 +80,8 @@ if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
    anyDataAtAll=1
 fi
-if [ ${count} -lt 5200 ]; then
-  echo "FAIL: less then 5200 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
+if [ ${count} -lt 1500 ]; then
+  echo "FAIL: less then 1500 .ldb files (${count}) in /mnt/hdd/bitcoin/indexes/txindex (transfere seems invalid)"
   quickCheckOK=0
 fi
 
