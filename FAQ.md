@@ -71,7 +71,7 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data and set the correct permissions. Then make a reboot `sudo shutdown -r now`*
+**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. Then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data. Then make a reboot `sudo shutdown -r now`*
 
 ## How do I clone the Blockchain from a 2nd HDD?
 
@@ -488,3 +488,11 @@ When you put in a sd card with a new/clean RaspiBlitz image the RaspiBlitz will 
 But there might be cases where you want to start a totally fresh/clean RaspiBlitz from the beginning. To do so you need to delete the old data from the HDD. You can do so by formating it on another computer (for example with FAT and name it "NEW"). Or when you can run the script "/home/admin/XXcleanHD.sh -all" on the terminal.
 
 When the HDD is clean, then flash a new RaspiBlitz sd card and your setup should start fresh. 
+
+## My blockchain data is corrupted - what can I do?
+
+You could try to re-index, but that can take some very long time - multiple days or even weeks.
+
+Another option would be to delete the old blockchain and get a new one. See for details the FAQ question: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md)
+
+Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD is degrading - maybe this is a good time to replace it. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md)
