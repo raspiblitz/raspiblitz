@@ -269,7 +269,7 @@ fi
 echo ""
 echo "*** Moving Files ***"
 date +%s
-echo "can take some minutes... please wait"
+echo "can take 10-60 minutes... please wait"
 sudo mkdir /mnt/hdd/${network} 2>/dev/null
 sudo mv ${targetPath1}/* /mnt/hdd/${network}/
 sudo cp -r ${targetPath2}/* /mnt/hdd/${network}/

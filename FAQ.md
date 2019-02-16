@@ -464,15 +464,23 @@ Work Nodes for the process of producing a new sd card image release:
 * Remove `Ubuntu LIVE` USB stick and replace with `Ubuntu AIRGAP`
 * PowerOn Build Laptop (press F12 for boot menu)
 * Cut Power of RaspiBlitz, remove sd card and connect with sd card reader to build laptop
+
+Old:
 * Open `Disks` manager, select sd card and choose `Create Disk Image` (right upper corner window)
 * Store image to NTFS USB stick (click to start can take a while - enter password)
 * Open in File Manager the NTFS USB Stick, context menu the created IMG file `compress`
 * Name it: `raspiblitz-vX.X-YEAR-MONTH-DAY.img.zip`
-* Delete all IMG files from NTFS (just keep zips)
+
+New:
+* open terminal - check name if sd-card writer with `df`
+* `dd if=/dev/[sdcarddevice] | gzip > /media/ubuntu/NTFS/raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
+
+* Delete all IMG files from NTFS (just keep zips/gzs)
 * Context on white space, `Open in Terminal`, run `shasum -a 256 [NEW-ZIP] > sha256.txt`
 * [Do future author signing here with tools from airgap build machine]
 * Shutdown build computer
 * Connect NTFS USB stick to MacOS (its just readonly)
+* Check if file can be unzipped on OSX
 * Run tests with new image
 * Upload new image to Download Server 
 * Copy SHA256-String into GutHub README and update downloadlink 
