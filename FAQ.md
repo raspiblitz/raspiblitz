@@ -121,7 +121,7 @@ Recovering the coins that you have in an active channel is a bit more complicate
 
 To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
 
-But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
+But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: `scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
 
 ## What is this mnemonic seed word list?
 

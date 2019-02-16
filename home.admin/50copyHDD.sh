@@ -55,9 +55,6 @@ echo "PRESS ENTER if transfers is done OR if you want to choose another another 
 sleep 2
 read key
 
-# unlink bitcoin user (will created later in setup again)
-sudo unlink /home/bitcoin/.bitcoin 
-
 # make quick check if data is there
 anyDataAtAll=0
 quickCheckOK=1
@@ -120,7 +117,7 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
   sudo systemctl enable bitcoind
-  "DONE - reboot is needed: sudo shutdown -r now"
+  echo "DONE - reboot is needed: sudo shutdown -r now"
   exit 0
 fi
 
