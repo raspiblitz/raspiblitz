@@ -16,6 +16,7 @@ if [ "${setupStep}" = "100" ]; then
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo systemctl disable bitcoind
+  sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
 # delete all IN bitcoin directory but not itself if it exists
