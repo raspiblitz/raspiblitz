@@ -16,7 +16,7 @@ See the hardware specs:  [hardware specs](hw_comparison.md).
 
 ## Download the fully prebuilt RaspiBlitz on DietPi SDcard image
 
-for the Odroid HC1 / HC2 / XU3 / XU4 from this [torrent](/home/buidl/Documents/droidblitz/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) or from [mega.nz](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA).  
+for the Odroid HC1 / HC2 / XU3 / XU4 from this [torrent](https://github.com/openoms/raspiblitz/blob/raspiblitz-dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) or from [mega.nz](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA).  
 (sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 
 96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2)
 
