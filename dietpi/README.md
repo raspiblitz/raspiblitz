@@ -16,7 +16,9 @@ See the hardware specs:  [hardware specs](hw_comparison.md).
 
 ## Download the fully prebuilt RaspiBlitz on DietPi SDcard image
 
-for the Odroid HC1 / HC2 / XU3 / XU4 from this [torrent](/home/buidl/Documents/droidblitz/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
+for the Odroid HC1 / HC2 / XU3 / XU4 from this [torrent](/home/buidl/Documents/droidblitz/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) or from [mega.nz](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA).  
+(sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 
+96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2)
 
 Steps to run:
 - download the .img file,
@@ -33,8 +35,9 @@ The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootz
 
 ### Download the updated DietPi image
 
-For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded here:  
-https://mega.nz/#!AcdVBAbR!O-W3jP5LUgw7lMY8S9XcBWcKX3IhRNAAFmaYzDXIUC0  
+For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded [here](
+https://mega.nz/#!AcdVBAbR!O-W3jP5LUgw7lMY8S9XcBWcKX3IhRNAAFmaYzDXIUC0). (sha256sum DietPi_v6.20.6_OdroidXU4-ARMv7-Stretch.img: 
+1459b91f66b9db98f3437c31231e44497b7b7dcd9146d2cc41a3da653f9a9215)
 
 Burn to the SDCard with [Etcher](https://www.balena.io/etcher/) and extend the rootfs partition to the size of your card with a partition manager.
 
