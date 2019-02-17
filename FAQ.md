@@ -488,3 +488,8 @@ When you put in a sd card with a new/clean RaspiBlitz image the RaspiBlitz will 
 But there might be cases where you want to start a totally fresh/clean RaspiBlitz from the beginning. To do so you need to delete the old data from the HDD. You can do so by formating it on another computer (for example with FAT and name it "NEW"). Or when you can run the script "/home/admin/XXcleanHD.sh -all" on the terminal.
 
 When the HDD is clean, then flash a new RaspiBlitz sd card and your setup should start fresh. 
+
+## Can I flip the screen?
+
+For the default 3.5" LCD you need to edit the /boot/config.txt. Run `sudo nano /boot/config.txt`
+look for the line `dtoverlay=tft35a:rotate=270` towards the end. To flip the screen with 180 degrees change the line to `dtoverlay=tft35a:rotate=90` and reboot with `sudo reboot`. Reference: https://github.com/goodtft/LCD-show/issues/34
