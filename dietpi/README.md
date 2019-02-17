@@ -22,7 +22,7 @@ Steps to run:
 - download the .img file,
 - burn to a 16 GB SD with [Etcher](https://www.balena.io/etcher/)
 - extend the rootFS partition with a partition manager (disks, Gparted, etc.)
-- boot the Odroid ith the SDcard and login with ssh admin@at.your.raspiblitz.ip, password: raspiblitz
+- boot the Odroid with the SDcard and login with ssh admin@at.your.raspiblitz.ip, password: raspiblitz
 
 Using this image you can skip the rest of this guide as it is mostly about how this image was built.
 
