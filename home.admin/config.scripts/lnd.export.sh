@@ -42,7 +42,8 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
 fi
 
 # load data from config
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 ########################
 # CANCEL

@@ -2,7 +2,9 @@
 
 # get raspiblitz config
 echo "get raspiblitz config"
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
+
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
@@ -32,7 +34,7 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -52,12 +54,14 @@ if [ ${dialogcancel} -eq 1 ]; then
 fi
 
 needsReboot=0
+anychange=0
 
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoPilot}" != "${choice}" ]; then
   echo "Autopilot Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
   needsReboot=1
 else 
@@ -72,6 +76,7 @@ if [ "${chain}" != "${choice}" ]; then
      dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
   else
     echo "Testnet Setting changed .."
+    anychange=1
     sudo /home/admin/config.scripts/network.chain.sh ${choice}net
     walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
     if [ ${walletExists} -eq 0 ]; then
@@ -141,6 +146,7 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${domainValue}" != "${choice}" ]; then
   echo "Dynamic Domain changed .."
+  anychange=1
   sudo /home/admin/config.scripts/internet.dyndomain.sh ${choice}
   needsReboot=1
 else
@@ -152,6 +158,7 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
   needsReboot=1
 else 
@@ -170,7 +177,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
     l2="Try to open the following URL in your local webrowser"
     l3="and login with your PASSWORD B."
     l4="---> http://${localip}:3000"
-    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 50
+    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 65
   fi
   needsReboot=1
 else
@@ -182,6 +189,7 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoUnlock}" != "${choice}" ]; then
   echo "LND Autounlock Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
   l1="AUTO-UNLOCK IS NOW OFF"
   if [ "${choice}" = "on" ]; then
@@ -194,6 +202,11 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
+fi
+
+if [ ${anychange} -eq 0 ]; then
+     dialog --pause "Hint: Use Spacebar to check/uncheck services." 8 58 5
+     exit 0
 fi
 
 if [ ${needsReboot} -eq 1 ]; then

@@ -19,6 +19,8 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
+# make raspiblitz.conf if not there
+sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
@@ -51,6 +53,9 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
+if [ "${setupStep}" != "100" ]; then
+  echo "hostname=${hostname}" >> $infoFile
+fi
 sudo chmod 777 ${infoFile}
 
 ################################
@@ -207,7 +212,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
-  # check if HDD cointains existing LND data (old RaspiBlitz Version)
+  # check if HDD contains existing LND data (old RaspiBlitz Version)
   echo "Check if HDD contains existing LND data .." >> $logFile
   lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${lndDataExists} -eq 1 ]; then
@@ -222,9 +227,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
 
   # check if HDD contains pre-loaded blockchain data
   echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
-  litecoinDataExists=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  bitcoinDataExists=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
 
   # check if node can go into presync (only for bitcoin)
   if [ ${bitcoinDataExists} -eq 1 ]; then
@@ -241,6 +245,8 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # check if pre-sync was already activated on last power-on
     #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
     echo "starting pre-sync in background" >> $logFile
+    # make sure that debug file is clean, so just pre-sync gets analysed on stop
+    sudo rm /mnt/hdd/bitcoin/debug.log
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
@@ -283,6 +289,15 @@ if [ ${configExists} -eq 1 ]; then
   sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
   if [ ${#freshPublicIP} -eq 0 ]; then
+    # prevent having no publicIP set at all and LND getting stuck
+    # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+    if [ ${#publicIP} -eq 0 ]; then
+      localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
+      freshPublicIP="${localIP}"
+    fi
+  fi
+  if [ ${#freshPublicIP} -eq 0 ]; then
    echo "WARNING: Was not able to determine external IP on startup." >> $logFile
   else
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
@@ -324,7 +339,30 @@ fi
 # SD INFOFILE BASICS
 ################################
 
+# state info
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
+
+# determine network and chain from system
+
+# check for BITCOIN
+loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
+  source /mnt/hdd/bitcoin/bitcoin.conf
+  if [ ${testnet} -gt 0 ]; then
+    sed -i "s/^chain=.*/chain=test/g" ${infoFile}
+  else
+    sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+  fi
+fi
+
+# check for LITECOIN
+loaded=$(sudo systemctl status litecoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
+  sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+fi
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

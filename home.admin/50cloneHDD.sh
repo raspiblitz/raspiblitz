@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 echo ""
 echo "*** Check 1st HDD ***"
@@ -34,7 +34,7 @@ while [ ${ready} -eq 0 ]
   done
 
 echo ""
-echo "*** Copy Blockchain form a second HDD ***"
+echo "*** Clone Blockchain form a second HDD ***"
 echo ""
 echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
 echo ""
@@ -204,5 +204,7 @@ else
 
 fi
 
-# setup script will decide the next logical step
-./10setupBlitz.sh
+if [ ${setupStep} -lt 100 ]; then
+  # setup script will decide the next logical step
+  /home/admin/10setupBlitz.sh
+fi

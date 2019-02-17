@@ -69,12 +69,23 @@ fi
 if [ "${state}" = "presync" ]; then
   # stopping the pre-sync
   echo ""
-  echo "********************************************"
-  echo "Stopping pre-sync ... pls wait (up to 1min)"
-  echo "********************************************"
-  sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
-  echo "bitcoind called to stop .."
-  sleep 50
+  # analyse if blockchain was detected broken by pre-sync
+  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
+  if [ ${blockchainBroken} -eq 1 ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "Detected corrupted blockchain on pre-sync !"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "Deleting blockchain data ..."
+    echo "(needs to get downloaded fresh during setup)"
+    sudo rm -f -r /mnt/hdd/bitcoin
+  else
+    echo "********************************************"
+    echo "Stopping pre-sync ... pls wait (up to 1min)"
+    echo "********************************************"
+    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
+    echo "bitcoind called to stop .."
+    sleep 50
+  fi
 
   # unmount the temporary mount
   echo "Unmount HDD .."
@@ -91,9 +102,8 @@ fi
 if [ "${state}" = "ready" ]; then
   configExists=$(ls ${configFile} | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
-    echo "setup is done - loading config data"
+    echo "loading config data"
     source ${configFile}
-    setupStep=100
   else
     echo "setup still in progress - setupStep(${setupStep})"
   fi
@@ -182,7 +192,7 @@ if [ ${setupStep} -eq 0 ]; then
     # old data setup
     BACKTITLE="RaspiBlitz - Manual Update"
     TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
-    MENU="\n         ATTENTION: OLD DATA COULD COINTAIN FUNDS\n"
+    MENU="\n         ATTENTION: OLD DATA COULD CONTAIN FUNDS\n"
     OPTIONS+=(MANUAL "read how to recover your old funds" \
               DELETE "erase old data, keep blockchain, reboot" )
     HEIGHT=11
@@ -204,7 +214,7 @@ elif [ ${setupStep} -lt 100 ]; then
     # see function above
     if [ ${setupStep} -gt 59 ]; then
       waitUntilChainNetworkIsReady
-    fi  
+    fi
 
     # continue setup
     BACKTITLE="${hostname} / ${network} / ${chain}"
@@ -458,8 +468,9 @@ case $CHOICE in
             ;;
         MANUAL)
             echo "************************************************************************************"
-            echo "PLEASE open in browser for more information:"
-            echo "https://github.com/rootzoll/raspiblitz#recover-your-coins-from-a-failing-raspiblitz"
+            echo "PLEASE go to RaspiBlitz FAQ:"
+            echo "https://github.com/rootzoll/raspiblitz"
+            echo "And check: How can I recover my coins from a failing RaspiBlitz?"
             echo "************************************************************************************"
             exit 0
             ;;

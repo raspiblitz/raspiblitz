@@ -18,7 +18,8 @@ fi
 _temp="./dialog.$$"
 
 # load raspiblitz config (if available)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
 fi
@@ -75,7 +76,7 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (first time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+       --insecure --passwordbox "Set new Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
 
     # get user input
     password1=$( cat $_temp )
@@ -220,8 +221,11 @@ elif [ "${abcd}" = "c" ]; then
   echo "****************************************************************************"
   echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
   echo "If you had Auto-Unlock active - you need to re-activate after this."
-  echo "To CANCEL use CTRL+C"
   echo "****************************************************************************"
+
+  echo "LND needs to be restarted to lock wallet first .. (please wait)"
+  sudo systemctl restart lnd
+  sleep 6
 
   # let LND-CLI handle the password change
   sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword

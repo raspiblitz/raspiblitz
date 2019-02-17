@@ -192,7 +192,7 @@ else
   if [ ${#dynDomain} -gt 0 ]; then
 
     #check if dyndns resolves to correct IP
-    ipOfDynDNS=$(getent hosts rootzoll.chickenkiller.com | awk '{ print $1 }')
+    ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
       public_color="${color_red}"
     else

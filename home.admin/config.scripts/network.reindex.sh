@@ -9,7 +9,8 @@ fi
 
 # check and load raspiblitz config
 # to know which network is running
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
  exit 1
@@ -41,6 +42,7 @@ fi
 
 # while loop to wait to finish
 finished=0
+progress=0
 while [ ${finished} -eq 0 ]
   do
   clear
@@ -51,13 +53,19 @@ while [ ${finished} -eq 0 ]
   echo "THIS CAN TAKE SOME LONG TIME"
   echo "If you dont see any progress after 24h keep X pressed to stop."
 
-  progress=0
-  echo ""
-  echo "PROGRESS: ${progress}%"
-  echo ""
+  # get blockchain sync progress
+  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
+  progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
+  #progress=$(echo "${progress}*100" | bc)
+  inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
+  if [ "${inprogress}" = "false" ]; then
+    finished=1
+  fi
 
-  #TODO: detect and display progress
-  #TODO: determine when finished and then finished=1
+  echo ""
+  echo "RUNNING: ${inprogress}"
+  echo "PROGRESS: ${progress}"
+  echo ""
 
   echo "You can close terminal while reindex is running.."
   echo "But you have to login again to check if ready."
@@ -73,9 +81,14 @@ while [ ${finished} -eq 0 ]
 
 done
 
+
 # trigger reboot when finished
 echo "*************************"
-echo "Re-Index finished"
+if [ ${finished} -eq 0 ]; then
+  echo "Re-Index CANCELED"
+else 
+  echo "Re-Index finished"
+fi
 echo "Starting reboot ..."
 echo "*************************"
 # stop bitcoind

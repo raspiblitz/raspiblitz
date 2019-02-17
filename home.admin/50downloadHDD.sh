@@ -1,6 +1,9 @@
 #!/bin/bash
 echo ""
 
+## get basic info
+source /home/admin/raspiblitz.info
+
 # *** BITCOIN (just mainnet) ***
 bitcoinList="" # url to list with other sources
 #bitcoinUrl="ftp://anonymous:anonymous@91.83.237.185:21/raspiblitz-bitcoin-2018-07-16"
@@ -14,9 +17,6 @@ litecoinSize=22220000 # 22221160-tolerance
 
 # NOTE TO GET THE SIZE RIGHT: for new download add 9999999999 as size. Run download.
 # When finished the warning comes up and behind WARNING: copy that number
-
-## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
 
 # settings based on network
 list=$bitcoinList
@@ -111,7 +111,7 @@ if [ ${isRunning} -eq 1 ]; then
   echo "killing screen session PID(${sessionPID})"
   # kill all child processes of screen sceesion
   pkill -P ${sessionPID}
-  echo "proccesses klilled"
+  echo "proccesses killed"
   sleep 3
  # tell the screen session to quit and wait a bit
   screen -S ${name} -X quit 1>/dev/null
@@ -141,7 +141,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   dialog --title " WARNING (${finalSize}) " --yesno "The download failed or is not complete. Maybe try again (later). Do you want keep already downloaded data for next try?" 8 57
   response=$?
   case $response in
-    1) sudo rm -rf ${targetDir} ;;
+    1) sudo rm -rf /mnt/hdd/download ;;
   esac
   ./00mainMenu.sh
   exit 1;
@@ -153,10 +153,11 @@ else
   sudo mv ${targetDir}${targetPath} /mnt/hdd/${network}
   echo "OK"
 
-  # set SetupState
-  sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
-
-  # continue setup
-  ./60finishHDD.sh
+  if [ ${setupStep} -lt 100 ]; then
+    # set SetupState
+    sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
+    # continue setup
+    ./60finishHDD.sh
+  fi
 
 fi

@@ -1,4 +1,7 @@
-source /mnt/hdd/raspiblitz.conf
+#!/bin/bash
+
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 
 
 ### USER PI AUTOSTART (LCD Display)
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')

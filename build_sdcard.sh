@@ -12,7 +12,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.00  *"
 echo "*****************************************"
 echo ""
 
@@ -96,8 +96,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   echo "*** PREPARE DietPi ***"
   echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
-  # add pi to the sudo group
-  sudo adduser pi sudo
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
@@ -116,8 +114,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   # install OpenSSH client + server
   sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
-
-
 
 fi
 
@@ -316,8 +312,8 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
-lndVersion="0.5.1-beta"
-lndSHA256="c8be77708fe95d5076fa6988229100598c14ae6c54e92a56d5f09f3e17732244"
+lndVersion="0.5.2-beta"
+lndSHA256="9adf9f3d0b8a62942f68d75ffe043f9255319209f751dee4eac82375ec0a86cd"
 olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
@@ -466,8 +462,9 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 # profile path for admin
 sudo bash -c "echo '' >> /home/admin/.profile"
 sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin:' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
 sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
@@ -507,29 +504,21 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
-# *** BOOTSTRAP ***
-# see background README for details
+# *** BACKGROUND ***
 echo ""
 echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
 
-# Prepare for TOR service
-echo "*** Adding Tor Sources to sources.list ***"
-echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "OK"
+# *** TOR Prepare ***
+echo "*** Prepare TOR source+keys ***"
+sudo /home/admin/config.scripts/internet.tor.sh prepare
 echo ""
-echo "*** Installing dirmngr ***"
-sudo apt install dirmngr
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "If you see fails above .. please run again later on:"
+echo "sudo /home/admin/config.scripts/internet.tor.sh prepare"
 echo ""
-echo "*** Fetching GPG key ***"
-sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
-sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-sudo gpg --keyserver pgpkeys.mit.edu --recv-key  74A941BA219EC810
-sudo gpg -a --export 74A941BA219EC810 | sudo apt-key add -
-echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -547,7 +536,7 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with `sudo shutdown -r now` and login with admin"
+echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
 # install LCD only on an rPI running Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
@@ -561,10 +550,12 @@ if [ "${baseImage}" = "raspbian" ]; then
   dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
   defaultDisplay=$?
 
-  if [[ $defaultDisplay -eq 0 ]]
-  then
+  if [ "${defaultDisplay}" = "0" ]; then
+
     # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
     # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+    
+    echo "--> LCD DEFAULT"
     cd /home/admin/
     sudo apt-mark hold raspberrypi-bootloader
     git clone https://github.com/goodtft/LCD-show.git
@@ -572,10 +563,13 @@ if [ "${baseImage}" = "raspbian" ]; then
     sudo chown -R admin:admin LCD-show
     cd LCD-show/
     sudo ./LCD35-show
+
   else
+
     # Download and install the driver
     # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
 
+    echo "--> LCD ALTERNATIVE"
     cd /boot
     sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
     sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
@@ -606,7 +600,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   display_rotate=3
 
   dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
-  EOF
+  fi
+EOF
     init 6
   fi
 fi

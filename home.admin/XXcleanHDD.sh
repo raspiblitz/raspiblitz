@@ -64,9 +64,7 @@ else
     sudo rm -f -r /mnt/hdd/tor
     sudo rm -f /mnt/hdd/raspiblitz.conf
     sudo rm -f /home/admin/raspiblitz.info
-    # recreate /mnt/hdd/ssh otherwise link with /etc/ssh is broken
-    sudo mkdir /mnt/hdd/ssh
-
+    
 
 fi
 

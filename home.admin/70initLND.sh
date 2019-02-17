@@ -2,7 +2,8 @@
 echo ""
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 
 
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"

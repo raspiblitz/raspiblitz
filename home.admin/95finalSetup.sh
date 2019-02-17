@@ -19,16 +19,6 @@ dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " 
     Press OK for a final reboot.
 " 10 42
 
-# init the RASPIBLITZ Config
-echo "# RASPIBLITZ CONFIG FILE" > $configFile
-echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
-sudo chmod 777 ${configFile}
-
-# transfer data from SD info file
-echo "hostname=${hostname}" >> $configFile
-echo "network=${network}" >> $configFile
-echo "chain=${chain}" >> $configFile
-
 # let migration/init script do the rest
 /home/admin/_bootstrap.migration.sh
 
@@ -39,7 +29,7 @@ cp $logFile /home/admin/raspiblitz.setup.log
 echo "Setting the Name/Alias/Hostname .."
 sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
-# mark setup is done (100%)
+# mark setup is done
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 clear

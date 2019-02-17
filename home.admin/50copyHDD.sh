@@ -1,16 +1,44 @@
 #!/bin/bash
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 # get local ip
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+# additional prep if this is used to replace corrupted blockchain
+if [ "${setupStep}" = "100" ]; then
+  # warn user
+  echo "!! Press ENTER to delete the old blockchain .. CTRL+C to CANCEL"
+  read key
+  # make sure services are not running
+  echo "stopping servcies ..."
+  sudo systemctl stop lnd 
+  sudo systemctl stop bitcoind 
+fi
+
+
 # create bitcoin base directory and link with bitcoin user
+echo "delete and create new blockchain directory ..."
 sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
+sudo rm -rf /home/bitcoin/.bitcoin 2>/dev/null
 sudo mkdir /mnt/hdd/bitcoin
 sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
 sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+
+# check setup
+echo "checking setup ..."
+sudo touch /home/bitcoin/.bitcoin/test.txt
+createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
+sudo rm /home/bitcoin/.bitcoin/test.txt
+if [ ${createdCorerct} -eq 0 ]; then
+  sudo rm -rf /mnt/hdd/bitcoin
+  sudo rm -rf /home/bitcoin/.bitcoin
+  echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
+  echo "Press ENTER to get back to menu ..."
+  read key
+  exit 1
+fi
 
 clear
 echo "************************************************************************************"
@@ -29,18 +57,13 @@ echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
 echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin"
-echo ""
-echo "This command will ask for your SSH PASSWORD A from this RaspiBlitz."
+echo "" 
+echo "This command may ask you first about the admin password of the other computer (because sudo)."
+echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
-#echo "Copy, Paste and Execute the following commands - line by line:"
-#echo "sudo scp -r ./chainstate bitcoin@${localip}:/home/bitcoin/.bitcoin/chainstate"
-#echo "sudo scp -r ./indexes bitcoin@${localip}:/home/bitcoin/.bitcoin/indexes"
-#echo "sudo scp -r ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin/blocks"
-#echo ""
-#echo "Every command above needs your SSH PASSWORD A to work and will take some time to transfer."
-#echo "PRESS ENTER if all 3 transfers are done or if you dont care and you want to return to menu."
+sleep 2
 read key
 
 # unlink bitcoin user (will created later in setup again)
@@ -72,8 +95,8 @@ if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
    anyDataAtAll=1
 fi
-if [ ${count} -lt 5200 ]; then
-  echo "FAIL: less then 5200 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
+if [ ${count} -lt 1500 ]; then
+  echo "FAIL: less then 1500 .ldb files (${count}) in /mnt/hdd/bitcoin/indexes/txindex (transfere seems invalid)"
   quickCheckOK=0
 fi
 
@@ -103,10 +126,16 @@ if [ ${anyDataAtAll} -eq 1 ]; then
 
 else
   
+  echo "back to menu ..."
   # when no data transferred - just delete bitcoin base dir again
   sudo rm -rf /mnt/hdd/bitcoin
+  sleep 2
 
 fi
 
-# setup script will decide the next logical step
-./10setupBlitz.sh
+if [ ${setupStep} -lt 100 ]; then
+  # setup script will decide the next logical step
+  /home/admin/10setupBlitz.sh
+else
+  "DONE - reboot is needed: sudo shutdown -r now"
+fi
