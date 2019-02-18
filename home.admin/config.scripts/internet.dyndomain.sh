@@ -11,11 +11,17 @@ fi
 turn="off"
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then turn="on"; fi
 
+echo "number of args($#)"
+
 # 2. parameter [?domainName]
-dynDomain=$2
+if [ $# > 1 ]; then
+  dynDomain=$2
+fi
 
 # 3. parameter [?domainName]
-dynUpdateUrl=$3
+if [ $# > 2 ]; then
+  dynUpdateUrl=$3
+fi
 
 # run interactive if 'turn on' && no further parameters
 if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
