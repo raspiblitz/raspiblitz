@@ -15,7 +15,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then turn="on"; fi
 dynDomain=$2
 
 # 3. parameter [?domainName]
-updateDynDomain=$3
+dynUpdateUrl=$3
 
 # run interactive if 'turn on' && no further parameters
 if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
