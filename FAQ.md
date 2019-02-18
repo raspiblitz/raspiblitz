@@ -121,7 +121,17 @@ Recovering the coins that you have in an active channel is a bit more complicate
 
 To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
 
-But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: `scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
+But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: 
+
+`scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
+
+And if you want to put a LND backup state back. Make a fresh RaspiBlitz (new sd card image and a clean HDD), set it up until its ready (you see the status screen on LCD) and then go to terminal, stop lnd service with `sudo systemctl stop lnd` delete the content of the lnd data dir with `sudo rm -rf /mnt/hdd/lnd/*`. Then on your laptop being in terminal in the same directory you did the backup in (the backuped lnd directory is listed there) run the following SCP command:
+
+`scp -r ./lnd/* bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/` use password A
+
+No run a reboot with: `sudo shutdown -r now` ... LND may need some longer rescan after reboot, but then you should see your old channels and balances. 
+
+**Be aware that if backup is some hours/days old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state and LND is closing channels it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution.**
 
 ## What is this mnemonic seed word list?
 
@@ -472,8 +482,9 @@ Old:
 * Name it: `raspiblitz-vX.X-YEAR-MONTH-DAY.img.zip`
 
 New:
-* open terminal - check name if sd-card writer with `df`
-* `dd if=/dev/[sdcarddevice] | gzip > /media/ubuntu/NTFS/raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
+* Connect and open in Filemenager NTFS - context on white scace -> open terminal 
+* run `df`to check on sd card reader device name
+* `sudo dd if=/dev/[sdcarddevice] | gzip > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 
 * Delete all IMG files from NTFS (just keep zips/gzs)
 * Context on white space, `Open in Terminal`, run `shasum -a 256 [NEW-ZIP] > sha256.txt`
