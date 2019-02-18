@@ -91,7 +91,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
-  sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
+
+  # setting dynUpdateUrl is a bit cpmplicated because value can contain chars that break sed replacement
+  # so first remove dynUpdateUrl from config and then add fresh as new line at the end
+  grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > /mnt/hdd/raspiblitz.conf
+  echo "dynUpdateUrl='${dynUpdateUrl}'" >> ${configFile}
+  #sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
 
   echo "changing lnd.conf"
 
