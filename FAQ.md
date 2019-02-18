@@ -63,15 +63,15 @@ Copying a already synced blockchain from another computer (for example your Lapt
 
 One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1 with transaction index switched on (`txindex=1` in the `bitcoin.conf`). 
 
-But we dont copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writeable by Windows or Mac computers. So I will explain a way to copy the data thru your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
+But we dont copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writeable by Windows or Mac computers. So I will explain a way to copy the data through your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
 
-Both computers (your RaspberryPi and the other computer with the full blockchain on) need to be connected to the same local network. Make sure that bitcoin is stoped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz run on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blochcian data is with `cd /mnt/hdd/bitcoin` - when copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
+Both computers (your RaspberryPi and the other computer with the full blockchain on) need to be connected to the same local network. Make sure that bitcoin is stoped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz run on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
 
-If everything of the above is prepared, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - its OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfere the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands, that will copy the data over your Local Network to your RaspiBlitz. 
+If everything of the above is prepared, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - its OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfer the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands, that will copy the data over your Local Network to your RaspiBlitz. 
 
-Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfere. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
+Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfer. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. `sudo systemctl stop bitcoind` and `sudo systemctl stop lnd` then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data and set the correct permissions. Then make a reboot `sudo shutdown -r now`*
+**If you want to replace a corrupted blockchain this way:**  *Go to terminal - maybe with CTRL+c. Then call `/home/admin/50copyHDD.sh` use the displayed SCP commands to copy over the fresh blockchain. Press ENTER when all is copied, so that the script can quick check the data. Then make a reboot `sudo shutdown -r now`*
 
 ## How do I clone the Blockchain from a 2nd HDD?
 
@@ -121,7 +121,17 @@ Recovering the coins that you have in an active channel is a bit more complicate
 
 To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
 
-But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped.
+But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: 
+
+`scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
+
+And if you want to put a LND backup state back. Make a fresh RaspiBlitz (new sd card image and a clean HDD), set it up until its ready (you see the status screen on LCD) and then go to terminal, stop lnd service with `sudo systemctl stop lnd` delete the content of the lnd data dir with `sudo rm -rf /mnt/hdd/lnd/*`. Then on your laptop being in terminal in the same directory you did the backup in (the backuped lnd directory is listed there) run the following SCP command:
+
+`scp -r ./lnd/* bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/` use password A
+
+No run a reboot with: `sudo shutdown -r now` ... LND may need some longer rescan after reboot, but then you should see your old channels and balances. 
+
+**Be aware that if backup is some hours/days old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state and LND is closing channels it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution.**
 
 ## What is this mnemonic seed word list?
 
@@ -464,15 +474,24 @@ Work Nodes for the process of producing a new sd card image release:
 * Remove `Ubuntu LIVE` USB stick and replace with `Ubuntu AIRGAP`
 * PowerOn Build Laptop (press F12 for boot menu)
 * Cut Power of RaspiBlitz, remove sd card and connect with sd card reader to build laptop
+
+Old:
 * Open `Disks` manager, select sd card and choose `Create Disk Image` (right upper corner window)
 * Store image to NTFS USB stick (click to start can take a while - enter password)
 * Open in File Manager the NTFS USB Stick, context menu the created IMG file `compress`
 * Name it: `raspiblitz-vX.X-YEAR-MONTH-DAY.img.zip`
-* Delete all IMG files from NTFS (just keep zips)
+
+New:
+* Connect and open in Filemenager NTFS - context on white scace -> open terminal 
+* run `df`to check on sd card reader device name
+* `sudo dd if=/dev/[sdcarddevice] | gzip > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
+
+* Delete all IMG files from NTFS (just keep zips/gzs)
 * Context on white space, `Open in Terminal`, run `shasum -a 256 [NEW-ZIP] > sha256.txt`
 * [Do future author signing here with tools from airgap build machine]
 * Shutdown build computer
 * Connect NTFS USB stick to MacOS (its just readonly)
+* Check if file can be unzipped on OSX
 * Run tests with new image
 * Upload new image to Download Server 
 * Copy SHA256-String into GutHub README and update downloadlink 
@@ -488,6 +507,14 @@ When you put in a sd card with a new/clean RaspiBlitz image the RaspiBlitz will 
 But there might be cases where you want to start a totally fresh/clean RaspiBlitz from the beginning. To do so you need to delete the old data from the HDD. You can do so by formating it on another computer (for example with FAT and name it "NEW"). Or when you can run the script "/home/admin/XXcleanHD.sh -all" on the terminal.
 
 When the HDD is clean, then flash a new RaspiBlitz sd card and your setup should start fresh. 
+
+## My blockchain data is corrupted - what can I do?
+
+You could try to re-index, but that can take some very long time - multiple days or even weeks.
+
+Another option would be to delete the old blockchain and get a new one. See for details the FAQ question: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz). And even if you are not able to delete the data, first rename the undeletable folders and then follow the instructions.
+
+Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD is degrading - maybe this is a good time to replace it. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
 
 ## Can I flip the screen?
 
