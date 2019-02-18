@@ -26,6 +26,10 @@ fi
 # run interactive if 'turn on' && no further parameters
 if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
 
+  # make sure dialog file is writeable
+  sudp touch ./.tmp
+  sudo chmod 777 ./.tmp
+
   dialog --backtitle "DynamicDNS" --inputbox "ENTER the Dynamic Domain Name:
 
 For more details see chapter in GitHub README 
