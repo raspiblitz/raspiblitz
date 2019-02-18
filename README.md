@@ -81,9 +81,9 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 1. Download SD-Card image - **Version 1.0**:
 
-http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2018-02-18.torrent
 SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
-Torrent-Download: 
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
