@@ -9,12 +9,14 @@ This guide was tested on:
 * Raspberry Pi 3 B Plus - no LCD support so far
 * hoping to extend this list with more compatible boards especially the ROCK64  
 
-See the  [hardware comparison](hw_comparison.md).
+See the [hardware comparison](hw_comparison.md).
+
+---
 
 
 ### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
 ---
-## General Guide for RaspiBlitz-on-DietPi 
+## General guide for the RaspiBlitz-on-DietPi 
 
 ### Setting up the DietPi OS
 
