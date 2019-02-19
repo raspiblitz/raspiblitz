@@ -501,8 +501,16 @@ When the HDD is clean, then flash a new RaspiBlitz sd card and your setup should
 
 ## My blockchain data is corrupted - what can I do?
 
-You could try to re-index, but that can take some very long time - multiple days or even weeks.
+You could try to re-index, but that can take some very long time - multiple days or even weeks. But there are other options:
 
-Another option would be to delete the old blockchain and get a new one. See for details the FAQ question: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz). And even if you are not able to delete the data, first rename the undeletable folders and then follow the instructions.
+1. Copy Blockchain from another Computer
 
-Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD is degrading - maybe this is a good time to replace it. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+You can delete the old blockchain and get a new one. See for details the FAQ question: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz). And even if you are not able to delete the data, first rename the undeletable folders and then follow the instructions.
+
+2. Re-Torrent download prepared Blockchain
+
+You can also start a new Torrent-Download and replace the old blockchain with a new download once its finished. Go to terminal and run script `/mnt/hdd/50torrentHDD.sh`
+
+3. Backup LND Data, make fresh Blitz, Replay LND Data
+
+You can backup your channel and wallet data, make a complete fresh RaspiBlitz and after that one is setup you replace the LND data with your old one. Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD or SD card is degrading - maybe this is a good time to replace. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)*
