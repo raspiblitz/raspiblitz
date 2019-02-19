@@ -1,4 +1,4 @@
-# ⚡️ RaspiBlitz on DietPi ⚡️
+# ⚡️ RaspiBlitz-on-DietPi ⚡️
 #  A hardware agnostic platform
 
 
@@ -9,105 +9,69 @@ This guide was tested on:
 * Raspberry Pi 3 B Plus - no LCD support so far
 * hoping to extend this list with more compatible boards especially the ROCK64  
 
-See the hardware specs:  [hardware specs](hw_comparison.md).
+See the [hardware comparison](hw_comparison.md).
+
+---
 
 
-![](pictures/DroidBlitz.jpg)
+### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
+---
+## General guide for the RaspiBlitz-on-DietPi 
 
+### Setting up the DietPi OS
 
-## Setting up the DietPi OS
+Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9 
 
-### Download the updated DietPi image
+* Start with an ARM based Single Board Computer listed on DietPi.com.  
+At least 1GB RAM is recommended.  
+Look for the SD card image for the specific SBC in the [download section](https://dietpi.com/#download).
 
-For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded here:  
-https://mega.nz/#!AcdVBAbR!O-W3jP5LUgw7lMY8S9XcBWcKX3IhRNAAFmaYzDXIUC0  
+* Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/) and extend the rootfs partition to the size of your card with a partition manager.
 
-Burn the SDCard with [Etcher](https://www.balena.io/etcher/) and extend the rootfs partition to the size of your card with a partition manager.
+* Insert the SDcard into your SBC.
 
-Insert the SDcard into the Odroid.
+* Connect the HDD with a powered suitably powered adapter.
+A USB 2.0 port will not be able to power an HDD so you will need extra cable
+If you are connecting the HDD to a USB 3.0 port and have an at least 2A power supply, you might be able to run without an extra cable.
 
-Power up and continue with: [Run the DietPi optimized Raspiblitz SDcard build script](#Run-the-DietPi-optimized-Raspiblitz-SDcard-build-script)
-
-### Build your own DietPi image:
-
-For the Odroid HC1 / HC2 / XU3 / XU4 download this image:   
-https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z  
-and burn it to the SD with [Etcher](https://www.balena.io/etcher/)
-
-Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9  
-
-In the desktop terminal on Linux / MacOS or Putty on Windows:  
-
+* Power up and log in with the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
 
-Ok > Cancel > Cancel  
-automatic apt update & apt upgrade and asks to reboot
-![](pictures/dietpi_1st_reboot.png)  
 
-`ssh root@[IP-OF-DIETPI]`  
-after the previous update the ssh keys might change:
+* You might be asked about updating DietPi. This is not a straightforward process if starting from a  version <6.20. Try to update, it is best to build on the latest version.
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
-@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @  
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
-
-run (can be copied from the terminal output):   
+* In the DietPi software menu install `fail2ban` and make `OpenSSH server` the default SSH server.  
+Changing the SSH server will change the SSH keys again. To clear:  
 `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
-`ssh root@[IP-OF-DIETPI]`   
-yes >   
-password: `dietpi`  
-
-At this point if the DietPi was not updated from 6.14 it does not manage to save settings going forward.  
-Exit the sotware installer (press Tab to jump to Exit)
-![](pictures/dietpi-software_exit.png)  
-
-in the bash prompt run:  
-`dietpi-update`
->Ok > Cancel the recovery point   
-update > >Opt out of survey > Ok  
-Reboots
-
+* After every reboot log back in:  
 `ssh root@[IP-OF-DIETPI]`  
-password: `dietpi` 
+password: `dietpi`
 
->Ok > Cancel > Cancel  
-Search `fail2ban` > Space to select > Enter   
-> Install > Ok  
->Opt out of survey > Ok  
-Reboots again
-
-## Run the DietPi optimized Raspiblitz SDcard build script
-
-In the desktop terminal in Linux / MacOS or Putty in Windows:
-
-`ssh root@[IP-OF-DIETPI]`  
-password: `dietpi`  
-Should end up here on version v6.20.6 or higher: 
+* Should end up here on version v6.20.6 or higher: 
 ![](pictures/bash_prompt.png)
 
-run the SDcard build script in this format:
-`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`
 
-Be aware of that the fork needs to be called `raspiblitz` for the git download to work.
-if you intend to use @openoms`s forked version:
+### Run the RaspiBlitz build_sdcard.sh script
 
-`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`
+* Use this format to build the SDcard with the Raspiblitz script:  
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
+If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
-See my example output on the Odorid HC1: [HC1_sdcard_build_output](logs/HC1_sdcard_build_output)  
+* Run the forked version of @openoms:  
+`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`  
+This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
+* Restart when done and log back in now as `admin`:  
 `ssh admin@[IP-OF-DROIDBLITZ]`  
-password: raspiblitz
+password: `raspiblitz`
 
-### The setup continues as described in the RaspiBlitz setup [README.md](/README.md#documentation)
+* From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
 
-### Examples of copying the blockchain data from a HDD using a powered USB to SATA adapter
 
-![copy the blockchain from a HDD of a Raspiblitz](pictures/5_options_to_copy.png)
-![example setup](pictures/HDD_copy_example.jpg)
-![](pictures/adapterHDD_HC1.jpg)
 
+---
 ### Useful commands for debugging:
 To test a new configuration run XXcleanHDD.sh and strictly restart
 (this makes _bootstrap.sh and 00mainMenu.sh run in the right order)
@@ -119,14 +83,13 @@ To test a new configuration run XXcleanHDD.sh and strictly restart
 `sudo tail -n100 /mnt/hdd/bitcoin/debug.log` - shows the last 100 lines  
 `sudo systemctl status lnd`  
 `sudo journalctl -f -u lnd`  
-`./home/admin/XXdebugLogs.sh` - debug log collection on the raspiblitz 
+`./home/admin/XXdebugLogs.sh` - debug log collection on the RaspiBlitz 
 
 ---
 
-Currently the DietPi update process has a bug causing bootloop if left alone. Will be sorted once the current, >6.2 version is uploaded as the starting image.  
 
-## Excerpts from the default dietpi.txt  
-(https://github.com/Fourdee/DietPi/blob/master/dietpi.txt) to be used once the automatic install is feasible.
+## Excerpts from the default [dietpi.txt](https://github.com/Fourdee/DietPi/blob/master/dietpi.txt)
+to be used for a fully automatic SDcard building process.
 
 ### Automate installation with the dietpi.txt
 Need to copy to SDcard /boot/dietpi.txt after burning the image with Etcher.
@@ -158,3 +121,6 @@ Allows you to automatically execute a custom script at the end of DietPi install
 Option 1 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.  
 Option 2 = Host your script online, then use AUTO_SETUP_CUSTOM_SCRIPT_EXEC=http://myweb.com/myscript.sh, it will be downloaded and executed automatically. | 0=disabled  
 NB: Executed script log /var/tmp/dietpi/logs/dietpi-automation_custom_script.log
+
+### Guide to clone your SD-cards in Windows, MacOS and Linux and shrink the image in Linux:
+https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
