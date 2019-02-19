@@ -491,6 +491,11 @@ Work Nodes for the process of producing a new sd card image release:
 
 There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
 
+## Can I flip the screen?
+
+For the default 3.5" LCD you need to edit the /boot/config.txt. Run `sudo nano /boot/config.txt`
+look for the line `dtoverlay=tft35a:rotate=270` towards the end. To flip the screen with 180 degrees change the line to `dtoverlay=tft35a:rotate=90` and reboot with `sudo reboot`. Reference: https://github.com/goodtft/LCD-show/issues/34
+
 ## How to setup fresh/clean/reset and not getting into recovery mode?
 
 When you put in a sd card with a new/clean RaspiBlitz image the RaspiBlitz will get into recovery mode because it detects the old data on your HDD and assumes you just want to continue to work with this data. 
