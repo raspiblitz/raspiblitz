@@ -20,6 +20,8 @@ See the [hardware comparison](hw_comparison.md).
 
 ### Setting up the DietPi OS
 
+Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9 
+
 * Start with an ARM based Single Board Computer listed on DietPi.com.  
 At least 1GB RAM is recommended.  
 Look for the SD card image for the specific SBC in the [download section](https://dietpi.com/#download).
@@ -32,18 +34,14 @@ Look for the SD card image for the specific SBC in the [download section](https:
 A USB 2.0 port will not be able to power an HDD so you will need extra cable
 If you are connecting the HDD to a USB 3.0 port and have an at least 2A power supply, you might be able to run without an extra cable.
 
-* Power up and continue with: [Run the DietPi optimized Raspiblitz SDcard build script](#Run-the-RaspiBlitz-build_sdcard.sh-script)
-
-
- 
-* In the desktop terminal on Linux / MacOS or Putty on Windows:  
+* Power up and log in with the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
-Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9 
 
-* You might be asked about updating DietPi. This might not be straightforward if starting froma  version <6.20. Try to update, it is best to build on the latest version.
 
-* In the DietPi software menu install fail2ban and make OpenSSH server the default SSH server.
+* You might be asked about updating DietPi. This is not a straightforward process if starting from a  version <6.20. Try to update, it is best to build on the latest version.
+
+* In the DietPi software menu install `fail2ban` and make `OpenSSH server` the default SSH server.  
 Changing the SSH server will change the SSH keys again. To clear:  
 `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
@@ -57,13 +55,13 @@ password: `dietpi`
 
 ### Run the RaspiBlitz build_sdcard.sh script
 
-* Format of the command to build the SDcard:  
+* Use this format to build the SDcard with the Raspiblitz script:  
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
 * Run the forked version of @openoms:  
 `wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`  
-This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
+This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
 * Restart when done and log back in now as `admin`:  
 `ssh admin@[IP-OF-DROIDBLITZ]`  

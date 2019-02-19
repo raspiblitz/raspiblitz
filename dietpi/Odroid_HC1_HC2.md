@@ -5,7 +5,7 @@
 ![](pictures/DroidBlitz.jpg)
 
 ## There are 3 options provided:
-* a trusted SDcard image 
+* a trusted fully prebuilt SDcard image
 * building your own SDcard from an updated DietPi image.
 * Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
 ---
@@ -30,7 +30,7 @@ The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootz
 ---
 ### Download the updated DietPi image
 
-* For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded [here](
+For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded [here](
 https://mega.nz/#!AcdVBAbR!O-W3jP5LUgw7lMY8S9XcBWcKX3IhRNAAFmaYzDXIUC0).  
 sha256sum DietPi_v6.20.6_OdroidXU4-ARMv7-Stretch.img: 
 1459b91f66b9db98f3437c31231e44497b7b7dcd9146d2cc41a3da653f9a9215
@@ -39,13 +39,13 @@ sha256sum DietPi_v6.20.6_OdroidXU4-ARMv7-Stretch.img:
 
 * Insert the SDcard into the Odroid.
 
-* Power up and continue with: [Run the RaspiBlitz build_sdcard.sh script](#Run-the-RaspiBlitz-build_sdcard.sh-script)
+* Power up and continue with [running the RaspiBlitz build_sdcard.sh script](#Run-the-RaspiBlitz-build_sdcard.sh-script)
 
 ---
 
 ### Build your own DietPi image:
 
-* Watch out this is an ardous process. 
+Watch out this is an ardous process. 
 Updating from a v6.14 DietPi image is causing a bootloop under some circumstances. Will be sorted once the current, >6.2 version is uploaded for the Odroids.  
 
 * For the Odroid HC1 / HC2 / XU3 / XU4 the start is this image:   
@@ -65,7 +65,7 @@ automatic apt update & apt upgrade and asks to reboot
 * Log back in:
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
-* after the previous update the ssh keys might change:
+* after the update the ssh keys might change:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
 @ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @  
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
@@ -75,8 +75,8 @@ run (can be copied from the terminal output):
 yes >   
 password: `dietpi`  
 
-* At this point if the DietPi was not updated from 6.14 it does not manage to save settings going forward.  
-Exit the sotware installer (press Tab to jump to Exit)
+* At this point if the DietPi OS was not updated from 6.14 it does not manage to save settings going forward.  
+Exit the software installer (press Tab to jump to Exit)
 ![](pictures/dietpi-software_exit.png)  
 
 * in the bash prompt run:  
@@ -88,9 +88,7 @@ Reboots
 * Log back in:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi` 
-* In the DietPi software menu install fail2ban and make OpenSSH server the default SSH server.
-Changing the SSH server will change the SSH keys again. To clear:  
-`ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`  
+* In the DietPi software menu install fail2ban and make OpenSSH server the default SSH server.  
 Ok > Cancel > Cancel  
 Search `fail2ban` > Space to select > Enter  
 SSH server > switch from Dropbear to the OpenSSH-server  
@@ -98,7 +96,10 @@ Install > Ok
 Opt out of survey > Ok  
 Reboots again
 
-* Changing the SSH server will change the SSH keys again. To clear:  
+* Log back in:  
+`ssh root@[IP-OF-DIETPI]`  
+password: `dietpi`  
+Changing the SSH server will change the SSH keys again. To clear:  
 `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
 
