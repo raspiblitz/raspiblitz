@@ -198,7 +198,7 @@ while :
         l2="ssh admin@${localip}\n"
         l3="Waiting for AUTO-UNLOCK"
       fi
-      boxwidth=$((${#localip} + 24))
+      boxwidth=$((${#localip} + 26))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3$l4" ${h} ${boxwidth}
       sleep 5
       continue

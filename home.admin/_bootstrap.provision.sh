@@ -157,4 +157,8 @@ else
 fi
 
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
+
+echo "DONE - Give raspi some cool off time after hard building .... 20 secs sleep" >> ${logFile}
+sleep 20
+
 echo "END Provisioning" >> ${logFile}

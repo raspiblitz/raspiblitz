@@ -14,31 +14,20 @@ if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
-  sudo systemctl stop bitcoind 
+  sudo systemctl stop bitcoind
+  sudo systemctl disable bitcoind
+  sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
+# delete all IN bitcoin directory but not itself if it exists
+# so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
+sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
 
-# create bitcoin base directory and link with bitcoin user
-echo "delete and create new blockchain directory ..."
-sudo rm -rf /mnt/hdd/bitcoin 2>/dev/null
-sudo rm -rf /home/bitcoin/.bitcoin 2>/dev/null
-sudo mkdir /mnt/hdd/bitcoin
-sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin 
-sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+# make sure /mnt/hdd/bitcoin exists
+sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
 
-# check setup
-echo "checking setup ..."
-sudo touch /home/bitcoin/.bitcoin/test.txt
-createdCorerct=$(sudo ls /mnt/hdd/bitcoin/test.txt | grep -c 'test.txt')
-sudo rm /home/bitcoin/.bitcoin/test.txt
-if [ ${createdCorerct} -eq 0 ]; then
-  sudo rm -rf /mnt/hdd/bitcoin
-  sudo rm -rf /home/bitcoin/.bitcoin
-  echo "FAILED: sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin"
-  echo "Press ENTER to get back to menu ..."
-  read key
-  exit 1
-fi
+# allow all users write to it ()
+sudo chmod 777 /mnt/hdd/bitcoin
 
 clear
 echo "************************************************************************************"
@@ -56,7 +45,7 @@ echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'inde
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
-echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/home/bitcoin/.bitcoin"
+echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."
 echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
@@ -65,9 +54,6 @@ echo "**************************************************************************
 echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
 sleep 2
 read key
-
-# unlink bitcoin user (will created later in setup again)
-sudo unlink /home/bitcoin/.bitcoin 
 
 # make quick check if data is there
 anyDataAtAll=0
@@ -100,42 +86,65 @@ if [ ${count} -lt 1500 ]; then
   quickCheckOK=0
 fi
 
+echo "*********************************************"
+echo "QUICK CHECK RESULT"
+echo "*********************************************"
+
 # just if any data transferred ..
 if [ ${anyDataAtAll} -eq 1 ]; then
 
   # data was invalid - ask user to keep?
   if [ ${quickCheckOK} -eq 0 ]; then
-    echo "*********************************************"
-    echo "There seems to be an invalid transfer."
-    echo "Wait 5 secs ..."
-    sleep 5
-    dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 60
-    response=$?
-    echo "response(${response})"
-    case $response in
-      1) quickCheckOK=1 ;;
-    esac
-  fi
 
-  if [ ${quickCheckOK} -eq 0 ]; then
-    echo "Deleting invalid Data ..."
-    sudo rm -rf /mnt/hdd/bitcoin
-    sudo rm -rf /home/bitcoin/.bitcoin
-    sleep 2
+    echo "FAIL -> DATA seems incomplete."
+
+  else
+
+    echo "OK -> DATA LOOKS GOOD :D"
+
   fi
 
 else
+
+  echo "CANCEL -> NO DATA was copied."
+  quickCheckOK=0
+
+fi
+echo "*********************************************"
+
+# if started after intial setup - quit here
+if [ "${setupStep}" = "100" ]; then
+  sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+  sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
+  sudo systemctl enable bitcoind
+  echo "DONE - reboot is needed: sudo shutdown -r now"
+  exit 0
+fi
+
+# REACT ON QUICK CHECK DURING INITAL SETUP
+
+
+if [ ${quickCheckOK} -eq 0 ]; then
+
+  echo "*********************************************"
+  echo "There seems to be an invalid transfer."
+
+  echo "Wait 5 secs ..."
+  sleep 5
+  dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 60
+  response=$?
+  echo "response(${response})"
+  case $response in
+    1) quickCheckOK=1 ;;
+  esac
   
-  echo "back to menu ..."
-  # when no data transferred - just delete bitcoin base dir again
+fi
+
+if [ ${quickCheckOK} -eq 0 ]; then
+  echo "Deleting invalid Data ... "
   sudo rm -rf /mnt/hdd/bitcoin
   sleep 2
-
 fi
 
-if [ ${setupStep} -lt 100 ]; then
-  # setup script will decide the next logical step
-  /home/admin/10setupBlitz.sh
-else
-  "DONE - reboot is needed: sudo shutdown -r now"
-fi
+# setup script will decide the next logical step
+/home/admin/10setupBlitz.sh

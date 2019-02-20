@@ -170,6 +170,7 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/bonus.rtl.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
