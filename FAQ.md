@@ -323,7 +323,7 @@ Also there are first free 3D open source files in this repo in the directory `ca
 
 ## Are those "Under-Voltage detected" warnings a problem?
 
-When your USB power adapter for the RaspiBlitz delivers too low power those messages with "Under-Voltage detected" (undervoltage) are shortly seen on the display. If you see those just one or two times that's not OK, but can be in a tolerant window. Nevertheless make sure your USB power adapter can deliver at least 3A. If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD through a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB
+When your USB power adapter for the RaspiBlitz delivers too low power those messages with "Under-Voltage detected" (undervoltage) are shortly seen on the display. This can lead to data loss/corruption on the HDD. If you see those just one or two times that's not OK, but can be in a tolerant window. Nevertheless it make sure your USB power adapter can deliver at least 3A (big and stable is good). If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD through a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB or put a USB Hub with extra power between the raspberry and the HDD. 
 
 ## Why do we need to download the blockchain and not syncing it?
 
