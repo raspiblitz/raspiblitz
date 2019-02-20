@@ -40,9 +40,9 @@ sleep 3
 echo ""
 echo "*** CHECK BASE IMAGE ***"
 
-# armv7=32Bit , armv8=64Bit
+# armv7=32Bit , armv8=64Bit , aarch
 echo "Check if Linux ARM based ..." 
-isARM=$(uname -m | grep -c 'arm')
+isARM=$(uname -m | grep -E -c 'arm|aarch64')
 if [ ${isARM} -eq 0 ]; then
   echo "!!! FAIL !!!"
   echo "Can just build on ARM Linux, not on:"
@@ -206,11 +206,11 @@ echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.17.0.1"
+bitcoinVersion="0.17.1"
 
 # needed to make sure download is not changed
 # calulate with sha256sum and also check with SHA256SUMS.asc
-bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
+bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -220,7 +220,7 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
+binaryName="bitcoin-${bitcoinVersion}-aarch64-linux-gnu.tar.gz"
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
 if [ ! -f "./${binaryName}" ]
 then
@@ -278,35 +278,35 @@ if [ ${installed} -lt 1 ]; then
   exit 1
 fi
 
-echo ""
-echo "*** LITECOIN ***"
-# based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
-
-# set version (change if update is available)
-litecoinVersion="0.16.3"
-litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
-cd /home/admin/download
-
-# download
-binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
-sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
-
-# check download
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
-  exit 1
-fi
-
-# install
-sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
-installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
-if [ ${installed} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
-  exit 1
-fi
+#echo ""
+#echo "*** LITECOIN ***"
+## based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
+#
+## set version (change if update is available)
+#litecoinVersion="0.16.3"
+#litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+#cd /home/admin/download
+#
+## download
+#binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+#sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+#
+## check download
+#binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+#if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+#  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+#  exit 1
+#fi
+#
+## install
+#sudo -u admin tar -xvf ${binaryName}
+#sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
+#installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
+#if [ ${installed} -lt 1 ]; then
+#  echo ""
+#  echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
+#  exit 1
+#fi
 
 echo ""
 echo "*** LND ***"
@@ -536,7 +536,7 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with sudo shutdown -r  now and login with admin"
+echo "to continue reboot with `reboot` and login with admin"
 
 # install LCD only on an rPI running Raspbian
 if [ "${baseImage}" = "raspbian" ]; then

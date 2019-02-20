@@ -20,6 +20,8 @@ if [ ${hddExists} -eq 0 ]; then
     echo "Press ENTER to create a Partition - or CTRL+C to abort"
     read key
     echo "Creating Partition ..."
+    # to solve Error: /dev/sda: unrecognised disk label on a brand new HDD
+    sudo parted /dev/sda --script -- mklabel msdos
     sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
     echo "DONE."
     sleep 3
@@ -203,8 +205,9 @@ if [ ${setupStep} -eq 0 ]; then
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
     MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+    #OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+    #          LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning")
     HEIGHT=11
 
   fi
