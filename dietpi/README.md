@@ -7,14 +7,14 @@ This guide was tested on:
 * Odroid HC1
 * Odroid HC2 (the same board except it accommodates a 3.5" 12V HDD)
 * Raspberry Pi 3 B Plus - no LCD support so far
-* hoping to extend this list with more compatible boards especially the ROCK64  
+* Rock64  
 
 See the [hardware comparison](hw_comparison.md).
 
 ---
+### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](odroid_hc1.md)
+### Downloads and walkthrough for the [Rock64](rock64.md)
 
-
-### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
 ---
 ## General guide for the RaspiBlitz-on-DietPi 
 
