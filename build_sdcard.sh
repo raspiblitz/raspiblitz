@@ -39,7 +39,7 @@ sleep 3
 
 echo ""
 echo "*** CHECK BASE IMAGE ***"
-# armv7=32Bit , armv8=64Bit , aarch=Rock64
+# armv7=32Bit , armv8=64Bit , aarch64=armv8(Rock64)
 echo "Check if Linux ARM based ..." 
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
@@ -619,7 +619,7 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with `reboot` and login with admin"
+echo "to continue reboot with \`reboot\` and login again with \`ssh admin@your.raspiblitz.IP\` "
 
 # install LCD only on an rPI running Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
