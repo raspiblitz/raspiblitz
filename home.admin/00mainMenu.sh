@@ -201,15 +201,24 @@ if [ ${setupStep} -eq 0 ]; then
 
   else
 
-    # start setup
-    BACKTITLE="RaspiBlitz - Setup"
-    TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-    #OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-    #          LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning")
-    HEIGHT=11
-
+    isARM=$(uname -m | grep -c 'arm')
+    isAARCH64=$(uname -m | grep -c 'aarch64')
+    if [ ${isAARCH64} -eq 1 ] ; then
+      # start setup
+      BACKTITLE="RaspiBlitz - Setup"
+      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+      MENU="\nStart setting up your RaspiBlitz: \n "
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning" )
+      HEIGHT=6
+    else
+      # start setup
+      BACKTITLE="RaspiBlitz - Setup"
+      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+      MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+      HEIGHT=11
+    fi
   fi
 
 elif [ ${setupStep} -lt 100 ]; then
