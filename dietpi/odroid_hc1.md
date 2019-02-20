@@ -10,7 +10,7 @@
 * Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
 ---
 ### Download the fully prebuilt RaspiBlitz-on-DietPi SDcard image
-* [torrent](https://github.com/openoms/raspiblitz/blob/raspiblitz-dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
+* [torrent](https://github.com/openoms/raspiblitz/raw/raspiblitz-dev/dietpi/RaspiBlitz1.0-OdroidHC1-DietPi6.21.1-2019-02-17.torrent) 
 * [mega.nz link](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA)
 
 sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2
