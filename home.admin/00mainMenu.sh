@@ -113,8 +113,8 @@ fi
 
 ## default menu settings
 # to fit the main menu without scrolling: 
-# HEIGHT=23
-# CHOICE_HEIGHT=20 
+# HEIGHT=25
+# CHOICE_HEIGHT=22 
 HEIGHT=13
 WIDTH=64
 CHOICE_HEIGHT=6
@@ -201,7 +201,6 @@ if [ ${setupStep} -eq 0 ]; then
 
   else
 
-    isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     if [ ${isAARCH64} -eq 1 ] ; then
       # start setup
@@ -209,7 +208,7 @@ if [ ${setupStep} -eq 0 ]; then
       TITLE="⚡ Welcome to your RaspiBlitz ⚡"
       MENU="\nStart setting up your RaspiBlitz: \n "
       OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning" )
-      HEIGHT=6
+      HEIGHT=9
     else
       # start setup
       BACKTITLE="RaspiBlitz - Setup"

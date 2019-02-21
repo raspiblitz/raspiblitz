@@ -64,7 +64,7 @@ If you are working from a forked repo be aware of that the fork needs to be call
 This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
 * Restart when done and log back in now as `admin`:  
-`ssh admin@[IP-OF-DROIDBLITZ]`  
+`ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
 
 * From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
