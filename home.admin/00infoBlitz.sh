@@ -6,7 +6,8 @@ source /home/admin/_version.info
 # set colors
 color_red='\033[0;31m'
 color_green='\033[0;32m'
-color_yellow='\033[0;33m'
+color_amber='\033[0;33m'
+color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
 color_purple='\033[0;35m'
 
@@ -174,7 +175,7 @@ else
   if [ $public_check = "0" ]; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    public_color="${color_yellow}"
+    public_color="${color_amber}"
   else
     public=""
     public_color="${color_red}"
@@ -188,7 +189,7 @@ else
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
       public_color="${color_red}"
     else
-      public_color="${color_yellow}"
+      public_color="${color_amber}"
     fi
 
     # replace IP display with dynDNS
@@ -230,7 +231,7 @@ else
    public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    ln_publicColor="${color_yellow}"
+    ln_publicColor="${color_amber}"
   else
     ln_publicColor="${color_red}"
   fi
@@ -269,20 +270,20 @@ printf "
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
-${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
+${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
-${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
-${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
-${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}         /     ${color_amber}%s
+${color_yellow}       //      ${color_gray}%s, CPU %s°C
+${color_yellow}     / /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
+${color_yellow}   /  /______  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
+${color_yellow} /_____    /   ${color_gray}${webinterfaceInfo}
+${color_yellow}      /  /     ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}     / /       ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}    //         ${color_gray}
+${color_yellow}   /           ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}
+${color_gray}${ln_publicColor}${ln_external}
 
 " \
 "RaspiBlitz v${codeVersion}" \
