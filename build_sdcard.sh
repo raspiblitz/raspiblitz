@@ -243,13 +243,12 @@ then
   echo "!!! FAIL !!! Download laanwj-releases.asc not success."
   exit 1
 fi
+gpg ./laanwj-releases.asc
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
-  echo "Should be laanwjPGP: ${laanwjPGP}"
-  echo "This is the output of that check (gpg ./laanwj-releases.asc):"
-  gpg ./laanwj-releases.asc
+  echo "Should contain laanwjPGP: ${laanwjPGP}"
   echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
   read key
 fi
@@ -336,11 +335,14 @@ if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
 fi
 
 # check gpg finger print
+gpg ./pgp_keys.asc
 fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-  exit 1
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should contain olaoluwaPGP: ${olaoluwaPGP}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
 fi
 gpg --import ./pgp_keys.asc
 sleep 3
