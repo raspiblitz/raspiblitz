@@ -246,8 +246,12 @@ fi
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> Bitcoin download PGP author not OK"
-  exit 1
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should be laanwjPGP: ${laanwjPGP}"
+  echo "This is the output of that check (gpg ./laanwj-releases.asc):"
+  gpg ./laanwj-releases.asc
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
 fi
 gpg --import ./laanwj-releases.asc
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
