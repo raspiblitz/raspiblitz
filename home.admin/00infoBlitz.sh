@@ -179,14 +179,6 @@ else
     public=""
     public_color="${color_red}"
   fi
-  if [ ${#public_addr} -gt 25 ]; then
-    # if a IPv6 address dont show peers to save space
-    networkConnectionsInfo=""
-  fi
-  if [ ${#public_addr} -gt 35 ]; then
-    # if a LONG IPv6 address dont show "Public" in front to save space
-    public_addr_pre=""
-  fi
 
   # DynDNS
   if [ ${#dynDomain} -gt 0 ]; then
@@ -201,9 +193,17 @@ else
 
     # replace IP display with dynDNS
     public_addr_pre="DynDNS "
-    networkConnectionsInfo=""
     public_addr="${dynDomain}"
+  fi
 
+  if [ ${#public_addr} -gt 25 ]; then
+    # if a IPv6 address dont show peers to save space
+    networkConnectionsInfo=""
+  fi
+
+  if [ ${#public_addr} -gt 35 ]; then
+    # if a LONG IPv6 address dont show "Public" in front to save space
+    public_addr_pre=""
   fi
 
 fi
