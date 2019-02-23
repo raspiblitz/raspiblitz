@@ -10,6 +10,13 @@ fi
 
 portnumber=$1
 
+# check port numer is a integer
+if ! [ "$portnumber" -eq "$portnumber" ] 2> /dev/null
+then
+  echo "FAIL - portnumber(${portnumber}) not a number"
+  exit 1
+fi
+
 # check port number is bigger then zero
 if [ ${portnumber} -lt 1 ]; then
   echo "FAIL - portnumber(${portnumber}) not above 0"
