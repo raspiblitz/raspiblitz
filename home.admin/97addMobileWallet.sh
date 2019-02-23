@@ -25,16 +25,39 @@ fi
 
 # Basic Options
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
-        SHANGO "Shango Wallet (iOS/Android)")
+         SHANGO_IOS "Shango Wallet for iOS"
+	 SHANGO_ANDROID "Shango Wallet for Android"
+	)
 
-CHOICE=$(dialog --clear --title "Choose Mobile Wallet" --menu "" 10 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --title "Choose Mobile Wallet" --menu "" 10 50 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
         CLOSE)
             exit 1;
             ;;
-        SHANGO)
+	SHANGO_IOS)
+	    echo "************************************"
+	    echo "Install Testflight and Shango-Wallet"
+	    echo "************************************"
+	    echo "At the moment this app is in public beta testing:"
+	    echo 
+	    echo "https://testflight.apple.com/join/WwCjFnS8"
+	    echo "https://testflight.apple.com/join/WwCjFnS8" > qr.txt
+	    echo 
+            ./XXdisplayQR.sh
+            ./97addMobileWalletShango.sh
+	    exit 1;
+	    ;;
+	SHANGO_ANDROID)
+	    echo "*******************************************"
+            echo "Install Shango-Wallet on your Android Phone"
+	    echo "*******************************************"
+	    echo
+	    echo "At the moment this app is in public beta testing:"	    
+	    echo "https://play.google.com/apps/testing/com.shango" >qr.txt
+	    echo "https://play.google.com/apps/testing/com.shango"
+            ./XXdisplayQR.sh
             ./97addMobileWalletShango.sh
             exit 1;
             ;;
