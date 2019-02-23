@@ -65,17 +65,10 @@ echo "Send ${coininfo} to address --> ${address}"
 if [ "$chain" = "test" ]; then
   echo "get some testnet coins from https://testnet-faucet.mempool.co"
 fi
+
+echo -e "$network:${address}" > qr.txt
+/home/admin/XXdisplayQR.sh
+
 echo "Whats next? --> Wait for confirmations. You can use info on LCD to check if funds have arrived."
 echo "If you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
 echo ""
-
-echo ""
-echo "******************************"
-echo "QR-Code? (Y/N)"
-echo "******************************"
-echo "Would you like to see a QR-code of this address? Press Y"
-read -n1 key
-
-if [ "$key" = "y" ]; then
-  /home/admin/XXdisplayQR.sh $network:${address}
-fi

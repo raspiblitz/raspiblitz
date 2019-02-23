@@ -79,10 +79,10 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-  echo "******************************"
-  echo "WIN"
-  echo "******************************"
-  echo "${result}"
+#  echo "******************************"
+#  echo "WIN"
+#  echo "******************************"
+#  echo "${result}"
   echo ""
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
   payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
@@ -96,3 +96,5 @@ else
 
 fi
 echo ""
+echo -e "${payReq}" > qr.txt
+./XXdisplayQR.sh

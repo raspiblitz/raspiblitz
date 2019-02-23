@@ -4,10 +4,7 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
-# make sure qrcode-encoder in installed
 clear
-echo "*** Setup ***"
-sudo apt-get install qrencode -y 
 
 # get local IP
 myip=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -35,20 +32,20 @@ echo "On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'"
 echo "(Or in the App go to --> 'Settings' > 'Connect to your LND Server')"
 echo "There you see three 3 form fields to fill out. Skip those and go right to the buttons below."
 echo ""
-echo "Click on the 'Scan QR' button"
-echo "Make the this terminal as big as possible - fullscreen would be best."
-echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it with the app."
-read key
+echo "Click on the 'Scan QR' button and PRESS ENTER"
 
+read key
 clear
 echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
-echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt && qrencode -t ANSI256 < qr.txt
-echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
-read key
-shred qr.txt
+
+echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt
+
+./XXdisplayQR.sh
 
 clear
+echo
 echo "Now press 'Connect' within the Shango Wallet."
 echo "If its not working - check issues on GitHub:"
+echo
 echo "https://github.com/neogeno/shango-lightning-wallet/issues"
 echo ""
