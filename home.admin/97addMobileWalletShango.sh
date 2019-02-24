@@ -42,7 +42,8 @@ read key
 
 clear
 echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
-echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt && qrencode -t ANSI256 < qr.txt
+#echo -e "${myip}:10009,\n$(xxd -p -c2000 ~/.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && qrencode -t ANSIUTF8 < qr.txt
+echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && qrencode -t ANSI256 < qr.txt
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
 read key
 shred qr.txt
