@@ -18,17 +18,16 @@
 
 * Connect the HDD.
 
-* The setup will run automatically and will the Rock64 will restart at least twice during the process. Give it circa 20 mins. Log in with `root` if you want to follow along.
+* The setup will run automatically and the Rock64 will restart at least twice during the process. Give it circa 20 mins. Log in with `root` if you want to follow along. The build_sdcard.ah script output can be seen with: `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log`
 
 * When the setup is finished log in as `admin`:  
 `ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
-
 
 * From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
 
 ## To build manually
 * Follow the generic DietPi install process to [build your own SDCard](https://github.com/rootzoll/raspiblitz/tree/master/dietpi#general-guide-for-the-raspiblitz-on-dietpi)
 
-* Use the rock64 branch from @openoms the build_sdcard.sh:  
+* Use the rock64 branch from @openoms to build the SDcard:  
 `wget https://raw.githubusercontent.com/openoms/raspiblitz/rock64/build_sdcard.sh && sudo bash build_sdcard.sh rock64 openoms`  
