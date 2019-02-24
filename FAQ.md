@@ -519,3 +519,13 @@ You can also start a new Torrent-Download and replace the old blockchain with a 
 3. Backup LND Data, make fresh Blitz, Replay LND Data
 
 You can backup your channel and wallet data, make a complete fresh RaspiBlitz and after that one is setup you replace the LND data with your old one. Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD or SD card is degrading - maybe this is a good time to replace. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)*
+
+## Can I run the RaspiBlitz without a display/LCD?
+
+The display is one of the nice features of the RaspiBlitz but the raspberry can un without it. Maybe not all add-on feature could be used to the full extend, but you can get started without the LCD and even plug it on later.
+
+Normally with the LCD its easy to see your local IP changes and you can get started quickly. Without it needs a bit more digging thru your network - you can find a good tutorial on that on the RaspiBolt tutorial (origin of RaspiBlitz):
+
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#connecting-to-the-network
+
+*Please Note: Without a LCD-Hat you cannot simply use the HDMI as alternative, because screen signal is routed to the GPIO pins. On how to switch that back manually - see [waveshare documentation](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)).*
