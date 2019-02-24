@@ -25,6 +25,7 @@ if [ ${chainInSync} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo ""
   exit 1
+  # TODO: Wait and loop. Offer the user a "abort wait" button
 fi
 
 # check number of connected peers
@@ -50,6 +51,8 @@ if [ ${#amount} -eq 0 ]; then
   echo "FAIL - not a valid input (${amount})"
   exit 1
 fi
+
+# TODO let user enter a description
 
 # build command
 command="lncli --chain=${network} --network=${chain}net addinvoice ${amount}"
@@ -83,18 +86,44 @@ else
 #  echo "WIN"
 #  echo "******************************"
 #  echo "${result}"
-  echo ""
+
+
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
   payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
+  echo -e "${payReq}" > qr.txt
+  ./XXdisplayQRlcd.sh
+
+  echo
+  echo "********************"
+  echo "Here is your invoice"
+  echo "********************"
+  echo
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
-  echo ""
-  echo ${payReq}
-  echo ""
-  echo "You can use 'lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}' to check the payment. "
+  echo
+  echo "${payReq}"
+  echo
+  echo "Do you want to see the invoice QR-code in this terminal? (Y/N)"
 
+  read -n1 key
+  if [ "$key" = "y" ]; then
+     /home/admin/XXdisplayQR.sh
+  fi
+
+  shred qr.txt
+  rm -f qr.txt
+
+  clear
+  echo "************"
+  echo "What's next?"
+  echo "************"
+  echo
+  echo "You can use"
+  echo 
+  echo "lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}"
+  echo
+  echo "to check the payment."
+
+  /home/admin/XXdisplayQRlcd_hide.sh
   # TODO: Offer to go into monitor for incommin payment loop.
-
+  #       Or simply start the loop and show success status when payment occured
 fi
-echo ""
-echo -e "${payReq}" > qr.txt
-./XXdisplayQR.sh

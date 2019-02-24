@@ -14,33 +14,33 @@ if [ ${#dynDomain} -gt 0 ]; then
   myip="${dynDomain}"
 fi
 
-clear
-echo "******************************"
-echo "Connect Shango Mobile Wallet"
-echo "******************************"
-echo ""
-echo "*** STEP 1 ***"
+#echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt
+echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
+
+./XXdisplayQRlcd.sh
+
+msg=""
 if [ ${#dynDomain} -eq 0 ]; then 
-  echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
+  msg="Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi  
-echo "On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'"
-echo "(Or in the App go to --> 'Settings' > 'Connect to your LND Server')"
-echo "There you see three 3 form fields to fill out. Skip those and go right to the buttons below."
-echo ""
-echo "Click on the 'Scan QR' button and PRESS ENTER"
+msg="${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED' \n\n (Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR> to see it in this window."
 
-read key
-clear
-echo "*** STEP 2 : SCAN MACAROON (make whole QR code fill camera) ***"
+whiptail --backtitle "Connecting Shango Mobile Wallet" \
+	 --title "Setup Shango Step 1" \
+	 --yes-button "show QR" \
+	 --no-button "continue" \
+	 --yesno "${msg}" 20 65
 
-echo -e "${myip}:10009,\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt && cat ./.lnd/tls.cert >>qr.txt
+if [ $? -eq 0 ]; then
+    /home/admin/XXdisplayQR.sh
+fi
+shred qr.txt
+rm -f qr.txt
 
-./XXdisplayQR.sh
+whiptail --backtitle "Connecting Shango Mobile Wallet" \
+	 --title "Press Connect on Shango" \
+	 --msgbox "Now press 'Connect' within the Shango Wallet.\n\nIf its not working - check issues on GitHub:\n\nhttps://github.com/neogeno/shango-lightning-wallet/issues" 15 65
 
-clear
-echo
-echo "Now press 'Connect' within the Shango Wallet."
-echo "If its not working - check issues on GitHub:"
-echo
-echo "https://github.com/neogeno/shango-lightning-wallet/issues"
-echo ""
+./XXdisplayQRlcd_hide.sh
+shred qr.png 2> /dev/null
+rm -f qr.png

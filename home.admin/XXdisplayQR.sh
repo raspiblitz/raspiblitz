@@ -2,24 +2,17 @@
 
 # Display a QR code for the string in qr.txt
 
-echo
-echo "Please wait. Generating QR-code..."
-echo 
 # make sure qrcode-encode and fbi are installed
-sudo apt-get install qrencode fbi -y > /dev/null
+#clear
+#echo "*** Setup ***"
 
-qrencode -l L -o /home/admin/qr.png < /home/admin/qr.txt > /dev/null
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+echo 50 | whiptail --title "Installing" --backtitle "QR-Code" --gauge "please wait" 4 40 100
+./XXaptInstall.sh qrencode
+echo 90 | whiptail --title "Installing" --backtitle "QR-Code" --gauge "please wait" 4 40 100
+./XXaptInstall.sh fbi
 
-echo "************************************"
-echo "Scan the QR-Code on the LCD-Display."
-echo "************************************"
-echo
-echo "If you don't have access to the LCD, you can view it here."
-echo "Make the this terminal window as big as possible - fullscreen would be best."
-echo "Then PRESS ENTER here in the terminal to show QR code."
-
-read key
+whiptail --title "Get ready" --backtitle "QR-Code in Terminal Window" \
+       --msgbox "Make this terminal window as large as possible - fullscreen would be best. \n\nThe QR-Code might be too large for your display. In that case, shrink the letters by pressing the keys Ctrl and Minus (or Cmd and Minus if you are on a Mac) \n\nPRESS ENTER when you are ready to see the QR-code." 20 60
 
 clear
 qrencode -t ANSI256 < /home/admin/qr.txt
@@ -29,8 +22,3 @@ echo "(To shrink QR code: macOS press CMD- / LINUX press CTRL-) Press ENTER when
 read key
 
 clear
-
-# remove the QR picture on the raspi LCD
-sudo killall -3 fbi
-shred /home/admin/qr.png
-rm -f /home/admin/qr.png
