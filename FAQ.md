@@ -529,3 +529,11 @@ Normally with the LCD its easy to see your local IP changes and you can get star
 https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#connecting-to-the-network
 
 *Please Note: Without a LCD-Hat you cannot simply use the HDMI as alternative, because screen signal is routed to the GPIO pins. On how to switch that back manually - see [waveshare documentation](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)).*
+
+## I have two RaspiBlitz in my network - can they both be public?
+
+Yes but you need to change at least on one RaspiBlitz the port number (for example to 9736) on one of your RaspiBlitzes - see how to change a port below. Then you can forward both ports from your home internet router to the matching RaspiBlitzes.
+
+## How to change the public port LND/Lightning node is running on?
+
+There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-466722712
