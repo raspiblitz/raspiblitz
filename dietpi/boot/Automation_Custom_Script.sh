@@ -1,1 +1,2 @@
-wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms
+# wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms
+wget https://raw.githubusercontent.com/openoms/raspiblitz/rock64/build_sdcard.sh && sudo bash build_sdcard.sh rock64 openoms

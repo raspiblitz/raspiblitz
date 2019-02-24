@@ -50,8 +50,8 @@ Updating from a v6.14 DietPi image is causing a bootloop under some circumstance
 
 * For the Odroid HC1 / HC2 / XU3 / XU4 the start is this image:   
 https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z  
-* Burn it to the SD with [Etcher](https://www.balena.io/etcher/)
 
+* Burn it to the SD with [Etcher](https://www.balena.io/etcher/)
 
 * In the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  

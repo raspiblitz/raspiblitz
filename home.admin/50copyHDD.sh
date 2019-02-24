@@ -12,7 +12,7 @@ if [ "${setupStep}" = "100" ]; then
   echo "!! Press ENTER to delete the old blockchain .. CTRL+C to CANCEL"
   read key
   # make sure services are not running
-  echo "stopping servcies ..."
+  echo "stopping services ..."
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo systemctl disable bitcoind
