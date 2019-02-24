@@ -12,8 +12,10 @@ This guide was tested on:
 See the [hardware comparison](hw_comparison.md).
 
 ---
+
+### Specific intructions for the [Rock64](rock64.md)
 ### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](odroid_hc1.md)
-### Downloads and walkthrough for the [Rock64](rock64.md)
+
 
 ---
 ## General guide for the RaspiBlitz-on-DietPi 
@@ -28,11 +30,9 @@ Look for the SD card image for the specific SBC in the [download section](https:
 
 * Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/).
 
-* Insert the SDcard into your SBC.
+* Insert the SDcard into your SingleBoardComputer.
 
-* Connect the HDD with a powered suitably powered adapter.
-A USB 2.0 port will not be able to power an HDD so you will need extra cable
-If you are connecting the HDD to a USB 3.0 port and have an at least 2A power supply, you might be able to run without an extra cable.
+* Connect the HDD.
 
 * Power up and log in with the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
@@ -88,7 +88,7 @@ To test a new configuration run XXcleanHDD.sh and strictly restart
 ---
 
 
-## Excerpts from the [costumized dietpi.txt](/dietpi/boot/dietpi.txt)
+## Excerpts from the [customized dietpi.txt](/dietpi/boot/dietpi.txt)
 to be used for a fully automatic SDcard building process.
 
 ### Automate installation with the dietpi.txt
@@ -120,7 +120,7 @@ AUTO_SETUP_SSH_SERVER_INDEX=-2
 
 ---
 ## Custom Script (post-networking and post-DietPi install) 
-Runs after DietPi installation is completed
+Runs after DietPi installation is completed.  
 Allows you to automatically execute a custom script at the end of DietPi installation.  
 Option 1 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.  
 Option 2 = Host your script online, then use AUTO_SETUP_CUSTOM_SCRIPT_EXEC=http://myweb.com/myscript.sh, it will be downloaded and executed automatically. | 0=disabled  

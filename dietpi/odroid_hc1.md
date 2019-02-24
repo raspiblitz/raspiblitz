@@ -1,6 +1,6 @@
 
 # ⚡️ RaspiBlitz-on-DietPi ⚡️
-# For the Odroid HC1 / HC2 / XU3 / XU4
+# Odroid HC1 / HC2 / XU3 / XU4
 
 ![](pictures/DroidBlitz.jpg)
 
@@ -39,7 +39,7 @@ sha256sum DietPi_v6.20.6_OdroidXU4-ARMv7-Stretch.img:
 
 * Insert the SDcard into the Odroid.
 
-* Power up and continue with [running the RaspiBlitz build_sdcard.sh script](#Run-the-RaspiBlitz-build_sdcard.sh-script)
+* Power up and continue with [running the RaspiBlitz build_sdcard.sh script](https://github.com/rootzoll/raspiblitz/blob/master/dietpi/Odroid_HC1_HC2.md#run-the-raspiblitz-build_sdcardsh-script)
 
 ---
 
