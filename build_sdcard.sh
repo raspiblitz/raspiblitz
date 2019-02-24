@@ -39,18 +39,17 @@ sleep 3
 
 echo ""
 echo "*** CHECK BASE IMAGE ***"
-# armv7=32Bit , armv8=64Bit , aarch64=armv8(Rock64)
+
+# armv7=32Bit , armv8=64Bit
 echo "Check if Linux ARM based ..." 
 isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] ; then
+if [ ${isARM} -eq 0 ]; then
   echo "!!! FAIL !!!"
-  echo "Can only build on ARM or aarch64, not on:"
-  uname -m 
+  echo "Can just build on ARM Linux, not on:"
+  uname -m
   exit 1
-else
- echo "OK running on $(uname -m) architecture."
 fi
+echo "OK running on Linux ARM architecture."
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 echo "Detect Base Image ..." 
@@ -202,201 +201,116 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
+echo ""
+echo "*** BITCOIN ***"
+# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
-if [ ${isARM} -eq 1 ] ; then
-  echo ""
-  echo "*** BITCOIN ***"
-  # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
+# set version (change if update is available)
+bitcoinVersion="0.17.0.1"
 
-  # set version (change if update is available)
-  bitcoinVersion="0.17.0.1"
+# needed to make sure download is not changed
+# calulate with sha256sum and also check with SHA256SUMS.asc
+bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
 
-  # needed to make sure download is not changed
-  # calulate with sha256sum and also check with SHA256SUMS.asc
-  bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
+# needed to check code signing
+laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
-  # needed to check code signing
-  laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
+# prepare directories
+sudo -u admin mkdir /home/admin/download
+cd /home/admin/download
 
-  # prepare directories
-  sudo -u admin mkdir /home/admin/download
-  cd /home/admin/download
-
-  # download resources
-  binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-  if [ ! -f "./${binaryName}" ]
-  then
-      echo "!!! FAIL !!! Download BITCOIN BINARY not success."
-      exit 1
-  fi
-
-  # check binary is was not manipulated (checksum test)
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+# download resources
+binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]
+then
+    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
     exit 1
-  fi
-
-
-  # check gpg finger print
-  gpg ./pgp_keys.asc
-  sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
-  if [ ! -f "./laanwj-releases.asc" ]
-  then
-    echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
-    echo "Should contain olaoluwaPGP: ${olaoluwaPGP}"
-    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-    read key
-  fi
-  gpg ./laanwj-releases.asc
-  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
-  if [ ${fingerprint} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
-    echo "Should contain laanwjPGP: ${laanwjPGP}"
-    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-    read key
-  fi
-  gpg --import ./laanwj-releases.asc
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
-  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
-  echo "correctKey(${correctKey})"
-  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-    exit 1
-  fi
-
-  # correct versions for install if needed
-  if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
-   bitcoinVersion="0.17.0"
-  fi 
-
-  # install
-  sudo -u admin tar -xvf ${binaryName}
-  sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
-  sleep 3
-  installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
-  if [ ${installed} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
-    exit 1
-  fi
-
-  echo ""
-  echo "*** LITECOIN ***"
-  # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
-
-  # set version (change if update is available)
-  litecoinVersion="0.16.3"
-  litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
-  cd /home/admin/download
-
-  # download
-  binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
-  sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
-
-  # check download
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
-    exit 1
-  fi
-
-  # install
-  sudo -u admin tar -xvf ${binaryName}
-  sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
-  installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
-  if [ ${installed} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
-    exit 1
-  fi
 fi
 
-if [ ${isAARCH64} -eq 1 ] ; then
-  echo ""
-  echo "*** BITCOIN ***"
-  # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
-
-  # set version (change if update is available)
-  bitcoinVersion="0.17.1"
-
-  # needed to make sure download is not changed
-  # calulate with sha256sum and also check with SHA256SUMS.asc
-  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
-
-  # needed to check code signing
-  laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
-
-  # prepare directories
-  sudo -u admin mkdir /home/admin/download
-  cd /home/admin/download
-
-  # download resources
-  binaryName="bitcoin-${bitcoinVersion}-aarch64-linux-gnu.tar.gz"
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-  if [ ! -f "./${binaryName}" ]
-  then
-      echo "!!! FAIL !!! Download BITCOIN BINARY not success."
-      exit 1
-  fi
-
-  # check binary is was not manipulated (checksum test)
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-    exit 1
-  fi
-
-
-  # check gpg finger print
-  sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
-  if [ ! -f "./laanwj-releases.asc" ]
-  then
-    echo "!!! FAIL !!! Download laanwj-releases.asc not success."
-    exit 1
-  fi
-  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
-  if [ ${fingerprint} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> Bitcoin download PGP author not OK"
-    exit 1
-  fi
-  gpg --import ./laanwj-releases.asc
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
-  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
-  echo "correctKey(${correctKey})"
-  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
-    exit 1
-  fi
-
-  # correct versions for install if needed
-  if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
-  bitcoinVersion="0.17.0"
-  fi 
-
-  # install
-  sudo -u admin tar -xvf ${binaryName}
-  sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
-  sleep 3
-  installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
-  if [ ${installed} -lt 1 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
-    exit 1
-  fi
-  # not testing LITECOIN sorry
+# check binary is was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  exit 1
 fi
+
+
+# check gpg finger print
+sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
+if [ ! -f "./laanwj-releases.asc" ]
+then
+  echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+  exit 1
+fi
+gpg ./laanwj-releases.asc
+fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
+if [ ${fingerprint} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should contain laanwjPGP: ${laanwjPGP}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
+fi
+gpg --import ./laanwj-releases.asc
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+echo "goodSignature(${goodSignature})"
+correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
+echo "correctKey(${correctKey})"
+if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  exit 1
+fi
+
+# correct versions for install if needed
+if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
+ bitcoinVersion="0.17.0"
+fi 
+
+# install
+sudo -u admin tar -xvf ${binaryName}
+sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
+sleep 3
+installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
+if [ ${installed} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
+  exit 1
+fi
+
+echo ""
+echo "*** LITECOIN ***"
+# based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
+
+# set version (change if update is available)
+litecoinVersion="0.16.3"
+litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+cd /home/admin/download
+
+# download
+binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+
+# check download
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+  exit 1
+fi
+
+# install
+sudo -u admin tar -xvf ${binaryName}
+sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
+installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
+if [ ${installed} -lt 1 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
+  exit 1
+fi
+
 echo ""
 echo "*** LND ***"
 
@@ -421,11 +335,14 @@ if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
 fi
 
 # check gpg finger print
+gpg ./pgp_keys.asc
 fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-  exit 1
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should contain olaoluwaPGP: ${olaoluwaPGP}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
 fi
 gpg --import ./pgp_keys.asc
 sleep 3
@@ -625,7 +542,7 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with \`reboot\` and login again with \`ssh admin@your.raspiblitz.IP\` "
+echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
 # install LCD only on an rPI running Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
