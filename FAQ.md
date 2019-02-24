@@ -519,3 +519,11 @@ You can also start a new Torrent-Download and replace the old blockchain with a 
 3. Backup LND Data, make fresh Blitz, Replay LND Data
 
 You can backup your channel and wallet data, make a complete fresh RaspiBlitz and after that one is setup you replace the LND data with your old one. Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD or SD card is degrading - maybe this is a good time to replace. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)*
+
+## I have two RaspiBlitz in my network - can they both be public?
+
+Yes but you need to change at least on one RaspiBlitz the port number (for example to 9736) on one of your RaspiBlitzes - see how to change a port below. Then you can forward both ports from your home internet router to the matching RaspiBlitzes.
+
+## How to change the public port LND/Lightning node is running on?
+
+There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-466722712
