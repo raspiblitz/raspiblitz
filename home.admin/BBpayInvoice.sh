@@ -12,32 +12,10 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
-echo ""
-echo "*** Precheck ***"
-echo "please wait a moment ..."
-
-# check if chain is in sync
-chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
-if [ ${chainInSync} -eq 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
-  echo "Wait until chain is sync with LND and try again."
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo ""
-  exit 1
-fi
-
-
-# check number of connected peers
-echo "check for open channels"
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | grep chan_id -c)
-if [ ${openChannels} -eq 0 ]; then
-  echo ""
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo ""
-  exit 1
+# Check if ready (chain in sync and channels open)
+./XXchainInSync.sh $network $chain
+if [ $? != 0 ]; then
+    exit 1
 fi
 
 paymentRequestStart="???"
