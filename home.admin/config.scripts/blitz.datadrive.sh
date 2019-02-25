@@ -11,12 +11,13 @@ fi
 # check if sudo
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root (with sudo)"
-  exit
+  exit 1
 fi
 
 # update install sources
-echo "make sure BTRFS is installed"
+echo "make sure BTRFS is installed ..."
 sudo apt-get install -y btrfs-tools
+echo ""
 
 # detect the two usb drives
 echo "Detecting two USB sticks/drives with same size ..."
@@ -41,6 +42,33 @@ rm -f .dev2.tmp
 echo "RESULTS:"
 echo "dev1(${dev1})"
 echo "dev2(${dev2})"
+echo ""
+
+# check that results are available
+if [ ${#dev1} -eq 0 ] || [ ${#dev2} -eq 0 ]; then
+  echo "!! FAIL -> was not able to detect two devices with the same size"
+  exit 1
+fi
+
+# check size (at least 4GB minus some tolerance)
+size=$(lsblk -o NAME,SIZE -b | grep "^${dev1}" | awk '$1=$1' | cut -d " " -f 2)
+if [ ${size} -lt  3500000000 ]; then
+  echo "!! FAIL -> too small - additional storage needs to be bigger than 4GB"
+  exit 1
+fi
+
+# check if devices are containing old data
+echo "Analysing Drives ..."
+nameDev1=$(lsblk -o NAME,LABEL | grep "^${dev1}" | awk '$1=$1' | cut -d " " -f 2)
+nameDev2=$(lsblk -o NAME,LABEL | grep "^${dev2}" | awk '$1=$1' | cut -d " " -f 2)
+if [ "${nameDev1}" = "DATASTORE" ] || [ "${nameDev2}" = "DATASTORE" ]; then
+  # TODO: once implemented -> also make sure that dev1 is named "DATASTORE" and if 2nd is other -> format and add as raid
+  echo "!! NOT IMPLEMENTED YET -> devices seem contain old data, because name is 'DATASTORE'"
+  echo "if you dont care about that data: format devices devices on other computer with FAT(32) named TEST"
+  exit 1
+fi
+echo "OK drives dont contain old data."
+echo ""
 
 exit 0
 
