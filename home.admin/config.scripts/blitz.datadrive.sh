@@ -104,13 +104,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # mount the BTRFS drive
   echo "Mounting under /mnt/data ..."
   sudo mkdir -p /mnt/data
-  sudo mount /dev/sdb1 /mnt/data
+  sudo mount /dev/${dev1} /mnt/data
   echo "OK"
   echo ""
 
   # adding the second device
   echo "Adding the second device as RAID1 .."
-  sudo btrfs device add -f /dev/sdc /mnt/data
+  sudo btrfs device add -f /dev/${dev2} /mnt/data
   sudo btrfs filesystem balance start -dconvert=raid1 -mconvert=raid1 /mnt/data
   echo ""
   exit 0
@@ -129,7 +129,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo btrfs filesystem show /mnt/data
   sudo btrfs filesystem df /mnt/data
-  
+
   sudo umount /mnt/data
 
   exit 0
