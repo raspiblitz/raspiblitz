@@ -24,10 +24,10 @@ echo "Detecting two USB sticks/drives with same size ..."
 dev1=""
 dev2=""
 lsblk -o NAME | grep "^sd" | while read -r test1 ; do
-    size1=$(lsblk -o NAME,SIZE -b | grep "^${test1}")
+    size1=$(lsblk -o NAME,SIZE -b | grep "^${test1}" | awk '$1=$1' | cut -d " " -f 2)
     echo "Checking : ${test1} size(${size1})"
     lsblk -o NAME | grep "^sd" | grep -v "${test1}" | while read -r test2 ; do
-      size2=$(lsblk -o NAME,SIZE -b | grep "^${test2}")
+      size2=$(lsblk -o NAME,SIZE -b | grep "^${test2}" | awk '$1=$1' | cut -d " " -f 2)
       echo "  compare ${test2} size(${size2})"
       if [ "${size1}" = "${size2}" ]; then
         echo "  MATCH ${test1} = ${test2}"
