@@ -44,9 +44,7 @@ else
     # just delete selective
     echo "selective delete ... (please wait)"
     sudo rm -f -r /mnt/hdd/lnd
-    # unable to boot if linked dir is deleted
-    # sudo rm -f -r /mnt/hdd/ssh
-    sudo rm /etc/ssh/ssh_host_*
+    sudo rm -f -r /mnt/hdd/ssh
     sudo rm -f /mnt/hdd/swapfile
     sudo rm -f /mnt/hdd/bitcoin/bitcoin.conf
     sudo rm -f /mnt/hdd/bitcoin/bitcoin.pid
