@@ -20,9 +20,24 @@ sudo apt-get install -y btrfs-tools
 
 
 # detect the two usb drives
-lsblk -o NAME | grep "^sd" | grep -v "sda" | while read -r line ; do
-    echo "Processing: $line"
+echo "Detecting two USB sticks with same size ..."
+dev1=""
+dev2=""
+lsblk -o NAME | grep "^sd" | grep -v "sda" | while read -r test1 ; do
+    size1=$(lsblk -o NAME,SIZE -b | grep "^${test1}")
+    echo "Checking : ${test1} -> ${size1}"
+    lsblk -o NAME | grep "^sd" | grep -v "sda" | while read -r test2 ; do
+      size2=$(lsblk -o NAME,SIZE -b | grep "^${test2}")
+      echo "  compare with ${test2} -> ${size2}"
+      if [ "${size1}" = "${size2}" ]; then
+        echo "  MATCH ${test1} = ${test2}"
+        # remember last match
+        dev1="${test1}"
+        dev2="${test2}"
+      fi
+    done
 done
+echo "RESULT: ${dev1} & ${dev2}"
 
 exit 0
 
