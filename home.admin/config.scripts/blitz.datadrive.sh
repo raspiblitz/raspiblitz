@@ -18,11 +18,8 @@ fi
 echo "make sure BTRFS is installed"
 sudo apt-get install -y btrfs-tools
 
-
 # detect the two usb drives
 echo "Detecting two USB sticks/drives with same size ..."
-dev1=""
-dev2=""
 lsblk -o NAME | grep "^sd" | while read -r test1 ; do
     size1=$(lsblk -o NAME,SIZE -b | grep "^${test1}" | awk '$1=$1' | cut -d " " -f 2)
     echo "Checking : ${test1} size(${size1})"
@@ -30,13 +27,17 @@ lsblk -o NAME | grep "^sd" | while read -r test1 ; do
       size2=$(lsblk -o NAME,SIZE -b | grep "^${test2}" | awk '$1=$1' | cut -d " " -f 2)
       if [ "${size1}" = "${size2}" ]; then
         echo "  MATCHING ${test2} size(${size2})"
-        dev1=$(echo "${test1}")
-        dev2=$(echo "${test2}")
+        echo "${test1}" > .dev1.tmp
+        echo "${test2}" > .dev2.tmp
       else
         echo "  different ${test2} size(${size2})"
       fi
     done
 done
+dev1=$(cat .dev1.tmp)
+dev2=$(cat .dev2.tmp)
+rm -f .dev1.tmp
+rm -f .dev2.tmp
 echo "RESULTS:"
 echo "dev1(${dev1})"
 echo "dev2(${dev2})"
