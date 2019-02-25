@@ -1,7 +1,13 @@
+
 echo "Press ENTER to install LCD and reboot ..."
 read key
-# give Raspi a default hostname (optional)
-sudo raspi-config nonint do_hostname "RaspiBlitz"
+echo "stopping services ... (please wait)"
+echo "- background"
+sudo systemctl stop background 2>/dev/null
+echo "- lnd"
+sudo systemctl stop lnd.service 2>/dev/null
+echo "- blockchain"
+sudo systemctl stop bitcoind.service 2>/dev/null
 # *** Display selection ***
 dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
 defaultDisplay=$?
