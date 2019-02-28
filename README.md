@@ -410,8 +410,6 @@ But this also comes with the following side effects:
 
 To try it out just switch on the service - you can deactivate later on if its not working for you.
 
-The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
-
 ##### RTL Webinterface
 
 The RTL Webinterface is a LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitu SSH menus. Its recommended to give it a try.
