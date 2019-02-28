@@ -115,7 +115,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo ""
   exit 0
 
-  #uuid=$(lsblk -o NAME,UUID | grep "^${dev1}" | awk '$1=$1' | cut -d " " -f 2)
+    # adding the second device
+  uuid=$(sudo btrfs filesystem show /mnt/data | grep "uuid:" | awk '$1=$1' | cut -d " " -f 4)
 
 fi
 
