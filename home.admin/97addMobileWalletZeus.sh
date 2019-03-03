@@ -47,21 +47,21 @@ sleep 3
 
 clear
 echo "******************************"
-echo "Connect Zap Mobile Wallet"
+echo "Connect Zeus Mobile Wallet"
 echo "******************************"
 echo ""
 echo "GETTING THE APP"
-echo "At the moment this app is in closed beta testing."
-echo "Go to http://www.zap-ios.jackmallers.com sign up with your email (confirmation can take time)"
-echo "iOS: Read https://developer.apple.com/testflight/testers/"
+echo "At the moment this app is in alpha stages."
+echo "You can compile the code for iOS or Android but only an Android APK is currently available for downloads."
+echo "Go to https://github.com/ZeusLN/zeus/releases to find the latest release."
 echo ""
 echo "*** STEP 1 ***"
 if [ ${#dynDomain} -eq 0 ]; then
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
-echo "During Setup of the Zap app you should get to the 'Connect Remote-Node' screen."
+echo "During setup of the Zeus app you should get to the 'Settings' screen."
 echo ""
-echo "---> Click on Scan"
+echo "---> Click on the Scan lndconnect config button"
 echo "Make the this terminal as big as possible - fullscreen would be best."
 echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it with the app."
 read key
@@ -71,10 +71,10 @@ echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then
   # If you drop the -i parameter, lndconnect will use the external IP.
-  lndconnect -i
+  lndconnect -i --port=8080
 else
   # when dynamic domain is set
-  lndconnect --host=${dynDomain}
+  lndconnect --host=${dynDomain} --port=8080
 fi
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
@@ -82,6 +82,6 @@ read key
 
 clear
 echo "If it's not working - check issues on GitHub:"
-echo "https://github.com/LN-Zap/zap-iOS/issues"
+echo "https://github.com/ZeusLN/zeus"
 echo "https://github.com/LN-Zap/lndconnect/issues"
 echo ""

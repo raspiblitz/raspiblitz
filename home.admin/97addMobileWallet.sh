@@ -7,10 +7,10 @@ source /mnt/hdd/raspiblitz.conf
 # check if dynamic domain is set
 if [ ${#dynDomain} -eq 0 ]; then
   dialog --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
-also from outside your local network you need to 
-activate 'Services' -> 'DynamicDNS' FIRST. 
+also from outside your local network you need to
+activate 'Services' -> 'DynamicDNS' FIRST.
 
-For more details see chapter in GitHub README 
+For more details see chapter in GitHub README
 'Public Domain with DynamicDNS'
 https://github.com/rootzoll/raspiblitz
 
@@ -25,7 +25,8 @@ fi
 
 # Basic Options
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
-        SHANGO "Shango Wallet (iOS/Android)")
+        SHANGO "Shango Wallet (iOS/Android)" \
+        ZEUS "Zeus Wallet (iOS/Android)")
 
 CHOICE=$(dialog --clear --title "Choose Mobile Wallet" --menu "" 10 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -40,6 +41,10 @@ case $CHOICE in
             ;;
         ZAP)
             ./97addMobileWalletZap.sh
+            exit 1;
+            ;;
+        ZEUS)
+            ./97addMobileWalletZeus.sh
             exit 1;
             ;;
 esac
