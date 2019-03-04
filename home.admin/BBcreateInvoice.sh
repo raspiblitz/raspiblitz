@@ -13,29 +13,9 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
-echo ""
-echo "*** Precheck ***"
-
-# check if chain is in sync
-chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
-if [ ${chainInSync} -eq 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
-  echo "Wait until chain is sync with LND and try again."
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo ""
-  exit 1
-fi
-
-# check number of connected peers
-echo "check for open channels"
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | grep chan_id -c)
-if [ ${openChannels} -eq 0 ]; then
-  echo ""
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
-  echo "!!!!!!!!!!!!!!!!!!!"
-  echo ""
+# Check if ready (chain in sync and channels open)
+./XXchainInSync.sh $network $chain
+if [ $? != 0 ]; then
   exit 1
 fi
 
@@ -50,6 +30,8 @@ if [ ${#amount} -eq 0 ]; then
   echo "FAIL - not a valid input (${amount})"
   exit 1
 fi
+
+# TODO let user enter a description
 
 # build command
 command="lncli --chain=${network} --network=${chain}net addinvoice ${amount}"
@@ -79,20 +61,48 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-  echo "******************************"
-  echo "WIN"
-  echo "******************************"
-  echo "${result}"
-  echo ""
+#  echo "******************************"
+#  echo "WIN"
+#  echo "******************************"
+#  echo "${result}"
+
+
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
   payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
+  echo -e "${payReq}" > qr.txt
+  ./XXdisplayQRlcd.sh
+
+  echo
+  echo "********************"
+  echo "Here is your invoice"
+  echo "********************"
+  echo
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
-  echo ""
-  echo ${payReq}
-  echo ""
-  echo "You can use 'lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}' to check the payment. "
+  echo
+  echo "${payReq}"
+  echo
+  echo "Do you want to see the invoice QR-code in this terminal? (Y/N)"
 
+  read -n1 key
+  if [ "$key" = "y" ]; then
+     /home/admin/XXdisplayQR.sh
+  fi
+
+  shred qr.txt
+  rm -f qr.txt
+
+  clear
+  echo "************"
+  echo "What's next?"
+  echo "************"
+  echo
+  echo "You can use"
+  echo 
+  echo "lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}"
+  echo
+  echo "to check the payment."
+
+  /home/admin/XXdisplayQRlcd_hide.sh
   # TODO: Offer to go into monitor for incommin payment loop.
-
+  #       Or simply start the loop and show success status when payment occured
 fi
-echo ""
