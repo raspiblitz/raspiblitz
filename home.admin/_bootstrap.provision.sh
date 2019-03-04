@@ -156,6 +156,14 @@ else
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
+# CUSTOM LND PORT
+# if a custom LND port was set, then run config for that
+portNumber=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=" | cut -f2 -d':')
+if [ ${#portNumber} -gt 0 ]; then
+  echo "Provisioning Custom LND Port ${portNumber}- run config script" >> ${logFile}
+  sudo /home/admin/config.scripts/lnd.setportsh ${portNumber} >> ${logFile} 2>&1
+fi
+
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
 echo "DONE - Give raspi some cool off time after hard building .... 20 secs sleep" >> ${logFile}

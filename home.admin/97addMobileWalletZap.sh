@@ -77,7 +77,21 @@ else
   lndconnect --host=${dynDomain}
 fi
 
-echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
+
+platform='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+   platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+   platform='Darwin' # mac OSX
+fi
+
+if [[ $platform == 'Linux' ]]; then
+    echo "(To shrink QR code: CTRL-) Press ENTER when finished."
+elif [[ $platform == 'Darwin' ]]; then
+    echo "(To shrink QR code: CMD-) Press ENTER when finished."
+fi
+
 read key
 
 clear

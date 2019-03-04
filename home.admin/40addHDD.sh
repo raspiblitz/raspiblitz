@@ -48,7 +48,7 @@ if [ ${existsHDD} -gt 0 ]; then
 
           # init the RASPIBLITZ Config
           configFile="/mnt/hdd/raspiblitz.conf"
-          configExists=$(sudo ls ${configFile} | grep -c 'raspiblitz.conf')
+          configExists=$(sudo ls ${configFile} 2>/dev/null | grep -c 'raspiblitz.conf')
           if [ ${configExists} -eq 0 ]; then
      
             # create file and use init values from raspiblitz.info
