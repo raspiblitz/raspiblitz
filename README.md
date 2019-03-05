@@ -50,6 +50,7 @@ These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
+* [Canada](shoppinglist_ca.md)
 * [UK](shoppinglist_uk.md)
 * [Switzerland](shoppinglist_ch.md)
 * [France](shoppinglist_fr.md)
