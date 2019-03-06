@@ -36,7 +36,7 @@ if [ ${#item} -eq 0 ]; then
 
   # check if offline
   # https://en.wikipedia.org/wiki/1.1.1.1
-  online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
 fi
 
 # get total number of blocks
@@ -59,7 +59,7 @@ fi
 if [ ${online} -eq 0 ]; then
     heigh=7
     width=44
-    infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.1.1.1\n Local IP is ${localip}\n Please check cables and router.")
+    infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.0.0.1\n Local IP is ${localip}\n Please check cables and router.")
 elif [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
   infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress} %\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"

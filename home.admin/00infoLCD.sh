@@ -73,7 +73,7 @@ while :
 
       # check for internet connection
       # https://en.wikipedia.org/wiki/1.1.1.1
-      online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+      online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
       if [ ${online} -eq 0 ]; then
         message="no internet connection"
 
