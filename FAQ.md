@@ -537,3 +537,12 @@ Yes but you need to change at least on one RaspiBlitz the port number (for examp
 ## How to change the public port LND/Lightning node is running on?
 
 There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-466722712
+
+## How to solve a "signature mismatch after caveat verification" error?
+
+If you get this error by LND that means that something is wrong with the macaroons being used to communicate with LND .. see: https://github.com/lightningnetwork/lnd/blob/master/docs/macaroons.md
+
+To fix this depends on where you get this error:
+
+* If you get it in a mobile wallet, then redo the connection with the RaspiBlitz to get fresh macaroons.
+* If you get this from RTL or from the scripts of the SSH menus of the RaspiBlitz, then go to "EXPORT Macacroons and TLS.cert" in SSH main menu and choose the the "RESET Macaroons & TLS" option.
