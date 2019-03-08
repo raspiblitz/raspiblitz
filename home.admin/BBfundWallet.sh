@@ -23,8 +23,8 @@ echo ""
 echo "RESULT:"
 
 # PRECHECK) check if chain is in sync
-chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
-if [ ${chainInSync} -eq 0 ]; then
+chainOutSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": false' -c)
+if [ ${chainOutSync} -eq 1 ]; then
   command=""
   result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
 fi
