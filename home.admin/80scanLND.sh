@@ -46,7 +46,8 @@ scanstate="${item}/${total}"
 
 # get blockchain sync progress
 progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-progress=$(echo "${progress}*100" | bc)
+#progress=$(echo "${progress}*100" | bc)
+progress=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
 
 # check if blockchain is still syncing
 heigh=6
@@ -88,4 +89,5 @@ fi
 
 # display progress to user
 sleep 3
-dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})" --infobox "${infoStr}" ${heigh} ${width}
+temp=$(echo "scale=1; $(cat /sys/class/thermal/thermal_zone0/temp)/1000" | bc)
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})     CPU: ${temp}°C" --infobox "${infoStr}" ${heigh} ${width}

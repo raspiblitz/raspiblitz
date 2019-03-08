@@ -91,7 +91,7 @@ if [ -n ${btc_path} ]; then
     block_diff=$(expr ${block_chain} - ${block_verified})
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
+    sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
 
     if [ ${block_diff} -eq 0 ]; then    # fully synced
       sync="OK"
