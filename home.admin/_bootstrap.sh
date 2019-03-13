@@ -58,6 +58,11 @@ if [ "${setupStep}" != "100" ]; then
 fi
 sudo chmod 777 ${infoFile}
 
+# cleaning system logs to prevent SD card filling up
+# see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
+echo "Cleaning system logs"
+sudo rm /var/log/daemon* && sudo rm /var/log/*.gz
+
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
 # on first boot up
