@@ -29,9 +29,6 @@ sudo systemctl stop RTL 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL RTL ***"
 
-  # setting value in raspi blitz config
-  sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
-
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 0 ]; then
 
@@ -42,18 +39,42 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get install -y nodejs
     echo ""
 
+    # check if nodeJS was installed 
+    nodeJSInstalled=$(node -v | grep -c "v11.")
+    if [ nodeJSInstalled -eq 0 ]; then
+      echo "FAIL - Was not able to install nodeJS 11"
+      echo "ABORT - RTL install"
+      exit 1
+    fi
+
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     git clone https://github.com/ShahanaFarooqui/RTL.git
     cd RTL
-    git reset --hard v0.2.1
-    #git reset --hard v0.1.14-alpha
+    git reset --hard v0.2.15
+    # check if node_modles exists now
+    if [ -d "/home/admin/RTL" ]; then
+     echo "OK - RTL code copy looks good"
+    else
+      echo "FAIL - code copy did not run correctly"
+      echo "ABORT - RTL install"
+      exit 1
+    fi
+    echo ""
     
 
     # install
     echo "*** Run: npm install ***"
     npm install
     cd ..
+    # check if node_modles exists now
+    if [ -d "/home/admin/RTL/node_modules" ]; then
+     echo "OK - RTL install looks good"
+    else
+      echo "FAIL - npm install did not run correctly"
+      echo "ABORT - RTL install"
+      exit 1
+    fi
     echo ""
 
     # prepare RTL.conf file
@@ -77,9 +98,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - RTL is now ACTIVE"
+
   else 
     echo "RTL already installed."
   fi
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
   echo "needs reboot to activate new setting"
   exit 0
