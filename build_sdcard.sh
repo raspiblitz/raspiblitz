@@ -12,7 +12,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.00  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.1   *"
 echo "*****************************************"
 echo ""
 
