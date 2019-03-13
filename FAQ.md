@@ -506,3 +506,12 @@ You could try to re-index, but that can take some very long time - multiple days
 Another option would be to delete the old blockchain and get a new one. See for details the FAQ question: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz). And even if you are not able to delete the data, first rename the undeletable folders and then follow the instructions.
 
 Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD is degrading - maybe this is a good time to replace it. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+
+## Why is my node not routing? 
+
+1. You don't have inbound liquidity 
+2. Low uptime
+3. Capital is committed to competitive destinations 
+4. Capital committed to destinations no one wants to send to 
+5. Fees are too high
+6. Your inbound liquidity doesn't have good inbound liquidity itself
