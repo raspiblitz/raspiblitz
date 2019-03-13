@@ -71,6 +71,11 @@ else
   echo "OK running ${baseImage}"
 fi
 
+# setting static DNS server
+# see https://github.com/rootzoll/raspiblitz/issues/322#issuecomment-466733550
+sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcpcd.conf
+systemctl daemon-reload
+
 # fixing locales for build
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
@@ -147,6 +152,27 @@ sudo raspi-config nonint do_boot_behaviour B2
 sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+
+# change log rotates
+# see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
+sudo head -n 18 /etc/logrotate.d/rsyslog > ./rsyslog
+echo "{" >> ./rsyslog
+echo "        rotate 4" >> ./rsyslog
+echo "        size=100M" >> ./rsyslog
+echo "        missingok" >> ./rsyslog
+echo "        notifempty" >> ./rsyslog
+echo "        compress" >> ./rsyslog
+echo "        delaycompress" >> ./rsyslog
+echo "        sharedscripts" >> ./rsyslog
+echo "        postrotate" >> ./rsyslog
+echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "        endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+sudo tail -n +19 /etc/logrotate.d/rsyslog >> ./rsyslog
+sudo mv ./rsyslog /etc/logrotate.d/rsyslog
+sudo chown root:root /etc/logrotate.d/rsyslog
+sudo service rsyslog restart
 
 echo ""
 echo "*** SOFTWARE UPDATE ***"
