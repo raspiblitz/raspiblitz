@@ -67,7 +67,7 @@ do
 
   # every 15min - not too often
   # because its a ping to external service
-  recheckPublicIP=$((($counter % 9)+1))
+  recheckPublicIP=$((($counter % 900)+1))
   updateDynDomain=0
   if [ ${recheckPublicIP} -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
