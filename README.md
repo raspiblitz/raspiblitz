@@ -195,7 +195,6 @@ It is safe to close the terminal window (shutdown your laptop) while the RaspiBl
 You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on torrent if the other option is slower or not working.
 
 * [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
-* [Why is taking my torrent download of the blockchain so long?]()
 
 
 #### 2. Copying from another Computer
