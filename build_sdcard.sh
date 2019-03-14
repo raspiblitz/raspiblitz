@@ -132,6 +132,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   sudo raspi-config nonint do_wifi_country US
+  # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
+  echo "max_usb_current=1" | sudo tee -a /boot/config.txt
   # extra: remove some big packages not needed
   sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
   sudo apt-get clean
