@@ -15,11 +15,13 @@ if [ ${#GOPATH} -eq 0 ]; then
 fi
 
 # make sure go is installed
+goVersion="1.11"
+echo "### Check Framework: GO ###"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
-  echo "### Installing GO ###"
-  wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-  sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+  echo "---> Installing GO"
+  wget https://storage.googleapis.com/golang/go${goVersion}.linux-armv6l.tar.gz
+  sudo tar -C /usr/local -xzf go${goVersion}.linux-armv6l.tar.gz
   sudo rm *.gz
   sudo mkdir /usr/local/gocode
   sudo chmod 777 /usr/local/gocode
@@ -27,11 +29,19 @@ if [ ${goInstalled} -eq 0 ];then
 fi
 if [ ${goInstalled} -eq 0 ];then
   echo "FAIL: Was not able to install GO (needed to run LndConnect)"
+  sleep 4
   exit 1
+fi
+clear
+correctGoVersion=$(go version | grep -c "go${goVersion}")
+if [ ${correctGoVersion} -eq 0 ]; then
+  echo "WARNING: You work with a untested version of GO - should be ${goVersion} .. trying to continue"
+  go version
+  sleep 6
+  echo ""
 fi
 
 # make sure qrcode-encoder in installed
-clear
 echo "*** Setup ***"
 echo ""
 echo "Installing zapconnect. Please wait..."
