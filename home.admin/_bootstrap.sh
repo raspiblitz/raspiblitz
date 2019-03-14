@@ -58,10 +58,21 @@ if [ "${setupStep}" != "100" ]; then
 fi
 sudo chmod 777 ${infoFile}
 
-# cleaning system logs to prevent SD card filling up
+# Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
-echo "Cleaning system logs"
-sudo rm /var/log/daemon* && sudo rm /var/log/*.gz
+echo "*** Checking Log Size ***"
+logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+if [ ${logsMegaByte} -gt 1000 ]; then
+  echo "WARN !! Logs /var/log in are bigger then 1GB"
+  echo "ACTION --> DELETED ALL LOGS"
+  sudo rm -r /var/log/*
+  sleep 3
+  echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
+  echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
+else
+  echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
+fi
+echo ""
 
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
