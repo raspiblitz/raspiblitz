@@ -343,7 +343,7 @@ The downloaded blockchain is pre-indexed and pre-validated. That should be pract
 
 If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then don't use the torrent/ftp download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, verified and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
 
-# Why is taking my torrent download of the blockchain so long?
+## Why is taking my torrent download of the blockchain so long?
 
 Other users reported that opening up and forwarding the following port from their router to the RaspiBlitz helped speed up and getting started the torrent download: 6881-6889, 6969, 1337
 
