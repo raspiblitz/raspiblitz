@@ -15,11 +15,13 @@ if [ ${#GOPATH} -eq 0 ]; then
 fi
 
 # make sure go is installed
+goVersion="1.11"
+echo "### Check Framework: GO ###"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
-  echo "### Installing GO ###"
-  wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-  sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+  echo "---> Installing GO"
+  wget https://storage.googleapis.com/golang/go${goVersion}.linux-armv6l.tar.gz
+  sudo tar -C /usr/local -xzf go${goVersion}.linux-armv6l.tar.gz
   sudo rm *.gz
   sudo mkdir /usr/local/gocode
   sudo chmod 777 /usr/local/gocode
@@ -27,11 +29,19 @@ if [ ${goInstalled} -eq 0 ];then
 fi
 if [ ${goInstalled} -eq 0 ];then
   echo "FAIL: Was not able to install GO (needed to run LndConnect)"
+  sleep 4
   exit 1
+fi
+clear
+correctGoVersion=$(go version | grep -c "go${goVersion}")
+if [ ${correctGoVersion} -eq 0 ]; then
+  echo "WARNING: You work with a untested version of GO - should be ${goVersion} .. trying to continue"
+  go version
+  sleep 6
+  echo ""
 fi
 
 # make sure qrcode-encoder in installed
-clear
 echo "*** Setup ***"
 echo ""
 echo "Installing zapconnect. Please wait..."
@@ -52,10 +62,10 @@ echo "******************************"
 echo ""
 echo "GETTING THE APP"
 echo "At the moment this app is in closed beta testing and the source code has not been published yet."
-echo "Go to http://www.zap-ios.jackmallers.com sign up with your email (confirmation can take time)"
-echo "iOS: Read https://developer.apple.com/testflight/testers/"
+echo "1. Install the app 'TestFlight' from Apple Appstore. Open it and agree to all terms of services."
+echo "2. Open on your iOS device https://github.com/LN-Zap/zap-iOS and follow 'Download the Alpha'"
 echo ""
-echo "*** STEP 1 ***"
+echo "*** PAIRING STEP 1 ***"
 if [ ${#dynDomain} -eq 0 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
@@ -67,7 +77,7 @@ echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it 
 read key
 
 clear
-echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
+echo "*** PAIRING STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then 
   # If you drop the -i parameter, lndconnect will use the external IP. 

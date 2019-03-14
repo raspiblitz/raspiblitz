@@ -245,7 +245,7 @@ if [ ${torrentError} -gt 0 ]; then
   # User Cancel --> Torrent incomplete
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try FTP download next time. Do you want keep already downloaded torrent data?" 8 57
+  dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try COPY option. Do you want keep already downloaded torrent data?" 8 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;

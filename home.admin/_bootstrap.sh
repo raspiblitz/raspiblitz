@@ -38,6 +38,12 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
+sleep 5
+sudo killall -3 fbi
+
 # set default values for raspiblitz.info
 network=""
 chain=""
@@ -57,6 +63,22 @@ if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
 sudo chmod 777 ${infoFile}
+
+# Emergency cleaning logs when over 1GB (to prevent SD card filling up)
+# see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
+echo "*** Checking Log Size ***"
+logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+if [ ${logsMegaByte} -gt 1000 ]; then
+  echo "WARN !! Logs /var/log in are bigger then 1GB"
+  echo "ACTION --> DELETED ALL LOGS"
+  sudo rm -r /var/log/*
+  sleep 3
+  echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
+  echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
+else
+  echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
+fi
+echo ""
 
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
@@ -288,6 +310,19 @@ if [ ${configExists} -eq 1 ]; then
   # wait otherwise looking for publicIP fails
   sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+
+  # sanity check on IP data
+  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
+  echo "-> sanity check of IP data: ${freshPublicIP}"
+  if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
+    echo "OK IPv6"
+  elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
+    echo "OK IPv4"
+  else
+    echo "FAIL - not an IPv4 or IPv6 address"
+    freshPublicIP=""
+  fi
+
   if [ ${#freshPublicIP} -eq 0 ]; then
     # prevent having no publicIP set at all and LND getting stuck
     # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101

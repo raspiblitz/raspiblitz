@@ -55,11 +55,11 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 ## How can I avoid using a prepared blockchain and validate myself?
 
-The torrent and FTP download use a prepared blockchain to kick start the RaspiBlitz. If you want to selft validate you could do this on another more powerful computer and then transfere your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
+The torrent download use a prepared blockchain to kick start the RaspiBlitz. If you want to selft validate you could do this on another more powerful computer and then transfere your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
 
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
-Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz FTP/Torrent downloads (dont trust, verify).
+Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you synced and verified the blockchain yourself and not trusting the RaspiBlitz Torrent downloads (dont trust, verify).
 
 One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1 with transaction index switched on (`txindex=1` in the `bitcoin.conf`). 
 
@@ -107,7 +107,7 @@ To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra 
 
 ## Why is my "final sync" taking so long?
 
-First of all if you see a final sync over 90% and you can see from time to time small increase - you should be OK ... this can take some looong time to catch up with the network. Only in the case that you activly choose the `SYNC` option in the `Getting the Blockchain` a final sync under 90% is OK. If you did a torrent, a FTP or a copy from another computer and seeing under 90% somthing went wrong and the setup process is ignoring your prepared Blockchain and doing a full sync - which can almost take forever on a raspberryPi.
+First of all if you see a final sync over 90% and you can see from time to time small increase - you should be OK ... this can take some looong time to catch up with the network. Only in the case that you activly choose the `SYNC` option in the `Getting the Blockchain` a final sync under 90% is OK. If you did a torrent or a copy from another computer and seeing under 90% somthing went wrong and the setup process is ignoring your prepared Blockchain and doing a full sync - which can almost take forever on a raspberryPi.
 
 So if something is wrong (like mentioned above) then try again from the beginning. You need to reset your HDD for a fresh start: SSH in as admin user. Abort the final sync info with CTRL+c to get to the terminal. There run `sudo /home/admin/XXcleanHDD.sh -all` and follow the script to delete all data in HDD. When finsihed power down with `sudo shutdown now`. Then make a fresh SD card from image and this time try another option to get the blockchain. If you run into trouble the second time, please report an issue on GitHub.
 
@@ -343,6 +343,10 @@ The downloaded blockchain is pre-indexed and pre-validated. That should be pract
 
 If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then don't use the torrent/ftp download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, verified and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
 
+## Why is taking my torrent download of the blockchain so long?
+
+Other users reported that opening up and forwarding the following port from their router to the RaspiBlitz helped speed up and getting started the torrent download: 6881-6889, 6969, 1337
+
 ## What is the "Base Torrent File"?
 
 Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - that will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
@@ -546,3 +550,14 @@ To fix this depends on where you get this error:
 
 * If you get it in a mobile wallet, then redo the connection with the RaspiBlitz to get fresh macaroons.
 * If you get this from RTL or from the scripts of the SSH menus of the RaspiBlitz, then go to "EXPORT Macacroons and TLS.cert" in SSH main menu and choose the the "RESET Macaroons & TLS" option.
+
+Also make sure to check again on your power supply - it needs to deliver equal or more then 3A and should deliver a stable current. If you think your HDD is degrading - maybe this is a good time to replace it. See for details the FAQ question: [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+
+## Why is my node not routing? 
+
+1. You don't have inbound liquidity 
+2. Low uptime
+3. Capital is committed to competitive destinations 
+4. Capital committed to destinations no one wants to send to 
+5. Fees are too high
+6. Your inbound liquidity doesn't have good inbound liquidity itself
