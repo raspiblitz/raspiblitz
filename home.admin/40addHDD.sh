@@ -25,7 +25,8 @@ if [ ${existsHDD} -gt 0 ]; then
       uuid=$1
       fstabOK=$(cat /etc/fstab | grep -c ${uuid})
       if [ ${fstabOK} -eq 0 ]; then
-        fstabAdd="UUID=${uuid} /mnt/hdd ext4 noexec,defaults 0 0"
+        # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
+        fstabAdd="UUID=${uuid} /mnt/hdd ext4 noexec,defaults 0 2"
         echo "Adding line to /etc/fstab ..."
         echo ${fstabAdd}
         # adding the new line after line 3 to the /etc/fstab
@@ -45,6 +46,10 @@ if [ ${existsHDD} -gt 0 ]; then
 
           echo "OK - HDD is mounted"
 	        echo ""
+
+          # setting fsk check intervall to 1
+          # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
+          sudo tune2fs -c 1 /dev/sda1
 
           # init the RASPIBLITZ Config
           configFile="/mnt/hdd/raspiblitz.conf"

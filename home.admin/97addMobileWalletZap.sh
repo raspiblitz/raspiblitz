@@ -62,10 +62,10 @@ echo "******************************"
 echo ""
 echo "GETTING THE APP"
 echo "At the moment this app is in closed beta testing and the source code has not been published yet."
-echo "Go to http://www.zap-ios.jackmallers.com sign up with your email (confirmation can take time)"
-echo "iOS: Read https://developer.apple.com/testflight/testers/"
+echo "1. Install the app 'TestFlight' from Apple Appstore. Open it and agree to all terms of services."
+echo "2. Open on your iOS device https://github.com/LN-Zap/zap-iOS and follow 'Download the Alpha'"
 echo ""
-echo "*** STEP 1 ***"
+echo "*** PAIRING STEP 1 ***"
 if [ ${#dynDomain} -eq 0 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
@@ -77,7 +77,7 @@ echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it 
 read key
 
 clear
-echo "*** STEP 2 : Click on Scan (make whole QR code fill camera) ***"
+echo "*** PAIRING STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
 if [ ${#dynDomain} -eq 0 ]; then 
   # If you drop the -i parameter, lndconnect will use the external IP. 
