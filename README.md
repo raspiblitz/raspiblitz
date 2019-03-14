@@ -50,6 +50,7 @@ These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
+* [Canada](shoppinglist_ca.md)
 * [UK](shoppinglist_uk.md)
 * [Switzerland](shoppinglist_ch.md)
 * [France](shoppinglist_fr.md)
@@ -83,7 +84,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2018-02-18.torrent
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
 
 SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
 
@@ -400,8 +401,6 @@ But this also comes with the following side effects:
 * Lightning nodes that dont run TOR cannot reach you (like behind NAT)
 
 To try it out just switch on the service - you can deactivate later on if its not working for you.
-
-The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
 
 ##### RTL Webinterface
 
