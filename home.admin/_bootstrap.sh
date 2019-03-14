@@ -41,7 +41,7 @@ echo "***********************************************" >> $logFile
 # display 3 secs logo - try to kickstart LCD
 # see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
 sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
-sleep 3
+sleep 5
 sudo killall -3 fbi
 
 # set default values for raspiblitz.info
