@@ -184,6 +184,9 @@ sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
 
+# preprae for display graphics mode 
+sudo apt-get install -y fbi
+
 echo ""
 echo "*** ADDING MAIN USER admin ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-main-user-admin
