@@ -45,6 +45,7 @@ pathAdd=""
 if [ "${chain}" = "test" ]; then
   pathAdd="/testnet3"
 fi
+sudo journalctl -u ${network}d -b --no-pager -n5
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
 echo ""
 
@@ -53,7 +54,8 @@ sudo systemctl status lnd -n2 --no-pager
 echo ""
 
 echo "*** LAST 20 LND LOGS ***"
-sudo journalctl -u lnd -b --no-pager -n20
+sudo journalctl -u lnd -b --no-pager -n5
+sudo tail -n 20 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
 if [ "${rtlWebinterface}" = "on" ]; then
