@@ -6,11 +6,31 @@ source /home/admin/raspiblitz.info
 # get local ip
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+# Basic Options
+OPTIONS=(UNIX "MacOS or Linux" \
+        WINDOWS "Windows"
+        )
+
+CHOICE=$(dialog --clear --title "Which System is running on the other computer?" --menu "" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+clear
+case $CHOICE in
+        UNIX) echo "Linus";;
+        WINDOWS) echo "Bill";;
+        *) exit 1;;
+esac
+
+if [ -d "/mnt/hdd/bitcoin" ]; then
+  dialog --title "Prepare Copy" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
+  response=$?
+  echo "response(${response})"
+  case $response in
+    1) exit 1 ;;
+  esac
+fi
+
 # additional prep if this is used to replace corrupted blockchain
 if [ "${setupStep}" = "100" ]; then
-  # warn user
-  echo "!! Press ENTER to delete the old blockchain .. CTRL+C to CANCEL"
-  read key
   # make sure services are not running
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
@@ -18,21 +38,6 @@ if [ "${setupStep}" = "100" ]; then
   sudo systemctl disable bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
-
-# Basic Options
-OPTIONS=(UNIX "MacOS or Linux" \
-        WINDOWS "Windows" \
-        BLITZ "RaspiBlitz" \
-        )
-
-CHOICE=$(dialog --clear --title "Which System is running on the other computer?" --menu "" 11 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
-
-clear
-case $CHOICE in
-        CLOSE)
-            exit 1;
-            ;;
-esac
 
 # delete all IN bitcoin directory but not itself if it exists
 # so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
