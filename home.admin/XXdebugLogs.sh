@@ -42,6 +42,7 @@ echo ""
 
 echo "*** LAST 5 ERROR LOGS ***"
 sudo journalctl -u ${network}d -b --no-pager -n5
+echo ""
 echo "*** LAST 20 INFO LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
@@ -56,6 +57,7 @@ echo ""
 
 echo "*** LAST 5 LND ERROR LOGS ***"
 sudo journalctl -u lnd -b --no-pager -n5
+echo ""
 echo "*** LAST 20 LND INFO LOGS ***"
 sudo tail -n 20 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
