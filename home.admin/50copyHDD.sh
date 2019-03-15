@@ -19,6 +19,21 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
+# Basic Options
+OPTIONS=(UNIX "MacOS or Linux" \
+        WINDOWS "Windows" \
+        BLITZ "RaspiBlitz" \
+        )
+
+CHOICE=$(dialog --clear --title "Which System is running on the other computer?" --menu "" 11 40 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+clear
+case $CHOICE in
+        CLOSE)
+            exit 1;
+            ;;
+esac
+
 # delete all IN bitcoin directory but not itself if it exists
 # so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
 sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
@@ -26,7 +41,7 @@ sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
 # make sure /mnt/hdd/bitcoin exists
 sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
 
-# allow all users write to it ()
+# allow all users write to it
 sudo chmod 777 /mnt/hdd/bitcoin
 
 clear
@@ -45,7 +60,11 @@ echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'inde
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
-echo "sudo scp -r ./chainstate ./indexes ./testnet3 ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+if [ "${CHOICE}" = "WINDOWS" ]; then
+  echo "sudo scp -r ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+else
+  echo "sudo rsync -avhW --progress ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+fi  
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."
 echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
