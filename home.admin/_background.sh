@@ -61,6 +61,25 @@ do
   fi
 
   ####################################################
+  # CHECK FOR UNDERVOLTAGE REPORTS
+  # every 1 hour scan for undervoltage reports
+  ####################################################
+  recheckUndervoltage=$(($counter % 3600))
+  if [ ${recheckUndervoltage} -eq 1 ]; then
+    echo "*** RECHECK UNDERVOLTAGE ***"
+    countReports=$(sudo cat /var/log/syslog | grep -c "Under-voltage detected!")
+    echo "${countReports} undervoltage reports found in syslog"
+    if [ ${#undervoltageReports} -eq 0 ]; then
+      # write new value to info file
+      undervoltageReports="${countReports}"
+      echo "undervoltageReports=${undervoltageReports}" >> ${infoFile}
+    else
+      # update value in info file
+      sed -i "s/^undervoltageReports=.*/undervoltageReports=${countReports}/g" ${infoFile}
+    fi
+  fi
+
+  ####################################################
   # RECHECK PUBLIC IP
   # when public IP changes, restart LND with new IP
   ####################################################
