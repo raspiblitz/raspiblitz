@@ -12,6 +12,7 @@ Type=oneshot
 RemainAfterExit=true
 ExecStart=/home/admin/_bootstrap.sh
 StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

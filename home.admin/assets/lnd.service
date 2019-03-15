@@ -20,6 +20,8 @@ KillMode=process
 TimeoutSec=180
 Restart=always
 RestartSec=60
+StandardOutput=null
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
