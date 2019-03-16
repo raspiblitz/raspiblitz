@@ -30,7 +30,7 @@ if [ ${mode} = "backup" ]; then
   sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
 
   # name with md5 checksum
-  md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz)
+  md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
   mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
 
   # start LND
