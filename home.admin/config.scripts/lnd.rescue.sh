@@ -133,6 +133,7 @@ elif [ ${mode} = "restore" ]; then
   # unpack zip
   echo "Restoring LND data from ${filename} ..."
   sudo tar -xf ${filename} -C /
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   echo "OK"
   echo
 
