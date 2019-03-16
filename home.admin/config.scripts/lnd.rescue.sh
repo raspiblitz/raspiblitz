@@ -90,6 +90,12 @@ elif [ ${mode} = "restore" ]; then
       if [ ${countZips} -eq 1 ]; then
         
         clear
+        echo
+        echo "**************************"
+        echo "* RESTORING BACKUP FILE  *"
+        echo "**************************"
+        echo
+        
         filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
         echo "OK -> found file to restore: ${filename}"
 
