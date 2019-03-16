@@ -33,12 +33,6 @@ if [ ${mode} = "backup" ]; then
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
   mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
 
-  # start LND
-  echo "Starting lnd..."
-  sudo systemctl start lnd
-  echo "OK"
-  echo
-
   # offer SCP for download
   echo "****************************"
   echo "* DOWNLOAD THE BACKUP FILE *"
@@ -49,6 +43,10 @@ if [ ${mode} = "backup" ]; then
   echo ""
   echo "Use password A to authenticate file transfere."
   echo
+  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
+  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
+  echo "anymore bacause it cointains outdated channel data and can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 

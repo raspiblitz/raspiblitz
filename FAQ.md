@@ -119,7 +119,22 @@ But there is one safe way to start: Store your LND wallet seed (list of words yo
 
 Recovering the coins that you have in an active channel is a bit more complicated. Because you have to be sure that you really have an up to date backup of your channel state data. The problem is: If you post an old state of your channel, to the network this looks like an atempt to cheat, and your channel partner is allowed claim all the funds in the channel.
 
-To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
+To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment. But if you feel experimental and you look for a continues backup you may want to check out the following script to integrate into your RaspiBlitz: https://github.com/vindard/lnd-backup/blob/master/do-lndbackup.sh
+
+How to backup LND data in a rescue situation see next question.
+
+## How to rescue/move LND data between two RaspiBlitzes?
+
+In some situations you may just want to rescue/export your LND data (funds and channels) from a RaspiBlitz to then be able to restore it back to a fresh one. For this you can use the following procedure ...
+
+To rescue/export your Lightning data from a RaspiBlitz:
+
+* SSH into your RaspiBlitz and EXIT to terminal from the menu.
+* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* follow the instructions of the script.
+
+This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. 
+
 
 But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: 
 
