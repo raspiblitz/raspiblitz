@@ -62,7 +62,7 @@ elif [ ${mode} = "restore" ]; then
   filename=""
   while [ ${#filename} -eq 0 ]
     do
-      countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz | grep -c 'lnd-rescue')
+      countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz 2>/dev/null | grep -c 'lnd-rescue')
       if [ ${countZips} -lt 1 ]; then
         echo "**************************"
         echo "* UPLOAD THE BACKUP FILE *"
@@ -83,7 +83,8 @@ elif [ ${mode} = "restore" ]; then
       if [ ${countZips} -gt 1 ]; then
         echo "!! WARNING !!"
         echo "There are multiple lnd-rescue files in directory /home/admin."
-        echo "Make sure there is only one to workd with and start again."
+        echo "Make sure there is only one file to work with and start again."
+        echo 
         exit 1
       fi
       if [ ${countZips} -eq 1 ]; then
