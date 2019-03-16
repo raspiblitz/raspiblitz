@@ -95,7 +95,7 @@ elif [ ${mode} = "restore" ]; then
         echo "* RESTORING BACKUP FILE  *"
         echo "**************************"
         echo
-        
+
         filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
         echo "OK -> found file to restore: ${filename}"
 
@@ -131,7 +131,7 @@ elif [ ${mode} = "restore" ]; then
   echo 
 
   # unpack zip
-  echo "Restoring LND data ..."
+  echo "Restoring LND data from ${filename} ..."
   sudo tar -xfv ${filename} -C /
   echo "OK"
   echo
