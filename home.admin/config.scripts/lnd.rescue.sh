@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "small rescue script to to backup or restore"
+ echo "lnd.rescue.sh [backup|restore]"
+ exit 1
+fi
+
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
+mode="$1"
+if [ ${mode} = "backup" ]; then
+
+  ################################
+  # BACKUP
+  ################################
+
+  echo "*** LND.RESCUE --> BACKUP"
+
+  # stop LND
+  echo "Stopping lnd..."
+  sudo systemctl stop lnd
+  sleep 5
+  echo "OK"
+  echo 
+
+  # zip it
+  sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd
+  sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
+
+  # name with md5 checksum
+  md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz)
+  mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
+
+  # start LND
+  echo "Starting lnd..."
+  sudo systemctl start lnd
+  echo "OK"
+  echo
+
+  # offer SCP for download
+  echo "****************************"
+  echo "* DOWNLOAD THE BACKUP FILE *"
+  echo "****************************"
+  echo 
+  echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
+  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
+  echo ""
+  echo "Use password A to authenticate file transfere."
+  echo
+
+elif [ ${mode} = "restore" ]; then
+
+  ################################
+  # RESTORE
+  ################################
+
+  echo "*** LND.RESCUE --> RESTORE"
+  echo ""
+
+  filename=""
+  while [ ${#filename} -eq 0 ]
+    do
+      countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz | grep -c 'lnd-rescue')
+      if [ ${countZips} -lt 1 ]; then
+        echo "**************************"
+        echo "* UPLOAD THE BACKUP FILE *"
+        echo "**************************"
+        echo 
+        echo "If you have a lnd-rescue backup file on your laptop you can now"
+        echo "upload it and restore the your old LND state."
+        echo
+        echo "To make upload open a new terminal on your laptop,"
+        echo "change into the directory where your lnd-rescue file is and"
+        echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+        echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
+        echo ""
+        echo "Use password A to authenticate file transfere."
+        echo
+        echo "PRESS ENTER when upload is done. Use CTRL-C to abort."
+      fi
+      if [ ${countZips} -gt 1 ]; then
+        echo "!! WARNING !!"
+        echo "There are multiple lnd-rescue files in directory /home/admin."
+        echo "Make sure there is only one to workd with and start again."
+        exit 1
+      fi
+      if [ ${countZips} -eq 1 ]; then
+        
+        filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
+        echo "OK -> found file to restore: ${filename}"
+
+        md5checksum=$(md5sum ${filename} | head -n1 | cut -d " " -f1)
+        isCorrect=$(echo ${filename} | grep -c ${md5checksum})
+        if [ ${isCorrect} -eq 1 ]; then
+          echo "OK -> checksum looks good: ${md5checksum}"
+        else
+          echo "!!! FAIL -> Checksum not correct."
+          echo "Maybe transfere failed? Continue on your own risk!"
+          echo "Recommend to abort and upload again!"
+        fi
+
+        echo
+        echo "WARNING: This will delete the actual LND state/funds of this RaspiBlitz."
+        echo
+        echo "PRESS ENTER to start restore. Use CTRL-C to abort."
+      fi
+      read key
+    done
+
+  # stop LND
+  echo "Stopping lnd..."
+  systemctl stop lnd
+  sleep 5
+  echo "OK"
+  echo 
+
+  # clean DIR
+  echo "Cleaning LND data ..."
+  sudo rm -r /mnt/hdd/lnd/*
+  echo "OK"
+  echo 
+
+  # unpack zip
+  echo "Restoring LND data ..."
+  sudo tar -xfv ${filename} -C /
+  echo "OK"
+  echo
+
+  # start LND
+  echo "Starting lnd..."
+  sudo systemctl start lnd
+  echo "OK"
+  echo
+
+  echo "DONE - please check if LND starts up correctly with restored state and funds."
+  echo "Keep in mind that some channels got forced closed by channel partners in the meanwhile."
+  echo 
+
+else
+  echo "unknown parameter '${mode}' - exit"
+fi
