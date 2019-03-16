@@ -89,6 +89,7 @@ elif [ ${mode} = "restore" ]; then
       fi
       if [ ${countZips} -eq 1 ]; then
         
+        clear
         filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
         echo "OK -> found file to restore: ${filename}"
 
@@ -112,7 +113,7 @@ elif [ ${mode} = "restore" ]; then
 
   # stop LND
   echo "Stopping lnd..."
-  systemctl stop lnd
+  sudo systemctl stop lnd
   sleep 5
   echo "OK"
   echo 
