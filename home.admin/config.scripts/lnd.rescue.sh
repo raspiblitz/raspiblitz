@@ -132,7 +132,7 @@ elif [ ${mode} = "restore" ]; then
 
   # unpack zip
   echo "Restoring LND data from ${filename} ..."
-  sudo tar -xfv ${filename} -C /
+  sudo tar -xf ${filename} -C /
   echo "OK"
   echo
 
