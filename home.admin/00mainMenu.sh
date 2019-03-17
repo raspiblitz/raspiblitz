@@ -142,6 +142,7 @@ waitUntilChainNetworkIsReady()
 
       # check for missing blockchain data
       blockchainsize=$(du /mnt/hdd/bitcoin | head -n1 | awk '{print $1;}')
+      echo "blockchainsize(${blockchainsize})"
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt 1000000 ]; then
           echo "Mission Bloclchain Data ..."
@@ -149,6 +150,7 @@ waitUntilChainNetworkIsReady()
           sleep 3
         fi
       fi
+      sleep 5
 
       if [ ${#clienterror} -gt 0 ]; then
 
