@@ -33,7 +33,7 @@ if [ -d "/mnt/hdd/bitcoin" ]; then
   dialog --title "Fresh or Repair" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
   response=$?
   echo "response(${response})"
-  if [ "${$response}" = "1" ]; then
+  if [ "${response}" = "1" ]; then
     echo "OK - keep old blockchain - just try to repair by copying over it"
     sleep 3
   else
