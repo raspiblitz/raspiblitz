@@ -153,31 +153,31 @@ https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
 
 The RaspiBlitz will now try to help you on with the repair.
 Maybe use BACKUP option first to secure your funds & channels.
-" 13 52
+" 13 65
 
           clear
           # Basic Options
           OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
-                   COPY "Copy Blockchain from another Computer (SKILLED)" \
+                   COPY "Copy from another Computer (SKILLED)" \
                    REINDEX "Resync thru ${network}d (TAKES VERY VERY LONG)" \
                    BACKUP "Run Backup LND data first (optional)"
           )
 
-          CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Who to repair blockchain?" --menu "test" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Repair Blockchain Data" --menu "Choose a repair/recovery option:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
           clear
           if [ "${CHOICE}" = "TORRENT" ]; then
             echo "Starting TORRENT ..."
             sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
             /home/admin/50torrentHDD.sh
-            raspiblitz
+            /home/admin/00mainMenu.sh
             exit
 
           elif [ "${CHOICE}" = "COPY" ]; then
             echo "Starting COPY ..."
             sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
             /home/admin/50copyHDD.sh
-            raspiblitz
+            /home/admin/00mainMenu.sh
             exit
 
           elif [ "${CHOICE}" = "REINDEX" ]; then
@@ -189,7 +189,7 @@ Maybe use BACKUP option first to secure your funds & channels.
             sudo /home/admin/config.scripts/lnd.rescue.sh backup
             echo "PRESS ENTER to return to menu."
             read key
-            raspiblitz
+            /home/admin/00mainMenu.sh
             exit
 
           else

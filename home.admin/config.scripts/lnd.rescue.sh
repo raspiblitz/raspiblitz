@@ -34,6 +34,7 @@ if [ ${mode} = "backup" ]; then
   mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
 
   # offer SCP for download
+  echo
   echo "****************************"
   echo "* DOWNLOAD THE BACKUP FILE *"
   echo "****************************"
