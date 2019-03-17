@@ -145,12 +145,12 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
   sudo systemctl enable bitcoind
-  echo "DONE - reboot is needed: sudo shutdown -r now"
+  echo "DONE - rebooting: sudo shutdown -r now"
+  sudo shutdown -r now
   exit 0
 fi
 
 # REACT ON QUICK CHECK DURING INITAL SETUP
-
 
 if [ ${quickCheckOK} -eq 0 ]; then
 

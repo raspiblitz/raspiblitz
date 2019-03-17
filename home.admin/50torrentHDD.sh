@@ -290,7 +290,8 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
   sudo chown -R bitcoin:bitcoin /mnt/hdd/${network}/
   sudo systemctl enable ${network}d
-  echo "DONE - reboot needed: sudo shutdown -r now"
+  echo "DONE - rebooting: sudo shutdown -r now"
+  sudo shutdown -r now
 else
   # set SetupState
   sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
