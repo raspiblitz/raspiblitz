@@ -142,10 +142,49 @@ waitUntilChainNetworkIsReady()
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
         if [ ${reindex} -gt 0 ]; then
-          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair script."
+          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
           sleep 3
-          sudo /home/admin/config.scripts/network.reindex.sh
-          exit
+
+          clear
+          # Basic Options
+          OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
+                   COPY "Copy Blockchain from another Computer (SKILLED)" \
+                   REINDEX "Resync thru ${${network}}d (TAKES VERY VERY LONG)" \
+                   BACKUP "Run Backup LND data first (optional)" \
+          )
+
+          CHOICE=$(dialog --clear --title "Who to repair blockchain?" --menu "" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+          clear
+          if [ "${CHOICE}" = "TORRENT" ]; then
+            echo "Starting TORRENT ..."
+            /home/admin/50torrentHDD.sh
+            raspiblitz
+            exit
+
+          elif [ "${CHOICE}" = "COPY" ]; then
+            echo "Starting COPY ..."
+            /home/admin/50copyHDD.sh
+            raspiblitz
+            exit
+
+          elif [ "${CHOICE}" = "REINDEX" ]; then
+            echo "Starting REINDEX ..."
+            sudo /home/admin/config.scripts/network.reindex.sh
+            exit
+
+          elif [ "${CHOICE}" = "BACKUP" ]; then
+            sudo /home/admin/config.scripts/lnd.rescue.sh backup
+            echo "PRESS ENTER to return to menu."
+            read key
+            raspiblitz
+            exit
+
+          else
+            echo "CANCEL"
+            exit
+          fi
+
         fi
 
         # normal info
