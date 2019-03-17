@@ -234,6 +234,9 @@ sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
 
+# prepare for BTRFS data drive raid
+sudo apt-get install -y btrfs-tools
+
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334
 sudo apt-get install -y fbi
