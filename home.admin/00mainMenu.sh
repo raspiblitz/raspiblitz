@@ -158,12 +158,14 @@ waitUntilChainNetworkIsReady()
           clear
           if [ "${CHOICE}" = "TORRENT" ]; then
             echo "Starting TORRENT ..."
+            sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
             /home/admin/50torrentHDD.sh
             raspiblitz
             exit
 
           elif [ "${CHOICE}" = "COPY" ]; then
             echo "Starting COPY ..."
+            sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
             /home/admin/50copyHDD.sh
             raspiblitz
             exit
@@ -185,6 +187,8 @@ waitUntilChainNetworkIsReady()
             exit
           fi
 
+        else
+          echo "${network} error: ${clienterror}"
         fi
 
         # normal info
