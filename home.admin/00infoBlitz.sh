@@ -286,7 +286,7 @@ ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}
+${color_yellow}${ln_publicColor}${ln_external}${color_red}
 
 " \
 "RaspiBlitz v${codeVersion}" \
@@ -295,5 +295,5 @@ ${color_yellow}${ln_publicColor}${ln_external}
 "${hdd}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
-  echo "!! ${color_red}${undervoltageReports} undervoltage reports found - maybe upgrade power supply !!"
+  echo "!! ${undervoltageReports} undervoltage reports found - maybe upgrade power supply !!"
 fi
