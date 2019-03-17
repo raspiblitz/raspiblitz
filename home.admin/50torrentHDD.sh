@@ -13,7 +13,6 @@ if [ "${setupStep}" = "100" ]; then
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
   sudo systemctl stop ${network}d
-  sudo systemctl disable ${network}d
 fi
 
 # make sure rtorrent is available
