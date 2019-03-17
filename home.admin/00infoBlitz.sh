@@ -289,7 +289,7 @@ ${color_yellow}${ln_publicColor}${ln_external}
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
-if [ "${runBehindTor}" != "on" ]; then
-  # one extra space line at the end if nodeaddress is not TOR
-  echo ""
+
+if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
+  echo "${undervoltageReports} undervoltage reports found in syslog"
 fi

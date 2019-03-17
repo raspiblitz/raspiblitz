@@ -119,45 +119,45 @@ But there is one safe way to start: Store your LND wallet seed (list of words yo
 
 Recovering the coins that you have in an active channel is a bit more complicated. Because you have to be sure that you really have an up to date backup of your channel state data. The problem is: If you post an old state of your channel, to the network this looks like an atempt to cheat, and your channel partner is allowed claim all the funds in the channel.
 
-To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment.
+To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment. But if you feel experimental and you look for a continues backup you may want to check out the following script to integrate into your RaspiBlitz: https://github.com/vindard/lnd-backup/blob/master/do-lndbackup.sh
 
-But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: 
-
-`scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
-
-And if you want to put a LND backup state back. Make a fresh RaspiBlitz (new sd card image and a clean HDD), set it up until its ready (you see the status screen on LCD) and then go to terminal, stop lnd service with `sudo systemctl stop lnd` delete the content of the lnd data dir with `sudo rm -rf /mnt/hdd/lnd/*`. Then on your laptop being in terminal in the same directory you did the backup in (the backuped lnd directory is listed there) run the following SCP command:
-
-`scp -r ./lnd/* bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/` use password A
-
-No run a reboot with: `sudo shutdown -r now` ... LND may need some longer rescan after reboot, but then you should see your old channels and balances. 
-
-**Be aware that if backup is some hours/days old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state and LND is closing channels it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution.**
-
-## What is this mnemonic seed word list?
-
-With the 24 word list given you by LND on wallet creation you can recover your private key (BIP 39). You should write it down and store it at a save place. 
-
-For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
-
-## How does PASSWORD D effects the word seed?
-
-On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
-
-To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
+How to backup LND data in a rescue situation see next question "How can I recover my coins from a failing RaspiBlitz?".
 
 ## How can I recover my coins from a failing RaspiBlitz?
 
-You might run into a situation where your hardware fails or the software starts to act buggy. So you decide to setup a fresh RaspiBlitz, like in the chapter above "Update to a new SD Card Release" - but the closing channels and cashing out is not working anymore. So whats about the funds you already have on your failing setup?
+On a RaspiBlitz you have coins in your on-chain wallet (bitcoin wallet) and also coins in lightning channels. First we will try to recover all of them and even trying to keep your channels open with "Recover LND data". This that is not possible you can fall back to the second option "Recover from Wallet Seed".
 
-There is not a perfect way yet to backup/recover your coins, but you can try the following to make the best out of the situation:
+### 1) Recover LND data
 
-### 1) Recover from Wallet Seed
+To recover all your LND data you must still be able to SSH into the RaspiBlitz (minimum v1.1) and the HDD should be still useable/reachable (mounted) - even it shows some errors. If this is not possible anymore you should skip to the second option "Recover from Wallet Seed".
+
+If you still can SSH in and HDD is readable, we can try to rescue/export your LND data (funds and channels) from a RaspiBlitz to then be able to restore it back to a fresh one. For this you can use the following procedure ...
+
+To rescue/export your Lightning data from a RaspiBlitz:
+
+* SSH into your RaspiBlitz and EXIT to terminal from the menu.
+* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* follow the instructions of the script.
+
+This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfere the lnd-rescue file to your laptop. If transfere was successfull. You can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
+
+Then to restore your old LND data and to recover your funds and channels:
+
+* SSH into your new RaspiBlitz and EXIT to terminal from the menu.
+* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* follow the instructions of the script.
+
+This script will offer you a way to transfere the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND gets then restarted for you and after some time it should show you the status screen again with your old funds and channels.
+
+**Be aware that if backup is some hours old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older then 1 day also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution. But its recommended to try in recover and rescue situations - its not for regular backups.**
+
+### 2) Recover from Wallet Seed
 
 Remember those 24 words you were writing down during the setup? Thats your "cipher seed" - now this words are important to recover your wallet. If you dont have them anymore: skip this chapter and read option 2. If you still have the cypher seed: good, but read the following carefully:
 
 With the cypher seed you can recover the bitcoin wallet that LND was managing for you - but it does not contain all the details about the channels you have open - its just the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything is OK and you can go on. If you had open channels with funds in there, the following is to consider:
 
-* You now rely on your channel counter parts to force close the channel at one point. If they do, the coins will be available to use in your funding wallet again at one point in the future - after force close delay.
+* You now rely on your channel counter parts to force close the channel at one point. If they do, the coins will be available to use in your funding wallet again at one point in the future - after force close delay (but see also [#278](https://github.com/rootzoll/raspiblitz/issues/278) ).
 * If your channel counter parts never force close the channel (because they are offline too) your channel funds can be frozen forever.
 
 So going this way there is a small risk, that you will not recover your funds. But normally if your channel counter parts are still online, see that you will not come back online and they have themselves some funds on their channel side with you: They have an incentive to force close the channel to make use of their funds again.
@@ -178,19 +178,17 @@ Then give LND some time to rescan the blockchain. In the end you will have resto
 
 *Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
 
-### 2) LND Channel State Backup
+## What is this mnemonic seed word list?
 
-This second option is very very risky and can lead to complete loss of funds. And it olny can work, if you can still access the HDD content of your failing RaspiBlitz. It should only be used if you lost your cypher seed for the option above, forgot your cypher seed encryption password or your old channel counter parts are offline, too.
+With the 24 word list given you by LND on wallet creation you can recover your private key (BIP 39). You should write it down and store it at a save place. 
 
-What you do is in priciple:
-- Make a copy of the HDD directory `/mnt/hdd/lnd`
-- Setup a fresh RaspiBlitz
-- Stop LND with `sudo systemctl stop lnd`
-- Replace the new `/mnt/hdd/lnd` with your backuped version
-- Make sure everything in `/mnt/hdd/lnd` is owned by bitcoin:bitcoin
-- Reboot the RaspiBlitz
+For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
 
-This is highly experimental. And again: If you restore the LND with an backup that is not representing the latest channel state, this will trigger the lightning "penalty" mechanism - allowing your channel counter part to grab all the funds from a channel. Its a measure of last resort. But if its working for you, let us know.
+## How does PASSWORD D effects the word seed?
+
+On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
+
+To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
 
 ## How do I change the Name/Alias of my lightning node
 

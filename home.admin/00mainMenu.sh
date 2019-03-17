@@ -134,18 +134,85 @@ waitUntilChainNetworkIsReady()
     echo "can take longer if device was off or first time"
     while :
     do
+      
+      # check for error on network
       sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
       clienterror=`cat error.tmp`
       rm error.tmp
+
+      # check for missing blockchain data
+      blockchainsize=$(sudo du /mnt/hdd/bitcoin | head -n1 | awk '{print $1;}')
+      echo "blockchainsize(${blockchainsize})"
+      if [ ${#blockchainsize} -gt 0 ]; then
+        if [ ${blockchainsize} -lt 1000000 ]; then
+          echo "Mission Blockchain Data ..."
+          clienterror="missing blockchain"
+          sleep 3
+        fi
+      fi
+
       if [ ${#clienterror} -gt 0 ]; then
 
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
-        if [ ${reindex} -gt 0 ]; then
-          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair script."
+        if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
+          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
           sleep 3
-          sudo /home/admin/config.scripts/network.reindex.sh
-          exit
+
+          dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
+This can be due to power problems or a failing HDD.
+Please check the FAQ on RaspiBlitz Github
+'My blockchain data is corrupted - what can I do?'
+https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
+
+The RaspiBlitz will now try to help you on with the repair.
+To run a BACKUP of funds & channels first is recommended.
+" 13 65
+
+          clear
+          # Basic Options
+          OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
+                   COPY "Copy from another Computer (SKILLED)" \
+                   REINDEX "Resync thru ${network}d (TAKES VERY VERY LONG)" \
+                   BACKUP "Run Backup LND data first (optional)"
+          )
+
+          CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Repair Blockchain Data" --menu "Choose a repair/recovery option:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+          clear
+          if [ "${CHOICE}" = "TORRENT" ]; then
+            echo "Starting TORRENT ..."
+            sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
+            /home/admin/50torrentHDD.sh
+            /home/admin/00mainMenu.sh
+            exit
+
+          elif [ "${CHOICE}" = "COPY" ]; then
+            echo "Starting COPY ..."
+            sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
+            /home/admin/50copyHDD.sh
+            /home/admin/00mainMenu.sh
+            exit
+
+          elif [ "${CHOICE}" = "REINDEX" ]; then
+            echo "Starting REINDEX ..."
+            sudo /home/admin/config.scripts/network.reindex.sh
+            exit
+
+          elif [ "${CHOICE}" = "BACKUP" ]; then
+            sudo /home/admin/config.scripts/lnd.rescue.sh backup
+            echo "PRESS ENTER to return to menu."
+            read key
+            /home/admin/00mainMenu.sh
+            exit
+
+          else
+            echo "CANCEL"
+            exit
+          fi
+
+        else
+          echo "${network} error: ${clienterror}"
         fi
 
         # normal info
