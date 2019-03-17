@@ -263,9 +263,10 @@ if [ "${setupStep}" = "100" ]; then
   sudo systemctl disable ${network}d
   sudo cp -f /mnt/hdd/${network}/${network}.conf /home/admin/assets/${network}.conf 
   sudo rm -rfv /mnt/hdd/${network}/* 2>/dev/null
+  sudo rm /mnt/hdd/${network}/debug.log
 fi
 
-# Download worked / just move, copy on USB2 >4h
+# Download worked / just move, copy on USB2 would be >4h
 echo ""
 echo "*** Moving Files ***"
 date +%s

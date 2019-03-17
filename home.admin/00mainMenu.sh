@@ -146,13 +146,13 @@ waitUntilChainNetworkIsReady()
           sleep 3
 
           dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
-This can be due to a power problems or a failing HDD.
-Please check the FAQ on Raspi9Blitz Github
+This can be due to power problems or a failing HDD.
+Please check the FAQ on RaspiBlitz Github
 'My blockchain data is corrupted - what can I do?'
 https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
 
 The RaspiBlitz will now try to help you on with the repair.
-Maybe use BACKUP option first to secure your funds & channels.
+To run a BACKUP of funds & channels first is recommended.
 " 13 65
 
           clear
