@@ -158,7 +158,7 @@ waitUntilChainNetworkIsReady()
       echo "blockchainsize(${blockchainsize})"
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
-          echo "Mission Blockchain Data (<${minSize}) ..."
+          echo "Missing Blockchain Data (<${minSize}) ..."
           clienterror="missing blockchain"
           sleep 3
         fi
