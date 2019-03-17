@@ -150,11 +150,15 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      blockchainsize=$(sudo du /mnt/hdd/bitcoin | head -n1 | awk '{print $1;}')
+      minSize=250000000000
+      if [ "${network}" = "litecoin" ]; then
+        minSize=20000000000
+      fi
+      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} | head -n1 | awk '{print $1;}')
       echo "blockchainsize(${blockchainsize})"
       if [ ${#blockchainsize} -gt 0 ]; then
-        if [ ${blockchainsize} -lt 1000000 ]; then
-          echo "Mission Blockchain Data ..."
+        if [ ${blockchainsize} -lt ${minsize} ]; then
+          echo "Mission Blockchain Data (<${minsize}) ..."
           clienterror="missing blockchain"
           sleep 3
         fi
