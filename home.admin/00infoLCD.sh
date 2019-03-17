@@ -123,7 +123,7 @@ while :
     fi
     
     # check if recovering/upgrade is running
-    if [ "${state}" = "repair" ] || [ "${state}" = "retorrent" ] || [ "${state}" = "recopy" ]; then
+    if [ $state == 'repair' ] || [ $state == 'retorrent' ] || [ $state == 'recopy' ] ; then
       l1="Repair Mode\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: PasswordA\n"
