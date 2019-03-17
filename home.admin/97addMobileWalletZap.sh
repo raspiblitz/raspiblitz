@@ -44,9 +44,9 @@ fi
 # make sure qrcode-encoder in installed
 echo "*** Setup ***"
 echo ""
-echo "Installing zapconnect. Please wait..."
+echo "Installing zapconnect."
 echo ""
-echo "Getting github.com/LN-Zap/lndconnect (please wait) ..."
+echo "Getting github.com/LN-Zap/lndconnect (please wait - can take several minutes) ..."
 go get -d github.com/LN-Zap/lndconnect
 cd $GOPATH/src/github.com/LN-Zap/lndconnect
 echo ""

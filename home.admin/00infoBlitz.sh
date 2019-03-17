@@ -215,6 +215,10 @@ ln_channelInfo="\n"
 ln_external="\n"
 ln_alias="${hostname}"
 ln_publicColor=""
+ln_port=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+if [ ${#ln_port} -eq 0 ]; then
+  ln_port="9735"
+fi
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
@@ -227,7 +231,7 @@ else
  if [ ${ln_tor} -eq 1 ]; then
    ln_publicColor="${color_green}"
  else
-   public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
+   public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     ln_publicColor="${color_yellow}"
@@ -282,7 +286,7 @@ ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}
+${color_yellow}${ln_publicColor}${ln_external}${color_red}
 
 " \
 "RaspiBlitz v${codeVersion}" \
@@ -291,5 +295,5 @@ ${color_yellow}${ln_publicColor}${ln_external}
 "${hdd}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
-  echo "${undervoltageReports} undervoltage reports found in syslog"
+  echo "${undervoltageReports} undervoltage reports found - maybe upgrade power supply"
 fi

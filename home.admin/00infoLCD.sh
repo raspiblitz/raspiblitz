@@ -160,6 +160,36 @@ while :
     # DISPLAY AFTER SETUP
     ###########################
 
+    if [ "${state}" = "repair" ]; then
+      l1="Repair Mode\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "retorrent" ]; then
+      l1="Repair Mode- TORRENT\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "recopy" ]; then
+      l1="Repair Mode - COPY\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
     # check if bitcoin is ready
     sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
     clienterror=`cat error.tmp`

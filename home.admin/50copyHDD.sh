@@ -35,7 +35,6 @@ if [ "${setupStep}" = "100" ]; then
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
-  sudo systemctl disable bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
@@ -72,7 +71,7 @@ echo "COPY, PASTE & EXECUTE the following command on the blockchain source compu
 if [ "${CHOICE}" = "WINDOWS" ]; then
   echo "sudo scp -r ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 else
-  echo "sudo rsync -avhW --info=progress2 ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo "sudo rsync -avhW --progress ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 fi
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."

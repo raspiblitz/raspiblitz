@@ -157,7 +157,24 @@ sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 li
 
 # change log rotates
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
-sudo head -n 18 /etc/logrotate.d/rsyslog > ./rsyslog
+echo "/var/log/syslog" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "	rotate 7" >> ./rsyslog
+echo "	daily" >> ./rsyslog
+echo "	missingok" >> ./rsyslog
+echo "	notifempty" >> ./rsyslog
+echo "	delaycompress" >> ./rsyslog
+echo "	compress" >> ./rsyslog
+echo "	postrotate" >> ./rsyslog
+echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "	endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+echo "/var/log/mail.info" >> ./rsyslog
+echo "/var/log/mail.warn" >> ./rsyslog
+echo "/var/log/mail.err" >> ./rsyslog
+echo "/var/log/mail.log" >> ./rsyslog
+echo "/var/log/daemon.log" >> ./rsyslog
 echo "{" >> ./rsyslog
 echo "        rotate 4" >> ./rsyslog
 echo "        size=100M" >> ./rsyslog
@@ -171,7 +188,38 @@ echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
 echo "        endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
 echo "" >> ./rsyslog
-sudo tail -n +19 /etc/logrotate.d/rsyslog >> ./rsyslog
+echo "/var/log/kern.log" >> ./rsyslog
+echo "/var/log/auth.log" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "        rotate 4" >> ./rsyslog
+echo "        size=100M" >> ./rsyslog
+echo "        missingok" >> ./rsyslog
+echo "        notifempty" >> ./rsyslog
+echo "        compress" >> ./rsyslog
+echo "        delaycompress" >> ./rsyslog
+echo "        sharedscripts" >> ./rsyslog
+echo "        postrotate" >> ./rsyslog
+echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "        endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+echo "/var/log/user.log" >> ./rsyslog
+echo "/var/log/lpr.log" >> ./rsyslog
+echo "/var/log/cron.log" >> ./rsyslog
+echo "/var/log/debug" >> ./rsyslog
+echo "/var/log/messages" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "	rotate 4" >> ./rsyslog
+echo "	weekly" >> ./rsyslog
+echo "	missingok" >> ./rsyslog
+echo "	notifempty" >> ./rsyslog
+echo "	compress" >> ./rsyslog
+echo "	delaycompress" >> ./rsyslog
+echo "	sharedscripts" >> ./rsyslog
+echo "	postrotate" >> ./rsyslog
+echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "	endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
 sudo mv ./rsyslog /etc/logrotate.d/rsyslog
 sudo chown root:root /etc/logrotate.d/rsyslog
 sudo service rsyslog restart
@@ -185,6 +233,9 @@ sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
+
+# prepare for BTRFS data drive raid
+sudo apt-get install -y btrfs-tools
 
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334

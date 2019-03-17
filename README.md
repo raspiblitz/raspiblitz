@@ -38,8 +38,8 @@ The RaspiBlitz is build from the following parts:
 * RaspBerryPi 3 B+
 * 1TB Hard Drive
 * LCD-Display
-* Micro SD-Card 16GB
-* Powersupply >=3A (big & stable)
+* Micro SD-Card (min 16GB - go for quality)
+* Powersupply >=3A (choose big & stable output)
 * Cheap Casing
 
 **All together under 150 USD / 130 EUR (depending on country & shop)**

@@ -156,6 +156,20 @@ else
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
+# CUSTOM PORT
+echo "Provisioning LND Port" >> ${logFile}
+lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+if [ ${#lndPort} -gt 0 ]; then
+  if [ "${lndPort}" != "9735" ]; then
+    echo "User is running custom LND port: ${lndPort}" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.setport.sh ${lndPort} >> ${logFile} 2>&1
+  else
+    echo "User is running standard LND port: ${lndPort}" >> ${logFile}
+  fi
+else
+  echo "Was not able to get LND port from config." >> ${logFile}
+fi
+
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
 echo "DONE - Give raspi some cool off time after hard building .... 20 secs sleep" >> ${logFile}

@@ -65,6 +65,15 @@ if [ "${state}" = "reindex" ]; then
   exit 1
 fi 
 
+# singal that torrent is in re-download
+if [ "${state}" = "retorrent" ]; then
+  echo "Re-Index in progress ... start monitoring:"
+  /home/admin/50torrentHDD.sh
+  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+  /home/admin/00mainMenu.sh
+  exit
+fi
+
 # if pre-sync is running - stop it - before continue
 if [ "${state}" = "presync" ]; then
   # stopping the pre-sync
@@ -141,11 +150,15 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      blockchainsize=$(sudo du /mnt/hdd/bitcoin | head -n1 | awk '{print $1;}')
+      minSize=250000000000
+      if [ "${network}" = "litecoin" ]; then
+        minSize=20000000000
+      fi
+      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} | head -n1 | awk '{print $1;}')
       echo "blockchainsize(${blockchainsize})"
       if [ ${#blockchainsize} -gt 0 ]; then
-        if [ ${blockchainsize} -lt 1000000 ]; then
-          echo "Mission Blockchain Data ..."
+        if [ ${blockchainsize} -lt ${minSize} ]; then
+          echo "Missing Blockchain Data (<${minSize}) ..."
           clienterror="missing blockchain"
           sleep 3
         fi
@@ -157,6 +170,7 @@ waitUntilChainNetworkIsReady()
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
         if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
           echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
+          sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
           sleep 3
 
           dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
@@ -184,6 +198,7 @@ To run a BACKUP of funds & channels first is recommended.
             echo "Starting TORRENT ..."
             sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
             /home/admin/50torrentHDD.sh
+            sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
             /home/admin/00mainMenu.sh
             exit
 
@@ -191,6 +206,7 @@ To run a BACKUP of funds & channels first is recommended.
             echo "Starting COPY ..."
             sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
             /home/admin/50copyHDD.sh
+            sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
             /home/admin/00mainMenu.sh
             exit
 

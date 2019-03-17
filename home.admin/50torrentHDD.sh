@@ -7,6 +7,14 @@ echo ""
 ## get basic info
 source /home/admin/raspiblitz.info
 
+
+# if setup was done - remove old data
+if [ "${setupStep}" = "100" ]; then
+  echo "stopping servcies ..."
+  sudo systemctl stop lnd 
+  sudo systemctl stop ${network}d
+fi
+
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
 echo ""
