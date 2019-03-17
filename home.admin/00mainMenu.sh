@@ -145,15 +145,25 @@ waitUntilChainNetworkIsReady()
           echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
           sleep 3
 
+          dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
+This can be due to a power problems or a failing HDD.
+Please check the FAQ on Raspi9Blitz Github
+'My blockchain data is corrupted - what can I do?'
+https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
+
+The RaspiBlitz will now try to help you on with the repair.
+Maybe use BACKUP option first to secure your funds & channels.
+" 13 52
+
           clear
           # Basic Options
           OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
                    COPY "Copy Blockchain from another Computer (SKILLED)" \
-                   REINDEX "Resync thru ${${network}}d (TAKES VERY VERY LONG)" \
-                   BACKUP "Run Backup LND data first (optional)" \
+                   REINDEX "Resync thru ${network}d (TAKES VERY VERY LONG)" \
+                   BACKUP "Run Backup LND data first (optional)"
           )
 
-          CHOICE=$(dialog --clear --title "Who to repair blockchain?" --menu "" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Who to repair blockchain?" --menu "test" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
           clear
           if [ "${CHOICE}" = "TORRENT" ]; then
