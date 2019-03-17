@@ -41,7 +41,10 @@ fi
 
 # delete all IN bitcoin directory but not itself if it exists
 # so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
+# also keep debug logs for repair script
+sudo mv /mnt/hdd/bitcoin/debug.log /home/admin/debug.log 2>/dev/null
 sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
+sudo mv /home/admin/debug.log /mnt/hdd/bitcoin/debug.log 2>/dev/null
 
 # make sure /mnt/hdd/bitcoin exists
 sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
@@ -49,6 +52,7 @@ sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
 # allow all users write to it
 sudo chmod 777 /mnt/hdd/bitcoin
 
+echo 
 clear
 echo "************************************************************************************"
 echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another computer"
@@ -125,7 +129,7 @@ if [ ${anyDataAtAll} -eq 1 ]; then
   else
 
     echo "OK -> DATA LOOKS GOOD :D"
-    sudo rm /mnt/hdd/${network}/debug.log
+    sudo rm /mnt/hdd/bitcoin/debug.log
 
   fi
 

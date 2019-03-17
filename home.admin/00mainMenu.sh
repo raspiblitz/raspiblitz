@@ -134,14 +134,27 @@ waitUntilChainNetworkIsReady()
     echo "can take longer if device was off or first time"
     while :
     do
+      
+      # check for error on network
       sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
       clienterror=`cat error.tmp`
       rm error.tmp
+
+      # check for missing blockchain data
+      blockchainsize=$(du /mnt/hdd/bitcoin | head -n1 | awk '{print $1;}')
+      if [ ${#blockchainsize} -gt 0 ]; then
+        if [ ${blockchainsize} -lt 1000000 ]; then
+          echo "Mission Bloclchain Data ..."
+          clienterror="missing blockchain"
+          sleep 3
+        fi
+      fi
+
       if [ ${#clienterror} -gt 0 ]; then
 
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
-        if [ ${reindex} -gt 0 ]; then
+        if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
           echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
           sleep 3
 
