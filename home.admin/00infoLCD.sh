@@ -144,6 +144,22 @@ while :
       continue
     fi
 
+    # when setup is in progress - password has been changed
+    if [ ${setupStep} -lt 100 ]; then
+      l1="Login to your RaspiBlitz with:\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use your Password A\n"
+      boxwidth=$((${#localip} + 24))
+      sleep 3
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 7
+      continue
+    fi
+
+    ###########################
+    # DISPLAY AFTER SETUP
+    ###########################
+
     if [ "${state}" = "repair" ]; then
       l1="Repair Mode\n"
       l2="ssh admin@${localip}\n"
@@ -173,22 +189,6 @@ while :
       sleep 3
       continue
     fi
-
-    # when setup is in progress - password has been changed
-    if [ ${setupStep} -lt 100 ]; then
-      l1="Login to your RaspiBlitz with:\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use your Password A\n"
-      boxwidth=$((${#localip} + 24))
-      sleep 3
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 7
-      continue
-    fi
-
-    ###########################
-    # DISPLAY AFTER SETUP
-    ###########################
 
     # check if bitcoin is ready
     sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
