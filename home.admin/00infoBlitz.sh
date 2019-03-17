@@ -295,5 +295,5 @@ ${color_yellow}${ln_publicColor}${ln_external}
 "${hdd}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
-  echo "!! ${color_red}${undervoltageReports} undervoltage reports found in syslog !!"
+  echo "!! ${color_red}${undervoltageReports} undervoltage reports found - maybe upgrade power supply !!"
 fi
