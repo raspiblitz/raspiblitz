@@ -133,20 +133,17 @@ To rescue/export your Lightning data from a RaspiBlitz:
 * then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
 * follow the instructions of the script.
 
-This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. 
+This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfere the lnd-rescue file to your laptop. If transfere was successfull. You can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
 
+Then to restore your old LND data and to recover your funds and channels:
 
-But you can try to backup at your own risk. All your Lightning Node data is within the `/mnt/hdd/lnd` directory. Just run a backup of that data when the lnd service is stopped -> `sudo systemctl stop lnd` Then on your laptop you go with the terminal into the directory you want to store the backup in and use the following SCP command to download: 
+* SSH into your new RaspiBlitz and EXIT to terminal from the menu.
+* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* follow the instructions of the script.
 
-`scp -r bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/ ./` use your password A
+This script will offer you a way to transfere the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND gets then restarted for you and after some time it should show you the status screen again with your old funds and channels.
 
-And if you want to put a LND backup state back. Make a fresh RaspiBlitz (new sd card image and a clean HDD), set it up until its ready (you see the status screen on LCD) and then go to terminal, stop lnd service with `sudo systemctl stop lnd` delete the content of the lnd data dir with `sudo rm -rf /mnt/hdd/lnd/*`. Then on your laptop being in terminal in the same directory you did the backup in (the backuped lnd directory is listed there) run the following SCP command:
-
-`scp -r ./lnd/* bitcoin@[LOCAL-IP-OF-RASPIBLITZ]:/mnt/hdd/lnd/` use password A
-
-No run a reboot with: `sudo shutdown -r now` ... LND may need some longer rescan after reboot, but then you should see your old channels and balances. 
-
-**Be aware that if backup is some hours/days old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state and LND is closing channels it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution.**
+**Be aware that if backup is some hours old, channels could have been closed by the other party and it may take some time until you see funds back on-chain. If backup is somewhat older then 1 day also the channel counter parties may have used your offline time to cheat you with an old state. And if your backup was not the latest state it could also been happening that you are posting an old channel state (seen as cheating) and funds of that channel get lost as punishment. So again .. this backup method can be risky, use with caution. But its recommended to try in recover and rescue situations - its not for regular backups.**
 
 ## What is this mnemonic seed word list?
 
