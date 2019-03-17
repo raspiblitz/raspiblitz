@@ -20,15 +20,6 @@ case $CHOICE in
         *) exit 1;;
 esac
 
-if [ -d "/mnt/hdd/bitcoin" ]; then
-  dialog --title "Prepare Copy" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
-  response=$?
-  echo "response(${response})"
-  case $response in
-    1) exit 1 ;;
-  esac
-fi
-
 # additional prep if this is used to replace corrupted blockchain
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
@@ -38,12 +29,24 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
-# delete all IN bitcoin directory but not itself if it exists
-# so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
-# also keep debug logs for repair script
-sudo mv /mnt/hdd/bitcoin/debug.log /home/admin/debug.log 2>/dev/null
-sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
-sudo mv /home/admin/debug.log /mnt/hdd/bitcoin/debug.log 2>/dev/null
+if [ -d "/mnt/hdd/bitcoin" ]; then
+  dialog --title "Fresh or Repair" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
+  response=$?
+  echo "response(${response})"
+  if [ "${$response}" = "1" ]; then
+    echo "OK - keep old blockchain - just try to repair by copying over it"
+    sleep 3
+  else
+    echo "OK - delete old blockchain"
+    # delete all IN bitcoin directory but not itself if it exists
+    # so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
+    # also keep debug logs for repair script
+    sudo mv /mnt/hdd/bitcoin/debug.log /home/admin/debug.log 2>/dev/null
+    sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
+    sudo mv /home/admin/debug.log /mnt/hdd/bitcoin/debug.log 2>/dev/null
+    sleep 3
+  fi
+fi
 
 # make sure /mnt/hdd/bitcoin exists
 sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
@@ -143,7 +146,9 @@ echo "*********************************************"
 # if started after intial setup - quit here
 if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+  rpcpass=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep 'bitcoind.rpcpass' | cut -d "=" -f2)
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
+  sudo sed -i "s/^rpcpassword=.*/rpcpassword=${rpcpass}/g" /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
   sudo systemctl enable bitcoind
   echo "DONE - rebooting: sudo shutdown -r now"
   sudo shutdown -r now
