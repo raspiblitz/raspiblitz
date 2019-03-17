@@ -122,36 +122,6 @@ while :
       continue
     fi
     
-    if [ $state == 'repair' ]; then
-      l1="Repair Mode\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ $state == 'retorrent' ]; then
-      l1="Repair Mode- TORRENT\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ $state == 'recopy' ]; then
-      l1="Repair Mode - COPY\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
     # if freshly recovered 
     if [ "${state}" = "recovered" ]; then
       l1="FINAL RECOVER LOGIN NEEDED:\n"
@@ -170,6 +140,36 @@ while :
       l3="ssh admin@${localip}\n"
       boxwidth=$((${#localip} + 28))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "repair" ]; then
+      l1="Repair Mode\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "retorrent" ]; then
+      l1="Repair Mode- TORRENT\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "recopy" ]; then
+      l1="Repair Mode - COPY\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
