@@ -88,12 +88,13 @@ Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.1-2019-
 
 SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
 
-* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
-* [Can I still get version 1.0 of RaspiBlitz?](FAQ.md#can-i-still-get-version-10-of-raspiblitz)
-
 **Write the SD-Card image to your SD Card**
 
 if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+
+* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
+* [Whats new in Version 1.1 of RaspiBlitz?](FAQ.md#whats-new-in-version-11-of-raspiblitz)
+* [Can I still get version 1.0 of RaspiBlitz?](FAQ.md#can-i-still-get-version-10-of-raspiblitz)
 
 ## Boot your RaspiBlitz
 
