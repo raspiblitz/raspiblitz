@@ -1,27 +1,61 @@
 # FAQ - Frequently Asked Questions
 
-## How do I generate a Debug Report?
+## Whats new in Version 1.1 of RaspiBlitz?
 
-If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
+Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
 
-- ssh into your raspiblitz as admin user with your password A
-- If you see the menu - use CTRL+C to get to the terminal
-- To generate debug report run: `./XXdebugLogs.sh`
-- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+- Update: RTL (Ride the Lightning) Web UI version 0.2.15-beta
+- Fix: Preventing logs from filling up the sd card 
+- Fix: Pairing for latest Zap iOS Mobile Wallet
+- Fix: Pairing for latest Shango Mobile Wallet
+- Fix: Open LND port check when custom port
+- New: Undervoltage Reports on LCD
+- New: fsk (file system consistency check) of HDD on every boot
+- New: Repair Help Menu in case if blockchain data corruption
+- New: /config.scripts/lnd.setport.sh (set custom LND port)
+- New: /config.scripts/lnd.rescue.sh (backup/replay LND data)
+- Removed: FTP download option for blockchain
 
-*PLEASE NOTICE: Its possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
+
+Instructions on how to update see FAQ info below.
 
 ## How to update my RaspiBlitz (AFTER version 0.98)?
 
-To prepare the RaspiBlitz update:
+For update you dont need to close any channels, remove funding or download the blockchain again.
+
+Simply [Ddwnload the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an sd card writer ready. Then login into your RaspiBlitz with SSH and:
 
 - main menu > OFF
 - remove power
 - remove SD card
 
-Now download the new RaspiBlitz SD card image and write it to your SD card .. yes you simply overwrite the old one, it's OK, all your personal data is on the HDD (if you haven't done any manual changes to the system). See details about latest SD card image here: https://github.com/rootzoll/raspiblitz#scenario-2-start-at-home
+Write the new image it to your SD card .. yes you simply overwrite the old one, it's OK, all your personal data is on the HDD. If you want to be extra safe you can make a image backup of your old sd card first - but that is optional. If you made manual changes to your RaspiBlitz with scripts on the sd card you might wanna check on this FAQ question first: [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).
 
-If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and dont worry, you dont need to re-download the blockchain again.
+- insert new sd card image
+- power on the RaspiBlitz again
+
+You should see that it switched into recover/backup mode. Its now provisioning the fresh OS on the sd card your old settings and data. This process can take some while especially if you had RTL Web UI activated. Follow the instructions on the display ... if it takes longer then an hour .. [get support](https://github.com/rootzoll/raspiblitz#support).
+
+When update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED` message on the display. Login per SSH by using the password `raspiblitz` and set your Password A again. It can be the same as the old one, but maybe use the occasion to make password change for security reasons. If you had auto-unlock activated you might also be asked to enter your old Password C again. Then it wil make a final reboot.
+
+After your RaspiBlitz is done with catching up the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
+
+## Can I downgrade from v1.1 to v1.0?
+
+Yes - it was tested one time and worked. Just follow the normal update mechanism - just use the old v1.0 image or your own backup image of the old sd card.
+
+## Can I still get version 1.0 of RaspiBlitz?
+
+Yes here are the links:
+
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
+
+SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
+
+Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
 
 ## How to update a old RaspiBlitz (BEFORE version 0.98)?
 
@@ -104,6 +138,17 @@ optional you can add also the testnet data:
 To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack (like in picture below) or choose a external HDD with its own power supply.
 
 ![ExtraPower](pictures/extrapower.png)
+
+## How do I generate a Debug Report?
+
+If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
+
+- ssh into your raspiblitz as admin user with your password A
+- If you see the menu - use CTRL+C to get to the terminal
+- To generate debug report run: `./XXdebugLogs.sh`
+- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+
+*PLEASE NOTICE: Its possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
 
 ## Why is my "final sync" taking so long?
 
