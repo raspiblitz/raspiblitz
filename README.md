@@ -38,8 +38,8 @@ The RaspiBlitz is build from the following parts:
 * RaspBerryPi 3 B+
 * 1TB Hard Drive
 * LCD-Display
-* Micro SD-Card 16GB
-* Powersupply >=3A (big & stable)
+* Micro SD-Card (min 16GB - go for quality)
+* Powersupply >=3A (choose big & stable output)
 * Cheap Casing
 
 **All together under 150 USD / 130 EUR (depending on country & shop)**
@@ -50,6 +50,7 @@ These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
+* [Canada](shoppinglist_ca.md)
 * [UK](shoppinglist_uk.md)
 * [Switzerland](shoppinglist_ch.md)
 * [France](shoppinglist_fr.md)
@@ -80,7 +81,12 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
 1. Download SD-Card image - **Version 1.0**:
-(PLEASE BE PATIENT - IMAGE v1.0 IS COMING SOON)
+
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
+
+SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
 
 2. Write the SD-Card image to your SD Card - if you need details, see here:
 https://www.raspberrypi.org/documentation/installation/installing-images/README.md
@@ -103,7 +109,7 @@ When everything boots up correctly, you should see the local IP address of your 
 
 ![LCD0](pictures/lcd0-welcome.png)
 
-Now open up a [terminal](https://www.youtube.com/watch?v=5XgBd6rjuDQ) and connect thru SSH with the command displayed by the RaspiBlitz:
+Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win10](https://www.youtube.com/watch?v=xIfzZXHaCzQ)) and connect thru SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
@@ -183,26 +189,17 @@ This is the default way to download the blockchain data for the RaspiBlitz. If y
 
 ![DOWNLOAD1](pictures/download-torrent.png)
 
-*This can take a while - normally it should be done if you keep it running over night, but some users reported that it took up to 3 days. If it takes longer than that or you cannot see any progress (downloading starting) for over an hour after you started thsi option consider to cancel the download and choose the FTP download option.*
+*This can take a while - normally it should be done if you keep it running over night, but some users reported that it took up to 3 days. If it takes longer than that or you cannot see any progress (downloading starting) for over an hour after you started this option consider to cancel the download and go with the COPY option or retry fresh.*
 
 It is safe to close the terminal window (shutdown your laptop) while the RaspiBlitz is doing the torrent download. To check on progress and to continue the setup you need to ssh back in again. 
 
 You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on torrent if the other option is slower or not working.
 
 * [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
-* [Why is taking my torrent download of the blockchain so long?]()
+* [Why is taking my torrent download of the blockchain so long?](FAQ.md#why-is-taking-my-torrent-download-of-the-blockchain-so-long)
 
-#### 2. FTP-Download
 
-You should try the FTP download if the torrent option is not working for you. Please be aware that the files are hosted on a central server by us and up-time and bandwidth is not guaranteed. If you start it, you should see the following screen:
-
-![DOWNLOAD1](pictures/download-ftp.png)
-
-It is safe to close the terminal window (shutdown your laptop) while the RaspiBlitz is doing the FTP download. To check on progress and to continue the setup you need to ssh back in again. 
-
-You can cancel the FTP download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on FTP download if the other option is slower or not working.
-
-#### 4. Copying from another Computer
+#### 2. Copying from another Computer
 
 If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain (with txindex=1) you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfere). Choose this option and follow the given instructions.
 
@@ -210,11 +207,11 @@ This is also the best option if you dont like to run your RaspiBlitz with a prep
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-#### 5. Cloning from a 2nd HDD
+#### 3. Cloning from a 2nd HDD
 
 If is a backup way to transfere a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd). 
 
-#### 6. Sync from Bitcoin-Network
+#### 4. Sync from Bitcoin-Network
 
 This is the fallback of last resort. A RaspberryPi has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - thats why the other options above where invented.
 
@@ -405,8 +402,6 @@ But this also comes with the following side effects:
 
 To try it out just switch on the service - you can deactivate later on if its not working for you.
 
-The TOR integration is experimental and at the moment there is no way to switch off TOR again. 
-
 ##### RTL Webinterface
 
 The RTL Webinterface is a LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitu SSH menus. Its recommended to give it a try.
@@ -573,6 +568,8 @@ You have still more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 ## Community Development
 
 Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in progress. [Check the issues](https://github.com/rootzoll/raspiblitz/issues) if you wanna help out or add new ideas. You find the scripts used for RaspiBlitz interactions on the device at `/home/admin` or in this git repo in the subfolder `home.admin`.
+
+Also get inspired for a deep-dive with the original "[RaspiBolt](https://github.com/Stadicus/guides/tree/master/raspibolt)" tutorial on how to build a lightning node on the RaspberryPi which was the base work the RaspiBlitz was developed on - so much thx to Stadicus :)
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a upcomming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by on of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 

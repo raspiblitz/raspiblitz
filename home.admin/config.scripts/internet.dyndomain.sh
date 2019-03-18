@@ -11,14 +11,24 @@ fi
 turn="off"
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then turn="on"; fi
 
+echo "number of args($#)"
+
 # 2. parameter [?domainName]
-dynDomain=$2
+if [ $# > 1 ]; then
+  dynDomain=$2
+fi
 
 # 3. parameter [?domainName]
-updateDynDomain=$3
+if [ $# > 2 ]; then
+  dynUpdateUrl=$3
+fi
 
 # run interactive if 'turn on' && no further parameters
 if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
+
+  # make sure dialog file is writeable
+  sudp touch ./.tmp
+  sudo chmod 777 ./.tmp
 
   dialog --backtitle "DynamicDNS" --inputbox "ENTER the Dynamic Domain Name:
 
@@ -81,7 +91,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
-  sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
+
+  # setting dynUpdateUrl is a bit cpmplicated because value can contain chars that break sed replacement
+  # so first remove dynUpdateUrl from config and then add fresh as new line at the end
+  grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > ./raspiblitz.conf.new
+  echo "dynUpdateUrl='${dynUpdateUrl}'" >> ./raspiblitz.conf.new
+  sudo rm /mnt/hdd/raspiblitz.conf
+  sudo mv ./raspiblitz.conf.new /mnt/hdd/raspiblitz.conf
+  sudo chmod 777 /mnt/hdd/raspiblitz.conf
+  #sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
 
   echo "changing lnd.conf"
 

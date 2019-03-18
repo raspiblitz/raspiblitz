@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# requests missing in dietpi
+sudo pip install requests
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to autounlock lnd after restart"

@@ -40,7 +40,10 @@ echo "*** CHAINNETWORK SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
 
-echo "*** LAST 20 CHAINNETWORK LOGS ***"
+echo "*** LAST 5 ERROR LOGS ***"
+sudo journalctl -u ${network}d -b --no-pager -n5
+echo ""
+echo "*** LAST 20 INFO LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
   pathAdd="/testnet3"
@@ -52,8 +55,11 @@ echo "*** LND SYSTEMD STATUS ***"
 sudo systemctl status lnd -n2 --no-pager
 echo ""
 
-echo "*** LAST 20 LND LOGS ***"
-sudo journalctl -u lnd -b --no-pager -n20
+echo "*** LAST 5 LND ERROR LOGS ***"
+sudo journalctl -u lnd -b --no-pager -n5
+echo ""
+echo "*** LAST 20 LND INFO LOGS ***"
+sudo tail -n 20 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
 if [ "${rtlWebinterface}" = "on" ]; then

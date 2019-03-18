@@ -188,7 +188,6 @@ if [ ${mountOK} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> MAINNET + TESTNET per FTP (FALLBACK)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
     N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
     S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
@@ -199,7 +198,6 @@ if [ ${mountOK} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
     T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> MAINNET per FTP (FALLBACK)" \
     S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # error
@@ -224,9 +222,6 @@ if [ ${mountOK} -eq 1 ]; then
               ;;              
           S)
               /home/admin/50syncHDD.sh
-              ;;
-          D)
-              /home/admin/50downloadHDD.sh
               ;;
   esac
   exit 1
