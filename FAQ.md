@@ -605,3 +605,9 @@ Also make sure to check again on your power supply - it needs to deliver equal o
 4. Capital committed to destinations no one wants to send to 
 5. Fees are too high
 6. Your inbound liquidity doesn't have good inbound liquidity itself
+
+## How can I change the boot screen logo? 
+
+Just replace the file `/home/admin/raspiblitz/pictures/logoraspiblitz.png` with a PNG of the same dimensions.
+
+NOTE: On updates this change will get lost and you might need to redo it.
