@@ -155,9 +155,9 @@ waitUntilChainNetworkIsReady()
         minSize=20000000000
       fi
       blockchainsize=$(sudo du -shbc /mnt/hdd/${network} | head -n1 | awk '{print $1;}')
-      echo "blockchainsize(${blockchainsize})"
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
+          echo "blockchainsize(${blockchainsize})"
           echo "Missing Blockchain Data (<${minSize}) ..."
           clienterror="missing blockchain"
           sleep 3
