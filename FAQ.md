@@ -559,3 +559,19 @@ Also make sure to check again on your power supply - it needs to deliver equal o
 4. Capital committed to destinations no one wants to send to 
 5. Fees are too high
 6. Your inbound liquidity doesn't have good inbound liquidity itself
+
+## Can I still get version 1.0 of RaspiBlitz?
+
+Yes here are the links:
+
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
+
+SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
+
+Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
+
+## Is it safe to downgrade from v1.1 to v1.0?
+
+Yes it should - but its not tested yet.
