@@ -14,6 +14,7 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 - New: Repair Help Menu in case if blockchain data corruption
 - New: /config.scripts/lnd.setport.sh (set custom LND port)
 - New: /config.scripts/lnd.rescue.sh (backup/replay LND data)
+- New: Bootscreen with logo
 - Removed: FTP download option for blockchain
 
 For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
