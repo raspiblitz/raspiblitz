@@ -572,6 +572,6 @@ SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
 
 Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
 
-## Is it safe to downgrade from v1.1 to v1.0?
+## Can I downgrade from v1.1 to v1.0?
 
-Yes it should - but its not tested yet.
+Yes - it was tested ne time and worked. Just follow the normal update mechanism - just use the old v1.0 image.
