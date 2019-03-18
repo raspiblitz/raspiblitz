@@ -119,7 +119,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   # install OpenSSH client + server
   sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
-
 fi
 
 # special prepare when Raspbian
@@ -148,33 +147,24 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-# set Raspi to boot up automatically with user pi (for the LCD)
-# https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-sudo raspi-config nonint do_boot_behaviour B2
-sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+if [ "${baseImage}" = "raspbian" ]; then
+  # set Raspi to boot up automatically with user pi (for the LCD)
+  # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+  sudo raspi-config nonint do_boot_behaviour B2
+  sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+  sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+fi
+
+if [ "${baseImage}" = "dietpi" ]; then
+  sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
+  sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
+  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
+fi
 
 # change log rotates
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
-echo "/var/log/syslog" >> ./rsyslog
-echo "{" >> ./rsyslog
-echo "	rotate 7" >> ./rsyslog
-echo "	daily" >> ./rsyslog
-echo "	missingok" >> ./rsyslog
-echo "	notifempty" >> ./rsyslog
-echo "	delaycompress" >> ./rsyslog
-echo "	compress" >> ./rsyslog
-echo "	postrotate" >> ./rsyslog
-echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
-echo "	endscript" >> ./rsyslog
-echo "}" >> ./rsyslog
-echo "" >> ./rsyslog
-echo "/var/log/mail.info" >> ./rsyslog
-echo "/var/log/mail.warn" >> ./rsyslog
-echo "/var/log/mail.err" >> ./rsyslog
-echo "/var/log/mail.log" >> ./rsyslog
-echo "/var/log/daemon.log" >> ./rsyslog
+sudo head -n 18 /etc/logrotate.d/rsyslog > ./rsyslog
 echo "{" >> ./rsyslog
 echo "        rotate 4" >> ./rsyslog
 echo "        size=100M" >> ./rsyslog
@@ -188,38 +178,7 @@ echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
 echo "        endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
 echo "" >> ./rsyslog
-echo "/var/log/kern.log" >> ./rsyslog
-echo "/var/log/auth.log" >> ./rsyslog
-echo "{" >> ./rsyslog
-echo "        rotate 4" >> ./rsyslog
-echo "        size=100M" >> ./rsyslog
-echo "        missingok" >> ./rsyslog
-echo "        notifempty" >> ./rsyslog
-echo "        compress" >> ./rsyslog
-echo "        delaycompress" >> ./rsyslog
-echo "        sharedscripts" >> ./rsyslog
-echo "        postrotate" >> ./rsyslog
-echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
-echo "        endscript" >> ./rsyslog
-echo "}" >> ./rsyslog
-echo "" >> ./rsyslog
-echo "/var/log/user.log" >> ./rsyslog
-echo "/var/log/lpr.log" >> ./rsyslog
-echo "/var/log/cron.log" >> ./rsyslog
-echo "/var/log/debug" >> ./rsyslog
-echo "/var/log/messages" >> ./rsyslog
-echo "{" >> ./rsyslog
-echo "	rotate 4" >> ./rsyslog
-echo "	weekly" >> ./rsyslog
-echo "	missingok" >> ./rsyslog
-echo "	notifempty" >> ./rsyslog
-echo "	compress" >> ./rsyslog
-echo "	delaycompress" >> ./rsyslog
-echo "	sharedscripts" >> ./rsyslog
-echo "	postrotate" >> ./rsyslog
-echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
-echo "	endscript" >> ./rsyslog
-echo "}" >> ./rsyslog
+sudo tail -n +19 /etc/logrotate.d/rsyslog >> ./rsyslog
 sudo mv ./rsyslog /etc/logrotate.d/rsyslog
 sudo chown root:root /etc/logrotate.d/rsyslog
 sudo service rsyslog restart
@@ -233,9 +192,6 @@ sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
 
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
-
-# prepare for BTRFS data drive raid
-sudo apt-get install -y btrfs-tools
 
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334
@@ -566,13 +522,23 @@ sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 
-# bash autostart for pi
-# run as exec to dont allow easy physical access by keyboard
-# see https://github.com/rootzoll/raspiblitz/issues/54
-sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+if [ "${baseImage}" = "raspbian" ]; then
+  # bash autostart for pi
+  # run as exec to dont allow easy physical access by keyboard
+  # see https://github.com/rootzoll/raspiblitz/issues/54
+  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+fi
+
+if [ "${baseImage}" = "dietpi" ]; then
+  # bash autostart for dietpi
+  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+fi
 
 # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
 cat > /home/admin/setup.sh <<EOF
