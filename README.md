@@ -80,7 +80,7 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
-**-->** Download SD-Card image - **Version 1.1**:
+**Download SD-Card image - Version 1.1:**
 
 HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.1-2019-03-18.img.gz
 
@@ -91,8 +91,9 @@ SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
 * [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
 * [Can I still get version 1.0 of RaspiBlitz?](FAQ.md#can-i-still-get-version-10-of-raspiblitz)
 
-**-->** Write the SD-Card image to your SD Card - if you need details, see here:
-https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+**Write the SD-Card image to your SD Card**
+
+if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
 ## Boot your RaspiBlitz
 
