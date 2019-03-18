@@ -27,7 +27,7 @@ AUTO_SETUP_NET_STATIC_GATEWAY=192.168.0.1
 AUTO_SETUP_NET_STATIC_DNS=8.8.8.8
 
 #    Hostname
-AUTO_SETUP_NET_HOSTNAME=DietPi
+AUTO_SETUP_NET_HOSTNAME=DietBlitz
 
 #    Force ethernet speeds
 #        NB: This is mainly aimed at Pine A64's which may have an HW issue that causes unstable 1Gbit link.
@@ -68,21 +68,18 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=23    #will install Desktop LXDE
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=74    #will install LAMP webserver stack
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=44    #will install Bittorrent transmission
-# install fail2ban
-AUTO_SETUP_INSTALL_SOFTWARE_ID=73
-# install OpenSSH Client
-# AUTO_SETUP_INSTALL_SOFTWARE_ID=0
-# install OpenSSH Server
-# AUTO_SETUP_INSTALL_SOFTWARE_ID=105
 
+AUTO_SETUP_INSTALL_SOFTWARE_ID=73 # install fail2ban
 
+# AUTO_SETUP_INSTALL_SOFTWARE_ID=0 # install OpenSSH Client
+# AUTO_SETUP_INSTALL_SOFTWARE_ID=105 # install OpenSSH Server
 
 #    DietPi-Software Choice System
 #    SSH Server Selection:
 #        0=none
 #        -1=dropbear
 #        -2=opensshserver
-AUTO_SETUP_SSH_SERVER_INDEX=-1
+AUTO_SETUP_SSH_SERVER_INDEX=-2
 
 #    File Server Selection:
 #        0=none/manual
@@ -129,7 +126,7 @@ AUTO_SETUP_KEYBOARD_LAYOUT=gb
 #        Option 1 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.
 #        Option 2 = Host your script online, then use AUTO_SETUP_CUSTOM_SCRIPT_EXEC=http://myweb.com/myscript.sh , it will be downloaded and executed automatically. | 0=disabled
 #        NB: Executed script log /var/tmp/dietpi/logs/dietpi-automation_custom_script.log
-AUTO_SETUP_CUSTOM_SCRIPT_EXEC=0
+AUTO_SETUP_CUSTOM_SCRIPT_EXEC=1
 
 #Disable HDMI (and GPU/VPU where supported) output for supported devices:
 #	RPi | Odroid C1 | Odroid C2

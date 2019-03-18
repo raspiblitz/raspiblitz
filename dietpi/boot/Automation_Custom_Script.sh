@@ -1,1 +1,1 @@
-wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build.sdcard/raspbianStretchDesktop.sh && sudo bash raspbianStretchDesktop.sh raspiblitz-dev openoms
+wget https://github.com/openoms/raspiblitz/raw/DietPi/build_sdcard.sh && sudo bash build_sdcard.sh DietPi openoms

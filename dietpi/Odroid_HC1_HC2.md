@@ -10,7 +10,7 @@
 * Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
 ---
 ### Download the fully prebuilt RaspiBlitz-on-DietPi SDcard image
-* [torrent](https://github.com/openoms/raspiblitz/blob/raspiblitz-dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
+* [torrent](https://github.com/openoms/raspiblitz/raw/raspiblitz-dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
 * [mega.nz link](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA)
 
 sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2
@@ -110,7 +110,7 @@ Changing the SSH server will change the SSH keys again. To clear:
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
 * Run the forked version of @openoms:  
-`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`  
+`wget https://raw.githubusercontent.com/openoms/raspiblitz/DietPi/build_sdcard.sh && sudo bash build_sdcard.sh DietPi openoms`  
 This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
 
 * Restart when done and log back in now as `admin`:  
