@@ -611,3 +611,16 @@ Also make sure to check again on your power supply - it needs to deliver equal o
 Just replace the file `/home/admin/raspiblitz/pictures/logoraspiblitz.png` with a PNG of the same dimensions.
 
 NOTE: On updates this change will get lost and you might need to redo it.
+
+## I cannot connect per SSH to my RaspiBlitz. What to do?
+
+- Check the command again with how its on the display  - do you have it typed in correctly?
+- Replace `ssh` with `sudo ssh` and try it (laptop admin password might be required).
+
+If that not works ry to ping the IP of the RaspiBlitz with `ping [IP-of-RaspiBlitz]`. If you get no response on the ping requests the device is not reachable try this check list:
+
+- Make sure that your RaspiBlitz and your laptop are really on the same local network
+- Check if you have a VPN running on your laptop - some VPNs block local network
+- Some Routers have `IP Isolation` switched on - not allowing to devices to connect
+
+If that all is not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
