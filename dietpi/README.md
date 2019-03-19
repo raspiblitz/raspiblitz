@@ -7,14 +7,13 @@ This guide was tested on:
 * Odroid HC1
 * Odroid HC2 (the same board with a 3.5" 12V HDD)
 * Odroid XU4 (with HDMI screen)
-* Raspberry Pi 3 B + (no support for the default GPIO LCDso far, but the HDMI works)
+* Raspberry Pi 3 B + (no support for the default GPIO LCD so far, but the HDMI works)
 
 See the [hardware comparison](hw_comparison.md).
 
 The screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
 ---
-
 
 ### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
 ---
