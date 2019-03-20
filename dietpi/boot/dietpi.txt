@@ -172,7 +172,7 @@ CONFIG_BOOT_WAIT_FOR_NETWORK=2
 #DietPi checks for updates (allows dietpi to check for updates on a daily basis and boot using a <1kb file download.)
 CONFIG_CHECK_DIETPI_UPDATES=1
 #	Optional: Automatically update DietPi when updates are available. | requires CONFIG_CHECK_DIETPI_UPDATES=1
-CONFIG_AUTO_DIETPI_UPDATES=0
+CONFIG_AUTO_DIETPI_UPDATES=1
 
 #NTPD Update Mode: 0=disabled | 1=boot only | 2=boot + daily | 3=boot + hourly | 4=Daemon + Drift
 CONFIG_NTP_MODE=2
