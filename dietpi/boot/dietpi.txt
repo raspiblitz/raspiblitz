@@ -27,7 +27,7 @@ AUTO_SETUP_NET_STATIC_GATEWAY=192.168.0.1
 AUTO_SETUP_NET_STATIC_DNS=8.8.8.8
 
 #    Hostname
-AUTO_SETUP_NET_HOSTNAME=DietBlitz
+AUTO_SETUP_NET_HOSTNAME=DietPi
 
 #    Force ethernet speeds
 #        NB: This is mainly aimed at Pine A64's which may have an HW issue that causes unstable 1Gbit link.
@@ -69,8 +69,8 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=74    #will install LAMP webserver stack
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=44    #will install Bittorrent transmission
 
-AUTO_SETUP_INSTALL_SOFTWARE_ID=73 # install fail2ban
-
+# install fail2ban
+AUTO_SETUP_INSTALL_SOFTWARE_ID=73 
 # AUTO_SETUP_INSTALL_SOFTWARE_ID=0 # install OpenSSH Client
 # AUTO_SETUP_INSTALL_SOFTWARE_ID=105 # install OpenSSH Server
 

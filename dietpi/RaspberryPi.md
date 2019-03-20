@@ -17,9 +17,22 @@ https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Stretch.7z
 
 * Insert the SDcard into your Raspberry Pi.
 
-* Connect the HDD, network cable and power supply to boot. (The optional default LCD will be setup automtically)
+* Connect the HDD, network cable and power supply to boot. (The optional default LCD will be setup automatically.)
 
-* The automated setup will run and the Raspberry Pi will restart at least twice during the process. This will take up to an hour. Log in with `root` if you want to follow along. The build_sdcard.sh script output can be seen with: `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log`
+* Login from a terminal (Putty from Windows) with  
+`ssh root@[IP-OF-RASPIBLITZ]`  
+password: `dietpi`
+
+    The ssh keys might change during the process:  
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
+    @ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
+    To solve run (can be copied from the terminal output):  
+    `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
+
+
+
+* The automated setup will continue and the Raspberry Pi will restart at least twice during the process. This will take up to an hour. Log in with `root` if you want to follow along. The build_sdcard.sh script output can be seen with: `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log`
 
 * When the setup is finished log in as `admin`:  
 `ssh admin@[IP-OF-RASPIBLITZ]`  
