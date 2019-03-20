@@ -596,9 +596,31 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
-# install LCD only on an rPI running Raspbian
+# install default LCD on DietPi without reboot to allow automatic build
+if [ "${baseImage}" = "dietpi" ]; then
+  echo "Installing the default display available from Amazon" 
+  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+  cd /home/admin/
+  # sudo apt-mark hold raspberrypi-bootloader
+  git clone https://github.com/goodtft/LCD-show.git
+  sudo chmod -R 755 LCD-show
+  sudo chown -R admin:admin LCD-show
+  cd LCD-show/
+  # sudo ./LCD35-show
+  sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+  sudo mkdir /etc/X11/xorg.conf.d
+  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+  sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+  sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+  sudo cp ./usr/cmdline.txt /DietPI/
+  sudo cp ./usr/inittab /etc/
+  sudo cp ./boot/config-35.txt /DietPi/config.txt
+  echo "to continue reboot with \`sudo shutdown -r now \` and login with admin"
+fi
+
+# ask about LCD only on Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
   echo "Press ENTER to install LCD and reboot ..."
   read key

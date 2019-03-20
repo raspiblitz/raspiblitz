@@ -101,7 +101,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     echo "Installing the default display available from Amazon"
 
     # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-      cd /home/admin/
+    cd /home/admin/
     #sudo apt-mark hold raspberrypi-bootloader
     git clone https://github.com/goodtft/LCD-show.git
     sudo chmod -R 755 LCD-show
@@ -116,7 +116,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
     sudo cp ./usr/cmdline.txt /DietPI/
     sudo cp ./usr/inittab /etc/
-    sudo cp ./boot/config-35.txt /DietPi/config.tx
+    sudo cp ./boot/config-35.txt /DietPi/config.txt
     echo "***"
     echo "reboot with \`sudo reboot\` to have the LCD working"
     echo "***"
@@ -127,7 +127,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     echo "Installing the 3.5\" HDMI display from Aliexpress"
     
     # based on http://www.lcdwiki.com/3.5inch_HDMI_Display-B
-      git clone https://github.com/goodtft/LCD-show.git
+    git clone https://github.com/goodtft/LCD-show.git
     chmod -R 755 LCD-show
     cd LCD-show/
     #sudo ./MPI3508-show  
@@ -137,7 +137,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     sudo cp ./usr/inittab /etc/
     sudo cp -rf ./usr/99-fbturbo.conf-HDMI /usr/share/X11/xorg.conf.d/99-fbturbo.conf 
     sudo mkdir -p /etc/X11/xorg.conf.d 
-    sudo cp -rf ./usr/99-calibration.conf-3508 /etc/X11/xorg.conf.d/99-calibration.con
+    sudo cp -rf ./usr/99-calibration.conf-3508 /etc/X11/xorg.conf.d/99-calibration.conf
     echo "***"
     echo "reboot with \`sudo reboot\` to have the LCD working"
     echo "***"
