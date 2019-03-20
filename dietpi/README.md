@@ -7,16 +7,20 @@ This guide was tested on:
 * Odroid HC1
 * Odroid HC2 (the same board with a 3.5" 12V HDD)
 * Odroid XU4 (with HDMI screen)
-* Raspberry Pi 3 B + (no support for the default GPIO LCD so far, but the HDMI works)
+* Raspberry Pi 3 B+ (with the default GPIO or HDMI display support)
 
 See the [hardware comparison](hw_comparison.md).
 
-The screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
+The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
 ---
 
 ### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
+
+### Instructions for the [Raspberry Pi](RaspberryPi.md)
+
 ---
+
 ## General guide for the RaspiBlitz-on-DietPi 
 
 ### Setting up the DietPi OS
@@ -31,8 +35,8 @@ Look for the SD card image for the specific SBC in the [download section](https:
 
 * Insert the SDcard into your SBC.
 
-* Connect the HDD with a powered suitably powered adapter.
-A USB 2.0 port will not be able to power an HDD so you will need extra cable
+* Connect the HDD with a suitably powered adapter.
+A USB 2.0 port will not be able to power an HDD so you will need extra cable.
 If you are connecting the HDD to a USB 3.0 port and have an at least 2A power supply, you might be able to run without an extra cable.
 
 * Power up and log in with the desktop terminal on Linux / MacOS or Putty on Windows:  
@@ -59,17 +63,15 @@ password: `dietpi`
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
-* Run the forked version of @openoms:  
-`wget https://raw.githubusercontent.com/openoms/raspiblitz/DietPi/build_sdcard.sh && sudo bash build_sdcard.sh DietPi openoms`  
+* Run the dev branch of @rootzoll:  
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev rootzoll`  
 This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
-* Restart when done and log back in now as `admin`:  
-`ssh admin@[IP-OF-DROIDBLITZ]`  
+* After the automatic restart log back in now as `admin`:  
+`ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
 
 * From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
-
-
 
 ---
 ### Useful commands for debugging:
