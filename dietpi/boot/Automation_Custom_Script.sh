@@ -11,4 +11,4 @@
 wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev
 
 # @openoms DietPi branch:
-# https://raw.githubusercontent.com/openoms/raspiblitz/DietPi/build_sdcard.sh  && sudo bash build_sdcard.sh DietPi openoms
+# wget https://raw.githubusercontent.com/openoms/raspiblitz/DietPi/build_sdcard.sh  && sudo bash build_sdcard.sh DietPi openoms
