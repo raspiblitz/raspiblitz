@@ -14,10 +14,11 @@ See the [hardware comparison](hw_comparison.md).
 The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
 ---
+## Specific instructions and downloads:
 
-### Downloads and walkthrough for the [Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
+[Odroid HC1 / HC2 / XU3 / XU4](Odroid_HC1_HC2.md)
 
-### Instructions for the [Raspberry Pi](RaspberryPi.md)
+[Raspberry Pi](RaspberryPi.md)
 
 ---
 

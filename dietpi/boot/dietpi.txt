@@ -68,11 +68,7 @@ AUTO_SETUP_GLOBAL_PASSWORD=dietpi
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=23    #will install Desktop LXDE
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=74    #will install LAMP webserver stack
 #AUTO_SETUP_INSTALL_SOFTWARE_ID=44    #will install Bittorrent transmission
-
-# install fail2ban
-AUTO_SETUP_INSTALL_SOFTWARE_ID=73 
-# AUTO_SETUP_INSTALL_SOFTWARE_ID=0 # install OpenSSH Client
-# AUTO_SETUP_INSTALL_SOFTWARE_ID=105 # install OpenSSH Server
+AUTO_SETUP_INSTALL_SOFTWARE_ID=73 # install fail2ban
 
 #    DietPi-Software Choice System
 #    SSH Server Selection:
@@ -126,7 +122,7 @@ AUTO_SETUP_KEYBOARD_LAYOUT=gb
 #        Option 1 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.
 #        Option 2 = Host your script online, then use AUTO_SETUP_CUSTOM_SCRIPT_EXEC=http://myweb.com/myscript.sh , it will be downloaded and executed automatically. | 0=disabled
 #        NB: Executed script log /var/tmp/dietpi/logs/dietpi-automation_custom_script.log
-AUTO_SETUP_CUSTOM_SCRIPT_EXEC=1
+AUTO_SETUP_CUSTOM_SCRIPT_EXEC=0
 
 #Disable HDMI (and GPU/VPU where supported) output for supported devices:
 #	RPi | Odroid C1 | Odroid C2
@@ -172,7 +168,7 @@ CONFIG_BOOT_WAIT_FOR_NETWORK=2
 #DietPi checks for updates (allows dietpi to check for updates on a daily basis and boot using a <1kb file download.)
 CONFIG_CHECK_DIETPI_UPDATES=1
 #	Optional: Automatically update DietPi when updates are available. | requires CONFIG_CHECK_DIETPI_UPDATES=1
-CONFIG_AUTO_DIETPI_UPDATES=1
+CONFIG_AUTO_DIETPI_UPDATES=0
 
 #NTPD Update Mode: 0=disabled | 1=boot only | 2=boot + daily | 3=boot + hourly | 4=Daemon + Drift
 CONFIG_NTP_MODE=2
