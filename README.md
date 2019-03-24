@@ -1,7 +1,7 @@
 # RaspiBlitz
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.0 with lnd 0.5.2-beta and bitcoin 0.17.0.1 or litecoin 0.16.3.`
+`Version 1.1 with lnd 0.5.2-beta and bitcoin 0.17.0.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -80,16 +80,21 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image: 
 
-1. Download SD-Card image - **Version 1.0**:
+**Download SD-Card image - Version 1.1:**
 
-HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.1-2019-03-18.img.gz
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.1-2019-03-18.torrent
 
-SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
+SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
 
-2. Write the SD-Card image to your SD Card - if you need details, see here:
-https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+**Write the SD-Card image to your SD Card**
+
+if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+
+* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
+* [Whats new in Version 1.1 of RaspiBlitz?](FAQ.md#whats-new-in-version-11-of-raspiblitz)
+* [Can I still get version 1.0 of RaspiBlitz?](FAQ.md#can-i-still-get-version-10-of-raspiblitz)
 
 ## Boot your RaspiBlitz
 
@@ -114,6 +119,8 @@ Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win1
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 
 **Now follow the dialoge in your terminal. This can take some time (prepare some coffee) - but in the end you should have a running Lightning node on your RaspberryPi that you can start to learn and hack on.**
+
+* [I cannot connect per SSH to my RaspiBlitz. What to do?](FAQ.md#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
 
 ## Support
 
