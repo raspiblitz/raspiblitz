@@ -157,9 +157,10 @@ if [ "${baseImage}" = "raspbian" ]; then
 fi
 
 if [ "${baseImage}" = "dietpi" ]; then
-  sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
-  sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
-  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf"
+  # set DietPi to boot up automatically with user pi (for the LCD)
+  # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
+  # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
+  sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
 fi
 
 # change log rotates
