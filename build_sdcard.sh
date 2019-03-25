@@ -261,6 +261,7 @@ bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
+sudo rm -r /home/admin/download
 sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
