@@ -24,8 +24,9 @@ https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Stretch.7z
 
 
     The automated setup will continue and the Raspberry Pi will restart at least twice during the process. This will take up to an hour.  
-    To follow along: login with `root`. The output of the build_sdcard.sh script can be seen with:  
-     `tail -n1000 -f /var/tmp/dietpi/logs/   dietpi-automation_custom_script.log`
+    To follow the logs during the automated building process login with `root` and press CTRL+C.  
+    `tail -n1000 -f /tmp/DietPi-Update/dietpi-update.log` - follow the dietpi-update process  
+    `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow the output of the build_sdcard.sh  
 
 
 6) When the setup is finished log in as `admin`:  

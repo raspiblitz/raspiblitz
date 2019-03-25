@@ -7,7 +7,7 @@ This guide was tested on:
 * Odroid HC1
 * Odroid HC2 (the same board with a 3.5" 12V HDD)
 * Odroid XU4 (with HDMI screen)
-* Raspberry Pi 3 B+ (with the default GPIO or HDMI display support)
+* Raspberry Pi 3 B+ (with the default GPIO or HDMI display)
 
 See the [hardware comparison](hw_comparison.md).
 
@@ -36,19 +36,19 @@ Look for the SD card image for the specific SBC in the [download section](https:
 
 * Insert the SDcard into your SBC.
 
-* Connect the HDD with a suitably powered adapter.
-A USB 2.0 port will not be able to power an HDD so you will need extra cable.
-If you are connecting the HDD to a USB 3.0 port and have an at least 2A power supply, you might be able to run without an extra cable.
-
+* Connect the HDD with a suitably powered adapter.   
+    Aim to use 2 USB ports or a separate power supply to power the HDD for a more reliable setup.
 * Power up and log in with the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
 
-* You might be asked about updating DietPi. This is not a straightforward process if starting from a  version <6.20. Try to update, it is best to build on the latest version.
+* If you are asked about updating DietPi, go ahead with it. This is not always a straightforward process, but it is best to build on the latest version.
 
 * In the DietPi software menu install `fail2ban` and make `OpenSSH server` the default SSH server.  
-Changing the SSH server will change the SSH keys again. To clear:  
-`ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
+    If there is a screen installed: within the Dietpi-Config menu set the Autostart to  `7: Automatic login. `
+
+    Changing the SSH server will change the SSH keys again. To clear:  
+    `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
 * After every reboot log back in:  
 `ssh root@[IP-OF-DIETPI]`  
@@ -64,9 +64,9 @@ password: `dietpi`
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
-* Run the dev branch of @rootzoll:  
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev rootzoll`  
-This will take a couple minutes depending on your internet connection and the processing power of the SBC.
+    Example to run the dev branch of @rootzoll:  
+    `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev rootzoll`  
+    This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
 * After the automatic restart log back in now as `admin`:  
 `ssh admin@[IP-OF-RASPIBLITZ]`  
@@ -76,17 +76,18 @@ password: `raspiblitz`
 
 ---
 ### Useful commands for debugging:
-To test a new configuration run XXcleanHDD.sh and strictly restart
-(this makes _bootstrap.sh and 00mainMenu.sh run in the right order)
+During the Automated setup:  
+`tail -n1000 -f /tmp/DietPi-Update/dietpi-update.log` - follow the dietpi-update process  
+`tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow the output of the build_sdcard.sh  
 
-`tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow startup setup script log  
-`lsblk` see the partitions  
+During the RaspiBlitz setup process:  
+`lsblk` check the disk partitions  
 `tail -n1000 -f raspiblitz.log` - debug logs of bootstrap.sh  
-`sudo tail -f /mnt/hdd/bitcoin/debug.log` - continuous monitoring  
+`sudo tail -f /mnt/hdd/bitcoin/debug.log` - continuous monitoring of bitcoind
 `sudo tail -n100 /mnt/hdd/bitcoin/debug.log` - shows the last 100 lines  
-`sudo systemctl status lnd`  
-`sudo journalctl -f -u lnd`  
-`./home/admin/XXdebugLogs.sh` - debug log collection on the RaspiBlitz 
+`sudo systemctl status lnd` - status of the lnd service
+`sudo journalctl -f -u lnd` 
+`./home/admin/XXdebugLogs.sh` - debug log collection on the RaspiBlitz
 
 ---
 
