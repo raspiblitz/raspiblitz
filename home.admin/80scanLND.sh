@@ -36,7 +36,7 @@ if [ ${#item} -eq 0 ]; then
 
   # check if offline
   # https://en.wikipedia.org/wiki/1.1.1.1
-  online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
 fi
 
 # get total number of blocks
@@ -46,7 +46,8 @@ scanstate="${item}/${total}"
 
 # get blockchain sync progress
 progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-progress=$(echo "${progress}*100" | bc)
+#progress=$(echo "${progress}*100" | bc)
+progress=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
 
 # check if blockchain is still syncing
 heigh=6
@@ -59,7 +60,7 @@ fi
 if [ ${online} -eq 0 ]; then
     heigh=7
     width=44
-    infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.1.1.1\n Local IP is ${localip}\n Please check cables and router.")
+    infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.0.0.1\n Local IP is ${localip}\n Please check cables and router.")
 elif [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
   infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress} %\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
@@ -88,4 +89,5 @@ fi
 
 # display progress to user
 sleep 3
-dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})" --infobox "${infoStr}" ${heigh} ${width}
+temp=$(echo "scale=1; $(cat /sys/class/thermal/thermal_zone0/temp)/1000" | bc)
+dialog --title " ${network} / ${chain} " --backtitle "RaspiBlitz (${hostname})     CPU: ${temp}°C" --infobox "${infoStr}" ${heigh} ${width}
