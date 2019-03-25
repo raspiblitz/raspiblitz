@@ -7,6 +7,14 @@ echo ""
 ## get basic info
 source /home/admin/raspiblitz.info
 
+
+# if setup was done - remove old data
+if [ "${setupStep}" = "100" ]; then
+  echo "stopping servcies ..."
+  sudo systemctl stop lnd 
+  sudo systemctl stop ${network}d
+fi
+
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y
 echo ""
@@ -245,7 +253,7 @@ if [ ${torrentError} -gt 0 ]; then
   # User Cancel --> Torrent incomplete
   sleep 3
   echo -ne '\007'
-  dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try FTP download next time. Do you want keep already downloaded torrent data?" 8 57
+  dialog --title " WARNING (${torrentError})" --yesno "The Torrent download failed or is not complete - maybe try COPY option. Do you want keep already downloaded torrent data?" 8 57
   response=$?
   case $response in
     1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;
@@ -263,9 +271,10 @@ if [ "${setupStep}" = "100" ]; then
   sudo systemctl disable ${network}d
   sudo cp -f /mnt/hdd/${network}/${network}.conf /home/admin/assets/${network}.conf 
   sudo rm -rfv /mnt/hdd/${network}/* 2>/dev/null
+  sudo rm /mnt/hdd/${network}/debug.log
 fi
 
-# Download worked / just move, copy on USB2 >4h
+# Download worked / just move, copy on USB2 would be >4h
 echo ""
 echo "*** Moving Files ***"
 date +%s
@@ -279,9 +288,12 @@ date +%s
 
 if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+  rpcpass=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "${network}d.rpcpass" | cut -d "=" -f2)
+  sudo sed -i "s/^rpcpassword=.*/rpcpassword=${rpcpass}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/${network}/
   sudo systemctl enable ${network}d
-  echo "DONE - reboot needed: sudo shutdown -r now"
+  echo "DONE - rebooting: sudo shutdown -r now"
+  sudo shutdown -r now
 else
   # set SetupState
   sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
