@@ -20,6 +20,8 @@ The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-To
 
 [Raspberry Pi](RaspberryPi.md)
 
+[Display install script](dietpi.display.sh)
+
 ---
 
 ## General guide for the RaspiBlitz-on-DietPi 
