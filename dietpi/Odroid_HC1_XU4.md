@@ -10,7 +10,7 @@
 * Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
 ---
 ### Download the fully prebuilt RaspiBlitz-on-DietPi SDcard image
-* [torrent](https://github.com/rootzoll/raspiblitz/raw/dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
+
 * [mega.nz link](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA)
 
 sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2
@@ -23,7 +23,7 @@ Steps to run:
 - login with `ssh admin@at.your.raspiblitz.ip`  
 password: `raspiblitz`
 
-Using this image you can skip the rest of this guide as it is mostly about how this image was built.
+Using this image you can skip the rest of this page.
 
 The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
 
@@ -53,7 +53,7 @@ https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
     `tail -n1000 -f /tmp/DietPi-Update/dietpi-update.log` - follow the dietpi-update process  
     `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow the output of the build_sdcard.sh  
 
-    Starting from from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495. This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com.
+    Starting from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495. This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com.
     To get past it:
      * Log in with root after the first restart (when the loop is ongoing - without any output to the HDMI screen)
     * CTRL+C, run `dietpi-update` and update
