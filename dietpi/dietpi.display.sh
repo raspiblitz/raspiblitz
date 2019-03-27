@@ -136,7 +136,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     
     # based on http://www.lcdwiki.com/3.5inch_HDMI_Display-B
     git clone https://github.com/goodtft/LCD-show.git
-    chmod -R 755 LCD-show
+    sudo chmod -R 755 LCD-show
     cd LCD-show/
     #sudo ./MPI3508-show  
     sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
