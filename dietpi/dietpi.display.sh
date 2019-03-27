@@ -119,8 +119,14 @@ if [ "${baseImage}" = "dietpi" ]; then
     sudo cp ./usr/cmdline.txt /DietPi/
     sudo cp ./usr/inittab /etc/
     sudo cp ./boot/config-35.txt /DietPi/config.txt
+
+    # revert font change
+    # based on https://www.raspberrypi-spy.co.uk/2014/04/how-to-change-the-command-line-font-size/
+    sudo sed -i 's/FONTFACE="TerminusBold"/FONTFACE="Fixed"/' /etc/default/console-setup
+    sudo sed -i 's/FONTSIZE="12x24"/FONTSIZE="8x16"/' /etc/default/console-setup 
+
     echo "***"
-    echo "reboot with \`sudo reboot\` to have the LCD working"
+    echo "reboot with \`sudo reboot\` to make the LCD work"
     echo "***"
 
     exit
@@ -130,7 +136,7 @@ if [ "${baseImage}" = "dietpi" ]; then
     
     # based on http://www.lcdwiki.com/3.5inch_HDMI_Display-B
     git clone https://github.com/goodtft/LCD-show.git
-    chmod -R 755 LCD-show
+    sudo chmod -R 755 LCD-show
     cd LCD-show/
     #sudo ./MPI3508-show  
     sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
@@ -140,8 +146,13 @@ if [ "${baseImage}" = "dietpi" ]; then
     sudo cp -rf ./usr/99-fbturbo.conf-HDMI /usr/share/X11/xorg.conf.d/99-fbturbo.conf 
     sudo mkdir -p /etc/X11/xorg.conf.d 
     sudo cp -rf ./usr/99-calibration.conf-3508 /etc/X11/xorg.conf.d/99-calibration.conf
+
+    # based on https://www.raspberrypi-spy.co.uk/2014/04/how-to-change-the-command-line-font-size/
+    sudo sed -i 's/FONTFACE="Fixed"/FONTFACE="TerminusBold"/' /etc/default/console-setup
+    sudo sed -i 's/FONTSIZE="8x16"/FONTSIZE="12x24"/' /etc/default/console-setup 
+
     echo "***"
-    echo "reboot with \`sudo reboot\` to have the LCD working"
+    echo "reboot with \`sudo reboot\` to make the LCD work"
     echo "***"
 
     exit
@@ -152,6 +163,12 @@ if [ "${baseImage}" = "dietpi" ]; then
     # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
 
     echo "--> LCD ALTERNATIVE"
+    
+    # revert font change
+    # based on https://www.raspberrypi-spy.co.uk/2014/04/how-to-change-the-command-line-font-size/
+    sudo sed -i 's/FONTFACE="TerminusBold"/FONTFACE="Fixed"/' /etc/default/console-setup
+    sudo sed -i 's/FONTSIZE="12x24"/FONTSIZE="8x16"/' /etc/default/console-setup 
+    
     cd /DietPi
     sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
     sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
