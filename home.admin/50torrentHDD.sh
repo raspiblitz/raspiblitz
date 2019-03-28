@@ -10,7 +10,7 @@ source /home/admin/raspiblitz.info
 
 # if setup was done - remove old data
 if [ "${setupStep}" = "100" ]; then
-  echo "stopping servcies ..."
+  echo "stopping services ..."
   sudo systemctl stop lnd 
   sudo systemctl stop ${network}d
 fi
