@@ -119,7 +119,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   # install OpenSSH client + server
   sudo apt install -y openssh-client
   sudo apt install -y openssh-sftp-server
-
 fi
 
 # special prepare when Raspbian
@@ -148,12 +147,21 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-# set Raspi to boot up automatically with user pi (for the LCD)
-# https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-sudo raspi-config nonint do_boot_behaviour B2
-sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+if [ "${baseImage}" = "raspbian" ]; then
+  # set Raspi to boot up automatically with user pi (for the LCD)
+  # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+  sudo raspi-config nonint do_boot_behaviour B2
+  sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+  sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+fi
+
+if [ "${baseImage}" = "dietpi" ]; then
+  # set DietPi to boot up automatically with user pi (for the LCD)
+  # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
+  # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
+  sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+fi
 
 # change log rotates
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
@@ -237,6 +245,7 @@ sudo apt-get install -y vnstat
 # prepare for BTRFS data drive raid
 sudo apt-get install -y btrfs-tools
 
+
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334
 sudo apt-get install -y fbi
@@ -304,6 +313,7 @@ bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
+sudo rm -r /home/admin/download
 sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
@@ -566,13 +576,23 @@ sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 
-# bash autostart for pi
-# run as exec to dont allow easy physical access by keyboard
-# see https://github.com/rootzoll/raspiblitz/issues/54
-sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+if [ "${baseImage}" = "raspbian" ]; then
+  # bash autostart for pi
+  # run as exec to dont allow easy physical access by keyboard
+  # see https://github.com/rootzoll/raspiblitz/issues/54
+  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+  sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+fi
+
+if [ "${baseImage}" = "dietpi" ]; then
+  # bash autostart for dietpi
+  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+  sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+fi
 
 # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
 cat > /home/admin/setup.sh <<EOF
@@ -630,9 +650,31 @@ echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
 echo ""
-echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
-# install LCD only on an rPI running Raspbian
+# install default LCD on DietPi without reboot to allow automatic build
+if [ "${baseImage}" = "dietpi" ]; then
+  echo "Installing the default display available from Amazon" 
+  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+  cd /home/admin/
+  # sudo apt-mark hold raspberrypi-bootloader
+  git clone https://github.com/goodtft/LCD-show.git
+  sudo chmod -R 755 LCD-show
+  sudo chown -R admin:admin LCD-show
+  cd LCD-show/
+  # sudo ./LCD35-show
+  sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+  sudo mkdir /etc/X11/xorg.conf.d
+  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+  sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+  sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+  sudo cp ./usr/cmdline.txt /DietPi/
+  sudo cp ./usr/inittab /etc/
+  sudo cp ./boot/config-35.txt /DietPi/config.txt
+  echo "to continue reboot with \`sudo shutdown -r now \` and login with admin"
+fi
+
+# ask about LCD only on Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
   echo "Press ENTER to install LCD and reboot ..."
   read key
