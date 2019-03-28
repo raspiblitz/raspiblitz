@@ -109,7 +109,7 @@ elif [ ${mode} = "restore" ]; then
         fi
 
         echo
-        echo "WARNING: This will delete the actual LND state/funds of this RaspiBlitz."
+        echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
         echo
         echo "PRESS ENTER to start restore. Use CTRL-C to abort."
       fi
