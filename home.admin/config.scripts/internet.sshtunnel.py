@@ -16,9 +16,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 if sys.argv[1] == "on":
 
     # check if already running -> systemctl is-enabled autossh-tunnel.service
-    alreadyRunning = subprocess.check_output('systemctl is-enabled autossh-tunnel.service' ,shell=True)
+    alreadyRunning = subprocess.check_output('systemctl is-enabled autossh-tunnel.service' ,shell=True, universal_newlines=True)
     print(alreadyRunning)
-    if alreadyRunning == "enabled":
+    if str(alreadyRunning).count("enabled") > 0:
         print("already running - run 'internet.sshtunnel.py off' first")
         sys.exit(1)
 
