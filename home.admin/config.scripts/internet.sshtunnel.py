@@ -39,7 +39,7 @@ WantedBy=multi-user.target
 if sys.argv[1] == "on":
 
     # check if already running
-    already_running = subprocess.check_output(f"systemctl is-enabled {SERVICENAME}" ,shell=True, universal_newlines=True)
+    already_running = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
     if str(already_running).count("enabled") > 0:
         print("already ON - run 'internet.sshtunnel.py off' first")
         sys.exit(1)
