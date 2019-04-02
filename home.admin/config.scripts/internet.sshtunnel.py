@@ -104,7 +104,7 @@ if sys.argv[1] == "on":
 
     # final info (can be ignored if run by other script)
     print(f"*** OK - SSH TUNNEL SERVICE STARTED ***")
-    print(f"- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
+    #print(f"- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
     print(f"- Tunnel service needs final reboot to start.")
     #print(f"- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
 
