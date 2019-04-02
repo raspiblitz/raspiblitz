@@ -140,10 +140,10 @@ if sys.argv[1] == "on":
     if file_content.count("sshtunnel=") == 0:
         file_content = file_content+"\nsshtunnel=''"
     file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
-    file_content = re.sub("\n\n", "\n", file_content)
+    file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
-        text_file.write(file_content+"\n")
+        text_file.write(file_content)
     print("DONE")
 
     # make sure autossh is installed
@@ -160,7 +160,9 @@ if sys.argv[1] == "on":
 
     # final info (can be ignored if run by other script)
     print()
-    print("*** OK - SSH TUNNEL SERVICE DONE SETUP ***")
+    print("**************************************")
+    print("*** WIN - SSH TUNNEL SERVICE SETUP ***")
+    print("**************************************")
     print("See chapter 'How to setup port-forwarding with a SSH tunnel?' in:")
     print("https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md")
     print("- Tunnel service needs final reboot to start.")
