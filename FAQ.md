@@ -644,11 +644,11 @@ You can add those at the end of the file, save and reboot.
 
 On the RaspiBlitz you can then setup for example to forward the gRPC port 10009 (internal port) to the port 20009 on the public server (external port) with the user = `test` and server address = `raspiblitz.com` with the following command:
 
-`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com 10009<20009`
+`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com "10009<20009"`
 
 You can even set multiple port forwardings like with:
 
-`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com 10009<20009 8080<9090`
+`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com "10009<20009" "8080<9090"`
 
 Please beware that after you set such a port forwarding you need to set the domain of the public server as a `DynamicDNS` name (leave update url empty) and then connect mobile wallets fresh or export again the macaroons/certs. When connecting the mobile wallets you may need to adjust ports manually after QR code scan. And if you SSH tunnel the LND node port `9735` you may also need to sun the custom LND port script and maybe also a manual set of the domain in the LND service is needed. This all is very experimental at the moment ... better integration will come in the future.
 
