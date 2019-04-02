@@ -87,7 +87,7 @@ if sys.argv[1] == "on":
     # generate custom service config
     service_data = SERVICETEMPLATE.replace("[PLACEHOLDER]", additional_parameters)
 
-    # DEBUG exit
+    # debug print out service
     print()
     print("*** New systemd service: %s" % (SERVICENAME))
     print(service_data)
@@ -101,7 +101,9 @@ if sys.argv[1] == "on":
     # check if SSH keys for root user need to be created
     print()
     print("*** Checking root SSH keys")
-    if Path("/root/.ssh/id_rsa.pub").exists() == False:
+    sshkeys_exist = subprocess.check_output("sudo ls /root/.ssh/id_rsa.pub | grep -c 'id_rsa.pub'", shell=True, universal_newlines=True)
+    print(sshkeys_exist)
+    if str(sshkeys_exist).count("1") == 0:
         print("Generating root SSH keys ...")
         subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
         print("DONE")
