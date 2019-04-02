@@ -100,16 +100,17 @@ if sys.argv[1] == "on":
 
     # check if SSH keys for root user need to be created
     print()
-    print("*** Checking root SSH keys")
+    print("*** Checking root SSH pub keys")
+    ssh_pubkey=""
     try:
-        subprocess.call("sudo ls /root/.ssh/id_rsa.pub | grep -c 'id_rsa.pub'", shell=True)
+        ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
         print("OK - root id_rsa.pub file exists")
     except subprocess.CalledProcessError as e:
         print("Generating root SSH keys ...")
         subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
+        ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
         print("DONE")
-    ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
-
+    
     # make sure autossh is installed
     # https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/
     print()
