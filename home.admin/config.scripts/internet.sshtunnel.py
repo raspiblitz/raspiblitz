@@ -102,7 +102,7 @@ if sys.argv[1] == "on":
     print()
     print("*** Checking root SSH keys")
     try:
-        subprocess.call("sudo ls /root/.ssh/id_rsa.pub", shell=True)
+        subprocess.call("sudo ls /root/.ssh/id_rsa.pub | grep -c 'id_rsa.pub'", shell=True)
         print("OK - root id_rsa.pub file exists")
     except subprocess.CalledProcessError as e:
         print("Generating root SSH keys ...")
