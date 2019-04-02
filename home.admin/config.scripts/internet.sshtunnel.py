@@ -56,10 +56,11 @@ if sys.argv[1] == "on":
 
     # check if already running
     try:
-      subprocess.call("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+        subprocess.call("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+        print("already ON - run 'internet.sshtunnel.py off' first")
+        sys.exit(1)
     except subprocess.CalledProcessError as e:
-      print("already ON - run 'internet.sshtunnel.py off' first")
-      sys.exit(1)
+        print("*** Installing SSH TUNNEL")
 
     # check server address
     if len(sys.argv) < 3:
