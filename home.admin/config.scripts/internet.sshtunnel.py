@@ -126,7 +126,7 @@ if sys.argv[1] == "on":
     # final info (can be ignored if run by other script)
     print()
     print("*** OK - SSH TUNNEL SERVICE DONE SETUP ***")
-    print("For details see chapter '' in:")
+    print("See chapter 'How to setup port-forwarding with a SSH tunnel?' in:")
     print("https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md")
     print("- Tunnel service needs final reboot to start.")
     print("- After reboot check logs: sudo journalctl -f -u %s" % (SERVICENAME))
