@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, subprocess
+import sys, subprocess, re
 from pathlib import Path
 
 # display config script info
@@ -82,6 +82,7 @@ if sys.argv[1] == "on":
         i=i+1
 
     # genenate additional parameter for autossh (server)
+    ssh_ports= additional_parameters.strip()
     additional_parameters= additional_parameters + ssh_server
 
     # generate custom service config
@@ -109,8 +110,25 @@ if sys.argv[1] == "on":
         print("Generating root SSH keys ...")
         subprocess.call("sudo sh -c 'yes y | sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"'", shell=True)
         ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
-        print("DONE")
     
+    # copy SSH keys for backup (for update with new sd card)
+    print("making backup copy of SSH keys")
+    subprocess.call("sudo cp -r /root/.ssh /mnt/hdd/ssh/root_backup", shell=True)
+    print("DONE")
+    
+    # write ssh tunnel data to raspiblitz config (for update with new sd card)
+    print("*** Updating RaspiBlitz Config")
+    with open('/mnt/hdd/raspiblitz.conf') as f:
+        file_content = f.read()
+    if file_content.count("sshtunnel=") == 0:
+        file_content = file_content+"\nsshtunnel=''"
+    file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
+    file_content = re.sub("\n\n", "\n", file_content)
+    print(file_content)
+    with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
+        text_file.write(file_content+"\n")
+    print("DONE")
+
     # make sure autossh is installed
     # https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/
     print()
@@ -147,6 +165,16 @@ elif sys.argv[1] == "off":
     subprocess.call("sudo systemctl daemon-reload", shell=True)
     print("OK Done")
     print()
+
+    print("*** Removing SSH Tunnel data from RaspiBlitz config")
+    with open('/mnt/hdd/raspiblitz.conf') as f:
+        file_content = f.read()
+    file_content = re.sub("sshtunnel=.*", "", file_content)
+    file_content = re.sub("\n\n", "\n", file_content)
+    print(file_content)
+    with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
+        text_file.write(file_content)
+    print("OK Done")
 
 #
 # UNKOWN PARAMETER
