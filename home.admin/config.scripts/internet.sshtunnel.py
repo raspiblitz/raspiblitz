@@ -101,14 +101,13 @@ if sys.argv[1] == "on":
     # check if SSH keys for root user need to be created
     print()
     print("*** Checking root SSH keys")
-    sshkeys_exist = subprocess.check_output("sudo ls /root/.ssh/id_rsa.pub | grep -c 'id_rsa.pub'", shell=True, universal_newlines=True)
-    print(sshkeys_exist)
-    if str(sshkeys_exist).count("1") == 0:
+    try:
+        subprocess.call("sudo ls /root/.ssh/id_rsa.pub", shell=True)
+        print("OK - root id_rsa.pub file exists")
+    except subprocess.CalledProcessError as e:
         print("Generating root SSH keys ...")
         subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
         print("DONE")
-    else:
-        print("OK - root id_rsa.pub file exists")
     ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
 
     # make sure autossh is installed
