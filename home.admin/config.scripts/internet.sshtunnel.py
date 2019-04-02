@@ -39,10 +39,10 @@ WantedBy=multi-user.target
 if sys.argv[1] == "on":
 
     # check if already running
-    #already_running = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
-    #if str(already_running).count("enabled") > 0:
-    #    print("already ON - run 'internet.sshtunnel.py off' first")
-    #    sys.exit(1)
+    already_running = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+    if str(already_running).count("enabled") > 0:
+        print("already ON - run 'internet.sshtunnel.py off' first")
+        sys.exit(1)
 
     # check server address
     if len(sys.argv) < 3:
@@ -87,26 +87,50 @@ if sys.argv[1] == "on":
     service_data = SERVICETEMPLATE.replace("[PLACEHOLDER]", additional_parameters)
 
     # DEBUG exit
-    print("****** SERVICE ******")
+    print()
+    print("*** New systemd service: %s" % (SERVICENAME))
     print(service_data)
-    sys.exit(0)
 
     # write service file
     service_file = open(SERVICEFILE, "w")
     service_file.write(service_data)
     service_file.close()
 
-    # enable service
-    print("*** Enabling systemd service: SERVICENAME")
-    subprocess.call("systemctl daemon-reload", shell=True)
-    #subprocess.call(f"systemctl enable {SERVICENAME}", shell=True)
+    # check if SSH keys for root user need to be created
     print()
+    print("*** Checking root SSH keys")
+    if Path("/home/root/.ssh/id_rsa.pub").exists() == False:
+        print("Generating root SSH keys ...")
+        subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N """, shell=True)
+        print("DONE")
+    else:
+        print("OK - root id_rsa.pub file exists")
+    ssh_pubkey=""
+    with open('/home/root/.ssh/id_rsa.pub', 'r') as file:
+        ssh_pubkey = file.read().replace('\n', '')
+
+    # make sure autossh is installed
+    # https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/
+    print()
+    print("*** Install autossh")
+    subprocess.call("sudo apt-get install -y autossh", shell=True)
+    
+    # enable service
+    print()
+    print("*** Enabling systemd service: %s" % (SERVICENAME))
+    subprocess.call("sudo systemctl daemon-reload", shell=True)
+    subprocess.call("sudo systemctl enable %s" % (SERVICENAME), shell=True)
 
     # final info (can be ignored if run by other script)
-    print("*** OK - SSH TUNNEL SERVICE STARTED ***")
-    #print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
+    print()
+    print("*** OK - SSH TUNNEL SERVICE DONE SETUP ***")
+    print("For details see chapter '' in:")
+    print("https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md")
     print("- Tunnel service needs final reboot to start.")
-    #print("- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
+    print("- After reboot check logs: sudo journalctl -f -u %s" % (SERVICENAME))
+    print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of %s :" % (ssh_server))
+    print(ssh_pubkey)
+    print()
 
 #
 # SWITCHING OFF
@@ -115,12 +139,18 @@ if sys.argv[1] == "on":
 elif sys.argv[1] == "off":
 
     # check if already disabled
-    #alreadyRunning = subprocess.check_output(f"systemctl is-enabled {SERVICENAME}" ,shell=True, universal_newlines=True)
-    #if str(alreadyRunning).count("enabled") == 0:
-    #    print("Was already OFF")
-    #    sys.exit(0)
+    alreadyRunning = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+    if str(alreadyRunning).count("enabled") == 0:
+        print("Was already OFF")
+        sys.exit(0)
 
-    print ("TODO: Switch OFF")
+    print("*** Disabling systemd service: %s" % (SERVICENAME))
+    subprocess.call("sudo systemctl stop %s" % (SERVICENAME), shell=True)
+    subprocess.call("sudo systemctl disable %s" % (SERVICENAME), shell=True)
+    subprocess.call("sudo rm %s" % (SERVICEFILE), shell=True)
+    subprocess.call("sudo systemctl daemon-reload", shell=True)
+    print("OK Done")
+    print()
 
 #
 # UNKOWN PARAMETER
