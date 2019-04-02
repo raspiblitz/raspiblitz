@@ -103,7 +103,7 @@ if sys.argv[1] == "on":
     print("*** Checking root SSH keys")
     if Path("/home/root/.ssh/id_rsa.pub").exists() == False:
         print("Generating root SSH keys ...")
-        subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N """, shell=True)
+        subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
         print("DONE")
     else:
         print("OK - root id_rsa.pub file exists")
@@ -139,13 +139,6 @@ if sys.argv[1] == "on":
 #
 
 elif sys.argv[1] == "off":
-
-    # check if already disabled
-    try:
-      subprocess.call("systemctl is-disabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
-    except subprocess.CalledProcessError as e:
-      print("Was already OFF")
-      sys.exit(0)
 
     print("*** Disabling systemd service: %s" % (SERVICENAME))
     subprocess.call("sudo systemctl stop %s" % (SERVICENAME), shell=True)
