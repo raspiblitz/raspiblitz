@@ -6,13 +6,14 @@ from pathlib import Path
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("forward ports from another server to raspiblitz with reverse SSH tunnel")
-    print("internet.sshtunnel.py [on|off] [USER]@[SERVER] [INTERNAL-PORT]:[EXTERNAL-PORT]")
+    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER] [INTERNAL-PORT]:[EXTERNAL-PORT]")
     print("note that [INTERNAL-PORT]:[EXTERNAL-PORT] can one or multiple forwardings")
     sys.exit(1)
 
 #
 # CONSTANTS
 # sudo journalctl -f -u autossh-tunnel
+#
 
 SERVICENAME="autossh-tunnel.service"
 SERVICEFILE="/etc/systemd/system/"+SERVICENAME
@@ -31,6 +32,17 @@ StandardOutput=journal
 [Install]
 WantedBy=multi-user.target
 """
+
+#
+# RESTORE = SWITCHING ON with restore flag on
+# on restore other external scripts dont need calling
+#
+
+restoringOnUpdate = False
+if sys.argv[1] == "restore":
+    print("internet.sshtunnel.py -> running with restore flag")
+    sys.argv[1] = "on"
+    restoringOnUpdate = True
 
 #
 # SWITCHING ON
