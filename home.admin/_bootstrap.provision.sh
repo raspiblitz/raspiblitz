@@ -101,14 +101,6 @@ echo "" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Setup System ..'/g" ${infoFile}
 /home/admin/90finishSetup.sh >> ${logFile} 2>&1
 
-# set the local network hostname
-if [ ${#hostname} -gt 0 ]; then
-  echo "Setting new network hostname '$hostname'" >> ${logFile}
-  sudo raspi-config nonint do_hostname ${hostname} >> ${logFile} 2>&1
-else 
-  echo "No hostname set." >> ${logFile}
-fi
-
 ##########################
 # PROVISIONING SERVICES
 ##########################
@@ -224,6 +216,20 @@ fi
 echo "" >> ${logFile}
 
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
+
+# set the local network hostname
+# have at the end - see https://github.com/rootzoll/raspiblitz/issues/462
+if [ ${#hostname} -gt 0 ]; then
+  hostnameSanatized=$(echo "${hostname}"| tr -dc '[:alnum:]\n\r')
+  if [ ${#hostnameSanatized} -gt 0 ]; then
+    echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
+    sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+  else
+    echo "WARNING: hostname in raspiblitz.conf contains just special chars" >> ${logFile}
+  fi
+else 
+  echo "No hostname set." >> ${logFile}
+fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 20 secs sleep" >> ${logFile}
 sleep 20
