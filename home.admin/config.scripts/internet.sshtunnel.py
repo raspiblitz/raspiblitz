@@ -12,7 +12,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 
 #
 # CONSTANTS
-#
+# sudo journalctl -f -u autossh-tunnel
 
 SERVICENAME="autossh-tunnel.service"
 SERVICEFILE="/etc/systemd/system/"+SERVICENAME
