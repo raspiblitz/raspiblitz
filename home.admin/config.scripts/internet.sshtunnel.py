@@ -55,12 +55,11 @@ if sys.argv[1] == "restore":
 if sys.argv[1] == "on":
 
     # check if already running
-    try:
-        subprocess.call("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
-        print("already ON - run 'internet.sshtunnel.py off' first")
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print("*** Installing SSH TUNNEL")
+    isRunning = subprocess.getoutput("sudo systemctl --no-pager | grep 'autossh-tunnel' -c %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+    print(isRunning)
+    if int(str(isRunning)) > 1:
+      print("already ON - run 'internet.sshtunnel.py off' first")
+      sys.exit(1)
 
     # check server address
     if len(sys.argv) < 3:
