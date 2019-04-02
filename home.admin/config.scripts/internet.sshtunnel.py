@@ -55,7 +55,7 @@ if sys.argv[1] == "restore":
 if sys.argv[1] == "on":
 
     # check if already running
-    isRunning = subprocess.getoutput("sudo systemctl --no-pager | grep 'autossh-tunnel' -c %s" % (SERVICENAME))
+    isRunning = subprocess.getoutput("sudo systemctl --no-pager | grep '%s' -c" % (SERVICENAME))
     print(isRunning)
     if int(isRunning) > 1:
       print("already ON - run 'internet.sshtunnel.py off' first")
