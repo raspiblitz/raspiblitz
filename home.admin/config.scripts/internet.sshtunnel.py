@@ -4,13 +4,13 @@ import sys, subprocess, re
 from pathlib import Path
 
 # IDEA: At the momemt its just Reverse-SSh Tunnels thats why [INTERNAL-PORT]<[EXTERNAL-PORT]
-# For the future also just local ssh tunnels could be added with [INTERNAL-PORT]>[EXTERNAL-PORT]
+# For the future also just local ssh tunnels could be added with [INTERNAL-PORT]-[EXTERNAL-PORT]
 # for the use case when a server wants to use a RaspiBlitz behind a NAT as Lightning backend
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("forward ports from another server to raspiblitz with reverse SSH tunnel")
-    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER] [INTERNAL-PORT]<[EXTERNAL-PORT]")
+    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
     print("note that [INTERNAL-PORT]<[EXTERNAL-PORT] can one or multiple forwardings")
     sys.exit(1)
 
@@ -56,9 +56,8 @@ if sys.argv[1] == "on":
 
     # check if already running
     isRunning = subprocess.getoutput("sudo systemctl --no-pager | grep '%s' -c" % (SERVICENAME))
-    print(isRunning)
     if int(isRunning) > 1:
-      print("already ON - run 'internet.sshtunnel.py off' first")
+      print("SSH TUNNEL ALREADY ACTIVATED - run 'internet.sshtunnel.py off' first to set new tunnel")
       sys.exit(1)
 
     # check server address
@@ -72,8 +71,9 @@ if sys.argv[1] == "on":
 
     # genenate additional parameter for autossh (forwarding ports)
     if len(sys.argv) < 4:
-        print("[INTERNAL-PORT]<[EXTERNAL-PORT] missing - run 'internet.sshtunnel.py off' first")
+        print("[INTERNAL-PORT]<[EXTERNAL-PORT] missing")
         sys.exit(1)
+    ssh_ports=""
     additional_parameters=""
     i = 3
     while i < len(sys.argv):
@@ -94,11 +94,12 @@ if sys.argv[1] == "on":
             print("[INTERNAL-PORT]<[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
 
+        ssh_ports = ssh_ports + "\"%s\" " % (sys.argv[i])
         additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external,port_internal)
         i=i+1
 
     # genenate additional parameter for autossh (server)
-    ssh_ports= additional_parameters.strip()
+    ssh_ports = ssh_ports.strip()
     additional_parameters= additional_parameters + ssh_server
 
     # generate custom service config
