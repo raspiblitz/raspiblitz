@@ -584,6 +584,15 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
   sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
   sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+
+  # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
+  cat > /home/admin/setup.sh <<EOF
+
+  # make LCD screen rotation correct
+  sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
+
+EOF
+  sudo chmod +x /home/admin/setup.sh
 fi
 
 if [ "${baseImage}" = "dietpi" ]; then
@@ -593,15 +602,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
   sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
 fi
-
-# create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
-cat > /home/admin/setup.sh <<EOF
-
-# make LCD screen rotation correct
-sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
-
-EOF
-sudo chmod +x /home/admin/setup.sh
 
 echo ""
 echo "*** HARDENING ***"
@@ -671,6 +671,8 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo cp ./usr/cmdline.txt /DietPi/
   sudo cp ./usr/inittab /etc/
   sudo cp ./boot/config-35.txt /DietPi/config.txt
+  # make LCD screen rotation correct
+  sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
   echo "to continue reboot with \`sudo shutdown -r now \` and login with admin"
 fi
 
