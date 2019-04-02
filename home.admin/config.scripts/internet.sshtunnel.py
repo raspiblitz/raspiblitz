@@ -40,6 +40,7 @@ if sys.argv[1] == "on":
 
     # check if already running
     already_running = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+    print(already_running)
     if str(already_running).count("enabled") > 0:
         print("already ON - run 'internet.sshtunnel.py off' first")
         sys.exit(1)
@@ -47,7 +48,7 @@ if sys.argv[1] == "on":
     # check server address
     ssh_server = sys.argv[2]
     if ssh_server.count("@") != 1:
-        print(f"[USER]@[SERVER] wrong - use 'internet.sshtunnel.py -h' for help")
+        print("[USER]@[SERVER] wrong - use 'internet.sshtunnel.py -h' for help")
         sys.exit(1)
 
     # check minimal forwardings
@@ -62,7 +63,7 @@ if sys.argv[1] == "on":
 
         # check forwarding format
         if sys.argv[i].count(":") != 1:
-            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] wrong format '{sys.argv[i]}'")
+            print("[INTERNAL-PORT]:[EXTERNAL-PORT] wrong format '%s'" % (sys.argv[i]))
             sys.exit(1)
 
         # get ports
@@ -70,13 +71,13 @@ if sys.argv[1] == "on":
         port_internal = ports[0]
         port_external = ports[1]
         if port_internal.isdigit() == False:
-            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] internal not number '{sys.argv[i]}'")
+            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] internal not number '%s'" % (sys.argv[i]))
             sys.exit(1)
         if port_external.isdigit() == False:
-            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] external not number '{sys.argv[i]}'")
+            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
 
-        additional_parameters= additional_parameters + f"-R {port_external}:localhost:{port_internal} "
+        additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external,port_internal)
         i=i+1
 
     # genenate additional parameter for autossh (server)
@@ -98,14 +99,14 @@ if sys.argv[1] == "on":
     # enable service
     print(f"*** Enabling systemd service: {{SERVICENAME}}")
     subprocess.call(f"systemctl daemon-reload", shell=True)
-    subprocess.call(f"systemctl enable {SERVICENAME}", shell=True)
+    #subprocess.call(f"systemctl enable {SERVICENAME}", shell=True)
     print()
 
     # final info (can be ignored if run by other script)
     print(f"*** OK - SSH TUNNEL SERVICE STARTED ***")
     print(f"- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
     print(f"- Tunnel service needs final reboot to start.")
-    print(f"- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
+    #print(f"- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
 
 #
 # SWITCHING OFF
@@ -114,10 +115,10 @@ if sys.argv[1] == "on":
 elif sys.argv[1] == "off":
 
     # check if already disabled
-    alreadyRunning = subprocess.check_output(f"systemctl is-enabled {SERVICENAME}" ,shell=True, universal_newlines=True)
-    if str(alreadyRunning).count("enabled") == 0:
-        print("Was already OFF")
-        sys.exit(0)
+    #alreadyRunning = subprocess.check_output(f"systemctl is-enabled {SERVICENAME}" ,shell=True, universal_newlines=True)
+    #if str(alreadyRunning).count("enabled") == 0:
+    #    print("Was already OFF")
+    #    sys.exit(0)
 
     print ("TODO: Switch OFF")
 
