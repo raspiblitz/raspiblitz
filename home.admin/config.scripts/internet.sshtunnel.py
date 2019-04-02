@@ -93,10 +93,10 @@ if sys.argv[1] == "on":
     print(service_data)
 
     # write service file
-    service_file = open("./temp.service", "w")
+    service_file = open("/home/admin/temp.service", "w")
     service_file.write(service_data)
     service_file.close()
-    subprocess.call("sudo mv ./temp.service SERVICEFILE", shell=True)
+    subprocess.call("sudo mv /home/admin/temp.service %s" % (SERVICEFILE), shell=True)
 
     # check if SSH keys for root user need to be created
     print()
