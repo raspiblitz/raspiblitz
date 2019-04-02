@@ -45,17 +45,18 @@ if sys.argv[1] == "on":
     #    sys.exit(1)
 
     # check server address
-    ssh_server = sys.argv[2]
-    if ssh_server.count("@") != 1:
+    if len(sys.argv) < 3:
+        print("[USER]@[SERVER] missing - use 'internet.sshtunnel.py -h' for help")
+        sys.exit(1)
+    if sys.argv[2].count("@") != 1:
         print("[USER]@[SERVER] wrong - use 'internet.sshtunnel.py -h' for help")
         sys.exit(1)
+    ssh_server = sys.argv[2]
 
-    # check minimal forwardings
+    # genenate additional parameter for autossh (forwarding ports)
     if len(sys.argv) < 4:
         print("[INTERNAL-PORT]:[EXTERNAL-PORT] missing - run 'internet.sshtunnel.py off' first")
         sys.exit(1)
-
-    # genenate additional parameter for autossh (forwarding ports)
     additional_parameters=""
     i = 3
     while i < len(sys.argv):
