@@ -107,7 +107,7 @@ if sys.argv[1] == "on":
         print("OK - root id_rsa.pub file exists")
     except subprocess.CalledProcessError as e:
         print("Generating root SSH keys ...")
-        subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
+        subprocess.call("sudo sh -c 'yes y | sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"'", shell=True)
         ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
         print("DONE")
     
