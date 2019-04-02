@@ -71,10 +71,10 @@ if sys.argv[1] == "on":
         port_internal = ports[0]
         port_external = ports[1]
         if port_internal.isdigit() == False:
-            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] internal not number '%s'" % (sys.argv[i]))
+            print("[INTERNAL-PORT]:[EXTERNAL-PORT] internal not number '%s'" % (sys.argv[i]))
             sys.exit(1)
         if port_external.isdigit() == False:
-            print(f"[INTERNAL-PORT]:[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
+            print("[INTERNAL-PORT]:[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
 
         additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external,port_internal)
@@ -97,16 +97,16 @@ if sys.argv[1] == "on":
     service_file.close()
 
     # enable service
-    print(f"*** Enabling systemd service: {{SERVICENAME}}")
-    subprocess.call(f"systemctl daemon-reload", shell=True)
+    print("*** Enabling systemd service: SERVICENAME")
+    subprocess.call("systemctl daemon-reload", shell=True)
     #subprocess.call(f"systemctl enable {SERVICENAME}", shell=True)
     print()
 
     # final info (can be ignored if run by other script)
-    print(f"*** OK - SSH TUNNEL SERVICE STARTED ***")
-    #print(f"- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
-    print(f"- Tunnel service needs final reboot to start.")
-    #print(f"- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
+    print("*** OK - SSH TUNNEL SERVICE STARTED ***")
+    #print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {} ")
+    print("- Tunnel service needs final reboot to start.")
+    #print("- After reboot check logs: sudo journalctl -f -u {SERVICENAME}")
 
 #
 # SWITCHING OFF
