@@ -101,7 +101,7 @@ if sys.argv[1] == "on":
     # check if SSH keys for root user need to be created
     print()
     print("*** Checking root SSH keys")
-    if Path("/home/root/.ssh/id_rsa.pub").exists() == False:
+    if Path("/root/.ssh/id_rsa.pub").exists() == False:
         print("Generating root SSH keys ...")
         subprocess.call("sudo -u root ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N \"\"", shell=True)
         print("DONE")
