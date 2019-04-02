@@ -40,12 +40,10 @@ if sys.argv[1] == "on":
 
     # check if already running
     try:
-      already_running = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+      subprocess.call("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
     except subprocess.CalledProcessError as e:
-      already_running = "disabled"
-    if str(already_running).count("enabled") > 0:
-        print("already ON - run 'internet.sshtunnel.py off' first")
-        sys.exit(1)
+      print("already ON - run 'internet.sshtunnel.py off' first")
+      sys.exit(1)
 
     # check server address
     if len(sys.argv) < 3:
@@ -144,12 +142,10 @@ elif sys.argv[1] == "off":
 
     # check if already disabled
     try:
-      alreadyRunning = subprocess.check_output("systemctl is-enabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
+      subprocess.call("systemctl is-disabled %s" % (SERVICENAME) ,shell=True, universal_newlines=True)
     except subprocess.CalledProcessError as e:
-      already_running = "disabled"
-    if str(alreadyRunning).count("enabled") == 0:
-        print("Was already OFF")
-        sys.exit(0)
+      print("Was already OFF")
+      sys.exit(0)
 
     print("*** Disabling systemd service: %s" % (SERVICENAME))
     subprocess.call("sudo systemctl stop %s" % (SERVICENAME), shell=True)
