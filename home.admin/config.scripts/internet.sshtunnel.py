@@ -107,9 +107,7 @@ if sys.argv[1] == "on":
         print("DONE")
     else:
         print("OK - root id_rsa.pub file exists")
-    ssh_pubkey=""
-    with open('/home/root/.ssh/id_rsa.pub', 'r') as file:
-        ssh_pubkey = file.read().replace('\n', '')
+    ssh_pubkey = subprocess.check_output("sudo cat /root/.ssh/id_rsa.pub", shell=True, universal_newlines=True)
 
     # make sure autossh is installed
     # https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/
