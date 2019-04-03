@@ -20,12 +20,12 @@ Sure one part of the fun for participents is to assemble the hardware themselves
 
 These are the following steps you need to prepare (follow links for details):
 
-* Buy all the Hardware
-* Assemble all the Hardware
-* Prepare HDDs with Blockchain Data
-* Prepare SD cards with latest RaspiBlitz image
-* Setup Workshop Environment
-* Pre-Sync RaspiBlitzes at Workshop Location
+* [Buy all the Hardware](WORKSHOP.md#buy-all-the-hardware)
+* [Assemble all the Hardware](WORKSHOP.md#assemble-all-the-hardware)
+* [Prepare HDDs with Blockchain Data](WORKSHOP.md#prepare-hdds-with-blockchain-data)
+* [Prepare SD cards with latest RaspiBlitz image](WORKSHOP.md#prepare-sd-cards-with-latest-raspiblitz-image)
+* [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
+* [Pre-Sync RaspiBlitzes at Workshop Location]()
 
 ## B) Provide a RaspiBlitz Hardware-Kit
 
@@ -35,22 +35,22 @@ In this workshop scenario you buy all the hardware but let participants assemble
 
 These are the following steps you need to prepare (follow links for details):
 
-* Buy all the Hardware
-* Prepare HDDs with Blockchain Data
-* Prepare SD cards with latest RaspiBlitz image
-* Setup Workshop Environment
+* [Buy all the Hardware](WORKSHOP.md#buy-all-the-hardware)
+* [Prepare HDDs with Blockchain Data](WORKSHOP.md#prepare-hdds-with-blockchain-data)
+* [Prepare SD cards with latest RaspiBlitz image](WORKSHOP.md#prepare-sd-cards-with-latest-raspiblitz-image)
+* [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 
 Variation: If you dont have a big bugdet to prefinance the part shoppings or people have already hardware they want to bring to can just buy the HHDs and SD cards and prepare them to run this scenario.
 
 ## B) Bring your own Hardware
 
-Estimated Duration: 4 hours
+Estimated Duration: 4-6 hours
 
 This scenario is just adviced for small groups or you need to bring multiple blockchain copy stations - see details on "Prepare HDDs with Blockchain Data". Otherwise it needs the least prepartion time and prefinance and can be announced about participants 5 days before, so that they have time to order all the parts online. 
 
-* Instruct Participants to bring Hardware
-* Prepare Blockchain Copy Station
-* Setup Workshop Environment
+* [Instruct Participants to bring Hardware](WORKSHOP.md#instruct-participants-to-bring-hardware)
+* [Prepare Blockchain Copy Station](WORKSHOP.md#prepare-blockchain-copy-station)
+* [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 
 Make sure that as early as the participants arrive at the workhop location to check their hardware list and even before official starting time take their HDDs and start the blockchain copy process.
 
@@ -58,15 +58,15 @@ Make sure that as early as the participants arrive at the workhop location to ch
 
 Make sure you have the following Hardware and Infrastructure ready for the workshop:
 
-* Lots of 'multiple power outlets/extensions' (min. 2 per participants - RaspiBlitz +Laptop)
-* Network-Switch with enough ports (min 1 per RaspiBlitz)
-* Enough LAN network cables (short ones to connect the RaspiBlitzes)
-* Good internet connection at location with LAN port (or a WLAN to LAN adapter)
-* Extra WLAN Router (if you are not sure if LAN & WLAN is not on the same network at location)
-* One or two USB SD card adapters
-* One or two USB-C to USB-A adapters
-* Some Tape, Marker & Pens come always handy (also for participants to wirte down seed & passwords)
-* And eventually some Bitcoin funds (if people dont have their own to start small funding channels)
+- Lots of 'multiple power outlets/extensions' (min. 2 per participants - RaspiBlitz +Laptop)
+- Network-Switch with enough ports (min 1 per RaspiBlitz)
+- Enough LAN network cables (short ones to connect the RaspiBlitzes)
+- Good internet connection at location with LAN port (or a WLAN to LAN adapter)
+- Extra WLAN Router (if you are not sure if LAN & WLAN is not on the same network at location)
+- One or two USB SD card adapters
+- One or two USB-C to USB-A adapters
+- Some Tape, Marker & Pens come always handy (also for participants to wirte down seed & passwords)
+- And eventually some Bitcoin funds (if people dont have their own to start small funding channels)
 
 Participants need at least to bring their laptops.
 
@@ -130,21 +130,25 @@ In all scenarios make sure people bring their laptops.
 
 Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README. Think of a safe way to transport the assambled devices to the workshop location - HHDs like it soft.
 
-# Prepare HDDs with Blockchain Data
+## Prepare HDDs with Blockchain Data
 
 This is the most time consuming part of the preparation. Try it once to get a feel for how much time you need to prepare one HDD.
 
 A prepared HDD is formatted in EXT4 and named "BLOCKCHAIN". In folder called `bitcoin` it contains a copy of the following data folders from a running Bitcoin core client (same version on RaspiBlitz).
 
+```
 /bitcoin/blocks
 /bitcoin/chainstate
 /bitcoin/indexes
+```
 
 optionaly you can add also the testnet data:
 
+```
 /bitcoin/testnet3/blocks
 /bitcoin/testnet3/chainstate
 /bitcoin/testnet3/indexes
+```
 
 The bitcoin core client the folders are from needs to have `txindex=1` in the bitcoin.conf and needs to be stopped while the data is copied to the HDD.
 
