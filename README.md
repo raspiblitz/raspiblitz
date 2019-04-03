@@ -27,7 +27,7 @@ See more details in the [Feature Documentation](#feature-documentation) & of cou
 
 ## Time Estimate to Setup a RaspiBlitz
 
-The RaspiBlitz is optimized for being setup during a workshop at a hackday or conference. When it comes ready assembled together with a up-to-date synced blockchain its possible to have it ready in about 2 to 3 hours - most is waiting time.
+The RaspiBlitz is optimized for being setup during a workshop at a hackday or conference (see [detailed workshop tutorial](WORKSHOP.md)). When it comes ready assembled together with a up-to-date synced blockchain its possible to have it ready in about 2 to 3 hours - most is waiting time.
 
 If you start at home ordering the parts from Amazon (see shopping list below) then its a weekend project with a lot of download and syncing time where you can do other stuff while checking on the progress from time to time. 
 
@@ -137,6 +137,8 @@ If you run into a problem or you have still a question, follow the steps below t
 ## Setup Process (Detailed Documentation)
 
 *The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and to mention edge cases.*
+
+If you are looking for a tutorial on how to oragnise a workshop to build the RaspiBlitz, [see here](WORKSHOP.md).
 
 ### Init
 
