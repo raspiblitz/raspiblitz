@@ -154,9 +154,11 @@ if sys.argv[1] == "on":
     file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
     if restoringOnUpdate == False:
         serverdomain=ssh_server.split("@")[1]
-        # setting server on DynDomain for all other ports
-        print("Setting server domain for service dyndomain")
-        subprocess.call("sudo /home/admin/config.scripts/internet.dyndomain.sh on %s" % (serverdomain), shell=True)
+        # make sure serverdomain is set as tls alias 
+        print("Setting server as tls alias and generating new certs")
+        subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf")
+        subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%$/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain))
+        subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
             print("Setting server domain for LND Port")
