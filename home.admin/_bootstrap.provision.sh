@@ -185,7 +185,7 @@ if [ "${#sshtunnel}" -gt 0 ]; then
     sudo sed -i "s/^message=.*/message='Setup SSH Tunnel'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
 else 
-    echo "Provisioning SSH Tunnel - keep default" >> ${logFile}
+    echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
 # ROOT SSH KEYS
