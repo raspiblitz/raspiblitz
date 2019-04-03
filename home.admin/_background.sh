@@ -169,11 +169,8 @@ do
         passwordC=$(sudo cat /root/lnd.autounlock.pwd)
         command="sudo python /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
         bash -c "${command}"
-      else
-        echo "lncli says not locked"
+        
       fi
-    else
-      echo "auto-unlock is OFF"
     fi
   fi
 
