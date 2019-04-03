@@ -179,15 +179,6 @@ else
   echo "Was not able to get LND port from config." >> ${logFile}
 fi
 
-# SSH TUNNEL
-if [ "${#sshtunnel}" -gt 0 ]; then
-    echo "Provisioning SSH Tunnel - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SSH Tunnel'/g" ${infoFile}
-    sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
-else 
-    echo "Provisioning SSH Tunnel - not active" >> ${logFile}
-fi
-
 # ROOT SSH KEYS
 # check if a backup on HDD exists and when retsore back
 backupRootSSH=$(sudo ls /mnt/hdd/ssh/root_backup 2>/dev/null | grep -c "id_rsa")
@@ -197,6 +188,15 @@ if [ ${backupRootSSH} -gt 0 ]; then
     sudo chown -R root:root /root/.ssh
 else
     echo "Provisioning Root SSH Keys - keep default" >> ${logFile}
+fi
+
+# SSH TUNNEL
+if [ "${#sshtunnel}" -gt 0 ]; then
+    echo "Provisioning SSH Tunnel - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup SSH Tunnel'/g" ${infoFile}
+    sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
+else 
+    echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
 # replay backup LND dir (especially for macaroons and tlscerts)
