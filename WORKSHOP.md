@@ -67,6 +67,34 @@ Make sure you have the following Hardware and Infrastructure ready for the works
 * One or two USB-C to USB-A adapters
 * Some Tape, Marker & Pens come always handy (also for participants to wirte down seed & passwords)
 
+# Running of the Workshop
+
+The basic structure of the workshop is set by the RaspiBlitz setup process. Simply you just follow that. The following parts should share some experiences and suggestions how you can optimize the time and the mentoring during this process.
+
+## Welcome and Intro
+
+TODO
+
+## Assembling
+
+TODO
+
+## Basic Setup
+
+TODO
+
+## Waiting Time
+
+TODO
+
+## Final Setup
+
+TODO
+
+## Funding, Channels, API
+
+TODO
+
 # Organisation Tasks
 
 Which of the follwoing organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:
@@ -77,6 +105,8 @@ See the shopping list on the RaspiBlitz Github README - you need to buy all of t
 
 From experience start ordering two weeks before the workshop (if you need to assembly) and minimum one week if you handing out hardware kits - even if you have Amazon Prime. There is always a shipment comming late - its a lot of packages.
 
+## Instruct Participants to bring Hardware
+
 ## Assemble all the Hardware
 
 Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README. Think of a safe way to transport the assambled devices to the workshop location - HHDs like it soft.
@@ -86,4 +116,12 @@ Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README.
 This is the most time consuming part. Try it once to get a feel for how much time you need to prepare one HDD.
 
 A prepared HDD is formatted in Ext4, named "BLOCKCHAIN" and contains at least the following
+
+## Prepare Blockchain Copy Station
+
+## Prepare SD cards with latest RaspiBlitz image
+
+## Setup Workshop Environment
+
+## Pre-Sync RaspiBlitzes at Workshop Location
 
