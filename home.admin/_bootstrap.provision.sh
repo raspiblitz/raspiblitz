@@ -165,7 +165,9 @@ fi
 
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}
-lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+if [ ${#lndPort} -eq 0 ]; then
+  lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+fi
 if [ ${#lndPort} -gt 0 ]; then
   if [ "${lndPort}" != "9735" ]; then
     echo "User is running custom LND port: ${lndPort}" >> ${logFile}

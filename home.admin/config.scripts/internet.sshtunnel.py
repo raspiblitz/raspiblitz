@@ -103,7 +103,7 @@ if sys.argv[1] == "on":
             forwardingLND = True
             if port_internal != port_external:
                 print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
-                print("Try again by using the same port. If you cant change the external port, change local LND port with: /home/config.scripts/lnd.setport.sh")
+                print("Try again by using the same port. If you cant change the external port, change local LND port with: /home/admin/config.scripts/lnd.setport.sh")
                 sys.exit(1)
 
         ssh_ports = ssh_ports + "\"%s\" " % (sys.argv[i])
