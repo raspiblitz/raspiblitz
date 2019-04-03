@@ -63,7 +63,7 @@ if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
   if [ ${isForwarded} -gt 0 ]; then
     host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
-    port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | sed 's/[^0-9]//g')
+    port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1)
     echo "port 10009 forwarding from port ${port} from server ${host}"
   else
     echo "port 10009 is not part of the ssh forwarding - keep default port 10009"
@@ -83,3 +83,4 @@ echo "Now press 'Connect' within the Shango Wallet."
 echo "If its not working - check issues on GitHub:"
 echo "https://github.com/neogeno/shango-lightning-wallet/issues"
 echo ""
+
