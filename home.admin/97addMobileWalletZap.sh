@@ -92,7 +92,7 @@ fi
 
 # check if port 10009 is forwarded
 if [ ${#sshtunnel} -gt 0 ]; then
-  isForwarded=$(echo "${sshtunnel}" | grep -c "10009<")
+  isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
   if [ ${isForwarded} -gt 0 ]; then
     host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
     port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | sed 's/[^0-9]//g')

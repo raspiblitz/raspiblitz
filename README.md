@@ -384,11 +384,14 @@ To do so you can register at an DynamicDomain service like freedns.afraid.org an
 
 * 8333 (Bitcoin/mainnet)
 * 9735 (LND Node)
-* 10009 (LND RPC) 
+* 10009 (LND RPC)
+* 8080 (LND REST API)
 
 ... from your internet router to the local IP of your RaspiBlitz and then activate unter "Services" the "DynamicDNS" option.
 
 You will be asked for your dynamic domain name such like "mynode.crabdance.org" and you can also optionally set an URL that will be called regularly to update your routers IP with the dynnamic domain service. At freedns.afraid.org this URL is called "Direct URL" under the menu "Dynamic DNS" once you added one.
+
+*NOTE: DynamicDNS just works if you can forward ports on your router and you have a temporary public IP address (your ISP is not running you behind a NAT - like on most mobile connections). Another solution to make your ports reachable from the public internet is to use reverse ssh tunneling - see FAQ on ['How to setup port-forwarding with a SSH tunnel?'](FAQ.md#how-to-setup-port-forwarding-with-a-ssh-tunnel)*
 
 ##### Run behind TOR
 

@@ -4,19 +4,37 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+justLocal=1
+
+# if dynDomain is set connect from outside is possible (no notice)
+if [ ${#dynDomain} -gt 0 ]; then
+  justLocal=0
+fi
+
+# if sshtunnel to 10009/8080 then outside reach is possible (no notice)
+isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
+if [ ${isForwarded} -gt 0 ]; then
+  justLocal=0
+fi
+isForwarded=$(echo ${sshtunnel} | grep -c "8080<")
+if [ ${isForwarded} -gt 0 ]; then
+  justLocal=0
+fi
+
 # check if dynamic domain is set
-if [ ${#dynDomain} -eq 0 ]; then
+if [ ${justLocal} -eq 1 ]; then
   dialog --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
 also from outside your local network you need to 
-activate 'Services' -> 'DynamicDNS' FIRST. 
+activate 'Services' -> 'DynamicDNS' FIRST.
+Or use SSH tunnel forwarding for port 10009.
 
 For more details see chapter in GitHub README 
-'Public Domain with DynamicDNS'
+on the service 'DynamicDNS'
 https://github.com/rootzoll/raspiblitz
 
 Do you JUST want to connect with your mobile
 when your are on the same LOCAL NETWORK?
-" 14 54
+" 15 54
   response=$?
   case $response in
     1) exit ;;
