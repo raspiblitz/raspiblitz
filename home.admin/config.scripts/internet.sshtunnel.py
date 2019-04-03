@@ -156,8 +156,8 @@ if sys.argv[1] == "on":
         serverdomain=ssh_server.split("@")[1]
         # make sure serverdomain is set as tls alias 
         print("Setting server as tls alias and generating new certs")
-        subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf")
-        subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%$/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain))
+        subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf", shell=True)
+        subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%$/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain), shell=True)
         subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
