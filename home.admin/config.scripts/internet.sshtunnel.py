@@ -47,6 +47,7 @@ if len(LNDPORT) == 0:
 # on restore other external scripts dont need calling
 #
 
+forwardingLND = False
 restoringOnUpdate = False
 if sys.argv[1] == "restore":
     print("internet.sshtunnel.py -> running with restore flag")
@@ -99,6 +100,7 @@ if sys.argv[1] == "on":
             print("[INTERNAL-PORT]<[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
         if port_internal == LNDPORT:
+            forwardingLND = True
             if port_internal != port_external:
                 print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
                 print("Try again by using the same port. If you cant change the external port, change local LND port with: /home/config.scripts/lnd.setport.sh")
@@ -152,7 +154,13 @@ if sys.argv[1] == "on":
     file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
     if restoringOnUpdate == False:
         serverdomain=ssh_server.split("@")[1]
-        file_content = re.sub("lndAddress=.*", "lndAddress='%s'" % (serverdomain), file_content)
+        # setting server on DynDomain for all other ports
+        print("Setting server domain for service dyndomain")
+        subprocess.call("sudo /home/admin/config.scripts/internet.dyndomain.sh on %s" % (serverdomain), shell=True)
+        if forwardingLND:
+            # setting server explicitly on LND if LND port is forwarded
+            print("Setting server domain for LND Port")
+            subprocess.call("sudo /home/admin/config.scripts/lnd.setadress.sh on %s" % (serverdomain), shell=True)
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
@@ -198,11 +206,14 @@ elif sys.argv[1] == "off":
     print("OK Done")
     print()
 
+    print("*** Removing LND Address")
+    subprocess.call("sudo /home/admin/config.scripts/lnd.setadress.sh off", shell=True)
+    print()
+
     print("*** Removing SSH Tunnel data from RaspiBlitz config")
     with open('/mnt/hdd/raspiblitz.conf') as f:
         file_content = f.read()
     file_content = re.sub("sshtunnel=.*", "", file_content)
-    file_content = re.sub("lndAddress=.*", "lndAddress=''", file_content)
     file_content = re.sub("\n\n", "\n", file_content)
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:

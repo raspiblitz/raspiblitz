@@ -1,13 +1,16 @@
 #!/bin/bash
 
+# INFO : Does not need to be part of update/provision, because
+# all data is already on HDD ready
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a fixed domain or IP for LND"
- echo "internet.dyndomain.sh [domain|ip|off] [?address]"
+ echo "internet.dyndomain.sh [on|off] [?address]"
  exit 1
 fi
 
-# 1. parameter [domain|ip|off]
+# 1. parameter [on|off]
 mode="$1"
 
 echo "number of args($#)"
@@ -25,8 +28,8 @@ if [ ${configExists} -eq 0 ]; then
  exit 1
 fi
 
-# FIXED DOMAIN
-if [ "${mode}" = "domain" ]; then
+# FIXED DOMAIN/IP
+if [ "${mode}" = "on" ]; then
 
   address=$2
   if [ ${#address} -eq 0 ]; then
@@ -50,24 +53,6 @@ if [ "${mode}" = "domain" ]; then
 
   # refresh TLS cert
   sudo /home/admin/config.scripts/lnd.newtlscert.sh
-
-  echo "fixedAddress is now ON"
-fi
-
-# FIXED IP
-if [ "${mode}" = "ip" ]; then
-
-  address=$2
-  if [ ${#address} -eq 0 ]; then
-    echo "missing parameter"
-    exit(1)
-  fi
-
-  echo "switching fixed LND IP ON"
-  echo "address(${address})"
-
-  # setting value in raspi blitz config
-  sudo sed -i "s/^lndAddress=.*/lndAddress='${address}'/g" /mnt/hdd/raspiblitz.conf
 
   echo "fixedAddress is now ON"
 fi
