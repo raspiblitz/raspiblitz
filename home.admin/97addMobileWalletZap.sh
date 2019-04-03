@@ -79,13 +79,30 @@ read key
 clear
 echo "*** PAIRING STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
-if [ ${#dynDomain} -eq 0 ]; then 
-  # If you drop the -i parameter, lndconnect will use the external IP. 
-  lndconnect -i
-else
-  # when dynamic domain is set
-  lndconnect --host=${dynDomain}
+# default host to local IP
+host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+# default port to 10009
+port="10009"
+
+# change host to dynDNS if set
+if [ ${#dynDomain} -gt 0 ]; then
+  host="${dynDomain}"
+  echo "port 10009 forwarding from dynDomain ${host}"
 fi
+
+# check if port 10009 is forwarded
+if [ ${#sshtunnel} -gt 0 ]; then
+  isForwarded=$(echo "${sshtunnel}" | grep -c "10009<")
+  if [ ${isForwarded} -gt 0 ]; then
+    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
+    port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | sed 's/[^0-9]//g')
+    echo "port 10009 forwarding from port ${port} from server ${host}"
+  else
+    echo "port 10009 is not part of the ssh forwarding - keep default port 10009"
+  fi
+fi
+
+lndconnect --host=${host} --port=${port}
 
 echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
 read key
