@@ -90,7 +90,8 @@ if sys.argv[1] == "on":
             sys.exit(1)
 
         # get ports
-        ports = re.sub('"','', sys.argv[i] ).split("<")
+        sys.argv[i] = re.sub('"','', sys.argv[i] )
+        ports = sys.argv[i].split("<")
         port_internal = ports[0]
         port_external = ports[1]
         if port_internal.isdigit() == False:
