@@ -42,7 +42,7 @@ These are the following steps you need to prepare (follow links for details):
 
 Variation: If you dont have a big bugdet to prefinance the part shoppings or people have already hardware they want to bring to can just buy the HHDs and SD cards and prepare them to run this scenario.
 
-## B) Bring your own Hardware
+## C) Bring your own Hardware
 
 Estimated Duration: 4-6 hours
 
@@ -72,9 +72,7 @@ Participants need at least to bring their laptops.
 
 # Running of the Workshop
 
-The basic structure of the workshop is set by the RaspiBlitz setup process. Simply you just follow that. The following parts should share some experiences and suggestions how you can optimize the time and the mentoring during this process.
-
-*Feel free to share your experience here.*
+*The basic structure of the workshop is set by the RaspiBlitz setup process. Simply you just follow that. The following parts should share some experiences and suggestions how you can optimize the time and the mentoring during this process. Feel free to share your experience here.*
 
 ## Welcome and Intro
 
@@ -112,7 +110,7 @@ Its also nice to add casual social open-end segment to the end of the workshop. 
 
 # Organisation Tasks
 
-Which of the follwoing organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:
+*Which of the follwoing organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:*
 
 ## Buy all the Hardware
 
