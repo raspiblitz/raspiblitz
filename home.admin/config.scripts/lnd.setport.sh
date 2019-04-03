@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # based on: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-465997126
+# based on: https://github.com/rootzoll/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
  echo "small config script set the port LND is running on"
@@ -61,6 +62,16 @@ sudo systemctl disable lnd
 # change port in lnd config
 echo "change port in lnd config"
 sudo sed -i "s/^listen=.*/listen=0.0.0.0:${portnumber}/g" /mnt/hdd/lnd/lnd.conf
+
+# add to raspiblitz.config (so it can survive update)
+valueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'customPortLND=')
+if [ ${valueExists} -eq 0 ]; then
+  # add as new value
+  echo "customPortLND=${portnumber}" >> /mnt/hdd/raspiblitz.conf
+else
+  # update existing value
+  sudo sed -i "s/^customPortLND=.*/customPortLND=${portnumber}/g" /mnt/hdd/raspiblitz.conf
+fi
 
 # editing service file
 echo "editing /etc/systemd/system/lnd.service"
