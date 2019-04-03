@@ -209,7 +209,7 @@ elif sys.argv[1] == "off":
     print()
 
     print("*** Removing LND Address")
-    subprocess.call("sudo /home/admin/config.scripts/lnd.setadress.sh off", shell=True)
+    subprocess.call("sudo /home/admin/config.scripts/lnd.setaddress.sh off", shell=True)
     print()
 
     print("*** Removing SSH Tunnel data from RaspiBlitz config")
