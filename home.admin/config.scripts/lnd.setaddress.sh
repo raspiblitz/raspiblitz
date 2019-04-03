@@ -34,7 +34,7 @@ if [ "${mode}" = "on" ]; then
   address=$2
   if [ ${#address} -eq 0 ]; then
     echo "missing parameter"
-    exit(1)
+    exit 1
   fi
 
   echo "switching fixed LND Domain ON"
