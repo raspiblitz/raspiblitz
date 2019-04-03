@@ -6,11 +6,11 @@
 
 ## There are 3 options provided:
 * a trusted fully prebuilt SDcard image
-* building your own SDcard from an updated DietPi image.
+* Automated building process.
 * Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
 ---
 ### Download the fully prebuilt RaspiBlitz-on-DietPi SDcard image
-* [torrent](https://github.com/openoms/raspiblitz/blob/raspiblitz-dev/dietpi/RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.torrent) 
+
 * [mega.nz link](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA)
 
 sha256sum RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img: 96ee8700f52a12fb5b13fab3fffcdcf5d364c6dd16c580d969e421cef2cd7cc2
@@ -23,35 +23,63 @@ Steps to run:
 - login with `ssh admin@at.your.raspiblitz.ip`  
 password: `raspiblitz`
 
-Using this image you can skip the rest of this guide as it is mostly about how this image was built.
+Using this image you can skip the rest of this page.
 
 The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
 
 ---
-### Download the updated DietPi image
+### The automated building process:
 
-For the Odroid HC1 / HC2 / XU3 / XU4 a v6.20.6 DietPi image with fail2ban installed is uploaded [here](
-https://mega.nz/#!AcdVBAbR!O-W3jP5LUgw7lMY8S9XcBWcKX3IhRNAAFmaYzDXIUC0).  
-sha256sum DietPi_v6.20.6_OdroidXU4-ARMv7-Stretch.img: 
-1459b91f66b9db98f3437c31231e44497b7b7dcd9146d2cc41a3da653f9a9215
+1) Download the DietPi image for the Odroid HC1 / HC2 / XU3 / XU4:   
+https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
+2) Burn it to the SD card with [Etcher](https://www.balena.io/etcher/)
 
-* Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/) and extend the rootfs partition to the size of your card with a partition manager (disks, Gparted, etc).
+3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/Automation_Custom_Script.sh)
 
-* Insert the SDcard into the Odroid.
+4) Copy them to the /boot directory of the DietPi SDcard
 
-* Power up and continue with [running the RaspiBlitz build_sdcard.sh script](#Run-the-RaspiBlitz-build_sdcard.sh-script)
+    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/dev/dietpi#excerpts-from-the-customized-dietpitxt))
+
+    [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
+    (Optionally open the file with a text editor and uncomment (remove the `#` from the front of) the line with the branch you want to build the SDcard from.) 
+
+5) Assemble and boot the Odroid
+
+    Insert the SDcard, connect the HDD, network cable and power supply to boot.
+    
+    The automated setup will continue and the Odroid will restart at least twice during the process. 
+
+    To follow the logs during the automated building process login with `root` and press CTRL+C.  
+    `tail -n1000 -f /tmp/DietPi-Update/dietpi-update.log` - follow the dietpi-update process  
+    `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow the output of the build_sdcard.sh  
+
+    Starting from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495. This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com.
+    To get past it:
+     * Log in with root after the first restart (when the loop is ongoing - without any output to the HDMI screen)
+    * CTRL+C, run `dietpi-update` and update
+    * `reboot` once finished
+    * from then the Automation_Custom_Script.sh is carrying on
+
+
+6) When the setup is finished log in as `admin`:  
+`ssh admin@[IP-OF-RASPIBLITZ]`  
+password: `raspiblitz`
+
+    The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
 
 ---
 
 ### Build your own DietPi image:
 
 Watch out this is an ardous process. 
-Updating from a v6.14 DietPi image is causing a bootloop under some circumstances. Will be sorted once the current, >6.2 version is uploaded for the Odroids.  
+Updating from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495.
+This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com
 
 * For the Odroid HC1 / HC2 / XU3 / XU4 the start is this image:   
 https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z  
 * Burn it to the SD with [Etcher](https://www.balena.io/etcher/)
 
+* Insert the SD card, connect the HDD, the network cable and power supply to boot up the Odroid: 
 
 * In the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
@@ -109,8 +137,8 @@ Changing the SSH server will change the SSH keys again. To clear:
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
-* Run the forked version of @openoms:  
-`wget https://raw.githubusercontent.com/openoms/raspiblitz/raspiblitz-dev/build_sdcard.sh && sudo bash build_sdcard.sh raspiblitz-dev openoms`  
+* Example: run from the dev branch @rootzoll:  
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev rootzoll`  
 This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
 
 * Restart when done and log back in now as `admin`:  
