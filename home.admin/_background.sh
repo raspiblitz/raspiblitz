@@ -87,6 +87,10 @@ do
   # every 15min - not too often
   # because its a ping to external service
   recheckPublicIP=$((($counter % 900)+1))
+  # prevent when lndAddress is set
+  if [ ${#lndAddress} -gt 3 ]; then
+    recheckPublicIP=0
+  fi
   updateDynDomain=0
   if [ ${recheckPublicIP} -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
@@ -120,8 +124,8 @@ do
 
         # 1) update config file
         echo "update config value"
-        sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
-        publicIP=${freshPublicIP}
+        sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
+        publicIP='${freshPublicIP}'
 
         # 2) only restart LND if dynDNS is activated
         # because this signals that user wants "public node"

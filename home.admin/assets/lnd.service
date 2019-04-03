@@ -10,7 +10,7 @@ After=bitcoind.service
 
 [Service]
 EnvironmentFile=/mnt/hdd/raspiblitz.conf
-ExecStart=/usr/local/bin/lnd --externalip=${publicIP}
+ExecStart=/usr/local/bin/lnd --externalip=${publicIP}:{lndPort}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin

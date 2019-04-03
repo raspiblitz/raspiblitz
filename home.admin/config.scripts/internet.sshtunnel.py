@@ -37,6 +37,11 @@ StandardOutput=journal
 WantedBy=multi-user.target
 """
 
+# get LND port form lnd.conf
+LNDPORT = subprocess.getoutput("sudo cat /mnt/hdd/lnd/lnd.conf | grep '^listen=*' | cut -f2 -d':'")
+if len(LNDPORT) == 0:
+    LNDPORT="9735"
+
 #
 # RESTORE = SWITCHING ON with restore flag on
 # on restore other external scripts dont need calling
@@ -93,6 +98,11 @@ if sys.argv[1] == "on":
         if port_external.isdigit() == False:
             print("[INTERNAL-PORT]<[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
+        if port_internal == LNDPORT:
+            if port_internal != port_external:
+                print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
+                print("Try again by using the same port. If you cant change the external port, change local LND port with: /home/config.scripts/lnd.setport.sh")
+                sys.exit(1)
 
         ssh_ports = ssh_ports + "\"%s\" " % (sys.argv[i])
         additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external,port_internal)
@@ -140,6 +150,9 @@ if sys.argv[1] == "on":
     if file_content.count("sshtunnel=") == 0:
         file_content = file_content+"\nsshtunnel=''"
     file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
+    if restoringOnUpdate == False:
+        serverdomain=ssh_server.split("@")[1]
+        file_content = re.sub("lndAddress=.*", "lndAddress='%s'" % (serverdomain), file_content)
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
@@ -189,6 +202,7 @@ elif sys.argv[1] == "off":
     with open('/mnt/hdd/raspiblitz.conf') as f:
         file_content = f.read()
     file_content = re.sub("sshtunnel=.*", "", file_content)
+    file_content = re.sub("lndAddress=.*", "lndAddress=''", file_content)
     file_content = re.sub("\n\n", "\n", file_content)
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
