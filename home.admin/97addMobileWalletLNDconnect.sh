@@ -3,7 +3,14 @@
 # get service port from argument
 servicePort="10009"
 if [ $# -gt 0 ]; then
-  servicePort="$1"
+  if [ "$1" == "RPC" ]; then
+    echo "running RPC mode"
+    servicePort="10009"
+  fi
+  if [ "$1" == "REST" ]; then
+    echo "running REST mode"
+    servicePort="8080"
+  fi
 fi
 
 # load raspiblitz config data
@@ -79,7 +86,11 @@ if [ ${#sshtunnel} -gt 0 ]; then
   if [ ${isForwarded} -gt 0 ]; then
     local=0
     host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
-    port=$(echo $sshtunnel | awk "{split($0,a,\"${servicePort}<\"); print a[2]}" | cut -d ' ' -f1 | sed 's/[^0-9]//g')
+    if [ "${servicePort}" == "1009" ]; then
+      port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
+    elif [ "${servicePort}" == "8080" ]; then
+      port=$(echo $sshtunnel | awk '{split($0,a,"8080<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
+    fi
     echo "port ${servicePort} forwarding from port ${port} from server ${host}"
   else
     echo "port ${servicePort} is not part of the ssh forwarding - keep default port ${servicePort}"

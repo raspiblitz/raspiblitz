@@ -111,7 +111,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 
-  	./97addMobileWalletLNDconnect.sh 10009
+  	./97addMobileWalletLNDconnect.sh RPC
     exit 1;
     ;;
   ZEUS_IOS)
@@ -130,7 +130,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 	
-  	./97addMobileWalletLNDconnect.sh 8080
+  	./97addMobileWalletLNDconnect.sh REST
   	exit 1;
   	;;
   ZEUS_ANDROID)
@@ -147,7 +147,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 
-  	./97addMobileWalletLNDconnect.sh 8080
+  	./97addMobileWalletLNDconnect.sh REST
   	exit 1;
   	;;
 esac
