@@ -98,19 +98,18 @@ if [ ${#sshtunnel} -gt 0 ]; then
   fi
 fi
 
-# write qr code data to text file
-#echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
+# write qr code data to an image
 lndconnect --host=${host} --port=${port} --image
 
-# display qr code on LCD
+# display qr code image on LCD
 ./XXdisplayLCD.sh lndconnect-qr.png
 
-# show pairing info
+# show pairing info dialog
 msg=""
 if [ ${local} -eq 1 ]; then 
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
-msg="${msg}When you start the App choose to connect to your own node.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
+msg="${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "continue" \
