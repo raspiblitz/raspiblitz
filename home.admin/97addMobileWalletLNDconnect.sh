@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# get service port from argument
+servicePort="10009"
+if [ $# -gt 0 ]; then
+  servicePort="$1"
+fi
+
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -55,32 +61,31 @@ make
 cd
 sleep 3
 
-# default host to local IP and port 10009
+# default host to local IP and port
 local=1
 host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-port="10009"
+port="${servicePort}"
 
 # change host to dynDNS if set
 if [ ${#dynDomain} -gt 0 ]; then
   local=0
   host="${dynDomain}"
-  echo "port 10009 forwarding from dynDomain ${host}"
+  echo "port ${servicePort} forwarding from dynDomain ${host}"
 fi
 
-# check if port 10009 is forwarded
+# check if local service port is forwarded
 if [ ${#sshtunnel} -gt 0 ]; then
-  isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
+  isForwarded=$(echo ${sshtunnel} | grep -c "${servicePort}<")
   if [ ${isForwarded} -gt 0 ]; then
     local=0
     host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
-    port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
-    echo "port 10009 forwarding from port ${port} from server ${host}"
+    port=$(echo $sshtunnel | awk "{split($0,a,\"${servicePort}<\"); print a[2]}" | cut -d ' ' -f1 | sed 's/[^0-9]//g')
+    echo "port ${servicePort} forwarding from port ${port} from server ${host}"
   else
-    echo "port 10009 is not part of the ssh forwarding - keep default port 10009"
+    echo "port ${servicePort} is not part of the ssh forwarding - keep default port ${servicePort}"
   fi
 fi
 
-clear
 echo "******************************"
 echo "Connect Zap Mobile Wallet"
 echo "******************************"
@@ -110,6 +115,5 @@ read key
 
 clear
 echo "If it's not working - check issues on GitHub:"
-echo "https://github.com/LN-Zap/zap-iOS/issues"
 echo "https://github.com/LN-Zap/lndconnect/issues"
 echo ""

@@ -43,9 +43,10 @@ fi
 
 # Basic Options
 OPTIONS=(ZAP "Zap Wallet (iOS)" \
-        ZEUS "Zeus Wallet (iOS/Android)"
-        SHANGO_IOS "Shango Wallet for iOS"
-        SHANGO_ANDROID "Shango Wallet for Android"
+        SHANGO_IOS "Shango Wallet (iOS)" \
+        SHANGO_ANDROID "Shango Wallet (Android)" \
+        ZEUS_IOS "Zeus Wallet (iOS)" \
+        ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 15 50 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -82,7 +83,7 @@ case $CHOICE in
 	  whiptail --title "Install Shango on your Android Phone" \
 			--yes-button "continue" \
 			--no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://play.google.com/apps/testing/com.shango" 10 60
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://play.google.com/apps/testing/com.shango\n\nEasiest way to install scan QR code on LCD with phone." 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -95,11 +96,58 @@ case $CHOICE in
     exit 1;
     ;;
   ZAP)
-  	./97addMobileWalletZap.sh
+	  echo "https://testflight.apple.com/join/P32C380R" > qr.txt
+		./XXdisplayQRlcd.sh
+	    
+	  whiptail --title "Install Testflight and Zap on your iOS device" \
+			--yes-button "continue" \
+		  --no-button "link as QR code" \
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow all instructions." 10 60
+
+	  if [ $? -eq 1 ]; then
+			/home/admin/XXdisplayQR.sh
+	  fi
+	  shred qr.txt
+	  rm -f qr.txt
+	  /home/admin/XXdisplayQRlcd_hide.sh
+
+  	./97addMobileWalletLNDconnect.sh 10009
     exit 1;
     ;;
-  ZEUS)
-  	./97addMobileWalletZeus.sh
+  ZEUS_IOS)
+	  echo "https://testflight.apple.com/join/gpVFzEHN" > qr.txt
+		./XXdisplayQRlcd.sh
+	    
+	  whiptail --title "Install Testflight and Zeus on your iOS device" \
+			--yes-button "continue" \
+		  --no-button "link as QR code" \
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/gpVFzEHN\n\nJoin testing and follow all instructions." 10 60
+
+	  if [ $? -eq 1 ]; then
+			/home/admin/XXdisplayQR.sh
+	  fi
+	  shred qr.txt
+	  rm -f qr.txt
+	  /home/admin/XXdisplayQRlcd_hide.sh
+	
+  	./97addMobileWalletLNDconnect.sh 8080
+  	exit 1;
+  	;;
+  ZEUS_ANDROID)
+		echo "market://details?id=com.zeusln.zeus" > qr.txt
+	  ./XXdisplayQRlcd.sh
+	  whiptail --title "Install Shango on your Android Phone" \
+			--yes-button "continue" \
+			--no-button "link as QR code" \
+		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone." 10 60
+	  if [ $? -eq 1 ]; then
+			/home/admin/XXdisplayQR.sh
+	  fi
+	  shred qr.txt
+	  rm -f qr.txt
+	  /home/admin/XXdisplayQRlcd_hide.sh
+
+  	./97addMobileWalletLNDconnect.sh 8080
   	exit 1;
   	;;
 esac
