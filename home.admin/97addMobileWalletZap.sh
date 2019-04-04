@@ -55,6 +55,31 @@ make
 cd
 sleep 3
 
+# default host to local IP and port 10009
+local=1
+host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+port="10009"
+
+# change host to dynDNS if set
+if [ ${#dynDomain} -gt 0 ]; then
+  local=0
+  host="${dynDomain}"
+  echo "port 10009 forwarding from dynDomain ${host}"
+fi
+
+# check if port 10009 is forwarded
+if [ ${#sshtunnel} -gt 0 ]; then
+  isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
+  if [ ${isForwarded} -gt 0 ]; then
+    local=0
+    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
+    port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
+    echo "port 10009 forwarding from port ${port} from server ${host}"
+  else
+    echo "port 10009 is not part of the ssh forwarding - keep default port 10009"
+  fi
+fi
+
 clear
 echo "******************************"
 echo "Connect Zap Mobile Wallet"
@@ -66,7 +91,7 @@ echo "1. Install the app 'TestFlight' from Apple Appstore. Open it and agree to 
 echo "2. Open on your iOS device https://github.com/LN-Zap/zap-iOS and follow 'Download the Alpha'"
 echo ""
 echo "*** PAIRING STEP 1 ***"
-if [ ${#dynDomain} -eq 0 ]; then 
+if [ ${local} -eq 1 ]; then 
   echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
 echo "During Setup of the Zap app you should get to the 'Connect Remote-Node' screen."
@@ -79,29 +104,8 @@ read key
 clear
 echo "*** PAIRING STEP 2 : Click on Scan (make whole QR code fill camera) ***"
 
-if [ ${#dynDomain} -eq 0 ]; then
-  # If you drop the -i parameter, lndconnect will use the external IP.
-  lndconnect -i
-else
-  # when dynamic domain is set
-  lndconnect --host=${dynDomain}
-fi
-
-
-platform='unknown'
-unamestr=`uname`
-if [[ "$unamestr" == 'Linux' ]]; then
-   platform='linux'
-elif [[ "$unamestr" == 'Darwin' ]]; then
-   platform='Darwin' # mac OSX
-fi
-
-if [[ $platform == 'Linux' ]]; then
-    echo "(To shrink QR code: CTRL-) Press ENTER when finished."
-elif [[ $platform == 'Darwin' ]]; then
-    echo "(To shrink QR code: CMD-) Press ENTER when finished."
-fi
-
+lndconnect --host=${host} --port=${port}
+echo "(To shrink QR code: CTRL- or CMD-) Press ENTER when finished."
 read key
 
 clear

@@ -245,6 +245,8 @@ sudo apt-get install -y vnstat
 # prepare for BTRFS data drive raid
 sudo apt-get install -y btrfs-tools
 
+# prepare for ssh reverse tunneling
+sudo apt-get install -y autossh
 
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334

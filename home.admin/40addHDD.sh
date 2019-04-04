@@ -87,7 +87,7 @@ if [ ${existsHDD} -gt 0 ]; then
               echo "WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
               freshPublicIP="${localIP}"
             fi
-            echo "publicIP=${freshPublicIP}" >> $configFile
+            echo "publicIP='${freshPublicIP}'" >> $configFile
 
           fi
 

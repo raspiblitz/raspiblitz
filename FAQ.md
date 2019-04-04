@@ -624,3 +624,62 @@ If that not works ry to ping the IP of the RaspiBlitz with `ping [IP-of-RaspiBli
 - Some Routers have `IP Isolation` switched on - not allowing to devices to connect
 
 If that all is not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+
+## How to setup port-forwarding with a SSH tunnel?
+
+To use a public server for port-forwarding thru a SSH tunnel you can use the following experimental script on the RaspiBlitz (since v1.2):
+
+`/home/admin/config.scripts/internet.sshtunnel.py`
+
+But first you need to make sure that the public server you are using is supporting SSH reverse tunneling and authentification by public authorized key. Check the `/etc/ssh/sshd_config` on the public server to contain the following settings:
+
+```
+RSAAuthentication yes
+PubkeyAuthentication yes
+GatewayPorts yes
+AllowTcpForwarding yes
+```
+
+You can add those at the end of the file, save and reboot.
+
+On the RaspiBlitz you can then setup for example to forward the gRPC port 10009 (internal port) to the port 20009 on the public server (external port) with the user = `test` and server address = `raspiblitz.com` with the following command:
+
+`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com "10009<20009"`
+
+You can even set multiple port forwardings like with:
+
+`/home/admin/config.scripts/internet.sshtunnel.py on test@raspiblitz.com "10009<20009" "8080<9090"`
+
+Please beware that after you set such a port forwarding you need to set the domain of the public server as a `DynamicDNS` name (leave update url empty) and then connect mobile wallets fresh or export again the macaroons/certs. When connecting the mobile wallets you may need to adjust ports manually after QR code scan. And if you SSH tunnel the LND node port `9735` you may also need to sun the custom LND port script and maybe also a manual set of the domain in the LND service is needed. This all is very experimental at the moment ... better integration will come in the future.
+
+To switch this SSH tunneling off again use: 
+
+`/home/admin/config.scripts/internet.sshtunnel.py off` and also deactivate the DynamicDNS again. 
+
+## How to setup just a port-forwarding user on my public server?
+
+Make sure the `/etc/ssh/sshd_config` has the following lines at the end:
+
+```
+RSAAuthentication yes
+PubkeyAuthentication yes
+GatewayPorts yes
+AllowTcpForwarding yes
+AuthorizedKeysFile  /etc/ssh/authorized_keys/%u
+```
+
+The last one stores all authorized_keys in one directory with a file per user. See https://serverfault.com/questions/313465/is-a-central-location-for-authorized-keys-a-good-idea#424659 To prepare this run:
+```
+mkdir /etc/ssh/authorized_keys
+groupadd forwardings
+```
+
+To add a forwarding user run:
+```
+useradd -g forwardings -d /home [USERNAME]
+echo "command="date" [CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]" > /etc/ssh/authorized_keys/[USERNAME]
+passwd [USERNAME]
+```
+
+The `[CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]` you get when running the `internet.sshtunnel.py` script on the RaspiBlitz (see above).
+
