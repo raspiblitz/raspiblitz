@@ -97,6 +97,7 @@ else
       echo $result
       echo
       echo "Returning to menu - OK Invoice payed."
+      /home/admin/XXdisplayQRlcd_hide.sh
       /home/admin/XXdisplayLCD.sh /home/admin/raspiblitz/pictures/ok.png
       sleep 2
       break
