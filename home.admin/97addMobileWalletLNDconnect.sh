@@ -97,34 +97,33 @@ if [ ${#sshtunnel} -gt 0 ]; then
   fi
 fi
 
-echo "******************************"
-echo "Connect Zap Mobile Wallet"
-echo "******************************"
-echo ""
-echo "GETTING THE APP"
-echo "At the moment this app is in closed beta testing and the source code has not been published yet."
-echo "1. Install the app 'TestFlight' from Apple Appstore. Open it and agree to all terms of services."
-echo "2. Open on your iOS device https://github.com/LN-Zap/zap-iOS and follow 'Download the Alpha'"
-echo ""
-echo "*** PAIRING STEP 1 ***"
+# write qr code data to text file
+#echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
+lndconnect --host=${host} --port=${port} --image qr.png
+
+# display qr code on LCD
+./XXdisplayLCD.sh qr.png
+
+# show pairing info
+msg=""
 if [ ${local} -eq 1 ]; then 
-  echo "Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
+  msg="Make sure you are on the same local network (WLAN same as LAN).\n\n"
 fi
-echo "During Setup of the Zap app you should get to the 'Connect Remote-Node' screen."
-echo ""
-echo "---> Click on Scan"
-echo "Make the this terminal as big as possible - fullscreen would be best."
-echo "Then PRESS ENTER here in the terminal to generare the QR code and scan it with the app."
-read key
+msg="${msg}When you start the App choose to connect to your own node.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
+whiptail --backtitle "Connecting Mobile Wallet" \
+	 --title "Pairing by QR code" \
+	 --yes-button "continue" \
+	 --no-button "show QR code" \
+	 --yesno "${msg}" 20 65
+if [ $? -eq 1 ]; then
+  lndconnect --host=${host} --port=${port}
+  echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
+  read key
+fi
 
-clear
-echo "*** PAIRING STEP 2 : Click on Scan (make whole QR code fill camera) ***"
-
-lndconnect --host=${host} --port=${port}
-echo "(To shrink QR code: CTRL- or CMD-) Press ENTER when finished."
-read key
-
-clear
-echo "If it's not working - check issues on GitHub:"
-echo "https://github.com/LN-Zap/lndconnect/issues"
-echo ""
+# clean up
+./XXdisplayQRlcd_hide.sh
+shred qr.png 2> /dev/null
+rm -f qr.png 2> /dev/null
+shred qr.txt 2> /dev/null
+rm -f qr.txt 2> /dev/null
