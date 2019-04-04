@@ -65,7 +65,7 @@ case $CHOICE in
 	  whiptail --title "Install Testflight and Shango on your iOS device" \
 			--yes-button "continue" \
 		  --no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/WwCjFnS8\n\nJoin testing and follow all instructions." 10 60
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/WwCjFnS8\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -83,7 +83,7 @@ case $CHOICE in
 	  whiptail --title "Install Shango on your Android Phone" \
 			--yes-button "continue" \
 			--no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://play.google.com/apps/testing/com.shango\n\nEasiest way to install scan QR code on LCD with phone." 10 60
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://play.google.com/apps/testing/com.shango\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue" 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -102,7 +102,7 @@ case $CHOICE in
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
 			--yes-button "continue" \
 		  --no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow all instructions." 10 60
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -121,7 +121,7 @@ case $CHOICE in
 	  whiptail --title "Install Testflight and Zeus on your iOS device" \
 			--yes-button "continue" \
 		  --no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/gpVFzEHN\n\nJoin testing and follow all instructions." 10 60
+		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/gpVFzEHN\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -139,7 +139,7 @@ case $CHOICE in
 	  whiptail --title "Install Shango on your Android Phone" \
 			--yes-button "continue" \
 			--no-button "link as QR code" \
-		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone." 10 60
+		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
 	  fi
