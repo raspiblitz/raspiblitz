@@ -130,7 +130,7 @@ shred qr.txt 2> /dev/null
 rm -f qr.txt 2> /dev/null
 
 echo "------------------------------"
-echo "If was not working:"
+echo "If the connection was not working:"
 if [ ${#dynDomain} -gt 0 ]; then
   echo "- Make sure that your router is forwarding port ${port} to the Raspiblitz with IP ${localIP}"
 fi
