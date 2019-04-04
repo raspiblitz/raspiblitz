@@ -99,10 +99,10 @@ fi
 
 # write qr code data to text file
 #echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
-lndconnect --host=${host} --port=${port} --image qr.png
+lndconnect --host=${host} --port=${port} --image
 
 # display qr code on LCD
-./XXdisplayLCD.sh qr.png
+./XXdisplayLCD.sh lndconnect-qr.png
 
 # show pairing info
 msg=""
@@ -123,7 +123,7 @@ fi
 
 # clean up
 ./XXdisplayQRlcd_hide.sh
-shred qr.png 2> /dev/null
-rm -f qr.png 2> /dev/null
+shred lndconnect-qr.png 2> /dev/null
+rm -f lndconnect-qr.png 2> /dev/null
 shred qr.txt 2> /dev/null
 rm -f qr.txt 2> /dev/null
