@@ -91,14 +91,24 @@ else
     do
 
     result=$(lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash})
-    echo $result
+    wasPayed=$(echo $result | grep -c '"settled": true')
+    if [ ${wasPayed} -gt 0 ]; then
+      echo 
+      echo $result
+      echo
+      echo "Returning to menu - OK Invoice payed."
+      break
+    fi
  
     # wait 2 seconds for key input
     read -n 1 -t 2 keyPressed
 
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
-      echo "Returning to menu - invoice is still valid."
+      echo 
+      echo $result
+      echo
+      echo "Returning to menu - invoice was not payed yet."
       break
     fi
 
@@ -109,3 +119,5 @@ else
   rm -f qr.txt
 
 fi
+
+{ "memo": "", "receipt": null, "r_preimage": "D99HHUz2sPaRv/6CEvO/R7vbOJ0n4UTfwWrx5AiDSKk=", "r_hash": "XSvsBs5Q9qv26ui1Iwe5vNuTzGNaYCE5HR1rJ3tQ4Fo=", "value": "1000", "settled": false, "creation_date": "1554346721", "settle_date": "0", "payment_request": "lnbc10u1pw22uhppp5t547cpkw2rm2hah2az6jxpaehnde8nrrtfszzwgar44jw76supdqdqqcqzys3pjs0jf6fk59n5kcjn4y0lswasjkpktxad8wteqah6u59gxpkx6xyhqurqsg79zgwxx9hgrkxqvdy4f2rnj46mqa9686eh6lsz7s86gqt8qx56", "description_hash": null, "expiry": "3600", "fallback_addr": "", "cltv_expiry": "144", "route_hints": [ ], "private": false, "add_index": "2", "settle_index": "0", "amt_paid": "0", "amt_paid_sat": "0", "amt_paid_msat": "0" }
