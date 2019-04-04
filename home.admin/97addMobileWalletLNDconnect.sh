@@ -70,7 +70,8 @@ sleep 3
 
 # default host to local IP and port
 local=1
-host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+host="${localIP}"
 port="${servicePort}"
 
 # change host to dynDNS if set
@@ -127,3 +128,12 @@ shred lndconnect-qr.png 2> /dev/null
 rm -f lndconnect-qr.png 2> /dev/null
 shred qr.txt 2> /dev/null
 rm -f qr.txt 2> /dev/null
+
+echo "------------------------------"
+echo "If was not working:"
+if [ ${#dynDomain} -gt 0 ]; then
+  echo "- Make sure that your router is forwarding port ${port} to the Raspiblitz with IP ${localIP}"
+fi
+echo "- check issues: https://github.com/LN-Zap/lndconnect/issues"
+echo "- check issues: https://github.com/rootzoll/raspiblitz/issues"
+echo ""
