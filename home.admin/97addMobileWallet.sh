@@ -78,7 +78,8 @@ case $CHOICE in
 	    exit 1;
 	    ;;
 	SHANGO_ANDROID)
-	    echo "https://play.google.com/apps/testing/com.shango" > qr.txt
+	    #echo "https://play.google.com/apps/testing/com.shango" > qr.txt
+			echo "market://details?id=com.shango" > qr.txt
 	    ./XXdisplayQRlcd.sh
 	    whiptail --title "Install Shango on your Android Phone" \
 		     --yes-button "show link as QR" \
