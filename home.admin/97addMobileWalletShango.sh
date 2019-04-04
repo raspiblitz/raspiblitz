@@ -1,10 +1,9 @@
 #!/bin/bash
+clear
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
-
-clear
 
 # default host to local IP & port 10009
 host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -31,45 +30,33 @@ fi
 # write qr code data to text file
 echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
 
-# display qr code
+# display qr code on LCD
 ./XXdisplayQRlcd.sh
 
-#clear
-#echo "******************************"
-#echo "Connect Shango Mobile Wallet"
-#echo "******************************"
-#echo ""
-#echo "GETTING THE APP"
-#echo "At the moment this app is in public beta testing:"
-#echo "iOS: Read https://testflight.apple.com/join/WwCjFnS8 (open on device)"
-#echo "Android: https://play.google.com/apps/testing/com.shango (open on device)"
-#echo ""
-#echo "*** STEP 1 ***"
-
+# show pairing info
+clear
 msg=""
 if [ ${#dynDomain} -eq 0 ]; then 
   msg="Once you have the app is running make sure you are on the same local network (WLAN same as LAN)."
 fi
-msg="${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED' \n\n (Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR> to see it in this window."
-
+msg="${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'\n\n(Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
 whiptail --backtitle "Connecting Shango Mobile Wallet" \
 	 --title "Setup Shango Step 1" \
-	 --yes-button "show QR" \
-	 --no-button "continue" \
+	 --yes-button "continue" \
+	 --no-button "show QR code" \
 	 --yesno "${msg}" 20 65
-
-if [ $? -eq 0 ]; then
+if [ $? -eq 1 ]; then
     /home/admin/XXdisplayQR.sh
 fi
-
-shred qr.txt
-rm -f qr.txt
-
-whiptail --backtitle "Connecting Shango Mobile Wallet" \
-	 --title "Press Connect on Shango" \
-	 --msgbox "Now press 'Connect' within the Shango Wallet.\n\nIf its not working - check issues on GitHub:\n\nhttps://github.com/neogeno/shango-lightning-wallet/issues" 15 65
 
 # clean up
 ./XXdisplayQRlcd_hide.sh
 shred qr.png 2> /dev/null
-rm -f qr.png
+rm -f qr.png 2> /dev/null
+shred qr.txt 2> /dev/null
+rm -f qr.txt 2> /dev/null
+
+# follow up dialog
+whiptail --backtitle "Connecting Shango Mobile Wallet" \
+	 --title "Press Connect on Shango" \
+	 --msgbox "Now press 'Connect' within the Shango Wallet.\n\nIf its not working - check issues on GitHub:\n\nhttps://github.com/neogeno/shango-lightning-wallet/issues" 15 65
