@@ -108,7 +108,7 @@ lndconnect --host=${host} --port=${port} --image
 # show pairing info
 msg=""
 if [ ${local} -eq 1 ]; then 
-  msg="Make sure you are on the same local network (WLAN same as LAN).\n\n"
+  msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
 msg="${msg}When you start the App choose to connect to your own node.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
 whiptail --backtitle "Connecting Mobile Wallet" \
@@ -133,6 +133,9 @@ echo "------------------------------"
 echo "If was not working:"
 if [ ${#dynDomain} -gt 0 ]; then
   echo "- Make sure that your router is forwarding port ${port} to the Raspiblitz with IP ${localIP}"
+fi
+if [ ${local} -eq 1 ]; then
+  echo "- Check that your WIFI devices can talk to the LAN devices on your router (deactivate IP isolation or guest mode)."
 fi
 echo "- check issues: https://github.com/LN-Zap/lndconnect/issues"
 echo "- check issues: https://github.com/rootzoll/raspiblitz/issues"
