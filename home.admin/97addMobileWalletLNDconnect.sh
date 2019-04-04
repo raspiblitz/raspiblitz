@@ -86,9 +86,9 @@ if [ ${#sshtunnel} -gt 0 ]; then
   if [ ${isForwarded} -gt 0 ]; then
     local=0
     host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
-    if [ "${servicePort}" = "1009" ]; then
+    if [ "${servicePort}" == "10009" ]; then
       port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
-    elif [ "${servicePort}" = "8080" ]; then
+    elif [ "${servicePort}" == "8080" ]; then
       port=$(echo $sshtunnel | awk '{split($0,a,"8080<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
     fi
     echo "port ${servicePort} forwarding from port ${port} from server ${host}"
