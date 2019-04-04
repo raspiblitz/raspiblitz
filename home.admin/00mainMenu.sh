@@ -439,8 +439,6 @@ case $CHOICE in
             ;;
         FUNDING)
             ./BBfundWallet.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ./00mainMenu.sh
             ;;
         CASHOUT)

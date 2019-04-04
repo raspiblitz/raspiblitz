@@ -15,6 +15,9 @@ fi
 chainOutSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": false' -c)
 if [ ${chainOutSync} -eq 1 ]; then
   echo "FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+  echo ""
+  echo "PRESS ENTER to return to menu"
+  read key
   exit 1
 fi
 
@@ -29,6 +32,8 @@ echo "$result"
 if [ ${#result} -eq 0 ]; then
   echo "Empty result - sorry something went wrong - thats unusual."
   echo ""
+  echo "PRESS ENTER to return to menu"
+  read key
   exit 1
 fi
  
