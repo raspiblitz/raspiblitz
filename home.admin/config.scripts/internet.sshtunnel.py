@@ -39,8 +39,11 @@ WantedBy=multi-user.target
 
 # get LND port form lnd.conf
 LNDPORT = subprocess.getoutput("sudo cat /mnt/hdd/lnd/lnd.conf | grep '^listen=*' | cut -f2 -d':'")
+print(len(LNDPORT))
+print(LNDPORT)
 if len(LNDPORT) == 0:
     LNDPORT="9735"
+print(LNDPORT)
 
 #
 # RESTORE = SWITCHING ON with restore flag on
@@ -101,6 +104,7 @@ if sys.argv[1] == "on":
             print("[INTERNAL-PORT]<[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
         if port_internal == LNDPORT:
+            print("Detected LND Port Forwaring")
             forwardingLND = True
             if port_internal != port_external:
                 print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
