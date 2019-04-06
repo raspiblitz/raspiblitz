@@ -612,6 +612,11 @@ Just replace the file `/home/admin/raspiblitz/pictures/logoraspiblitz.png` with 
 
 NOTE: On updates this change will get lost and you might need to redo it.
 
+## How can I update LND or bitcoind even before the next RaspiBlitz update?
+
+Try updating before a official RaspiBlitz on your very own risk - you can find some info about that here:
+https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_faq.md#how-to-upgrade-bitcoin-core
+
 ## I cannot connect per SSH to my RaspiBlitz. What to do?
 
 - Check the command again with how its on the display  - do you have it typed in correctly?
