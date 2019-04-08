@@ -66,7 +66,7 @@ if [ "${mode}" = "off" ]; then
   sudo systemctl stop lnd 2>/dev/null
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lndAddress=.*/lndAddress=/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^lndAddress=.*/lndAddress=''/g" /mnt/hdd/raspiblitz.conf
 
   echo "changing lnd.conf"
 

@@ -25,7 +25,9 @@ Instructions on how to update see FAQ info below.
 
 For update you dont need to close any channels, remove funding or download the blockchain again.
 
-Simply [Ddwnload the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an sd card writer ready. Then login into your RaspiBlitz with SSH and:
+Here is a YouTube video tutorial on how to update: https://www.youtube.com/watch?v=Xvn0WQfHUdI
+
+Simply [Download the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an sd card writer ready. Then login into your RaspiBlitz with SSH and:
 
 - main menu > OFF
 - remove power

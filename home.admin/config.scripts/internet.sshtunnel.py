@@ -39,11 +39,8 @@ WantedBy=multi-user.target
 
 # get LND port form lnd.conf
 LNDPORT = subprocess.getoutput("sudo cat /mnt/hdd/lnd/lnd.conf | grep '^listen=*' | cut -f2 -d':'")
-print(len(LNDPORT))
-print(LNDPORT)
 if len(LNDPORT) == 0:
     LNDPORT="9735"
-print(LNDPORT)
 
 #
 # RESTORE = SWITCHING ON with restore flag on
@@ -168,6 +165,8 @@ if sys.argv[1] == "on":
             # setting server explicitly on LND if LND port is forwarded
             print("Setting server domain for LND Port")
             subprocess.call("sudo /home/admin/config.scripts/lnd.setaddress.sh on %s" % (serverdomain), shell=True)
+        else:
+            print("No need to set fixed domain forwarding")
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
