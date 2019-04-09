@@ -27,7 +27,7 @@ echo "*** Torrent Files ***"
 # WITHOUT THE '.torrent' ENDING
 
 bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
-bitcoinUpdate="raspiblitz-bitcoin1-2019-01-16-update"
+bitcoinUpdate="raspiblitz-bitcoin1-2019-04-09-update"
 
 litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
 litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
