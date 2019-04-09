@@ -40,9 +40,9 @@ The RaspiBlitz is build from the following parts:
 * LCD-Display
 * Micro SD-Card (min 16GB - go for quality)
 * Powersupply >=3A (choose big & stable output)
-* Cheap Casing
+* Case with Heatsink
 
-**All together under 150 USD / 130 EUR (depending on country & shop)**
+**All together under 160 USD / 140 EUR (depending on country & shop)**
 
 ## Amazon Shopping Lists
 
