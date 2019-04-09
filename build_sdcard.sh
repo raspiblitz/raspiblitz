@@ -305,11 +305,11 @@ echo "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.17.0.1"
+bitcoinVersion="0.17.1"
 
 # needed to make sure download is not changed
 # calulate with sha256sum and also check with SHA256SUMS.asc
-bitcoinSHA256="1b9cdf29a9eada239e26bf4471c432389c2f2784362fc8ef0267ba7f48602292"
+bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -366,9 +366,10 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 fi
 
 # correct versions for install if needed
+# just if an small update shows a different formatted version number
 if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
  bitcoinVersion="0.17.0"
-fi 
+fi
 
 # install
 sudo -u admin tar -xvf ${binaryName}

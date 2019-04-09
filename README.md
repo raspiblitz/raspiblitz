@@ -1,7 +1,7 @@
 # RaspiBlitz
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.1 with lnd 0.5.2-beta and bitcoin 0.17.0.1 or litecoin 0.16.3.`
+`Version 1.1 with lnd 0.6-beta-RC3 and bitcoin 0.17.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
