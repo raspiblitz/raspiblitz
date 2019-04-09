@@ -252,6 +252,9 @@ sudo apt-get install -y autossh
 # see https://github.com/rootzoll/raspiblitz/pull/334
 sudo apt-get install -y fbi
 
+# prepare for powertest
+sudo apt install -y sysbench
+
 # prepare dor display service
 # see https://github.com/rootzoll/raspiblitz/issues/88#issuecomment-471342311
 sudo apt-get install -y redis-server
