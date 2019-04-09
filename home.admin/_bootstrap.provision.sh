@@ -179,6 +179,14 @@ else
   echo "Was not able to get LND port from config." >> ${logFile}
 fi
 
+# DNS Server
+if [ ${#dnsServer} -gt 0 ]; then
+    echo "Provisioning DNS Server - Setting DNS Server" >> ${logFile}
+    sudo /home/admin/config.scripts/internet.dns.sh ${dnsServer} >> ${logFile} 2>&1
+else
+    echo "Provisioning DNS Server - keep default" >> ${logFile}
+fi
+
 # ROOT SSH KEYS
 # check if a backup on HDD exists and when retsore back
 backupRootSSH=$(sudo ls /mnt/hdd/ssh/root_backup 2>/dev/null | grep -c "id_rsa")
