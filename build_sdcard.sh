@@ -419,12 +419,12 @@ lndVersion="0.6-beta-rc3"
 lndSHA256="811a5fde2f804caaa7334d30d31666798420f1a353bb91ae84d897c2fd2432a0"
 
 # olaoluwa
-#PGPpkeys = "https://keybase.io/bitconner/pgp_keys.asc"
-#PGPcheck = "BD599672C804AF2770869A048B80CD2BB8BD8132"
+#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+#PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # bitconner 
-PGPpkeys = "https://keybase.io/bitconner/pgp_keys.asc"
-PGPcheck = "9C8D61868A7C492003B2744EE7D737B67FA592C7"
+PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
 cd /home/admin/download
@@ -432,7 +432,7 @@ binaryName="lnd-linux-armv7-v${lndVersion}.tar.gz"
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -O pgp_keys.asc ${PGPpkeys}
+sudo -u admin wget -O /home/admin/download/pgp_keys.asc ${PGPpkeys}
 
 # check binary is was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
@@ -443,7 +443,7 @@ fi
 
 # check gpg finger print
 gpg ./pgp_keys.asc
-fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
+fingerprint=$(sudo -u admin gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
