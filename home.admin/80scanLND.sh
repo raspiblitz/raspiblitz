@@ -35,8 +35,16 @@ if [ ${#item} -eq 0 ]; then
   item="?" 
 
   # check if offline
-  # https://en.wikipedia.org/wiki/1.1.1.1
   online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+  fi
+
 fi
 
 # get total number of blocks
