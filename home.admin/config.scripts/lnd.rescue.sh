@@ -47,7 +47,7 @@ if [ ${mode} = "backup" ]; then
   echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
   echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
   echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
-  echo "anymore bacause it cointains outdated channel data and can lead to loss of channel funds."
+  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 
