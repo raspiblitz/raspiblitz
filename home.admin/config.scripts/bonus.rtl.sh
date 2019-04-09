@@ -41,7 +41,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # check if nodeJS was installed 
     nodeJSInstalled=$(node -v | grep -c "v11.")
-    if [ nodeJSInstalled -eq 0 ]; then
+    if [ ${nodeJSInstalled} -eq 0 ]; then
       echo "FAIL - Was not able to install nodeJS 11"
       echo "ABORT - RTL install"
       exit 1
