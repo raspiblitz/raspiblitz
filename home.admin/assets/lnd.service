@@ -9,7 +9,7 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-EnvironmentFile=
+EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStart=/usr/local/bin/lnd --externalip=${publicIP}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
@@ -20,6 +20,8 @@ KillMode=process
 TimeoutSec=180
 Restart=always
 RestartSec=60
+StandardOutput=null
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

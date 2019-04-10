@@ -2,14 +2,15 @@
 echo ""
 
 ## get basic info
-source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 
 
 # verify that bitcoin is running
 echo "*** Checking ${network} ***"
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   #doublecheck
-  bitcoinRunning=$(${network}-cli getblockchaininfo  | grep -c verificationprogress)
+  bitcoinRunning=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo  | grep -c verificationprogress)
 fi
 if [ ${bitcoinRunning} -eq 0 ]; then
   # HDD is not available yet
@@ -27,7 +28,7 @@ echo "*** Wait until ${network}d is ready ..."
 while [ ${chainIsReady} -eq 0 ]
   do
     loopCount=$(($loopCount +1))
-    result=$(${network}-cli getblockchaininfo 2>error.out)
+    result=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>error.out)
     error=`cat error.out`
     rm error.out
     if [ ${#error} -gt 0 ]; then
@@ -75,7 +76,7 @@ echo ""
 
 ###### Start LND
 echo "*** Starting LND ***"
-lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
+lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
   sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
@@ -83,15 +84,15 @@ if [ ${lndRunning} -eq 0 ]; then
   sudo chmod +x /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
   sudo systemctl start lnd
-  echo "Starting LND ... give 120 seconds to init."
-  sleep 120
+  echo ""
+  dialog --pause "  Starting LND - please wait .." 8 58 120
 fi
 
 ###### Check LND is running
 lndRunning=0
 while [ ${lndRunning} -eq 0 ]
 do
-  lndRunning=$(systemctl status lnd.service | grep -c running)
+  lndRunning=$(sudo systemctl status lnd.service | grep -c running)
   if [ ${lndRunning} -eq 0 ]; then
     date +%s
     echo "LND not ready yet ... waiting another 60 seconds."
@@ -157,8 +158,7 @@ Press OK and follow the 'Helping Instructions'.
   sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
 fi
 
-echo "--> lets wait 60 seconds for LND to get ready"
-sleep 60
+dialog --pause "  Waiting for LND - please wait .." 8 58 60
 
 ###### Copy LND macaroons to admin
 echo ""
@@ -205,40 +205,6 @@ if [ ${locked} -gt 0 ]; then
 else
   echo "OK - Wallet is already unlocked"
 fi
-
-#### Show Lighthning Sync
-#echo ""
-#echo "*** Check LND Sync ***"
-#item=0
-#lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-#if [ ${lndSyncing} -eq 0 ]; then
-#  echo "OK - wait for LND to be synced"
-#  while :
-#    do
-#      
-#      # show sync status
-#      ./80scanLND.sh
-#      sleep 15
-#      
-#      # break loop when synced
-#      lndSyncing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-#      if [ ${lndSyncing} -eq 1 ]; then
-#        break
-#      fi
-#
-#      # break loop when wallet is locked
-#      locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
-#      if [ ${locked} -eq 1 ]; then
-#        break
-#      fi
-#
-#      sleep 15
-#
-#    done
-#  clear
-#else
-#  echo "OK - LND is in sync"
-#fi
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info

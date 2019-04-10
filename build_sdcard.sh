@@ -4,13 +4,15 @@
 # RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
 # https://www.raspberrypi.org/downloads/raspbian/
 # SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
+# 
+# or download the image for your ARM based SBC on https://DietPi.com
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script: 
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v0.99  *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.1   *"
 echo "*****************************************"
 echo ""
 
@@ -25,7 +27,7 @@ echo "will use code from branch --> '${wantedBranch}'"
 
 # 2nd optional parameter is the GITHUB-USERNAME to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
-# if 2nd paramter is used - 1st is mandatory
+# if 2nd parameter is used - 1st is mandatory
 echo "*** CHECK INPUT PARAMETERS ***"
 githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
@@ -69,6 +71,11 @@ else
   echo "OK running ${baseImage}"
 fi
 
+# setting static DNS server
+# see https://github.com/rootzoll/raspiblitz/issues/322#issuecomment-466733550
+sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcpcd.conf
+systemctl daemon-reload
+
 # fixing locales for build
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
@@ -92,13 +99,27 @@ sudo apt-get upgrade -f -y --allow-change-held-packages
 if [ "${baseImage}" = "dietpi" ]; then
   echo ""
   echo "*** PREPARE DietPi ***"
-  echo "renaming dietpi user ti pi"
+  echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
   echo "install pip"
   sudo apt-get update
   sudo apt-get remove -y fail2ban
   sudo apt-get install -y build-essential
-  sudp apt-get install -y python-pip
+  sudo apt-get install -y python-pip
+  # rsync is needed to copy from HDD
+  sudo apt install -y rsync
+  # install ifconfig
+  sudo apt install -y net-tools
+  #to display hex codes
+  sudo apt install -y xxd
+  # setuptools needed for Nyx
+  sudo pip install setuptools
+  # netcat for 00infoBlitz.sh
+  sudo apt install -y netcat
+  # install OpenSSH client + server
+  sudo apt install -y openssh-client
+  sudo apt install -y openssh-sftp-server
+
 fi
 
 # special prepare when Raspbian
@@ -111,6 +132,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   sudo raspi-config nonint do_wifi_country US
+  # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
+  echo "max_usb_current=1" | sudo tee -a /boot/config.txt
   # extra: remove some big packages not needed
   sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
   sudo apt-get clean
@@ -132,12 +155,96 @@ sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autol
 sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
 
+# change log rotates
+# see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
+echo "/var/log/syslog" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "	rotate 7" >> ./rsyslog
+echo "	daily" >> ./rsyslog
+echo "	missingok" >> ./rsyslog
+echo "	notifempty" >> ./rsyslog
+echo "	delaycompress" >> ./rsyslog
+echo "	compress" >> ./rsyslog
+echo "	postrotate" >> ./rsyslog
+echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "	endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+echo "/var/log/mail.info" >> ./rsyslog
+echo "/var/log/mail.warn" >> ./rsyslog
+echo "/var/log/mail.err" >> ./rsyslog
+echo "/var/log/mail.log" >> ./rsyslog
+echo "/var/log/daemon.log" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "        rotate 4" >> ./rsyslog
+echo "        size=100M" >> ./rsyslog
+echo "        missingok" >> ./rsyslog
+echo "        notifempty" >> ./rsyslog
+echo "        compress" >> ./rsyslog
+echo "        delaycompress" >> ./rsyslog
+echo "        sharedscripts" >> ./rsyslog
+echo "        postrotate" >> ./rsyslog
+echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "        endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+echo "/var/log/kern.log" >> ./rsyslog
+echo "/var/log/auth.log" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "        rotate 4" >> ./rsyslog
+echo "        size=100M" >> ./rsyslog
+echo "        missingok" >> ./rsyslog
+echo "        notifempty" >> ./rsyslog
+echo "        compress" >> ./rsyslog
+echo "        delaycompress" >> ./rsyslog
+echo "        sharedscripts" >> ./rsyslog
+echo "        postrotate" >> ./rsyslog
+echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "        endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+echo "" >> ./rsyslog
+echo "/var/log/user.log" >> ./rsyslog
+echo "/var/log/lpr.log" >> ./rsyslog
+echo "/var/log/cron.log" >> ./rsyslog
+echo "/var/log/debug" >> ./rsyslog
+echo "/var/log/messages" >> ./rsyslog
+echo "{" >> ./rsyslog
+echo "	rotate 4" >> ./rsyslog
+echo "	weekly" >> ./rsyslog
+echo "	missingok" >> ./rsyslog
+echo "	notifempty" >> ./rsyslog
+echo "	compress" >> ./rsyslog
+echo "	delaycompress" >> ./rsyslog
+echo "	sharedscripts" >> ./rsyslog
+echo "	postrotate" >> ./rsyslog
+echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "	endscript" >> ./rsyslog
+echo "}" >> ./rsyslog
+sudo mv ./rsyslog /etc/logrotate.d/rsyslog
+sudo chown root:root /etc/logrotate.d/rsyslog
+sudo service rsyslog restart
+
 echo ""
 echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
 sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
+
+# installs bandwidth monitoring for future statistics
+sudo apt-get install -y vnstat
+
+# prepare for BTRFS data drive raid
+sudo apt-get install -y btrfs-tools
+
+# prepare for display graphics mode
+# see https://github.com/rootzoll/raspiblitz/pull/334
+sudo apt-get install -y fbi
+
+# prepare dor display service
+# see https://github.com/rootzoll/raspiblitz/issues/88#issuecomment-471342311
+sudo apt-get install -y redis-server
+sudo -H pip3 install redis
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
@@ -224,11 +331,14 @@ then
   echo "!!! FAIL !!! Download laanwj-releases.asc not success."
   exit 1
 fi
+gpg ./laanwj-releases.asc
 fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> Bitcoin download PGP author not OK"
-  exit 1
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should contain laanwjPGP: ${laanwjPGP}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
 fi
 gpg --import ./laanwj-releases.asc
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
@@ -293,8 +403,8 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
-lndVersion="0.5.1-beta"
-lndSHA256="c8be77708fe95d5076fa6988229100598c14ae6c54e92a56d5f09f3e17732244"
+lndVersion="0.5.2-beta"
+lndSHA256="9adf9f3d0b8a62942f68d75ffe043f9255319209f751dee4eac82375ec0a86cd"
 olaoluwaPGP="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
@@ -313,11 +423,14 @@ if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
 fi
 
 # check gpg finger print
+gpg ./pgp_keys.asc
 fingerprint=$(gpg ./pgp_keys.asc 2>/dev/null | grep "${olaoluwaPGP}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND download author PGP not OK"
-  exit 1
+  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
+  echo "Should contain olaoluwaPGP: ${olaoluwaPGP}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
 fi
 gpg --import ./pgp_keys.asc
 sleep 3
@@ -437,13 +550,23 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
-# bash aoutstart for admin
+# add /sbin to path for all
+sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
+
+# profile path for admin
+sudo bash -c "echo '' >> /home/admin/.profile"
+sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
+sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
+sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
+
+# bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
 
-# bash aoutstart for pi
+# bash autostart for pi
 # run as exec to dont allow easy physical access by keyboard
 # see https://github.com/rootzoll/raspiblitz/issues/54
 sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
@@ -475,27 +598,21 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
-# *** BOOTSTRAP ***
-# see background README for details
+# *** BACKGROUND ***
 echo ""
 echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
 
-# Prepare for TOR service
-echo "*** Adding Tor Sources to sources.list ***"
-echo "deb http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "deb-src http://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
-echo "OK"
+# *** TOR Prepare ***
+echo "*** Prepare TOR source+keys ***"
+sudo /home/admin/config.scripts/internet.tor.sh prepare
 echo ""
-echo "*** Installing dirmngr ***"
-sudo apt install dirmngr
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "If you see fails above .. please run again later on:"
+echo "sudo /home/admin/config.scripts/internet.tor.sh prepare"
 echo ""
-echo "*** Fetching GPG key ***"
-sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
-sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-echo "!!!!!! Please check if the above really worked!"
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -509,61 +626,76 @@ echo ""
 echo "Maybe take the chance and look thru the output above if you can spot any errror."
 echo ""
 echo "After final reboot - your SD Card Image is ready."
-echo "Press ENTER to install LCD and reboot ..."
-read key
+echo ""
+echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo ""
+echo "to continue reboot with sudo shutdown -r  now and login with admin"
 
-# give Raspi a default hostname (optional)
-sudo raspi-config nonint do_hostname "RaspiBlitz"
+# install LCD only on an rPI running Raspbian
+if [ "${baseImage}" = "raspbian" ]; then
+  echo "Press ENTER to install LCD and reboot ..."
+  read key
 
-# *** Display selection ***
-dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
-defaultDisplay=$?
+  # give Raspi a default hostname (optional)
+  sudo raspi-config nonint do_hostname "RaspiBlitz"
 
-if [[ $defaultDisplay -eq 0 ]]
-then
-  # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
-  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-  cd /home/admin/
-  sudo apt-mark hold raspberrypi-bootloader
-  git clone https://github.com/goodtft/LCD-show.git
-  sudo chmod -R 755 LCD-show
-  sudo chown -R admin:admin LCD-show
-  cd LCD-show/
-  sudo ./LCD35-show
-else
-  # Download and install the driver
-  # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+  # *** Display selection ***
+  dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
+  defaultDisplay=$?
 
-  cd /boot
-  sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
-  sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
-  cat <<EOF >> config.txt
+  if [ "${defaultDisplay}" = "0" ]; then
 
-dtparam=spi=off
-dtparam=i2c_arm=off
+    # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
+    # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+    
+    echo "--> LCD DEFAULT"
+    cd /home/admin/
+    sudo apt-mark hold raspberrypi-bootloader
+    git clone https://github.com/goodtft/LCD-show.git
+    sudo chmod -R 755 LCD-show
+    sudo chown -R admin:admin LCD-show
+    cd LCD-show/
+    sudo ./LCD35-show
 
-# Set screen size and any overscan required
-overscan_left=0
-overscan_right=0
-overscan_top=0
-overscan_bottom=0
-framebuffer_width=800
-framebuffer_height=480
+  else
+
+    # Download and install the driver
+    # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
+
+    echo "--> LCD ALTERNATIVE"
+    cd /boot
+    sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
+    sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
+    cat <<EOF >> config.txt
+
+  dtparam=spi=off
+  dtparam=i2c_arm=off
+
+  # Set screen size and any overscan required
+  overscan_left=0
+  overscan_right=0
+  overscan_top=0
+  overscan_bottom=0
+  framebuffer_width=800
+  framebuffer_height=480
 
 
-enable_dpi_lcd=1
-display_default_lcd=1
-dpi_group=2
-dpi_mode=87
-dpi_output_format=0x6f015
+  enable_dpi_lcd=1
+  display_default_lcd=1
+  dpi_group=2
+  dpi_mode=87
+  dpi_output_format=0x6f015
 
-# set up the size to 800x480
-hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
+  # set up the size to 800x480
+  hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
 
-#rotate screen
-display_rotate=3
+  #rotate screen
+  display_rotate=3
 
-dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
+  dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
+  fi
 EOF
-  init 6
+    init 6
+  fi
 fi

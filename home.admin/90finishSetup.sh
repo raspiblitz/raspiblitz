@@ -66,26 +66,19 @@ sudo ufw allow 8080 comment 'lightning REST API'
 echo "allow: trasmission"
 sudo ufw allow 51413 comment 'transmission'
 echo "allow: local web admin"
-sudo ufw allow from 192.168.0.0/24 to any port 80 comment 'allow local LAN web'
+sudo ufw allow from 192.168.0.0/16 to any port 80 comment 'allow local LAN web'
 echo "open firewall for  auto nat discover (see issue #129)"
-sudo ufw allow proto udp from 192.168.0.0/24 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+sudo ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 echo "enable lazy firewall"
 sudo ufw --force enable
 echo ""
-
-# set raspi config as environment for lnd service
-sudo systemctl stop lnd
-sudo systemctl disable lnd
-sudo sed -i "s/^EnvironmentFile=.*/EnvironmentFile=\/mnt\/hdd\/raspiblitz.conf/g" /etc/systemd/system/lnd.service
-sudo systemctl enable lnd
 
 # update system
 echo ""
 echo "*** Update System ***"
 sudo apt-mark hold raspberrypi-bootloader
 sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
 echo "OK - System is now up to date"
 
 # mark setup is done
-sudo sed -i "s/^setupStep=.*/setupStep=90/g" /home/admin/raspiblitz.info
+sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info

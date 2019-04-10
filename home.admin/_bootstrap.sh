@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script runs on every start calles by boostrap.service
+# This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
@@ -19,6 +19,8 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
+# make raspiblitz.conf if not there
+sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
@@ -36,12 +38,59 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
+sleep 5
+sudo killall -3 fbi
+
+# set default values for raspiblitz.info
+network=""
+chain=""
+setupStep=0
+
+# try to load old values if available (overwrites defaults)
+source ${infoFile} 2>/dev/null
+
+# resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
-echo "network=" >> $infoFile
-echo "chain=" >> $infoFile
 echo "message=" >> $infoFile
+echo "network=${network}" >> $infoFile
+echo "chain=${chain}" >> $infoFile
+echo "setupStep=${setupStep}" >> $infoFile
+if [ "${setupStep}" != "100" ]; then
+  echo "hostname=${hostname}" >> $infoFile
+fi
 sudo chmod 777 ${infoFile}
+
+# Emergency cleaning logs when over 1GB (to prevent SD card filling up)
+# see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
+echo "*** Checking Log Size ***"
+logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+if [ ${logsMegaByte} -gt 1000 ]; then
+  echo "WARN !! Logs /var/log in are bigger then 1GB"
+  echo "ACTION --> DELETED ALL LOGS"
+  sudo rm -r /var/log/*
+  sleep 3
+  echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
+  echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
+else
+  echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
+fi
+echo ""
+
+################################
+# GENERATE UNIQUE SSH PUB KEYS
+# on first boot up
+################################
+
+numberOfPubKeys=$(sudo ls /etc/ssh/ | grep -c 'ssh_host_')
+if [ ${numberOfPubKeys} -eq 0 ]; then
+  echo "*** Generating new SSH PubKeys" >> $logFile
+  sudo dpkg-reconfigure openssh-server
+  echo "OK" >> $logFile
+fi
 
 ################################
 # AFTER BOOT SCRIPT
@@ -185,7 +234,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
-  # check if HDD cointains existing LND data (old RaspiBlitz Version)
+  # check if HDD contains existing LND data (old RaspiBlitz Version)
   echo "Check if HDD contains existing LND data .." >> $logFile
   lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${lndDataExists} -eq 1 ]; then
@@ -218,13 +267,15 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     # check if pre-sync was already activated on last power-on
     #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
     echo "starting pre-sync in background" >> $logFile
+    # make sure that debug file is clean, so just pre-sync gets analysed on stop
+    sudo rm /mnt/hdd/bitcoin/debug.log
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
     sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
     echo "OK Started bitcoind for presync" >> $logFile
     sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
-    # after admin login, presync will be stoped and HDD unmounted
+    # after admin login, presync will be stopped and HDD unmounted
     exit 0
   
   else
@@ -256,16 +307,57 @@ if [ ${configExists} -eq 1 ]; then
   source ${configFile}
 
   # update public IP on boot
+  # wait otherwise looking for publicIP fails
+  sleep 5
   freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-  if [ ${#publicIP} -eq 0 ]; then
-    echo "create value (${freshPublicIP})" >> $logFile
-    echo "publicIP=${freshPublicIP}" >> $configFile
+
+  # sanity check on IP data
+  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
+  echo "-> sanity check of IP data: ${freshPublicIP}"
+  if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
+    echo "OK IPv6"
+  elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
+    echo "OK IPv4"
   else
-    echo "update value (${freshPublicIP})" >> $logFile
-    sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
+    echo "FAIL - not an IPv4 or IPv6 address"
+    freshPublicIP=""
+  fi
+
+  if [ ${#freshPublicIP} -eq 0 ]; then
+    # prevent having no publicIP set at all and LND getting stuck
+    # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+    if [ ${#publicIP} -eq 0 ]; then
+      localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
+      freshPublicIP="${localIP}"
+    fi
+  fi
+  if [ ${#freshPublicIP} -eq 0 ]; then
+   echo "WARNING: Was not able to determine external IP on startup." >> $logFile
+  else
+    publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
+    if [ ${publicIPValueExists} -gt 1 ]; then
+      # remove one 
+      echo "more then one publiIp entry - removing one" >> $logFile
+      sed -i "s/^publicIP=.*//g" ${configFile}
+      publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
+    fi
+    if [ ${publicIPValueExists} -eq 0 ]; then
+      echo "create value (${freshPublicIP})" >> $logFile
+      echo "publicIP=${freshPublicIP}" >> $configFile
+    else
+      echo "update value (${freshPublicIP})" >> $logFile
+      sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
+    fi
   fi
 
 fi
+
+#################################
+# FIX BLOCKCHAINDATA OWNER (just in case)
+# https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
+#################################
+sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
 ################################
 # DETECT FRESHLY RECOVERED SD
@@ -282,7 +374,30 @@ fi
 # SD INFOFILE BASICS
 ################################
 
+# state info
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
+
+# determine network and chain from system
+
+# check for BITCOIN
+loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
+  source /mnt/hdd/bitcoin/bitcoin.conf
+  if [ ${testnet} -gt 0 ]; then
+    sed -i "s/^chain=.*/chain=test/g" ${infoFile}
+  else
+    sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+  fi
+fi
+
+# check for LITECOIN
+loaded=$(sudo systemctl status litecoind | grep -c 'loaded')
+if [ ${loaded} -gt 0 ]; then
+  sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
+  sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+fi
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

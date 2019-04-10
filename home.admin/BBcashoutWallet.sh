@@ -5,8 +5,10 @@ _error="./.error.out"
 echo "please wait ..."
 
 # load raspiblitz config data (with backup from old config)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo | jq -r '.chain')
 fi
@@ -46,7 +48,7 @@ l1="Enter on-chain address to send confirmed funds to:"
 l2="You will send: ${maxAmount} sat"
 l3="Maximal fee: 20000 sat (wil be subtracted)"
 dialog --title "Where to send funds?" \
---inputbox "$l1\n$l2\n$l3" 8 75 2>$_temp
+--inputbox "$l1\n$l2\n$l3" 9 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"

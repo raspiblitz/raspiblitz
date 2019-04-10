@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# requests missing in dietpi
+sudo pip install requests
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to autounlock lnd after restart"
@@ -102,6 +105,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
 
   echo "Auto-Unlock is now ON"
+  echo "NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
 fi
 
 # switch off
@@ -112,8 +116,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
   # delete password C securly
-  echo "shredding password on RaspiBlitz"
-  sudo shred -u /root/lnd.autounlock.pwd
+  echo "shredding password on for RaspiBlitz Auto-Unlock"
+  sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 
   echo "Auto-Unlock is now OFF"
 fi

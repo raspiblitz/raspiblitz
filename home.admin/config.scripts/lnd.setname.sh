@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# command info
+if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "small config script to set a alias of LND (and hostname of raspi)"
+ echo "lnd.setname.sh [?newName]"
+ exit 1
+fi
+
+# 1. parameter [?newName]
+newName=$1
+
+# run interactive if 'turn on' && no further parameters
+if [ ${#newName} -eq 0 ]; then
+
+  sudo rm ./.tmp
+  dialog --backtitle "Set LND Name/Alias" --inputbox "ENTER the new Name/Alias for LND node:
+(free to choose, one word, use basic characters)
+" 8 52 2>./.tmp
+  newName=$( cat ./.tmp )
+  if [ ${#newName} -eq 0 ]; then
+    echo "FAIL input cannot be empty"
+    exit 1
+  fi
+fi
+
+# config file
+blitzConfig="/mnt/hdd/raspiblitz.conf"
+
+# lnd conf file
+lndConfig="/mnt/hdd/lnd/lnd.conf"
+
+# check if raspibblitz config file exists
+configExists=$(ls ${blitzConfig} | grep -c '.conf')
+if [ ${configExists} -eq 0 ]; then
+ echo "FAIL - missing ${blitzConfig}"
+ exit 1
+fi
+
+# make sure entry line for 'hostname' exists 
+entryExists=$(cat ${blitzConfig} | grep -c 'hostname=')
+if [ ${entryExists} -eq 0 ]; then
+  echo "hostname=" >> ${blitzConfig}
+fi
+
+# check if lnd config file exists
+configExists=$(ls ${lndConfig} | grep -c '.conf')
+if [ ${configExists} -eq 0 ]; then
+ echo "FAIL - missing ${lndConfig}"
+ exit 1
+fi
+
+# make sure entry line for 'alias' exists 
+entryExists=$(cat ${lndConfig} | grep -c 'alias=')
+if [ ${entryExists} -eq 0 ]; then
+  echo "alias=" >> ${blitzConfig}
+fi
+
+# stop services
+echo "making sure services are not running"
+sudo systemctl stop lnd 2>/dev/null
+
+# lnd.conf: change name
+sudo sed -i "s/^alias=.*/alias=${newName}/g" ${lndConfig}
+
+# raspiblitz.conf: change name
+sudo sed -i "s/^hostname=.*/hostname=${newName}/g" ${blitzConfig}
+
+# OS: change hostname
+sudo raspi-config nonint do_hostname ${newName}
+
+echo "needs reboot to run normal again"
+exit 0

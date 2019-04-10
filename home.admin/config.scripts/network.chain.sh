@@ -15,9 +15,10 @@ fi
 
 # check and load raspiblitz config
 # to know which network is running
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
+ echo "FAIL - missing network info"
  exit 1
 fi
 
@@ -78,6 +79,12 @@ if [ "$1" = "testnet" ]; then
   sudo sed -i "s/^chain=.*/chain=test/g" /mnt/hdd/raspiblitz.conf
 else
   sudo sed -i "s/^chain=.*/chain=main/g" /mnt/hdd/raspiblitz.conf
+fi
+
+# edit RTL.conf (if active)
+if [ "${rtlWebinterface}" = "on" ]; then
+  echo "editing /home/admin/RTL/RTL.conf"
+  sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/$1/g" /home/admin/RTL/RTL.conf
 fi
 
 # now a reboot is needed to load all services fresh

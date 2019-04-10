@@ -4,8 +4,10 @@ _error="./.error.out"
 sudo chmod 7777 ${_error}
 
 # load raspiblitz config data (with backup from old config)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')

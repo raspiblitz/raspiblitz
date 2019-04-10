@@ -1,19 +1,22 @@
 #!/bin/bash
 
 # get raspiblitz config
+echo "get raspiblitz config"
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
+
+echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
-if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 
-# map chain to on/off
+echo "map chain to on/off"
 chainValue="off"
 if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
-# map domain to on/off
+echo "map domain to on/off"
 domainValue="off"
 dynDomainMenu='DynamicDNS'
 if [ ${#dynDomain} -gt 0 ]; then 
@@ -21,32 +24,44 @@ if [ ${#dynDomain} -gt 0 ]; then
   dynDomainMenu="${dynDomain}"
 fi
 
+echo "check autopilot by lnd.conf"
+lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
+if [ ${lndAutoPilotOn} -eq 1 ]; then
+  autoPilot="on"
+else
+  autoPilot="off"
+fi
+
 # show select dialog
-CHOICES=$(dialog --checklist 'Activate/Deactivate Services:' 15 45 7 \
+echo "run dialog ..."
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 7 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
-3 'Router AutoNAT' ${autoNatDiscovery} \
-4 ${dynDomainMenu} ${domainValue} \
-5 'Run behind TOR' ${runBehindTor} \
-6 'RTL Webinterface' ${rtlWebinterface} \
-7 'LND Auto-Unlock' ${autoUnlock} \
+3 ${dynDomainMenu} ${domainValue} \
+4 'Run behind TOR' ${runBehindTor} \
+5 'RTL Webinterface' ${rtlWebinterface} \
+6 'LND Auto-Unlock' ${autoUnlock} \
 2>&1 >/dev/tty)
 dialogcancel=$?
+echo "done dialog"
 clear
 
 # check if user canceled dialog
+echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
   exit 1
 fi
 
 needsReboot=0
+anychange=0
 
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoPilot}" != "${choice}" ]; then
   echo "Autopilot Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
   needsReboot=1
 else 
@@ -61,6 +76,7 @@ if [ "${chain}" != "${choice}" ]; then
      dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
   else
     echo "Testnet Setting changed .."
+    anychange=1
     sudo /home/admin/config.scripts/network.chain.sh ${choice}net
     walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
     if [ ${walletExists} -eq 0 ]; then
@@ -125,22 +141,12 @@ else
   echo "Testnet Setting unchanged."
 fi
 
-# AUTONAT process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoNatDiscovery}" != "${choice}" ]; then
-  echo "AutoNAT Setting changed .."
-  sudo /home/admin/config.scripts/lnd.autonat.sh ${choice}
-  needsReboot=1
-else 
-  echo "AutoNAT Setting unchanged."
-fi
-
 # Dynamic Domain
-choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${domainValue}" != "${choice}" ]; then
   echo "Dynamic Domain changed .."
+  anychange=1
   sudo /home/admin/config.scripts/internet.dyndomain.sh ${choice}
   needsReboot=1
 else
@@ -148,10 +154,11 @@ else
 fi
 
 # TOR process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
   needsReboot=1
 else 
@@ -159,17 +166,27 @@ else
 fi
 
 # RTL process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/bonus.rtl.sh ${choice}
+  errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
-    l1="RTL web servcie should be installed - AFTER NEXT REBOOT:"
-    l2="Try to open the following URL in your local webrowser"
-    l3="and unlock your wallet from there with PASSWORD C."
-    l4="---> http://${localip}:3000"
-    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 45
+    if [ ${errorOnInstall} -eq 0 ]; then
+      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      l1="RTL web service will be ready AFTER NEXT REBOOT:"
+      l2="Try to open the following URL in your local web browser"
+      l3="and login with your PASSWORD B."
+      l4="---> http://${localip}:3000"
+      dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 65
+    else
+      l1="!!! FAIL on RTL install !!!"
+      l2="Try manual install on terminal after rebootwith:"
+      l3="sudo /home/admin/config.scripts/bonus.rtl.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 10 65
+    fi
   fi
   needsReboot=1
 else
@@ -177,20 +194,37 @@ else
 fi
 
 # LND Auto-Unlock
-choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoUnlock}" != "${choice}" ]; then
   echo "LND Autounlock Setting changed .."
+  anychange=1
   sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
+  l1="AUTO-UNLOCK IS NOW OFF"
+  if [ "${choice}" = "on" ]; then
+    l1="AUTO-UNLOCK IS NOW ACTIVE"
+  fi  
+  l2="-------------------------"
+  l3="mobile/external wallets may need reconnect"
+  l4="possible change in macaroon / TLS cert"
+  dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 60
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
 fi
 
+if [ ${anychange} -eq 0 ]; then
+     dialog --pause "Hint: Use Spacebar to check/uncheck services." 8 58 5
+     exit 0
+fi
+
 if [ ${needsReboot} -eq 1 ]; then
    sleep 2
    dialog --pause "OK. System will reboot to activate changes." 8 58 8
+   clear
    echo "rebooting .. (please wait)"
-   sleep 3
+   # stop bitcoind
+   sudo -u bitcoin ${network}-cli stop
+   sleep 4
    sudo shutdown -r now
 fi

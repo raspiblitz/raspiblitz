@@ -101,8 +101,11 @@ fi #end - when lighting is running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
   # double check
-  echo "${network} is not running - double checking - wait 120secs"
-  sleep 120
+  seconds=120
+  if [ ${setupStep} -lt 60 ]; then
+    seconds=10
+  fi
+  dialog --pause "  Double checking for ${network}d - please wait .." 8 58 ${seconds}
   bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
 else
   echo "${network} is running"  
@@ -120,8 +123,22 @@ fi #end - when bitcoin is running
 mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
 if [ ${mountOK} -eq 1 ]; then
   
+  # FAILSAFE: check if raspiblitz.conf is available
+  configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c '.conf')
+  if [ ${configExists} -eq 0 ]; then
+    echo ""
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "FAIL: /mnt/hdd/raspiblitz.conf should exists at this point, but not found!"
+    echo "Please report to: https://github.com/rootzoll/raspiblitz/issues/293"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "Press ENTER to EXIT."
+    read key
+    exit 1
+  fi
+
   # are there any signs of blockchain data and activity
-  blockchainDataExists=$(ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
+  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
   if [ ${blockchainDataExists} -eq 1 ]; then
@@ -133,18 +150,34 @@ if [ ${mountOK} -eq 1 ]; then
       echo "Sometimes a reboot helps --> sudo shutdown -r now"
       exit 1
     else 
-      echo "Got mounted blockchain, but no config and runnign service yet --> finish HDD"
+      echo "Got mounted blockchain, but no config and running service yet --> finish HDD"
       ./60finishHDD.sh
       exit 1
     fi
   fi
 
-  # check if there is a download to continue
-  downloadProgressExists=$(sudo ls /home/admin/.Download.out 2>/dev/null | grep ".Download.out" -c)
+  # check if there is torrent data to continue
+  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
+  if [ ${torrentProgressExists} -eq 1 ]; then
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found torrent data .. resuming"
+      ./50torrentHDD.sh
+      exit 1
+    fi
+  fi
+
+  # check if there is ftp data to continue
+  downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
   if [ ${downloadProgressExists} -eq 1 ]; then
-    echo "found download in progress .."
-    ./50downloadHDD.sh
-    exit 1
+    # check if there is a running screen session to return to
+    noScreenSession=$(screen -ls | grep -c "No Sockets found")
+    if [ ${noScreenSession} -eq 0 ]; then 
+      echo "found download in data .. resuming"
+      ./50downloadHDD.sh
+      exit 1
+    fi
   fi
 
   # HDD is empty - get Blockchain
@@ -153,11 +186,11 @@ if [ ${mountOK} -eq 1 ]; then
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 3 options:" 13 75 4 \
-    T "TORRENT  --> TESTNET + MAINNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> TESTNET + MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> TESTNET + MAINNET from another HDD (TRICKY+FAST)" \
-    S "SYNC     --> JUST TESTNET thru Bitoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
+    T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
+    C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
+    N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
+    S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -165,8 +198,6 @@ if [ ${mountOK} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
     T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
-    D "DOWNLOAD --> MAINNET per FTP (FALLBACK)" \
-    C "COPY     --> MAINNET from another HDD (TRICKY+FAST)" \
     S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
   # error
@@ -181,16 +212,16 @@ if [ ${mountOK} -eq 1 ]; then
   clear
   case $menuitem in
           T)
-              ./50torrentHDD.sh
+              /home/admin/50torrentHDD.sh
               ;;
           C)
-              ./50copyHDD.sh
+              /home/admin/50copyHDD.sh
               ;;
+          N)
+              /home/admin/50cloneHDD.sh
+              ;;              
           S)
-              ./50syncHDD.sh
-              ;;
-          D)
-              ./50downloadHDD.sh
+              /home/admin/50syncHDD.sh
               ;;
   esac
   exit 1
@@ -214,13 +245,13 @@ fi
 # the HDD is already ext4 formated and called blockchain
 formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
 if [ ${formatExt4OK} -eq 1 ]; then
-  echo "HDD was already inited or prepared"
+  echo "HDD was already initialized/prepared"
   echo "Now needs to be mounted"
   ./40addHDD.sh
   exit 1
 fi
 
 # the HDD had no init yet
-echo "HDD needs init"
+echo "init HDD ..."
 ./30initHDD.sh
 exit 1

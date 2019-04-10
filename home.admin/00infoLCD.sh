@@ -37,7 +37,7 @@ while :
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
       l3="Is LAN cable connected?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
       sleep 3
       continue
     fi
@@ -47,22 +47,20 @@ while :
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
       l3="Will try reboot every 5min.\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 30
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
       sleep 3
       continue
     fi
 
-    ## get basic info from SD
-    bootstrapInfoExists=$(ls ${infoFile} 2>/dev/null | grep -c '.info')
-    if [ ${bootstrapInfoExists} -eq 1 ]; then
-      source ${infoFile}
-    fi
-
-    # get final config if already avaulable
+    # get config info if already available
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
-      setupStep=100
+    fi
+
+    # if setup not marked as done (=100) load boostrap info file
+    if [ "${setupStep}" != "100" ]; then
+      source ${infoFile}
     fi
 
     # if no information available from files - set default
@@ -110,6 +108,42 @@ while :
       continue
     fi
 
+    # check if recovering/upgrade is running
+    if [ "${state}" = "recovering" ]; then
+      if [ ${#message} -eq 0 ]; then
+        message="Setup in Progress"
+      fi
+      l1="Upgrade/Recover/Provision\n"
+      l2="---> ${message}\n"
+      l3="Please keep running until reboot."
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+    
+    # if freshly recovered 
+    if [ "${state}" = "recovered" ]; then
+      l1="FINAL RECOVER LOGIN NEEDED:\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: raspiblitz\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    # if re-indexing 
+    if [ "${state}" = "reindex" ]; then
+      l1="REINDEXING BLOCKCHAIN\n"
+      l2="To monitor & detect finish:\n"
+      l3="ssh admin@${localip}\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
     # when setup is in progress - password has been changed
     if [ ${setupStep} -lt 100 ]; then
       l1="Login to your RaspiBlitz with:\n"
@@ -126,27 +160,32 @@ while :
     # DISPLAY AFTER SETUP
     ###########################
 
-    # check if recovering/upgrade is running
-    if [ "${state}" = "recovering" ]; then
-      if [ ${#message} -eq 0 ]; then
-        message="Setup in Progress"
-      fi
-      l1="Upgrade/Recover/Provision\n"
-      l2="---> ${message}\n"
-      l3="Please keep running until reboot."
+    if [ "${state}" = "repair" ]; then
+      l1="Repair Mode\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
-    
-    # if freshly recovered 
-    if [ "${state}" = "recovered" ]; then
-      l1="FINAL RECOVER LOGIN NEEDED:\n"
+
+    if [ "${state}" = "retorrent" ]; then
+      l1="Repair Mode- TORRENT\n"
       l2="ssh admin@${localip}\n"
-      l3="Use password: raspiblitz\n"
+      l3="Use password: PasswordA\n"
       boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "recopy" ]; then
+      l1="Repair Mode - COPY\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      boxwidth=$((${#localip} + 28))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
       continue
     fi
@@ -156,15 +195,14 @@ while :
     clienterror=`cat error.tmp`
     rm error.tmp
     if [ ${#clienterror} -gt 0 ]; then
-
-      l1="Waiting for ${network}d to get ready.\n"
-      l2="---> Starting Up\n"
-      l3="Can take longer if device was off."
-      isVerifying=$(echo "${clienterror}" | grep -c 'Verifying blocks')
-      if [ ${isVerifying} -gt 0 ]; then
-        l2="---> Verifying Blocks\n"
-      fi
       boxwidth=40
+      l1="Waiting for ${network}d to get ready.\n"
+      l2="---> ${clienterror/error*:/}\n"
+      l3="Can take longer if device was off."
+      uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
+      if [ ${uptimeSeconds} -gt 600 ]; then
+        l3="!!Please login for more details!!"
+      fi
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 5
       continue
@@ -175,19 +213,23 @@ while :
     if [ "${locked}" -gt 0 ]; then
 
       # special case: LND wallet is locked ---> show unlock info
+      h=5
       l1="!!! LND WALLET IS LOCKED !!!\n"
       l2="Login: ssh admin@${localip}\n"
       l3="Use your Password A\n"
+      l4=""
       if [ "${rtlWebinterface}" = "on" ]; then
-        l2="Open: http://${localip}:3000\n"
-        l3="Use Password C to unlock\n"
+        l2="Browser: http://${localip}:3000\n"
+        l3="PasswordB=login / PasswordC=unlock\n"
+        l4="PasswordA: ssh admin@${localip}"
+        h=6
       fi
       if [ "${autoUnlock}" = "on" ]; then
         l2="ssh admin@${localip}\n"
         l3="Waiting for AUTO-UNLOCK"
       fi
-      boxwidth=$((${#localip} + 24))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3" 5 ${boxwidth}
+      boxwidth=$((${#localip} + 26))
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3$l4" ${h} ${boxwidth}
       sleep 5
       continue
     fi

@@ -28,6 +28,7 @@ if [ ${valueExists} -eq 0 ]; then
 fi
 
 # add default value to raspi config if needed
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 if [ ${#autoPilot} -eq 0 ]; then
   echo "autoPilot=off" >> /mnt/hdd/raspiblitz.conf

@@ -3,8 +3,10 @@ _temp="./download/dialog.$$"
 _error="./.error.out"
 
 # load raspiblitz config data (with backup from old config)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
@@ -12,6 +14,7 @@ fi
 
 echo ""
 echo "*** Precheck ***"
+echo "please wait a moment ..."
 
 # check if chain is in sync
 chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
@@ -79,9 +82,11 @@ command="lncli --chain=${network} --network=${chain}net sendpayment --force --pa
 
 # info output
 clear
-echo "******************************"
+echo "************************************************************"
 echo "Pay Invoice / Payment Request"
-echo "******************************"
+echo "This script is as an example how to use the lncli interface."
+echo "Its not optimized for performance or error handling."
+echo "************************************************************"
 echo ""
 echo "COMMAND LINE: "
 echo $command
@@ -95,9 +100,15 @@ error=`cat ${_error}`
 #echo "result(${result})"
 #echo "error(${error})"
 
+resultIsError=$(echo "${result}" | grep -c "payment_error")
+if [ ${resultIsError} -gt 0 ]; then
+  error="${result}"
+fi
+
 if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "FAIL"
+  echo "try with a wallet app or the RTL WebGUI (see services)"
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else

@@ -4,7 +4,11 @@ _temp="./download/dialog.$$"
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
 
-# welcome and ask for name of RaspiBlitz 
+###################
+# ENTER NAME
+###################
+
+# welcome and ask for name of RaspiBlitz
 result=""
 while [ ${#result} -eq 0 ]
   do
@@ -13,6 +17,8 @@ while [ ${#result} -eq 0 ]
     dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
     shred $_temp
+    echo "processing ..."
+    sleep 3
   done
 
 # set lightning alias
@@ -29,13 +35,12 @@ else
   sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
 fi
 
+###################
+# ENTER PASSWORDS 
+###################
 
-passwordValid=0
-result=""
-while [ ${passwordValid} -eq 0 ]
-  do
-    # show password info dialog
-    dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "RaspiBlitz uses 4 different passwords.
+# show password info dialog
+dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "RaspiBlitz uses 4 different passwords.
 Referenced as password A, B, C and D.
 
 A) Master User Password
@@ -48,63 +53,15 @@ no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 15 52
 
-    # ask user for new password A
-    dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})"\
-       --inputbox "Please enter your Master/Admin Password A:\n!!! This is new password to login per SSH !!!" 10 52 2>$_temp
+# call set password a script
+sudo /home/admin/config.scripts/blitz.setpassword.sh a
 
-    # get user input
-    result=$( cat $_temp )
-    shred $_temp
-    passwordValid=1
+# sucess info dialog
+dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
 
-    clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
-      clear
-      echo "FAIL - Password contained not allowed chars (see next screen)"
-      echo "Press ENTER to continue .."
-      read key
-      passwordValid=0
-    else
+# call set password b script
+sudo /home/admin/config.scripts/blitz.setpassword.sh b
 
-      # change user passwords and then change hostname
-      echo "pi:$result" | sudo chpasswd
-      echo "root:$result" | sudo chpasswd
-      echo "bitcoin:$result" | sudo chpasswd
-      echo "admin:$result" | sudo chpasswd
-      sleep 1
-
-      # sucess info dialog
-      dialog --backtitle "RaspiBlitz" --msgbox "OK - password changed to '$result'\nfor all users pi, admin, root & bitcoin" 6 52
-
-      # repeat until user input is nit length 0
-      result=""
-      dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})"\
-      --inputbox "Enter your RPC Password B:" 9 52 2>$_temp
-      result=$( cat $_temp )
-      shred $_temp
-
-      clearedResult=$(echo "${result}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-      if [ ${#clearedResult} != ${#result} ] || [ ${#clearedResult} -eq 0 ]; then
-        clear
-        echo "FAIL - Password contained not allowed chars (see next screen)"
-        echo "Press ENTER to continue to start again"
-        read key
-        passwordValid=0
-      else
-
-        # set Blockchain RPC Password (for admin cli & template for user bitcoin)
-        sed -i "s/^rpcpassword=.*/rpcpassword=${result}/g" /home/admin/assets/${network}.conf
-        sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${result}/g" /home/admin/assets/lnd.${network}.conf
-
-        # success info dialog
-        dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "OK - RPC password changed to '$result'\n\nNow starting the Setup of your RaspiBlitz." 7 52
-        clear
-  
-      fi
-
-    fi
-
-  done
-
-
-
+# success info dialog
+dialog --backtitle "RaspiBlitz" --msgbox "OK - RPC password changed \n\nNow starting the Setup of your RaspiBlitz." 7 52
+clear

@@ -145,23 +145,28 @@ if [ ${runningRTL} -eq 1 ]; then
 fi
 
 # CHAIN NETWORK
+public_addr_pre="Public "
 public_addr="??"
 torInfo=""
 # Version
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
-onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-if [ "${onionAddress}" != "null" ]; then
+
+if [ "${runBehindTor}" = "on" ]; then
+
   # TOR address
+  onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
   torInfo="+ TOR"
+
 else
+
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
   public_addr="${public_ip}:${public_port}"
@@ -174,6 +179,33 @@ else
     public=""
     public_color="${color_red}"
   fi
+  if [ ${#public_addr} -gt 25 ]; then
+    # if a IPv6 address dont show peers to save space
+    networkConnectionsInfo=""
+  fi
+  if [ ${#public_addr} -gt 35 ]; then
+    # if a LONG IPv6 address dont show "Public" in front to save space
+    public_addr_pre=""
+  fi
+
+  # DynDNS
+  if [ ${#dynDomain} -gt 0 ]; then
+
+    #check if dyndns resolves to correct IP
+    ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
+    if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
+      public_color="${color_red}"
+    else
+      public_color="${color_yellow}"
+    fi
+
+    # replace IP display with dynDNS
+    public_addr_pre="DynDNS "
+    networkConnectionsInfo=""
+    public_addr="${dynDomain}"
+
+  fi
+
 fi
 
 # LIGHTNING NETWORK
@@ -183,6 +215,10 @@ ln_channelInfo="\n"
 ln_external="\n"
 ln_alias="${hostname}"
 ln_publicColor=""
+ln_port=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+if [ ${#ln_port} -eq 0 ]; then
+  ln_port="9735"
+fi
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
@@ -195,7 +231,7 @@ else
  if [ ${ln_tor} -eq 1 ]; then
    ln_publicColor="${color_green}"
  else
-   public_check=$(nc -z -w6 ${public_ip} 9735 2>/dev/null; echo $?)
+   public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     ln_publicColor="${color_yellow}"
@@ -245,19 +281,19 @@ ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_g
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
-${color_yellow}     / ,'      ${color_gray}Public ${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}
+${color_yellow}${ln_publicColor}${ln_external}${color_red}
 
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
-if [ ${#onionAddress} -eq 0 ]; then
-  # one extra space line at the end if nodeaddress is not TOR
-  echo ""
+
+if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
+  echo "${undervoltageReports} undervoltage reports found - maybe upgrade power supply"
 fi

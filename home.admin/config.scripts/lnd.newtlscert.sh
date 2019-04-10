@@ -5,8 +5,10 @@
 echo "making sure services are not running"
 sudo systemctl stop lnd 2>/dev/null
 
-echo "deleting TLSCert"
-sudo rm /mnt/hdd/lnd/tls.* 2>/dev/null
+echo "keep old tls data as backup"
+sudo mv /mnt/hdd/lnd/tls.cert /mnt/hdd/lnd/tls.cert.old 
+sudo mv /mnt/hdd/lnd/tls.key /mnt/hdd/lnd/tls.key.old 
+
 echo "let lnd generate new TLSCert"
 sudo -u bitcoin /usr/local/bin/lnd &>/dev/null &
 echo "wait until generated"
@@ -26,4 +28,5 @@ done
 sudo killall /usr/local/bin/lnd
 echo "copy new cert to admin user"
 sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
+sudo chown admin:admin -R /home/admin/.lnd/*.cert
 echo "OK TLS certs are fresh"

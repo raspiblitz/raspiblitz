@@ -8,12 +8,42 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off]"
+ echo "internet.tor.sh [on|off|prepare]"
  exit 1
+fi
+
+# function: install keys & sources
+prepareTorSources()
+{
+    # Prepare for TOR service
+    echo "*** INSTALL TOR REPO ***"
+    echo ""
+
+    echo "*** Install dirmngr ***"
+    sudo apt install dirmngr -y
+    echo ""
+
+    echo "*** Adding KEYS deb.torproject.org ***"
+    curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+    echo ""
+ 
+    echo "*** Adding Tor Sources to sources.list ***"
+    echo "deb https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org stretch main" | sudo tee -a /etc/apt/sources.list
+    echo "OK"
+    echo ""
+}
+
+# if started with prepare 
+if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
+  prepareTorSources
+  exit 0
 fi
 
 # check and load raspiblitz config
 # to know which network is running
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
@@ -26,6 +56,8 @@ if [ ${#runBehindTor} -eq 0 ]; then
 fi
 
 # location of TOR config
+# make sure /etc/tor exists
+sudo mkdir /etc/tor 2>/dev/null
 torrc="/etc/tor/torrc"
 
 # stop services
@@ -55,24 +87,31 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
   fi
 
-  echo "*** Updating System ***"
-  sudo apt-get update
-  echo ""
+  # check if TOR package is installed
+  packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
+  if [ ${packageInstalled} -eq 0 ]; then
 
-  echo "*** Install Tor ***"
-  sudo apt install tor tor-arm -y
+    # calling function from above
+    prepareTorSources
 
-  echo ""
-  echo "*** Tor Config ***"
-  sudo rm -r -f /mnt/hdd/tor 2>/dev/null
-  sudo mkdir /mnt/hdd/tor
-  sudo mkdir /mnt/hdd/tor/sys
-  sudo mkdir /mnt/hdd/tor/web80
-  sudo mkdir /mnt/hdd/tor/lnd9735
-  sudo mkdir /mnt/hdd/tor/lndrpc9735
-  sudo chmod -R 700 /mnt/hdd/tor
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/tor
-  cat > ./torrc <<EOF
+    echo "*** Updating System ***"
+    sudo apt-get update
+    echo ""
+
+    echo "*** Install Tor ***"
+    sudo apt install tor tor-arm -y
+
+    echo ""
+    echo "*** Tor Config ***"
+    #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
+    sudo mkdir /mnt/hdd/tor 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/sys 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
+    sudo chmod -R 700 /mnt/hdd/tor
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+    cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
 DataDirectory /mnt/hdd/tor/sys
@@ -88,6 +127,7 @@ User bitcoin
 PortForwarding 1
 ControlPort 9051
 SocksPort 9050
+ExitRelay 0
 
 CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
 CookieAuthentication 1
@@ -109,98 +149,65 @@ HiddenServicePort 9735 127.0.0.1:9735
 
 # NOTE: bitcoind get tor service automatically - see /mnt/hdd/bitcoin for onion key
 EOF
-  sudo rm $torrc
-  sudo mv ./torrc $torrc
-  sudo chmod 644 $torrc
-  sudo chown -R bitcoin:bitcoin /var/run/tor/
-  echo ""
+    sudo rm $torrc
+    sudo mv ./torrc $torrc
+    sudo chmod 644 $torrc
+    sudo chown -R bitcoin:bitcoin /var/run/tor/
+    echo ""
 
-  # NYX - Tor monitor tool
-  #  https://nyx.torproject.org/#home
-  echo "*** Installing NYX - TOR monitoring Tool ***"
-  nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
-  if [ ${nyxInstalled} -eq 0 ]; then
-    sudo pip install nyx
-  else
-    echo "NYX already installed"
-  fi
-  echo ""
+    # NYX - Tor monitor tool
+    #  https://nyx.torproject.org/#home
+    echo "*** Installing NYX - TOR monitoring Tool ***"
+    nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
+    if [ ${nyxInstalled} -eq 0 ]; then
+      sudo pip install nyx
+    else
+      echo "NYX already installed"
+    fi
+    echo ""
   
-  echo "*** Activating TOR system service ***"
-  echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable tor@default
-  echo ""
+    echo "*** Activating TOR system service ***"
+    echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable tor@default
+    echo ""
 
-  #echo "*** Waiting for TOR to boostrap ***"
-  #torIsBootstrapped=0
-  #while [ ${torIsBootstrapped} -eq 0 ]
-  #do
-  #  echo "--- Checking 1 ---"
-  #  date +%s
-  #  sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped" | tail -n 10
-  #  torIsBootstrapped=$(sudo cat /mnt/hdd/tor/notice.log 2>/dev/null | grep "Bootstrapped 100" -c)
-  #  echo "torIsBootstrapped(${torIsBootstrapped})"
-  #  echo "If this takes too long --> CTRL+c, reboot and check manually"
-  #  sleep 5
-  #done
-  #echo "OK - Tor Bootstrap is ready"
-  #echo ""
+    echo "*** Changing ${network} Config ***"
+    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
+    if [ ${networkIsTor} -eq 0 ]; then
 
-  echo "*** Changing ${network} Config ***"
-  networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-  if [ ${networkIsTor} -eq 0 ]; then
+      echo "Only Connect thru TOR"
+      echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
 
-    echo "Only Connect thru TOR"
-    echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      if [ "${network}" = "bitcoin" ]; then
+        echo "Adding some bitcoin onion nodes to connect to"
+        echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      fi
 
-    if [ "${network}" = "bitcoin" ]; then
-      echo "Adding some bitcoin onion nodes to connect to"
-      echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-      echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+      sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
+    else
+      echo "Chain network already configured for TOR"
     fi
 
-    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-    sudo chown admin:admin /home/admin/.${network}/${network}.conf
-
   else
-    echo "Chain network already configured for TOR"
+    
+    echo "TOR package/service is installed and was prepared earlier .. just activating again"
+
+    echo "*** Enable TOR service ***"
+    sudo systemctl enable tor@default
+    echo ""
+
   fi
-
-  #echo "*** ${network} re-init - Waiting for Onion Address ***"
-  # restarting bitcoind to start with tor and generare onion.address
-  #echo "restarting ${network}d ..."
-  #sudo systemctl restart ${network}d
-  #sleep 8
-  #onionAddress=""
-  #while [ ${#onionAddress} -eq 0 ]
-  #do
-  #  echo "--- Checking 2 ---"
-  #  date +%s
-  #  testNetAdd=""
-  #  if [ "${chain}" = "test" ];then
-  #    testNetAdd="/testnet3"
-  #  fi
-  #  sudo cat /mnt/hdd/${network}${testNetAdd}/debug.log 2>/dev/null | grep "tor" | tail -n 10
-  #  onionAddress=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"address"' | cut -d '"' -f4)
-  #  echo "Can take up to 20min - if this takes longer --> CTRL+c, reboot and check manually"
-  #  sleep 5
-  #done
-  #onionPort=$(sudo -u bitcoin ${network}-cli getnetworkinfo | grep '"port"' | tr -dc '0-9')
-  #echo "Your Chain Network Onion Address is: ${onionAddress}:${onionPort}"
-  #echo ""
-
-  #echo "*** Setting your Onion Address ***"
-  #onionLND=$(sudo cat /mnt/hdd/tor/lnd9735/hostname)
-  #echo "Your Lightning Tor Onion Address is: ${onionLND}:9735"
-  #echo ""
 
   # ACTIVATE LND OVER TOR
   echo "*** Putting LND behind TOR ***"
-  echo "Make sutre LND is disabled"
+  echo "Make sure LND is disabled"
   sudo systemctl disable lnd 2>/dev/null
 
   echo "editing /etc/systemd/system/lnd.service"
@@ -242,18 +249,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl enable lnd
   echo "OK"
-  echo ""
-
-  echo "*** Remove Tor ***"
-  sudo apt remove tor tor-arm -y
-  echo ""
-  
-  echo "*** Remove NYX ***"
-  sudo pip uninstall nyx -y
-  echo ""
-
-  echo "*** Remove TOR Files/Config ***"
-  sudo rm -r -f /mnt/hdd/tor
   echo ""
 
   echo "needs reboot to activate new setting"
