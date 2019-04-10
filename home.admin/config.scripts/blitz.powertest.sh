@@ -36,7 +36,7 @@ for (( n=0; n<15; ++n )); do
     # analyse Voltage
     voltFloat=$(echo "${CoreVoltage/V/}*10000" | bc)
     voltInt=${voltFloat/.*}
-    echo "V -> ${voltFloat}/${voltInt}"
+    #echo "V -> ${voltFloat}/${voltInt}"
     if [ ${voltInt} -lt 12500 ]; then
       echo "Voltage too Low" >&2
     fi
@@ -44,8 +44,8 @@ for (( n=0; n<15; ++n )); do
     # analyse Temp
     tempFloat=$(echo "${Temp/\'C/}*100" | bc)
     tempInt=${tempFloat/.*}
-    echo "T -> ${tempFloat}/${tempInt}"
-    if [ ${voltInt} -gt 6999 ]; then
+    #echo "T -> ${tempFloat}/${tempInt}"
+    if [ ${tempInt} -gt 6999 ]; then
       echo "Temp too High" >&2
     fi
 
