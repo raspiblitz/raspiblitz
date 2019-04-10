@@ -46,9 +46,9 @@ for (( n=0; n<15; ++n )); do
 
     # debug output
 	if [ ${RealClockspeed} -ge ${Maxfreq} ]; then
-		echo -e "${Temp}$(printf "%5s" ${SysFSClockspeed}) MHz  ${CoreVoltage}" >&2
+		echo "${Temp}$(printf "%5s" ${SysFSClockspeed}) MHz  ${CoreVoltage}" >&2
 	else
-	  	echo -e "${Temp}$(printf "%5s" ${RealClockspeed})/$(printf "%4s" ${SysFSClockspeed}) MHz ${CoreVoltage}" >&2
+	  	echo "${Temp}$(printf "%5s" ${RealClockspeed})/$(printf "%4s" ${SysFSClockspeed}) MHz ${CoreVoltage}" >&2
   	fi
 
     # analyse Voltage
