@@ -16,7 +16,7 @@ echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=100
 # result values
 powerWARN=0
 powerFAIL=0
-powerMIN=0
+powerMIN=9999999
 tempWARN=0
 tempFAIL=0
 tempMAX=0
