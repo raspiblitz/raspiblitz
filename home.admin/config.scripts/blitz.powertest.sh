@@ -10,15 +10,15 @@ if [ ${sysbenchInstalled} -eq 0 ];then
 fi
 
 # do debug outputs to the STDERR - so that the STDOUT is just the results in the end
-echo "RaspiBlitz powertest v0.1" >&2
+echo "RaspiBlitz Powertest v0.1" >&2
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
 
 # starting bench mark
-sysbench --max-time=60 --test=cpu --cpu-max-prime=10000 --num-threads=4 run 1>/dev/null 2>&1 & 
+sysbench --max-time=120 --test=cpu --cpu-max-prime=10000 --num-threads=4 run 1>/dev/null 2>&1 & 
 
 # keep monitoring in the background
 Maxfreq=$(( $(awk '{printf ("%0.0f",$1/1000); }'  </sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq) -15 ))
-for (( n=0; n<15; ++n )); do
+for (( n=0; n<25; ++n )); do
 
     # make measurements
 	Temp=$(sudo vcgencmd measure_temp | cut -f2 -d=)
