@@ -76,11 +76,22 @@ Your are ready to continue - have fun.
 " 8 43
 fi
 
-    whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --menu "What todo about Power Issues?" 12 60 6 \
+$choice=$(whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --menu "What todo about Power Issues?" 12 60 6 \
 "TESTAGAIN" "Run Test again to be sure." \
 "CONTINUE" "I take the risk - continue." \
-"SHUTDOWN" "Shutdown to change hardware."
-if [ $? != 0 ]; then
+"SHUTDOWN" "Shutdown to change hardware." 3>&1 1>&2 2>&3)
+if [ ${#choice} -eq 0 ]; then
   $choice="SHUTDOWN"
 fi
 echo "User eneterd $choice"
+if [ "${choice}" == "TESTAGAIN" ]; then
+  echo "Shutting down ..."
+  sudo /home/admin/05hardwareTest.sh
+  exit 0
+elif [ "${choice}" == "SHUTDOWN" ]; then
+  echo "Shutting down ..."
+  sudo shutdown now
+  exit 1
+else
+  echo "OK continue .."
+fi
