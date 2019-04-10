@@ -431,7 +431,7 @@ sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoras
 sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
 
 # remove logo from LCD
-sudo killall -3 fbi 1>/dev/null 2>/dev/null
+sudo killall -3 fbi
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
