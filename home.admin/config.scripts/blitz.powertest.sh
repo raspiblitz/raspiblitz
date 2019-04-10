@@ -37,7 +37,7 @@ for (( n=0; n<15; ++n )); do
     voltFloat=$(echo "${CoreVoltage/V/}*10000" | bc)
     voltInt=${voltFloat/.*}
     echo "V -> ${voltFloat}/${voltInt}"
-    if [ ${voltInt} -lt 1.2500 ]; then
+    if [ ${voltInt} -lt 12500 ]; then
       echo "Voltage too low"
     else
       echo "Voltage OK"
