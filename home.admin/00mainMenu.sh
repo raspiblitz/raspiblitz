@@ -373,6 +373,7 @@ else
       fi
 
       # final Options
+      OPTIONS+=(HARDWARE "Run Hardwaretest")   
       OPTIONS+=(OFF "PowerOff RaspiBlitz")   
       OPTIONS+=(X "Console / Terminal")
 
@@ -516,6 +517,10 @@ case $CHOICE in
             else
               ./00mainMenu.sh
             fi
+            ;;
+        HARDWARE)
+            sudo ./05hardwareTest.sh
+            ./00mainMenu.sh
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh

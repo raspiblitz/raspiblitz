@@ -9,6 +9,7 @@
 # INFOFILE - state data from bootstrap
 source /home/admin/raspiblitz.info
 
+clear
 echo "*** Hardware Test Report ***"
 echo ""
 
