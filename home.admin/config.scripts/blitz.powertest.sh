@@ -44,7 +44,7 @@ for (( n=0; n<15; ++n )); do
     fi
 
     # analyse Temp
-    echo "T -> ${Temp}"
+    echo "T -> ${Temp/\'C/}"
 
 	sleep 5
 done
