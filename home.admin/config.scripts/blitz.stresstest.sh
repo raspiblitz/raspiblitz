@@ -55,7 +55,7 @@ for (( n=0; n<15; ++n )); do
     voltFloat=$(echo "${CoreVoltage/V/}*1000000" | bc)
     voltInt=${voltFloat/.*}
     #echo "V -> ${voltFloat}/${voltInt}"
-    if [ ${voltInt} -lt 1200100 ]; then
+    if [ ${voltInt} -lt 1200100 ] && [ ${powerWARN} -gt 0 ]; then
       powerFAIL=1
     fi
     if [ ${voltInt} -lt 1250000 ]; then
