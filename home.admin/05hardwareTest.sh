@@ -67,5 +67,9 @@ if [ ${showHeatImproveInfo} -gt 0 ]; then
 fi
 
 if [ ${showPowerImproveInfo} -eq 0 ] && [ ${showHeatImproveInfo} -eq 0 ]; then
-    echo "TODO: Tell user everything is OK"
+          dialog --backtitle "RaspiBlitz - Hardware Check" --msgbox "
+RaspiBlitz hardware setup looks OK :)
+Your good to continue - have fun ...
+
+" 7 65
 fi
