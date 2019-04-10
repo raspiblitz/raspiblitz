@@ -20,7 +20,7 @@ if [ ${sysbenchInstalled} -eq 0 ];then
 fi
 
 # do debug outputs to the STDERR - so that the STDOUT is just the results in the end
-echo "RaspiBlitz Powertest v0.1" >&2
+echo "RaspiBlitz Hardwaretest v0.1" >&2
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
 
 # result values

@@ -8,6 +8,7 @@
 
 # INFOFILE - state data from bootstrap
 source /home/admin/raspiblitz.info
+source /home/admin/_version.info
 
 clear
 echo "*** Hardware Test Report ***"
@@ -67,9 +68,9 @@ if [ ${showHeatImproveInfo} -gt 0 ]; then
 fi
 
 if [ ${showPowerImproveInfo} -eq 0 ] && [ ${showHeatImproveInfo} -eq 0 ]; then
-          dialog --backtitle "RaspiBlitz - Hardware Check" --msgbox "
-RaspiBlitz hardware setup looks OK :)
-Your good to continue - have fun ...
+          dialog --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --msgbox "
+RaspiBlitz hardware setup looks good :)
+Your are ready to continue - have fun.
 
-" 7 65
+" 8 48
 fi
