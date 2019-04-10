@@ -76,12 +76,12 @@ Your are ready to continue - have fun.
 " 8 43
 fi
 
-$choice=$(whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --menu "What todo about Power Issues?" 12 60 6 \
+choice=$(whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --menu "What todo about Power Issues?" 12 60 6 \
 TESTAGAIN "Run Test again to be sure." \
 CONTINUE "I take the risk - continue." \
 SHUTDOWN "Shutdown to change hardware." 3>&1 1>&2 2>&3)
 if [ ${#choice} -eq 0 ]; then
-  $choice="CONTINUE"
+  choice="CONTINUE"
 fi
 echo "User eneterd (${choice})"
 if [ "${choice}" == "TESTAGAIN" ]; then
