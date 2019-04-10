@@ -374,6 +374,7 @@ else
 
       # final Options
       OPTIONS+=(HARDWARE "Run Hardwaretest")   
+      OPTIONS+=(SOFTWARE "Run Softwaretest")  
       OPTIONS+=(OFF "PowerOff RaspiBlitz")   
       OPTIONS+=(X "Console / Terminal")
 
@@ -520,6 +521,12 @@ case $CHOICE in
             ;;
         HARDWARE)
             sudo ./05hardwareTest.sh
+            ./00mainMenu.sh
+            ;;
+        SOFTWARE)
+            sudo ./XXdebugLogs.sh
+            echo "Press ENTER to return to main menu."
+            read key
             ./00mainMenu.sh
             ;;
         PASSWORD)
