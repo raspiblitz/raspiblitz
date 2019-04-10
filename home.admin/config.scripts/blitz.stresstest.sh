@@ -1,7 +1,17 @@
 #!/bin/bash
 
+# command info
+if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "run stress test to measure heat and voltage"
+ echo "blitz.stresstest.sh [?filenameForReport]"
+ exit 1
+fi
+
 # Based on https://github.com/bamarni/pi64/issues/4#issuecomment-292707581
 # sysbench manual: http://imysql.com/wp-content/uploads/2014/10/sysbench-manual.pdf
+
+# get parameter
+filenameForReport=$1
 
 # check if bechmarking tool is installed
 sysbenchInstalled=$(sysbench --version 2>/dev/null | grep -c 'sysbench 0.')
@@ -72,10 +82,18 @@ for (( n=0; n<15; ++n )); do
 	sleep 5
 done
 
-echo "# result of powertest script"
-echo "powerFAIL=${powerFAIL}"
-echo "powerWARN=${powerWARN}"
-echo "powerMIN=${powerMIN} microVolt"
-echo "tempFAIL=${tempFAIL}"
-echo "tempWARN=${tempWARN}"
-echo "tempMAX=${tempMAX} centiGrad"
+if [ ${#filenameForReport} -eq 0 ]; then
+  echo "powerFAIL=${powerFAIL}"
+  echo "powerWARN=${powerWARN}"
+  echo "powerMIN='${powerMIN} microVolt'"
+  echo "tempFAIL=${tempFAIL}"
+  echo "tempWARN=${tempWARN}"
+  echo "tempMAX='${tempMAX} centiGrad'"
+else
+  echo "powerFAIL=${powerFAIL}" >${filenameForReport}
+  echo "powerWARN=${powerWARN}" >>${filenameForReport}
+  echo "powerMIN='${powerMIN} microVolt'" >>${filenameForReport}
+  echo "tempFAIL=${tempFAIL}" >>${filenameForReport}
+  echo "tempWARN=${tempWARN}" >>${filenameForReport}
+  echo "tempMAX='${tempMAX} centiGrad'" >>${filenameForReport}
+fi
