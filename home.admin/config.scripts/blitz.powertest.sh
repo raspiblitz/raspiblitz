@@ -33,9 +33,18 @@ for (( n=0; n<15; ++n )); do
 	  	echo -e "${Temp}$(printf "%5s" ${RealClockspeed})/$(printf "%4s" ${SysFSClockspeed}) MHz ${CoreVoltage}" >&2
   	fi
 
-    # analyse values
-    voltvalue="${CoreVoltage/V/}"
-    echo "V -> ${voltvalue}"
+    # analyse Voltage
+    voltFloat=$(echo "${CoreVoltage/V/}*10000" | bc)
+    voltInt=${voltFloat/.*}
+    echo "V -> ${voltFloat}/${voltInt}"
+    if [ ${voltInt} -lt 1.2500 ]; then
+      echo "Voltage too low"
+    else
+      echo "Voltage OK"
+    fi
+
+    # analyse Temp
+    echo "T -> ${Temp}"
 
 	sleep 5
 done
