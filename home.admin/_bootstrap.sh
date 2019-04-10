@@ -426,5 +426,12 @@ if [ ${loaded} -gt 0 ]; then
   sed -i "s/^chain=.*/chain=main/g" ${infoFile}
 fi
 
+################################
+# STRESSTEST HARDWARE
+################################
+
+# generate stresstest report on every startup (in case hardware has changed)
+sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
