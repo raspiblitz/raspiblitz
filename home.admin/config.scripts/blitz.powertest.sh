@@ -13,12 +13,20 @@ fi
 echo "RaspiBlitz Powertest v0.1" >&2
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
 
+# result values
+powerWARN=0
+powerFAIL=0
+powerMIN=0
+tempWARN=0
+tempFAIL=0
+tempMAX=0
+
 # starting bench mark
-sysbench --max-time=120 --test=cpu --cpu-max-prime=10000 --num-threads=4 run 1>/dev/null 2>&1 & 
+sysbench --max-time=60 --test=cpu --cpu-max-prime=10000 --num-threads=4 run 1>/dev/null 2>&1 & 
 
 # keep monitoring in the background
 Maxfreq=$(( $(awk '{printf ("%0.0f",$1/1000); }'  </sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq) -15 ))
-for (( n=0; n<25; ++n )); do
+for (( n=0; n<15; ++n )); do
 
     # make measurements
 	Temp=$(sudo vcgencmd measure_temp | cut -f2 -d=)
@@ -34,11 +42,17 @@ for (( n=0; n<25; ++n )); do
   	fi
 
     # analyse Voltage
-    voltFloat=$(echo "${CoreVoltage/V/}*10000" | bc)
+    voltFloat=$(echo "${CoreVoltage/V/}*1000000" | bc)
     voltInt=${voltFloat/.*}
     #echo "V -> ${voltFloat}/${voltInt}"
-    if [ ${voltInt} -lt 12500 ]; then
-      echo "Voltage too Low" >&2
+    if [ ${voltInt} -lt 1200100 ]; then
+      powerFAIL=1
+    fi
+    if [ ${voltInt} -lt 1250000 ]; then
+      powerWARN=1
+    fi
+    if [ ${voltInt} -lt ${powerMIN} ]; then
+      powerMIN=${voltInt}
     fi
 
     # analyse Temp
@@ -46,8 +60,22 @@ for (( n=0; n<25; ++n )); do
     tempInt=${tempFloat/.*}
     #echo "T -> ${tempFloat}/${tempInt}"
     if [ ${tempInt} -gt 6999 ]; then
-      echo "Temp too High" >&2
+      tempFAIL=1
+    fi
+    if [ ${tempInt} -gt 6500 ]; then
+      tempWARN=1
+    fi
+    if [ ${tempInt} -gt ${tempMAX} ]; then
+      tempMAX=${tempInt}
     fi
 
 	sleep 5
 done
+
+echo "# result of powertest script"
+echo "powerFAIL=${powerFAIL}"
+echo "powerWARN=${powerWARN}"
+echo "powerMIN=${powerMIN} microVolt"
+echo "tempFAIL=${tempFAIL}"
+echo "tempWARN=${tempWARN}"
+echo "tempMAX=${tempMAX} centiGrad"
