@@ -38,6 +38,12 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
+sleep 5
+sudo killall -3 fbi
+
 # set default values for raspiblitz.info
 network=""
 chain=""
@@ -424,14 +430,10 @@ fi
 # STRESSTEST HARDWARE
 ################################
 
-# show logo on LCD
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
-
 # generate stresstest report on every startup (in case hardware has changed)
+sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
+sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
 sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
-
-# remove logo from LCD
-sudo killall -3 fbi
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
