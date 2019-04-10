@@ -57,9 +57,11 @@ for (( n=0; n<15; ++n )); do
     #echo "V -> ${voltFloat}/${voltInt}"
     if [ ${voltInt} -lt 1200100 ] && [ ${powerWARN} -gt 0 ]; then
       powerFAIL=1
+      echo "--> Power FAIL detected" >&2
     fi
     if [ ${voltInt} -lt 1250000 ]; then
       powerWARN=1
+      echo "--> Power WARN detected" >&2
     fi
     if [ ${voltInt} -lt ${powerMIN} ]; then
       powerMIN=${voltInt}
@@ -71,9 +73,11 @@ for (( n=0; n<15; ++n )); do
     #echo "T -> ${tempFloat}/${tempInt}"
     if [ ${tempInt} -gt 6999 ]; then
       tempFAIL=1
+      echo "--> Temp FAIL detected" >&2
     fi
     if [ ${tempInt} -gt 6500 ]; then
       tempWARN=1
+      echo "--> Temp WARN detected" >&2
     fi
     if [ ${tempInt} -gt ${tempMAX} ]; then
       tempMAX=${tempInt}
