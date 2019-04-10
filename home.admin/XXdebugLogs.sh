@@ -69,7 +69,14 @@ echo ""
 if [ "${rtlWebinterface}" = "on" ]; then
   echo "*** LAST 20 RTL LOGS ***"
   sudo journalctl -u RTL -b --no-pager -n20
-  echo ""
 else
   echo "- RTL is OFF by config"
 fi
+echo ""
+
+echo "*** HARDWARE TEST RESULTS ***"
+echo "UndervoltageReports in Logs: ${undervoltageReports}"
+if [ -f /home/admin/stresstest.report ]; then
+  sudo cat /home/admin/stresstest.report
+fi
+echo ""
