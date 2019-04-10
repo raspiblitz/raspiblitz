@@ -30,7 +30,7 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 echo ""
-echo "*** RASPIBLITZ LOGS ***"
+echo "*** RASPIBLITZ SOFTWARE LOGS ***"
 echo "blitzversion: ${codeVersion}"
 echo "chainnetwork: ${network} / ${chain}"
 uptime
