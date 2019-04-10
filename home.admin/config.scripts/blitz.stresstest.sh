@@ -96,4 +96,5 @@ else
   echo "tempFAIL=${tempFAIL}" >>${filenameForReport}
   echo "tempWARN=${tempWARN}" >>${filenameForReport}
   echo "tempMAX='${tempMAX} centiGrad'" >>${filenameForReport}
+  sudo chmod 744 ${filenameForReport}
 fi

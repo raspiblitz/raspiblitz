@@ -295,6 +295,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_red}
 "load average:${load##up*,  }" "${temp}" \
 "${hdd}" "${sync_percentage}"
 
+source /home/admin/stresstest.report 2>/dev/null
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
   echo "${undervoltageReports} undervoltage reports found - run 'Hardware Test' in main menu"
 elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
