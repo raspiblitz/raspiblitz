@@ -349,6 +349,38 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - thats OK as long as you dont make changes to the sd card build script - then you would need to build a fresh sd card again from your repo.
 
+## How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
+
+You need to have your forked repo checked out on your laptop. There your should see your forked repo as `origin`, when you run `git remote -v`. If you dont see a additional `upstream` remote yet, then it with the following command `git remote add upstream https://github.com/rootzoll/raspiblitz.git`.
+
+So first checkout the new branch namend `BRANCH` from the original RaspBlitz repo to your local computer with: `git fetch upstream` and then `git checkout -b BRANCH upstream/BRANCH`.
+
+Now push the new branch to your forked GitHub repo with `git push -u origin BRANCH`.
+
+Once the branch is available and synced between the RaspiBlitz GitHub repo, your forked GitHub repo and your local computer git repo, you can start developing. 
+
+## How can I sync a branch of my forked with my local RaspiBlitz?
+
+You need to know that there is a git copy of the original RaspiBlitz GitHub repo on your physical RaspiBlitz in the folder `/home/admin/raspiblitz`. If you change into that folder and run `git remote -v` you can see the set origin repo.
+
+You need to change that origin repo to your forked repo. You do that with:
+```
+git remote set-url origin [THE-URL-OF-YOUR-FORKED-REPO]
+```
+
+Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz you always just the run:
+```
+/home/admin/XXsyncScripts.sh BRANCH
+```
+
+So your workflow can go: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
+
+## How contribute a feature/change from my forked branch back to the RaspiBlitz repo?
+
+Like the way above you can build a new feature or test a change. Once you have something ready you want to contribute back, you make sure its pushed to your forked GitHub repo and start a pull request from the GitHub website there to the RaspiBlitz repo. 
+
+See more info: https://yangsu.github.io/pull-request-tutorial/
+
 ## How to attach the RaspberryPi to the HDD?
 
 There are multiple ways to do it - just remember it should be easy to get to the SD card slot to remove and replace the card.
