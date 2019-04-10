@@ -49,6 +49,7 @@ fi
 
 if [ ${showPowerImproveInfo} -gt 0 ]; then
     echo "TODO: Tell user how to improve Power"
+    # tell that sometimes a test rerun is needed
     # tell users if they have a power supply from the shopping list, they should report in
 fi
 
@@ -72,5 +73,14 @@ if [ ${showPowerImproveInfo} -eq 0 ] && [ ${showHeatImproveInfo} -eq 0 ]; then
 RaspiBlitz hardware setup looks good :)
 Your are ready to continue - have fun.
 
-" 8 48
+" 8 43
 fi
+
+    whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --menu "What todo about Power Issues?" 12 60 6 \
+"TESTAGAIN" "Run Test again to be sure." \
+"CONTINUE" "I take the risk - continue." \
+"SHUTDOWN" "Shutdown to change hardware."
+if [ $? != 0 ]; then
+  $choice="SHUTDOWN"
+fi
+echo "User eneterd $choice"
