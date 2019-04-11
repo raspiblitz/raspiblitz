@@ -64,7 +64,7 @@ sudo ufw allow 10009 comment 'lightning gRPC'
 echo "allow: lightning REST API"
 sudo ufw allow 8080 comment 'lightning REST API'
 echo "allow: transmission"
-sudo ufw allow 51413 comment 'transmission'
+sudo ufw allow 49200:49250/tcp comment 'rtorrent'
 echo "allow: local web admin"
 sudo ufw allow from 192.168.0.0/16 to any port 80 comment 'allow local LAN web'
 echo "open firewall for  auto nat discover (see issue #129)"
