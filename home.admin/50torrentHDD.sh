@@ -62,6 +62,25 @@ if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
   echo "DONE"
   exit
 fi
+if [ "$1" == "backup-torrent-hosting-status" ]; then
+  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    echo "baseSeeding=1"
+  else
+    echo "baseSeeding=0"
+  fi
+  torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+  echo "baseComplete=${torrentComplete}"
+  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    echo "updateSeeding=1"
+  else
+    echo "updateSeeding=0"
+  fi
+  torrentComplete=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+  echo "updateComplete=${torrentComplete}"
+  exit
+fi
 
 # if setup was done - remove old data
 if [ "${setupStep}" = "100" ] && [ ${#1} -eq 0 ]; then

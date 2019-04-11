@@ -222,7 +222,7 @@ if [ "${backupTorrentSeeding}" != "${choice}" ]; then
   echo "BACKUP TORRENT SEEDING Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
-    sudo /home/admin/50torrentHDD.sh backup-torrent-hosting
+    /home/admin/50torrentHDD.sh backup-torrent-hosting
 
     dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
 BACKUP TORRENT SEEDING IS NOW ACTIVE
@@ -237,7 +237,7 @@ RaspiBlitz can be slow.
 
   else
     echo "Stopping Torrents and Cleaning Up ..."
-    sudo /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
+    /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
     echo "BACKUP TORRENT SEEDING IS NOW OFF"
     needsReboot=1
   fi
