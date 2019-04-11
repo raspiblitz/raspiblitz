@@ -273,7 +273,8 @@ fi
 # STATUS SINALING: Backup Torrent Seeding
 torrentBaseStatus="•"
 torrentUpdateStatus="•"
-source <(/home/admin/50torrentHDD.sh backup-torrent-hosting-status)
+/home/admin/50torrentHDD.sh backup-torrent-hosting-status 1>./.torrent.status
+source ./.torrent.status
 if [ "${baseComplete}" == "1" ]; then
   torrentBaseStatus="↑"
 elif [ "${baseSeeding}" == "1" ]; then
