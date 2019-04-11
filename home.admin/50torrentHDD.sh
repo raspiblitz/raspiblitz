@@ -1,9 +1,16 @@
 #!/bin/bash
 
-# START with parameter "backup-torrent-hosting" to just kick of the torrent downloads in the background during 
+# POSSOBLE PARAMETERS:
+
+# backup-torrent-hosting
+# to just kick of the torrent downloads in the background during 
 # regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
 
-# START with parameter "backup-torrent-hosting-cleanup" to stop background torrents and clean up
+# backup-torrent-hosting-cleanup
+# to stop background torrents and clean up
+
+# backup-torrent-hosting-status
+# to get info backround torrent hosting
  
 ## get basic info
 source /home/admin/raspiblitz.info
