@@ -28,14 +28,9 @@ fi
 echo "# TORRENT-FILES"
 echo "baseTorrent='${baseTorrentFile}'"
 echo "updateTorrent='${updateTorrentFile}'"
-sleep 1
 
 targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
-sudo mkdir ${sessionDir} 2>/dev/null
-sudo mkdir ${targetDir} 2>/dev/null
-sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
-sudo mkdir ${sessionDir}/update/ 2>/dev/null
 
 # BACKUP TORRENT SEEDING
 if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
@@ -79,6 +74,12 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   echo "updateComplete=${torrentComplete}"
   exit
 fi
+
+# make sure folders exist
+sudo mkdir ${sessionDir} 2>/dev/null
+sudo mkdir ${targetDir} 2>/dev/null
+sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
+sudo mkdir ${sessionDir}/update/ 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
