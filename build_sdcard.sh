@@ -419,6 +419,7 @@ echo ""
 echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
+## see LND releases: https://github.com/lightningnetwork/lnd/releases
 lndVersion="0.6-beta-rc3"
 lndSHA256="811a5fde2f804caaa7334d30d31666798420f1a353bb91ae84d897c2fd2432a0"
 
