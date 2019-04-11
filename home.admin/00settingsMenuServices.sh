@@ -223,11 +223,18 @@ if [ "${backupTorrentSeeding}" != "${choice}" ]; then
   anychange=1
   if [ "${choice}" = "on" ]; then
     sudo /home/admin/50torrentHDD.sh backup-torrent-hosting
-    l1="BACKUP TORRENT SEEDING IS NOW ON"
-    l2="--------------------------------"
-    l3="If possible forward ports 49200-49250"
-    l4="from your router to this RaspiBlitz"
-    dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 9 50
+
+    dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
+BACKUP TORRENT SEEDING IS NOW ACTIVE
+-------------------------------------
+If possible forward ports 49200-49250
+from your router to this RaspiBlitz.
+
+During initial torrent download your
+RaspiBlitz can be slow.
+
+" 13 42
+
   else
     echo "Stopping Torrents and Cleaning Up ..."
     sudo /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
