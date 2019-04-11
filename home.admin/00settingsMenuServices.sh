@@ -178,8 +178,8 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      l1="RTL web servcie will be ready AFTER NEXT REBOOT:"
-      l2="Try to open the following URL in your local webrowser"
+      l1="RTL web service will be ready AFTER NEXT REBOOT:"
+      l2="Try to open the following URL in your local web browser"
       l3="and login with your PASSWORD B."
       l4="---> http://${localip}:3000"
       dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 65
