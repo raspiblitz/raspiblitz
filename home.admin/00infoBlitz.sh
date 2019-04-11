@@ -50,7 +50,8 @@ load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
 
 # get CPU temp
 cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
-temp=$((cpu/1000))
+tempC=$((cpu/1000))
+tempF=$(((cpu/1000) * (9/5) + 32))
 
 # get memory
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
@@ -276,7 +277,7 @@ ${color_yellow}
 ${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
+${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C | %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
@@ -291,7 +292,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_red}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
-"load average:${load##up*,  }" "${temp}" \
+"load average:${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
