@@ -42,20 +42,7 @@ sudo mkdir ${targetDir} 2>/dev/null
 sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
 sudo mkdir ${sessionDir}/update/ 2>/dev/null
 
-################################
-# BACKUP TORRENT HOSTING
-################################
-
-if [ "$1" == "backup-torrent-hosting" ]; then
-  echo "Starting BACKUP TORRENT HOSTING ..."
-  sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent &
-  torrentBasePID=$!
-  sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent &
-  torrentUpdatePID=$!
-  echo "DONE with torrentBasePID(${torrentBasePID}) & torrentUpdatePID(${torrentUpdatePID})"
-  exit
-fi
-
+# BACKUP TORRENT SEEDING
 if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
   echo "Deleting all possible old (version) torrent data ..."
   sudo rm -r /home/admin/.rtorrent.session 2>/dev/null
@@ -64,7 +51,7 @@ if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
 fi
 
 # if setup was done - remove old data
-if [ "${setupStep}" = "100" ]; then
+if [ "${setupStep}" = "100" ] && [ ${#1} -eq 0 ]; then
   echo "stopping servcies ..."
   sudo systemctl stop lnd 
   sudo systemctl stop ${network}d
@@ -118,6 +105,13 @@ if [ ${torrentComplete2} -eq 0 ]; then
   fi
 fi
 sleep 2
+
+# BACKUP TORRENT SEEDING
+# just let torrent start and run in the background
+if [ "$1" == "backup-torrent-hosting" ]; then
+  echo "Done BACKUP TORRENT HOSTING .."
+  exit
+fi
 
 ##############################
 # MONITOR PROGRESS
