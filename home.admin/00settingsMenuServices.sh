@@ -222,7 +222,7 @@ if [ "${backupTorrentSeeding}" != "${choice}" ]; then
   echo "BACKUP TORRENT SEEDING Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
-
+    sudo /home/admin/50torrentHDD.sh backup-torrent-hosting
     echo "BACKUP TORRENT SEEDING IS NOW ON"
   else
     echo "Stopping Torrents and Cleaning Up ..."
