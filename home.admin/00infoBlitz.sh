@@ -278,7 +278,7 @@ ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, temp %s°C | %s°F
+${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
@@ -293,7 +293,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_red}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
-"CPU load ${load##up*,  }" "${tempC}" "${tempF}" \
+"CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
 source /home/admin/stresstest.report 2>/dev/null
