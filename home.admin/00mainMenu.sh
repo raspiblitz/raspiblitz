@@ -282,6 +282,9 @@ if [ ${setupStep} -eq 0 ]; then
 
   else
 
+    # show hardware test
+    /home/admin/05hardwareTest.sh no-new-stresstest
+
     # start setup
     BACKTITLE="RaspiBlitz - Setup"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
