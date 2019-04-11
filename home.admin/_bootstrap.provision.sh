@@ -207,6 +207,14 @@ else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
+# BACKUP TORRENT HOSTING
+if [ "${backupTorrentHosting}" == "on" ]; then
+    echo "Backup Torrent Hosting - clean up possible old torrent data" >> ${logFile}
+    sudo /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
+else
+    echo "Backup Torrent Hosting - not active" >> ${logFile}
+fi
+
 # replay backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}

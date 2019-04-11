@@ -1,21 +1,13 @@
 #!/bin/bash
-echo ""
 
-# see background_downloadBlockchain.md for info
-# why there are two torrent files
-
+# START with parameter "backup-torrent-hosting" to just kick of the torrent downloads in the background during 
+# regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
+ 
 ## get basic info
 source /home/admin/raspiblitz.info
 
-
-# if setup was done - remove old data
-if [ "${setupStep}" = "100" ]; then
-  echo "stopping servcies ..."
-  sudo systemctl stop lnd 
-  sudo systemctl stop ${network}d
-fi
-
 # make sure rtorrent is available
+echo ""
 sudo apt-get install rtorrent -y
 echo ""
 
@@ -46,6 +38,37 @@ sleep 1
 targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 sudo mkdir ${sessionDir} 2>/dev/null
+sudo mkdir ${targetDir} 2>/dev/null
+sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
+sudo mkdir ${sessionDir}/update/ 2>/dev/null
+
+################################
+# BACKUP TORRENT HOSTING
+################################
+
+if [ "$1" == "backup-torrent-hosting" ]; then
+  echo "Starting BACKUP TORRENT HOSTING ..."
+  sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent &
+  torrentBasePID=$!
+  sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent &
+  torrentUpdatePID=$!
+  echo "DONE with torrentBasePID(${torrentBasePID}) & torrentUpdatePID(${torrentUpdatePID})"
+  exit
+fi
+
+if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
+  echo "Deleting all possible old (version) torrent data ..."
+  sudo rm -r /home/admin/.rtorrent.session 2>/dev/null
+  sudo rm -r /mnt/hdd/torrent 2>/dev/null
+  exit
+fi
+
+# if setup was done - remove old data
+if [ "${setupStep}" = "100" ]; then
+  echo "stopping servcies ..."
+  sudo systemctl stop lnd 
+  sudo systemctl stop ${network}d
+fi
 
 ##############################
 # CHECK TORRENT 1 "BLOCKCHAIN"
@@ -64,8 +87,6 @@ if [ ${torrentComplete1} -eq 0 ]; then
     # start torrent download in screen session
     echo "starting torrent: blockchain"
     command1="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
-    sudo mkdir ${targetDir} 2>/dev/null
-    sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
@@ -90,8 +111,6 @@ if [ ${torrentComplete2} -eq 0 ]; then
     # start torrent download in screen session
     echo "starting torrent: update"
     command2="sudo rtorrent -n -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
-    sudo mkdir ${targetDir} 2>/dev/null
-    sudo mkdir ${sessionDir}/update/ 2>/dev/null
     screenCommand="screen -S update -L screen.log -dm ${command2}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
