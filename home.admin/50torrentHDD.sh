@@ -2,6 +2,7 @@
 
 # START with parameter "backup-torrent-hosting" to just kick of the torrent downloads in the background during 
 # regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
+# START with parameter "backup-torrent-hosting-cleanup" to stop background torrents and clean up
  
 ## get basic info
 source /home/admin/raspiblitz.info
@@ -44,9 +45,21 @@ sudo mkdir ${sessionDir}/update/ 2>/dev/null
 
 # BACKUP TORRENT SEEDING
 if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
+  echo "Stopping Torrents ..."
+  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    sudo pkill -P ${sessionPID}
+  fi
+  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    sudo pkill -P ${sessionPID}
+  fi
   echo "Deleting all possible old (version) torrent data ..."
   sudo rm -r /home/admin/.rtorrent.session 2>/dev/null
   sudo rm -r /mnt/hdd/torrent 2>/dev/null
+  echo "Changing config ..."
+  sudo sed -i "s/^backupTorrentSeeding=.*/backupTorrentSeeding=off/g" /mnt/hdd/raspiblitz.conf
+  echo "DONE"
   exit
 fi
 
@@ -106,10 +119,20 @@ if [ ${torrentComplete2} -eq 0 ]; then
 fi
 sleep 2
 
+##############################
 # BACKUP TORRENT SEEDING
+##############################
 # just let torrent start and run in the background
+
 if [ "$1" == "backup-torrent-hosting" ]; then
-  echo "Done BACKUP TORRENT HOSTING .."
+  # changing config - so it can be startup again after a reboot by bootstrap
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${#backupTorrentSeeding} -eq 0 ]; then 
+    echo "backupTorrentSeeding=on" >> /mnt/hdd/raspiblitz.conf
+  else
+    sudo sed -i "s/^backupTorrentSeeding=.*/backupTorrentSeeding=on/g" /mnt/hdd/raspiblitz.conf
+  fi
+  echo "Done BACKUP TORRENT HOSTING"
   exit
 fi
 
