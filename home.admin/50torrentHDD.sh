@@ -25,6 +25,7 @@ if [ "$network" = "litecoin" ]; then
   baseTorrentFile=${litecoinBase}
   updateTorrentFile=${litecoinUpdate}
 fi
+echo "# TORRENT-FILES"
 echo "baseTorrent='${baseTorrentFile}'"
 echo "updateTorrent='${updateTorrentFile}'"
 sleep 1
@@ -56,7 +57,8 @@ if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
   exit
 fi
 if [ "$1" == "backup-torrent-hosting-status" ]; then
-  echo "#--> screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out"
+  echo "# BASE TORRENT - for details call:"
+  echo "# screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out"
   sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
     echo "baseSeeding=1"
@@ -65,7 +67,8 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   fi
   torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
   echo "baseComplete=${torrentComplete}"
-  echo "#--> screen -S update -X hardcopy .temp.out && cat ./.temp.out"
+  echo "# UPDATE TORRENT - for details call:"
+  echo "# screen -S update -X hardcopy .temp.out && cat ./.temp.out"
   sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
     echo "updateSeeding=1"
