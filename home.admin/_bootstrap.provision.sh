@@ -221,7 +221,7 @@ echo "" >> ${logFile}
 echo "*** Replay backup of LND directory" >> ${logFile}
 if [ -d "/mnt/hdd/backup_lnd" ]; then
   echo "Copying ..." >> ${logFile}
-  sudo cp -r /mnt/hdd/backup_lnd /mnt/hdd/lnd >> ${logFile} 2>&1
+  sudo cp -r /mnt/hdd/backup_lnd/* /mnt/hdd/lnd >> ${logFile} 2>&1
   echo "Updating user admin creds ..." >> ${logFile}
   sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile} 2>&1
   sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile} 2>&1
