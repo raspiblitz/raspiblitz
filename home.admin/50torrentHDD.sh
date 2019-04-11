@@ -86,7 +86,7 @@ if [ ${torrentComplete1} -eq 0 ]; then
 
     # start torrent download in screen session
     echo "starting torrent: blockchain"
-    command1="sudo nice -n 10 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
+    command1="sudo nice -n 10 chrt -i 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
@@ -110,7 +110,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
     
     # start torrent download in screen session
     echo "starting torrent: update"
-    command2="sudo nice -n 10 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
+    command2="sudo nice -n 10 chrt -i 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
     screenCommand="screen -S update -L screen.log -dm ${command2}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
