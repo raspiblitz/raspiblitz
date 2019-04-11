@@ -440,8 +440,8 @@ sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.repor
 ################################
 
 if [ "${backupTorrentSeeding}" == "on" ]; then
-  echo "Starting BACKUP TORRENT HOSTING in background ..." >> $logFile
-  sudo /home/admin/50torrentHDD.sh backup-torrent-hosting
+  echo "Starting BACKUP TORRENT HOSTING in background (after 5 minutes) ..." >> $logFile
+  ( sleep 300 ; sudo /home/admin/50torrentHDD.sh backup-torrent-hosting ) &
 fi
 
 echo "DONE BOOTSTRAP" >> $logFile
