@@ -270,6 +270,21 @@ else
   fi
 fi
 
+# STATUS SINALING: Backup Torrent Seeding
+torrentBaseStatus="•"
+torrentUpdateStatus="•"
+sudo /home/admin/50torrentHDD.sh backup-torrent-hosting-status | source /dev/stdin
+if [ "${baseComplete}" == "1" ]; then
+  torrentBaseStatus="↑"
+elif [ "${baseSeeding}" == "1" ]; then
+  torrentBaseStatus="↓"
+fi
+if [ "${updateComplete}" == "1" ]; then
+  torrentUpdateStatus="↑"
+elif [ "${updateSeeding}" == "1" ]; then
+  torrentUpdateStatus="↓"
+fi
+
 sleep 5
 printf "
 ${color_yellow}
@@ -282,7 +297,7 @@ ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s${torrentBaseStatus}${torrentUpdateStatus}
 ${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
