@@ -8,10 +8,6 @@
 ## get basic info
 source /home/admin/raspiblitz.info
 
-# make sure rtorrent is available
-
-sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
-
 # torrent files that are available
 # in directory /home.admin/assets/
 # WITHOUT THE '.torrent' ENDING
@@ -80,6 +76,9 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   echo "updateComplete=${torrentComplete}"
   exit
 fi
+
+# make sure rtorrent is available
+sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
 
 # if setup was done - remove old data
 if [ "${setupStep}" = "100" ] && [ ${#1} -eq 0 ]; then
