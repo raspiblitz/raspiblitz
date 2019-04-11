@@ -2,18 +2,15 @@
 
 # START with parameter "backup-torrent-hosting" to just kick of the torrent downloads in the background during 
 # regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
+
 # START with parameter "backup-torrent-hosting-cleanup" to stop background torrents and clean up
  
 ## get basic info
 source /home/admin/raspiblitz.info
 
 # make sure rtorrent is available
-echo ""
-sudo apt-get install rtorrent -y
-echo ""
 
-echo ""
-echo "*** Torrent Files ***"
+sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
 
 # torrent files that are available
 # in directory /home.admin/assets/
@@ -32,8 +29,8 @@ if [ "$network" = "litecoin" ]; then
   baseTorrentFile=${litecoinBase}
   updateTorrentFile=${litecoinUpdate}
 fi
-echo "base   : ${baseTorrentFile}"
-echo "update : ${updateTorrentFile}"
+echo "baseTorrent='${baseTorrentFile}'"
+echo "updateTorrent='${updateTorrentFile}'"
 sleep 1
 
 targetDir="/mnt/hdd/torrent"
@@ -69,7 +66,7 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   else
     echo "baseSeeding=0"
   fi
-  torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent | grep ':completei1' -c)
+  torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
   echo "baseComplete=${torrentComplete}"
   sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
@@ -77,7 +74,7 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   else
     echo "updateSeeding=0"
   fi
-  torrentComplete=$(cat ${sessionDir}/update/*.torrent.rtorrent | grep ':completei1' -c)
+  torrentComplete=$(cat ${sessionDir}/update/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
   echo "updateComplete=${torrentComplete}"
   exit
 fi
