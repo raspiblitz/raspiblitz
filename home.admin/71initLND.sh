@@ -8,4 +8,4 @@
 # - TLS.cert was created
 
 source lnd/bin/activate
-python /home/admin/config.scripts/lnd.initwallet.sh ahdahdkash
+python /home/admin/config.scripts/lnd.initwallet.py ahdahdkash

@@ -64,8 +64,9 @@ echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
-sudo -u admin cp -f /home/admin/raspiblitz/home.admin/config.scripts/*.* /home/admin/config.scripts
+sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/config.scripts/*.* /home/admin/config.scripts
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
+sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
 echo "Reboot recommended"
