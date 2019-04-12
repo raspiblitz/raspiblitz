@@ -305,7 +305,7 @@ elif [ "${abcd}" = "x" ]; then
     fi
 
     # store result is file
-    newPassword="${password1}"
+    echo "${password1}" > ${resultFile}
     
 # everything else
 else

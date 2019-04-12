@@ -21,42 +21,6 @@ fi
 echo "OK - ${network}d is running"
 echo ""
 
-# verify that chainnetwork is ready
-chainIsReady=0
-loopCount=0
-echo "*** Wait until ${network}d is ready ..."
-while [ ${chainIsReady} -eq 0 ]
-  do
-    loopCount=$(($loopCount +1))
-    result=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>error.out)
-    error=`cat error.out`
-    rm error.out
-    if [ ${#error} -gt 0 ]; then
-      if [ ${loopCount} -gt 33 ]; then
-        echo "*** TAKES LONGER THEN EXCEPTED ***"
-        date +%s
-        echo "result(${result})"
-        echo "error(${error})"
-        testnetAdd=""
-        if [ "${chain}"  = "test" ]; then
-         testnetAdd="testnet3/"
-        fi
-        sudo tail -n 5 /mnt/hdd/${network}/${testnetAdd}debug.log
-        echo "If you see an error -28 relax, just give it some time."
-        echo "Waiting 1 minute and then trying again ..."
-        sleep 60
-      else
-        echo "(${loopCount}/33) still waiting .."
-        sleep 10
-      fi
-    else
-      echo "OK - chainnetwork is working"
-      echo ""
-      chainIsReady=1
-      break
-    fi
-  done
-
 ###### LND Config
 echo "*** LND Config ***"
 configExists=$( sudo ls /mnt/hdd/lnd/ | grep -c lnd.conf )
