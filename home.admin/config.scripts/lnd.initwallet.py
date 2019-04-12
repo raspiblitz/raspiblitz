@@ -66,9 +66,9 @@ if mode=="new":
         seedwords = response.cipher_seed_mnemonic
         seedwordsString=','.join(seedwords)
         print("seedwords='"+seedwordsString+"'")
-    except: 
-        e = sys.exc_info()[0]
-        print(e)
+    except Exception as err: 
+        #e = sys.exc_info()[0]
+        print(err)
         print >> sys.stderr, e
         print("err='Failed: RPC GenSeedRequest'")  
 
