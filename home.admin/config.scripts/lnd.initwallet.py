@@ -55,15 +55,28 @@ ssl_creds = grpc.ssl_channel_credentials(cert)
 channel = grpc.secure_channel('localhost:10009', ssl_creds)
 stub = lnrpc.WalletUnlockerStub(channel)
 
-print("TODO: mode "+mode)
-sys.exit(1)
+if mode=="new":
 
-#request = ln.InitWalletRequest(
-#        wallet_password=base64.b64encode(sys.argv[1]).decode(),
-#        cipher_seed_mnemonic=<array string>,
-#        aezeed_passphrase=<bytes>,
-#        recovery_window=<int32>,
-#        channel_backups=<ChanBackupSnapshot>,
-#    )
-#response = stub.InitWallet(request)
-#print(response)
+    if len(seedpassword)>0:
+        request = ln.InitWalletRequest(
+            wallet_password=base64.b64encode(walletpassword.decode(),
+            aezeed_passphrase=base64.b64encode(seedpassword).decode()
+        )
+    else:
+        request = ln.InitWalletRequest(
+            wallet_password=base64.b64encode(walletpassword.decode()
+        )
+
+    response = stub.InitWallet(request)
+    print(response)
+
+elif mode=="seed":
+
+    print("err='TODO: implement creating from seed'")
+    sys.exit(1)
+
+elif mode=="scb":
+
+    print("err='TODO: implement creating from seed/scb'")
+    sys.exit(1)
+
