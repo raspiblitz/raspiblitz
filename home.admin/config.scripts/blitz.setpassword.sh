@@ -269,7 +269,7 @@ elif [ "${abcd}" = "x" ]; then
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter:\n(to test if typed in correctly)" 10 52 2>$_temp
+       --insecure --passwordbox "Re-Enter the Password:\n(to test if typed in correctly)" 10 52 2>$_temp
 
     # get user input
     password2=$( cat $_temp )
