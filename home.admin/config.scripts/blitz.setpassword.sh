@@ -5,7 +5,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
- echo "blitz.setpassword.sh [X] [text] [result-file]"
+ echo "blitz.setpassword.sh [x] [text] [result-file]"
  echo "exits on 0 = needs reboot"
  exit 1
 fi
@@ -252,7 +252,7 @@ elif [ "${abcd}" = "d" ]; then
 
 ############################
 # PASSWORD X
-elif [ "${abcd}" = "X" ]; then
+elif [ "${abcd}" = "x" ]; then
 
     # second parameter is the flexible text
     text=$2
@@ -278,14 +278,14 @@ elif [ "${abcd}" = "X" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh X $2 $3
+      sudo /home/admin/config.scripts/blitz.setpassword.sh X "$2" "$3"
       exit 1
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh X $2 $3
+      sudo /home/admin/config.scripts/blitz.setpassword.sh X "$2" "$3"
       exit 1
     fi
 
@@ -293,14 +293,14 @@ elif [ "${abcd}" = "X" ]; then
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh X $2 $3
+      sudo /home/admin/config.scripts/blitz.setpassword.sh X "$2" "$3"
       exit 1
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh X $2 $3
+      sudo /home/admin/config.scripts/blitz.setpassword.sh X "$2" "$3"
       exit 1
     fi
 
