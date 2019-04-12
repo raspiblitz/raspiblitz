@@ -63,8 +63,8 @@ if mode=="new":
     request = ln.GenSeedRequest()
     response = stub.GenSeed(request)
     print(response)
-    print(len(cipher_seed_mnemonic))
     seedwords = response.cipher_seed_mnemonic
+    print(len(seedwords))
 
     # TODO: do first https://api.lightning.community/#genseed
 
