@@ -68,7 +68,8 @@ if mode=="new":
         print("seedwords='"+seedwordsString+"'")
     except: 
         e = sys.exc_info()[0]
-        write_to_page( "<p>Error: %s</p>" % e )
+        print(e)
+        print >> sys.stderr, e
         print("err='Failed: RPC GenSeedRequest'")  
 
     # TODO: do first https://api.lightning.community/#genseed
@@ -85,7 +86,7 @@ if mode=="new":
       response = stub.InitWallet(request)
     except: 
         e = sys.exc_info()[0]
-        write_to_page( "<p>Error: %s</p>" % e )
+        print >> sys.stderr, e
         print("err='Failed: RPC InitWallet'")
 
 elif mode=="seed":
