@@ -62,9 +62,9 @@ if mode=="new":
     #)
     request = ln.GenSeedRequest()
     response = stub.GenSeed(request)
-    print(response)
     seedwords = response.cipher_seed_mnemonic
-    print(len(seedwords))
+    seedwordsString=','.join(seedwords)
+    print("seedwords='"+seedwordsString+"'")
 
     # TODO: do first https://api.lightning.community/#genseed
 
@@ -77,7 +77,7 @@ if mode=="new":
         cipher_seed_mnemonic=seedwords
     )
     response = stub.InitWallet(request)
-    print(response)
+    #print(response)
 
 elif mode=="seed":
 
