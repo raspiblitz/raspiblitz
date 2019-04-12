@@ -67,15 +67,14 @@ if mode=="new":
         seedwordsString=','.join(seedwords)
         print("seedwords='"+seedwordsString+"'")
     except grpc.RpcError as err:
-        print("err='Failed: gRPC gRPC error'")  
-        print >> sys.stderr, err     
-        print >> sys.stderr, err.code()
-        print(err)
-        print(err.code())
-    except Exception as err: 
-        print("err='Failed: RPC GenSeedRequest'")  
-        print("debug='"+err.debug_error_string+"'")
+        # - wallet might already exist
+        print("err='grpc.RpcError'")
         print >> sys.stderr, err
+        sys.exit(1)
+    except Exception as err: 
+        print("err='GenSeedRequest'")  
+        print >> sys.stderr, err
+        sys.exit(1)
 
     # TODO: do first https://api.lightning.community/#genseed
 
@@ -93,6 +92,7 @@ if mode=="new":
         e = sys.exc_info()[0]
         print >> sys.stderr, e
         print("err='Failed: RPC InitWallet'")
+        sys.exit(1)
 
 elif mode=="seed":
 
