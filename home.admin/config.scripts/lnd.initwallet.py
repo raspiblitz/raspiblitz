@@ -66,11 +66,14 @@ if mode=="new":
         seedwords = response.cipher_seed_mnemonic
         seedwordsString=','.join(seedwords)
         print("seedwords='"+seedwordsString+"'")
+    except grpc.RpcError as err:
+        print("err='Failed: gRPC gRPC error'")  
+        print("errCode="+err.code())  
+        print >> sys.stderr, err     
     except Exception as err: 
-        #e = sys.exc_info()[0]
-        print >> sys.stderr, err
         print("err='Failed: RPC GenSeedRequest'")  
         print("debug='"+err.debug_error_string+"'")
+        print >> sys.stderr, err
 
     # TODO: do first https://api.lightning.community/#genseed
 
