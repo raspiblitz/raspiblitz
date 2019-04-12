@@ -54,14 +54,24 @@ cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
 ssl_creds = grpc.ssl_channel_credentials(cert)
 channel = grpc.secure_channel('localhost:10009', ssl_creds)
 stub = lnrpc.WalletUnlockerStub(channel)
-
 if mode=="new":
+
+    #request = ln.GenSeedRequest(
+    #    aezeed_passphrase=<bytes>
+    #)
+    #response = stub.GenSeed(request)
+    #print(response)
+
+    # TODO: do first https://api.lightning.community/#genseed
 
     #request=False
     #if len(seedpassword)>0:
     #    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode(),aezeed_passphrase=base64.b64encode(seedpassword).decode())
     #else:
-    request = ln.InitWalletRequest(wallet_password=walletpassword)
+
+    request = ln.InitWalletRequest(
+        wallet_password=walletpassword
+    )
     response = stub.InitWallet(request)
     print(response)
 
