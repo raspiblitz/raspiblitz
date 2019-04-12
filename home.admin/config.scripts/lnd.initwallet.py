@@ -59,8 +59,9 @@ if mode=="new":
     #request = ln.GenSeedRequest(
     #    aezeed_passphrase=<bytes>
     #)
-    #response = stub.GenSeed(request)
-    #print(response)
+    request = ln.GenSeedRequest()
+    response = stub.GenSeed(request)
+    print(response)
 
     # TODO: do first https://api.lightning.community/#genseed
 
@@ -69,11 +70,11 @@ if mode=="new":
     #    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode(),aezeed_passphrase=base64.b64encode(seedpassword).decode())
     #else:
 
-    request = ln.InitWalletRequest(
-        wallet_password=walletpassword
-    )
-    response = stub.InitWallet(request)
-    print(response)
+    #request = ln.InitWalletRequest(
+    #    wallet_password=walletpassword
+    #)
+    #response = stub.InitWallet(request)
+    #print(response)
 
 elif mode=="seed":
 
