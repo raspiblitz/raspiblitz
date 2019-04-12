@@ -30,17 +30,17 @@ else:
 print("TODO: Implement")
 sys.exit(1)
 
-os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
-ssl_creds = grpc.ssl_channel_credentials(cert)
-channel = grpc.secure_channel('localhost:10009', ssl_creds)
-stub = lnrpc.WalletUnlockerStub(channel)
-request = ln.InitWalletRequest(
-        wallet_password=base64.b64encode(sys.argv[1]).decode(),
-        cipher_seed_mnemonic=<array string>,
-        aezeed_passphrase=<bytes>,
-        recovery_window=<int32>,
-        channel_backups=<ChanBackupSnapshot>,
-    )
-response = stub.InitWallet(request)
-print(response)
+#os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+#cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
+#ssl_creds = grpc.ssl_channel_credentials(cert)
+#channel = grpc.secure_channel('localhost:10009', ssl_creds)
+#stub = lnrpc.WalletUnlockerStub(channel)
+#request = ln.InitWalletRequest(
+#        wallet_password=base64.b64encode(sys.argv[1]).decode(),
+#        cipher_seed_mnemonic=<array string>,
+#        aezeed_passphrase=<bytes>,
+#        recovery_window=<int32>,
+#        channel_backups=<ChanBackupSnapshot>,
+#    )
+#response = stub.InitWallet(request)
+#print(response)
