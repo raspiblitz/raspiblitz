@@ -61,7 +61,7 @@ if mode=="new":
     #if len(seedpassword)>0:
     #    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode(),aezeed_passphrase=base64.b64encode(seedpassword).decode())
     #else:
-    request = ln.InitWalletRequest(base64.b64encode(wallet_password=walletpassword.decode(),)
+    request = ln.InitWalletRequest(wallet_password=walletpassword)
     response = stub.InitWallet(request)
     print(response)
 
