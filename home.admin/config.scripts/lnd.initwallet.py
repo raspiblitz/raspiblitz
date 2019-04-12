@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import codecs, grpc, os, sys, base64
-import rpc_pb2 as ln, rpc_pb2_grpc as lnrpc
+from lnd060libs import rpc_pb2 as ln
+from lnd060libs rpc_pb2_grpc as lnrpc
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
@@ -61,6 +62,7 @@ if mode=="new":
     #)
     request = ln.GenSeedRequest()
     response = stub.GenSeed(request)
+    response.
     print(response)
 
     # TODO: do first https://api.lightning.community/#genseed
