@@ -16,7 +16,6 @@ source lnd/bin/activate
 ````
 
 Now to generate the lnd RPC libs:
-
 ```
 git clone https://github.com/googleapis/googleapis.git
 curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
