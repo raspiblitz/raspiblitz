@@ -68,8 +68,10 @@ if mode=="new":
         print("seedwords='"+seedwordsString+"'")
     except grpc.RpcError as err:
         print("err='Failed: gRPC gRPC error'")  
-        print("errCode="+err.code())  
         print >> sys.stderr, err     
+        print >> sys.stderr, err.code()
+        print(err)
+        print(err.code())
     except Exception as err: 
         print("err='Failed: RPC GenSeedRequest'")  
         print("debug='"+err.debug_error_string+"'")
