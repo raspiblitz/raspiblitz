@@ -62,7 +62,6 @@ if mode=="new":
     #)
     request = ln.GenSeedRequest()
     response = stub.GenSeed(request)
-    response.
     print(response)
 
     # TODO: do first https://api.lightning.community/#genseed
