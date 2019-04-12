@@ -338,7 +338,6 @@ if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
   exit 1
 fi
 
-
 # check gpg finger print
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
@@ -479,6 +478,21 @@ if [ ${#installed} -eq 0 ]; then
   echo "!!! BUILD FAILED --> Was not able to install LND"
   exit 1
 fi
+
+# prepare python for lnd api use
+# https://dev.lightning.community/guides/python-grpc/
+# 
+echo ""
+echo "*** LND API for Python ***"
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 2
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1
+echo "to switch between python2/3: sudo update-alternatives --config python"
+sudo apt-get -f -y install virtualenv
+sudo -u admin virtualenv lnd
+sudo -u admin source lnd/bin/activate
+sudo -u admin pip install grpcio grpcio-tools googleapis-common-protos
+
+echo ""
 
 # Go is needed for ZAP connect later
 echo "*** Installing Go ***"
