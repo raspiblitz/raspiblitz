@@ -61,10 +61,15 @@ if mode=="new":
     #    aezeed_passphrase=<bytes>
     #)
     request = ln.GenSeedRequest()
-    response = stub.GenSeed(request)
-    seedwords = response.cipher_seed_mnemonic
-    seedwordsString=','.join(seedwords)
-    print("seedwords='"+seedwordsString+"'")
+    try:
+        response = stub.GenSeed(request)
+        seedwords = response.cipher_seed_mnemonic
+        seedwordsString=','.join(seedwords)
+        print("seedwords='"+seedwordsString+"'")
+    except: 
+        e = sys.exc_info()[0]
+        write_to_page( "<p>Error: %s</p>" % e )
+        print("err='Failed: RPC GenSeedRequest'")  
 
     # TODO: do first https://api.lightning.community/#genseed
 
@@ -76,8 +81,12 @@ if mode=="new":
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords
     )
-    response = stub.InitWallet(request)
-    #print(response)
+    try:
+      response = stub.InitWallet(request)
+    except: 
+        e = sys.exc_info()[0]
+        write_to_page( "<p>Error: %s</p>" % e )
+        print("err='Failed: RPC InitWallet'")
 
 elif mode=="seed":
 
