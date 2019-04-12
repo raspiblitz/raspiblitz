@@ -22,7 +22,7 @@ if mode=="new":
 
     print("# *** CREATING NEW LND WALLET ***")
 
-    if len(sys.argv)>=2:
+    if len(sys.argv)>2:
         walletpassword=sys.argv[2]
         if len(walletpassword)<8:
             print("err='wallet password is too short'")
@@ -31,7 +31,7 @@ if mode=="new":
         print("err='wallet password is too short'")
         sys.exit(1)
 
-    if len(sys.argv)>=3:
+    if len(sys.argv)>3:
         seedpassword=sys.argv[3]
 
 elif mode=="seed":
