@@ -67,7 +67,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
   # editing lnd service (adding the static publicip) 
   echo "editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}/g" /etc/systemd/system/lnd.service
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}\/g" /etc/systemd/system/lnd.service
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=off/g" /mnt/hdd/raspiblitz.conf
