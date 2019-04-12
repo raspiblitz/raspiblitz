@@ -68,9 +68,9 @@ if mode=="new":
         print("seedwords='"+seedwordsString+"'")
     except Exception as err: 
         #e = sys.exc_info()[0]
-        print(err)
-        print >> sys.stderr, e
+        print >> sys.stderr, err
         print("err='Failed: RPC GenSeedRequest'")  
+        print("debug='"+err.debug_error_string+"'")
 
     # TODO: do first https://api.lightning.community/#genseed
 
