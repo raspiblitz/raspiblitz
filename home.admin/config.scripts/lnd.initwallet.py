@@ -7,7 +7,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("creating or recovering the LND wallet")
     print("lnd.winitwallet.py new [walletpassword] [?seedpassword]")
     print("lnd.winitwallet.py seed [walletpassword] [seedstring] [?seedpassword]")
-     print("lnd.winitwallet.py scb [walletpassword] [seedstring] [filepathSCB] [?seedpassword]")
+    print("lnd.winitwallet.py scb [walletpassword] [seedstring] [filepathSCB] [?seedpassword]")
     sys.exit(1)
 
 walletpassword=""
