@@ -27,7 +27,7 @@ else:
     print("unkown mode - run without parameter to see options")
     sys.exit(1)
 
-print("TODO: Implement)
+print("TODO: Implement")
 sys.exit(1)
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
