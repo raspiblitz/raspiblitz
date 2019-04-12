@@ -9,8 +9,9 @@
 
 # CHECK 3: Does LND wallet already exists
 # - yes: Jump to next point or ask to delete
-# 
+# sudo systemctl stop lnd
 # sudo rm /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db
+# sudo systemctl start lnd
 
 # UI: Ask if user wants NEW wallet or RECOVER a wallet
 
