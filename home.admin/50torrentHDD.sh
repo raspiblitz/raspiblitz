@@ -60,7 +60,7 @@ if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
 fi
 if [ "$1" == "backup-torrent-hosting-status" ]; then
   echo "# BASE TORRENT - for details call:"
-  echo "# screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out"
+  echo "# screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out && rm ./.temp.out"
   sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
     echo "baseSeeding=1"
@@ -70,7 +70,7 @@ if [ "$1" == "backup-torrent-hosting-status" ]; then
   torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
   echo "baseComplete=${torrentComplete}"
   echo "# UPDATE TORRENT - for details call:"
-  echo "# screen -S update -X hardcopy .temp.out && cat ./.temp.out"
+  echo "# screen -S update -X hardcopy .temp.out && cat ./.temp.out && rm ./.temp.out"
   sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
     echo "updateSeeding=1"
@@ -114,7 +114,7 @@ if [ ${torrentComplete1} -eq 0 ]; then
 
     # start torrent download in screen session
     echo "starting torrent: blockchain"
-    command1="sudo nice -n 10 chrt -i 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
+    command1="sudo nice -n 10 chrt -r -p 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
     screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
@@ -138,7 +138,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
     
     # start torrent download in screen session
     echo "starting torrent: update"
-    command2="sudo nice -n 10 chrt -i 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
+    command2="sudo nice -n 10 chrt -r -p 0 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
     screenCommand="screen -S update -L screen.log -dm ${command2}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
