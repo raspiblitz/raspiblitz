@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import codecs, grpc, os, sys
+import codecs, grpc, os, sys, base64
 import rpc_pb2 as ln, rpc_pb2_grpc as lnrpc
 
 # display config script info
@@ -61,7 +61,7 @@ if mode=="new":
     #if len(seedpassword)>0:
     #    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode(),aezeed_passphrase=base64.b64encode(seedpassword).decode())
     #else:
-    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode())
+    request = ln.InitWalletRequest(base64.b64encode(wallet_password=walletpassword.decode(),)
     response = stub.InitWallet(request)
     print(response)
 
