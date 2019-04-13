@@ -6,10 +6,10 @@
 # to just kick of the torrent downloads in the background during 
 # regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
 
-# backup-torrent-hosting-cleanup
+# cleanup
 # to stop background torrents and clean up
 
-# backup-torrent-hosting-status
+# status
 # to get info backround torrent hosting
  
 ## get basic info
@@ -40,7 +40,7 @@ targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 
 # BACKUP TORRENT SEEDING
-if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
+if [ "$1" == "cleanup" ]; then
   echo "Stopping Torrents ..."
   sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
@@ -58,7 +58,7 @@ if [ "$1" == "backup-torrent-hosting-cleanup" ]; then
   echo "DONE"
   exit
 fi
-if [ "$1" == "backup-torrent-hosting-status" ]; then
+if [ "$1" == "status" ]; then
   echo "# BASE TORRENT - for details call:"
   echo "# screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out && rm ./.temp.out"
   sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)

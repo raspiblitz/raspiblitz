@@ -237,7 +237,7 @@ RaspiBlitz can be slow.
 
   else
     echo "Stopping Torrents and Cleaning Up ..."
-    /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
+    /home/admin/50torrentHDD.sh cleanup
     echo "BACKUP TORRENT SEEDING IS NOW OFF"
     needsReboot=1
   fi
