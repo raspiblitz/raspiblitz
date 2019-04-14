@@ -1,10 +1,17 @@
 # ⚡️ Alternative platforms for the RaspiBlitz ⚡️
 
 Minimum requirements:
-
 * ARM V7 or V8 processor architecture (32 or 64 bit)
 * 1 GB RAM
-* \> 300 GB diskspace
+* \> 300 GB HDD
+
+Desirable:
+* \> 2GB DDR3 RAM
+* USB 3.0 or SATA connector
+* SSD
+* Compact case with efficient cooling (heatsink / fan)
+* HDMI / GPIO screen
+
 
 Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 
@@ -80,3 +87,7 @@ Tested on:
 The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
 Detailed instructions for the RaspiBlitz-on-DietPi: [/dietpi/README.md](/dietpi/README.md)
+
+---
+Extras for advanced users and powerful hardware:
+https://github.com/openoms/bitcoin-tutorials/
