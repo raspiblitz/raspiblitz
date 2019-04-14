@@ -34,7 +34,7 @@ while [ ${ready} -eq 0 ]
   done
 
 echo ""
-echo "*** Clone Blockchain form a second HDD ***"
+echo "*** Clone Blockchain from a second HDD ***"
 echo ""
 echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
 echo ""
