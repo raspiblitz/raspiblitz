@@ -569,6 +569,7 @@ sudo apt-get -y install exfat-fuse
 # for blockchain torrent download
 sudo apt-get -y install transmission-cli
 sudo apt-get -y install rtorrent
+sudo apt-get -y install cpulimit
 
 # for background downloading
 sudo apt-get -y install screen
