@@ -161,8 +161,8 @@ if [ ${walletExists} -eq 0 ]; then
     fi
 
     # generate wallet with seed and set passwordC
-    source lnd/bin/activate
-    sudo python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
+    source /home/admin/python-env-lnd/bin/activate
+    python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
     sudo shred /home/admin/.pass.tmp 2>/dev/null
 
@@ -174,7 +174,7 @@ if [ ${walletExists} -eq 0 ]; then
     else
       if [ ${#seedwords} -eq 0 ]; then
         echo "FAIL!! -> MISSING seedwords data - but also no err data ?!?"
-        echo "CHECK output data above - PRESS ENTER to retart 70initLND.sh" 
+        echo "CHECK output data above - PRESS ENTER to restart 70initLND.sh" 
         read key
         /home/admin/70initLND.sh
         exit 1

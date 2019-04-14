@@ -488,10 +488,7 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 2
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1
 echo "to switch between python2/3: sudo update-alternatives --config python"
 sudo apt-get -f -y install virtualenv
-sudo -u admin virtualenv lnd
-sudo -u admin source lnd/bin/activate
-sudo -u admin pip install grpcio grpcio-tools googleapis-common-protos
-
+sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos"
 echo ""
 
 # Go is needed for ZAP connect later
