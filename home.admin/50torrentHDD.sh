@@ -162,14 +162,26 @@ if [ "$1" == "backup-torrent-hosting" ]; then
     sudo sed -i "s/^backupTorrentSeeding=.*/backupTorrentSeeding=on/g" /mnt/hdd/raspiblitz.conf
   fi
 
-  # set the torrents processes to cpulimit 20%
-  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
-  echo "Putting rTorrent blockchain 'BASE' (PID=${sessionPID}) to background ... (please wait)"
-  sudo cpulimit -p ${sessionPID} -l 25 &
-  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
-  echo "Putting rTorrent blockchain 'UPDATE' (PID=${sessionPID}) to background ... (please wait)"
-  sudo cpulimit -p ${sessionPID} -l 25 &
+  # set the torrents processes to cpulimit 25%
   sleep 6
+  echo ""
+  rtorrentPIDs=$(ps axf | grep "rtorrent" | awk '{$1=$1;print}' | cut -d' ' -f1)
+  while read -r pid ; do
+    ps ${pid} | grep "rtorrent"
+    echo "---> reducing this rTorrent process to 25% CPU"
+    sudo cpulimit -p ${pid} -l 25 &
+    echo ""
+  done < <(echo "${rtorrentPIDs}")
+  sleep 6
+
+  # set the torrents processes to cpulimit 20%
+  #sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
+  #echo "Putting rTorrent blockchain 'BASE' (PID=${sessionPID}) to background ... (please wait)"
+  #sudo cpulimit -p ${sessionPID} -l 25 &
+  #sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
+  #echo "Putting rTorrent blockchain 'UPDATE' (PID=${sessionPID}) to background ... (please wait)"
+  #sudo cpulimit -p ${sessionPID} -l 25 &
+
   echo "Done BACKUP TORRENT HOSTING"
   exit
 fi
