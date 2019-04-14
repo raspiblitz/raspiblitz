@@ -154,7 +154,6 @@ sleep 2
 
 if [ "$1" == "backup-torrent-hosting" ]; then
 
-
   # changing config - so it can be startup again after a reboot by bootstrap
   source /mnt/hdd/raspiblitz.conf
   if [ ${#backupTorrentSeeding} -eq 0 ]; then 
@@ -170,6 +169,7 @@ if [ "$1" == "backup-torrent-hosting" ]; then
   sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
   echo "Putting rTorrent blockchain 'UPDATE' (PID=${sessionPID}) to background ... (please wait)"
   sudo cpulimit -p ${sessionPID} -l 25 &
+  sleep 6
   echo "Done BACKUP TORRENT HOSTING"
   exit
 fi

@@ -143,7 +143,7 @@ if [ ${walletExists} -eq 0 ]; then
   # UI: Ask if user wants NEW wallet or RECOVER a wallet
   OPTIONS=(NEW "Setup a brand new Lightning Node (DEFAULT)" \
            OLD "I had a old Node I want to recover/restore")
-  CHOICE=$(dialog --backtitle "RaspiBlitz - LND Setup" --clear --title "LND Data & Wallet" --menu "How to setup your node?:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   echo "choice($CHOICE)"
 
   if [ "${CHOICE}" == "NEW" ]; then
@@ -167,10 +167,18 @@ if [ ${walletExists} -eq 0 ]; then
     sudo shred /home/admin/.pass.tmp 2>/dev/null
 
     # in case of error - retry
-    if [ ${#err} -eq 0 ]; then
+    if [ ${#err} -gt 0 ]; then
       whiptail --title "lnd.initwallet.py - ERROR" --msgbox "${err}" 8 50
       /home/admin/70initLND.sh
       exit 1
+    else
+      if [ ${#seedwords} -eq 0 ]; then
+        echo "FAIL!! -> MISSING seedwords data - but also no err data ?!?"
+        echo "CHECK output data above - PRESS ENTER to retart 70initLND.sh" 
+        read key
+        /home/admin/70initLND.sh
+        exit 1
+      fi
     fi
 
     # TODO: create numbered string in rows
