@@ -206,6 +206,10 @@ if [ ${walletExists} -eq 0 ]; then
 
   fi
 
+else
+  echo "OK - LND wallet already exists."
+fi
+
 dialog --pause "  Waiting for LND - please wait .." 8 58 60
 
 ###### Copy LND macaroons to admin
@@ -260,4 +264,3 @@ sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
 ###### finishSetup
 sudo ./90finishSetup.sh
 sudo ./95finalSetup.sh
-
