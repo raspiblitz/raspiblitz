@@ -347,13 +347,13 @@ bitcoinVersion="0.17.1"
 
 # set OS version 
 if [ ${isARM} -eq 1 ] ; then
-  bitcoinOSversion="arm"
+  bitcoinOSversion="arm-linux-gnueabihf"
   # needed to make sure download is not changed
   # calulate with sha256sum and also check with SHA256SUMS.asc
   bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
-  bitcoinOSversion="aarch64"
+  bitcoinOSversion="aarch64-linux-gnu"
   bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
 fi
 
@@ -366,7 +366,7 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}-linux-gnueabihf.tar.gz"
+binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
 if [ ! -f "./${binaryName}" ]
 then
