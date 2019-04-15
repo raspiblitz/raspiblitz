@@ -26,15 +26,23 @@ if [ ${#openChannels} -eq 0 ]; then
 fi
 
 if [ ${openChannels} -gt 0 ]; then
-   dialog --title 'Info' --msgbox 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved.' 7 58
+   whiptail --title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved' 10 56
+   if [ $? -eq 1 ]; then
+     exit 1
+   fi
    echo "please wait ..."
+   exit 1
 fi
 
 # check if money is waiting to get confirmed
 unconfirmed=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
 if [ ${unconfirmed} -gt 0 ]; then
    dialog --title 'Info' --msgbox "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
+   if [ $? -eq 1 ]; then
+     exit 1
+   fi
    echo "please wait ..."
+   exit 1
 fi
 
 # get available amount in on-chain wallet
