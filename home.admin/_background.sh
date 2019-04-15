@@ -172,22 +172,28 @@ do
         actualSecondsTimestamp=$(date +%s)
         secondsInSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
         echo "${secondsInSync} seconds"
-        if [ "${backupTorrentSeeding}" == "on" ]; then
-          echo "Backup Torrent Seeding is ON - check if already running"
-          source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-          if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
-            echo "---> STARTING Backup Torrent Seeding"
-            sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
+
+        # when >10min in sync
+        if [ ${secondsInSync} -gt 600 ]; then
+          echo "LND in sync for longer then 10 minutes"
+          if [ "${backupTorrentSeeding}" == "on" ]; then
+            echo "Backup Torrent Seeding is ON - check if already running"
+            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+            if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
+              echo "---> STARTING Backup Torrent Seeding"
+              sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
+            else
+              echo "Backup Torrent Seeding - already running"
+            fi
           else
-            echo "Backup Torrent Seeding - already running"
+            echo "Backup Torrent Seeding is OFF"
           fi
-        else
-          echo "Backup Torrent Seeding is OFF"
         fi
+        
       else
         echo "still not in sync"
         if [ ${syncedSince} -gt 0 ]; then
-        
+
           echo "was in sync at least once since rinning but lost now for:"
           actualSecondsTimestamp=$(date +%s)
           secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
