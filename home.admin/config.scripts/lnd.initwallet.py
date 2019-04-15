@@ -57,15 +57,24 @@ channel = grpc.secure_channel('localhost:10009', ssl_creds)
 stub = lnrpc.WalletUnlockerStub(channel)
 if mode=="new":
 
-    #request = ln.GenSeedRequest(
-    #    aezeed_passphrase=<bytes>
-    #)
     request = ln.GenSeedRequest()
     try:
         response = stub.GenSeed(request)
         seedwords = response.cipher_seed_mnemonic
         seedwordsString=','.join(seedwords)
         print("seedwords='"+seedwordsString+"'")
+
+        # add a 6x4 formatted version to the output
+        seedwords6x4=""
+        for i in range(0,len(seedwords)):
+            if (i % 6 == 0) && (i != 0):
+                seedwords6x4=seedwords6x4+"\n"
+            singleWord=(i+1)+":"+seedwords[i]
+            while len(singleWord)<12
+                singleWord=singleWord+" "
+            seedwords6x4=seedwords6x4+singleWord
+        print("seedwords6x4='"+seedwords6x4+"'")
+
     except grpc.RpcError as err:
         # - wallet might already exist
         print("err='grpc.RpcError'")
@@ -75,12 +84,6 @@ if mode=="new":
         print("err='GenSeedRequest'")  
         print >> sys.stderr, err
         sys.exit(1)
-
-    # TODO: do first https://api.lightning.community/#genseed
-
-    #if len(seedpassword)>0:
-    #    request = ln.InitWalletRequest(wallet_password=base64.b64encode(walletpassword.decode(),aezeed_passphrase=base64.b64encode(seedpassword).decode())
-    #else:
 
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
