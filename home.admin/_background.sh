@@ -189,7 +189,7 @@ do
             echo "Backup Torrent Seeding is OFF"
           fi
         fi
-        
+
       else
         echo "still not in sync"
         if [ ${syncedSince} -gt 0 ]; then
@@ -241,7 +241,7 @@ do
       fi
     fi
   
-    lastSyncState=${lastSyncState}
+    lastSyncState=${lndSynced}
   fi
 
   ###############################
