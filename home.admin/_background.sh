@@ -22,6 +22,10 @@ fi
 
 echo "_background.sh STARTED"
 
+# monitor lost LND sync
+syncedSince=0
+lastSyncState=0
+
 counter=0
 while [ 1 ]
 do
@@ -144,6 +148,94 @@ do
       echo "skip - because setup is still running"
     fi
 
+  fi
+
+
+  ###############################
+  # LND MONITOR LOST SYNC
+  ###############################
+
+  # check every 5min
+  recheckSync=$(($counter % 300))
+  if [ ${recheckSync} -eq 1 ]; then
+    source ${configFile}
+    echo "LND MONITOR LOST SYNC ..."
+    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    echo "lndSynced(${lndSynced})"
+    echo "syncedSince(${syncedSince})"
+    echo "lastSyncState(${lastSyncState})"
+    if [ ${lndSynced} -eq ${lastSyncState} ]; then
+
+      echo "no sync change"
+      if [ ${lndSynced} -eq 1 ]; then
+        echo "all is good - LND still in sync now for:"
+        actualSecondsTimestamp=$(date +%s)
+        secondsInSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
+        echo "${secondsInSync} seconds"
+        if [ "${backupTorrentSeeding}" == "on" ]; then
+          echo "Backup Torrent Seeding is ON - check if already running"
+          source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+          if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
+            echo "---> STARTING Backup Torrent Seeding"
+            sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
+          else
+            echo "Backup Torrent Seeding - already running"
+          fi
+        else
+          echo "Backup Torrent Seeding is OFF"
+        fi
+      else
+        echo "still not in sync"
+        if [ ${syncedSince} -gt 0 ]; then
+        
+          echo "was in sync at least once since rinning but lost now for:"
+          actualSecondsTimestamp=$(date +%s)
+          secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
+          echo "${secondsOutOfSync} seconds"
+
+          # when >10min out of sync
+          if [ ${secondsOutOfSync} -gt 600 ]; then
+            echo "! LND fell out of sync for longer then 10 minutes !"
+            if [ "${backupTorrentSeeding}" == "on" ]; then
+              echo "Backup Torrent Seeding is ON - check if still running"
+              source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+              if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
+                echo "---> STOPPING Backup Torrent Seeding"
+                sudo -u admin /home/admin/50torrentHDD.sh stop
+              else
+                echo "No Backup Torrent Seeding - already stopped"
+              fi
+            else
+              echo "Backup Torrent Seeding is OFF"
+            fi
+          fi
+
+          # when >1h out of sync
+          if [ ${secondsOutOfSync} -gt 3600 ]; then
+            echo "!!!! LND fell out of sync for longer then 1 hour !!!"
+            # TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
+          fi
+
+        else
+          echo "LND was never in sync since since started (could be multiple reasons - dont act)"
+        fi
+      fi
+
+    else
+      echo "sync change detected"
+      if [ ${lastSyncState} -eq 1 ] && [ ${lndSynced} -eq 0 ]; then
+        echo "--> LND SNC LOST"
+      else
+        if [ ${syncedSince} -eq 0 ]; then
+          echo "--> LND SYNC GAINED"
+        else
+          echo "--> LND SYNC RECOVERED"
+        fi
+        syncedSince=$(date +%s)
+      fi
+    fi
+  
+    lastSyncState=${lastSyncState}
   fi
 
   ###############################

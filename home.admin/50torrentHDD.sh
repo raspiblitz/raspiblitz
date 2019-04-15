@@ -11,6 +11,9 @@
 
 # status
 # to get info backround torrent hosting
+
+# stop
+# just stopping the download - not switching off
  
 ## get basic info
 source /home/admin/raspiblitz.info
