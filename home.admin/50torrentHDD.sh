@@ -40,7 +40,7 @@ targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 
 # BACKUP TORRENT SEEDING
-if [ "$1" == "cleanup" ]; then
+if [ "$1" == "stop" ] || [ "$1" == "cleanup" ]; then
   echo "Stopping Torrents ..."
   sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
@@ -49,6 +49,20 @@ if [ "$1" == "cleanup" ]; then
   sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
   if [ ${#sessionPID} -gt 0 ]; then
     sudo pkill -P ${sessionPID}
+  fi
+fi
+if [ "$1" == "stop" ] || [ "$1" == "cleanup" ]; then
+  echo "Stopping Torrents ..."
+  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    sudo pkill -P ${sessionPID}
+  fi
+  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
+  if [ ${#sessionPID} -gt 0 ]; then
+    sudo pkill -P ${sessionPID}
+  fi
+  if [ "$1" == "stop" ]; then
+    exit 0
   fi
   echo "Deleting all possible old (version) torrent data ..."
   sudo rm -r /home/admin/.rtorrent.session 2>/dev/null
