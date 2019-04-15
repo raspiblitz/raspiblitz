@@ -56,9 +56,10 @@ elif [ "${MODE}" == "upload" ]; then
     --header "Authorization: Bearer "${DROPBOX_APITOKEN}"" \
     --header "Dropbox-API-Arg: {\"path\": \"/"$BACKUPFOLDER"/"$1"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false,\"strict_conflict\": false}" \
     --header "Content-Type: application/octet-stream" \
-    --data-binary @$1 > /home/admin/.dropbbox.tmp
-  safeResponse=$(sed 's/[^a-zA-Z0-9 ]//g' /home/admin/.dropbbox.tmp)
-  sudo shred /home/admin/.dropbbox.tmp
+    --data-binary @$1 > /home/admin/.dropbox.tmp
+  safeResponse=$(sed 's/[^a-zA-Z0-9 ]//g' /home/admin/.dropbox.tmp)
+  #sudo shred /home/admin/.dropbox.tmp
+  #sudo rm /home/admin/.dropbox.tmp 2>/dev/null
   UPLOADTIME=$(echo $FINISH | jq -r .server_modified)
   if [ ! -z $UPLOADTIME ] ; then
     echo "# Successfully uploaded!"
