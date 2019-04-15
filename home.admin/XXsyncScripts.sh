@@ -61,7 +61,7 @@ else
   echo "******************************************"
 fi
 echo "COPYING from GIT-Directory to /home/admin/ .."
-sudo -u admin cp --verbose -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod +x /home/admin/*.sh
 sudo -u admin chmod +x /home/admin/*.py
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
