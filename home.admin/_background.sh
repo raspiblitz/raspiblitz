@@ -239,11 +239,7 @@ do
             if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
               echo "---> STARTING Backup Torrent Seeding"
               sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
-            else
-              #echo "Backup Torrent Seeding - already running"
             fi
-          else
-            #echo "Backup Torrent Seeding is OFF"
           fi
         fi
 
@@ -265,11 +261,7 @@ do
               if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
                 echo "---> STOPPING Backup Torrent Seeding"
                 sudo -u admin /home/admin/50torrentHDD.sh stop
-              else
-                #echo "No Backup Torrent Seeding - already stopped"
               fi
-            else
-              #echo "Backup Torrent Seeding is OFF"
             fi
           fi
 
@@ -278,9 +270,7 @@ do
             # echo "!!!! LND fell out of sync for longer then 1 hour !!!"
             # TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
           fi
-
-        else
-          #echo "LND was never in sync since since started (could be multiple reasons - dont act)"
+          
         fi
       fi
 
