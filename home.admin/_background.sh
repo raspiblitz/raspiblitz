@@ -158,12 +158,12 @@ do
   # check every 1min
   recheckSCB=$(($counter % 60))
   if [ ${recheckSCB} -eq 1 ]; then
-    echo "SCB Monitoring ..."
+    #echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
     scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
-      echo "Found Channel Backup File .. check if changed .."
+      #echo "Found Channel Backup File .. check if changed .."
       md5checksumORG=$(sudo md5sum /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
       md5checksumCPY=$(sudo md5sum /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
@@ -181,9 +181,13 @@ do
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
-          result=$(sudo scp /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup)
-          echo $?
-          echo "result(${result})"
+          sudo scp /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
+          result=$?
+          if [ ${result} -eq 0 ]; then
+            echo "OK - SCP Backup exited with 0"
+          else
+            echo "FAIL - SCP Backup exited with ${result}"
+          fi
         fi
 
         # check if a DropBox backup target is set
@@ -194,18 +198,18 @@ do
           echo "--> Offsite-Backup Dropbox"
           source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup)
           if [ ${#err} -gt 0 ]; then
-            echo "FAIL: ${err}"
+            echo "FAIL -  ${err}"
             echo "${errMore}"
           else
-            echo "OK: ${upload}"
+            echo "OK - ${upload}"
           fi
         fi
       
-      else
-        echo "Channel Backup File not changed."
+      #else
+      #  echo "Channel Backup File not changed."
       fi
-    else
-      echo "No Channel Backup File .."
+    #else
+    #  echo "No Channel Backup File .."
     fi
   fi
 
@@ -224,7 +228,7 @@ do
     #echo "lastSyncState(${lastSyncState})"
     if [ ${lndSynced} -eq ${lastSyncState} ]; then
 
-      echo "no sync change"
+      #echo "no sync change"
       if [ ${lndSynced} -eq 1 ]; then
         #echo "all is good - LND still in sync now for:"
         actualSecondsTimestamp=$(date +%s)
