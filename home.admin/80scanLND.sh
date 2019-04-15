@@ -71,7 +71,7 @@ if [ ${online} -eq 0 ]; then
     infoStr=$(echo " Waiting INTERNET CONNECTION\n RaspiBlitz cannot ping 1.0.0.1\n Local IP is ${localip}\n Please check cables and router.")
 elif [ ${isInitialChainSync} -gt 0 ]; then
   heigh=7
-  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress} %\n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
+  infoStr=" Waiting for final Blockchain Sync\n Progress: ${progress} \n Please wait - this can take some time.\n ssh admin@${localip}\n Password A"
   if [ "$USER" = "admin" ]; then
     heigh=6
     width=53
