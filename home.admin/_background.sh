@@ -182,6 +182,7 @@ do
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
           result=$(sudo scp /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup)
+          echo $?
           echo "result(${result})"
         fi
 
