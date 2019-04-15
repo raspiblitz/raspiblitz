@@ -56,14 +56,14 @@ if [ "${state}" = "recovered" ]; then
   echo "System recovered - needs final user settings"
   ./20recoverDialog.sh 
   exit 1
-fi 
+fi
 
 # signal that a reindex was triggered
 if [ "${state}" = "reindex" ]; then
   echo "Re-Index in progress ... start monitoring:"
   /home/admin/config.scripts/network.reindex.sh
   exit 1
-fi 
+fi
 
 # singal that torrent is in re-download
 if [ "${state}" = "retorrent" ]; then
@@ -315,6 +315,7 @@ else
     waitUntilChainNetworkIsReady
 
     # MAIN MENU AFTER SETUP
+    source ${configFile}
 
     plus=""
     if [ "${runBehindTor}" = "on" ]; then
