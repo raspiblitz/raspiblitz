@@ -171,7 +171,7 @@ do
 
         # make copy to sd card (as local basic backup)
         sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
-        sudp cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
+        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
         echo "OK channel.backup copied to '/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup'"
       
         # check if a SCP backup target is set
