@@ -22,6 +22,8 @@ if [ ${#openChannels} -eq 0 ]; then
   echo "Still starting up, is locked or is not running?"
   echo "Try later, try reboot or check ./XXdebugLogs.sh"
   echo "************************************************"
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
@@ -57,6 +59,8 @@ address=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#address} -eq 0 ]; then
   echo "FAIL - not a valid address (${address})"
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
@@ -83,3 +87,5 @@ else
     echo "********************************************************************"
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key
