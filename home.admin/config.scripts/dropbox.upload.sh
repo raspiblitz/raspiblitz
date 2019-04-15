@@ -49,25 +49,39 @@ elif [ "${MODE}" == "upload" ]; then
     exit 1
   fi
 
-  DEVICE=$(echo $DEVICE | awk '{print tolower($0)}' | sed -e 's/ /-/g')
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${#hostname} -eq 0 ]; then
+    hostname="raspiblitz"
+  fi
+
+  DEVICE=$(echo "${hostname}" | awk '{print tolower($0)}' | sed -e 's/ /-/g')
   BACKUPFOLDER=.lndbackup-$DEVICE
+  FILENAME=$(basename "${SOURCEFILE}")
 
   sudo curl -s -X POST https://content.dropboxapi.com/2/files/upload \
     --header "Authorization: Bearer "${DROPBOX_APITOKEN}"" \
-    --header "Dropbox-API-Arg: {\"path\": \"/"$BACKUPFOLDER"/"$1"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false,\"strict_conflict\": false}" \
+    --header "Dropbox-API-Arg: {\"path\": \"/"$BACKUPFOLDER"/"$FILENAME"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false,\"strict_conflict\": false}" \
     --header "Content-Type: application/octet-stream" \
-    --data-binary @$1 > /home/admin/.dropbox.tmp
+    --data-binary @$SOURCEFILE > /home/admin/.dropbox.tmp
   safeResponse=$(sed 's/[^a-zA-Z0-9 ]//g' /home/admin/.dropbox.tmp)
-  success=$(echo "${safeResponse}" | grep -c 'servermodified')
   sudo shred /home/admin/.dropbox.tmp
   sudo rm /home/admin/.dropbox.tmp 2>/dev/null
-  if [ ${success} -gt 0 ] ; then
+
+  success=$(echo "${safeResponse}" | grep -c 'servermodified')
+  sizeZero=$(echo "${safeResponse}" | grep -c 'size 0')
+  if [ ${sizeZero} -gt 0 ]; then
+    echo "# Upload happened but is size zero"
+    echo "upload=0"
+    echo "err='size zero'"
+    echo "errMore='${safeResponse}'"
+  elif [ ${success} -gt 0 ] ; then
     echo "# Successfully uploaded!"
     echo "upload=1"
   else
     echo "# Unknown Error"
     echo "upload=0"
-    echo "err='${safeResponse}'"
+    echo "err='unknown'"
+    echo "errMore='${safeResponse}'"
   fi
 
 else
