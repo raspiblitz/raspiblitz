@@ -176,7 +176,7 @@ do
       
         # check if a SCP backup target is set
         # paramter in raspiblitz.conf:
-        # scpBackupTarget='[USER]@s[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
