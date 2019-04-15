@@ -257,19 +257,6 @@ do
           secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
           #echo "${secondsOutOfSync} seconds"
 
-          # when >10min out of sync
-          if [ ${secondsOutOfSync} -gt 600 ]; then
-            #echo "! LND fell out of sync for longer then 10 minutes !"
-            if [ "${backupTorrentSeeding}" == "on" ]; then
-              #echo "Backup Torrent Seeding is ON - check if still running"
-              source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-              if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
-                echo "---> STOPPING Backup Torrent Seeding"
-                sudo -u admin /home/admin/50torrentHDD.sh stop
-              fi
-            fi
-          fi
-
           # when >1h out of sync
           #if [ ${secondsOutOfSync} -gt 3600 ]; then
           #   echo "!!!! LND fell out of sync for longer then 1 hour !!!"
@@ -283,6 +270,16 @@ do
       echo "sync change detected"
       if [ ${lastSyncState} -eq 1 ] && [ ${lndSynced} -eq 0 ]; then
         echo "--> LND SYNC LOST"
+
+          if [ "${backupTorrentSeeding}" == "on" ]; then
+            #echo "Backup Torrent Seeding is ON - check if still running"
+            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+            if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
+              echo "---> STOPPING Backup Torrent Seeding"
+              sudo -u admin /home/admin/50torrentHDD.sh stop
+            fi
+          fi
+
       else
         if [ ${syncedSince} -eq 0 ]; then
           echo "--> LND SYNC GAINED"
