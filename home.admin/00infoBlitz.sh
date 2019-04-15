@@ -271,9 +271,11 @@ else
 fi
 
 # STATUS SINALING: Backup Torrent Seeding
-torrentBaseStatus="•"
-torrentUpdateStatus="•"
+torrentBaseStatus=""
+torrentUpdateStatus=""
 if [ "${backupTorrentSeeding}" == "on" ]; then
+  torrentBaseStatus="•"
+  torrentUpdateStatus="•"
   source <(sudo -u admin /home/admin/50torrentHDD.sh status)
   if [ "${baseComplete}" == "1" ]; then
     torrentBaseStatus="↑"
