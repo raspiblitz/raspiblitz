@@ -367,8 +367,8 @@ date +%s
 echo "can take 10-60 minutes... please wait"
 sudo mkdir /mnt/hdd/${network} 2>/dev/null
 sudo mv ${targetPath1}/* /mnt/hdd/${network}/
+sudo rm -r ${sessionDir}/blockchain
 sudo cp --verbose -r ${targetPath2}/* /mnt/hdd/${network}/
-sudo rm -r ${targetDir}
 echo "OK"
 date +%s
 
