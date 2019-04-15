@@ -31,7 +31,6 @@ if [ ${openChannels} -gt 0 ]; then
      exit 1
    fi
    echo "..."
-   exit 1
 fi
 
 # check if money is waiting to get confirmed
@@ -42,7 +41,6 @@ if [ ${unconfirmed} -gt 0 ]; then
      exit 1
    fi
    echo "..."
-   exit 1
 fi
 
 # let user enter the address
