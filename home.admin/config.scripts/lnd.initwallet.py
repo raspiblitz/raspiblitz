@@ -67,10 +67,10 @@ if mode=="new":
         # add a 6x4 formatted version to the output
         seedwords6x4=""
         for i in range(0,len(seedwords)):
-            if (i % 6 == 0) && (i != 0):
+            if i % 6 == 0 and i != 0:
                 seedwords6x4=seedwords6x4+"\n"
-            singleWord=(i+1)+":"+seedwords[i]
-            while len(singleWord)<12
+            singleWord=str(i+1)+":"+seedwords[i]
+            while len(singleWord)<12:
                 singleWord=singleWord+" "
             seedwords6x4=seedwords6x4+singleWord
         print("seedwords6x4='"+seedwords6x4+"'")
