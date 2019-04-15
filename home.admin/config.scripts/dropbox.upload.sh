@@ -49,17 +49,24 @@ elif [ "${MODE}" == "upload" ]; then
     exit 1
   fi
 
-  FINISH=$(curl -s -X POST https://content.dropboxapi.com/2/files/upload \
+  DEVICE=$(echo $DEVICE | awk '{print tolower($0)}' | sed -e 's/ /-/g')
+  BACKUPFOLDER=.lndbackup-$DEVICE
+
+  curl -s -X POST https://content.dropboxapi.com/2/files/upload \
     --header "Authorization: Bearer "${DROPBOX_APITOKEN}"" \
     --header "Dropbox-API-Arg: {\"path\": \"/"$BACKUPFOLDER"/"$1"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false,\"strict_conflict\": false}" \
     --header "Content-Type: application/octet-stream" \
-    --data-binary @$1)
-  echo "finish($FINISH)"
+    --data-binary @$1 > /home/admin/.dropbbox.tmp
+  safeResponse=$(sed 's/[^a-zA-Z0-9 ]//g' /home/admin/.dropbbox.tmp)
+  sudo shred /home/admin/.dropbbox.tmp
   UPLOADTIME=$(echo $FINISH | jq -r .server_modified)
   if [ ! -z $UPLOADTIME ] ; then
-    echo "Successfully uploaded!"
+    echo "# Successfully uploaded!"
+    echo "upload=1"
   else
-    echo "err='unknown error when uploading'"
+    echo "# Unknown Error"
+    echo "upload=0"
+    echo "err='${safeResponse}'"
   fi
 
 else
