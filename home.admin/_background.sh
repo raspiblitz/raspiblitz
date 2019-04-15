@@ -159,6 +159,7 @@ do
   recheckSCB=$(($counter % 60))
   if [ ${recheckSCB} -eq 1 ]; then
     echo "SCB Monitoring ..."
+    source ${configFile}
     # check if channel.backup exists
     scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
@@ -167,9 +168,38 @@ do
       md5checksumCPY=$(sudo md5sum /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
         echo "--> Channel Backup File changed"
+
+        # make copy to sd card (as local basic backup)
         sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
         sudp cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
         echo "OK channel.backup copied to '/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup'"
+      
+        # check if a SCP backup target is set
+        # paramter in raspiblitz.conf:
+        # scpBackupTarget='[USER]@s[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
+        # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
+        if [ ${#scpBackupTarget} -gt 0 ]; then
+          echo "--> Offsite-Backup SCP Server"
+          result=$(sudo scp /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup)
+          echo "result(${result})"
+        fi
+
+        # check if a DropBox backup target is set
+        # paramter in raspiblitz.conf:
+        # dropboxBackupTarget='[DROPBOX-APP-OAUTH2-TOKEN]'
+        # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+        if [ ${#dropboxBackupTarget} -gt 0 ]; then
+          echo "--> Offsite-Backup Dropbox"
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup)
+          if [ ${#err} -gt 0 ]; then
+            echo "FAIL: ${err}"
+            echo "${errMore}"
+          else
+            echo "OK: ${upload}"
+          fi
+        fi
+      
       else
         echo "Channel Backup File not changed."
       fi
