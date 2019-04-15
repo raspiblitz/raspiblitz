@@ -24,6 +24,7 @@ if [ ${#openChannels} -eq 0 ]; then
   echo "************************************************"
   exit 1
 fi
+
 if [ ${openChannels} -gt 0 ]; then
    dialog --title 'Info' --msgbox 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved.' 7 58
    echo "please wait ..."
@@ -45,10 +46,10 @@ fi
 
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
-l2="You will send: ${maxAmount} sat"
-l3="Maximal fee: 20000 sat (wil be subtracted)"
+#l2="You will send: ${maxAmount} sat"
+#l3="Maximal fee: 20000 sat (wil be subtracted)"
 dialog --title "Where to send funds?" \
---inputbox "$l1\n$l2\n$l3" 9 75 2>$_temp
+--inputbox "\n$l1\n" 9 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"
@@ -63,60 +64,32 @@ if [ ${#address} -eq 0 ]; then
   exit 1
 fi
 
-# TODO: check address is valid for network and chain
-
 clear
 echo "******************************"
 echo "Send on-chain Funds"
 echo "******************************"
-tryAgain=1
-count=1
-while [ ${tryAgain} -eq 1 ]
-  do
-    sleep 1
-    fee=$(($count * 1000))
-    amount=$(($maxAmount - $fee))
+
+# execute command
+command="lncli --chain=${network} --network=${chain}net sendcoins --sweepall --addr=${address} --conf_target=3"
+echo "$command"
+result=$($command 2>$_error)
+error=`cat ${_error}`
+    
+if [ ${#result} -eq 0 ]; then
+  # fail - retry on 'insufficient funds available to construct transaction'
+  echo "FAIL: $error"
+  tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
+  if [ ${tryAgain} -eq 0 ]; then
     echo ""
-    echo "TRY #${count} ---> with max fee ${fee} sat:"
-
-        # execute command
-    command="lncli --chain=${network} --network=${chain}net sendcoins --addr ${address} --amt ${amount} --conf_target 3"
-    echo "$command"
-    result=$($command 2>$_error)
-    error=`cat ${_error}`
-    #error="sim error: insufficient funds available to construct transaction"
-    #result=""
-    
-    if [ ${#result} -eq 0 ]; then
-      # fail - retry on 'insufficient funds available to construct transaction'
-      echo "FAIL: $error"
-      tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
-      if [ ${tryAgain} -eq 0 ]; then
-        echo ""
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        echo "FINAL FAIL --> Was not able to send transaction (see error above)"
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      fi
-    else
-      # success
-      echo "$result"
-      echo ""
-      echo "********************************************************************"
-      echo "OK --> send ${amount} sat to address + ${fee} sat fees max"
-      echo "********************************************************************"
-      tryAgain=0
-    fi
-    
-    # abort aftzer 20 tries
-    count=$(($count + 1))
-    if [ ${count} -gt 20 ]; then
-      echo ""
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo "FINAL FAIL --> Was not able to send transaction with max 20000 sat"
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      tryAgain=0
-    fi
-
-  done
-exit 1
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "FINAL FAIL --> Was not able to send transaction (see error above)"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  else
+    # success
+    echo "$result"
+    echo ""
+    echo "********************************************************************"
+    echo "OK --> to address ${address}"
+    echo "********************************************************************"    
+  fi
 echo ""
