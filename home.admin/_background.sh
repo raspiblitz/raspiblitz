@@ -266,10 +266,10 @@ do
           fi
 
           # when >1h out of sync
-          if [ ${secondsOutOfSync} -gt 3600 ]; then
-            # echo "!!!! LND fell out of sync for longer then 1 hour !!!"
-            # TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
-          fi
+          #if [ ${secondsOutOfSync} -gt 3600 ]; then
+          #   echo "!!!! LND fell out of sync for longer then 1 hour !!!"
+          #   TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
+          #fi
           
         fi
       fi
