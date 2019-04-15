@@ -61,7 +61,7 @@ if mode=="new":
     try:
         response = stub.GenSeed(request)
         seedwords = response.cipher_seed_mnemonic
-        seedwordsString=','.join(seedwords)
+        seedwordsString=', '.join(seedwords)
         print("seedwords='"+seedwordsString+"'")
 
         # add a 6x4 formatted version to the output

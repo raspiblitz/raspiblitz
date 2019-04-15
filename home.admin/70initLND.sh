@@ -181,13 +181,14 @@ if [ ${walletExists} -eq 0 ]; then
       fi
     fi
 
-    # TODO: create numbered string in rows
-    # 5 rows with 6 words each - each word needs to be filled up with spaces to be 12chars long -> (1:test      )
+    if [ ${#seedwords6x4} -eq 0 ]; then
+      seedwords6x4="${seedwords}"
+    fi
 
     ack=0
     while [ ${ack} -eq 0 ]
     do
-      whiptail --title "IMPORTANT - PLEASE WRITE DOWN" --msgbox "LND Wallet got created. Store these numbered words in a safe location:\n${seedwords}" 8 76
+      whiptail --title "IMPORTANT - PLEASE WRITE DOWN" --msgbox "LND Wallet got created. Store these numbered words in a safe location:\n${seedwords6x4}" 8 76
       whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
       if [ $? -eq 1 ]; then
         ack=1
