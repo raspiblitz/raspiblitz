@@ -30,34 +30,24 @@ if [ ${openChannels} -gt 0 ]; then
    if [ $? -eq 1 ]; then
      exit 1
    fi
-   echo "please wait ..."
+   echo "..."
    exit 1
 fi
 
 # check if money is waiting to get confirmed
 unconfirmed=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
 if [ ${unconfirmed} -gt 0 ]; then
-   dialog --title 'Info' --msgbox "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
+   whiptail--title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
    if [ $? -eq 1 ]; then
      exit 1
    fi
-   echo "please wait ..."
-   exit 1
-fi
-
-# get available amount in on-chain wallet
-maxAmount=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
-if [ ${maxAmount} -eq 0 ]; then
-   dialog --title 'Info' --msgbox "You have 0 moveable funds available.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
+   echo "..."
    exit 1
 fi
 
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
-#l2="You will send: ${maxAmount} sat"
-#l3="Maximal fee: 20000 sat (wil be subtracted)"
-dialog --title "Where to send funds?" \
---inputbox "\n$l1\n" 9 75 2>$_temp
+dialog --title "Where to send funds?" --inputbox "\n$l1\n" 9 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"
@@ -74,7 +64,7 @@ fi
 
 clear
 echo "******************************"
-echo "Send on-chain Funds"
+echo "Sweep all possible Funds"
 echo "******************************"
 
 # execute command
@@ -82,22 +72,16 @@ command="lncli --chain=${network} --network=${chain}net sendcoins --sweepall --a
 echo "$command"
 result=$($command 2>$_error)
 error=`cat ${_error}`
-    
-if [ ${#result} -eq 0 ]; then
-  # fail - retry on 'insufficient funds available to construct transaction'
-  echo "FAIL: $error"
-  tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
-  if [ ${tryAgain} -eq 0 ]; then
+echo ""
+if [ ${#error} -eq 0 ]; then
+    echo "FAIL: $error"
     echo ""
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "FINAL FAIL --> Was not able to send transaction (see error above)"
+    echo "FAIL --> Was not able to send transaction (see error above)"
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  else
-    # success
-    echo "$result"
+else
+    echo "Result: $result"
     echo ""
     echo "********************************************************************"
-    echo "OK --> to address ${address}"
-    echo "********************************************************************"    
-  fi
+fi
 echo ""
