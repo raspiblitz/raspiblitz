@@ -203,13 +203,13 @@ if [ ${walletExists} -eq 0 ]; then
     OPTIONS=(LNDRESCUE "LND tar.gz-Backupfile (BEST)" \
              SEED+SCB "Seed & channel.backup file (OK)" \
              ONLYSEED "Only Seed Word List (FALLBACK)")
-    CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "What Recover Data do you have=" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+    CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
     echo "choice($CHOICE)"
 
     if [ "${CHOICE}" == "ONLYSEED" ]; then
       echo "TODO: ONLYSEED"
       exit 1
-      
+
     elif [ "${CHOICE}" == "SEED+SCB" ]; then
       echo "TODO: SEED+SCB"
       exit 1
