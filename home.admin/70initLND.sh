@@ -213,6 +213,7 @@ if [ ${walletExists} -eq 0 ]; then
       do
 
         # dialog to enter
+        $_temp="/home/admin/.seed.tmp"
         dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>$_temp
         wordstring=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
         shred $_temp
