@@ -134,12 +134,15 @@ elif mode=="seed":
 
     try:
       response = stub.InitWallet(request)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        details = rpc_error_call.details()  
+        print("err='Failed: RPCError InitWallet "+code+"'")
+        print("errMore='"+details+"'")
     except: 
         e = sys.exc_info()[0]
         print >> sys.stderr, e
         print("err='Failed: RPC InitWallet'")
-        message = e.details()
-        print("errMore='"+message+"'")
         sys.exit(1)
 
 elif mode=="scb":
