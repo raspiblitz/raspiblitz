@@ -244,10 +244,13 @@ wordone,wordtweo,wordthree, ...
 
       # get the channel.backup file
       gotFile=-1
+      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       while [ ${gotFile} -lt 1 ]
       do
 
         # show info
+        clear
+        sleep 1
         echo "**********************************"
         echo "* UPLOAD THE channel.backup FILE *"
         echo "**********************************"
@@ -281,7 +284,7 @@ wordone,wordtweo,wordthree, ...
 
         # test upload
         gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
-        
+
       done
 
       exit 1
