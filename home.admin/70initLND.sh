@@ -200,19 +200,39 @@ if [ ${walletExists} -eq 0 ]; then
 
   else
 
+    OPTIONS=(LNDRESCUE "LND tar.gz-Backupfile (BEST)" \
+             SEED+SCB "Seed & channel.backup file (OK)" \
+             ONLYSEED "Only Seed Word List (FALLBACK)")
+    CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "What Recover Data do you have=" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+    echo "choice($CHOICE)"
+
+    if [ "${CHOICE}" == "ONLYSEED" ]; then
+      echo "TODO: ONLYSEED"
+      exit 1
+    elif [ "${CHOICE}" == "SEED+SCB" ]; then
+      echo "TODO: SEED+SCB"
+      exit 1
+    elif [ "${CHOICE}" == "LNDRESCUE" ]; then
+      sudo /home/admin/config.scripts/lnd.rescue.sh restore
+    else
+      echo "CANCEL"
+      /home/admin/70initLND.sh
+      exit 1
+    fi
+
     # TODO: IMPLEMENT
     # - Recover with Seed Word List 
     #   --> (ask if seed word list was password D protected)
-    # - Recover with Seed Word List & Channel Backup Snapshot File 
+    # - Recover with Seed Word List & channel.backup file 
     #   --> (ask if seed word list was password D protected)
     # - Restore LND backup made with Rescue-Script (tar.gz-file)
     #   --> run retsore script
 
     # FALLBACK TO lncli create FOR NOW
-    dialog --title "OK" --msgbox "\nI will start 'lncli create' for you ..." 7 44
-    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create
-    /home/admin/70initLND.sh
-    exit 1
+    #dialog --title "OK" --msgbox "\nI will start 'lncli create' for you ..." 7 44
+    #sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create
+    #/home/admin/70initLND.sh
+    
 
   fi
 
