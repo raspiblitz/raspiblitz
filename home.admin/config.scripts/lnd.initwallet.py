@@ -128,22 +128,15 @@ if mode=="new":
 
 elif mode=="seed":
 
-    print("# wallet passphrase: "+walletpassword)
+    print("err='TODO: debug creating from seed")
+    sys.exit(1)
+
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
         recovery_window=1000,
-        aezeed_passphrase=None
+        aezeed_passphrase=seedpassword
     )
-
-    if len(seedpassword)>0:
-        print("# running with seed passphrase")
-        request = ln.InitWalletRequest(
-            wallet_password=walletpassword,
-            cipher_seed_mnemonic=seedwords,
-            aezeed_passphrase=seedpassword,
-            recovery_window=1000
-        )
 
     try:
         response = stub.InitWallet(request)

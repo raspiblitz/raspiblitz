@@ -213,7 +213,17 @@ if [ ${walletExists} -eq 0 ]; then
              ONLYSEED "Only Seed Word List (FALLBACK)")
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-    # show warn when only seed
+    # LND RESCUE
+    if [ "${CHOICE}" == "LNDRESCUE" ]; then
+      sudo /home/admin/config.scripts/lnd.rescue.sh restore
+      echo ""
+      echo "PRESS ENTER to continue."
+      read key
+      /home/admin/70initLND.sh
+      exit 1
+    fi
+
+    # WRNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
@@ -227,88 +237,89 @@ or having a complete LND rescue-backup from your old node.
       fi
     fi
 
-    # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
-    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
-    passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
-
-    # get seed word list
-    if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
-
-      # dialog to enter
-      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
-      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9,]//g' )
-      shred /home/admin/.seed.tmp
-      echo "processing ... ${wordstring}"
-
-      # check correct number of words
-      IFS=',' read -r -a seedArray <<< "$wordstring"
-      if [ ${#seedArray[@]} -eq 24 ]; then
-        echo "OK - 24 words"
-      else
-        whiptail --title " WARNING " --msgbox "
-The word list has ${#seedArray[@]} words. But it must be 24.
-Please check your list and try again.
-
-Best is to write words in external editor 
-and then copy and paste them into dialog.
-
-The Word list should look like this:
-wordone,wordtweo,wordthree, ...
-
-" 16 52
-        /home/admin/70initLND.sh
-        exit 1
-      fi
-
-      # ask if seed was protected by password D
-      passwordD=""
-      dialog --title "SEED PASSWORD" --yes-button "No extra Password" --no-button "Yes" --yesno "
-Are your seed words protected by an extra password?
-
-During wallet creation LND offers to set an extra password
-to protect the seed words. Most users did not set this.
-      " 11 65
-      if [ $? -eq 1 ]; then
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
-        sudo ./config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
-        passwordD=`sudo cat /home/admin/.pass.tmp`
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
-      fi
-
-    fi
-
-    if [ "${CHOICE}" == "ONLYSEED" ]; then
-
-      # trigger wallet recovery
-      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} ${passwordD})
-
-      # on success the python script should return the seed words again
-      if [ ${#seedwords} -gt 1 ]; then
-        dialog --title " SUCCESS " --msgbox "
-Looks good :) LND was able to recover the wallet.
-      " 7 53
-      else
-        if [ ${#err} -eq 0 ]; then
-          echo
-          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
-          echo "PRESS ENTER to try again."
-          read key
-          /home/admin/70initLND.sh
-          exit 1
-        else
-          whiptail --title " FAIL " --msgbox "
-Something went wrong - see info below:
-${err}
-${errMore}
-      " 13 72
-          /home/admin/70initLND.sh
-          exit 1
-        fi
-      fi
-
-    elif [ "${CHOICE}" == "SEED+SCB" ]; then
+##### DEACTIVATED UNTIL config.scripts/lnd.initwallet.py WORKS
+#    # let user enter password c
+#    sudo shred /home/admin/.pass.tmp 2>/dev/null
+#    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
+#    passwordC=`sudo cat /home/admin/.pass.tmp`
+#    sudo shred /home/admin/.pass.tmp 2>/dev/null
+#
+#    # get seed word list
+#    if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
+#
+#      # dialog to enter
+#      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
+#      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9,]//g' )
+#      shred /home/admin/.seed.tmp
+#      echo "processing ... ${wordstring}"
+#
+#      # check correct number of words
+#      IFS=',' read -r -a seedArray <<< "$wordstring"
+#      if [ ${#seedArray[@]} -eq 24 ]; then
+#        echo "OK - 24 words"
+#      else
+#        whiptail --title " WARNING " --msgbox "
+#The word list has ${#seedArray[@]} words. But it must be 24.
+#Please check your list and try again.
+#
+#Best is to write words in external editor 
+#and then copy and paste them into dialog.
+#
+#The Word list should look like this:
+#wordone,wordtweo,wordthree, ...
+#
+#" 16 52
+#        /home/admin/70initLND.sh
+#        exit 1
+#      fi
+#
+#      # ask if seed was protected by password D
+#      passwordD=""
+#      dialog --title "SEED PASSWORD" --yes-button "No extra Password" --no-button "Yes" --yesno "
+#Are your seed words protected by an extra password?
+#
+#During wallet creation LND offers to set an extra password
+#to protect the seed words. Most users did not set this.
+#      " 11 65
+#      if [ $? -eq 1 ]; then
+#        sudo shred /home/admin/.pass.tmp 2>/dev/null
+#        sudo ./config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+#        passwordD=`sudo cat /home/admin/.pass.tmp`
+#        sudo shred /home/admin/.pass.tmp 2>/dev/null
+#      fi
+#
+#    fi
+#
+#    if [ "${CHOICE}" == "ONLYSEED" ]; then
+#
+#      # trigger wallet recovery
+#      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} ${passwordD})
+#
+#      # on success the python script should return the seed words again
+#      if [ ${#seedwords} -gt 1 ]; then
+#        dialog --title " SUCCESS " --msgbox "
+#Looks good :) LND was able to recover the wallet.
+#      " 7 53
+#      else
+#        if [ ${#err} -eq 0 ]; then
+#          echo
+#          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
+#          echo "PRESS ENTER to try again."
+#          read key
+#          /home/admin/70initLND.sh
+#          exit 1
+#        else
+#          whiptail --title " FAIL " --msgbox "
+#Something went wrong - see info below:
+#${err}
+#${errMore}
+#      " 13 72
+#          /home/admin/70initLND.sh
+#          exit 1
+#        fi
+#      fi
+#    fi
+    if [ "${CHOICE}" == "SEED+SCB" ]; then
 
       # get the channel.backup file
       gotFile=-1
@@ -348,59 +359,69 @@ ${errMore}
         fi
 
         # test upload
-        gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
+       gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
 
       done
 
       clear
       echo "OK - channel.backup file found."
 
-      # trigger wallet recovery
-      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} /home/admin/channel.backup ${passwordD})
 
-      # WIN/FAIL User feedback
-      # on success the python script should return the seed words again
-      if [ ${#seedwords} -gt 1 ]; then
-        dialog --title " SUCCESS " --msgbox "
-Looks good :) LND was able to recover the wallet.
-      " 7 53
-      else
-        if [ ${#err} -eq 0 ]; then
-          echo
-          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
-          echo "PRESS ENTER to try again."
-          read key
-          /home/admin/70initLND.sh
-          exit 1
-        else
-          whiptail --title " FAIL " --msgbox "
-Something went wrong - see info below:
-${err}
-${errMore}
-      " 13 72
-          /home/admin/70initLND.sh
-          exit 1
-        fi
-      fi
+##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
+    echo "****************************************************************************"
+    echo "Helping Instructions --> for recovering a LND Wallet"
+    echo "****************************************************************************"
+    echo "A) For 'Wallet Password' use your old PASSWORD C"
+    echo "B) For 'cipher seed mnemonic' answere 'y' and enter words sepereted by space" 
+    echo "C) Enter 'passphrase' to encrypt your 'cipher seed' only if u did on create"
+    echo "****************************************************************************"
+    echo ""
+    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>$_error
+    error=`cat ${_error}`
 
-    elif [ "${CHOICE}" == "LNDRESCUE" ]; then
-      sudo /home/admin/config.scripts/lnd.rescue.sh restore
+    if [ ${#error} -gt 0 ]; then
       echo ""
-      echo "PRESS ENTER to continue."
+      echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+      echo "${error}"
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo ""
+      echo "Press ENTER to retry ..."
       read key
-      /home/admin/70initLND.sh
-      exit 1
-
-    else
-      echo "CANCEL"
+      echo "Starting RETRY ..."
       /home/admin/70initLND.sh
       exit 1
     fi
 
-    # FALLBACK
-    #dialog --title "OK" --msgbox "\nI will start 'lncli create' for you ..." 7 44
-    #sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create
-    #/home/admin/70initLND.sh
+    /home/admin/70initLND.sh
+
+##### DEACTIVATED UNTIL config.scripts/lnd.initwallet.py WORKS
+#      # trigger wallet recovery
+#      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} /home/admin/channel.backup ${passwordD})
+#
+#      # WIN/FAIL User feedback
+#      # on success the python script should return the seed words again
+#      if [ ${#seedwords} -gt 1 ]; then
+#        dialog --title " SUCCESS " --msgbox "
+#Looks good :) LND was able to recover the wallet.
+#      " 7 53
+#      else
+#        if [ ${#err} -eq 0 ]; then
+#          echo
+#          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
+#          echo "PRESS ENTER to try again."
+#          read key
+#          /home/admin/70initLND.sh
+#          exit 1
+#        else
+#          whiptail --title " FAIL " --msgbox "
+#Something went wrong - see info below:
+#${err}
+#${errMore}
+#      " 13 72
+#          /home/admin/70initLND.sh
+#          exit 1
+#        fi
+#      fi
     
   fi
 
@@ -458,6 +479,18 @@ if [ ${locked} -gt 0 ]; then
 else
   echo "OK - Wallet is already unlocked"
 fi
+echo ""
+
+###### USE CHANNEL.BACKUP FILE IF AVAILABLE
+echo "*** SCB Recovery ***"
+gotSCB=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
+if [ ${gotSCB} -eq 1 ]; then
+  lncli restorechanbackup --multi_file=/home/admin/channel.backup
+else
+  echo "NO /home/admin/channel.backup file - skipping SCB"
+fi
+echo "PRESS ENTER"
+read key
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
