@@ -237,8 +237,14 @@ To run a BACKUP of funds & channels first is recommended.
       else
         locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
-          /home/admin/AAunlockLND.sh
-          echo "please wait ... update to next screen can be slow"
+          uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
+          if [ "${autoUnlock}" == "on" ] && [ ${uptime} -lt 240 ]; then
+            # give autounlock 4 min after startup to react
+            sleep 1
+          else
+            /home/admin/AAunlockLND.sh
+            echo "please wait ... update to next screen can be slow"
+          fi
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then
