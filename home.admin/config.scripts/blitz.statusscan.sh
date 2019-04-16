@@ -50,7 +50,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
 
     # get blockchain sync progress
     syncProgress="$(echo ${blockchaininfo} | jq -r '.verificationprogress')"
-    syncProgress=$(echo $syncProgress | awk '{printf( "%.2f%", 100 * $1)}')
+    syncProgress=$(echo $syncProgress | awk '{printf( "%.2f%%", 100 * $1)}' | tr '%' '' | tr -s " ")
     echo "syncProgress=${syncProgress}"
 
   fi
