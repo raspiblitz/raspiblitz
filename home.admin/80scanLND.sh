@@ -20,26 +20,33 @@ if [ ${bitcoinActive} -eq 0 ]; then
   height=6
   width=42
   title="Blockchain Info"
-  infoStr=" The ${network}d service is not running.\n Login for more details:"
-  if [ "$USER" == "admin" ]; then
-    echo ""
-    echo "*****************************************"
-    echo "* The ${network}d service is not running."
-    echo "*****************************************"
-    echo "If you just started some config/setup, this might be OK."
-    echo
-    if [ ${#bitcoinError} -gt 0 ]; then
-      echo "More Error Detail:"
-      echo ${bitcoinError}
+  if [ ${uptime} -gt 300 ]; then
+    infoStr=" The ${network}d service is not running.\n Login for more details:"
+    if [ "$USER" == "admin" ]; then
+      echo ""
+      echo "*****************************************"
+      echo "* The ${network}d service is not running."
+      echo "*****************************************"
+      echo "If you just started some config/setup, this might be OK."
       echo
+      if [ ${#bitcoinError} -gt 0 ]; then
+        echo "More Error Detail:"
+        echo ${bitcoinError}
+        echo
+      fi
+      echo "Use following command start ${network}d:"
+      echo "sudo systemctl start ${network}d"
+      echo
+      echo "Use following command to debug:"
+      echo "/home/admin/XXdebugLogs.sh"
+      echo ""
+      exit 1
     fi
-    echo "Use following command start ${network}d:"
-    echo "sudo systemctl start ${network}d"
-    echo
-    echo "Use following command to debug:"
-    echo "/home/admin/XXdebugLogs.sh"
-    echo ""
-    exit 1
+  else
+    infoStr=" The ${network}d service is starting.\n Login for more details:"
+    if [ "$USER" == "admin" ]; then
+      infoStr=" The ${network}d service is starting.\n Please wait up to 5min ..."
+    fi
   fi
 
 elif [ ${lndActive} -eq 0 ]; then
@@ -51,26 +58,33 @@ elif [ ${lndActive} -eq 0 ]; then
   height=5
   width=42
   title="Lightning Info"
-  infoStr=" The lnd service is not running.\n Login for more details:"
-  if [ "$USER" == "admin" ]; then
-    echo ""
-    echo "*********************************"
-    echo "* The LND service is not running."
-    echo "*********************************"
-    echo "If you just started some config/setup, this might be OK."
-    echo
-    if [ ${#lndError} -gt 0 ]; then
-      echo "More Error Detail:"
-      echo ${lndError}
+  if [ ${uptime} -gt 300 ]; then
+    infoStr=" The LND service is not running.\n Login for more details:"
+    if [ "$USER" == "admin" ]; then
+      echo ""
+      echo "*********************************"
+      echo "* The LND service is not running."
+      echo "*********************************"
+      echo "If you just started some config/setup, this might be OK."
       echo
+      if [ ${#lndError} -gt 0 ]; then
+        echo "More Error Detail:"
+        echo ${lndError}
+        echo
+      fi
+      echo "Use following command start lnd:"
+      echo "sudo systemctl start lnd"
+      echo
+      echo "Use following command to debug:"
+      echo "/home/admin/XXdebugLogs.sh"
+      echo ""
+      exit 1
     fi
-    echo "Use following command start lnd:"
-    echo "sudo systemctl start lnd"
-    echo
-    echo "Use following command to debug:"
-    echo "/home/admin/XXdebugLogs.sh"
-    echo ""
-    exit 1
+  else
+    infoStr=" The LND service is starting.\n Login for more details:"
+    if [ "$USER" == "admin" ]; then
+      infoStr=" The LND service is starting.\n Please wait up to 5min ..."
+    fi
   fi
 
 else

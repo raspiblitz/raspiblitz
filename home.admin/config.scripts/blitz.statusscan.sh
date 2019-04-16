@@ -24,6 +24,10 @@ echo "localIP='${localip}'"
 tempC=$(echo "scale=1; $(cat /sys/class/thermal/thermal_zone0/temp)/1000" | bc)
 echo "tempCelsius='${tempC}'"
 
+# uptime in seconds
+uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
+echo "uptime=${uptime}"
+
 # is bitcoind running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 echo "bitcoinActive=${bitcoinRunning}"
