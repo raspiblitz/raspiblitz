@@ -43,11 +43,11 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   else
     height=6
     if [ ${#bitcoinErrorShort} -eq 0 ]; then
-      bitcoinErrorShort="Initial Startup"
+      bitcoinErrorShort="Initial Startup - Please Wait"
     fi
-    infoStr=" The ${network}d service is starting.\n ${bitcoinErrorShort}\n Login for more details:"
+    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login for more details:"
     if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting.\n ${bitcoinErrorShort}\nPlease wait up to 5min ..."
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\nPlease wait up to 5min ..."
     fi
   fi
 
