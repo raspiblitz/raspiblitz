@@ -209,11 +209,19 @@ if [ ${walletExists} -eq 0 ]; then
     if [ "${CHOICE}" == "ONLYSEED" ]; then
       echo "TODO: ONLYSEED"
       exit 1
+      
     elif [ "${CHOICE}" == "SEED+SCB" ]; then
       echo "TODO: SEED+SCB"
       exit 1
+
     elif [ "${CHOICE}" == "LNDRESCUE" ]; then
       sudo /home/admin/config.scripts/lnd.rescue.sh restore
+      echo ""
+      echo "PRESS ENTER to continue."
+      read key
+      /home/admin/70initLND.sh
+      exit 1
+
     else
       echo "CANCEL"
       /home/admin/70initLND.sh

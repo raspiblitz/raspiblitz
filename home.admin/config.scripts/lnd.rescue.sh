@@ -66,9 +66,10 @@ elif [ ${mode} = "restore" ]; then
         echo "**************************"
         echo "* UPLOAD THE BACKUP FILE *"
         echo "**************************"
-        echo 
         echo "If you have a lnd-rescue backup file on your laptop you can now"
-        echo "upload it and restore the your old LND state."
+        echo "upload it and restore the your latest LND state."
+        echo
+        echo "CAUTION: Dont restore old LND states - risk of loosing funds!"
         echo
         echo "To make upload open a new terminal on your laptop,"
         echo "change into the directory where your lnd-rescue file is and"
@@ -76,7 +77,6 @@ elif [ ${mode} = "restore" ]; then
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
         echo "Use password A to authenticate file transfere."
-        echo
         echo "PRESS ENTER when upload is done. Use CTRL-C to abort."
       fi
       if [ ${countZips} -gt 1 ]; then
@@ -143,7 +143,7 @@ elif [ ${mode} = "restore" ]; then
   echo
 
   echo "DONE - please check if LND starts up correctly with restored state and funds."
-  echo "Keep in mind that some channels got forced closed by channel partners in the meanwhile."
+  echo "Keep in mind that some channels maybe forced closed in the meanwhile."
   echo 
 
 else
