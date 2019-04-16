@@ -84,15 +84,24 @@ else
   width=42
   title="Node is Syncing (${scriptRuntime})"
 
-  # format progress values
-  if [ ${#syncProgress} -lt 6 ]; then
-    syncProgress=" ${syncProgress}"
+  # formatting progress values
+  if [ ${#syncProgress} -eq 0 ]; then
+    syncProgress="(waiting)"
+  elif [ ${#syncProgress} -lt 6 ]; then
+    syncProgress=" ${syncProgress} %"
+  else
+    syncProgress="${syncProgress} %"
   fi
-  if [ ${#scanProgress} -lt 6 ]; then
-    scanProgress=" ${scanProgress}"
+  if [ ${#scanProgress} -eq 0 ]; then
+    scanProgress="(waiting)"
+  elif [ ${#scanProgress} -lt 6 ]; then
+    scanProgress=" ${scanProgress} %"
+  else
+    scanProgress="${scanProgress} %"
   fi
 
-  infoStr=" Blockchain Progress : ${syncProgress} %\n Lightning Progress  : ${scanProgress} %\n Please wait - this can take some time"
+  # setting info string
+  infoStr=" Blockchain Progress : ${syncProgress}\n Lightning Progress  : ${scanProgress}\n Please wait - this can take some time"
 
 fi
 
