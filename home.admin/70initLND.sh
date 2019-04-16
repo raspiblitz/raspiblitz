@@ -376,8 +376,9 @@ or having a complete LND rescue-backup from your old node.
     echo "C) Enter 'passphrase' to encrypt your 'cipher seed' only if u did on create"
     echo "****************************************************************************"
     echo ""
-    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>$_error
-    error=`cat ${_error}`
+    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>/home/admin/.error.tmp
+    error=`cat /home/admin/.error.tmp`
+    rm /home/admin/.error.tmp 2>/dev/null
 
     if [ ${#error} -gt 0 ]; then
       echo ""
