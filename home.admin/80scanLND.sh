@@ -86,14 +86,14 @@ else
 
   # formatting progress values
   if [ ${#syncProgress} -eq 0 ]; then
-    syncProgress="(waiting)"
+    syncProgress="waiting"
   elif [ ${#syncProgress} -lt 6 ]; then
     syncProgress=" ${syncProgress} %"
   else
     syncProgress="${syncProgress} %"
   fi
   if [ ${#scanProgress} -eq 0 ]; then
-    scanProgress="(waiting)"
+    scanProgress="waiting"
   elif [ ${#scanProgress} -lt 6 ]; then
     scanProgress=" ${scanProgress} %"
   else
