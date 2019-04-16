@@ -48,7 +48,7 @@ else
   # basic dialog info
   height=6
   width=42
-  title="Node is Syncing"
+  title="Node is Syncing (${scriptRuntime})"
 
   # format progress values
   if [ ${#syncProgress} -lt 6 ]; then
