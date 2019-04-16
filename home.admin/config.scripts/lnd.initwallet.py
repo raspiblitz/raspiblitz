@@ -99,8 +99,49 @@ if mode=="new":
 
 elif mode=="seed":
 
-    print("err='TODO: implement creating from seed'")
-    sys.exit(1)
+    if len(sys.argv)>2:
+        walletpassword=sys.argv[2]
+        if len(walletpassword)<8:
+            print("err='wallet password is too short'")
+            sys.exit(1)
+    else:
+        print("err='not correct amount of parameter'")
+        sys.exit(1)
+
+    if len(sys.argv)>3:
+        seedwordString=sys.argv[3]
+        seedwords=seedwordString.split(",")
+        if len(seedwords)<24:
+            print("err='not 24 seed words seperated by just commas'")
+            sys.exit(1)
+    else:
+        print("err='not correct amount of parameter'")
+        sys.exit(1)
+
+    if len(sys.argv)>4:
+        seedpassword=sys.argv[4]
+
+    request = ln.InitWalletRequest(
+        wallet_password=walletpassword,
+        cipher_seed_mnemonic=seedwords,
+        recovery_window=1000
+    )
+
+    if len(seedpassword)>0:
+        request = ln.InitWalletRequest(
+            wallet_password=walletpassword,
+            cipher_seed_mnemonic=seedwords,
+            aezeed_passphrase=seedpassword,
+            recovery_window=1000
+        )
+
+    try:
+      response = stub.InitWallet(request)
+    except: 
+        e = sys.exc_info()[0]
+        print >> sys.stderr, e
+        print("err='Failed: RPC InitWallet'")
+        sys.exit(1)
 
 elif mode=="scb":
 
