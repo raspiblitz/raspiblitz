@@ -50,7 +50,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
 
     # get blockchain sync progress
     syncProgress="$(echo ${blockchaininfo} | jq -r '.verificationprogress')"
-    syncProgress=$(echo $syncProgress | awk '{printf( "%.2f%%", 100 * $1)}')
+    syncProgress=$(echo $syncProgress | awk '{printf( "%.2f%", 100 * $1)}')
     echo "syncProgress=${syncProgress}"
 
   fi
@@ -80,18 +80,16 @@ if [ ${lndRunning} -eq 1 ]; then
     echo "syncedToChain=${syncedToChain}"
 
     # lnd scan progress
-    lndTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
-    echo "lndTimestamp=${lndTimestamp}"
-    lndDate=$(date -d @${lndTimestamp})
-    echo "lndDate=${lndDate}"
+    scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
+    echo "scanTimestamp=${scanTimestamp}"
+    scanDate=$(date -d @${scanTimestamp})
+    echo "scanDate=${scanDate}"
 
     # calculate LND scan progress by seconds since Genesisblock
     genesisTimestamp=1230940800
     nowTimestamp=$(date +%s)
     totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)
-    echo "# totalSeconds($totalSeconds)"
-    scannedSeconds=$(echo "${lndTimestamp}-${genesisTimestamp}" | bc)
-    echo "# scannedSeconds($scannedSeconds)"
+    scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
     scanProgress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
     echo "scanProgress=${scanProgress}"
     
@@ -104,6 +102,6 @@ fi
 # info on scan run time
 endTime=$(date +%s)
 runTime=$(echo "${endTime}-${startTime}" | bc)
-echo "scantime=${runTime}"
+echo "scriptRuntime=${runTime}"
 
 
