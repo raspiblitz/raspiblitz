@@ -201,12 +201,11 @@ if [ ${walletExists} -eq 0 ]; then
   else
 
     OPTIONS=(LNDRESCUE "LND tar.gz-Backupfile (BEST)" \
-             SEED_SCB "Seed & channel.backup file (OK)" \
+             SEED+SCB "Seed & channel.backup file (OK)" \
              ONLYSEED "Only Seed Word List (FALLBACK)")
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
-    echo "choice($CHOICE)"
 
-    if [ "${CHOICE}" == "SEED_SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
+    if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # dialog to enter
       dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
@@ -214,28 +213,36 @@ if [ ${walletExists} -eq 0 ]; then
       shred /home/admin/.seed.tmp
       echo "processing ... ${wordstring}"
 
-      # string to array
+      # check correct number of words
       IFS=',' read -r -a seedArray <<< "$wordstring"
-        
-      # check array
-      echo "numWords(${#seedArray[@]})"
       if [ ${#seedArray[@]} -eq 24 ]; then
         echo "OK - 24 words"
-        exit 1
       else
-        echo "wrong number of words"
-        wordstring=""
+        whiptail --title " WARNING " --msgbox "
+The word list has ${#seedArray[@]} words. But it must be 24.
+Please check your list and try again.
+
+Best is to write words in external editor 
+and then copy and paste them into dialog.
+
+The Word list should look like this:
+wordone,wordtweo,wordthree, ...
+
+" 16 52
         exit 1
+        /home/admin/70initLND.sh
       fi
+
+
 
     fi
 
     if [ "${CHOICE}" == "ONLYSEED" ]; then
-      echo "TODO: ONLYSEED"
+      echo "TODO: ONLYSEED words(${wordstring})"
       exit 1
 
-    elif [ "${CHOICE}" == "SEED_SCB" ]; then
-      echo "TODO: SEED+SCB"
+    elif [ "${CHOICE}" == "SEED+SCB" ]; then
+      echo "TODO: SEED+SCB words(${wordstring})" 
       exit 1
 
     elif [ "${CHOICE}" == "LNDRESCUE" ]; then
