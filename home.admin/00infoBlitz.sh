@@ -58,7 +58,7 @@ tempF=$(((cpu/1000) * (9/5) + 32))
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
 ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
 
-if [ ${ram_avail} -lt 100 ]; then
+if [ ${ram_avail} -lt 50 ]; then
   color_ram="${color_red}\e[7m"
 else
   color_ram=${color_green}
