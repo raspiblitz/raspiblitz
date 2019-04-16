@@ -246,6 +246,23 @@ wordone,wordtweo,wordthree, ...
       gotFile=0
       while [ ${gotFile} -eq 0 ]
       do
+
+        echo "**********************************"
+        echo "* UPLOAD THE channel.backup FILE *"
+        echo "**********************************"
+        echo "If you have a lnd-rescue backup file on your laptop you can now"
+        echo "upload it and restore the your latest LND state."
+        echo
+        echo "CAUTION: Dont restore old LND states - risk of loosing funds!"
+        echo
+        echo "To make upload open a new terminal on your laptop,"
+        echo "change into the directory where your lnd-rescue file is and"
+        echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+        echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
+        echo ""
+        echo "Use password A to authenticate file transfere."
+        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
+
         echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel:"
         read key
         echo "key(${key})" 
