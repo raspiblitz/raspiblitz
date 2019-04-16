@@ -244,7 +244,7 @@ wordone,wordtweo,wordthree, ...
 
       # get the channel.backup file
       gotFile=0
-      while [ ${gotFile} -eq 0];
+      while [ ${gotFile} -eq 0 ]
       do
         echo "Please upload file. Press Enter or CTRL-X to cancel:"
         read key
