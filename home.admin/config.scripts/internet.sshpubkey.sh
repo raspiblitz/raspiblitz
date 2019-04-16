@@ -16,26 +16,25 @@ MODE="$1"
 
 # root as default user 
 # its used for all ssh tunnel/back action
-USER="root"
 
 # make sure the ssh keys for that user are initialized
-sshKeysExist=$(sudo -u ${USER} ls ~/.ssh/id_rsa.pub | grep -c 'id_rsa.pub')
+sshKeysExist=$(sudo ls /root/.ssh/id_rsa.pub | grep -c 'id_rsa.pub')
 if [ ${sshKeysExist} -eq 0 ]; then
-  echo "# generation SSH keys for user ${USER}"
-  sudo -u ${USER} mkdir ~/.ssh
-  sudo sh -c 'yes y | sudo -u ${USER} ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa  -q -N ""'
+  echo "# generation SSH keys for user root"
+  sudo mkdir /root/.ssh 2>/dev/null
+  sudo sh -c 'yes y | sudo ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa  -q -N ""'
 fi
 
 if [ "${MODE}" == "get" ]; then
 
   # get ssh pub key and print
-  sshPubKey=$(sudo -u ${USER} cat ~/.ssh/id_rsa.pub)
-  echo "user='${USER}'"
+  sshPubKey=$(sudo cat /root/.ssh/id_rsa.pub)
+  echo "user='root'"
   echo "sshPubKey='${sshPubKey}'"
 
 elif [ "${MODE}" == "transfer" ]; then
 
-  sudo sh -c 'yes yes | sudo -u ${USER} ssh-copy-id $2'
+  sudo sh -c 'yes yes | sudo ssh-copy-id $2'
 
 else
   echo "err='paremeter not known - run with -help'"
