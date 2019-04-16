@@ -210,7 +210,7 @@ if [ ${walletExists} -eq 0 ]; then
 
       # dialog to enter
       dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
-      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
+      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9,]//g' )
       shred /home/admin/.seed.tmp
       echo "processing ... ${wordstring}"
 
