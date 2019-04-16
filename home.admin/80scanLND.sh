@@ -23,10 +23,19 @@ if [ ${bitcoinActive} -eq 0 ]; then
   infoStr=" The ${network}d service is not running.\n Login for more details:"
   if [ "$USER" == "admin" ]; then
     echo ""
-    echo "*********************************"
+    echo "*****************************************"
     echo "* The ${network}d service is not running."
-    echo "*********************************"
-    echo ${bitcoinError}
+    echo "*****************************************"
+    echo "If you just started some config/setup, this might be OK."
+    echo
+    if [ ${#bitcoinError} -gt 0 ]; then
+      echo "More Error Detail:"
+      echo ${bitcoinError}
+      echo
+    fi
+    echo "Use following command start ${network}d:"
+    echo "sudo systemctl start ${network}d"
+    echo
     echo "Use following command to debug:"
     echo "/home/admin/XXdebugLogs.sh"
     echo ""
@@ -46,9 +55,18 @@ elif [ ${lndActive} -eq 0 ]; then
   if [ "$USER" == "admin" ]; then
     echo ""
     echo "*********************************"
-    echo "* The lnd service is not running."
+    echo "* The LND service is not running."
     echo "*********************************"
-    echo ${lndError}
+    echo "If you just started some config/setup, this might be OK."
+    echo
+    if [ ${#lndError} -gt 0 ]; then
+      echo "More Error Detail:"
+      echo ${lndError}
+      echo
+    fi
+    echo "Use following command start lnd:"
+    echo "sudo systemctl start lnd"
+    echo
     echo "Use following command to debug:"
     echo "/home/admin/XXdebugLogs.sh"
     echo ""
