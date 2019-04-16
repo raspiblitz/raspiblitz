@@ -20,6 +20,10 @@ sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
 
+# temp
+tempC=$(echo "scale=1; $(cat /sys/class/thermal/thermal_zone0/temp)/1000" | bc)
+echo "tempCelsius='${tempC}'"
+
 # is bitcoind running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 echo "bitcoinActive=${bitcoinRunning}"
