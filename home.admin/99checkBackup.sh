@@ -51,6 +51,7 @@ OK. You are running the newest version of RaspiBlitz.
   if [ $? -eq 0 ]; then
     exit 1
   fi
+  clear
 else
 
   whiptail --title "Update Check" --yes-button "Yes" --no-button "Not Now" --yesno "
@@ -112,6 +113,10 @@ and do you WANT TO START UPDATE NOW?
       " 16 62
 
 if [ $? -eq 1 ]; then
+  dialog --title " Update Canceled " --msgbox "
+OK. RaspiBlitz will NOT update now.
+      " 7 39
+  sudo systemctl start lnd
   exit 1
 fi
 
