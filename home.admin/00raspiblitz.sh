@@ -238,8 +238,8 @@ To run a BACKUP of funds & channels first is recommended.
         locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then
           uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
-          if [ "${autoUnlock}" == "on" ] && [ ${uptime} -lt 240 ]; then
-            # give autounlock 4 min after startup to react
+          if [ "${autoUnlock}" == "on" ] && [ ${uptime} -lt 300 ]; then
+            # give autounlock 5 min after startup to react
             sleep 1
           else
             /home/admin/AAunlockLND.sh
