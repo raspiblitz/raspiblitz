@@ -35,7 +35,7 @@ if [ ${bitcoinActive} -eq 0 ]; then
         echo
       fi
       echo "-> To start ${network}d run: sudo systemctl start ${network}d"
-      echo "-> To force Main Menu run: /home/admin/00mainmenu.sh"
+      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo ""
       exit 1
@@ -71,7 +71,7 @@ elif [ ${lndActive} -eq 0 ]; then
         echo
       fi
       echo "-> To start LND run: sudo systemctl start lnd"
-      echo "-> To force Main Menu run: /home/admin/00mainmenu.sh"
+      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo ""
       exit 1
