@@ -12,6 +12,10 @@ fi
 # measure time of scan
 startTime=$(date +%s)
 
+# macke sure temp folder on HDD is available and fro all usable
+sudo mkdir /mnt/hdd/temp 2>/dev/null
+sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
+
 # localIP
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
@@ -23,11 +27,11 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/home/bitcoin/.${network}/.bitcoind.error)
+  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/mnt/hdd/temp/.bitcoind.error)
 
   # check if error on request
-  bitcoinError=$(sudo -u bitcoin cat /home/bitcoin/.${network}/.bitcoind.error | tr "'" '"' | tr '"' '\"' )
-  sudo -u bitcoin rm /home/bitcoin/.${network}/.bitcoind.error
+  bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null | tr "'" '"' | tr '"' '\"' )
+  rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     echo "bitcoinError='${bitcoinError}'"
   else
@@ -62,11 +66,11 @@ echo "lndActive=${lndRunning}"
 if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
-  lndinfo=$(sudo -u bitcoin lncli getinfo 2>/home/bitcoin/.lnd/.lnd.error)
+  lndinfo=$(sudo -u bitcoin lncli getinfo 2>/mnt/hdd/temp/.lnd.error)
 
   # check if error on request
-  lndError=$(sudo -u bitcoin cat /home/bitcoin/.lnd/.lnd.error | tr "'" '"' | tr '"' '\"' )
-  sudo -u bitcoin rm /home/bitcoin/.lnd/.lnd.error
+  lndError=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null | tr "'" '"' | tr '"' '\"' )
+  rm /mnt/hdd/temp/.lnd.error 2>/dev/null
   if [ ${#lndError} -gt 0 ]; then
     echo "lndError='${lndError}'"
   else
