@@ -209,10 +209,9 @@ if [ ${walletExists} -eq 0 ]; then
     if [ "${CHOICE}" == "SEED_SCB" ]; then
 
       # dialog to enter
-      $_temp="/home/admin/.seed.tmp"
-      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>$_temp
-      wordstring=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-      shred $_temp
+      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
+      wordstring=$( cat /home/admin/.seed.tmp | tr -dc '[:alnum:]-.' | tr -d ' ' )
+      shred /home/admin/.seed.tmp
       echo "processing ... ${wordstring}"
 
       # remove spaces
