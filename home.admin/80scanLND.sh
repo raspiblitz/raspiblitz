@@ -11,7 +11,7 @@ if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
 
-if [ ${bitcoinActive} -eq 0 ]; then
+if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
 
   ####################
   # On Bitcoin Error
@@ -48,7 +48,7 @@ if [ ${bitcoinActive} -eq 0 ]; then
     fi
   fi
 
-elif [ ${lndActive} -eq 0 ]; then
+elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
 
   ####################
   # On LND Error

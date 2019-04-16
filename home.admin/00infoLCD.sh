@@ -197,24 +197,6 @@ while :
       continue
     fi
 
-    # check if bitcoin is ready
-    #sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
-    #clienterror=`cat error.tmp`
-    #rm error.tmp
-    #if [ ${#clienterror} -gt 0 ]; then
-    #  boxwidth=40
-    #  l1="Waiting for ${network}d to get ready.\n"
-    #  l2="---> ${clienterror/error*:/}\n"
-    #  l3="Can take longer if device was off."
-    #  uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-    #  if [ ${uptimeSeconds} -gt 600 ]; then
-    #    l3="!!Please login for more details!!"
-    #  fi
-    #  dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
-    #  sleep 5
-    #  continue
-    #fi
-
     # check if locked
     locked=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock) 
     if [ "${locked}" -gt 0 ]; then

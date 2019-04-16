@@ -42,7 +42,8 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     echo "bitcoinErrorFull='${bitcoinError}'"
-    echo "bitcoinErrorShort='${bitcoinError/error*:/}'"
+    bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
+    echo "bitcoinErrorShort='${bitcoinErrorShort}'"
   else
 
     ##############################
