@@ -145,7 +145,7 @@ elif mode=="seed":
 
     try:
         response = stub.InitWallet(request)
-     except grpc.RpcError as rpc_error_call:
+    except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
         print >> sys.stderr, code
         details = rpc_error_call.details()  
