@@ -365,7 +365,7 @@ or having a complete LND rescue-backup from your old node.
 
       clear
       echo "OK - channel.backup file found."
-
+    fi
 
 ##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
     echo "****************************************************************************"
@@ -421,9 +421,8 @@ or having a complete LND rescue-backup from your old node.
 #          /home/admin/70initLND.sh
 #          exit 1
 #        fi
-#      fi
-    
-  fi
+#      fi   
+  fi # END OLD WALLET
 
 else
   echo "OK - LND wallet already exists."
