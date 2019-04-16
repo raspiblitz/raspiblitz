@@ -205,6 +205,7 @@ if [ ${walletExists} -eq 0 ]; then
              ONLYSEED "Only Seed Word List (FALLBACK)")
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
+    # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # dialog to enter
@@ -229,12 +230,9 @@ The Word list should look like this:
 wordone,wordtweo,wordthree, ...
 
 " 16 52
-        exit 1
         /home/admin/70initLND.sh
+        exit 1
       fi
-
-
-
     fi
 
     if [ "${CHOICE}" == "ONLYSEED" ]; then
@@ -243,6 +241,15 @@ wordone,wordtweo,wordthree, ...
 
     elif [ "${CHOICE}" == "SEED+SCB" ]; then
       echo "TODO: SEED+SCB words(${wordstring})" 
+
+      # get the channel.backup file
+      gotFile=0
+      while [ ${gotFile} -eq 0];
+      do
+        echo "Please upload file. Press Enter or CTRL-X to cancel:"
+        read key
+      done
+
       exit 1
 
     elif [ "${CHOICE}" == "LNDRESCUE" ]; then
