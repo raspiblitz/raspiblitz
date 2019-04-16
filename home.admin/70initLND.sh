@@ -215,20 +215,20 @@ if [ ${walletExists} -eq 0 ]; then
       echo "processing ... ${wordstring}"
 
       # remove spaces
-      #wordstring=$(echo "${wordstring}" | sed 's/[^a-zA-Z0-9 ]//g')
+      wordstring=$(echo "${wordstring}" | sed 's/[^a-zA-Z0-9 ]//g')
 
       # string to array
-      #IFS=',' read -r -a seedArray <<< "$wordstring"
+      IFS=',' read -r -a seedArray <<< "$wordstring"
         
       # check array
-      #if [ ${#seedArray[@]} -eq 24 ]; then
-      #  echo "OK - 24 words"
-      #  exit 1
-      #else
-      #  echo "wrong number of words"
-      #  wordstring=""
-      #  exit 1
-      #fi
+      if [ ${#seedArray[@]} -eq 24 ]; then
+        echo "OK - 24 words"
+        exit 1
+      else
+        echo "wrong number of words"
+        wordstring=""
+        exit 1
+      fi
 
     fi
 
