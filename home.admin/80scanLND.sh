@@ -18,7 +18,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   ####################
 
   height=5
-  width=42
+  width=43
   title="Blockchain Info"
   if [ ${uptime} -gt 300 ]; then
     infoStr=" The ${network}d service is not running.\n Login for more details:"
@@ -45,9 +45,9 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
     if [ ${#bitcoinErrorShort} -eq 0 ]; then
       bitcoinErrorShort="Initial Startup"
     fi
-    infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\n Login for more details:"
+    infoStr=" The ${network}d service is starting.\n ${bitcoinErrorShort}\n Login for more details:"
     if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\nPlease wait up to 5min ..."
+      infoStr=" The ${network}d service is starting.\n ${bitcoinErrorShort}\nPlease wait up to 5min ..."
     fi
   fi
 
@@ -58,7 +58,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
   ####################
 
   height=5
-  width=42
+  width=43
   title="Lightning Info"
   if [ ${uptime} -gt 300 ]; then
     infoStr=" The LND service is not running.\n Login for more details:"
@@ -95,7 +95,7 @@ else
 
   # basic dialog info
   height=6
-  width=42
+  width=43
   title="Node is Syncing (${scriptRuntime})"
 
   # formatting progress values
