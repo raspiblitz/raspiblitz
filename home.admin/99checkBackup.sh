@@ -26,13 +26,18 @@ fi
 localVersionMain=$(cut -d"=" -f2 /home/admin/_version.info | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
 localVersionSub=$(cut -d"=" -f2 /home/admin/_version.info | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
 
+echo "local  version: ${gitHubVersionMain}.${gitHubVersionSub}"
+echo "github version: ${localVersionMain}.${localVersionSub}"
+
 # compare versions
 newerVersionAvailable=0
 if [ ${gitHubVersionMain} -gt ${localVersionMain} ]; then
   echo "Main version is higher ..."
   newerVersionAvailable=1
 else
-  if [ ${gitHubVersionSub} -gt ${localVersionSub} ]; then
+  if [ ${gitHubVersionMain} -lt ${localVersionMain} ]; then
+    echo "Strange that GutHub main version is lower then local - you maybe using a early release."
+  elif [ ${gitHubVersionSub} -gt ${localVersionSub} ]; then
   echo "Sub version is higher ..."
   newerVersionAvailable=1
   fi
