@@ -94,14 +94,17 @@ if mode=="new":
             seedwords6x4=seedwords6x4+singleWord
         print("seedwords6x4='"+seedwords6x4+"'")
 
-    except grpc.RpcError as err:
-        # - wallet might already exist
-        print("err='grpc.RpcError'")
-        print >> sys.stderr, err
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print >> sys.stderr, code
+        details = rpc_error_call.details()  
+        print("err='RPCError GenSeedRequest'")
+        print("errMore='"+details+"'")
         sys.exit(1)
-    except Exception as err: 
-        print("err='GenSeedRequest'")  
-        print >> sys.stderr, err
+    except: 
+        e = sys.exc_info()[0]
+        print >> sys.stderr, e
+        print("err='GenSeedRequest'")
         sys.exit(1)
 
     request = ln.InitWalletRequest(
@@ -110,10 +113,17 @@ if mode=="new":
     )
     try:
       response = stub.InitWallet(request)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print >> sys.stderr, code
+        details = rpc_error_call.details()  
+        print("err='RPCError InitWallet'")
+        print("errMore='"+details+"'")
+        sys.exit(1)
     except: 
         e = sys.exc_info()[0]
         print >> sys.stderr, e
-        print("err='Failed: RPC InitWallet'")
+        print("err='InitWallet'")
         sys.exit(1)
 
 elif mode=="seed":
@@ -125,6 +135,7 @@ elif mode=="seed":
     )
 
     if len(seedpassword)>0:
+        print("# running with seed passphrase")
         request = ln.InitWalletRequest(
             wallet_password=walletpassword,
             cipher_seed_mnemonic=seedwords,
@@ -133,18 +144,18 @@ elif mode=="seed":
         )
 
     try:
-      response = stub.InitWallet(request)
-    except grpc.RpcError as rpc_error_call:
+        response = stub.InitWallet(request)
+     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        details = rpc_error_call.details()  
         print >> sys.stderr, code
-        print >> sys.stderr, details
-        print("err='Failed: RPCError InitWallet'")
+        details = rpc_error_call.details()  
+        print("err='RPCError InitWallet'")
         print("errMore='"+details+"'")
+        sys.exit(1)
     except: 
         e = sys.exc_info()[0]
         print >> sys.stderr, e
-        print("err='Failed: RPC InitWallet'")
+        print("err='InitWallet'")
         sys.exit(1)
 
 elif mode=="scb":
