@@ -29,9 +29,9 @@ if [ ${bitcoinActive} -eq 0 ]; then
       echo "*****************************************"
       echo "If you just started some config/setup, this might be OK."
       echo
-      if [ ${#bitcoinError} -gt 0 ]; then
+      if [ ${#bitcoinErrorFull} -gt 0 ]; then
         echo "More Error Detail:"
-        echo ${bitcoinError}
+        echo ${bitcoinErrorFull}
         echo
       fi
       echo "-> To start ${network}d run: sudo systemctl start ${network}d"
@@ -41,9 +41,10 @@ if [ ${bitcoinActive} -eq 0 ]; then
       exit 1
     fi
   else
-    infoStr=" The ${network}d service is starting.\n Login for more details:"
+    height=6
+    infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\n Login for more details:"
     if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting.\n Please wait up to 5min ..."
+      infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\nPlease wait up to 5min ..."
     fi
   fi
 
@@ -65,9 +66,9 @@ elif [ ${lndActive} -eq 0 ]; then
       echo "*********************************"
       echo "If you just started some config/setup, this might be OK."
       echo
-      if [ ${#lndError} -gt 0 ]; then
+      if [ ${#lndErrorFull} -gt 0 ]; then
         echo "More Error Detail:"
-        echo ${lndError}
+        echo ${lndErrorFull}
         echo
       fi
       echo "-> To start LND run: sudo systemctl start lnd"

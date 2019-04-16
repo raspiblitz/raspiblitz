@@ -38,10 +38,11 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/mnt/hdd/temp/.bitcoind.error)
 
   # check if error on request
-  bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null | tr "'" '"' | tr '"' '\"' )
+  bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
   rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
-    echo "bitcoinError='${bitcoinError}'"
+    echo "bitcoinErrorFull='${bitcoinError}'"
+    echo "bitcoinErrorShort='${clienterror/error*:/}'"
   else
 
     ##############################
@@ -77,10 +78,11 @@ if [ ${lndRunning} -eq 1 ]; then
   lndinfo=$(sudo -u bitcoin lncli getinfo 2>/mnt/hdd/temp/.lnd.error)
 
   # check if error on request
-  lndError=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null | tr "'" '"' | tr '"' '\"' )
+  lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
   rm /mnt/hdd/temp/.lnd.error 2>/dev/null
   if [ ${#lndError} -gt 0 ]; then
-    echo "lndError='${lndError}'"
+    echo "lndErrorFull='${lndErrorFull}'"
+    echo "lndErrorShort=''"
   else
     
     # synced to chain

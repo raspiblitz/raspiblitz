@@ -225,13 +225,12 @@ To run a BACKUP of funds & channels first is recommended.
             exit
           fi
 
-        else
-          echo "${network} error: ${clienterror}"
         fi
 
         # let 80scanLND script to the info to use
         /home/admin/80scanLND.sh
         if [ $? -gt 0 ]; then
+          echo "${network} error: ${clienterror}"
           exit 0
         fi
 
