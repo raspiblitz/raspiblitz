@@ -208,29 +208,28 @@ if [ ${walletExists} -eq 0 ]; then
 
     if [ "${CHOICE}" == "SEED_SCB" ]; then
 
-      echo "ENTER SEED"
       # dialog to enter
       #$_temp="/home/admin/.seed.tmp"
-      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78
+      wordstring=$(dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78)
       #wordstring=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
       #shred $_temp
       #echo "processing ..."
 
       # remove spaces
-      #wordstring=$(echo "${wordstring}" | sed 's/[^a-zA-Z0-9 ]//g')
+      wordstring=$(echo "${wordstring}" | sed 's/[^a-zA-Z0-9 ]//g')
 
       # string to array
-      #IFS=',' read -r -a seedArray <<< "$wordstring"
+      IFS=',' read -r -a seedArray <<< "$wordstring"
         
       # check array
-      #if [ ${#seedArray[@]} -eq 24 ]; then
-      #  echo "OK - 24 words"
-      #  exit 1
-      #else
-      #  echo "wrong number of words"
-      #  wordstring=""
-      #  exit 1
-      #fi
+      if [ ${#seedArray[@]} -eq 24 ]; then
+        echo "OK - 24 words"
+        exit 1
+      else
+        echo "wrong number of words"
+        wordstring=""
+        exit 1
+      fi
 
     fi
 
