@@ -51,7 +51,7 @@ OK. You are running the newest version of RaspiBlitz.
   if [ $? -eq 0 ]; then
     exit 1
   fi
-fi
+else
 
   whiptail --title "Update Check" --yes-button "Yes" --no-button "Not Now" --yesno "
 There is a new Version of RaspiBlitz available.
@@ -63,8 +63,9 @@ Do you want more Information on how to update?
   if [ $? -eq 1 ]; then
     exit 1
   fi
+fi
 
-  whiptail --title "Update Instructions" --yes-button "Not Now" --no-button "Start Update" --yesno "To update your RaspiBlitz to a new version:
+whiptail --title "Update Instructions" --yes-button "Not Now" --no-button "Start Update" --yesno "To update your RaspiBlitz to a new version:
 
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
@@ -75,30 +76,30 @@ No need to close channels or download blockchain again.
 
 Do you want to start the Update now?
       " 16 62
-  if [ $? -eq 0 ]; then
-    exit 1
-  fi
+if [ $? -eq 0 ]; then
+  exit 1
+fi
 
-   whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
+whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
 Before we start the RaspiBlitz Update process,
 its recommended to make a backup of all your LND Data
 and download that file to your laptop.
 
 Do you want to download LND Data Backup now?
       " 12 58
-  if [ $? -eq 0 ]; then
-    /home/admin/config.scripts/lnd.rescue.sh backup
-  else
-    clear
-    echo "*************************************"
-    echo "* JUST MAKING BACKUP TO OLD SD CARD"
-    echo "*************************************"
-    echo "please wait .."
-    sleep 2
-    /home/admin/config.scripts/lnd.rescue.sh backup no-download
-  fi
+if [ $? -eq 0 ]; then
+  /home/admin/config.scripts/lnd.rescue.sh backup
+else
+  clear
+  echo "*************************************"
+  echo "* JUST MAKING BACKUP TO OLD SD CARD"
+  echo "*************************************"
+  echo "please wait .."
+  sleep 2
+  /home/admin/config.scripts/lnd.rescue.sh backup no-download
+fi
 
-  whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
+whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
 Once the LCD is white and no LEDs are blicking anymore:
 
 - Remove the Power from RaspiBlitz
@@ -110,17 +111,9 @@ Do you have the SD card with the new version image ready
 and do you WANT TO START UPDATE NOW?
       " 16 62
 
-  if [ $? -eq 1 ]; then
-    exit 1
-  fi
-
-  echo "TODO: RUN UPDATE NOW"
+if [ $? -eq 1 ]; then
   exit 1
-
 fi
 
-
-
-
-
-
+echo "TODO: RUN UPDATE NOW"
+exit 1
