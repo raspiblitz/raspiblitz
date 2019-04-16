@@ -262,7 +262,7 @@ wordone,wordtweo,wordthree, ...
 Are your seed words protected by an extra password?
 
 During wallet creation LND offers to set an extra password
-to protect the seed words. Most users dont set this.
+to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
         sudo shred /home/admin/.pass.tmp 2>/dev/null
