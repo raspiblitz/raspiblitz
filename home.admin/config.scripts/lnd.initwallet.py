@@ -138,6 +138,8 @@ elif mode=="seed":
         e = sys.exc_info()[0]
         print >> sys.stderr, e
         print("err='Failed: RPC InitWallet'")
+        message = e.details()
+        print("errMore='"+message+"'")
         sys.exit(1)
 
 elif mode=="scb":
