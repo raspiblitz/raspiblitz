@@ -6,8 +6,8 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
 
-height=8
-width=52
+height=6
+width=44
 
 #infoStr=" Waiting for Blockchain Sync\n Progress: ${syncProgress}% \n Please wait - this can take some time.\n ssh admin@${localIP} -> Password A"
 title="Node is Syncing"
@@ -20,4 +20,4 @@ fi
 infoStr=" Blockchain Progress : ${syncProgress}%\n Lightning Progress  : ${scanProgress}%\n Please wait - this can take some time\n ssh admin@${localIP} ->Password A"
 
 # display progress to user
-dialog --title " ${title} " --backtitle "RaspiBlitz ${codeVersion} (${hostname}) / ${network} / ${chain} / CPU: ${tempCelsius}°C" --infobox "${infoStr}" ${height} ${width}
+dialog --title " ${title} " --backtitle "RaspiBlitz ${codeVersion} ${hostname} / ${network} / ${chain} / ${tempCelsius}°C" --infobox "${infoStr}" ${height} ${width}
