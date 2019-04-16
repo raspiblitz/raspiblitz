@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small rescue script to to backup or restore"
- echo "lnd.rescue.sh [backup|restore]"
+ echo "lnd.rescue.sh [backup|restore] [?no-download]"
  exit 1
 fi
 
@@ -35,6 +35,12 @@ if [ ${mode} = "backup" ]; then
   # name with md5 checksum
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
   mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
+
+  # stop here in case of 'no-download' option
+  if [ "${2}" == "no-download" ]; then
+    echo "No download of LND data requested."
+    exit 0
+  fi
 
   # offer SCP for download
   echo
