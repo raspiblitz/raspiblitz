@@ -243,29 +243,45 @@ wordone,wordtweo,wordthree, ...
       echo "TODO: SEED+SCB words(${wordstring})" 
 
       # get the channel.backup file
-      gotFile=0
-      while [ ${gotFile} -eq 0 ]
+      gotFile=-1
+      while [ ${gotFile} -lt 1 ]
       do
 
+        # show info
         echo "**********************************"
         echo "* UPLOAD THE channel.backup FILE *"
         echo "**********************************"
-        echo "If you have a lnd-rescue backup file on your laptop you can now"
-        echo "upload it and restore the your latest LND state."
         echo
-        echo "CAUTION: Dont restore old LND states - risk of loosing funds!"
+        if [ ${gotFile} -eq -1 ]; then
+          echo "If you have the channel.backup file on your laptop or on"
+          echo "another server you can now upload it to the RaspiBlitz."
+        elif [ ${gotFile} -eq 0 ]; then
+          echo "NO channel.backup FOUND IN /home/admin"
+          echo "Please try upload again."
+        else
+          echo "OK channel.backup file found"
+          break
+        fi
         echo
-        echo "To make upload open a new terminal on your laptop,"
-        echo "change into the directory where your lnd-rescue file is and"
+        echo "To make upload open a new terminal and change,"
+        echo "into the directory where your lnd-rescue file is and"
         echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-        echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
+        echo "scp ./channel.backup admin@${localip}:/home/admin/"
         echo ""
         echo "Use password A to authenticate file transfere."
         echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
 
-        echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel:"
+        # wait user interaction
+        echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel."
         read key
-        echo "key(${key})" 
+        if [ "${key}" == "x" ]; then
+          /home/admin/70initLND.sh
+          exit 1
+        fi
+
+        # test upload
+        gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
+        
       done
 
       exit 1
