@@ -372,8 +372,9 @@ or having a complete LND rescue-backup from your old node.
     echo "Helping Instructions --> for recovering a LND Wallet"
     echo "****************************************************************************"
     echo "A) For 'Wallet Password' use your old PASSWORD C"
-    echo "B) For 'cipher seed mnemonic' answere 'y' and enter words sepereted by space" 
-    echo "C) Enter 'passphrase' to encrypt your 'cipher seed' only if u did on create"
+    echo "B) For 'cipher seed mnemonic' answere 'y' and then enter your seed words" 
+    echo "C) On 'cipher seed passphrase' ONLY enter PASSWORD D if u used it on create"
+    echo "D) On 'address look-ahead' only enter more than 2500 had lots of channels"
     echo "****************************************************************************"
     echo ""
     sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>/home/admin/.error.tmp
@@ -485,7 +486,23 @@ echo ""
 echo "*** SCB Recovery ***"
 gotSCB=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
 if [ ${gotSCB} -eq 1 ]; then
-  lncli restorechanbackup --multi_file=/home/admin/channel.backup
+
+  lncli restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
+  error=`cat /home/admin/.error.tmp`
+  rm /home/admin/.error.tmp 2>/dev/null
+
+  if [ ${#error} -gt 0 ]; then
+    echo ""
+    echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+    echo "${error}"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo ""
+    echo "You can try after full setup to restore channel.backup file again."
+    echo "Press ENTER to continue ..."
+    read key
+    exit 1
+  fi
+  
 else
   echo "NO /home/admin/channel.backup file - skipping SCB"
 fi
