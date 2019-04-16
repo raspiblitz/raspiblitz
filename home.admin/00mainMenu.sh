@@ -377,9 +377,10 @@ else
       fi
 
       # final Options
-      OPTIONS+=(HARDWARE "Run Hardwaretest")   
-      OPTIONS+=(SOFTWARE "Run Softwaretest")  
-      OPTIONS+=(OFF "PowerOff RaspiBlitz")   
+      OPTIONS+=(HARDWARE "Run Hardwaretest")
+      OPTIONS+=(SOFTWARE "Run Softwaretest")
+      OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
+      OPTIONS+=(OFF "PowerOff RaspiBlitz")
       OPTIONS+=(X "Console / Terminal")
 
     fi
@@ -574,6 +575,11 @@ case $CHOICE in
         DELETE)
             sudo ./XXcleanHDD.sh
             sudo shutdown -r now
+            exit 0
+            ;;   
+        UPDATE)
+            /home/admin/99checkUpdate.sh
+            ./00mainMenu.sh
             exit 0
             ;;   
         X)

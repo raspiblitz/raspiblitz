@@ -129,5 +129,5 @@ OK. RaspiBlitz will NOT update now.
   exit 1
 fi
 
-echo "TODO: RUN UPDATE NOW"
-exit 1
+clear
+sudo shutdown now
