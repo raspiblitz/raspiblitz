@@ -47,7 +47,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
     fi
     infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login for more details:"
     if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\nPlease wait up to 5min ..."
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
     fi
   fi
 
