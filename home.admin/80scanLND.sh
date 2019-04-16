@@ -34,12 +34,9 @@ if [ ${bitcoinActive} -eq 0 ]; then
         echo ${bitcoinError}
         echo
       fi
-      echo "-> To try to start ${network}d run:"
-      echo "sudo systemctl start ${network}d"
-      echo "-> To force Main Menu run:"
-      echo "/home/admin/00mainmenu.sh"
-      echo "-> Use following command to debug:"
-      echo "/home/admin/XXdebugLogs.sh"
+      echo "-> To start ${network}d run: sudo systemctl start ${network}d"
+      echo "-> To force Main Menu run: /home/admin/00mainmenu.sh"
+      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo ""
       exit 1
     fi
@@ -73,12 +70,9 @@ elif [ ${lndActive} -eq 0 ]; then
         echo ${lndError}
         echo
       fi
-      echo "-> To try to start LND run:"
-      echo "sudo systemctl start lnd"
-      echo "-> To force Main Menu run:"
-      echo "/home/admin/00mainmenu.sh"
-      echo "-> Use following command to debug:"
-      echo "/home/admin/XXdebugLogs.sh"
+      echo "-> To start LND run: sudo systemctl start lnd"
+      echo "-> To force Main Menu run: /home/admin/00mainmenu.sh"
+      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo ""
       exit 1
     fi
