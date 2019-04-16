@@ -128,11 +128,12 @@ if mode=="new":
 
 elif mode=="seed":
 
-    print("# wallet passphrase+ "+walletpassword)
+    print("# wallet passphrase: "+walletpassword)
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=1000
+        recovery_window=1000,
+        aezeed_passphrase=seedpassword,
     )
 
     if len(seedpassword)>0:
