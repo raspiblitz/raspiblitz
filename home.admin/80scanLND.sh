@@ -42,6 +42,9 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
     fi
   else
     height=6
+    if [ ${#bitcoinErrorShort} -eq 0 ]; then
+      bitcoinErrorShort="Initial Startup"
+    fi
     infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\n Login for more details:"
     if [ "$USER" == "admin" ]; then
       infoStr=" The ${network}d service is starting.\n${bitcoinErrorShort}\nPlease wait up to 5min ..."
