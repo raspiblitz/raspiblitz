@@ -20,7 +20,7 @@ if [ ${bitcoinActive} -eq 0 ]; then
   height=6
   width=42
   title="Blockchain Warning"
-  infoStr=" The ${network}d service is not running.\n Login for more details."
+  infoStr=" The ${network}d service is not running.\n Login for more details:"
   if [ "$USER" == "admin" ]; then
     infoStr="${infoStr}\n${bitcoinError}"
   fi
@@ -34,7 +34,7 @@ elif [ ${lndActive} -eq 0 ]; then
   height=5
   width=42
   title="Lightning Warning"
-  infoStr=" The lnd service is not running.\n Login for more details."
+  infoStr=" The lnd service is not running.\n Login for more details:"
   if [ "$USER" == "admin" ]; then
     clear
     echo "*********************************"
@@ -43,7 +43,7 @@ elif [ ${lndActive} -eq 0 ]; then
     echo ${lndError}
     echo "Use following command to debug:"
     echo "/home/admin/XXdebugLogs.sh"
-    exit 0
+    exit 1
   fi
 
 else

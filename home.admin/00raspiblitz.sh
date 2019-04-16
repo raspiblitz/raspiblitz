@@ -251,6 +251,9 @@ To run a BACKUP of funds & channels first is recommended.
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
         if [ ${lndSynced} -eq 0 ]; then
           /home/admin/80scanLND.sh
+          if [ $? -gt 0 ]; then
+            exit 0
+          fi
         else
           # everything is ready - return from loop
           return
