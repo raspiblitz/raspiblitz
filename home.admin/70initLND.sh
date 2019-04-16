@@ -284,8 +284,29 @@ to protect the seed words. Most users dont set this.
       # trigger wallet recovery
       source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} ${passwordD})
 
-      echo "TODO: ONLYSEED words(${wordstring})"
-      exit 1
+      # on success the python script should return the seed words again
+      if [ ${#seedwords} -gt 1 ]; then
+        dialog --title " SUCCESS " --msgbox "
+Looks good :) LND was able to recover the wallet.
+      " 7 53
+      else
+        if [ ${#err} -eq 0 ]; then
+          echo
+          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
+          echo "PRESS ENTER to try again."
+          read key
+          /home/admin/70initLND.sh
+          exit 1
+        else
+          whiptail --title " FAIL " --msgbox "
+Something went wrong - see info below:
+${err}
+${errMore}
+      " 13 72
+          /home/admin/70initLND.sh
+          exit 1
+        fi
+      fi
 
     elif [ "${CHOICE}" == "SEED+SCB" ]; then
 
@@ -337,8 +358,30 @@ to protect the seed words. Most users dont set this.
       # trigger wallet recovery
       source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} /home/admin/channel.backup ${passwordD})
 
-      echo "TODO: Implement recovery with channel backup file"
-      exit 1
+      # WIN/FAIL User feedback
+      # on success the python script should return the seed words again
+      if [ ${#seedwords} -gt 1 ]; then
+        dialog --title " SUCCESS " --msgbox "
+Looks good :) LND was able to recover the wallet.
+      " 7 53
+      else
+        if [ ${#err} -eq 0 ]; then
+          echo
+          echo "FAIL!! Unkown Error - check output above for any hints and report to development."
+          echo "PRESS ENTER to try again."
+          read key
+          /home/admin/70initLND.sh
+          exit 1
+        else
+          whiptail --title " FAIL " --msgbox "
+Something went wrong - see info below:
+${err}
+${errMore}
+      " 13 72
+          /home/admin/70initLND.sh
+          exit 1
+        fi
+      fi
 
     elif [ "${CHOICE}" == "LNDRESCUE" ]; then
       sudo /home/admin/config.scripts/lnd.rescue.sh restore
