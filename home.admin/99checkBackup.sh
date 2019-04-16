@@ -89,7 +89,14 @@ and download that file to your laptop.
 Do you want to download LND Data Backup now?
       " 12 58
 if [ $? -eq 0 ]; then
+  clear
+  echo "*************************************"
+  echo "* PREPARING LND BACKUP DOWNLOAD"
+  echo "*************************************"
+  echo "please wait .."
+  sleep 2
   /home/admin/config.scripts/lnd.rescue.sh backup
+  read key
 else
   clear
   echo "*************************************"
@@ -98,6 +105,7 @@ else
   echo "please wait .."
   sleep 2
   /home/admin/config.scripts/lnd.rescue.sh backup no-download
+  read key
 fi
 
 whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
