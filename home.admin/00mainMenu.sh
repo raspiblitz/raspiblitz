@@ -11,7 +11,14 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 source ${configFile}
 
-# Backtitle Info
+# BASIC MENU INFO
+HEIGHT=13
+WIDTH=64
+CHOICE_HEIGHT=6
+BACKTITLE="RaspiBlitz"
+TITLE=""
+MENU="Choose one of the following options:"
+OPTIONS=()
 plus=""
 if [ "${runBehindTor}" = "on" ]; then
   plus=" / TOR"

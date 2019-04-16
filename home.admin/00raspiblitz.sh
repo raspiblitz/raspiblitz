@@ -120,8 +120,6 @@ fi
 
 ## default menu settings
 # to fit the main menu without scrolling: 
-# HEIGHT=23
-# CHOICE_HEIGHT=20 
 HEIGHT=13
 WIDTH=64
 CHOICE_HEIGHT=6
