@@ -19,8 +19,8 @@ if [ ${bitcoinActive} -eq 0 ]; then
 
   height=6
   width=42
-  title="Blockchain Error"
-  infoStr="The ${network}d service is not running."
+  title="Blockchain Warning"
+  infoStr=" The ${network}d service is not running.\n Login for more details."
   if [ "$USER" == "admin" ]; then
     infoStr="${infoStr}\n${bitcoinError}"
   fi
@@ -31,12 +31,19 @@ elif [ ${lndActive} -eq 0 ]; then
   # On LND Error
   ####################
 
-  height=6
+  height=5
   width=42
-  title="Lightning Error"
-  infoStr="The lnd service is not running."
+  title="Lightning Warning"
+  infoStr=" The lnd service is not running.\n Login for more details."
   if [ "$USER" == "admin" ]; then
-    infoStr="${infoStr}\n${lndError}"
+    clear
+    echo "*********************************"
+    echo "* The lnd service is not running."
+    echo "*********************************"
+    echo ${lndError}
+    echo "Use following command to debug:"
+    echo "/home/admin/XXdebugLogs.sh"
+    exit 0
   fi
 
 else
