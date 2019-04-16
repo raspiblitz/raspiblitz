@@ -137,7 +137,9 @@ elif mode=="seed":
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
         details = rpc_error_call.details()  
-        print("err='Failed: RPCError InitWallet "+code+"'")
+        print >> sys.stderr, code
+        print >> sys.stderr, details
+        print("err='Failed: RPCError InitWallet'")
         print("errMore='"+details+"'")
     except: 
         e = sys.exc_info()[0]
