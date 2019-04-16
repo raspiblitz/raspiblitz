@@ -148,6 +148,10 @@ if [ ${walletExists} -eq 0 ]; then
 
   if [ "${CHOICE}" == "NEW" ]; then
 
+############################
+# NEW WALLET
+############################
+
     # let user enter password c
     sudo shred /home/admin/.pass.tmp 2>/dev/null
     sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
@@ -200,10 +204,28 @@ if [ ${walletExists} -eq 0 ]; then
 
   else
 
+############################
+# RECOVER OLD WALLET
+############################
+
     OPTIONS=(LNDRESCUE "LND tar.gz-Backupfile (BEST)" \
              SEED+SCB "Seed & channel.backup file (OK)" \
              ONLYSEED "Only Seed Word List (FALLBACK)")
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+    # show warn when only seed
+    if [ "${CHOICE}" == "ONLYSEED" ]; then
+      whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
+Using JUST SEED WORDS will only recover your on-chain funds.
+To also try to recover the open channel funds you need the
+channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
+or having a complete LND rescue-backup from your old node.
+      " 11 65
+      if [ $? -eq 1 ]; then
+        /home/admin/70initLND.sh
+        exit 1
+      fi
+    fi
 
     # get seed word list
     if [ "${CHOICE}" == "!SEED+SCB" ] || [ "${CHOICE}" == "!ONLYSEED" ]; then
@@ -233,14 +255,39 @@ wordone,wordtweo,wordthree, ...
         /home/admin/70initLND.sh
         exit 1
       fi
+
+      # ask if seed was protected by password D
+      passwordD=""
+      dialog --title "SEED PASSWORD" --yes-button "No extra Password" --no-button "Yes" --yesno "
+Are your seed words protected by an extra password?
+
+During wallet creation LND offers to set an extra password
+to protect the seed words. Most users dont set this.
+      " 11 65
+      if [ $? -eq 1 ]; then
+        sudo shred /home/admin/.pass.tmp 2>/dev/null
+        sudo ./config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+        passwordD=`sudo cat /home/admin/.pass.tmp`
+        sudo shred /home/admin/.pass.tmp 2>/dev/null
+      fi
+
     fi
 
+    # let user enter password c
+    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
+    passwordC=`sudo cat /home/admin/.pass.tmp`
+    sudo shred /home/admin/.pass.tmp 2>/dev/null
+
     if [ "${CHOICE}" == "ONLYSEED" ]; then
+
+      # trigger wallet recovery
+      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} ${passwordD})
+
       echo "TODO: ONLYSEED words(${wordstring})"
       exit 1
 
     elif [ "${CHOICE}" == "SEED+SCB" ]; then
-      echo "TODO: SEED+SCB words(${wordstring})" 
 
       # get the channel.backup file
       gotFile=-1
@@ -261,9 +308,6 @@ wordone,wordtweo,wordthree, ...
         elif [ ${gotFile} -eq 0 ]; then
           echo "NO channel.backup FOUND IN /home/admin"
           echo "Please try upload again."
-        else
-          echo "OK channel.backup file found"
-          break
         fi
         echo
         echo "To make upload open a new terminal and change,"
@@ -287,6 +331,13 @@ wordone,wordtweo,wordthree, ...
 
       done
 
+      clear
+      echo "OK - channel.backup file found."
+
+      # trigger wallet recovery
+      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} /home/admin/channel.backup ${passwordD})
+
+      echo "TODO: Implement recovery with channel backup file"
       exit 1
 
     elif [ "${CHOICE}" == "LNDRESCUE" ]; then
@@ -303,15 +354,7 @@ wordone,wordtweo,wordthree, ...
       exit 1
     fi
 
-    # TODO: IMPLEMENT
-    # - Recover with Seed Word List 
-    #   --> (ask if seed word list was password D protected)
-    # - Recover with Seed Word List & channel.backup file 
-    #   --> (ask if seed word list was password D protected)
-    # - Restore LND backup made with Rescue-Script (tar.gz-file)
-    #   --> run retsore script
-
-    # FALLBACK TO lncli create FOR NOW
+    # FALLBACK
     #dialog --title "OK" --msgbox "\nI will start 'lncli create' for you ..." 7 44
     #sudo -u bitcoin /usr/local/bin/lncli --chain=${network} create
     #/home/admin/70initLND.sh
@@ -324,7 +367,10 @@ fi
 
 dialog --pause "  Waiting for LND - please wait .." 8 58 60
 
-###### Copy LND macaroons to admin
+############################
+# Copy LND macaroons to admin
+############################
+
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)

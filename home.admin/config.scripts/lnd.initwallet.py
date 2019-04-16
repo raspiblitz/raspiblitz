@@ -106,4 +106,3 @@ elif mode=="scb":
 
     print("err='TODO: implement creating from seed/scb'")
     sys.exit(1)
-
