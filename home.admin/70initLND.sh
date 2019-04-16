@@ -218,6 +218,7 @@ if [ ${walletExists} -eq 0 ]; then
       IFS=',' read -r -a seedArray <<< "$wordstring"
         
       # check array
+      echo "numWords(${#seedArray[@]})"
       if [ ${#seedArray[@]} -eq 24 ]; then
         echo "OK - 24 words"
         exit 1
