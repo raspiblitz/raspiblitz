@@ -19,7 +19,7 @@ if [ ${bitcoinActive} -eq 0 ]; then
 
   height=6
   width=42
-  title="Blockchain Warning"
+  title="Blockchain Info"
   infoStr=" The ${network}d service is not running.\n Login for more details:"
   if [ "$USER" == "admin" ]; then
     echo ""
@@ -50,7 +50,7 @@ elif [ ${lndActive} -eq 0 ]; then
 
   height=5
   width=42
-  title="Lightning Warning"
+  title="Lightning Info"
   infoStr=" The lnd service is not running.\n Login for more details:"
   if [ "$USER" == "admin" ]; then
     echo ""
