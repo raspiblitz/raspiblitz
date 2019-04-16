@@ -227,6 +227,12 @@ or having a complete LND rescue-backup from your old node.
       fi
     fi
 
+    # let user enter password c
+    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
+    passwordC=`sudo cat /home/admin/.pass.tmp`
+    sudo shred /home/admin/.pass.tmp 2>/dev/null
+
     # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
@@ -272,12 +278,6 @@ to protect the seed words. Most users did not set this.
       fi
 
     fi
-
-    # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
-    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
-    passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
 
     if [ "${CHOICE}" == "ONLYSEED" ]; then
 
