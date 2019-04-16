@@ -10,7 +10,7 @@ clear
 # get latest release verison from GitHub
 sudo curl -s -X GET https://raw.githubusercontent.com/rootzoll/raspiblitz/master/home.admin/_version.info > /home/admin/.version.tmp
 gitHubVersionMain=$(cut -d"=" -f2 /home/admin/.version.tmp | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
-gitHubVersionSub=$(cut -d"=" -f2 /home/admin/.version.tmp | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
+gitHubVersionSub=$(cut -d"=" -f2 /home/admin/.version.tmp | cut -d'"' -f2 | cut -d"." -f2 | egrep "^[0-9]")
 sudo shred /home/admin/.version.tmp
 sudo rm /home/admin/.version.tmp 2>/dev/null
 
@@ -24,7 +24,7 @@ fi
 
 # get local version
 localVersionMain=$(cut -d"=" -f2 /home/admin/_version.info | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
-localVersionSub=$(cut -d"=" -f2 /home/admin/_version.info | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
+localVersionSub=$(cut -d"=" -f2 /home/admin/_version.info | cut -d'"' -f2 | cut -d"." -f2 | egrep "^[0-9]")
 
 echo "local  version: ${gitHubVersionMain}.${gitHubVersionSub}"
 echo "github version: ${localVersionMain}.${localVersionSub}"
