@@ -34,7 +34,7 @@ if [ "${MODE}" == "get" ]; then
 
 elif [ "${MODE}" == "transfer" ]; then
 
-  sudo sh -c 'yes yes | sudo ssh-copy-id $2'
+  sudo ssh-copy-id $2
 
 else
   echo "err='paremeter not known - run with -help'"

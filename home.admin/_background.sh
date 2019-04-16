@@ -181,7 +181,9 @@ do
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
-          sudo scp /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
+          # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
+          # but its more likely that whithout ignoriing known host, script might not run thru and that way: no offsite channel backup
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
