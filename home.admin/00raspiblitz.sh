@@ -229,19 +229,12 @@ To run a BACKUP of funds & channels first is recommended.
           echo "${network} error: ${clienterror}"
         fi
 
-        # normal info
-        boxwidth=40
-        l1="Waiting for ${network}d to get ready.\n"
-        l2="---> ${clienterror/error*:/}\n"
-        l3="Can take longer if device was off."
-        uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-        # after 2 min show complete long string (full detail)
-        if [ ${uptimeSeconds} -gt 120 ]; then
-          boxwidth=80
-          l2="${clienterror}\n"
-          l3="CTRL+C => terminal"
+        # let 80scanLND script to the info to use
+        /home/admin/80scanLND.sh
+        if [ $? -gt 0 ]; then
+          exit 0
         fi
-        dialog --backtitle "RaspiBlitz ${localip} - Welcome" --infobox "$l1$l2$l3" 5 ${boxwidth}
+
       else
         locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
         if [ ${locked} -gt 0 ]; then

@@ -17,7 +17,7 @@ if [ ${bitcoinActive} -eq 0 ]; then
   # On Bitcoin Error
   ####################
 
-  height=6
+  height=5
   width=42
   title="Blockchain Info"
   if [ ${uptime} -gt 300 ]; then
