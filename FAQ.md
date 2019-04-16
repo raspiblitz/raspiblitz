@@ -621,6 +621,6 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 
 - Make sure that your RaspiBlitz and your laptop are really on the same local network
 - Check if you have a VPN running on your laptop - some VPNs block local network
-- Some Routers have `IP Isolation` switched on - not allowing to connect to devices 
+- Some Routers have `IP Isolation` switched on - not allowing two devices to connect  
 
 If everything does not work: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
