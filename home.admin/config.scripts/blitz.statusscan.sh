@@ -28,7 +28,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   # check if error on request
   bitcoinError=$(sudo -u bitcoin cat /home/bitcoin/.${network}/.bitcoind.error | tr "'" '"' | tr '"' '\"' )
   sudo -u bitcoin rm /home/bitcoin/.${network}/.bitcoind.error
-  if [ ${#bitcoinError} -gt 0 ];
+  if [ ${#bitcoinError} -gt 0 ]; then
     echo "bitcoinError='${bitcoinError}'"
   else
 
@@ -67,7 +67,7 @@ if [ ${lndRunning} -eq 1 ]; then
   # check if error on request
   lndError=$(sudo -u bitcoin cat /home/bitcoin/.lnd/.lnd.error | tr "'" '"' | tr '"' '\"' )
   sudo -u bitcoin rm /home/bitcoin/.lnd/.lnd.error
-  if [ ${#lndError} -gt 0 ];
+  if [ ${#lndError} -gt 0 ]; then
     echo "lndError='${lndError}'"
   else
     
