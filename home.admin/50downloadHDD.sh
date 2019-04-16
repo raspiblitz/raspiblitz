@@ -143,7 +143,7 @@ if [ ${finalSize} -lt ${targetSize} ]; then
   case $response in
     1) sudo rm -rf /mnt/hdd/download ;;
   esac
-  ./00mainMenu.sh
+  ./00raspiblitz.sh
   exit 1;
   
 else

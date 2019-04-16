@@ -600,7 +600,7 @@ sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
-sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo './00raspiblitz.sh' >> /home/admin/.bashrc"
 
 if [ "${baseImage}" = "raspbian" ]; then
   # bash autostart for pi
