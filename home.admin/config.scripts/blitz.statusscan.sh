@@ -35,14 +35,14 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/mnt/hdd/temp/.bitcoind.error)
-
+  sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
   # check if error on request
+  blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
   #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     echo "bitcoinErrorFull='${bitcoinError}'"
-    echo "bitcoinErrorShort='${clienterror/error*:/}'"
+    echo "bitcoinErrorShort='${bitcoinError/error*:/}'"
   else
 
     ##############################
