@@ -208,7 +208,8 @@ if [ ${walletExists} -eq 0 ]; then
 
     if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
       # enter SEED words
-      while [ ${#result} -eq 0 ]
+      wordstring=""
+      while [ ${#wordstring} -eq 0 ]
       do
 
         # dialog to enter
@@ -229,6 +230,7 @@ if [ ${walletExists} -eq 0 ]; then
           exit 1
         else
           echo "wrong number of words"
+          wordstring=""
           exit 1
         fi
         sleep 3
