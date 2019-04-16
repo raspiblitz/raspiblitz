@@ -206,7 +206,7 @@ if [ ${walletExists} -eq 0 ]; then
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
     # get seed word list
-    if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
+    if [ "${CHOICE}" == "!SEED+SCB" ] || [ "${CHOICE}" == "!ONLYSEED" ]; then
 
       # dialog to enter
       dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
@@ -246,8 +246,9 @@ wordone,wordtweo,wordthree, ...
       gotFile=0
       while [ ${gotFile} -eq 0 ]
       do
-        echo "Please upload file. Press Enter or CTRL-X to cancel:"
+        echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel:"
         read key
+        echo "key(${key})" 
       done
 
       exit 1
