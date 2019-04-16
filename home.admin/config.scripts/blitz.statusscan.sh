@@ -115,5 +115,3 @@ fi
 endTime=$(date +%s)
 runTime=$(echo "${endTime}-${startTime}" | bc)
 echo "scriptRuntime=${runTime}"
-
-
