@@ -206,16 +206,13 @@ if [ ${walletExists} -eq 0 ]; then
     CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
     echo "choice($CHOICE)"
 
-    if [ "${CHOICE}" == "SEED_SCB" ]; then
+    if [ "${CHOICE}" == "SEED_SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # dialog to enter
       dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by commas, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
-      wordstring=$( cat /home/admin/.seed.tmp | tr -dc '[:alnum:]-.' | tr -d ' ' )
+      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
       shred /home/admin/.seed.tmp
       echo "processing ... ${wordstring}"
-
-      # remove spaces
-      wordstring=$(echo "${wordstring}" | sed 's/[^a-zA-Z0-9 ]//g')
 
       # string to array
       IFS=',' read -r -a seedArray <<< "$wordstring"
