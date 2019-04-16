@@ -83,7 +83,7 @@ if [ ${lndRunning} -eq 1 ]; then
     scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
     echo "scanTimestamp=${scanTimestamp}"
     scanDate=$(date -d @${scanTimestamp})
-    echo "scanDate=${scanDate}"
+    echo "scanDate='${scanDate}'"
 
     # calculate LND scan progress by seconds since Genesisblock
     genesisTimestamp=1230940800
