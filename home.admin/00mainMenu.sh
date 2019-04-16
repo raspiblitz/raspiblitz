@@ -20,7 +20,8 @@ if [ ${#dynDomain} -gt 0 ]; then
   plus="${plus} / ${dynDomain}"
 fi
 BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}${plus}"
-if [ ${runningRTL} -eq 1 ]; then
+
+if [ "${rtlWebinterface}" == "on" ]; then
   TITLE="Webinterface: http://${localip}:3000"
 fi
 
@@ -47,10 +48,10 @@ fi
 
 # Depending Options
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
-if [ ${openChannels} -gt 0 ]; then
+if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")  
 fi
-if [ "${runBehindTor}" = "on" ]; then
+if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(NYX "Monitor TOR")  
 fi
 
