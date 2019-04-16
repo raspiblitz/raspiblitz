@@ -133,7 +133,7 @@ elif mode=="seed":
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
         recovery_window=1000,
-        aezeed_passphrase=seedpassword,
+        aezeed_passphrase=None
     )
 
     if len(seedpassword)>0:
