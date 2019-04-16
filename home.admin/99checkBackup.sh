@@ -45,11 +45,14 @@ fi
 
 # give feedback on version number
 if [ ${newerVersionAvailable} -eq 0 ]; then
-  dialog --title " Update Check " --msgbox "
+  dialog --title " Update Check " --yes-button "OK" --no-button "Update Anyway" --yesno "
 OK. You are running the newest version of RaspiBlitz.
       " 7 57
-  exit 0
-else
+  if [ $? -eq 0 ]; then
+    exit 1
+  fi
+fi
+
   whiptail --title "Update Check" --yes-button "Yes" --no-button "Not Now" --yesno "
 There is a new Version of RaspiBlitz available.
 You are running: ${localVersionMain}.${localVersionSub}
