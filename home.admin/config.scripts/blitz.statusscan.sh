@@ -39,7 +39,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
 
   # check if error on request
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
-  rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
+  #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     echo "bitcoinErrorFull='${bitcoinError}'"
     echo "bitcoinErrorShort='${clienterror/error*:/}'"
@@ -79,7 +79,7 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
-  rm /mnt/hdd/temp/.lnd.error 2>/dev/null
+  #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
   if [ ${#lndError} -gt 0 ]; then
     echo "lndErrorFull='${lndErrorFull}'"
     echo "lndErrorShort=''"
