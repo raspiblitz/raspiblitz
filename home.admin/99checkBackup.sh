@@ -96,6 +96,8 @@ if [ $? -eq 0 ]; then
   echo "please wait .."
   sleep 2
   /home/admin/config.scripts/lnd.rescue.sh backup
+  echo
+  echo "PRESS ENTER to continue once your done downloading."
   read key
 else
   clear
@@ -105,7 +107,6 @@ else
   echo "please wait .."
   sleep 2
   /home/admin/config.scripts/lnd.rescue.sh backup no-download
-  read key
 fi
 
 whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
