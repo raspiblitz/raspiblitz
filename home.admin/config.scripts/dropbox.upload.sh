@@ -55,7 +55,7 @@ elif [ "${MODE}" == "upload" ]; then
   fi
 
   DEVICE=$(echo "${hostname}" | awk '{print tolower($0)}' | sed -e 's/ /-/g')
-  BACKUPFOLDER=.lndbackup-$DEVICE
+  BACKUPFOLDER=lndbackup-$DEVICE
   FILENAME=$(basename "${SOURCEFILE}")
 
   sudo curl -s -X POST https://content.dropboxapi.com/2/files/upload \
