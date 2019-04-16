@@ -69,7 +69,7 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-clear
+#clear
 case $CHOICE in
         CLOSE)
             exit 1;

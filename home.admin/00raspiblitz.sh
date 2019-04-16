@@ -262,9 +262,6 @@ To run a BACKUP of funds & channels first is recommended.
     done
 }
 
-echo "B"
-read key
-
 if [ ${#setupStep} -eq 0 ]; then
   echo "WARN: no setup step found in raspiblitz.info"
   setupStep=0
@@ -314,14 +311,12 @@ elif [ ${setupStep} -lt 100 ]; then
 
 else
 
+  # when all is setup - forward to main menu
   waitUntilChainNetworkIsReady
-
   /home/admin/00mainMenu.sh
   exit 0
-fi
 
-echo "A"
-read key
+fi
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
