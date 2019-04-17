@@ -222,9 +222,16 @@ if [ "${backupTorrentSeeding}" != "${choice}" ]; then
   echo "BACKUP TORRENT SEEDING Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
-    /home/admin/50torrentHDD.sh backup-torrent-hosting
 
-    dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
+  whiptail --title "Experimental Feature" --yes-button "Activate" --no-button "Dont Activate" --yesno "The Backup Torrent Seeding is still a very early
+experimental feature and could compromise your
+Lightning Node stability.
+
+Are you sure that you want to activate it?
+    " 11 54
+    if [ $? -eq 0 ]; then
+      /home/admin/50torrentHDD.sh backup-torrent-hosting
+      dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
 BACKUP TORRENT SEEDING IS NOW ACTIVE
 -------------------------------------
 If possible forward ports 49200-49250
@@ -234,6 +241,12 @@ During initial torrent download your
 RaspiBlitz can be slow.
 
 " 13 42
+    else
+      echo
+      echo "Skipping Backup Torrent Seeding ..."
+      echo
+      sleep 3
+    fi
 
   else
     echo "Stopping Torrents and Cleaning Up ..."
