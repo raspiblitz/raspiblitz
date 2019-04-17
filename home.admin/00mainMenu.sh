@@ -11,6 +11,9 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 source ${configFile}
 
+# get the local network IP to be displayed on the lCD
+localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+
 # BASIC MENU INFO
 HEIGHT=13
 WIDTH=64
