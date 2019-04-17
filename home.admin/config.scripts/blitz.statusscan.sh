@@ -64,6 +64,43 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     echo "syncProgress=${syncProgress}"
 
   fi
+else
+
+  # find out why Bitcoin not running
+
+  pathAdd=""
+  if [ "${chain}" = "test" ]; then
+    pathAdd="/testnet3"
+  fi
+
+  #### POSSIBLE/SOFT PROBLEMS
+  # place here in future analysis
+
+  #### HARD PROBLEMS
+
+  # LOW DISK SPACE
+  lowDiskSpace=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error: Disk space is low!")
+  if [ ${lowDiskSpace} -gt 0 ]; then
+    bitcoinErrorShort="HDD DISK SPACE LOW"
+    bitcoinErrorFull="HDD DISK SPACE LOW - check what data you can delete on HDD and restart"
+  fi
+
+  #### GENERIC ERROR FIND
+
+  # if still no error identified - search logs for genereic error
+  if [ ${#bitcoinErrorShort} -eq 0 ]; then
+    bitcoinErrorFull=$(sudo tail -n 250 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1)
+    if [ ${#bitcoinErrorFull} -gt 0 ];
+      bitcoinErrorShort="Error found in Logs"
+    fi
+  fi
+   
+  # output error if found
+  if [ ${#bitcoinErrorShort} -gt 0 ]; then
+    echo "bitcoinErrorShort='${bitcoinErrorShort}'"
+    echo "bitcoinErrorFull='${bitcoinErrorFull}'"
+  fi
+
 fi
 
 # is LND running
