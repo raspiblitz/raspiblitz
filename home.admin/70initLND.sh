@@ -517,8 +517,6 @@ if [ ${gotSCB} -eq 1 ]; then
 else
   echo "NO /home/admin/channel.backup file - skipping SCB"
 fi
-echo "PRESS ENTER"
-read key
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
