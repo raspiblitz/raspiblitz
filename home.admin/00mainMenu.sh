@@ -67,7 +67,7 @@ fi
 
 # final Options
 OPTIONS+=(HARDWARE "Run Hardwaretest")
-OPTIONS+=(SOFTWARE "Run Softwaretest")
+OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
 OPTIONS+=(OFF "PowerOff RaspiBlitz")
 OPTIONS+=(X "Console / Terminal")
