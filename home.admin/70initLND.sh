@@ -484,7 +484,7 @@ echo ""
 
 ###### USE CHANNEL.BACKUP FILE IF AVAILABLE
 echo "*** channel.backup Recovery ***"
-gotSCB=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
+gotSCB=$(ls /home/admin/channel.backup 2>/dev/null | grep -c 'channel.backup')
 if [ ${gotSCB} -eq 1 ]; then
 
   lncli restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
