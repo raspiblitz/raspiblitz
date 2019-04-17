@@ -579,7 +579,7 @@ Work Nodes for the process of producing a new sd card image release:
 
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
-There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [dietpi/README.md](dietpi/README.md)
+There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [alternative.platforms/README.md](alternative.platforms/README.md)
 
 ## Can I flip the screen?
 

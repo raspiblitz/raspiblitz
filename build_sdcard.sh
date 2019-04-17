@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
+# RASPBIAN STRETCH WITH DESKTOP (2019-04-09)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
+# SHA256: 7e10a446f8e57210d0e9ad02f0c833aabb86e58187b4dc02431aff5a3f1ccb83
 # 
 # or download the image for your ARM based SBC on https://DietPi.com
 ##########################################################################
@@ -43,21 +43,31 @@ echo "*** CHECK BASE IMAGE ***"
 # armv7=32Bit , armv8=64Bit
 echo "Check if Linux ARM based ..." 
 isARM=$(uname -m | grep -c 'arm')
-if [ ${isARM} -eq 0 ]; then
+isAARCH64=$(uname -m | grep -c 'aarch64')
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] ; then
   echo "!!! FAIL !!!"
-  echo "Can just build on ARM Linux, not on:"
+  echo "Can only build on ARM or aarch64, not on:"
   uname -m
   exit 1
+else
+ echo "OK running on $(uname -m) architecture."
 fi
-echo "OK running on Linux ARM architecture."
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 echo "Detect Base Image ..." 
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
 fi
 if [ ${isDietPi} -gt 0 ]; then
   baseImage="dietpi"
@@ -73,21 +83,30 @@ fi
 
 # setting static DNS server
 # see https://github.com/rootzoll/raspiblitz/issues/322#issuecomment-466733550
-sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcpcd.conf
-systemctl daemon-reload
+# check /etc/dhcpd.conf and /etc/dhcp/dhcpd.conf
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
+  sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcpcd.conf
+  systemctl daemon-reload
+fi
+if [ "${baseImage}" = "ubuntu" ]; then
+  sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcp/dhcpd.conf
+  systemctl daemon-reload
+fi
 
-# fixing locales for build
-# https://github.com/rootzoll/raspiblitz/issues/138
-# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
-# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-echo ""
-echo "*** FIXING LOCALES FOR BUILD ***"
-sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-sudo locale-gen
-export LANGUAGE=en_GB.UTF-8
-export LANG=en_GB.UTF-8
-export LC_ALL=en_GB.UTF-8
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
+  # fixing locales for build
+  # https://github.com/rootzoll/raspiblitz/issues/138
+  # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
+  # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
+  echo ""
+  echo "*** FIXING LOCALES FOR BUILD ***"
+  sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+  sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+  sudo locale-gen
+  export LANGUAGE=en_GB.UTF-8
+  export LANG=en_GB.UTF-8
+  export LC_ALL=en_GB.UTF-8
+fi
 
 # update debian
 echo ""
@@ -95,36 +114,17 @@ echo "*** UPDATE DEBIAN ***"
 sudo apt-get update
 sudo apt-get upgrade -f -y --allow-change-held-packages
 
+echo ""
+echo "*** PREPARE ${baseImage} ***"
+
 # special prepare when DietPi
 if [ "${baseImage}" = "dietpi" ]; then
-  echo ""
-  echo "*** PREPARE DietPi ***"
   echo "renaming dietpi user to pi"
   sudo usermod -l pi dietpi
-  echo "install pip"
-  sudo apt-get update
-  sudo apt-get remove -y fail2ban
-  sudo apt-get install -y build-essential
-  sudo apt-get install -y python-pip
-  # rsync is needed to copy from HDD
-  sudo apt install -y rsync
-  # install ifconfig
-  sudo apt install -y net-tools
-  #to display hex codes
-  sudo apt install -y xxd
-  # setuptools needed for Nyx
-  sudo pip install setuptools
-  # netcat for 00infoBlitz.sh
-  sudo apt install -y netcat
-  # install OpenSSH client + server
-  sudo apt install -y openssh-client
-  sudo apt install -y openssh-sftp-server
 fi
 
 # special prepare when Raspbian
 if [ "${baseImage}" = "raspbian" ]; then
-  echo ""
-  echo "*** PREPARE Raspbian ***"
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -137,6 +137,13 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
   sudo apt-get clean
   sudo apt-get -y autoremove
+fi
+
+# special prepare when Ubuntu or Armbian
+if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
+  # make user pi and add to sudo 
+  sudo adduser --disabled-password --gecos "" pi
+  sudo adduser pi sudo
 fi
 
 echo ""
@@ -161,6 +168,12 @@ if [ "${baseImage}" = "dietpi" ]; then
   # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
   # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
   sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+fi
+
+if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
+  sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
+  sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
+  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
 fi
 
 # change log rotates
@@ -260,6 +273,27 @@ sudo apt install -y sysbench
 sudo apt-get install -y redis-server
 sudo -H pip3 install redis
 
+# check for dependencies on DietPi, Ubuntu, Armbian
+sudo apt-get install -y build-essential
+sudo apt-get install -y python-pip
+# rsync is needed to copy from HDD
+sudo apt install -y rsync
+# install ifconfig
+sudo apt install -y net-tools
+#to display hex codes
+sudo apt install -y xxd
+# setuptools needed for Nyx
+sudo pip install setuptools
+# netcat for 00infoBlitz.sh
+sudo apt install -y netcat
+# install OpenSSH client + server
+sudo apt install -y openssh-client
+sudo apt install -y openssh-sftp-server
+# install killall, fuser
+sudo apt-get install -y psmisc
+sudo apt-get clean
+sudo apt-get -y autoremove
+
 echo ""
 echo "*** ADDING MAIN USER admin ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-main-user-admin
@@ -273,6 +307,7 @@ sudo chsh admin -s /bin/bash
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
+echo ""
 echo "*** ADDING SERVICE USER bitcoin"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin
 
@@ -310,9 +345,17 @@ echo "*** BITCOIN ***"
 # set version (change if update is available)
 bitcoinVersion="0.17.1"
 
-# needed to make sure download is not changed
-# calulate with sha256sum and also check with SHA256SUMS.asc
-bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
+# set OS version 
+if [ ${isARM} -eq 1 ] ; then
+  bitcoinOSversion="arm-linux-gnueabihf"
+  # needed to make sure download is not changed
+  # calulate with sha256sum and also check with SHA256SUMS.asc
+  bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  bitcoinOSversion="aarch64-linux-gnu"
+  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
+fi
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -323,7 +366,7 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # download resources
-binaryName="bitcoin-${bitcoinVersion}-arm-linux-gnueabihf.tar.gz"
+binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
 if [ ! -f "./${binaryName}" ]
 then
@@ -420,19 +463,26 @@ echo "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 lndVersion="0.6-beta"
-lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
+
+if [ ${isARM} -eq 1 ] ; then
+  lndOSversion="armv7"
+  lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  lndOSversion="arm64"
+  lndSHA256="2f31b13a4da6217ed7e27a44e1705103d7ed846aa2f599b7e5de0e6033a66c19"
+fi
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
-
 # bitconner 
 #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
 cd /home/admin/download
-binaryName="lnd-linux-armv7-v${lndVersion}.tar.gz"
+binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
 sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
@@ -447,7 +497,7 @@ fi
 
 # check gpg finger print
 gpg ./pgp_keys.asc
-fingerprint=$(sudo -u admin gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
+fingerprint=$(sudo gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
@@ -470,7 +520,7 @@ fi
 
 # install
 sudo -u admin tar -xzf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-armv7-v${lndVersion}/*
+sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${lndOSversion}-v${lndVersion}/*
 sleep 3
 installed=$(sudo -u admin lnd --version)
 if [ ${#installed} -eq 0 ]; then
@@ -602,7 +652,7 @@ sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
 sudo bash -c "echo './00raspiblitz.sh' >> /home/admin/.bashrc"
 
-if [ "${baseImage}" = "raspbian" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
   # bash autostart for pi
   # run as exec to dont allow easy physical access by keyboard
   # see https://github.com/rootzoll/raspiblitz/issues/54
@@ -610,7 +660,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
   sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
   sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-
+fi
+if [ "${baseImage}" = "raspbian" ]; then
   # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
   cat > /home/admin/setup.sh <<EOF
 
@@ -675,6 +726,8 @@ echo "After final reboot - your SD Card Image is ready."
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo ""
+echo "to continue: reboot with \`sudo shutdown -r now\` and login with user:admin password:raspiblitz"
 echo ""
 
 # install default LCD on DietPi without reboot to allow automatic build

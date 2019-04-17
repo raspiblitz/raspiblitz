@@ -1,3 +1,9 @@
+## SBC benchmarks:
+
+https://github.com/ThomasKaiser/sbc-bench/blob/master/Results.md
+
+https://dietpi.com/survey/#benchmark
+
 ###  Raspberry Pi 3 Model B+
 
 * Broadcom BCM2837B0, Cortex-A53 (ARMv8) 64-bit SoC @ 1.4GHz
@@ -45,4 +51,3 @@ ROCK64 is a credit card size 4K60P HDR Single Board Computer powered by
 * MicroSD Card slot
 * Pi-2 Bus
 * Pi-P5+ Bus
-
