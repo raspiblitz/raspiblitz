@@ -483,7 +483,7 @@ fi
 echo ""
 
 ###### USE CHANNEL.BACKUP FILE IF AVAILABLE
-echo "*** SCB Recovery ***"
+echo "*** channel.backup Recovery ***"
 gotSCB=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
 if [ ${gotSCB} -eq 1 ]; then
 
@@ -494,11 +494,22 @@ if [ ${gotSCB} -eq 1 ]; then
   if [ ${#error} -gt 0 ]; then
     echo ""
     echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-    echo "${error}"
+
+    notMachtingSeed=$(echo $error | grep -c 'unable to unpack chan backup')
+    if [ ${notMachtingSeed} -gt 0 ]; then
+      echo "--> unable to unpack chan backup"
+      echo "The WORD SEED is not matching the channel.backup file."
+      echo "Either there was an error in the word seed list or"
+      echo "or the channel.backup file is from another RaspiBlitz."
+    else
+      echo "${error}"
+    fi
+
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo ""
-    echo "You can try after full setup to restore channel.backup file again."
-    echo "Press ENTER to continue ..."
+    echo "You can try after full setup to restore channel.backup file again with:"
+    echo "lncli restorechanbackup --multi_file=/home/admin/channel.backup"
+    echo "Press ENTER to continue for now ..."
     read key
     exit 1
   fi
