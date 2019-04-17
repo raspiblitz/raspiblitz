@@ -1,6 +1,4 @@
 # ⚡️ RaspiBlitz-on-DietPi ⚡️
-#  A hardware agnostic platform
-
 
 This guide was tested on:
 
@@ -9,7 +7,7 @@ This guide was tested on:
 * Odroid XU4 (with HDMI screen)
 * Raspberry Pi 3 B+ (with the default GPIO or HDMI display)
 
-See the [hardware comparison](hw_comparison.md).
+See the [hardware comparison](/alternative.platforms/hw_comparison.md).
 
 The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 

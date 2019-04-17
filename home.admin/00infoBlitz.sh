@@ -75,8 +75,15 @@ else
 fi
 
 # get network traffic
-network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+# ifconfig does not show eth0 on Armbian - get first traffic info 
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+if [ ${isArmbian} -gt 0 ]; then
+  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+else
+  network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+fi
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
