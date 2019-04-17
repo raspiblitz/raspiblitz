@@ -419,8 +419,8 @@ echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6-beta-rc4"
-lndSHA256="3ed4b5e54afb6bf083a9693058dbf7d490e15837da5e5dc49ba06bfb942a1312"
+lndVersion="0.6-beta"
+lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
