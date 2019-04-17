@@ -58,7 +58,7 @@ tempF=$(((cpu/1000) * (9/5) + 32))
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
 ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
 
-if [ ${ram_avail} -lt 100 ]; then
+if [ ${ram_avail} -lt 50 ]; then
   color_ram="${color_red}\e[7m"
 else
   color_ram=${color_green}
@@ -271,18 +271,22 @@ else
 fi
 
 # STATUS SINALING: Backup Torrent Seeding
-torrentBaseStatus="•"
-torrentUpdateStatus="•"
-source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-if [ "${baseComplete}" == "1" ]; then
-  torrentBaseStatus="↑"
-elif [ "${baseSeeding}" == "1" ]; then
-  torrentBaseStatus="↓"
-fi
-if [ "${updateComplete}" == "1" ]; then
-  torrentUpdateStatus="↑"
-elif [ "${updateSeeding}" == "1" ]; then
-  torrentUpdateStatus="↓"
+torrentBaseStatus=""
+torrentUpdateStatus=""
+if [ "${backupTorrentSeeding}" == "on" ]; then
+  torrentBaseStatus="•"
+  torrentUpdateStatus="•"
+  source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+  if [ "${baseComplete}" == "1" ]; then
+    torrentBaseStatus="↑"
+  elif [ "${baseSeeding}" == "1" ]; then
+    torrentBaseStatus="↓"
+  fi
+  if [ "${updateComplete}" == "1" ]; then
+    torrentUpdateStatus="↑"
+  elif [ "${updateSeeding}" == "1" ]; then
+    torrentUpdateStatus="↓"
+  fi
 fi
 
 sleep 5

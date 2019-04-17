@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small rescue script to to backup or restore"
- echo "lnd.rescue.sh [backup|restore]"
+ echo "lnd.rescue.sh [backup|restore] [?no-download]"
  exit 1
 fi
 
@@ -29,9 +29,18 @@ if [ ${mode} = "backup" ]; then
   sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd
   sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
 
+  # delete old backups
+  rm /home/admin/lnd-rescue-*.tar.gz
+
   # name with md5 checksum
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
   mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
+
+  # stop here in case of 'no-download' option
+  if [ "${2}" == "no-download" ]; then
+    echo "No download of LND data requested."
+    exit 0
+  fi
 
   # offer SCP for download
   echo
@@ -58,6 +67,9 @@ elif [ ${mode} = "restore" ]; then
   echo "*** LND.RESCUE --> RESTORE"
   echo ""
 
+    # delete old backups
+  rm /home/admin/lnd-rescue-*.tar.gz
+
   filename=""
   while [ ${#filename} -eq 0 ]
     do
@@ -66,9 +78,10 @@ elif [ ${mode} = "restore" ]; then
         echo "**************************"
         echo "* UPLOAD THE BACKUP FILE *"
         echo "**************************"
-        echo 
         echo "If you have a lnd-rescue backup file on your laptop you can now"
-        echo "upload it and restore the your old LND state."
+        echo "upload it and restore the your latest LND state."
+        echo
+        echo "CAUTION: Dont restore old LND states - risk of loosing funds!"
         echo
         echo "To make upload open a new terminal on your laptop,"
         echo "change into the directory where your lnd-rescue file is and"
@@ -76,14 +89,15 @@ elif [ ${mode} = "restore" ]; then
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
         echo "Use password A to authenticate file transfere."
-        echo
-        echo "PRESS ENTER when upload is done. Use CTRL-C to abort."
+        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
       fi
       if [ ${countZips} -gt 1 ]; then
         echo "!! WARNING !!"
         echo "There are multiple lnd-rescue files in directory /home/admin."
-        echo "Make sure there is only one file to work with and start again."
+        echo "Make sure you upload only one tar.gz-file and start again."
         echo 
+        echo "PRESS ENTER to continue."
+        read key
         exit 1
       fi
       if [ ${countZips} -eq 1 ]; then
@@ -111,9 +125,12 @@ elif [ ${mode} = "restore" ]; then
         echo
         echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
         echo
-        echo "PRESS ENTER to start restore. Use CTRL-C to abort."
+        echo "PRESS ENTER to start restore. Enter x & ENTER to cancel."
       fi
       read key
+      if [ "${key}" == "x" ]; then
+        exit 1
+      fi
     done
 
   # stop LND
@@ -143,7 +160,7 @@ elif [ ${mode} = "restore" ]; then
   echo
 
   echo "DONE - please check if LND starts up correctly with restored state and funds."
-  echo "Keep in mind that some channels got forced closed by channel partners in the meanwhile."
+  echo "Keep in mind that some channels maybe forced closed in the meanwhile."
   echo 
 
 else

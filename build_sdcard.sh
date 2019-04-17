@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2018-11-13)
+# RASPBIAN STRETCH WITH DESKTOP (2019-04-09)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: a121652937ccde1c2583fe77d1caec407f2cd248327df2901e4716649ac9bc97
+# SHA256: 7e10a446f8e57210d0e9ad02f0c833aabb86e58187b4dc02431aff5a3f1ccb83
 # 
 # or download the image for your ARM based SBC on https://DietPi.com
 ##########################################################################
@@ -462,16 +462,16 @@ echo "*** LND ***"
 
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6-beta-rc4"
+lndVersion="0.6-beta"
 
 if [ ${isARM} -eq 1 ] ; then
   lndOSversion="armv7"
-  lndSHA256="3ed4b5e54afb6bf083a9693058dbf7d490e15837da5e5dc49ba06bfb942a1312"
+  lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   lndOSversion="arm64"
-  lndSHA256="43c86a8fd50dc54d942bc85883202396da063780c249769f7b97b2159e8d5630"
-fi    
+  lndSHA256="2f31b13a4da6217ed7e27a44e1705103d7ed846aa2f599b7e5de0e6033a66c19"
+fi
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -538,10 +538,7 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 2
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1
 echo "to switch between python2/3: sudo update-alternatives --config python"
 sudo apt-get -f -y install virtualenv
-sudo -u admin virtualenv lnd
-sudo -u admin source lnd/bin/activate
-sudo -u admin pip install grpcio grpcio-tools googleapis-common-protos
-
+sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos"
 echo ""
 
 # Go is needed for ZAP connect later
@@ -619,6 +616,7 @@ sudo apt-get -y install exfat-fuse
 # for blockchain torrent download
 sudo apt-get -y install transmission-cli
 sudo apt-get -y install rtorrent
+sudo apt-get -y install cpulimit
 
 # for background downloading
 sudo apt-get -y install screen
@@ -652,7 +650,7 @@ sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
-sudo bash -c "echo './00mainMenu.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo './00raspiblitz.sh' >> /home/admin/.bashrc"
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
   # bash autostart for pi

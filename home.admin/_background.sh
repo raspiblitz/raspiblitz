@@ -22,6 +22,10 @@ fi
 
 echo "_background.sh STARTED"
 
+# monitor lost LND sync
+syncedSince=0
+lastSyncState=0
+
 counter=0
 while [ 1 ]
 do
@@ -144,6 +148,151 @@ do
       echo "skip - because setup is still running"
     fi
 
+  fi
+
+
+  ###############################
+  # SCB Monitoring
+  ###############################
+
+  # check every 1min
+  recheckSCB=$(($counter % 60))
+  if [ ${recheckSCB} -eq 1 ]; then
+    echo "SCB Monitoring ..."
+    source ${configFile}
+    # check if channel.backup exists
+    scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
+    if [ ${scbExists} -eq 1 ]; then
+      echo "Found Channel Backup File .. check if changed .."
+      md5checksumORG=$(sudo md5sum /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumCPY=$(sudo md5sum /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
+      if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
+        echo "--> Channel Backup File changed"
+
+        # make copy to sd card (as local basic backup)
+        sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
+        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
+        echo "OK channel.backup copied to '/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup'"
+      
+        # check if a SCP backup target is set
+        # paramter in raspiblitz.conf:
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
+        # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
+        if [ ${#scpBackupTarget} -gt 0 ]; then
+          echo "--> Offsite-Backup SCP Server"
+          # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
+          # but its more likely that whithout ignoriing known host, script might not run thru and that way: no offsite channel backup
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
+          result=$?
+          if [ ${result} -eq 0 ]; then
+            echo "OK - SCP Backup exited with 0"
+          else
+            echo "FAIL - SCP Backup exited with ${result}"
+          fi
+        fi
+
+        # check if a DropBox backup target is set
+        # paramter in raspiblitz.conf:
+        # dropboxBackupTarget='[DROPBOX-APP-OAUTH2-TOKEN]'
+        # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+        if [ ${#dropboxBackupTarget} -gt 0 ]; then
+          echo "--> Offsite-Backup Dropbox"
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup)
+          if [ ${#err} -gt 0 ]; then
+            echo "FAIL -  ${err}"
+            echo "${errMore}"
+          else
+            echo "OK - ${upload}"
+          fi
+        fi
+      
+      else
+        echo "Channel Backup File not changed."
+      fi
+    else
+      echo "No Channel Backup File .."
+    fi
+  fi
+
+  ###############################
+  # LND MONITOR LOST SYNC
+  ###############################
+
+  # check every 5min
+  recheckSync=$(($counter % 300))
+  if [ ${recheckSync} -eq 1 ]; then
+    source ${configFile}
+    echo "LND MONITOR LOST SYNC ..."
+    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    echo "lndSynced(${lndSynced})"
+    echo "syncedSince(${syncedSince})"
+    echo "lastSyncState(${lastSyncState})"
+    if [ ${lndSynced} -eq ${lastSyncState} ]; then
+
+      echo "no sync change"
+      if [ ${lndSynced} -eq 1 ]; then
+        echo "all is good - LND still in sync now for:"
+        actualSecondsTimestamp=$(date +%s)
+        secondsInSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
+        #echo "${secondsInSync} seconds"
+
+        # when >10min in sync
+        if [ ${secondsInSync} -gt 3600 ]; then
+          echo "LND in sync for longer then 1 hour"
+          if [ "${backupTorrentSeeding}" == "on" ]; then
+            echo "Backup Torrent Seeding is ON - check if already running"
+            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+            if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
+              echo "---> STARTING Backup Torrent Seeding"
+              sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
+            fi
+          fi
+        fi
+
+      else
+        echo "still not in sync"
+        if [ ${syncedSince} -gt 0 ]; then
+
+          echo "was in sync at least once since rinning but lost now for:"
+          actualSecondsTimestamp=$(date +%s)
+          secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
+          echo "${secondsOutOfSync} seconds"
+
+          # when >1h out of sync
+          #if [ ${secondsOutOfSync} -gt 3600 ]; then
+          #   echo "!!!! LND fell out of sync for longer then 1 hour !!!"
+          #   TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
+          #fi
+          
+        fi
+      fi
+
+    else
+      echo "sync change detected"
+      if [ ${lastSyncState} -eq 1 ] && [ ${lndSynced} -eq 0 ]; then
+        echo "--> LND SYNC LOST"
+
+          if [ "${backupTorrentSeeding}" == "on" ]; then
+            #echo "Backup Torrent Seeding is ON - check if still running"
+            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+            if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
+              echo "---> STOPPING Backup Torrent Seeding"
+              sudo -u admin /home/admin/50torrentHDD.sh stop
+            fi
+          fi
+
+      else
+        if [ ${syncedSince} -eq 0 ]; then
+          echo "--> LND SYNC GAINED"
+        else
+          echo "--> LND SYNC RECOVERED"
+        fi
+        syncedSince=$(date +%s)
+      fi
+    fi
+  
+    lastSyncState=${lndSynced}
   fi
 
   ###############################

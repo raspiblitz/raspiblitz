@@ -1,8 +1,8 @@
 #!/bin/bash
 echo ""
 
-# add bonus scripts
-/home/admin/91addBonus.sh
+# add bonus scripts (auto install deactivated to reduce third party repos)
+# /home/admin/91addBonus.sh
 
 ###### SWAP & FS
 echo ""

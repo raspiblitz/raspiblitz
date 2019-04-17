@@ -1,11 +1,11 @@
 #!/bin/bash
 echo ""
 
-# set raspiblitz config file
-configFile="/mnt/hdd/raspiblitz.conf"
-
 # load setup config
 source /home/admin/raspiblitz.info
+
+# in case the config already exists
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # load version
 source /home/admin/_version.info
