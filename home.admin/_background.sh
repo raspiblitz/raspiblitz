@@ -158,12 +158,12 @@ do
   # check every 1min
   recheckSCB=$(($counter % 60))
   if [ ${recheckSCB} -eq 1 ]; then
-    #echo "SCB Monitoring ..."
+    echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
     scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
-      #echo "Found Channel Backup File .. check if changed .."
+      echo "Found Channel Backup File .. check if changed .."
       md5checksumORG=$(sudo md5sum /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
       md5checksumCPY=$(sudo md5sum /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
@@ -207,11 +207,11 @@ do
           fi
         fi
       
-      #else
-      #  echo "Channel Backup File not changed."
+      else
+        echo "Channel Backup File not changed."
       fi
-    #else
-    #  echo "No Channel Backup File .."
+    else
+      echo "No Channel Backup File .."
     fi
   fi
 
@@ -223,25 +223,25 @@ do
   recheckSync=$(($counter % 300))
   if [ ${recheckSync} -eq 1 ]; then
     source ${configFile}
-    #echo "LND MONITOR LOST SYNC ..."
+    echo "LND MONITOR LOST SYNC ..."
     lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-    #echo "lndSynced(${lndSynced})"
-    #echo "syncedSince(${syncedSince})"
-    #echo "lastSyncState(${lastSyncState})"
+    echo "lndSynced(${lndSynced})"
+    echo "syncedSince(${syncedSince})"
+    echo "lastSyncState(${lastSyncState})"
     if [ ${lndSynced} -eq ${lastSyncState} ]; then
 
-      #echo "no sync change"
+      echo "no sync change"
       if [ ${lndSynced} -eq 1 ]; then
-        #echo "all is good - LND still in sync now for:"
+        echo "all is good - LND still in sync now for:"
         actualSecondsTimestamp=$(date +%s)
         secondsInSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
         #echo "${secondsInSync} seconds"
 
         # when >10min in sync
         if [ ${secondsInSync} -gt 3600 ]; then
-          #echo "LND in sync for longer then 1 hour"
+          echo "LND in sync for longer then 1 hour"
           if [ "${backupTorrentSeeding}" == "on" ]; then
-            #echo "Backup Torrent Seeding is ON - check if already running"
+            echo "Backup Torrent Seeding is ON - check if already running"
             source <(sudo -u admin /home/admin/50torrentHDD.sh status)
             if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
               echo "---> STARTING Backup Torrent Seeding"
@@ -251,13 +251,13 @@ do
         fi
 
       else
-        #echo "still not in sync"
+        echo "still not in sync"
         if [ ${syncedSince} -gt 0 ]; then
 
-          #echo "was in sync at least once since rinning but lost now for:"
+          echo "was in sync at least once since rinning but lost now for:"
           actualSecondsTimestamp=$(date +%s)
           secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
-          #echo "${secondsOutOfSync} seconds"
+          echo "${secondsOutOfSync} seconds"
 
           # when >1h out of sync
           #if [ ${secondsOutOfSync} -gt 3600 ]; then
