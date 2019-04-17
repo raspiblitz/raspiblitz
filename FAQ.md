@@ -313,7 +313,7 @@ In short for OSX:
 * connect with LAN directly
 * Settings > Sharing/Freigaben > activate "internet sharing" from WLAN to Ethernet
 * Settings > Network > Ethernet-Adapter > set to DHCP
-* in terminal > `ifconfig` there you should the the IP of the bridge100
+* in terminal > `ifconfig` there you should see the IP of the bridge100
 * in terminal > `arp -a` and check for an IP of a client to the bridge
 * in terminal > ssh admin@[clientIP] 
 
@@ -617,10 +617,10 @@ NOTE: On updates this change will get lost and you might need to redo it.
 - Check the command again with how its on the display  - do you have it typed in correctly?
 - Replace `ssh` with `sudo ssh` and try it (laptop admin password might be required).
 
-If that not works ry to ping the IP of the RaspiBlitz with `ping [IP-of-RaspiBlitz]`. If you get no response on the ping requests the device is not reachable try this check list:
+If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-RaspiBlitz]`. If you get no response on the ping requests and the device is not reachable, try this check list:
 
 - Make sure that your RaspiBlitz and your laptop are really on the same local network
 - Check if you have a VPN running on your laptop - some VPNs block local network
-- Some Routers have `IP Isolation` switched on - not allowing to devices to connect
+- Some Routers have `IP Isolation` switched on - not allowing two devices to connect  
 
-If that all is not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+If everything doesn't work: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
