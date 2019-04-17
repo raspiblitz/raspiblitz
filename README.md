@@ -1,7 +1,7 @@
 # RaspiBlitz
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.1 with lnd 0.6-beta-RC3 and bitcoin 0.17.1 or litecoin 0.16.3.`
+`Version 1.2 with lnd 0.6-beta and bitcoin 0.17.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -587,5 +587,3 @@ Also get inspired for a deep-dive with the original "[RaspiBolt](https://github.
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a upcomming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by on of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 
 * [How can I get further help/support?](#support)
-
-IRC channel on Freenode `irc://irc.freenode.net/raspiblitz` (unmoderated)
