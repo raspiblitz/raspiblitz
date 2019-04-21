@@ -66,7 +66,7 @@ If you run a version earlier then 0.98 you basically need to setup a new RaspiBl
 
 1. Close all open lightning channels you have (`lncli closeallchannels --force`) or use the menu option 'CLOSE ALL' if available. Wait until all closing transactions are done.
 
-2. Move all on-chain funds to a wallet outside raspiblitz (`lncli --conf_target 3 sendcoins [ADDRESS]`) or use the menu option 'CHASH OUT' if available
+2. Move all on-chain funds to a wallet outside raspiblitz (`lncli sendcoins --conf_target 3 <ADDRESS> <AMT>`) or use the menu option 'CASHOUT' if available
 
 3. Prepare the HDD for the new setup by running the script `/home/admin/XXcleanHDD.sh` (Blockchain will stay on HDD)
 
