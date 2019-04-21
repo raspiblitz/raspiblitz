@@ -226,9 +226,9 @@ Then give LND some time to rescan the blockchain. In the end you will have resto
 
 ## What is this mnemonic seed word list?
 
-With the 24 word list given you by LND on wallet creation you can recover your private key (BIP 39). You should write it down and store it at a save place. 
+With the 24 word list given you by LND on wallet creation you can recover your private key. You should write it down and store it at a save place. Bear in mind that *this 24 word mnemonic seed is not based on the BIP 39* and therefore cannot be recovered using a Bitcoin wallet.
 
-For more background on mnemonic seeds see this video: https://www.youtube.com/watch?v=wWCIQFNf_8g
+For more background on the LND mnemonic seed [read this article](https://github.com/lightningnetwork/lnd/blob/master/docs/recovery.md#recovering-funds-from-lnd-funds-are-safu).
 
 ## How does PASSWORD D effects the word seed?
 
