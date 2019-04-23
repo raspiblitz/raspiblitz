@@ -1,4 +1,3 @@
-
 ## Shopping List: Amazon Australia
 
 * RaspBerry Pi 3: https://www.amazon.com.au/dp/B07BFR7PBS
