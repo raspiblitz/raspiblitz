@@ -4,13 +4,16 @@ source /home/admin/_version.info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
+# all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
 
+# set follow up info different for LCD and ADMIN
 adminStr="ssh admin@${localIP} ->Password A"
 if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
 
+# bitcoin errors always first
 if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
 
   ####################
@@ -51,6 +54,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
     fi
   fi
 
+# LND errors second
 elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
 
   ####################
@@ -85,6 +89,21 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
     if [ "$USER" == "admin" ]; then
       infoStr=" The LND service is starting.\n Please wait up to 5min ..."
     fi
+  fi
+
+# if LND wallet is locked
+elif [ ${walletLocked} -gt 1 ]; then
+
+  if [ "${autoUnlock}" = "on" ]; then
+    infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
+  else
+    infoStr=" !!! LND WALLET IS LOCKED !!!\n"
+    if [ "${rtlWebinterface}" = "on" ]; then
+       height=6
+       infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
+    else
+       infoStr="${infoStr} Please use SSH to unlock:"
+    fi 
   fi
 
 else

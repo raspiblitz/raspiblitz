@@ -197,32 +197,6 @@ while :
       continue
     fi
 
-    # check if locked
-    locked=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock) 
-    if [ "${locked}" -gt 0 ]; then
-
-      # special case: LND wallet is locked ---> show unlock info
-      h=5
-      l1="!!! LND WALLET IS LOCKED !!!\n"
-      l2="Login: ssh admin@${localip}\n"
-      l3="Use your Password A\n"
-      l4=""
-      if [ "${rtlWebinterface}" = "on" ]; then
-        l2="Browser: http://${localip}:3000\n"
-        l3="PasswordB=login / PasswordC=unlock\n"
-        l4="PasswordA: ssh admin@${localip}"
-        h=6
-      fi
-      if [ "${autoUnlock}" = "on" ]; then
-        l2="ssh admin@${localip}\n"
-        l3="Waiting for AUTO-UNLOCK"
-      fi
-      boxwidth=$((${#localip} + 26))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3$l4" ${h} ${boxwidth}
-      sleep 5
-      continue
-    fi
-
     # if LND is syncing or scanning
     lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then

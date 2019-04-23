@@ -123,6 +123,14 @@ if [ ${lndRunning} -eq 1 ]; then
     echo "lndErrorShort=''"
   else
     
+    # check if wallet is locked
+    locked=$(echo ${lndinfo} | grep -c unlock)
+    if [ ${locked} -gt 0 ]; then
+      echo "walletLocked=1"
+    else
+      echo "walletLocked=0"
+    fi
+
     # synced to chain
     syncedToChain=$(echo ${lndinfo} | jq -r '.synced_to_chain' | grep -c 'true')
     echo "syncedToChain=${syncedToChain}"
