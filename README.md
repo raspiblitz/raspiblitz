@@ -40,9 +40,9 @@ The RaspiBlitz is build from the following parts:
 * LCD-Display
 * Micro SD-Card (min 16GB - go for quality)
 * Powersupply >=3A (choose big & stable output)
-* Cheap Casing
+* Case with Heatsink
 
-**All together under 150 USD / 130 EUR (depending on country & shop)**
+**All together under 160 USD / 140 EUR (depending on country & shop)**
 
 ## Amazon Shopping Lists
 
@@ -64,11 +64,11 @@ These are the community currated shopping lists based on country:
 
 ## Assemble your RaspiBlitz
 
-If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case and add the display like in picture below:
+If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case. If you have the Geekworm Heatsink-Case - [see video on how to install](https://www.youtube.com/watch?v=2QDlbAorJKw).
+
+Add the display on top like in picture below:
 
 ![LCD](pictures/lcdassm.png)
-
-*Some cases from the shopping lists contain a topping for smaller displays - you can ignore that topping.*
 
 Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
 
