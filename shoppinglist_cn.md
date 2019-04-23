@@ -1,5 +1,8 @@
 ## Shopping List: Taobao/T-Mall China
 
+*WARNING: This Shopping list is not up to date and needs updating (Power Supply, Heatsink-Case, ..)
+See the reference [German Shoppinglist](shoppinglist_de.md) for all the latest parts needed.*
+
 Set RaspBerry Pi + accessories:
 * RaspBerry Pi 3 B+
 * Micro SD-Card 16GB
