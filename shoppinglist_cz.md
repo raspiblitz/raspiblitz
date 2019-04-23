@@ -1,5 +1,8 @@
 ## Shopping List: Amazon/Alza/CZC Czech
 
+*WARNING: This Shopping list is not up to date and needs updating (Power Supply, Heatsink-Case, ..)
+See the reference [German Shoppinglist](shoppinglist_de.md) for all the latest parts needed.*
+
 - RaspBerry Pi 3: https://www.alza.cz/raspberry-pi-3-model-b-d5284636.htm?o=1
 - Micro SD-Card 32GB: https://www.alza.cz/EN/samsung-microsdhc-32gb-pro-endurance-uhs-i-u1-sd-adapter-d5339757.htm
 - Power: https://www.alza.cz/EN/alzapower-q100-quick-charge-3-0-black-d5324257.htm?o=2
