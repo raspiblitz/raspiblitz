@@ -20,7 +20,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   height=5
   width=43
   title="Blockchain Info"
-  if [ ${uptime} -gt 300 ]; then
+  if [ ${uptime} -gt 600 ]; then
     infoStr=" The ${network}d service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
       echo ""
@@ -60,7 +60,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
   height=5
   width=43
   title="Lightning Info"
-  if [ ${uptime} -gt 300 ]; then
+  if [ ${uptime} -gt 600 ]; then
     infoStr=" The LND service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
       echo ""
