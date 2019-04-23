@@ -64,11 +64,11 @@ These are the community currated shopping lists based on country:
 
 ## Assemble your RaspiBlitz
 
-If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case and add the display like in picture below:
+If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case. If you have the Geekworm Heatsink-Case - [see video on how to install](https://www.youtube.com/watch?v=2QDlbAorJKw).
+
+Add the display on top like in picture below:
 
 ![LCD](pictures/lcdassm.png)
-
-*Some cases from the shopping lists contain a topping for smaller displays - you can ignore that topping.*
 
 Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
 
