@@ -105,10 +105,15 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
 
 # if LND wallet is locked
 elif [ ${walletLocked} -gt 0 ]; then
+  
+  height=5
+  width=43
 
   if [ "${autoUnlock}" = "on" ]; then
+    title="Auto Unlock"
     infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
   else
+    title="Action Required"
     infoStr=" !!! LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
