@@ -15,5 +15,5 @@ fi
 
 # writing log file entry
 logFile="/home/admin/systemd.${2}.log"
-echo "${3} $(date +%s)" >> ${logFile}
+echo "$(date +%s) ${3}" >> ${logFile}
 echo "# OK: log '${3}' written to ${logFile}"

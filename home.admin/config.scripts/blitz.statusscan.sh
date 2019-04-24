@@ -43,11 +43,11 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   # check if error on request
   blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
-  rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
+  #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
-    bitcoinErrorFull=$(echo ${bitcoinError} | sed 's/[^a-zA-Z0-9 ]//g')
+    bitcoinErrorFull=$(echo ${bitcoinError} | tr -d "'")
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
 
@@ -94,7 +94,7 @@ else
 
   # if still no error identified - search logs for genereic error
   if [ ${#bitcoinErrorShort} -eq 0 ]; then
-    bitcoinErrorFull=$(sudo tail -n 250 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1 | sed 's/[^a-zA-Z0-9 ]//g')
+    bitcoinErrorFull=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1 | tr -d "'")
     if [ ${#bitcoinErrorFull} -gt 0 ]; then
       bitcoinErrorShort="Error found in Logs"
     fi
@@ -125,7 +125,7 @@ if [ ${lndRunning} -eq 1 ]; then
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
   lndErrorShort=''
-  rm /mnt/hdd/temp/.lnd.error 2>/dev/null
+  #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
 
   if [ ${#lndError} -gt 0 ]; then
 
