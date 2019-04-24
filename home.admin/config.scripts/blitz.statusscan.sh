@@ -159,8 +159,8 @@ if [ ${lndRunning} -eq 1 ]; then
 
     # lnd scan progress
     scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
-    echo "scanTimestamp=${scanTimestamp}"
     if [ ${#scanTimestamp} -gt 0 ]; then
+      echo "scanTimestamp=${scanTimestamp}"
       scanDate=$(date -d @${scanTimestamp})
       echo "scanDate='${scanDate}'"
 
@@ -171,6 +171,9 @@ if [ ${lndRunning} -eq 1 ]; then
       scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
       scanProgress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
       echo "scanProgress=${scanProgress}"
+    else
+      echo "# was not able to parse 'best_header_timestamp' from: lncli getinfo"
+      echo "scanTimestamp=-1"
     fi
     
   fi
