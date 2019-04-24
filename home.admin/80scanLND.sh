@@ -114,13 +114,13 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
   else
     title="Action Required"
-    infoStr=" LND WALLET IS LOCKED !!!\n"
+    infoStr=" LND WALLET IS LOCKED (${startcountLightning}) !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
        infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
-    fi 
+    fi
     if [ ${startcountLightning} -gt 1 ]; then
         height=$((height+1))
         infoStr=" LND restarted - login for details.\n${infoStr}"
