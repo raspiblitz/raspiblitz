@@ -39,10 +39,6 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
-echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
-sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo ""
-
 echo "*** BCLOCKHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
@@ -106,6 +102,11 @@ if [ ${showImproveInfo} -gt 0 ]; then
   echo "'Run Hardwaretest' in main menu or: sudo /home/admin/05hardwareTest.sh"
 fi
 echo ""
+
+echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
+sudo /home/admin/config.scripts/blitz.statusscan.sh
+echo ""
+
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"
