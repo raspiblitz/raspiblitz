@@ -47,7 +47,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   if [ ${#bitcoinError} -gt 0 ]; then
     bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
-    bitcoinErrorFull=(echo ${bitcoinError} | sed 's/[^a-zA-Z0-9 ]//g')
+    bitcoinErrorFull=$(echo ${bitcoinError} | sed 's/[^a-zA-Z0-9 ]//g')
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
 
