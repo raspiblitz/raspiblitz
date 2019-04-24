@@ -10,6 +10,7 @@ After=bootstrap.service
 User=bitcoin
 Group=bitcoin
 Type=simple
+ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
 ExecStart=/usr/local/bin/litecoind -daemon -conf=/home/bitcoin/.litecoin/litecoin.conf
 KillMode=process
 Restart=always

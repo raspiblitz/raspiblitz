@@ -65,10 +65,10 @@ fi
 sudo chmod 777 ${infoFile}
 
 # resetting start count files
-echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/blockchain.systemd.log
-echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/lightning.systemd.log
-sudo chmod 777 /home/admin/blockchain.systemd.log
-sudo chmod 777 /home/admin/lightning.systemd.log
+echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
+echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
+sudo chmod 777 /home/admin/systemd.blockchain.log
+sudo chmod 777 /home/admin/systemd.lightning.log
 
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944

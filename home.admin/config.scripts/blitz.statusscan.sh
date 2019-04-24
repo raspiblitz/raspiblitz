@@ -28,6 +28,14 @@ echo "tempCelsius='${tempC}'"
 uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
 echo "uptime=${uptime}"
 
+# count restarts of bitcoind/litecoind
+startcountBlockchain=$(cat systemd.blockchain.log | grep -c "STARTED")
+echo "startcountBlockchain=${startcountBlockchain}"
+
+# count restarts of bitcoind/litecoind
+startcountLightning=$(cat systemd.lightning.log | grep -c "STARTED")
+echo "startcountLightning=${startcountLightning}"
+
 # is bitcoind running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
 echo "bitcoinActive=${bitcoinRunning}"
