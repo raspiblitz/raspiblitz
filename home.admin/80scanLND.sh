@@ -122,6 +122,7 @@ elif [ ${walletLocked} -gt 0 ]; then
        infoStr="${infoStr} Please use SSH to unlock:"
     fi
     if [ ${startcountLightning} -gt 1 ]; then
+        width=45
         height=$((height+1))
         infoStr=" LIGHTNING RESTARTED - login for details\n${infoStr}"
     fi
