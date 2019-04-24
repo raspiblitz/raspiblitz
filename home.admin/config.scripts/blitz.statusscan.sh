@@ -103,6 +103,7 @@ else
   if [ ${#bitcoinErrorShort} -gt 0 ]; then
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
+    /home/admin/config.scripts/blitz.systemd.sh log blockchain "ERROR: ${bitcoinErrorShort}"
   fi
 
 fi
@@ -126,6 +127,7 @@ if [ ${lndRunning} -eq 1 ]; then
   if [ ${#lndError} -gt 0 ]; then
     echo "lndErrorFull='${lndErrorFull}'"
     echo "lndErrorShort=''"
+    #/home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorShort}"
   else
     
     # check if wallet is locked

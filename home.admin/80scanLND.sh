@@ -34,6 +34,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
       echo
       if [ ${startcountBlockchain} -gt 1 ]; then
         echo "${startcountBlockchain} RESTARTS DETECTED - ${network}d might be in a error loop"
+        cat /home/admin/systemd.blockchain.log | grep "ERROR"
         echo
       fi
       if [ ${#bitcoinErrorFull} -gt 0 ]; then
@@ -52,7 +53,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
     if [ ${#bitcoinErrorShort} -eq 0 ]; then
       bitcoinErrorShort="Initial Startup - Please Wait"
     fi
-    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login for more details:"
+    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
     if [ "$USER" == "admin" ]; then
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
     fi
@@ -79,6 +80,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
       echo
       if [ ${startcountLightning} -gt 1 ]; then
         echo "${startcountLightning} RESTARTS DETECTED - ${network}d might be in a error loop"
+        cat /home/admin/systemd.lightning.log | grep "ERROR"
         echo
       fi
       if [ ${#lndErrorFull} -gt 0 ]; then
@@ -132,7 +134,7 @@ else
       syncProgress="waiting"
     else
       syncProgress="${startcountBlockchain} restarts"
-      actionString="Please SSH in for more detail:"
+      actionString="Login with SSH for more details:"
     fi
   elif [ ${#syncProgress} -lt 6 ]; then
     syncProgress=" ${syncProgress} %"
@@ -144,7 +146,7 @@ else
       scanProgress="waiting"
     else
       scanProgress="${startcountLightning} restarts"
-      actionString="Please SSH in for more detail:"
+      actionString="Login with SSH for more details:"
     fi
   elif [ ${#scanProgress} -lt 6 ]; then
     scanProgress=" ${scanProgress} %"
