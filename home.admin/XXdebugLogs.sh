@@ -39,7 +39,7 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
-echo "*** SYSTEM STATUS ***"
+echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
 sudo /home/admin/config.scripts/blitz.statusscan.sh
 echo ""
 
