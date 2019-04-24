@@ -36,15 +36,20 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
-echo "*** CHAINNETWORK SYSTEMD STATUS ***"
+echo "*** SYSTEM STATUS ***"
+sudo /home/admin/config.scripts/blitz.statusscan.sh
+echo ""
+
+echo "*** BCLOCKHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
 
-echo "*** LAST 5 ERROR LOGS ***"
-echo "sudo journalctl -u ${network}d -b --no-pager -n5"
-sudo journalctl -u ${network}d -b --no-pager -n5
+echo "*** LAST BCLOCKHAIN ERROR LOGS ***"
+echo "sudo journalctl -u ${network}d -b --no-pager -n8"
+sudo journalctl -u ${network}d -b --no-pager -n8
+cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo ""
-echo "*** LAST 20 INFO LOGS ***"
+echo "*** LAST BCLOCKHAIN 20 INFO LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
   pathAdd="/testnet3"
@@ -57,9 +62,10 @@ echo "*** LND SYSTEMD STATUS ***"
 sudo systemctl status lnd -n2 --no-pager
 echo ""
 
-echo "*** LAST 5 LND ERROR LOGS ***"
-echo "sudo journalctl -u lnd -b --no-pager -n5"
-sudo journalctl -u lnd -b --no-pager -n5
+echo "*** LAST LND ERROR LOGS ***"
+echo "sudo journalctl -u lnd -b --no-pager -n8"
+sudo journalctl -u lnd -b --no-pager -n8
+cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -2
 echo ""
 echo "*** LAST 20 LND INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
