@@ -31,7 +31,9 @@ fi
 
 clear
 echo ""
-echo "*** RASPIBLITZ SOFTWARE LOGS ***"
+echo "***************************************************************"
+echo "* RASPIBLITZ DEBUG LOGS "
+echo "***************************************************************"
 echo "blitzversion: ${codeVersion}"
 echo "chainnetwork: ${network} / ${chain}"
 uptime
