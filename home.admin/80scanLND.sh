@@ -26,6 +26,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   if [ ${uptime} -gt 600 ]; then
     infoStr=" The ${network}d service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
+      clear
       echo ""
       echo "*****************************************"
       echo "* The ${network}d service is not running."
@@ -72,6 +73,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
   if [ ${uptime} -gt 600 ]; then
     infoStr=" The LND service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
+      clear
       echo ""
       echo "*********************************"
       echo "* The LND service is not running."
