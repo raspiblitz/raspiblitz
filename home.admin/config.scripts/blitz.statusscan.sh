@@ -29,7 +29,7 @@ uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
 echo "uptime=${uptime}"
 
 # count restarts of bitcoind/litecoind
-startcountBlockchain=$(cat systemd.blockchain.log 2>/dev/null | grep -c "STARTED")
+startcountBlockchain=$(cat /home/admin/systemd.blockchain.log 2>/dev/null | grep -c "STARTED")
 echo "startcountBlockchain=${startcountBlockchain}"
 
 # is bitcoind running
@@ -110,7 +110,7 @@ else
 fi
 
 # count restarts of bitcoind/litecoind
-startcountLightning=$(cat systemd.lightning.log 2>/dev/null | grep -c "STARTED")
+startcountLightning=$(cat /home/admin/systemd.lightning.log 2>/dev/null | grep -c "STARTED")
 echo "startcountLightning=${startcountLightning}"
 
 # is LND running
