@@ -34,7 +34,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
       echo
       if [ ${startcountBlockchain} -gt 1 ]; then
         echo "${startcountBlockchain} RESTARTS DETECTED - ${network}d might be in a error loop"
-        cat /home/admin/systemd.blockchain.log | grep "ERROR"
+        cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
         echo
       fi
       if [ ${#bitcoinErrorFull} -gt 0 ]; then
