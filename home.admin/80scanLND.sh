@@ -104,7 +104,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
   fi
 
 # if LND wallet is locked
-elif [ ${walletLocked} -gt 1 ]; then
+elif [ ${walletLocked} -gt 0 ]; then
 
   if [ "${autoUnlock}" = "on" ]; then
     infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
