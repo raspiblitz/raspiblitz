@@ -136,11 +136,23 @@ if [ ${lndRunning} -eq 1 ]; then
     else
       echo "walletLocked=0"
 
-      # if not locked error - then 
-      echo "lndErrorShort='Unkown Error - see logs'"
-      lndErrorFull=$(echo ${lndErrorFull} | tr -d "'")
+      rpcNotWorking=$(echo ${lndErrorFull} | greap -c 'connection refused')
+      if [ ${rpcNotWorking} -gt 0 ]; then
+        lndErrorShort='LND RPC not responding'
+        lndErrorFull=$(echo "LND RPC is not responding. LND may have problems starting up. Check logs, config files and systemd service. Org-Error: ${lndErrorFull}" | tr -d "'")
+      fi
+
+      # if not known error - keep generic
+      if [ ${#lndErrorShort} -eq 0 ]; then
+        lndErrorShort='Unkown Error - see logs'
+        lndErrorFull=$(echo ${lndErrorFull} | tr -d "'")
+      fi
+
+      # write to results
+      echo "lndErrorShort='${lndErrorShort}'"
       echo "lndErrorFull='${lndErrorFull}'"
       /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
+
     fi
 
   else

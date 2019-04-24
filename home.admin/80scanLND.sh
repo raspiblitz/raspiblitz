@@ -14,7 +14,7 @@ if [ "$USER" == "admin" ]; then
 fi
 
 # bitcoin errors always first
-if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
+if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
 
   ####################
   # On Bitcoin Error
@@ -23,7 +23,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   height=5
   width=43
   title="Blockchain Info"
-  if [ ${uptime} -gt 600 ]; then
+  if [ ${uptime} -gt 600 ] || [ "${1}" == "blockchain-error" ]; then
     infoStr=" The ${network}d service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
       clear
@@ -43,11 +43,10 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
         echo ${bitcoinErrorFull}
         echo
       fi
-      echo "-> To start ${network}d run: sudo systemctl start ${network}d"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
+      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
+      echo "-> To try restart: sudo shutdown -r now"
       echo ""
-      exit 1
     fi
   else
     height=6
@@ -61,7 +60,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ]; then
   fi
 
 # LND errors second
-elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
+elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightning-error" ]; then
 
   ####################
   # On LND Error
@@ -70,7 +69,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
   height=5
   width=43
   title="Lightning Info"
-  if [ ${uptime} -gt 600 ]; then
+  if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
     infoStr=" The LND service is not running.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
       clear
@@ -90,9 +89,9 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
         echo ${lndErrorFull}
         echo
       fi
-      echo "-> To start LND run: sudo systemctl start lnd"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
+      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
+      echo "-> To try restart: sudo shutdown -r now"
       echo ""
       exit 1
     fi
