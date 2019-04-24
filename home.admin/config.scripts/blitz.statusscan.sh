@@ -43,11 +43,12 @@ if [ ${bitcoinRunning} -eq 1 ]; then
   # check if error on request
   blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
-  #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
+  rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
-    echo "bitcoinErrorFull='${bitcoinError}'"
     bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
+    bitcoinErrorFull=(echo ${bitcoinError} | sed 's/[^a-zA-Z0-9 ]//g')
+    echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
 
     ##############################
@@ -93,7 +94,7 @@ else
 
   # if still no error identified - search logs for genereic error
   if [ ${#bitcoinErrorShort} -eq 0 ]; then
-    bitcoinErrorFull=$(sudo tail -n 250 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1)
+    bitcoinErrorFull=$(sudo tail -n 250 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1 | sed 's/[^a-zA-Z0-9 ]//g')
     if [ ${#bitcoinErrorFull} -gt 0 ]; then
       bitcoinErrorShort="Error found in Logs"
     fi
@@ -123,11 +124,25 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
-  #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
+  lndErrorShort=''
+  rm /mnt/hdd/temp/.lnd.error 2>/dev/null
+
   if [ ${#lndError} -gt 0 ]; then
-    echo "lndErrorFull='${lndErrorFull}'"
-    echo "lndErrorShort=''"
-    #/home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorShort}"
+
+    # scan error for walletLocked as common error
+    locked=$(echo ${lndinfo} | grep -c 'Wallet is encrypted')
+    if [ ${locked} -gt 0 ]; then
+      echo "walletLocked=1"
+    else
+      echo "walletLocked=0"
+
+      # if not locked error - then 
+      echo "lndErrorShort='Unkown Error - see logs'"
+      lndErrorFull=$(echo ${lndErrorFull} | sed 's/[^a-zA-Z0-9 ]//g')
+      echo "lndErrorFull='${lndErrorFull}'"
+      /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
+    fi
+
   else
     
     # check if wallet is locked
