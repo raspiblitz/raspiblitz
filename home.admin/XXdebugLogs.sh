@@ -106,3 +106,8 @@ if [ ${showImproveInfo} -gt 0 ]; then
   echo "'Run Hardwaretest' in main menu or: sudo /home/admin/05hardwareTest.sh"
 fi
 echo ""
+echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
+echo "An easy way to share this debug output on GitHub or on a support chat"
+echo "use the following command and share the resulting link:"
+echo "/home/admin/XXdebugLogs.sh | nc termbin.com 9999"
+echo ""
