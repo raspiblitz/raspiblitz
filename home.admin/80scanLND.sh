@@ -114,13 +114,17 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
   else
     title="Action Required"
-    infoStr=" !!! LND WALLET IS LOCKED !!!\n"
+    infoStr=" LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
        infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
     fi 
+    if [ ${startcountLightning} -gt 1 ]; then
+        height=$((height+1))
+        infoStr=" LND restarted - login for details.\n${infoStr}"
+    fi
   fi
 
 else
@@ -137,7 +141,7 @@ else
 
   # formatting progress values
   if [ ${#syncProgress} -eq 0 ]; then
-    if [ ${startcountBlockchain} -eq 0 ]; then
+    if [ ${startcountBlockchain} -lt 2 ]; then
       syncProgress="waiting"
     else
       syncProgress="${startcountBlockchain} restarts"
@@ -149,7 +153,7 @@ else
     syncProgress="${syncProgress} %"
   fi
   if [ ${#scanProgress} -eq 0 ]; then
-    if [ ${startcountLightning} -eq 0 ]; then
+    if [ ${startcountLightning} -lt 2 ]; then
       scanProgress="waiting"
     else
       scanProgress="${startcountLightning} restarts"
