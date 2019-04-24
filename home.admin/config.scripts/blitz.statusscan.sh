@@ -138,7 +138,7 @@ if [ ${lndRunning} -eq 1 ]; then
 
       # if not locked error - then 
       echo "lndErrorShort='Unkown Error - see logs'"
-      lndErrorFull=$(echo ${lndErrorFull} | sed 's/[^a-zA-Z0-9 ]//g')
+      lndErrorFull=$(echo ${lndErrorFull} | tr -d "'")
       echo "lndErrorFull='${lndErrorFull}'"
       /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
     fi
