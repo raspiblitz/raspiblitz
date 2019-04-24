@@ -127,10 +127,10 @@ if [ ${lndRunning} -eq 1 ]; then
   lndErrorShort=''
   #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
 
-  if [ ${#lndError} -gt 0 ]; then
+  if [ ${#lndErrorFull} -gt 0 ]; then
 
     # scan error for walletLocked as common error
-    locked=$(echo ${lndError} | grep -c 'Wallet is encrypted')
+    locked=$(echo ${lndErrorFull} | grep -c 'Wallet is encrypted')
     if [ ${locked} -gt 0 ]; then
       echo "walletLocked=1"
     else
