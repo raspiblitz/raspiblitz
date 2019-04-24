@@ -80,7 +80,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ]; then
       echo
       if [ ${startcountLightning} -gt 1 ]; then
         echo "${startcountLightning} RESTARTS DETECTED - ${network}d might be in a error loop"
-        cat /home/admin/systemd.lightning.log | grep "ERROR"
+        cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -2
         echo
       fi
       if [ ${#lndErrorFull} -gt 0 ]; then
