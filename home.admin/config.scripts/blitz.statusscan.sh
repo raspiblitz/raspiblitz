@@ -29,12 +29,8 @@ uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
 echo "uptime=${uptime}"
 
 # count restarts of bitcoind/litecoind
-startcountBlockchain=$(cat systemd.blockchain.log | grep -c "STARTED")
+startcountBlockchain=$(cat systemd.blockchain.log 2>/dev/null | grep -c "STARTED")
 echo "startcountBlockchain=${startcountBlockchain}"
-
-# count restarts of bitcoind/litecoind
-startcountLightning=$(cat systemd.lightning.log | grep -c "STARTED")
-echo "startcountLightning=${startcountLightning}"
 
 # is bitcoind running
 bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
@@ -111,11 +107,12 @@ else
 
 fi
 
+# count restarts of bitcoind/litecoind
+startcountLightning=$(cat systemd.lightning.log 2>/dev/null | grep -c "STARTED")
+echo "startcountLightning=${startcountLightning}"
+
 # is LND running
 lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
-
-# TODO: check how long running ... try to find out if problem on starting
-
 echo "lndActive=${lndRunning}"
 
 if [ ${lndRunning} -eq 1 ]; then

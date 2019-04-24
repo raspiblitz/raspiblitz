@@ -124,17 +124,28 @@ else
   height=6
   width=43
   title="Node is Syncing (${scriptRuntime})"
+  actionString="Please wait - this can take some time"
 
   # formatting progress values
   if [ ${#syncProgress} -eq 0 ]; then
-    syncProgress="waiting"
+    if [ ${startcountBlockchain} -eq 0 ]; then
+      syncProgress="waiting"
+    else
+      syncProgress="${startcountBlockchain} restarts"
+      actionString="Please SSH in for more detail:"
+    fi
   elif [ ${#syncProgress} -lt 6 ]; then
     syncProgress=" ${syncProgress} %"
   else
     syncProgress="${syncProgress} %"
   fi
   if [ ${#scanProgress} -eq 0 ]; then
-    scanProgress="waiting"
+    if [ ${startcountLightning} -eq 0 ]; then
+      scanProgress="waiting"
+    else
+      scanProgress="${startcountLightning} restarts"
+      actionString="Please SSH in for more detail:"
+    fi
   elif [ ${#scanProgress} -lt 6 ]; then
     scanProgress=" ${scanProgress} %"
   else
@@ -142,7 +153,7 @@ else
   fi
 
   # setting info string
-  infoStr=" Blockchain Progress : ${syncProgress}\n Lightning Progress  : ${scanProgress}\n Please wait - this can take some time"
+  infoStr=" Blockchain Progress : ${syncProgress}\n Lightning Progress  : ${scanProgress}\n ${actionString}"
 
 fi
 
