@@ -98,7 +98,7 @@ else
   # if still no error identified - search logs for genereic error
   if [ ${#bitcoinErrorShort} -eq 0 ]; then
     bitcoinErrorFull=$(sudo tail -n 250 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1)
-    if [ ${#bitcoinErrorFull} -gt 0 ];
+    if [ ${#bitcoinErrorFull} -gt 0 ]; then
       bitcoinErrorShort="Error found in Logs"
     fi
   fi
