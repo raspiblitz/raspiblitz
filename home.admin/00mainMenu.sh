@@ -86,9 +86,12 @@ case $CHOICE in
             exit 1;
             ;;
         INFO)
-            ./00infoBlitz.sh
-            echo "Screen is not refreshing itself ... press ENTER to continue."
-            read key
+            walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
+            if [ ${walletLocked} -eq 0 ]; then
+              ./00infoBlitz.sh
+              echo "Screen is not refreshing itself ... press ENTER to continue."
+              read key
+            fi
             ./00raspiblitz.sh
             ;;
         lnbalance)
