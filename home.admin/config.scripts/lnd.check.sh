@@ -93,9 +93,9 @@ if [ "$1" == "basic-setup" ]; then
   if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
     echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
   elif [ "${mainnet}" == "1" ]; then
-    lndChain="bitcoin"
+    lndChain="main"
   elif [ "${testnet}" == "1" ]; then
-    lndChain="litecoin"
+    lndChain="test"
   else
     echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
   fi
