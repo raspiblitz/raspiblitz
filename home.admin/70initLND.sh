@@ -77,7 +77,7 @@ configExists=$( sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
   sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
   source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
-  sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf
   sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
   if [ -d /home/bitcoin/.lnd ]; then
     echo "OK - LND config written"
