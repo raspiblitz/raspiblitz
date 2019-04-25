@@ -93,8 +93,8 @@ echo ""
 echo "*** Starting LND ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
-  sed -i "5s/.*/Wants=${network}d.service/" ./assets/lnd.service
-  sed -i "6s/.*/After=${network}d.service/" ./assets/lnd.service
+  sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service
+  sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
   sudo chmod +x /etc/systemd/system/lnd.service
   sudo systemctl enable lnd
@@ -154,7 +154,7 @@ if [ ${walletExists} -eq 0 ]; then
 
     # let user enter password c
     sudo shred /home/admin/.pass.tmp 2>/dev/null
-    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
+    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
     passwordC=`sudo cat /home/admin/.pass.tmp`
     sudo shred /home/admin/.pass.tmp 2>/dev/null
 
@@ -240,7 +240,7 @@ or having a complete LND rescue-backup from your old node.
 ##### DEACTIVATED UNTIL config.scripts/lnd.initwallet.py WORKS
 #    # let user enter password c
 #    sudo shred /home/admin/.pass.tmp 2>/dev/null
-#    sudo ./config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
+#    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
 #    passwordC=`sudo cat /home/admin/.pass.tmp`
 #    sudo shred /home/admin/.pass.tmp 2>/dev/null
 #
@@ -283,7 +283,7 @@ or having a complete LND rescue-backup from your old node.
 #      " 11 65
 #      if [ $? -eq 1 ]; then
 #        sudo shred /home/admin/.pass.tmp 2>/dev/null
-#        sudo ./config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+#        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
 #        passwordD=`sudo cat /home/admin/.pass.tmp`
 #        sudo shred /home/admin/.pass.tmp 2>/dev/null
 #      fi
@@ -440,7 +440,7 @@ echo ""
 echo "*** Copy LND Macaroons to user admin ***"
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  ./AAunlockLND.sh
+  /home/admin/AAunlockLND.sh
   sleep 3
 fi
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
@@ -476,7 +476,7 @@ echo "*** Check Wallet Lock ***"
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  ./AAunlockLND.sh
+  /home/admin/AAunlockLND.sh
 else
   echo "OK - Wallet is already unlocked"
 fi
@@ -522,5 +522,5 @@ fi
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
 
 ###### finishSetup
-sudo ./90finishSetup.sh
-sudo ./95finalSetup.sh
+sudo /home/admin/90finishSetup.sh
+sudo /home/admin/95finalSetup.sh
