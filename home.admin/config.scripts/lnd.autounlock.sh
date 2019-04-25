@@ -36,9 +36,10 @@ Password C will be stored on the device.
     sleep 3
     exit 1
   fi
-  
+
   # test if correct
   echo "testing password .. please wait"
+  echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
   result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
