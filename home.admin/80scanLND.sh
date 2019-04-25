@@ -80,10 +80,11 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
       echo "If you just started some config/setup, this might be OK."
       echo
       if [ ${startcountLightning} -gt 1 ]; then
-        echo "${startcountLightning} RESTARTS DETECTED - ${network}d might be in a error loop"
+        echo "${startcountLightning} RESTARTS DETECTED - LND might be in a error loop"
         cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
         echo
       fi
+      sudo journalctl -u lnd -b --no-pager -n14 | grep "lnd\["
       if [ ${#lndErrorFull} -gt 0 ]; then
         echo "More Error Detail:"
         echo ${lndErrorFull}
