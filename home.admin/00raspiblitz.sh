@@ -241,7 +241,7 @@ To run a BACKUP of funds & channels first is recommended.
           else
             /home/admin/AAunlockLND.sh
             echo "Starting up Wallet ..."
-            sleep 8
+            sleep 6
             echo "Please Wait ... update to next screen can be slow"
           fi
         fi
