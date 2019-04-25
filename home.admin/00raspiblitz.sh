@@ -239,10 +239,17 @@ To run a BACKUP of funds & channels first is recommended.
             # give autounlock 5 min after startup to react
             sleep 1
           else
-            /home/admin/AAunlockLND.sh
-            echo "Starting up Wallet ..."
-            sleep 6
-            echo "Please Wait ... update to next screen can be slow"
+            # check how many times LND was restarted
+            source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+            if [ ${startcountLightning} -lt 3 ]; then
+              /home/admin/AAunlockLND.sh
+              echo "Starting up Wallet ... (10sec)"
+              sleep 10
+              echo "please wait ... update to next screen can be slow"
+            else
+              /home/admin/80scanLND.sh error-report
+              exit 0
+            fi
           fi
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
