@@ -122,8 +122,9 @@ elif [ ${walletLocked} -gt 0 ]; then
     fi
     if [ ${startcountLightning} -gt 1 ]; then
         width=45
-        height=$((height+1))
+        height=$((height+2))
         infoStr=" LIGHTNING RESTARTED - login for details\n${infoStr}"
+        adminStr="${adminStr}\n or choose 'INFO' in main menu"
     fi
   fi
 

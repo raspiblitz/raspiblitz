@@ -87,9 +87,9 @@ case $CHOICE in
             ;;
         INFO)
             ./00infoBlitz.sh
-            echo "Screen is not updating ... press ENTER to continue."
+            echo "Screen is not refreshing itself ... press ENTER to continue."
             read key
-            ./00mainMenu.sh
+            ./00raspiblitz.sh
             ;;
         lnbalance)
             lnbalance ${network}
