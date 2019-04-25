@@ -100,7 +100,11 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
       echo "-> To try restart: sudo shutdown -r now"
       echo ""
       exit 1
-    fi
+    else
+     source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
+     if [ ${wallet} -eq 0 ] || [ ${macaroon} -eq 0 ] || [ ${config} -eq 0 ] || [ ${tls} -eq 0 ]; then
+       infoStr=" The LND service needs RE-SETUP.\n Login with SSH to continue:"
+     fi
   else
     infoStr=" The LND service is starting.\n Login for more details:"
     if [ "$USER" == "admin" ]; then
