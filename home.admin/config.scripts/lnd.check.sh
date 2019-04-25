@@ -6,7 +6,7 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
-if [ "$1" -eq "basic-setup" ]; then
+if [ "$1" == "basic-setup" ]; then
 
    # check TLS exits
   tlsExists=$(sudo ls /mnt/hdd/lnd/tls.cert | grep -c 'tls.cert')
