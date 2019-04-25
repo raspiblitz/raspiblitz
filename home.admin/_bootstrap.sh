@@ -392,6 +392,22 @@ fi
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
+#################################
+# MAKE SURE ADMIN USER HAS LATEST LND DATA
+#################################
+source ${configFile}
+if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
+  echo "updating admin user LND data" >> $logFile
+  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
+  sudo chown admin:admin /home/admin/.lnd/lnd.conf 2>> $logFile
+  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
+  sudo chown admin:admin /home/admin/.lnd/tls.cert 2>> $logFile
+  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null
+  sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>> $logFile
+else 
+  echo "skipping admin user LND data update" >> $logFile
+fi
+
 ################################
 # DETECT FRESHLY RECOVERED SD
 ################################
