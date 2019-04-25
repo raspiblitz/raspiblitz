@@ -155,7 +155,7 @@ if [ "$1" == "basic-setup" ]; then
     # OK looks good
     rpcusercorrect=1
   fi
-  echo "rpcusercorrect='${rpcusercorrect}'"
+  echo "rpcusercorrect=${rpcusercorrect}"
 
   # check that RPC PASSWORD between Bitcoin and LND is correct
   rpcpasscorrect=0
@@ -171,7 +171,7 @@ if [ "$1" == "basic-setup" ]; then
     # OK looks good
     rpcpasscorrect=1
   fi
-  echo "rpcpasscorrect='${rpcpasscorrect}'"
+  echo "rpcpasscorrect=${rpcpasscorrect}"
 
 else
   echo "# FAIL: parameter not known"
