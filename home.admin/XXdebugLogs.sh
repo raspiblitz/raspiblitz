@@ -62,9 +62,9 @@ sudo systemctl status lnd -n2 --no-pager
 echo ""
 
 echo "*** LAST LND ERROR LOGS ***"
-echo "sudo journalctl -u lnd -b --no-pager -n8"
-sudo journalctl -u lnd -b --no-pager -n8
-cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -2
+echo "sudo journalctl -u lnd -b --no-pager -n12"
+sudo journalctl -u lnd -b --no-pager -n12
+cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
 echo ""
 echo "*** LAST 30 LND INFO LOGS ***"
 echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
