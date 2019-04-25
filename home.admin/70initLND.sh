@@ -73,7 +73,7 @@ while [ ${chainIsReady} -eq 0 ]
 # CHECK #########
 
 echo "*** Check LND Config ***"
-configExists=$( sudo ls /mnt/hdd/lnd/ | grep -c lnd.conf )
+configExists=$( sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
   sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
   source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
