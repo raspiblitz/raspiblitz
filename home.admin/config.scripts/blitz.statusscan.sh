@@ -92,8 +92,8 @@ else
 
   #### GENERIC ERROR FIND
 
-  # if still no error identified - search logs for genereic error (after 2min uptime)
-  if [ ${#bitcoinErrorShort} -eq 0 ] && [ ${uptime} -gt 120 ]; then
+  # if still no error identified - search logs for genereic error (after 4min uptime)
+  if [ ${#bitcoinErrorShort} -eq 0 ] && [ ${uptime} -gt 240 ]; then
     bitcoinErrorFull=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1 | tr -d "'")
     if [ ${#bitcoinErrorFull} -gt 0 ]; then
       bitcoinErrorShort="Error found in Logs"
