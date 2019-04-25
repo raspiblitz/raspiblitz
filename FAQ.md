@@ -205,12 +205,9 @@ Remember those 24 words you were writing down during the setup? Thats your "ciph
 
 With the cypher seed you can recover the bitcoin wallet that LND was managing for you - but it does not contain all the details about the channels you have open - its just the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything is OK and you can go on. If you had open channels with funds in there, the following is to consider:
 
-* You now rely on your channel counter parts to force close the channel at one point. If they do, the coins will be available to use in your funding wallet again at one point in the future - after force close delay (but see also [#278](https://github.com/rootzoll/raspiblitz/issues/278) ).
-* If your channel counter parts never force close the channel (because they are offline too) your channel funds can be frozen forever.
+The best results to recover on-chain funds from wallet seeds are reported to get from installing the Lightning Labs App on your laptop and use the wallet seed (and same wallet passwords): https://github.com/lightninglabs/lightning-app/releases
 
-So going this way there is a small risk, that you will not recover your funds. But normally if your channel counter parts are still online, see that you will not come back online and they have themselves some funds on their channel side with you: They have an incentive to force close the channel to make use of their funds again.
-
-So here is what todo if you want to "Recover from Wallet Seed" with RaspiBlitz:
+You can also try it with a fresh RaspiBlitz - here is what todo:
 
 - SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
 - During the new SetUp you get to the point of creating the LND wallet (see image below).
