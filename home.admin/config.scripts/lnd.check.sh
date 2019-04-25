@@ -141,6 +141,22 @@ if [ "$1" == "basic-setup" ]; then
     echo "wallet=0"
   fi
 
+  # check that RPC password between Bitcoin and LND is correct
+  rpcpasscorrect=0
+  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}d.rpcpass" | sed 's/^[a-z]*\./lnd/g')
+  source <(sudo cat /mnt/hdd/${lndNetwork}/${lndNetwork}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
+  if [ ${#lndrpcpass} -eq 0 ]; then
+    echo "err='lnd.conf: missing ${lndNetwork}d.rpcpass (needs to be same as set in ${lndNetwork}.conf)'"
+  elif [ ${#rpcpassword} -eq 0 ]; then
+    echo "err='${lndNetwork}.conf: missing rpcpassword (needs to be same as set in lnd.conf)'"
+  elif [ "${rpcpassword}" != "${lndrpcpass}" ]; then
+    echo "err='${lndNetwork}.conf (${rpcpassword}) & lnd.conf (${lndrpcpass}): RPC password missmatch! - LND cannot connect to blockchain RPC'"
+  else
+    # OK looks good
+    rpcpasscorrect=1
+  fi
+  echo "rpcpasscorrect='${rpcpasscorrect}'"
+
 else
   echo "# FAIL: parameter not known"
 fi
