@@ -249,7 +249,7 @@ To run a BACKUP of funds & channels first is recommended.
               echo "please wait ... update to next screen can be slow"
             else
               /home/admin/80scanLND.sh lightning-error
-              echo "(exit after too much restarts/unlocks)"
+              echo "(exit after too much restarts/unlocks - restart to try again)"
               exit 0
             fi
           fi
