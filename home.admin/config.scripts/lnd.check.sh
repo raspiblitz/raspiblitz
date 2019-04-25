@@ -141,7 +141,23 @@ if [ "$1" == "basic-setup" ]; then
     echo "wallet=0"
   fi
 
-  # check that RPC password between Bitcoin and LND is correct
+  # check that RPC USER between Bitcoin and LND is correct
+  rpcusercorrect=0
+  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}d.rpcuser" | sed 's/^[a-z]*\./lnd/g')
+  source <(sudo cat /mnt/hdd/${lndNetwork}/${lndNetwork}.conf 2>/dev/null | grep "rpcuser" | sed 's/^[a-z]*\./lnd/g')
+  if [ ${#lndrpcuser} -eq 0 ]; then
+    echo "err='lnd.conf: missing ${lndNetwork}d.rpcuser (needs to be same as set in ${lndNetwork}.conf)'"
+  elif [ ${#rpcuser} -eq 0 ]; then
+    echo "err='${lndNetwork}.conf: missing rpcuser (needs to be same as set in lnd.conf)'"
+  elif [ "${rpcuser}" != "${lndrpcuser}" ]; then
+    echo "err='${lndNetwork}.conf (${rpcuser}) & lnd.conf (${lndrpcuser}): RPC user missmatch! - LND cannot connect to blockchain RPC'"
+  else
+    # OK looks good
+    rpcusercorrect=1
+  fi
+  echo "rpcusercorrect='${rpcusercorrect}'"
+
+  # check that RPC PASSWORD between Bitcoin and LND is correct
   rpcpasscorrect=0
   source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}d.rpcpass" | sed 's/^[a-z]*\./lnd/g')
   source <(sudo cat /mnt/hdd/${lndNetwork}/${lndNetwork}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
