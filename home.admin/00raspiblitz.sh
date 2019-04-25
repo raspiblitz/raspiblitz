@@ -318,6 +318,15 @@ elif [ ${setupStep} -lt 100 ]; then
 
 else
 
+  # check if LND needs re-setup
+  source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
+  if [ ${wallet} -eq 0 ] || [ ${macaroon} -eq 0 ] || [ ${config} -eq 0 ] || [ ${tls} -eq 0 ]; then
+      echo "WARN: LND needs re-setup"
+      waitUntilChainNetworkIsReady
+      /home/admin/70initLND.sh
+      exit 0
+  fi
+
   # when all is setup - forward to main menu
   waitUntilChainNetworkIsReady
   /home/admin/00mainMenu.sh
