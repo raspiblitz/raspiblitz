@@ -235,6 +235,28 @@ On wallet creation you get asked if you want to protect your word seed list with
 
 To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
 
+## How to move funds & channels from RaspiBlitz to LND Lightning Desktop App?
+
+Before you start - download a LND-data-rescue file from your RaspiBlitz to your laptop `main menu -> UPDATE -> Update Anyway -> Start Update -> Download Backup -> FOLLOW INSTRUCTIONS and press Enter when ready with download -> START UPDATE`. Now your RaspiBlitz will power down.
+
+Now install the LND Lightning Desktop App for your OS: https://github.com/lightninglabs/lightning-app/releases
+
+Then start the App and create a new wallet - its a trhowaway wallet (will be deleted afterwards with no funds) - so you dont need to keep seeds safe. To get easy thru the setup just make a photo of the seed with your mobile. If you get asked for funding - just click "done" until you reach the basic wallet screen.
+
+Now find out at with path LND stores the wallet data on your computer. Go to the settings and choose "Logs".
+Look thru the log lins and find a path that contains "lnd/data/chain". That is your "LND PATH".
+
+For example on Mac OSX the LND PATH looks like this:
+`/Users/[USERNAME]/Library/Application Support/lightning-app/lnd`
+
+Then close the LND Desktop App. Then open that directory on your local file manager and delete all data in the `lnd` directory. 
+
+No unkpack the lnd-rescue you made before and copy all the data from the `mnt/hdd/lnd` directory (including sub directories) into the LND-Path lnd directory. Delete the "lnd.conf" file.
+
+Now start the Lightning App again. Your wallet password should now be your RaspIBlitz PasswordC. 
+
+**If its working and you have access to your funds/channels on the Desktop App ... dont start the RaspiBlitz anymore. Delete sd card and HDD.**
+
 ## How do I change the Name/Alias of my lightning node
 
 Use the "Change Name/Alias of Node" option in the main menu. The RaspiBlitz will make a reboot after this.
