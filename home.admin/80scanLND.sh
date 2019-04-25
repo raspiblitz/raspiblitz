@@ -35,7 +35,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       echo
       if [ ${startcountBlockchain} -gt 1 ]; then
         echo "${startcountBlockchain} RESTARTS DETECTED - ${network}d might be in a error loop"
-        cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
+        cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -1
         echo
       fi
       if [ ${#bitcoinErrorFull} -gt 0 ]; then
@@ -81,7 +81,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
       echo
       if [ ${startcountLightning} -gt 1 ]; then
         echo "${startcountLightning} RESTARTS DETECTED - ${network}d might be in a error loop"
-        cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -2
+        cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
         echo
       fi
       if [ ${#lndErrorFull} -gt 0 ]; then
