@@ -134,6 +134,7 @@ runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.
 # function to use later
 waitUntilChainNetworkIsReady()
 {
+    source ${configFile}
     echo "checking ${network}d - please wait .."
     echo "can take longer if device was off or first time"
     while :
