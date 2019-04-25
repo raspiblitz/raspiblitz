@@ -82,14 +82,13 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
       if [ ${startcountLightning} -gt 1 ]; then
         echo "${startcountLightning} RESTARTS DETECTED - LND might be in a error loop"
         cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
-        echo
       fi
       sudo journalctl -u lnd -b --no-pager -n14 | grep "lnd\["
       if [ ${#lndErrorFull} -gt 0 ]; then
         echo "More Error Detail:"
         echo ${lndErrorFull}
-        echo
       fi
+      echo
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
       echo "-> To try restart: sudo shutdown -r now"
