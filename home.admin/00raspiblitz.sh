@@ -247,7 +247,7 @@ To run a BACKUP of funds & channels first is recommended.
               sleep 10
               echo "please wait ... update to next screen can be slow"
             else
-              /home/admin/80scanLND.sh error-report
+              /home/admin/80scanLND.sh lightning-error
               exit 0
             fi
           fi
