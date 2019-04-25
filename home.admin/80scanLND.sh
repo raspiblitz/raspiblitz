@@ -7,6 +7,11 @@ source /mnt/hdd/raspiblitz.conf
 # all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
 
+# when admin and no other error found run LND setup check 
+if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
+  lndErrorFull=$(sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep "err=" | tail -1)
+fi
+
 # set follow up info different for LCD and ADMIN
 adminStr="ssh admin@${localIP} ->Password A"
 if [ "$USER" == "admin" ]; then
@@ -84,6 +89,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
         cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
       fi
       sudo journalctl -u lnd -b --no-pager -n14 | grep "lnd\["
+      sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep "err="
       if [ ${#lndErrorFull} -gt 0 ]; then
         echo "More Error Detail:"
         echo ${lndErrorFull}
@@ -155,7 +161,15 @@ else
   fi
   if [ ${#scanProgress} -eq 0 ]; then
     if [ ${startcountLightning} -lt 2 ]; then
+
       scanProgress="waiting"
+
+      # check for possible error
+      lndSetupErrorCount=$(sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep -c "err=")
+      if [ ${lndSetupErrorCount} -gt 0 ]; then
+        scanProgress="possible error"
+      fi
+
     else
       scanProgress="${startcountLightning} restarts"
       actionString="Login with SSH for more details:"
