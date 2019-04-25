@@ -244,10 +244,12 @@ To run a BACKUP of funds & channels first is recommended.
             if [ ${startcountLightning} -lt 3 ]; then
               /home/admin/AAunlockLND.sh
               echo "Starting up Wallet ... (10sec)"
-              sleep 10
+              sleep 5
+              sleep 5
               echo "please wait ... update to next screen can be slow"
             else
               /home/admin/80scanLND.sh lightning-error
+              echo "(exit after too much restarts/unlocks)"
               exit 0
             fi
           fi
