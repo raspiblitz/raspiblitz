@@ -240,7 +240,9 @@ To run a BACKUP of funds & channels first is recommended.
             sleep 1
           else
             /home/admin/AAunlockLND.sh
-            echo "please wait ... update to next screen can be slow"
+            echo "Starting up Wallet ..."
+            sleep 8
+            echo "Please Wait ... update to next screen can be slow"
           fi
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
