@@ -136,7 +136,7 @@ if [ ${lndRunning} -eq 1 ]; then
     else
       echo "walletLocked=0"
 
-      rpcNotWorking=$(echo ${lndErrorFull} | greap -c 'connection refused')
+      rpcNotWorking=$(echo ${lndErrorFull} | grep -c 'connection refused')
       if [ ${rpcNotWorking} -gt 0 ]; then
         lndErrorShort='LND RPC not responding'
         lndErrorFull=$(echo "LND RPC is not responding. LND may have problems starting up. Check logs, config files and systemd service. Org-Error: ${lndErrorFull}" | tr -d "'")

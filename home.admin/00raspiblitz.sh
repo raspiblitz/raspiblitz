@@ -239,15 +239,8 @@ To run a BACKUP of funds & channels first is recommended.
             # give autounlock 5 min after startup to react
             sleep 1
           else
-            # check how many times LND was restarted
-            source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-            if [ ${startcountLightning} -lt 3 ]; then
-              /home/admin/AAunlockLND.sh
-              echo "please wait ... update to next screen can be slow"
-            else
-              /home/admin/80scanLND.sh error-report
-              exit 0
-            fi
+            /home/admin/AAunlockLND.sh
+            echo "please wait ... update to next screen can be slow"
           fi
         fi
         lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
