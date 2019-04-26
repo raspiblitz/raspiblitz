@@ -86,7 +86,7 @@ if [ ${lndRunning} -eq 1 ]; then
   fi
 
   # check if lnd is scanning blockchain
-  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo | grep "synced_to_chain")
+  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | grep "synced_to_chain")
   lndSyncing=1
   if [ ${#lndInfo} -gt 0 ];then
     lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
