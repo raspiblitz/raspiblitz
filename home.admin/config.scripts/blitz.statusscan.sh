@@ -120,6 +120,7 @@ echo "lndActive=${lndRunning}"
 if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
+  lndRPCReady=1
   lndinfo=$(sudo -u bitcoin lncli getinfo 2>/mnt/hdd/temp/.lnd.error)
 
   # check if error on request
@@ -128,6 +129,32 @@ if [ ${lndRunning} -eq 1 ]; then
   #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
 
   if [ ${#lndErrorFull} -gt 0 ]; then
+
+    # flag if error could be resoled by analysis
+    errorResolved=0
+
+    ### analyse LND logs since start
+
+    # find a the log date marker of last start of LND
+    # just do this on error case to save on processing memory
+    lndLastStartDate=$(sudo cat /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "LTND: Active chain:" | tail -1 | cut -d "[" -f1)
+
+    # get logs of last LND start
+    lndLogsAfterStart=$(sudo sed -n -e "/${lndLastStartDate}/,$p" /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log) 
+
+    # check RPC server ready (can take some time after wallet was unlocked)
+    lndRPCReady=$(echo "${lndLogsAfterStart}" | grep -c "RPCS: RPC server listening on"))
+    echo "lndRPCReady=${lndRPCReady}"
+
+    # check wallet if wallet was opened (after correct password)
+    lndWalletOpened=$(echo "${lndLogsAfterStart}" | grep -c "LNWL: Opened wallet"))
+    echo "walletOpened=${lndWalletOpened}"
+
+    # check wallet if wallet is ready (can take some time after wallet was opened)
+    lndWalletReady=$(echo "${lndLogsAfterStart}" | grep -c "LTND: LightningWallet opened"))
+    echo "walletReady=${lndWalletReady}"
+
+    ### check errors
 
     # scan error for walletLocked as common error
     locked=$(echo ${lndErrorFull} | grep -c 'Wallet is encrypted')
@@ -138,20 +165,36 @@ if [ ${lndRunning} -eq 1 ]; then
 
       rpcNotWorking=$(echo ${lndErrorFull} | grep -c 'connection refused')
       if [ ${rpcNotWorking} -gt 0 ]; then
-        lndErrorShort='LND RPC not responding'
-        lndErrorFull=$(echo "LND RPC is not responding. LND may have problems starting up. Check logs, config files and systemd service. Org-Error: ${lndErrorFull}" | tr -d "'")
+
+        # this can happen for a long time when LND is starting fresh sync
+        # on first startup - check if logs since start signaled RPC ready before
+        if [ ${lndRPCReady} -eq 0 ]; then
+          # nullify error - this is normal
+          lndErrorFull=""
+          errorResolved=1
+          # oputput basic data because no error
+          echo "# LND RPC is still warming up - no scan progress: prepare scan"
+          echo "scanTimestamp=-2"
+          echo "syncedToChain=0"
+        else
+          echo "# LND RPC was started - some other problem going on"
+          lndErrorShort='LND RPC not responding'
+          lndErrorFull=$(echo "LND RPC is not responding. LND may have problems starting up. Check logs, config files and systemd service. Org-Error: ${lndErrorFull}" | tr -d "'")
+        fi   
       fi
 
-      # if not known error - keep generic
-      if [ ${#lndErrorShort} -eq 0 ]; then
+      # if not known error and not resolved before - keep generic
+      if [ ${#lndErrorShort} -eq 0 ] && [ ${errorResolved} -eq 0 ]; then
         lndErrorShort='Unkown Error - see logs'
         lndErrorFull=$(echo ${lndErrorFull} | tr -d "'")
       fi
 
       # write to results
-      echo "lndErrorShort='${lndErrorShort}'"
-      echo "lndErrorFull='${lndErrorFull}'"
-      /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
+      if [ ${#lndErrorFull} -gt 0 ]; then
+        echo "lndErrorShort='${lndErrorShort}'"
+        echo "lndErrorFull='${lndErrorFull}'"
+        /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
+      fi
 
     fi
 
@@ -189,6 +232,9 @@ if [ ${lndRunning} -eq 1 ]; then
     fi
     
   fi
+
+  # output if lnd-RPC is ready
+  echo "lndRPCReady=${lndRPCReady}"
 
 fi
 

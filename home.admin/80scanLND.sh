@@ -163,7 +163,7 @@ else
   title="Node is Syncing (${scriptRuntime})"
   actionString="Please wait - this can take some time"
 
-  # formatting progress values
+  # formatting BLOCKCHAIN SYNC PROGRESS
   if [ ${#syncProgress} -eq 0 ]; then
     if [ ${startcountBlockchain} -lt 2 ]; then
       syncProgress="waiting"
@@ -176,21 +176,33 @@ else
   else
     syncProgress="${syncProgress} %"
   fi
+
+
+  # formatting LIGHTNING SCAN PROGRESS  
   if [ ${#scanProgress} -eq 0 ]; then
-    if [ ${startcountLightning} -lt 2 ]; then
 
-      scanProgress="waiting"
+    # in case of LND RPC is not ready yet
+    if [ ${scanTimestamp} -eq -2 ]; then
 
-      # check for possible error
+      scanProgress="prepare scan (pls wait)"
+
+    # in case LND restarting >2  
+    elif [ ${startcountLightning} -gt 2 ]; then
+
+      scanProgress="${startcountLightning} restarts"
+      actionString="Login with SSH for more details:"
+
+      # check if a specific error can be identified for restarts
       lndSetupErrorCount=$(sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep -c "err=")
       if [ ${lndSetupErrorCount} -gt 0 ]; then
         scanProgress="possible error"
       fi
 
+    # unkown cases
     else
-      scanProgress="${startcountLightning} restarts"
-      actionString="Login with SSH for more details:"
+      scanProgress="waiting"
     fi
+
   elif [ ${#scanProgress} -lt 6 ]; then
     scanProgress=" ${scanProgress} %"
   else
