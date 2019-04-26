@@ -76,6 +76,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
   title="Lightning Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
     if [ ${#lndErrorShort} -gt 0 ]; then
+       height=6
       lndErrorShort=" ${lndErrorShort}\n"
     fi
     if [ ${lndActive} -eq 0 ]; then
