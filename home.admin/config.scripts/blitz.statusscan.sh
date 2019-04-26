@@ -135,12 +135,12 @@ if [ ${lndRunning} -eq 1 ]; then
 
     ### analyse LND logs since start
 
-    # find a the log date marker of last start of LND
+    # find a the line number in logs of start of LND
     # just do this on error case to save on processing memory
-    lndLastStartDate=$(sudo cat /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep "LTND: Active chain:" | tail -1 | cut -d "[" -f1)
+    lndStartLineNumber=$(sudo cat /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -in "LTND: Active chain:" | tail -1 | cut -d ":" -f1)
 
     # get logs of last LND start
-    lndLogsAfterStart=$(sudo sed -n -e "/${lndLastStartDate}/,$p" /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log) 
+    lndLogsAfterStart=$(sudo tail --lines=+${lndStartLineNumber} /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log) 
 
     # check RPC server ready (can take some time after wallet was unlocked)
     lndRPCReady=$(echo "${lndLogsAfterStart}" | grep -c "RPCS: RPC server listening on")
