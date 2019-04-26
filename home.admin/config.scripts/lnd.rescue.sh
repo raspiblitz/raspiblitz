@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /mnt/hdd/raspiblitz.conf
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small rescue script to to backup or restore"
@@ -123,8 +125,11 @@ elif [ ${mode} = "restore" ]; then
           echo "Recommend to abort and upload again!"
         fi
 
-        echo
-        echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
+        oldWalletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c "wallet.db")
+        if [ ${oldWalletExists} -gt 0 ]; then
+          echo
+          echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
+        fi
         echo
         echo "PRESS ENTER to start restore. Enter x & ENTER to cancel."
       fi
