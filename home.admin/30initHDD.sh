@@ -85,6 +85,7 @@ Then Power up again." 8 39
       sudo shutdown now
       exit 1
     fi
+    clear
     echo ""
     echo "*** Formatting the HDD ***"
     echo "WARNING ALL DATA ON HDD WILL GET DELETED - CAN TAKE SOME TIME"

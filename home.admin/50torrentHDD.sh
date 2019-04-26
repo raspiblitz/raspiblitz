@@ -224,7 +224,7 @@ while :
     echo "NOTICE: This can take multiple hours or days !!"
     echo "Its OK to close terminal now and SSH back in later."
     echo "If u see the torrents 100% downloaded and verified,"
-    echo "press X to continue. Also press x to abort download"
+    echo "press x to continue. Also press x to abort download"
     echo "before 100% if you want to switch to another option."
     echo "****************************************************"
     echo ""
