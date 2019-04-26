@@ -143,15 +143,15 @@ if [ ${lndRunning} -eq 1 ]; then
     lndLogsAfterStart=$(sudo sed -n -e "/${lndLastStartDate}/,$p" /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log) 
 
     # check RPC server ready (can take some time after wallet was unlocked)
-    lndRPCReady=$(echo "${lndLogsAfterStart}" | grep -c "RPCS: RPC server listening on"))
+    lndRPCReady=$(echo "${lndLogsAfterStart}" | grep -c "RPCS: RPC server listening on")
     echo "lndRPCReady=${lndRPCReady}"
 
     # check wallet if wallet was opened (after correct password)
-    lndWalletOpened=$(echo "${lndLogsAfterStart}" | grep -c "LNWL: Opened wallet"))
+    lndWalletOpened=$(echo "${lndLogsAfterStart}" | grep -c "LNWL: Opened wallet")
     echo "walletOpened=${lndWalletOpened}"
 
     # check wallet if wallet is ready (can take some time after wallet was opened)
-    lndWalletReady=$(echo "${lndLogsAfterStart}" | grep -c "LTND: LightningWallet opened"))
+    lndWalletReady=$(echo "${lndLogsAfterStart}" | grep -c "LTND: LightningWallet opened")
     echo "walletReady=${lndWalletReady}"
 
     ### check errors
