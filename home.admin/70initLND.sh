@@ -241,6 +241,8 @@ or having a complete LND rescue-backup from your old node.
       fi
     fi
 
+    clear
+
 ##### DEACTIVATED UNTIL config.scripts/lnd.initwallet.py WORKS
 #    # let user enter password c
 #    sudo shred /home/admin/.pass.tmp 2>/dev/null
@@ -334,13 +336,14 @@ or having a complete LND rescue-backup from your old node.
         /home/admin/70initLND.sh
         exit 1
       else
+        clear
         echo "FILE UPLOADED --> will ne checked/activated after wallet restore from seed"
       fi
     fi
 
 ##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
     echo "****************************************************************************"
-    echo "Helping Instructions --> for recovering a LND Wallet"
+    echo "* RECOVER LND WALLET BY SEED WORDS"
     echo "****************************************************************************"
     echo "A) For 'Wallet Password' use your old PASSWORD C"
     echo "B) For 'cipher seed mnemonic' answere 'y' and then enter your seed words" 
