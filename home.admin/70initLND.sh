@@ -485,7 +485,6 @@ if [ ${gotSCB} -eq 1 ]; then
     echo "lncli restorechanbackup --multi_file=/home/admin/channel.backup"
     echo "Press ENTER to continue for now ..."
     read key
-    exit 1
   fi
   
 else
