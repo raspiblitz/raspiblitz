@@ -75,13 +75,24 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
   width=43
   title="Lightning Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
-    infoStr=" The LND service is not running.\n Login for more details:"
+    if [ ${#lndErrorShort} -gt 0 ]; then
+      lndErrorShort=" ${lndErrorShort}\n"
+    fi
+    if [ ${lndActive} -eq 0 ]; then
+      infoStr=" The LND service is not running.\n${lndErrorShort} Login for more details:"
+    else
+      infoStr=" The LND service is running with error.\n${lndErrorShort} Login for more details:"
+    fi
     if [ "$USER" == "admin" ]; then
       clear
       echo ""
-      echo "*********************************"
-      echo "* The LND service is not running."
-      echo "*********************************"
+      echo "****************************************"
+      if [ ${lndActive} -eq 0 ]; then
+        echo "* The LND service is not running."
+      else
+        echo "* The LND service is running with error."
+      fi
+      echo "****************************************"
       echo "If you just started some config/setup, this might be OK."
       echo
       if [ ${startcountLightning} -gt 1 ]; then
