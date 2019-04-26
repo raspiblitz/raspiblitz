@@ -305,11 +305,6 @@ if [ ${setupStep} -eq 0 ]; then
 
 elif [ ${setupStep} -lt 100 ]; then
 
-    # see function above
-    if [ ${setupStep} -gt 59 ]; then
-      waitUntilChainNetworkIsReady
-    fi
-
     # continue setup
     BACKTITLE="${hostname} / ${network} / ${chain}"
     TITLE="⚡ Welcome to your RaspiBlitz ⚡"
