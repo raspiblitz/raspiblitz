@@ -4,8 +4,15 @@ source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small rescue script to to backup or restore"
- echo "lnd.rescue.sh [backup|restore] [?no-download]"
+ echo "# small rescue script to to backup or restore LND data"
+ echo "# -> backup all LND data in a tar.gz file for download:"
+ echo "# lnd.rescue.sh backup [?no-download]"
+ echo "# -> upload a LND data tar.gz file to replace LND data:"
+ echo "# lnd.rescue.sh restore"
+ echo "# -> download the LND channel.backup file from SD card:"
+ echo "# lnd.rescue.sh scb-down"
+ echo "# -> upload the LND channel.backup to recover wallet:"
+ echo "# lnd.rescue.sh scb-up"
  exit 1
 fi
 
@@ -67,10 +74,10 @@ elif [ ${mode} = "restore" ]; then
   # RESTORE
   ################################
 
-  echo "*** LND.RESCUE --> RESTORE"
+  echo "# LND.RESCUE --> RESTORE"
   echo ""
 
-    # delete old backups
+  # delete old backups
   rm /home/admin/lnd-rescue-*.tar.gz
 
   filename=""
@@ -168,6 +175,69 @@ elif [ ${mode} = "restore" ]; then
   echo "DONE - please check if LND starts up correctly with restored state and funds."
   echo "Keep in mind that some channels maybe forced closed in the meanwhile."
   echo 
+
+elif [ ${mode} = "scb-down" ]; then
+
+  echo
+  echo "****************************"
+  echo "* DOWNLOAD THE BACKUP FILE *"
+  echo "****************************"
+  echo 
+  echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
+  echo "scp -r admin@${localip}:/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ./"
+  echo ""
+  echo "Use password A to authenticate file transfere."
+  echo
+  echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing" 
+  echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file" 
+  echo "Will just recover on-chain & channel-funds, but closing all channels" 
+
+elif [ ${mode} = "scb-up" ]; then
+
+  gotFile=-1
+  while [ ${gotFile} -lt 1 ]
+  do
+
+    # show info
+    clear
+    sleep 1
+    echo "**********************************"
+    echo "* UPLOAD THE channel.backup FILE *"
+    echo "**********************************"
+    echo
+    if [ ${gotFile} -eq -1 ]; then
+      echo "If you have the channel.backup file on your laptop or on"
+      echo "another server you can now upload it to the RaspiBlitz."
+    elif [ ${gotFile} -eq 0 ]; then
+      echo "NO channel.backup FOUND IN /home/admin"
+      echo "Please try upload again."
+    fi
+    echo
+    echo "To make upload open a new terminal and change,"
+    echo "into the directory where your lnd-rescue file is and"
+    echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+    echo "scp ./channel.backup admin@${localip}:/home/admin/"
+    echo ""
+    echo "Use password A to authenticate file transfere."
+    echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
+
+    # wait user interaction
+    echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel."
+    read key
+    if [ "${key}" == "x" ]; then
+      # EXIT with CODE 1 --> USER CANCEL
+      echo "# CANCEL upload"
+      exit 1
+    fi
+
+    # test upload
+    gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
+
+  done
+
+  # EXIT with CODE 1 --> FILE UPLOADED
+  echo "# OK channel.backup uploaded"
+  exit 0
 
 else
   echo "unknown parameter '${mode}' - exit"

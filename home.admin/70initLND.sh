@@ -227,7 +227,7 @@ if [ ${walletExists} -eq 0 ]; then
       exit 1
     fi
 
-    # WRNING ON ONLY SEED
+    # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
@@ -325,50 +325,17 @@ or having a complete LND rescue-backup from your old node.
 #    fi
     if [ "${CHOICE}" == "SEED+SCB" ]; then
 
-      # get the channel.backup file
-      gotFile=-1
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      while [ ${gotFile} -lt 1 ]
-      do
+      # let lnd.rescue script do the upload process
+      /home/admin/config.scripts/lnd.rescue.sh scb-up
 
-        # show info
-        clear
-        sleep 1
-        echo "**********************************"
-        echo "* UPLOAD THE channel.backup FILE *"
-        echo "**********************************"
-        echo
-        if [ ${gotFile} -eq -1 ]; then
-          echo "If you have the channel.backup file on your laptop or on"
-          echo "another server you can now upload it to the RaspiBlitz."
-        elif [ ${gotFile} -eq 0 ]; then
-          echo "NO channel.backup FOUND IN /home/admin"
-          echo "Please try upload again."
-        fi
-        echo
-        echo "To make upload open a new terminal and change,"
-        echo "into the directory where your lnd-rescue file is and"
-        echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-        echo "scp ./channel.backup admin@${localip}:/home/admin/"
-        echo ""
-        echo "Use password A to authenticate file transfere."
-        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
-
-        # wait user interaction
-        echo "Please upload file. Press ENTER to try again or (x & ENTER) to cancel."
-        read key
-        if [ "${key}" == "x" ]; then
-          /home/admin/70initLND.sh
-          exit 1
-        fi
-
-        # test upload
-       gotFile=$(ls /home/admin/channel.backup | grep -c 'channel.backup')
-
-      done
-
-      clear
-      echo "OK - channel.backup file found."
+      # check exit code of script
+      if [ $? -eq 1 ]; then
+        echo "USER CANCEL --> back to menu"
+        /home/admin/70initLND.sh
+        exit 1
+      else
+        echo "FILE UPLOADED --> will ne checked/activated after wallet restore from seed"
+      fi
     fi
 
 ##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
