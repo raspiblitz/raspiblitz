@@ -337,7 +337,7 @@ or having a complete LND rescue-backup from your old node.
         exit 1
       else
         clear
-        echo "FILE UPLOADED --> will ne checked/activated after wallet restore from seed"
+        echo "FILE UPLOADED --> will get checked/activated after wallet restore from seed"
       fi
     fi
 
