@@ -30,7 +30,7 @@ if [ ${mode} = "backup" ]; then
   sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
 
   # delete old backups
-  rm /home/admin/lnd-rescue-*.tar.gz
+  rm /home/admin/lnd-rescue-*.tar.gz 2>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
@@ -43,6 +43,7 @@ if [ ${mode} = "backup" ]; then
   fi
 
   # offer SCP for download
+  clear
   echo
   echo "****************************"
   echo "* DOWNLOAD THE BACKUP FILE *"
