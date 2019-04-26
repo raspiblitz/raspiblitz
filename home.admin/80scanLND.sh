@@ -184,7 +184,7 @@ else
     # in case of LND RPC is not ready yet
     if [ ${scanTimestamp} -eq -2 ]; then
 
-      scanProgress="prepare scan (pls wait)"
+      scanProgress="prepare sync"
 
     # in case LND restarting >2  
     elif [ ${startcountLightning} -gt 2 ]; then
