@@ -397,6 +397,7 @@ sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 #################################
 source ${configFile}
 if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
+
   echo "updating admin user LND data" >> $logFile
   sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
   sudo chown admin:admin /home/admin/.lnd/lnd.conf 2>> $logFile
@@ -404,6 +405,15 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
   sudo chown admin:admin /home/admin/.lnd/tls.cert 2>> $logFile
   sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null
   sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>> $logFile
+
+  echo "making sure LND blockchain RPC password is set correct" >> $logFile
+  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
+  if [ ${#rpcpass} -gt 0 ]; then
+    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpass}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+  else
+    echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
+  fi
+
 else 
   echo "skipping admin user LND data update" >> $logFile
 fi
