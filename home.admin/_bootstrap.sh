@@ -408,8 +408,8 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
   echo "making sure LND blockchain RPC password is set correct" >> $logFile
   source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#rpcpass} -gt 0 ]; then
-    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpass}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+  if [ ${#rpcpassword} -gt 0 ]; then
+    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   else
     echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
   fi
