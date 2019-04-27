@@ -166,7 +166,7 @@ if [ "$1" == "basic-setup" ]; then
   elif [ ${#rpcpassword} -eq 0 ]; then
     echo "err='${lndNetwork}.conf: missing rpcpassword (needs to be same as set in lnd.conf)'"
   elif [ "${rpcpassword}" != "${lndrpcpass}" ]; then
-    echo "err='${lndNetwork}.conf (${rpcpassword}) & lnd.conf (${lndrpcpass}): RPC password missmatch! - LND cannot connect to blockchain RPC'"
+    echo "err='${lndNetwork}.conf (${rpcpassword}) & lnd.conf (${lndrpcpass}): RPC password missmatch! - should autofix on reboot'"
   else
     # OK looks good
     rpcpasscorrect=1
