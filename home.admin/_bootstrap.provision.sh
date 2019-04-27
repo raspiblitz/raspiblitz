@@ -215,18 +215,19 @@ else
     echo "Backup Torrent Hosting - not active" >> ${logFile}
 fi
 
-# replay backup LND dir (especially for macaroons and tlscerts)
+# replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
-echo "*** Replay backup of LND directory" >> ${logFile}
+echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/mnt/hdd/backup_lnd" ]; then
-  echo "Copying ..." >> ${logFile}
-  sudo cp -r /mnt/hdd/backup_lnd/* /mnt/hdd/lnd >> ${logFile} 2>&1
-  echo "Updating user admin creds ..." >> ${logFile}
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile} 2>&1
-  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile} 2>&1
-  sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
-  sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
+
+  echo "Copying TLS ..." >> ${logFile}
+  sudo cp /mnt/hdd/backup_lnd/lnd.conf /mnt/hdd/lnd/lnd.conf >> ${logFile} 2>&1
+  sudo cp /mnt/hdd/backup_lnd/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
+  sudo cp /mnt/hdd/backup_lnd/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
+  echo "On next final restart admin creds will be updated by _boostrap.sh" >> ${logFile}
+
   echo "DONE" >> ${logFile}
 else
   echo "No BackupDir so skipping that step." >> ${logFile}
