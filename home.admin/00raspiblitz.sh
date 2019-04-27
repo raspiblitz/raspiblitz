@@ -150,7 +150,7 @@ waitUntilChainNetworkIsReady()
       if [ "${network}" = "litecoin" ]; then
         minSize=20000000000
       fi
-      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} | head -n1 | awk '{print $1;}')
+      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
           echo "blockchainsize(${blockchainsize})"
