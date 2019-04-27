@@ -42,12 +42,12 @@ msg=""
 if [ ${local} -eq 1 ]; then 
   msg="Once you have the app running make sure you are on the same local network (WLAN same as LAN).\n\n"
 fi
-msg="${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'\n\n(Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
+msg="You should now see the pairing QR code on the LCD.\n\n${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'\n\n(Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
 whiptail --backtitle "Connecting Shango Mobile Wallet" \
 	 --title "Setup Shango Step 1" \
 	 --yes-button "continue" \
 	 --no-button "show QR code" \
-	 --yesno "${msg}" 20 65
+	 --yesno "${msg}" 20 70
 if [ $? -eq 1 ]; then
     /home/admin/XXdisplayQR.sh
 fi
