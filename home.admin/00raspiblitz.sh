@@ -88,11 +88,11 @@ if [ "${state}" = "presync" ]; then
     echo "(needs to get downloaded fresh during setup)"
     sudo rm -f -r /mnt/hdd/bitcoin
   else
-    echo "********************************************"
-    echo "Stopping pre-sync ... pls wait (up to 1min)"
-    echo "********************************************"
-    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop
-    echo "bitcoind called to stop .."
+    echo "************************************"
+    echo "Preparing ... pls wait (up to 1min) "
+    echo "************************************"
+    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop 2>/dev/null
+    echo "Calling presync to finish up .."
     sleep 50
   fi
 
