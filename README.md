@@ -268,19 +268,17 @@ Now on first start you will habe a longer waiting time (between 1 hour and 2-3 d
 
 To understand what is taking so long .. its two things:
 
+![SSH9d1](pictures/ssh9d-sync.png)
+
 1. Blockchain Sync
 
-![SSH9d1](pictures/ssh9d-blockchainsync.png)
-
-The blockchain on you HDD is not absolutly up-to-date. Depending how you got it transferred to your RaspiBlitz it will be some hours, days or even weeks behind. Now the RaspiBlitz needs to catch-up the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. But even if you see in the beginning a 99.8% this can take time - gaining 1% can be up to 4 hours (depending on network speed). So be patient here.
+The blockchain on your HDD is not absolutly up-to-date. Depending how you got it transferred to your RaspiBlitz it will be some hours, days or even weeks behind. Now the RaspiBlitz needs to catch-up the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. But even if you see in the beginning a 99.8% this can take time - gaining 1% can be up to 4 hours (depending on network speed). So be patient here.
 
 * [Why is my "final sync" taking so long?](FAQ.md#why-is-my-final-sync-taking-so-long)
 
-2. LND Scanning
+2. Lightning Scanning
 
-![SSH9d2](pictures/ssh9d-lndscan.png)
-
-Automatically if the Blockchain Sync is done LND will start to scan the blockchain and collect information. If you reached this point it should normally just take around 1 hour until the waiting time is over.
+Automatically if the Blockchain Sync is progressing LND will start to scan the blockchain and collect information. The Lightning scanning alone normally just take around 1 hour until the waiting time is over. Can take much longer if you recover on old wallet from seed.
 
 Once all is done you should see this status screen on the RaspiBlitz LCD/display:
 

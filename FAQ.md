@@ -202,11 +202,11 @@ On a RaspiBlitz you have coins in your on-chain wallet (bitcoin wallet) and also
 
 ### 1) Recover LND data
 
-To recover all your LND data you must still be able to SSH into the RaspiBlitz (minimum v1.1) and the HDD should be still useable/reachable (mounted) - even it shows some errors. If this is not possible anymore you should skip to the second option "Recover from Wallet Seed".
+Best to recover all your LND data/channels is when you still can SSH into the RaspiBlitz and the HDD is still useable/reachable (mounted) - even it shows some errors. If this is not possible anymore you should skip to the second option "Recover from Wallet Seed" or try to recover the LND data from the HDD (directory `lnd`) from another computer.
 
 If you still can SSH in and HDD is readable, we can try to rescue/export your LND data (funds and channels) from a RaspiBlitz to then be able to restore it back to a fresh one. For this you can use the following procedure ...
 
-To rescue/export your Lightning data from a RaspiBlitz:
+To rescue/export your Lightning data from a RaspiBlitz (since v1.1):
 
 * SSH into your RaspiBlitz and EXIT to terminal from the menu.
 * then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
@@ -226,23 +226,17 @@ This script will offer you a way to transfere the lnd-rescue file from your lapt
 
 ### 2) Recover from Wallet Seed
 
-Remember those 24 words you were writing down during the setup? Thats your "cipher seed" - now this words are important to recover your wallet. If you dont have them anymore: skip this chapter and read option 2. If you still have the cypher seed: good, but read the following carefully:
+Remember those 24 words you were writing down during the setup? Thats your "cipher seed" - now this words are important to recover your wallet. If you dont have them anymore: go back to option "Recover LND data" and check all possible ways to recover data from the HDD. If you still have the word seed: good, but read the following carefully:
 
-With the cypher seed you can recover the bitcoin wallet that LND was managing for you - but it does not contain all the details about the channels you have open - its just the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything is OK and you can go on. If you had open channels with funds in there, the following is to consider:
+With the word seed you can recover the on-chain funds that LND was managing for you - but it does not contain all the details about the channels you have open - its mostly the key to your funding wallet. If you were able to close all channels or never opened any channels, then everything should be OK and the best esults to recover on-chain funds from wallet seeds are reported to get from installing the Lightning Labs App on your laptop and use the wallet seed (and same wallet passwords): https://github.com/lightninglabs/lightning-app/releases
 
-The best results to recover on-chain funds from wallet seeds are reported to get from installing the Lightning Labs App on your laptop and use the wallet seed (and same wallet passwords): https://github.com/lightninglabs/lightning-app/releases
-
-You can also try it with a fresh RaspiBlitz - here is what todo:
+If you had open channels it would be best to check if you have also the `channel.backup` file (Static-Channel-Backup feature) that is available since LND 0.6 (RaspiBlitz v1.2) and use that in the process below ... for more details on the `channel.backup` file see [README.md on backups](README.md#backup-for-on-chain---channel-funds).
 
 - SetUp a fresh RaspiBlitz (fresh SD-Card image and clean HDD).
 - During the new SetUp you get to the point of creating the LND wallet (see image below).
-
-![SSH8](pictures/wallet-recover.png)
-
-- When you get asked "do you have an existing cypher wallet" answere `y` this time.
-- Enter the cypher seed - all words in one line seperated by spaces
-- If you get asked at the end for the password D to encrypt your cypher seed, use the same as the last time. If you havent entered one last time, just press Enter again.
-- When asked about the "address look-ahead" number - use `250000` instead of the default!
+- Choose `OLD - I had a old Node I want to recover/restore`  option and then
+- Choose `SEED+SCB - Seed & channel.backup file` option
+- and follow the intructions to upload your `channel.backup` file and enter your seed
 
 Then give LND some time to rescan the blockchain. In the end you will have restored your funding wallet. You maybe need to wait for your old channel counter parts to force close the old channels until you see the coins back displayed.
 
