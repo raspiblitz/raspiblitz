@@ -173,10 +173,11 @@ if sys.argv[1] == "on":
 
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
-            print("Setting server domain for LND Port")
-            subprocess.call("sudo /home/admin/config.scripts/lnd.setaddress.sh on %s" % (serverdomain), shell=True)
+            print("Setting fixed address for LND with raspiblitz lndAddress")
+            #subprocess.call("sudo /home/admin/config.scripts/lnd.setaddress.sh on %s" % (serverdomain), shell=True)
+            subprocess.call("sudo sed -i \"s/^lndAddress=.*/lndAddress='%s'/g\" /mnt/hdd/raspiblitz.conf" % (serverdomain), shell=True)
         else:
-            print("No need to set fixed domain forwarding")
+            print("No need to set fixed address for LND with raspiblitz lndAddress")
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
     with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
