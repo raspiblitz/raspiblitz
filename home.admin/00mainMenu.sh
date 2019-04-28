@@ -86,6 +86,7 @@ case $CHOICE in
             exit 1;
             ;;
         X)
+            clear
             echo "LND commandline options: lncli -h"
             echo "To get back to main menu use command: raspiblitz"
             exit 1;
