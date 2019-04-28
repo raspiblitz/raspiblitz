@@ -92,7 +92,8 @@ case $CHOICE in
             echo "* Here be dragons .. have fun :)"
             echo "***********************************"
             echo "LND commandline options: lncli -h"
-            echo "To get back to main menu use command: raspiblitz"
+            echo "Back to main menu use command: raspiblitz"
+            echo
             exit 1;
             ;;
         INFO)
