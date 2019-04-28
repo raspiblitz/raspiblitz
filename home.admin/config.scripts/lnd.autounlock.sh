@@ -76,7 +76,7 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # get hash of lnd.conf before edit (to detect if changed later)
-  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert)
+  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
 
   # make sure config values are uncommented
   sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
@@ -97,7 +97,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^tlsextraip=.*/tlsextraip=0.0.0.0/g" /mnt/hdd/lnd/lnd.conf
 
   # refresh TLS cert (if lnd.conf was changed)
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert)
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
   if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
     echo "# lnd.conf changed - TLS certs need refreshing"
     sudo /home/admin/config.scripts/lnd.newtlscert.sh

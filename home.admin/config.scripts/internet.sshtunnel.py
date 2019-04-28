@@ -161,10 +161,10 @@ if sys.argv[1] == "on":
 
         # make sure serverdomain is set as tls alias 
         print("Setting server as tls alias")
-        oldConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/tls.cert")
+        oldConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
         subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf", shell=True)
         subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%s/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain), shell=True)
-        newConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/tls.cert")
+        newConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
         if oldConfigHash != newConfigHash:
             print("lnd.conf changed ... generating new TLS cert")
             subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
