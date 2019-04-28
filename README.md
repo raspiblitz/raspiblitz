@@ -541,7 +541,7 @@ The word seed you got during wallet setup, to write it down and to keep it at a 
 
 If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completly damaged, stolen or lost) then you can additional setup an off-loctaion or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so its OK to store the file to untrusted third parties for backup (if you want). The feature is still new ... here is how you can set it up -a t the moment the following two off-loctaion options are available (and/or):
 
-*For the v1.2 Release this Off-Site Backup options you need to manually editing the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` So this is more for expert users at the moment. If this feature is valided as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).*
+*For the v1.2 Release this Off-Site Backup options you need to manually editing the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` (CTRL+o = save & CTRL+x = exit) So this is more for expert users at the moment. If this feature is valided as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).*
 
 #### A) SCP Backup Target
 
