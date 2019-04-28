@@ -543,15 +543,15 @@ If you want to get one step further in securing your funds against total fall-ou
 
 #### A) SCP Backup Target
 
-In the raspiblitz.conf the parameter scpBackupTarget can be set with the value formatted like [USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
+In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget` can be set with the value formatted like `[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]`. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
 
-The script /home/admin/config.scripts/internet.sshpubkey.sh helps on init, show and transfer ssh-pubkey to a remote server.
+The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, show and transfer ssh-pubkey to a remote server.
 
 #### B) DropBox Backup Target
 
-In the raspiblitz.conf the parameter dropboxBackupTarget can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget` can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
 
-For the v1.2 Release this Off-Site Backup options need to be activated manually by editing the raspiblitz config. So they are for the more deep down users. If they run OK - in the following versions it should be more easy to set these Offsite-Backups by menu. The local copy to the sd card will be active automatically on a update to v1.2
+For the v1.2 Release this Off-Site Backup options you need to manually editing the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` So this is more for expert users at the moment. If this feature is valided as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. The local copy to the SD card will be active automatically on a update to v1.2
 
 Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).
 
