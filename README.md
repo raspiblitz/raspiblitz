@@ -541,19 +541,21 @@ The word seed you got during wallet setup, to write it down and to keep it at a 
 
 If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completly damaged, stolen or lost) then you can additional setup an off-loctaion or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so its OK to store the file to untrusted third parties for backup (if you want). The feature is still new ... here is how you can set it up -a t the moment the following two off-loctaion options are available (and/or):
 
+*For the v1.2 Release this Off-Site Backup options you need to manually editing the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` So this is more for expert users at the moment. If this feature is valided as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).*
+
 #### A) SCP Backup Target
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget` can be set with the value formatted like `[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]`. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
+In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
 
 The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, show and transfer ssh-pubkey to a remote server.
 
+To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+
 #### B) DropBox Backup Target
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget` can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget='DROPBOX'` can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
 
-For the v1.2 Release this Off-Site Backup options you need to manually editing the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` So this is more for expert users at the moment. If this feature is valided as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. The local copy to the SD card will be active automatically on a update to v1.2
-
-Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).
+To test it - open or close a channel and check if you find a copy of `channel.backup` in your dropbox. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
 ## Updating RaspiBlitz to new Version
 
