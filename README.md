@@ -142,7 +142,9 @@ If you are looking for a tutorial on how to oragnise a workshop to build the Ras
 
 ### Init
 
-Automatically after login per SSH as admin to the RaspiBlitz, the user can choose if the RaspiBlitz should run Bitcoin or Litecoin with Lightning:
+Automatically after login per SSH as admin to the RaspiBlitz, it will run a hardware test. If you see a warning there, please read carefully, because a lot of things that go wrong later (errors and even loss of funds) relate of problems with the hardware. If you get an OK here ... you are good to go :) 
+
+In the beginning you can coose to run on Bitcoin or Litecoin with Lightning:
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
