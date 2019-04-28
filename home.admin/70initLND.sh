@@ -337,7 +337,7 @@ or having a complete LND rescue-backup from your old node.
         exit 1
       else
         clear
-        echo "FILE UPLOADED --> will get checked/activated after wallet restore from seed"
+        echo "FILE UPLOADED --> will get checked/activated after blockchain/lightning is synced"
       fi
     fi
 
@@ -455,52 +455,6 @@ else
   echo "OK - Wallet is already unlocked"
 fi
 echo ""
-
-###### USE CHANNEL.BACKUP FILE IF AVAILABLE
-echo "*** channel.backup Recovery ***"
-gotSCB=$(ls /home/admin/channel.backup 2>/dev/null | grep -c 'channel.backup')
-if [ ${gotSCB} -eq 1 ]; then
-
-  lncli restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
-  error=`cat /home/admin/.error.tmp`
-  rm /home/admin/.error.tmp 2>/dev/null
-
-  if [ ${#error} -gt 0 ]; then
-
-    # output error message
-    echo ""
-    echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-    echo "${error}"
-
-    # check if its possible to give background info on the error
-    notMachtingSeed=$(echo $error | grep -c 'unable to unpack chan backup')
-    if [ ${notMachtingSeed} -gt 0 ]; then
-      echo "--> ERROR BACKGROUND:"
-      echo "The WORD SEED is not matching the channel.backup file."
-      echo "Either there was an error in the word seed list or"
-      echo "or the channel.backup file is from another RaspiBlitz."
-      echo 
-    fi
-
-    # basic info on error
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo 
-    echo "You can try after full setup to restore channel.backup file again with:"
-    echo "lncli restorechanbackup --multi_file=/home/admin/channel.backup"
-    echo
-    echo "Press ENTER to continue for now ..."
-    read key
-  else
-     dialog --title " OK channel.backup IMPORT " --msgbox "
-LND accepted the channel.backup file you uploaded. 
-After LND is synced to the blockchain it will try 
-to close your old channels to recover the funds.
-     " 9 54
-  fi
-  
-else
-  echo "NO /home/admin/channel.backup file - skipping SCB"
-fi
 
 # set SetupState (scan is done - so its 80%)
 sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
