@@ -83,6 +83,8 @@ CHOICE=$(dialog --clear \
 #clear
 case $CHOICE in
         CLOSE)
+            echo "LND commandline options: lncli -h"
+            echo "To get back to main menu use command: raspiblitz"
             exit 1;
             ;;
         INFO)
