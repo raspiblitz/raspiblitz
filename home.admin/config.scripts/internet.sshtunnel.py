@@ -156,11 +156,19 @@ if sys.argv[1] == "on":
     file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
     if restoringOnUpdate == False:
         serverdomain=ssh_server.split("@")[1]
+
         # make sure serverdomain is set as tls alias 
-        print("Setting server as tls alias and generating new certs")
+        print("Setting server as tls alias")
+        oldConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/tls.cert")
         subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf", shell=True)
         subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%s/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain), shell=True)
-        subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
+        newConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/tls.cert")
+        if oldConfigHash != newConfigHash:
+            print("lnd.conf changed ... generating new TLS cert")
+            subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
+        else:
+            print("lnd.conf unchanged... keep TLS cert")
+
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
             print("Setting server domain for LND Port")
