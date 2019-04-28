@@ -21,7 +21,11 @@ For full details see issue list of [Release 1.1 Milestone](https://github.com/ro
 
 Instructions on how to update see FAQ info below.
 
-## How to update my RaspiBlitz (AFTER version 0.98)?
+## How to update my RaspiBlitz from v1.2 and up?
+
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
+
+## How to update my RaspiBlitz from v1.0 and v1.1?
 
 For update you dont need to close any channels, remove funding or download the blockchain again.
 
@@ -48,6 +52,10 @@ After your RaspiBlitz is done with catching up the latest blockchain data you sh
 
 Yes - it was tested one time and worked. Just follow the normal update mechanism - just use the old v1.0 image or your own backup image of the old sd card.
 
+## Can I downgrade from v1.2 to v1.1?
+
+Not tested - but LND 0.6 changed some data structure - so its not recommended.
+
 ## Can I still get version 1.0 of RaspiBlitz?
 
 Yes here are the links:
@@ -60,7 +68,17 @@ SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
 
 Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
 
-## How to update a old RaspiBlitz (BEFORE version 0.98)?
+## Can I still get version 1.1 of RaspiBlitz?
+
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.1-2019-03-18.img.gz
+
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.1-2019-03-18.torrent
+
+SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
+
+Code: https://github.com/rootzoll/raspiblitz/tree/v1.1
+
+## How to update a old RaspiBlitz BEFORE v1.0?
 
 If your old RaspiBlitz if version 0.98 or higher, just follow the update instructions in the README.
 
@@ -161,13 +179,16 @@ So if something is wrong (like mentioned above) then try again from the beginnin
 
 ## How to backup my Lightning Node?
 
-CAUTION: Restoring a backup can lead to LOSS OF ALL CHANNEL FUNDS if it's not the latest channel state. There is no perfect backup solution for lightning nodes yet - this topic is in development by the community.
+There are two ways of Backup:
 
-But there is one safe way to start: Store your LND wallet seed (list of words you got on wallet creation) in a safe place. Its the key to recover access to your on-chain funds - your coins that are not bound in an active channel.
+### 1) Securing your On-Chain- and Channel-Funds during Operation
 
-Recovering the coins that you have in an active channel is a bit more complicated. Because you have to be sure that you really have an up to date backup of your channel state data. The problem is: If you post an old state of your channel, to the network this looks like an atempt to cheat, and your channel partner is allowed claim all the funds in the channel.
+This is best done by auto backuping the 'channel.backup' file to a remote location. But it just secures the funds you have in your on-chain wallet or in your channels. On recovery the channels will get closed. For details on how to setup see the README:
+https://github.com/rootzoll/raspiblitz/blob/v1.2/README.md#backup-for-on-chain---channel-funds
 
-To really have a reliable backup, such feature needs to be part of the LND software. Almost every other solution would not be perfect. Thats why RaspiBlitz is not trying to provide a backup feature at the moment. But if you feel experimental and you look for a continues backup you may want to check out the following script to integrate into your RaspiBlitz: https://github.com/vindard/lnd-backup/blob/master/do-lndbackup.sh
+### 2) Making a complete LND data backup
+
+This backups all your LND data - including all open channels. But its just inteded to use when you move your LND data between computers, during update situations or in rescue recoveries. Because replaying out-dated backups can lead to losas of all channel funds.
 
 How to backup LND data in a rescue situation see next question "How can I recover my coins from a failing RaspiBlitz?".
 
