@@ -743,7 +743,7 @@ groupadd forwardings
 To add a forwarding user run:
 ```
 useradd -g forwardings -d /home [USERNAME]
-echo "command="date" [CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]" > /etc/ssh/authorized_keys/[USERNAME]
+echo 'command="date" [CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]' > /etc/ssh/authorized_keys/[USERNAME]
 passwd [USERNAME]
 ```
 

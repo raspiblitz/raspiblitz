@@ -103,7 +103,7 @@ if sys.argv[1] == "on":
             print("[INTERNAL-PORT]<[EXTERNAL-PORT] external not number '%s'" % (sys.argv[i]))
             sys.exit(1) 
         if port_internal == LNDPORT:
-            print("Detected LND Port Forwaring")
+            print("Detected LND Port Forwarding")
             forwardingLND = True
             if port_internal != port_external:
                 print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
