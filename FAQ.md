@@ -260,15 +260,15 @@ Before you start - download a LND-data-rescue file from your RaspiBlitz to your 
 
 Now install the LND Lightning Desktop App for your OS: https://github.com/lightninglabs/lightning-app/releases
 
-Then start the App and create a new wallet - its a trhowaway wallet (will be deleted afterwards with no funds) - so you dont need to keep seeds safe. To get easy thru the setup just make a photo of the seed with your mobile. If you get asked for funding - just click "done" until you reach the basic wallet screen.
+Then start the App and create a new wallet - its a trhowaway wallet (will be deleted afterwards with no funds) - so you dont need to keep seeds safe. To get easy thru the setup just make a photo of the seed with your mobile. If you get asked for funding - just click "done" until you reach the basic wallet screen. Then close the LND Desktop App. 
 
-Now find out at with path LND stores the wallet data on your computer. Go to the settings and choose "Logs".
-Look thru the log lins and find a path that contains "lnd/data/chain". That is your "LND PATH".
+Now find out at with path LND stores the wallet data on your computer.
 
-For example on Mac OSX the LND PATH looks like this:
-`/Users/[USERNAME]/Library/Application Support/lightning-app/lnd`
+Linux: [USER-DIRECTORY]/.config/lightning-app/lnd
+OSX: [USER-DIRECTORY]/Library/Application Support/lightning-app/lnd
+Windows: %USERPROFILE%\AppData\Roaming\lightning-app\lnd
 
-Then close the LND Desktop App. Then open that directory on your local file manager and delete all data in the `lnd` directory. 
+Then open that directory on your local file manager and delete all data in the `lnd` directory. 
 
 No unkpack the lnd-rescue you made before and copy all the data from the `mnt/hdd/lnd` directory (including sub directories) into the LND-Path lnd directory. Delete the "lnd.conf" file.
 
