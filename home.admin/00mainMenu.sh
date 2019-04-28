@@ -87,6 +87,10 @@ case $CHOICE in
             ;;
         X)
             clear
+            echo "***********************************"
+            echo "* RaspiBlitz Commandline"
+            echo "* Here be dragons .. have fun :)"
+            echo "***********************************"
             echo "LND commandline options: lncli -h"
             echo "To get back to main menu use command: raspiblitz"
             exit 1;
