@@ -134,7 +134,7 @@ elif mode=="seed":
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=1000,
+        recovery_window=2500,
         aezeed_passphrase=seedpassword
     )
 
