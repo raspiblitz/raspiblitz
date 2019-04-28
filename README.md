@@ -553,7 +553,29 @@ To test it - open or close a channel and check if you find a copy of `channel.ba
 
 #### B) DropBox Backup Target
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget='DROPBOX'` can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget='DROPBOX'` can be set to a DropBox Authtoken. 
+
+Go get the Dropbox Authtoken, go to your web browser, do the following:
+
+1. Go to https://www.dropbox.com/developers/apps/create and sign in
+
+1. Choose **Dropbox Api**
+
+    ![Dropbox API 1](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-1.png)
+
+1. Choose **App Folder**
+
+    ![Dropbox API 2](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-2.png)
+
+1. Name your app and click **Create App** to proceed
+
+    ![Dropbox API 3](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-3.png)
+
+1. On the settings page for your new app, scroll down to **OAuth 2** and click **Generate**
+
+    ![Dropbox API 4](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-4.png)
+
+1. You will now see a string of letters and numbers appear. This is your **Dropbox Authtoken**.
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` in your dropbox. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
