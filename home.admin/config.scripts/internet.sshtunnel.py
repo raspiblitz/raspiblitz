@@ -42,6 +42,8 @@ LNDPORT = subprocess.getoutput("sudo cat /mnt/hdd/lnd/lnd.conf | grep '^listen=*
 if len(LNDPORT) == 0:
     LNDPORT="9735"
 
+
+
 #
 # RESTORE = SWITCHING ON with restore flag on
 # on restore other external scripts dont need calling
@@ -63,7 +65,7 @@ if sys.argv[1] == "on":
     # check if already running
     isRunning = subprocess.getoutput("sudo systemctl --no-pager | grep -c '%s'" % (SERVICENAME))
     if int(isRunning) > 0:
-      print("SSH TUNNEL ALREADY ACTIVATED - run 'internet.sshtunnel.py off' first to set new tunnel")
+      print("SSH TUNNEL SERVICE IS RUNNING - run 'internet.sshtunnel.py off' first to set new tunnel")
       sys.exit(1)
 
     # check server address
@@ -215,6 +217,7 @@ elif sys.argv[1] == "off":
     print("*** Disabling systemd service: %s" % (SERVICENAME))
     subprocess.call("sudo systemctl stop %s" % (SERVICENAME), shell=True)
     subprocess.call("sudo systemctl disable %s" % (SERVICENAME), shell=True)
+    subprocess.call("sudo systemctl reset-failed", shell=True)
     subprocess.call("sudo rm %s" % (SERVICEFILE), shell=True)
     subprocess.call("sudo systemctl daemon-reload", shell=True)
     print("OK Done")
