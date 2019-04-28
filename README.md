@@ -526,11 +526,42 @@ To develop your own scripts/apps and to connect other servcies/apps to your Rasp
 * `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
 * `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
 
-## Updating to new Version
+### Backup for On-Chain- & Channel-Funds
 
-If you have a RaspiBlitz older then verison 0.98 please [see here](FAQ.md).
+Since LND v.06 (and RaspiBlitz v1.2) a feature called Static-Channel-Backups is available.
+Within RaspiBlitz this is used when a `channel.backup` file is mentioned.
 
-If you have a RaspiBlitz version 0.98 or newer do the following:
+Its the best backup to protect the funds you put on your RaspiBlitz and into channel available yet - so its recommended to make use of it. 
+
+To recover your funds you need two things:
+- the 24 words seed
+- the latest `channel.backup` file
+
+The word seed you got during wallet setup, to write it down and to keep it at a safe (offline) location. The `channel.backup` is stored on the HDD and updated by LND everytime a new channel is opened or closed. The lastest version of this file is needed to recover all your funds (if possible). In case your HDD gets damaged, RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the subdirectories of: `/home/admin/.lnd/data/chain/`.
+
+If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completly damaged, stolen or lost) then you can additional setup an off-loctaion or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so its OK to store the file to untrusted third parties for backup (if you want). The feature is still new ... here is how you can set it up -a t the moment the following two off-loctaion options are available (and/or):
+
+#### A) SCP Backup Target
+
+In the raspiblitz.conf the parameter scpBackupTarget can be set with the value formatted like [USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
+
+The script /home/admin/config.scripts/internet.sshpubkey.sh helps on init, show and transfer ssh-pubkey to a remote server.
+
+#### B) DropBox Backup Target
+
+In the raspiblitz.conf the parameter dropboxBackupTarget can be set to a DropBox Authtoken. See how to get that token here: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
+
+For the v1.2 Release this Off-Site Backup options need to be activated manually by editing the raspiblitz config. So they are for the more deep down users. If they run OK - in the following versions it should be more easy to set these Offsite-Backups by menu. The local copy to the sd card will be active automatically on a update to v1.2
+
+Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libaries (that are not part of standard debian).
+
+## Updating RaspiBlitz to new Version
+
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
+
+If you have a RaspiBlitz older then verison v1.0 please [see here](FAQ.md).
+
+If you have a RaspiBlitz v1.0 or v1.1 or newer do the following:
 
 * Main menu > OFF
 * Remove power

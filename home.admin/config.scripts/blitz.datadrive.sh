@@ -2,6 +2,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "STILL EXPERIMENTAL - NOT FINISHED"
  echo "managing additional data storage"
  echo "blitz.datadrive.sh [on|off]"
  echo "exits on 0 = needs reboot"
