@@ -174,7 +174,7 @@ if sys.argv[1] == "on":
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
             print("Setting fixed address for LND with raspiblitz lndAddress")
-            subprocess.call("sudo /home/admin/config.scripts/lnd.setaddress.sh on %s" % (serverdomain), shell=True)
+            file_content = re.sub("lndAddress=.*", "lndAddress='%s'" % (serverdomain), file_content)
         else:
             print("No need to set fixed address for LND with raspiblitz lndAddress")
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
