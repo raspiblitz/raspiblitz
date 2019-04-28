@@ -28,6 +28,9 @@ if [ ${configExists} -eq 0 ]; then
  exit 1
 fi
 
+# get hash of lnd.conf before edit (to detect if changed later)
+md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert)
+
 # FIXED DOMAIN/IP
 if [ "${mode}" = "on" ]; then
 
@@ -52,7 +55,13 @@ if [ "${mode}" = "on" ]; then
   sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${address}/g" /mnt/hdd/lnd/lnd.conf
 
   # refresh TLS cert
-  sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert)
+  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
+    echo "# lnd.conf changed - TLS certs need refreshing"
+    sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  else
+    echo "# lnd.conf NOT changed - keep TLS certs"
+  fi
 
   echo "fixedAddress is now ON"
 fi
@@ -74,7 +83,13 @@ if [ "${mode}" = "off" ]; then
   sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
 
   # refresh TLS cert
-  sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert)
+  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
+    echo "# lnd.conf changed - TLS certs need refreshing"
+    sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  else
+    echo "# lnd.conf NOT changed - keep TLS certs"
+  fi
 
   echo "fixedAddress is now OFF"
 fi
