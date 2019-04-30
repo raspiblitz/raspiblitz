@@ -331,7 +331,7 @@ to protect the seed words. Most users did not set this.
 
       # trigger wallet recovery
       source /home/admin/python-env-lnd/bin/activate
-      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} ${wordstring} ${passwordD})
+      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD})
 
       # check if wallet was created for real
       if [ ${#err} -eq 0 ]; then
@@ -349,6 +349,7 @@ Looks good :) LND was able to recover the wallet.
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
+
 ${err}
 ${errMore}
       " 13 72
