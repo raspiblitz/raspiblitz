@@ -281,8 +281,8 @@ or having a complete LND rescue-backup from your old node.
         echo "processing ... ${wordstring}"
 
         # check correct number of words
-        IFS=' ' read -r -a seedArray <<< "$wordstring"
-        if [ ${#seedArray[@]} -eq 24 ]; then
+        wordcount=$(echo "${wordstring}" | wc -w)
+        if [ ${wordcount} -eq 24 ]; then
           echo "OK - 24 words"
           wordsCorrect=1
         else
@@ -290,7 +290,7 @@ or having a complete LND rescue-backup from your old node.
 			    --yes-button "Try Again" \
 		      --no-button "Cancel" \
 		      --yesno "
-The word list has ${#seedArray[@]} words. But it must be 24.
+The word list has ${wordcount} words. But it must be 24.
 Please check your list and try again.
 
 Best is to write words in external editor 
