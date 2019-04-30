@@ -352,6 +352,7 @@ Something went wrong - see info below:
 ${err}
 ${errMore}
       " 13 72
+          sleep 3
           /home/admin/70initLND.sh
           exit 1
       fi
