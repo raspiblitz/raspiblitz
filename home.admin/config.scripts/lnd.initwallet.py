@@ -7,8 +7,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# ! and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
     print("# lnd.winitwallet.py new [walletpassword] [?seedpassword]")
-    print("# lnd.winitwallet.py seed [walletpassword] [seedstring] [?seedpassword]")
-    print("# lnd.winitwallet.py scb [walletpassword] [seedstring] [filepathSCB] [?seedpassword]")
+    print("# lnd.winitwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
+    print("# lnd.winitwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
     print("err='missing parameters'")
     sys.exit(1)
 
@@ -52,7 +52,7 @@ elif mode=="seed":
 
     if len(sys.argv)>3:
         seedwordString=sys.argv[3]
-        seedwords=seedwordString.split(",")
+        seedwords=seedwordString.split(" ")
         if len(seedwords)<24:
             print("err='not 24 seed words seperated by just commas'")
             sys.exit(1)
