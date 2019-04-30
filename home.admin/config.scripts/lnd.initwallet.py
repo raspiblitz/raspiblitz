@@ -132,9 +132,6 @@ if mode=="new":
 
 elif mode=="seed":
 
-    print("err='TODO: debug creating from seed")
-    sys.exit(1)
-
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
