@@ -1,7 +1,10 @@
 #!/usr/bin/python
+print ("# always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
+print ("# and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
+
 import codecs, grpc, os, sys, base64
-from /home/admin/config.scripts/lndlibs import rpc_pb2 as ln
-from /home/admin/config.scripts/lndlibs import rpc_pb2_grpc as lnrpc
+from lndlibs import rpc_pb2 as ln
+from lndlibs import rpc_pb2_grpc as lnrpc
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
