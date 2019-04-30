@@ -15,6 +15,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 import grpc
 from lndlibs import rpc_pb2 as ln
 from lndlibs import rpc_pb2_grpc as lnrpc
+from pathlib2 import Path
 
 walletpassword=""
 seedwords=""
@@ -39,7 +40,7 @@ if mode=="new":
     if len(sys.argv)>3:
         seedpassword=sys.argv[3]
 
-elif mode=="seed":
+elif mode=="seed" or mode=="scb":
 
     if len(sys.argv)>2:
         walletpassword=sys.argv[2]
@@ -47,26 +48,41 @@ elif mode=="seed":
             print("err='wallet password is too short'")
             sys.exit(1)
     else:
-        print("err='not correct amount of parameter'")
+        print("err='not correct amount of parameter - missing wallet password'")
         sys.exit(1)
 
     if len(sys.argv)>3:
         seedwordString=sys.argv[3]
         seedwords=seedwordString.split(" ")
         if len(seedwords)<24:
-            print("err='not 24 seed words seperated by just commas'")
+            print("err='not 24 seed words seperated by just spaces (surrounded with \")'")
             sys.exit(1)
     else:
-        print("err='not correct amount of parameter'")
+        print("err='not correct amount of parameter  - missing seed string'")
         sys.exit(1)
+
+elif mode=="seed":
 
     if len(sys.argv)>4:
         seedpassword=sys.argv[4]
 
 elif mode=="scb":
 
-        print("err='TODO: implement creating from seed/scb'")
+    if len(sys.argv)>4:
+        filepathSCB=sys.argv[4]
+        scbFile = Path(filepathSCB)
+        if scbFile.is_file():
+            print("# OK SCB file exists")
+        else:
+            print("err='the given filepathSCB - file does not exists or no permission'")
+            sys.exit(1)
+
+    else:
+        print("err='not correct amount of parameter  - missing seed filepathSCB'")
         sys.exit(1)
+
+    if len(sys.argv)>5:
+        seedpassword=sys.argv[4]
 
 else:
 
