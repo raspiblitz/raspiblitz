@@ -290,7 +290,7 @@ Best is to write words in external editor
 and then copy and paste them into dialog.
 
 The Word list should look like this:
-wordone,wordtweo,wordthree, ...
+wordone wordtweo wordthree ...
 
 " 16 52
         /home/admin/70initLND.sh
