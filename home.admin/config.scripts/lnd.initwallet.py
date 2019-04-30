@@ -1,19 +1,20 @@
 #!/usr/bin/python
-print ("# always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
-print ("# and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
-
-import codecs, grpc, os, sys, base64
-from lndlibs import rpc_pb2 as ln
-from lndlibs import rpc_pb2_grpc as lnrpc
+import codecs, os, sys, base64
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
+    print("# ! always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
+    print("# ! and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
     print("# lnd.winitwallet.py new [walletpassword] [?seedpassword]")
     print("# lnd.winitwallet.py seed [walletpassword] [seedstring] [?seedpassword]")
     print("# lnd.winitwallet.py scb [walletpassword] [seedstring] [filepathSCB] [?seedpassword]")
     print("err='missing parameters'")
     sys.exit(1)
+
+import grpc
+from lndlibs import rpc_pb2 as ln
+from lndlibs import rpc_pb2_grpc as lnrpc
 
 walletpassword=""
 seedwords=""
