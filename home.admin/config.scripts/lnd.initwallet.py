@@ -171,5 +171,36 @@ elif mode=="seed":
 
 elif mode=="scb":
 
+
+
+    import binascii
+    with open(filepathSCB, 'rb') as f:
+        content = f.read()
+    scbHexString=binascii.hexlify(content)
+    print(scbHexString)
+
+    request = ln.InitWalletRequest(
+        wallet_password=walletpassword,
+        cipher_seed_mnemonic=seedwords,
+        recovery_window=2500,
+        aezeed_passphrase=seedpassword,
+        channel_backups=scbHexString
+    )
+
+    try:
+        response = stub.InitWallet(request)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print >> sys.stderr, code
+        details = rpc_error_call.details()  
+        print("err='RPCError InitWallet'")
+        print("errMore='"+details+"'")
+        sys.exit(1)
+    except:
+        e = sys.exc_info()[0]
+        print >> sys.stderr, e
+        print("err='InitWallet'")
+        sys.exit(1)
+
     print("err='TODO: implement creating from seed/scb'")
     sys.exit(1)
