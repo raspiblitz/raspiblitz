@@ -150,10 +150,11 @@ elif mode=="seed":
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=2500,
+        recovery_window=250,
         aezeed_passphrase=seedpassword
     )
-
+    print("seedwords='"+seedwords+"'")
+    
     try:
         response = stub.InitWallet(request)
     except grpc.RpcError as rpc_error_call:
@@ -171,8 +172,6 @@ elif mode=="seed":
 
 elif mode=="scb":
 
-
-
     import binascii
     with open(filepathSCB, 'rb') as f:
         content = f.read()
@@ -182,10 +181,11 @@ elif mode=="scb":
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=2500,
+        recovery_window=250,
         aezeed_passphrase=seedpassword,
         channel_backups=scbHexString
     )
+    print("seedwords='"+seedwords+"'")
 
     try:
         response = stub.InitWallet(request)
