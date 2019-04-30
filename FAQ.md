@@ -56,18 +56,6 @@ Yes - it was tested one time and worked. Just follow the normal update mechanism
 
 Not tested - but LND 0.6 changed some data structure - so its not recommended.
 
-## Can I still get version 1.0 of RaspiBlitz?
-
-Yes here are the links:
-
-HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.0-2019-02-18.img.gz
-
-Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
-
-SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
-
-Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
-
 ## Can I still get version 1.1 of RaspiBlitz?
 
 HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.1-2019-03-18.img.gz
@@ -77,6 +65,16 @@ Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.1-2019-
 SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
 
 Code: https://github.com/rootzoll/raspiblitz/tree/v1.1
+
+## Can I still get version 1.0 of RaspiBlitz?
+
+Yes here are the links:
+
+Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.0-2019-02-18.torrent
+
+SHA-256: 99ca96d214657388305ca117e2343ead45f9d907f185bef36c712a9a3e75568f
+
+Code: https://github.com/rootzoll/raspiblitz/tree/v1.0
 
 ## How to update a old RaspiBlitz BEFORE v1.0?
 

@@ -80,7 +80,7 @@ Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look 
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.1:**
+**Download SD-Card image - Version 1.2:**
 
 HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-04-28.img.gz
 
@@ -132,7 +132,9 @@ If you run into a problem or you have still a question, follow the steps below t
 
 3. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
 
-4. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
+4. Check the RaspiBlot Troubleshoort guide: https://stadicus.github.io/RaspiBolt/raspibolt_70_troubleshooting.html (RaspiBolt is very similar to the RaspiBlitz)
+
+5. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
 
 ## Setup Process (Detailed Documentation)
 
