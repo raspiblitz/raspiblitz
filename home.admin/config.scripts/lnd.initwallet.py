@@ -61,28 +61,27 @@ elif mode=="seed" or mode=="scb":
         print("err='not correct amount of parameter  - missing seed string'")
         sys.exit(1)
 
-elif mode=="seed":
+    if mode=="seed":
 
-    if len(sys.argv)>4:
-        seedpassword=sys.argv[4]
+        if len(sys.argv)>4:
+            seedpassword=sys.argv[4]
 
-elif mode=="scb":
+    elif mode=="scb":
 
-    if len(sys.argv)>4:
-        filepathSCB=sys.argv[4]
-        scbFile = Path(filepathSCB)
-        if scbFile.is_file():
-            print("# OK SCB file exists")
+        if len(sys.argv)>4:
+            filepathSCB=sys.argv[4]
+            scbFile = Path(filepathSCB)
+            if scbFile.is_file():
+                print("# OK SCB file exists")
+            else:
+                print("err='the given filepathSCB - file does not exists or no permission'")
+                sys.exit(1)
         else:
-            print("err='the given filepathSCB - file does not exists or no permission'")
+            print("err='not correct amount of parameter  - missing seed filepathSCB'")
             sys.exit(1)
 
-    else:
-        print("err='not correct amount of parameter  - missing seed filepathSCB'")
-        sys.exit(1)
-
-    if len(sys.argv)>5:
-        seedpassword=sys.argv[4]
+        if len(sys.argv)>5:
+            seedpassword=sys.argv[4]
 
 else:
 
