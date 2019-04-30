@@ -271,18 +271,25 @@ or having a complete LND rescue-backup from your old node.
     # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
-      # dialog to enter
-      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by paces, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
-      wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9,]//g' )
-      shred /home/admin/.seed.tmp
-      echo "processing ... ${wordstring}"
+      wordsCorrect=0
+      while [ ${wordsCorrect} -eq 0 ]
+      do
+        # dialog to enter
+        dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by paces, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
+        wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9,]//g' )
+        shred /home/admin/.seed.tmp
+        echo "processing ... ${wordstring}"
 
-      # check correct number of words
-      IFS=' ' read -r -a seedArray <<< "$wordstring"
-      if [ ${#seedArray[@]} -eq 24 ]; then
-        echo "OK - 24 words"
-      else
-        whiptail --title " WARNING " --msgbox "
+        # check correct number of words
+        IFS=' ' read -r -a seedArray <<< "$wordstring"
+        if [ ${#seedArray[@]} -eq 24 ]; then
+          echo "OK - 24 words"
+          wordsCorrect=1
+        else
+          whiptail --title " WARNING " \
+			    --yes-button "Try Again" \
+		      --no-button "Cancel" \
+		      --yesno "
 The word list has ${#seedArray[@]} words. But it must be 24.
 Please check your list and try again.
 
@@ -293,9 +300,13 @@ The Word list should look like this:
 wordone wordtweo wordthree ...
 
 " 16 52
-        /home/admin/70initLND.sh
-        exit 1
-      fi
+
+	        if [ $? -eq 1 ]; then
+            /home/admin/70initLND.sh
+            exit 1
+	        fi
+        fi
+      done
 
       # ask if seed was protected by password D
       passwordD=""
