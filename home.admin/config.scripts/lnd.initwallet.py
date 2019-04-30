@@ -153,7 +153,6 @@ elif mode=="seed":
         recovery_window=250,
         aezeed_passphrase=seedpassword
     )
-    print("seedwords='"+seedwords+"'")
     
     try:
         response = stub.InitWallet(request)
@@ -185,7 +184,6 @@ elif mode=="scb":
         aezeed_passphrase=seedpassword,
         channel_backups=scbHexString
     )
-    print("seedwords='"+seedwords+"'")
 
     try:
         response = stub.InitWallet(request)
