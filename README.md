@@ -66,11 +66,7 @@ These are the community currated shopping lists based on country:
 
 If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case. If you have the Geekworm Heatsink-Case - [see video on how to install](https://www.youtube.com/watch?v=2QDlbAorJKw).
 
-Add the display on top like in picture below:
-
-![LCD](pictures/lcdassm.png)
-
-Connect the HDD to one of the USB ports. In the end your RaspiBlitz should look like this:
+Add the display on top with the pins like in picture below. Connect the HDD to one of the USB ports. PlugIn the network cable. In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
