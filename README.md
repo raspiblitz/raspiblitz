@@ -78,7 +78,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.2:**
 
-HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-04-28.img.gz
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-05-01.img.gz
 
 Torrent: (TO BE CREATED)
 
