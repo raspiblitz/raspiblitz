@@ -80,12 +80,13 @@ if [ "${state}" = "presync" ]; then
   echo ""
   # analyse if blockchain was detected broken by pre-sync
   blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
-  # dismiss if its just a date thing
-  futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
-  if [ ${futureBlock} -gt 0 ]; then
-    blockchainBroken=0
-    echo "-> Ignore reindex - its just a future block, but delete logs to avoid future mismatches"
-    sudo rm /mnt/hdd/bitcoin/debug.log
+  if [ ${blockchainBroken} -eq 1 ]; then  
+    # dismiss if its just a date thing
+    futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
+    if [ ${futureBlock} -gt 0 ]; then
+      blockchainBroken=0
+      echo "-> Ignore reindex - its just a future block"
+    fi
   fi
   if [ ${blockchainBroken} -eq 1 ]; then
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -171,12 +172,13 @@ waitUntilChainNetworkIsReady()
 
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
-        # dismiss if its just a date thing
-        futureBlock=$(sudo tail /mnt/hdd/${network}/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover" | grep -c "block database contains a block which appears to be from the future")
-        if [ ${futureBlock} -gt 0 ]; then
-          blockchainBroken=0
-          echo "-> Ignore reindex - its just a future block, but delete logs to avoid future mismatches"
-          sudo rm /mnt/hdd/${network}/debug.log
+        if [ ${reindex} -gt 0 ]; then
+          # dismiss if its just a date thing
+          futureBlock=$(sudo tail /mnt/hdd/${network}/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover" | grep -c "block database contains a block which appears to be from the future")
+          if [ ${futureBlock} -gt 0 ]; then
+            blockchainBroken=0
+            echo "-> Ignore reindex - its just a future block"
+          fi
         fi
         if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
           echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
