@@ -258,7 +258,7 @@ To run a BACKUP of funds & channels first is recommended.
           else
             # check how many times LND was restarted
             source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-            if [ ${startcountLightning} -lt 3 ]; then
+            if [ ${startcountLightning} -lt 4 ]; then
               /home/admin/AAunlockLND.sh
               echo "Starting up Wallet ... (10sec)"
               sleep 5
