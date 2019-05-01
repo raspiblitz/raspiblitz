@@ -34,7 +34,7 @@ showPowerImproveInfo=0
 if [ ${powerWARN} -gt 0 ]; then
   showPowerImproveInfo=1
   if [ ${powerFAIL} -gt 0 ]; then
-    whiptail --backtitle "RaspiBlitz v${codeVersion} - ${powerMIN}" --title " POWER SUPPLY FAIL " --msgbox "
+    whiptail --backtitle "RaspiBlitz v${codeVersion} - ${powerMIN}" --title " POWER SUPPLY CRITICAL " --msgbox "
 Your power supply was FAILING the stress test (${powerMIN}).
 Most reports of data loss are caused by weak power supplies.
 Also a lot of RaspiBlitz setups fail because of weak power supplies.
@@ -112,7 +112,7 @@ showHeatImproveInfo=0
 if [ ${tempWARN} -gt 0 ]; then
   showHeatImproveInfo=1
   if [ ${tempFAIL} -gt 0 ]; then
-    whiptail --backtitle "RaspiBlitz v${codeVersion} - ${tempMAX}" --title " HEAT MANAGEMENT FAIL " --msgbox "
+    whiptail --backtitle "RaspiBlitz v${codeVersion} - ${tempMAX}" --title " HEAT MANAGEMENT CRITICAL " --msgbox "
 Your RaspiBlitz is getting MUCH TOO HOT (${tempMAX}).
 The system is getting very slow when hot - thats not a NO GO but bad.
 An upgrade of the Heat Management is HIGHLY RECOMMENDED.
@@ -138,7 +138,7 @@ if [ ${showHeatImproveInfo} -gt 0 ]; then
 To improve on heat issues an upgrade of the casing is recommended.
 Check if you have the latest casing listed in your shopping list.
 The lastest casing is a big heat sink to prevent overheating.
-If you have that one, check if its apllied correctly to CPU.
+If you have that one, check if its applied correctly to CPU.
 Alternative casings should add some passive/active heat sinks.
 In extreme cases consider some external fan helping out.
 

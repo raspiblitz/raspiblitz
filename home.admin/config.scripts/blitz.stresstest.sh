@@ -57,7 +57,7 @@ for (( n=0; n<15; ++n )); do
     #echo "V -> ${voltFloat}/${voltInt}"
     if [ ${voltInt} -lt 1200100 ] && [ ${powerWARN} -gt 1 ]; then
       ((powerFAIL=powerFAIL+1))
-      echo "--> Power FAIL detected" >&2
+      echo "--> Power CRITICAL detected" >&2
     fi
     if [ ${voltInt} -lt 1250000 ]; then
       ((powerWARN=powerWARN+1))
@@ -73,7 +73,7 @@ for (( n=0; n<15; ++n )); do
     #echo "T -> ${tempFloat}/${tempInt}"
     if [ ${tempInt} -gt 6999 ]; then
       ((tempFAIL=tempFAIL+1))
-      echo "--> Temp FAIL detected" >&2
+      echo "--> Temp CRITICAL detected" >&2
     fi
     if [ ${tempInt} -gt 6500 ]; then
       ((tempWARN=tempWARN+1))
