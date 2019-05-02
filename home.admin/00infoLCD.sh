@@ -130,7 +130,8 @@ while :
     fi
     
     # if freshly recovered 
-    if [ "${state}" = "recovered" ]; then
+    recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
+    if [ ${recoveredInfoExists} -gt 0 ]; then
       l1="FINAL RECOVER LOGIN NEEDED:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"

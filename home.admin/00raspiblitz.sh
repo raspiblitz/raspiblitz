@@ -52,7 +52,8 @@ if [ "${state}" = "recovering" ]; then
 fi
 
 # signal that after bootstrap recover user dialog is needed
-if [ "${state}" = "recovered" ]; then
+recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
+if [ ${recoveredInfoExists} -gt 0 ]; then
   echo "System recovered - needs final user settings"
   /home/admin/20recoverDialog.sh 
   exit 1
