@@ -29,27 +29,6 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 
 For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
 
-## Whats new in Version 1.1 of RaspiBlitz?
-
-Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
-
-- Update: RTL (Ride the Lightning) Web UI version 0.2.15-beta
-- Fix: Preventing logs from filling up the sd card 
-- Fix: Pairing for latest Zap iOS Mobile Wallet
-- Fix: Pairing for latest Shango Mobile Wallet
-- Fix: Open LND port check when custom port
-- New: Undervoltage Reports on LCD
-- New: fsk (file system consistency check) of HDD on every boot
-- New: Repair Help Menu in case if blockchain data corruption
-- New: /config.scripts/lnd.setport.sh (set custom LND port)
-- New: /config.scripts/lnd.rescue.sh (backup/replay LND data)
-- New: Bootscreen with logo
-- Removed: FTP download option for blockchain
-
-For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
-
-Instructions on how to update see FAQ info below.
-
 ## How to update my RaspiBlitz from v1.2 and up?
 
 If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
@@ -84,6 +63,27 @@ Yes - it was tested one time and worked. Just follow the normal update mechanism
 ## Can I downgrade from v1.2 to v1.1?
 
 Not tested - but LND 0.6 changed some data structure - so its not recommended.
+
+## Whats new in Version 1.1 of RaspiBlitz?
+
+Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
+
+- Update: RTL (Ride the Lightning) Web UI version 0.2.15-beta
+- Fix: Preventing logs from filling up the sd card 
+- Fix: Pairing for latest Zap iOS Mobile Wallet
+- Fix: Pairing for latest Shango Mobile Wallet
+- Fix: Open LND port check when custom port
+- New: Undervoltage Reports on LCD
+- New: fsk (file system consistency check) of HDD on every boot
+- New: Repair Help Menu in case if blockchain data corruption
+- New: /config.scripts/lnd.setport.sh (set custom LND port)
+- New: /config.scripts/lnd.rescue.sh (backup/replay LND data)
+- New: Bootscreen with logo
+- Removed: FTP download option for blockchain
+
+For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
+
+Instructions on how to update see FAQ info below.
 
 ## Can I still get version 1.1 of RaspiBlitz?
 
