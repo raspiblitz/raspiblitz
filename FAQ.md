@@ -1,5 +1,31 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.2 of RaspiBlitz?
+
+Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
+
+- Update: LND version 0.6-beta
+- Update: RTL (Ride the Lightning) Web UI version 0.2.16-beta
+- Fix: LND scanning stuck on ? (better error handling)
+- Fix: Cash out all funds
+- Fix: Keep TLS certs stable on update
+- New: Support Zeus Mobile Wallet
+- New: Show QR codes on LCD
+- New: Support LND Static Channel Backup
+- New: Remote-Backup of channel.backup file (SCP & Dropbox)
+- New: Recover Node from LND rescue backup file
+- New: Run Hardware Test on setup and main menu
+- New: Run Software Test (DebugLogs) from main manu
+- New: SSH-Forward Tunneling (commandline)
+- New: Set fixed IP/domain for RaspiBlitz (commandline)
+- New: Set DNS server (commandline)
+- New: Run LND on different port (commandline)
+- New: Ask before formatting HDD
+- New: Better Update support (from main menu)
+- Experimental: Backup Torrent Seeding (Service)
+
+TODO: more and link to milestone 1.2
+
 ## Whats new in Version 1.1 of RaspiBlitz?
 
 Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.

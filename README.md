@@ -134,7 +134,7 @@ If you run into a problem or you have still a question, follow the steps below t
 
 ## Setup Process (Detailed Documentation)
 
-*The goal is, that all information needed is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and to mention edge cases.*
+*The goal is, that all information needed during setup is provided from the interaction with the RaspiBlitz itself during the setup. Documentation in this chapter is for background, comments for educators and to mention edge cases.*
 
 If you are looking for a tutorial on how to oragnise a workshop to build the RaspiBlitz, [see here](WORKSHOP.md).
 
@@ -142,7 +142,7 @@ If you are looking for a tutorial on how to oragnise a workshop to build the Ras
 
 Automatically after login per SSH as admin to the RaspiBlitz, it will run a hardware test. If you see a warning there, please read carefully, because a lot of things that go wrong later (errors and even loss of funds) relate of problems with the hardware. If you get an OK here ... you are good to go :) 
 
-In the beginning you can coose to run on Bitcoin or Litecoin with Lightning:
+In the beginning you can choose to run on Bitcoin or Litecoin with Lightning:
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
@@ -180,13 +180,13 @@ After this the setup process will need some time and the user will see a lot of 
 
 ![SSH4](pictures/ssh4-scripts.png)
 
-*Background: After the user interaction the following scripts are started to automatically setup the RaspiBlitz:*
-
 ### Getting the Blockchain
 
 *If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screen:*
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
+
+TODO: new picture from opions
 
 <img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="600">
 
@@ -200,11 +200,11 @@ This is the default way to download the blockchain data for the RaspiBlitz. If y
 
 *This can take a while - normally it should be done if you keep it running over night, but some users reported that it took up to 3 days. If it takes longer than that or you cannot see any progress (downloading starting) for over an hour after you started this option consider to cancel the download and go with the COPY option or retry fresh.*
 
-It is safe to close the terminal window (shutdown your laptop) while the RaspiBlitz is doing the torrent download. To check on progress and to continue the setup you need to ssh back in again.
+It is safe to close the terminal window (and shutingdown your laptop) while the RaspiBlitz is doing the torrent download. To check on progress and to continue the setup you need to ssh back in again.
 
 You can cancel the torrent download by keeping the key `x` pressed. Then the download will stop and you will be asked if you want to keep the progress so far. This makes sense if you need to shutdown the RaspiBlitz and you want to continue later or when you want to try another download option but want to keep the option to continue on torrent if the other option is slower or not working.
 
-* [How can I avoid using a prepared blockchain and validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
+* [I dont trust a torrent blockchain, how can I validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
 * [Why is taking my torrent download of the blockchain so long?](FAQ.md#why-is-taking-my-torrent-download-of-the-blockchain-so-long)
 
 
@@ -212,13 +212,13 @@ You can cancel the torrent download by keeping the key `x` pressed. Then the dow
 
 If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain (with txindex=1) you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfere). Choose this option and follow the given instructions.
 
-This is also the best option if you dont like to run your RaspiBlitz with a prepared blockchain by a third party. Then install bitcoin-core in a more powerful computer, sync+validate the blockchain (with txindex=1) there by yourself and copy it over after that thru the local network.
+This is also the best option if you dont like to run your RaspiBlitz with a prepared blockchain by a third party. Then install bitcoin-core on a more powerful computer, sync+validate the blockchain (with txindex=1) there by yourself and copy it over after that thru the local network.
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
 #### 3. Cloning from a 2nd HDD
 
-If is a backup way to transfere a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd).
+This is a backup way to transfere a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd).
 
 #### 4. Sync from Bitcoin-Network
 
@@ -229,6 +229,8 @@ This is the fallback of last resort. A RaspberryPi has a very low power CPU and 
 Lightning is installed and waiting for your setup if you see this screen.
 
 ![SSH7](pictures/ssh7-lndinit.png)
+
+TODO: Update Wallet Creation (OLD / NEW) 
 
 The RaspiBlitz calling the LND wallet creation command for you:
 
@@ -254,7 +256,7 @@ The RaspiBlitz will now do final setup configuration like installing tools, movi
 
 ![SSH9b](pictures/ssh9b-reboot.png)
 
-The basic setup is done - hooray ... but still prepare for some long waiting time after this before you can play around with your new RaspiBlitz. Press OK to make a reboot. Your terminal session will get disconnected and the raspberry pi restarts.
+The basic setup is done - hooray ... but it can now take still some time before everything is ready and you can play around with your new RaspiBlitz. Press OK to make a reboot. Your terminal session will get disconnected and the raspberry pi restarts.
 
 ### First Start: Syncing & Scanning
 
@@ -268,17 +270,18 @@ Now on first start you will habe a longer waiting time (between 1 hour and 2-3 d
 
 To understand what is taking so long .. its two things:
 
+TODO: make a new picture
 ![SSH9d1](pictures/ssh9d-sync.png)
 
 1. Blockchain Sync
 
 The blockchain on your HDD is not absolutly up-to-date. Depending how you got it transferred to your RaspiBlitz it will be some hours, days or even weeks behind. Now the RaspiBlitz needs to catch-up the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. But even if you see in the beginning a 99.8% this can take time - gaining 1% can be up to 4 hours (depending on network speed). So be patient here.
 
-* [Why is my "final sync" taking so long?](FAQ.md#why-is-my-final-sync-taking-so-long)
-
 2. Lightning Scanning
 
 Automatically if the Blockchain Sync is progressing LND will start to scan the blockchain and collect information. The Lightning scanning alone normally just take around 1 hour until the waiting time is over. Can take much longer if you recover on old wallet from seed.
+
+* [Why is my "final sync" taking so long?](FAQ.md#why-is-my-final-sync-taking-so-long)
 
 Once all is done you should see this status screen on the RaspiBlitz LCD/display:
 
@@ -302,7 +305,7 @@ If you need an idea what the most basic next steps to experience Lightning would
 
 If you like to do this all from a webbrowser with a dashboard UI instead from an SSH terminal, go to `SERVICES`, activate the `RTL Webinterface` and after the reboot open in your webbrowser: http://[LOCAL-IP-OF-YOU-NODE]:3000 (PASSWORD B is your RPC password).
 
-Have fun and riding the lightning :D
+Have fun riding the lightning :D
 
 *BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll*
 
@@ -310,7 +313,7 @@ Have fun and riding the lightning :D
 
 ### Feature Documentation
 
-These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations to you. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
+These are the features available thru the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
 So lets take a look at the SSH main menu (3 pages to scroll down):
 
@@ -334,6 +337,8 @@ Before you can open channels with other nodes you need to put some coins onto yo
 
 *Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences.*
 
+You can make multiple fundings - so you can start with small amounts first to test. LND will generate always a different address, but all funds you send will get into the same LND on-chain wallet.
+
 #### CONNECT: Connect to a Peer
 
 Before you can open a channel with another node on the network you need to connect this node as a peer to your node.
@@ -344,7 +349,9 @@ Opening a channel with a peer is just optional. Having another node a peer helps
 
 To open a payment channel with another node you can use this option.
 
-Find interessting nodes to open channels with on online directories like [1ML.com](https://1ml.com/).
+TODO: RaspiBlitz Telegram Group Info
+
+Find interessting nodes to open channels with on online directories like [1ML.com](https://1ml.com/) or join the RaspiBlitz NodeManager telegram group to meat prople to open channels with. 
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
@@ -422,11 +429,21 @@ Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RT
 
 ##### LND Auto-Unlock
 
+The RaspiBlitz will automatically unlock the LND wallet on every start.
+
 This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
 
 It can be activated under "Services" -> "Auto-unlock LND". Its recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachbale until you manually unlock it.
 
 * [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
+
+##### Backup Torrent Seeding
+
+*THIS SERVICE IS STILL VERY EXPERIMENTAL AND CAN SLOW DOWN YOUR RASPBLITZ*
+
+Activating this feature you can help with your RaspiBlitz to upload the Blockchain Torrent files and help new RaspiBlitz users with a faster download of the blockchain.
+
+But also having this feature activated you always have a backup copy of the blockchain ready in case you run into data corruption on your main blockchain. So this will reduce your lightning node down-time on recovering of blockchain data.
 
 #### MOBILE: Connect Mobile Wallet
 
@@ -437,7 +454,7 @@ This feature should support you in connecting your RaspiBlitz to a mobile wallet
 At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS), [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet),
 and [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) are available.
 
-Please keep in mind that if you also want to connect to your smartphone also from the outside (thru LTE, 3G, ..) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changeing IP of our Home-DSL.
+Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changeing IP of our Home-DSL.
 
 * [How do I shrink the QR code for connecting my Shango/Zap/Zeus mobile phone?](FAQ.md#how-do-i-shrink-the-qr-code-for-connecting-my-shangozap-mobile-phone)
 
@@ -483,11 +500,11 @@ Change the name of your node.
 
 Change you passwords for security.
 
-![MainMenu-C](pictures/mainmenu3.png)
-
 #### CHASHOUT: Remove Funds fro, on-chain Wallet
 
 Use if the want to remove all funds from the RaspiBlitz.
+
+![MainMenu-C](pictures/mainmenu3.png)
 
 #### lnbalance: Detailed Wallet Balances
 
@@ -496,6 +513,28 @@ Use if the want to remove all funds from the RaspiBlitz.
 #### lnchannels: Lightning Channel List
 
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
+
+#### CLOSE ALL: Closing all open Channels
+
+With this feature you can close down all open channels and get funds locked up in those channels back to your on-chain wallet.
+
+It mioght even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
+
+#### HARDWARE: Run Hardware Test
+
+This will start the hardware test and indentify if your RaspiBlitz is in good shape and can provide a stable service.
+
+Use this option is you see under-voltage reports on your LCD display or you think your RaspiBlitz gets very hot.
+
+#### SOFTWARE: Run Software Tests (DebugReport)
+
+This will print out a lot of information that can be used to find software problems.
+
+Use this if you want to report a software problem with your RaspiBlitz so that others can have a look at the details and help you better.
+
+#### UPDATE: Check/Prepare RaspiBlitz Update
+
+You can test if a update for RaspiBlitz is available. If so you can follow the instructions to make the update.
 
 #### OFF: PowerOff RaspiBlitz
 
@@ -526,8 +565,7 @@ To develop your own scripts/apps and to connect other servcies/apps to your Rasp
 
 ### Backup for On-Chain- & Channel-Funds
 
-Since LND v.06 (and RaspiBlitz v1.2) a feature called Static-Channel-Backups is available.
-Within RaspiBlitz this is used when a `channel.backup` file is mentioned.
+Since LND v.06 (and RaspiBlitz v1.2) a feature called Static-Channel-Backups is available. Within RaspiBlitz this is used when a `channel.backup` file is mentioned.
 
 Its the best backup to protect the funds you put on your RaspiBlitz and into channel available yet - so its recommended to make use of it. 
 
