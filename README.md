@@ -184,11 +184,13 @@ After this the setup process will need some time and the user will see a lot of 
 
 *If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you can skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screen:*
 
+If you connected a fresh Hard Drive Disc to the RaspiBlitz it might now ask you if its OK to format the HDD.
+
+![SSH4](pictures/ssh4-fomatHDD.png)
+
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
-TODO: new picture from opions
-
-<img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="600">
+<img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="551">
 
 The options - and when to choose which - will be explained here shortly:
 
