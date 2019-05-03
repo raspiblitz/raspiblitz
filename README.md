@@ -230,21 +230,43 @@ Lightning is installed and waiting for your setup if you see this screen.
 
 ![SSH7](pictures/ssh7-lndinit.png)
 
-TODO: Update Wallet Creation (OLD / NEW) 
+You now decide if you want to setup a fresh new wallet or if you want to recover an old wallet from a RaspiBlitz you had before.
 
-The RaspiBlitz calling the LND wallet creation command for you:
+#### Setup a NEW Wallet
+
+This is the default if you setup a RaspiBlitz the first time.
 
 ![SSH8](pictures/ssh8-wallet.png)
 
-First it will ask you to set your wallet unlock password - use your choosen PASSWORD C here and confirm it by inputting it a second time.
+RaspiBlitz will ask you to set your wallet unlock password - use your choosen PASSWORD C here and confirm it by inputting it a second time.
 
-Second it will ask you if you have an existing "cipher seed mnemonic" - if this is your first RaspiBlitz/LND just ansere `n`.
+LND will now generate a fresh cipher seed (word list) for you.
 
-*The "cipher seed mnemonic" is the word list that contains the backup of your private key. If you dont have one from a former RaspiBlitz setup it will be created for you. If you want to recovcer on old LND wallet, thats the point in the setup to enter it.*
+![SSH8](pictures/ssh8-walletb.png)
 
-Third it will ask you if you want to protect your backup word list with an additional password. You can simple keep this empty and just press ENTER to continue. If you want to go for this extra protection use your chossen PASSWORD D here.
+WRITE THIS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe.
 
-LND will now generate a fresh cipher seed (word list) for you. WRITE THIS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe. Hit ENTER once your done.
+#### Recover a OLD Wallet
+
+Choose this option if you had an old RaspiBlitz you want to recover. You have three options to do that:
+
+![SSH7](pictures/ssh7-lndrecover.png)
+
+The RaspiBlitz calling the LND wallet creation command for you:
+
+##### LNDRESCUE LND tar.gz-Backupfile (BEST)
+
+Choose this option if you have made a complete backup of the LND data and have a tar.gz file available. It will recover all your on-chain funds and open channels you had. But you have to be shure, that the LND backup you have is reaklly the latest version - otherwise you might loose channel funds.
+
+##### SEED+SCB Words Seed & channel.backup file (OK)
+
+Next best option is, if you have the channel.backup file and the word seed. This is the best cahnce to recover your on-chain funds and funds you had in open channels. But all channels you had open before will be closed in this procedure.
+
+##### ONLY SEED Only Seed Word List (Fallback)
+
+If you just have the word list (RaspiBlitz 1.1 and older) you can at least try to recover your on-chain funds. Recover of channel funds is not very likely in this scenario.
+
+### Final LND Setup
 
 It will now make sure your wallet is initialized correctly and may ask you to unlock it with your just set PASSWORD C.
 
