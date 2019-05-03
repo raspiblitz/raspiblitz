@@ -186,7 +186,7 @@ After this the setup process will need some time and the user will see a lot of 
 
 If you connected a fresh Hard Drive Disc to the RaspiBlitz it might now ask you if its OK to format the HDD.
 
-<img src="pictures/ssh4-fomatHDD.png" alt="format-HDD" width="366">
+<img src="pictures/ssh4-formatHDD.png" alt="format-HDD" width="366">
 
 To get a copy of the blockchain, the RaspiBlitz offers the following options:
 
