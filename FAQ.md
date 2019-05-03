@@ -6,6 +6,8 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 
 - Update: LND version 0.6-beta
 - Update: RTL (Ride the Lightning) Web UI version 0.2.16-beta
+- Update: Shopping Lists (new Heatsink Case lowers 10°)
+- Update: New Torrent Update file (reducing blockchain sync time)
 - Fix: LND scanning stuck on ? (better error handling)
 - Fix: Cash out all funds
 - Fix: Keep TLS certs stable on update
@@ -22,9 +24,10 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 - New: Run LND on different port (commandline)
 - New: Ask before formatting HDD
 - New: Better Update support (from main menu)
+- New: Temp in Fahrenheit on the LCD
 - Experimental: Backup Torrent Seeding (Service)
 
-TODO: more and link to milestone 1.2
+For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
 
 ## Whats new in Version 1.1 of RaspiBlitz?
 
