@@ -78,11 +78,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.2:**
 
-HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-05-01b.img.gz
+HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-05-02.img.gz
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.2/raspiblitz-v1.2-2019-05-01b.torrent
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.2/raspiblitz-v1.2-2019-05-02.torrent
 
-SHA-256: 5644b8dd93058589533de1c4000e748d988384cacaf0c679cb7d5a2868b0c3a8
+SHA-256: ae9910bb99b7a992d14e920696183b6e494cc9b52db7b9c03dd02fd739d47659
 
 **Write the SD-Card image to your SD Card**
 
@@ -244,7 +244,7 @@ LND will now generate a fresh cipher seed (word list) for you.
 
 ![SSH8](pictures/ssh8-walletb.png)
 
-WRITE THIS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe.
+WRITE YOUR PERSONAL WORDS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe.
 
 #### Recover a OLD Wallet
 
@@ -292,7 +292,6 @@ Now on first start you will habe a longer waiting time (between 1 hour and 2-3 d
 
 To understand what is taking so long .. its two things:
 
-TODO: make a new picture
 ![SSH9d1](pictures/ssh9d-sync.png)
 
 1. Blockchain Sync
@@ -371,9 +370,7 @@ Opening a channel with a peer is just optional. Having another node a peer helps
 
 To open a payment channel with another node you can use this option.
 
-TODO: RaspiBlitz Telegram Group Info
-
-Find interessting nodes to open channels with on online directories like [1ML.com](https://1ml.com/) or join the RaspiBlitz NodeManager telegram group to meat prople to open channels with. 
+Find interessting nodes to open channels with on online directories like [1ML.com](https://1ml.com/) or join the RaspiBlitz NodeManager telegram group to meat prople to open channels with: https://t.me/raspiblitz 
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
