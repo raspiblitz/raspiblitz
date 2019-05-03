@@ -29,13 +29,9 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 
 For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
 
-## How to update my RaspiBlitz from v1.2 and up?
-
-If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
-
 ## How to update my RaspiBlitz from v1.0 and v1.1?
 
-For update you dont need to close any channels, remove funding or download the blockchain again.
+For update you DONT NEED to close any channels, remove funding or download the blockchain again.
 
 Here is a YouTube video tutorial on how to update: https://www.youtube.com/watch?v=Xvn0WQfHUdI
 
@@ -55,6 +51,10 @@ You should see that it switched into recover/backup mode. Its now provisioning t
 When update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED` message on the display. Login per SSH by using the password `raspiblitz` and set your Password A again. It can be the same as the old one, but maybe use the occasion to make password change for security reasons. If you had auto-unlock activated you might also be asked to enter your old Password C again. Then it wil make a final reboot.
 
 After your RaspiBlitz is done with catching up the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
+
+## How to update my RaspiBlitz from v1.2 and up?
+
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
 
 ## Can I downgrade from v1.1 to v1.0?
 
