@@ -35,7 +35,7 @@ fi
 
 # CHECK #########
 
-echo "*** Check ${network} Responding ***"
+echo "*** Check ${network} Responding *** (can take a while)"
 chainIsReady=0
 loopCount=0
 while [ ${chainIsReady} -eq 0 ]
