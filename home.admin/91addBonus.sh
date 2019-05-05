@@ -6,8 +6,8 @@ echo "Creating the command lnbalance as well as lnchannels which will give you a
 cd
 mkdir /home/admin/tmpScriptDL
 cd /home/admin/tmpScriptDL
-wget https://raw.githubusercontent.com/Stadicus/guides/master/raspibolt/resources/lnbalance
-wget https://raw.githubusercontent.com/Stadicus/guides/master/raspibolt/resources/lnchannels
+wget https://stadicus.github.io/RaspiBolt/resources/lnbalance
+wget https://stadicus.github.io/RaspiBolt/resources/lnchannels
 chmod +x lnbalance
 chmod +x lnchannels
 sudo cp lnchannels /usr/local/bin
