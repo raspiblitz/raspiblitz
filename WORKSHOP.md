@@ -118,6 +118,8 @@ See the shopping list on the RaspiBlitz Github README - you need to buy all of t
 
 From experience start ordering two weeks before the workshop (if you need to assembly) and minimum one week if you handing out hardware kits - even if you have Amazon Prime. There is always a shipment comming late - its a lot of packages.
 
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com)
+
 ## Instruct Participants to bring Hardware
 
 If you run the scenario of people bringing their own hardware. Make sure to let them know at least a week before the event so that there is enough time for online ordering. Also make sure that especially the power supply needs to provide 3A and a stable current (big fat with a thick cable is good) - because thats the most often error source if people just reuse some old weak power supply.
