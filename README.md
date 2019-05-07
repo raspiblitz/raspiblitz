@@ -46,9 +46,9 @@ The RaspiBlitz is build from the following parts:
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) (pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) *(pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)*
 
-**To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org**
+*To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org*
 
 ### International Shopping Lists (buy parts & build it yourself)
 
