@@ -32,12 +32,31 @@ goVersion="1.11"
 echo "### Check Framework: GO ###"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
-  echo "---> Installing GO"
-  wget https://storage.googleapis.com/golang/go${goVersion}.linux-armv6l.tar.gz
-  sudo tar -C /usr/local -xzf go${goVersion}.linux-armv6l.tar.gz
+  goVersion="1.12.4"
+  if [ ${isARM} -eq 1 ] || [ ${isAARCH64} -eq 1 ] ; then
+    goOSversion="armv6l"
+  fi
+  if [ ${isX86_64} -eq 1 ] ; then
+    goOSversion="amd64"
+  fi 
+
+  echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
+
+  # wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
+  wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
+  if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
+  then
+      echo "!!! FAIL !!! Download not success."
+      exit 1
+  fi
+  sudo tar -C /usr/local -xzf go${goVersion}.linux-${goOSversion}.tar.gz
   sudo rm *.gz
   sudo mkdir /usr/local/gocode
   sudo chmod 777 /usr/local/gocode
+  export GOROOT=/usr/local/go
+  export PATH=$PATH:$GOROOT/bin
+  export GOPATH=/usr/local/gocode
+  export PATH=$PATH:$GOPATH/bin
   goInstalled=$(go version 2>/dev/null | grep -c 'go')
 fi
 if [ ${goInstalled} -eq 0 ];then

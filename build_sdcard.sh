@@ -44,9 +44,10 @@ echo "*** CHECK BASE IMAGE ***"
 echo "Check if Linux ARM based ..." 
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] ; then
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
   echo "!!! FAIL !!!"
-  echo "Can only build on ARM or aarch64, not on:"
+  echo "Can only build on ARM, aarch64 or x86_64 not on:"
   uname -m
   exit 1
 else
@@ -338,8 +339,7 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
-echo ""
-echo "*** BITCOIN ***"
+# "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
@@ -356,6 +356,13 @@ if [ ${isAARCH64} -eq 1 ] ; then
   bitcoinOSversion="aarch64-linux-gnu"
   bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
 fi
+if [ ${isX86_64} -eq 1 ] ; then
+  bitcoinOSversion="x86_64-linux-gnu"
+  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
+fi
+
+echo ""
+echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -457,9 +464,7 @@ if [ ${installed} -lt 1 ]; then
   exit 1
 fi
 
-echo ""
-echo "*** LND ***"
-
+# "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 lndVersion="0.6-beta"
@@ -472,6 +477,13 @@ if [ ${isAARCH64} -eq 1 ] ; then
   lndOSversion="arm64"
   lndSHA256="2f31b13a4da6217ed7e27a44e1705103d7ed846aa2f599b7e5de0e6033a66c19"
 fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256="ef37b3658fd864dfb3af6af29404d92337229378c24bfb78aa2010ede4cd06af"
+fi 
+
+echo ""
+echo "*** LND v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -541,15 +553,26 @@ sudo apt-get -f -y install virtualenv
 sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
+# "*** Installing Go ***"
 # Go is needed for ZAP connect later
-echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+goVersion="1.12.4"
+if [ ${isARM} -eq 1 ] || [ ${isAARCH64} -eq 1 ] ; then
+  goOSversion="armv6l"
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  goOSversion="amd64"
+fi 
+
+echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
+
+# wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
+wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
+if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go${goVersion}.linux-${goOSversion}.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
 sudo chmod 777 /usr/local/gocode
