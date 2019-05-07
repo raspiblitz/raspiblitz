@@ -483,7 +483,7 @@ if [ ${isX86_64} -eq 1 ] ; then
 fi 
 
 echo ""
-echo "*** LND v${bitcoinVersion} for ${bitcoinOSversion} ***"
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
