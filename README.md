@@ -42,11 +42,17 @@ The RaspiBlitz is build from the following parts:
 * Powersupply >=3A (choose big & stable output)
 * Cheap Casing
 
-**All together under 150 USD / 130 EUR (depending on country & shop)**
+**All single parts together under 150 USD / 130 EUR  ... depending on country & shop, see shopping lists below.**
 
-## Amazon Shopping Lists
+### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-These are the community currated shopping lists based on country:
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a Hardwareset for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) 
+
+**To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org**
+
+### International Shopping Lists (buy parts & build it yourself)
+
+The cheapest way is to buy ans assemble the single parts yourself. These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
