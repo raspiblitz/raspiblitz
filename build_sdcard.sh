@@ -434,34 +434,36 @@ if [ ${installed} -lt 1 ]; then
   exit 1
 fi
 
-echo ""
-echo "*** LITECOIN ***"
-# based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
-
-# set version (change if update is available)
-litecoinVersion="0.16.3"
-litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
-cd /home/admin/download
-
-# download
-binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
-sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
-
-# check download
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
-  exit 1
-fi
-
-# install
-sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
-installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
-if [ ${installed} -lt 1 ]; then
+if [ "${baseImage}" = "raspbian" ]; then
   echo ""
-  echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
-  exit 1
+  echo "*** LITECOIN ***"
+  # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
+
+  # set version (change if update is available)
+  litecoinVersion="0.16.3"
+  litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+  cd /home/admin/download
+
+  # download
+  binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+  sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+
+  # check download
+  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+    exit 1
+  fi
+
+  # install
+  sudo -u admin tar -xvf ${binaryName}
+  sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
+  installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
+  if [ ${installed} -lt 1 ]; then
+    echo ""
+    echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
+    exit 1
+  fi
 fi
 
 # "*** LND ***"
