@@ -50,9 +50,8 @@ lnd_macaroon_dir="/home/bitcoin/.lnd/data/chain/${network}/${chain}net"
 load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
 
 # get CPU temp
-isX86_64=$(uname -m | grep -c 'x86_64')
 cpu=0
-if [ ${isX86_64} -eq 0 ] ; then
+if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
 fi
 tempC=$((cpu/1000))

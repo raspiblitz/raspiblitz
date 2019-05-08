@@ -21,12 +21,11 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 echo "localIP='${localip}'"
 
 # temp
-isX86_64=$(uname -m | grep -c 'x86_64')
 tempC=0
-if [ ${isX86_64} -eq 0 ] ; then
+if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   tempC=$(echo "scale=1; $(cat /sys/class/thermal/thermal_zone0/temp)/1000" | bc)
+  echo "tempCelsius='${tempC}'"
 fi
-echo "tempCelsius='${tempC}'"
 
 # uptime in seconds
 uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
