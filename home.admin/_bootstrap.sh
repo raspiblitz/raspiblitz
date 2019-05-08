@@ -475,13 +475,38 @@ sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
 
 ################################
-# STRESSTEST HARDWARE
+# RECORD BASEIMAGE
 ################################
 
-# generate stresstest report on every startup (in case hardware has changed)
-sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
-sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+echo "baseimage=${baseImage}" >> $infoFile
 
-echo "DONE BOOTSTRAP" >> $logFile
-exit 0
+################################
+# STRESSTEST RASPBERRY PI
+################################
+
+if [ "${baseImage}" = "raspbian" ] ; then
+  # generate stresstest report on every startup (in case hardware has changed)
+  sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
+  sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
+  sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+
+  echo "DONE BOOTSTRAP" >> $logFile
+  exit 0
+fi
