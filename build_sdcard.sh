@@ -41,7 +41,7 @@ echo ""
 echo "*** CHECK BASE IMAGE ***"
 
 # armv7=32Bit , armv8=64Bit
-echo "Check if Linux ARM based ..." 
+echo "Detect CPU architecture ..." 
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
