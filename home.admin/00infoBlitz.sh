@@ -49,7 +49,7 @@ lnd_macaroon_dir="/home/bitcoin/.lnd/data/chain/${network}/${chain}net"
 # get uptime & load
 load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
 
-# get CPU temp
+# get CPU temp - no measurement in a VM
 cpu=0
 if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
@@ -78,9 +78,9 @@ else
 fi
 
 # get network traffic
-# ifconfig does not show eth0 on Armbian - get first traffic info 
+# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info 
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ]; then
+if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
   network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
   network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 else
