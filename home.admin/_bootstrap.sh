@@ -157,7 +157,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
     echo "sda2(${size2})" >> $logFile
     size3=$(lsblk -o NAME,SIZE -b | grep "sdb" | awk '{ print substr( $0, 8, length($0)-2 ) }' | xargs)
-    echo "sdb(${size2})" >> $logFile
+    echo "sdb(${size3})" >> $logFile
     # choose to run with the bigger one
     if [ ${size2} -gt ${size1} ]; then
       echo "sda2 is BIGGER - run with this one" >> $logFile

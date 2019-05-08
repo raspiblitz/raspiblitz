@@ -16,7 +16,7 @@ if [ ${existsHDD} -eq 1 ]; then
   existsHDD2=$(lsblk | grep -c sda2)
   hddSecondDriveExists=$(lsblk | grep -c sdb)
   if [ ${existsHDD2} -eq 1 ] || [ ${hddSecondDriveExists} -eq 1 ] ; then
-    echo "OK - HDD found at sda2 ... determine which is bigger"
+    echo "OK - another HDD found at sdb ... determine which is bigger"
 
     # get both with size
     size1=$(lsblk -o NAME,SIZE -b | grep "sda1" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
@@ -24,7 +24,7 @@ if [ ${existsHDD} -eq 1 ]; then
     size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
     echo "sda2(${size2})"
     size3=$(lsblk -o NAME,SIZE -b | grep "sdb" | awk '{ print substr( $0, 8, length($0)-2 ) }' | xargs)
-    echo "sdb(${size2})"
+    echo "sdb(${size3})"
 
     # choose to run with the bigger one
     if [ ${size2} -gt ${size1} ]; then
