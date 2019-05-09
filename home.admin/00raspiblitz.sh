@@ -80,10 +80,10 @@ if [ "${state}" = "presync" ]; then
   # stopping the pre-sync
   echo ""
   # analyse if blockchain was detected broken by pre-sync
-  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
+  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
   if [ ${blockchainBroken} -eq 1 ]; then  
     # dismiss if its just a date thing
-    futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
+    futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
     if [ ${futureBlock} -gt 0 ]; then
       blockchainBroken=0
       echo "-> Ignore reindex - its just a future block"
@@ -172,10 +172,10 @@ waitUntilChainNetworkIsReady()
       if [ ${#clienterror} -gt 0 ]; then
 
         # analyse LOGS for possible reindex
-        reindex=$(sudo cat /mnt/hdd/${network}/debug.log | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
+        reindex=$(sudo cat /mnt/hdd/${network}/debug.log 2>/dev/null | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
         if [ ${reindex} -gt 0 ]; then
           # dismiss if its just a date thing
-          futureBlock=$(sudo tail /mnt/hdd/${network}/debug.log | grep "Please restart with -reindex or -reindex-chainstate to recover" | grep -c "block database contains a block which appears to be from the future")
+          futureBlock=$(sudo tail /mnt/hdd/${network}/debug.log 2>/dev/null | grep "Please restart with -reindex or -reindex-chainstate to recover" | grep -c "block database contains a block which appears to be from the future")
           if [ ${futureBlock} -gt 0 ]; then
             blockchainBroken=0
             echo "-> Ignore reindex - its just a future block"

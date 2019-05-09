@@ -22,7 +22,7 @@ while :
   do
     sudo -u bitcoin /usr/local/bin/lncli --chain=${network} unlock
     sleep 4
-    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
     if [ ${locked} -eq 0  ]; then
       break
     fi

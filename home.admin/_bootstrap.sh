@@ -274,7 +274,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
     echo "starting pre-sync in background" >> $logFile
     # make sure that debug file is clean, so just pre-sync gets analysed on stop
-    sudo rm /mnt/hdd/bitcoin/debug.log
+    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile

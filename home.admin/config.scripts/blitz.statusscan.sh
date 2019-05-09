@@ -84,7 +84,7 @@ else
   #### HARD PROBLEMS
 
   # LOW DISK SPACE
-  lowDiskSpace=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error: Disk space is low!")
+  lowDiskSpace=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log 2>/dev/null | grep -c "Error: Disk space is low!")
   if [ ${lowDiskSpace} -gt 0 ]; then
     bitcoinErrorShort="HDD DISK SPACE LOW"
     bitcoinErrorFull="HDD DISK SPACE LOW - check what data you can delete on HDD and restart"
@@ -94,7 +94,7 @@ else
 
   # if still no error identified - search logs for generic error (after 4min uptime)
   if [ ${#bitcoinErrorShort} -eq 0 ] && [ ${uptime} -gt 240 ]; then
-    bitcoinErrorFull=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "Error:" | tail -1 | tr -d "'")
+    bitcoinErrorFull=$(sudo tail -n 100 /mnt/hdd/${network}${pathAdd}/debug.log 2>/dev/null | grep -c "Error:" | tail -1 | tr -d "'")
     if [ ${#bitcoinErrorFull} -gt 0 ]; then
       bitcoinErrorShort="Error found in Logs"
     fi
@@ -137,10 +137,10 @@ if [ ${lndRunning} -eq 1 ]; then
 
     # find a the line number in logs of start of LND
     # just do this on error case to save on processing memory
-    lndStartLineNumber=$(sudo cat /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -in "LTND: Active chain:" | tail -1 | cut -d ":" -f1)
+    lndStartLineNumber=$(sudo cat /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -in "LTND: Active chain:" | tail -1 | cut -d ":" -f1)
 
     # get logs of last LND start
-    lndLogsAfterStart=$(sudo tail --lines=+${lndStartLineNumber} /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log) 
+    lndLogsAfterStart=$(sudo tail --lines=+${lndStartLineNumber} /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null) 
 
     # check RPC server ready (can take some time after wallet was unlocked)
     lndRPCReady=$(echo "${lndLogsAfterStart}" | grep -c "RPCS: RPC server listening on")
