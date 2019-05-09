@@ -488,11 +488,11 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
-  lndSHA256="e94d00624c857bfa00917f5b8679c294b749490e485ec20433fc3dcb29c5db4b"
+  lndSHA256="860a5d0a56c1ec9eef33a5f29c20013221b95298468825a1b7793d13320cba70"
 fi 
 if [ ${isI386} -eq 1 ] ; then
   lndOSversion="386"
-  lndSHA256="e94d00624c857bfa00917f5b8679c294b749490e485ec20433fc3dcb29c5db4b"
+  lndSHA256="19bb8acec1d79c376363a7660b7ef75624829cfdb6e83841e84b7dc98bbb10bc"
 fi 
 
 echo ""
