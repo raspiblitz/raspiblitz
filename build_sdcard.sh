@@ -45,9 +45,10 @@ echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
+isI386=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isI386} -eq 0 ] ; then
   echo "!!! FAIL !!!"
-  echo "Can only build on ARM, aarch64 or x86_64 not on:"
+  echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
   uname -m
   exit 1
 else
@@ -343,22 +344,28 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
-bitcoinVersion="0.17.1"
+# https://bitcoincore.org/en/download/
+bitcoinVersion="0.18.0"
 
-# set OS version 
+# set OS version and checksum
+# needed to make sure download is not changed
+# calulate with sha256sum and also check with SHA256SUMS.asc
+# https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
 if [ ${isARM} -eq 1 ] ; then
   bitcoinOSversion="arm-linux-gnueabihf"
-  # needed to make sure download is not changed
-  # calulate with sha256sum and also check with SHA256SUMS.asc
-  bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
+  bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   bitcoinOSversion="aarch64-linux-gnu"
-  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
+  bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
+  bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
+fi
+if [ ${isI386} -eq 1 ] ; then
+  bitcoinOSversion="i686-pc-linux-gnu"
+  bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
 fi
 
 echo ""
@@ -469,19 +476,23 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6-beta"
+lndVersion="v0.6.1-beta-rc2"
 
 if [ ${isARM} -eq 1 ] ; then
   lndOSversion="armv7"
-  lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
+  lndSHA256="acaed77436ea210164553ac9e11b87c92ed918f10b6a5e54f96c01ca0b93fe24"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   lndOSversion="arm64"
-  lndSHA256="2f31b13a4da6217ed7e27a44e1705103d7ed846aa2f599b7e5de0e6033a66c19"
+  lndSHA256="ce3e3ce3df6d5d98a78c776a06fa9a2cc5826f4ad6579bc36de4b6d634495efa"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
-  lndSHA256="ef37b3658fd864dfb3af6af29404d92337229378c24bfb78aa2010ede4cd06af"
+  lndSHA256="e94d00624c857bfa00917f5b8679c294b749490e485ec20433fc3dcb29c5db4b"
+fi 
+if [ ${isI386} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256="e94d00624c857bfa00917f5b8679c294b749490e485ec20433fc3dcb29c5db4b"
 fi 
 
 echo ""
@@ -558,12 +569,15 @@ echo ""
 
 # "*** Installing Go ***"
 # Go is needed for ZAP connect later
-goVersion="1.12.4"
+goVersion="1.12.5"
 if [ ${isARM} -eq 1 ] || [ ${isAARCH64} -eq 1 ] ; then
   goOSversion="armv6l"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   goOSversion="amd64"
+fi 
+if [ ${isI386} -eq 1 ] ; then
+  goOSversion="386"
 fi 
 
 echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
