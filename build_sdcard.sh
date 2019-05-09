@@ -476,7 +476,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="v0.6.1-beta-rc2"
+lndVersion="0.6.1-beta-rc2"
 
 if [ ${isARM} -eq 1 ] ; then
   lndOSversion="armv7"
