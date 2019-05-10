@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # based on: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-465997126
+# based on: https://github.com/rootzoll/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
  echo "small config script set the port LND is running on"
@@ -62,9 +63,19 @@ sudo systemctl disable lnd
 echo "change port in lnd config"
 sudo sed -i "s/^listen=.*/listen=0.0.0.0:${portnumber}/g" /mnt/hdd/lnd/lnd.conf
 
+# add to raspiblitz.config (so it can survive update)
+valueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'lndPort=')
+if [ ${valueExists} -eq 0 ]; then
+  # add as new value
+  echo "lndPort=${portnumber}" >> /mnt/hdd/raspiblitz.conf
+else
+  # update existing value
+  sudo sed -i "s/^lndPort=.*/lndPort=${portnumber}/g" /mnt/hdd/raspiblitz.conf
+fi
+
 # editing service file
 echo "editing /etc/systemd/system/lnd.service"
-sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:${portnumber}/g" /etc/systemd/system/lnd.service
+sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
 
 # enable service again
 echo "enable service again"

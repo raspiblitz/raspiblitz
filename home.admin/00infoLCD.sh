@@ -72,20 +72,27 @@ while :
     if [ ${setupStep} -eq 0 ]; then
 
       # check for internet connection
-      # https://en.wikipedia.org/wiki/1.1.1.1
-      online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+      online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+      if [ ${online} -eq 0 ]; then
+        # re-test with other server
+        online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+      fi
+      if [ ${online} -eq 0 ]; then
+        # re-test with other server
+        online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+      fi
+
       if [ ${online} -eq 0 ]; then
         message="no internet connection"
 
       # when in presync - get more info on progress
       elif [ "${state}" = "presync" ]; then
         # get blockchain sync progress
-        blockchaininfo="$(sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
+        blockchaininfo="$(sudo -u root ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null)"
         message="starting"
         if [ ${#blockchaininfo} -gt 0 ]; then
           message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-          message=$(echo "${message}*100" | bc)
-          message="${message}%"
+          message=$(echo $message | awk '{printf( "%.2f%%", 100 * $1)}')
         fi
 
       # when old data - improve message
@@ -123,7 +130,8 @@ while :
     fi
     
     # if freshly recovered 
-    if [ "${state}" = "recovered" ]; then
+    recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
+    if [ ${recoveredInfoExists} -gt 0 ]; then
       l1="FINAL RECOVER LOGIN NEEDED:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
@@ -187,50 +195,6 @@ while :
       boxwidth=$((${#localip} + 28))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
-      continue
-    fi
-
-    # check if bitcoin is ready
-    sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
-    clienterror=`cat error.tmp`
-    rm error.tmp
-    if [ ${#clienterror} -gt 0 ]; then
-      boxwidth=40
-      l1="Waiting for ${network}d to get ready.\n"
-      l2="---> ${clienterror/error*:/}\n"
-      l3="Can take longer if device was off."
-      uptimeSeconds="$(cat /proc/uptime | grep -o '^[0-9]\+')"
-      if [ ${uptimeSeconds} -gt 600 ]; then
-        l3="!!Please login for more details!!"
-      fi
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - Welcome Back" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 5
-      continue
-    fi
-
-    # check if locked
-    locked=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock) 
-    if [ "${locked}" -gt 0 ]; then
-
-      # special case: LND wallet is locked ---> show unlock info
-      h=5
-      l1="!!! LND WALLET IS LOCKED !!!\n"
-      l2="Login: ssh admin@${localip}\n"
-      l3="Use your Password A\n"
-      l4=""
-      if [ "${rtlWebinterface}" = "on" ]; then
-        l2="Browser: http://${localip}:3000\n"
-        l3="PasswordB=login / PasswordC=unlock\n"
-        l4="PasswordA: ssh admin@${localip}"
-        h=6
-      fi
-      if [ "${autoUnlock}" = "on" ]; then
-        l2="ssh admin@${localip}\n"
-        l3="Waiting for AUTO-UNLOCK"
-      fi
-      boxwidth=$((${#localip} + 26))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip}) - ${hostname}" --infobox "$l1$l2$l3$l4" ${h} ${boxwidth}
-      sleep 5
       continue
     fi
 

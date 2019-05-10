@@ -92,7 +92,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
 
-  # setting dynUpdateUrl is a bit cpmplicated because value can contain chars that break sed replacement
+  # setting dynUpdateUrl is a bit complicated because value can contain chars that break sed replacement
   # so first remove dynUpdateUrl from config and then add fresh as new line at the end
   grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > ./raspiblitz.conf.new
   echo "dynUpdateUrl='${dynUpdateUrl}'" >> ./raspiblitz.conf.new

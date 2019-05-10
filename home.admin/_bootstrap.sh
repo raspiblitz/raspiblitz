@@ -64,6 +64,12 @@ if [ "${setupStep}" != "100" ]; then
 fi
 sudo chmod 777 ${infoFile}
 
+# resetting start count files
+echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
+echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
+sudo chmod 777 /home/admin/systemd.blockchain.log
+sudo chmod 777 /home/admin/systemd.lightning.log
+
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
 echo "*** Checking Log Size ***"
@@ -268,7 +274,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
     echo "starting pre-sync in background" >> $logFile
     # make sure that debug file is clean, so just pre-sync gets analysed on stop
-    sudo rm /mnt/hdd/bitcoin/debug.log
+    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
     # starting in background, because this scripts is part of systemd
     # so to change systemd needs to happen after delay in seperate process
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
@@ -302,38 +308,65 @@ echo "Check if HDD contains configuration .." >> $logFile
 configExists=$(ls ${configFile} | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then
 
+  # make sure lndAddress & lndPort exist
+  valueExists=$(cat ${configFile} | grep -c 'lndPort=')
+  if [ ${valueExists} -eq 0 ]; then
+    lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+    if [ ${#lndPort} -eq 0 ]; then
+      lndPort="9735"
+    fi
+    echo "lndPort='${lndPort}'" >> ${configFile}
+  fi
+  valueExists=$(cat ${configFile} | grep -c 'lndAddress=')
+  if [ ${valueExists} -eq 0 ]; then
+      echo "lndAddress=''" >> ${configFile}
+  fi
+
   # load values
   echo "load and update publicIP" >> $logFile
   source ${configFile}
+  freshPublicIP=""
+  
+  # determine the publicIP/domain that LND should announce
+  if [ ${#lndAddress} -gt 3 ]; then
 
-  # update public IP on boot
-  # wait otherwise looking for publicIP fails
-  sleep 5
-  freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+    # use domain as PUBLICIP 
+    freshPublicIP="${lndAddress}"
 
-  # sanity check on IP data
-  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-  echo "-> sanity check of IP data: ${freshPublicIP}"
-  if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-    echo "OK IPv6"
-  elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-    echo "OK IPv4"
   else
-    echo "FAIL - not an IPv4 or IPv6 address"
-    freshPublicIP=""
+
+    # update public IP on boot
+    # wait otherwise looking for publicIP fails
+    sleep 5
+    freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
+
+    # sanity check on IP data
+    # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
+    echo "-> sanity check of IP data:"
+    if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
+      echo "OK IPv6"
+    elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
+      echo "OK IPv4"
+    else
+      echo "FAIL - not an IPv4 or IPv6 address"
+      freshPublicIP=""
+    fi
+
+    if [ ${#freshPublicIP} -eq 0 ]; then
+      # prevent having no publicIP set at all and LND getting stuck
+      # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+      if [ ${#publicIP} -eq 0 ]; then
+        localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+        echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
+        freshPublicIP="${localIP}"
+      fi
+    fi
+
   fi
 
+  # set publicip value in raspiblitz.conf
   if [ ${#freshPublicIP} -eq 0 ]; then
-    # prevent having no publicIP set at all and LND getting stuck
-    # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
-    if [ ${#publicIP} -eq 0 ]; then
-      localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
-      freshPublicIP="${localIP}"
-    fi
-  fi
-  if [ ${#freshPublicIP} -eq 0 ]; then
-   echo "WARNING: Was not able to determine external IP on startup." >> $logFile
+    echo "WARNING: Was not able to determine external IP/domain on startup." >> $logFile
   else
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     if [ ${publicIPValueExists} -gt 1 ]; then
@@ -344,10 +377,10 @@ if [ ${configExists} -eq 1 ]; then
     fi
     if [ ${publicIPValueExists} -eq 0 ]; then
       echo "create value (${freshPublicIP})" >> $logFile
-      echo "publicIP=${freshPublicIP}" >> $configFile
+      echo "publicIP='${freshPublicIP}'" >> $configFile
     else
       echo "update value (${freshPublicIP})" >> $logFile
-      sed -i "s/^publicIP=.*/publicIP=${freshPublicIP}/g" ${configFile}
+      sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
     fi
   fi
 
@@ -358,6 +391,32 @@ fi
 # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
+
+#################################
+# MAKE SURE ADMIN USER HAS LATEST LND DATA
+#################################
+source ${configFile}
+if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
+
+  echo "making sure LND blockchain RPC password is set correct in lnd.conf" >> $logFile
+  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
+  if [ ${#rpcpassword} -gt 0 ]; then
+    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+  else
+    echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
+  fi
+
+  echo "updating admin user LND data" >> $logFile
+  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
+  sudo chown admin:admin /home/admin/.lnd/lnd.conf 2>> $logFile
+  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
+  sudo chown admin:admin /home/admin/.lnd/tls.cert 2>> $logFile
+  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null
+  sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>> $logFile
+
+else 
+  echo "skipping admin user LND data update" >> $logFile
+fi
 
 ################################
 # DETECT FRESHLY RECOVERED SD
@@ -398,6 +457,25 @@ if [ ${loaded} -gt 0 ]; then
   sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
   sed -i "s/^chain=.*/chain=main/g" ${infoFile}
 fi
+
+################################
+# DELETE LOG FILES
+################################
+# LND and Blockchain Errors will be still in systemd journals
+
+# /mnt/hdd/bitcoin/debug.log
+sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
+# /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
+sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+
+################################
+# STRESSTEST HARDWARE
+################################
+
+# generate stresstest report on every startup (in case hardware has changed)
+sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
+sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
+sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

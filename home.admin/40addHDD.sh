@@ -53,7 +53,7 @@ if [ ${existsHDD} -gt 0 ]; then
 
           # init the RASPIBLITZ Config
           configFile="/mnt/hdd/raspiblitz.conf"
-          configExists=$(sudo ls ${configFile} | grep -c 'raspiblitz.conf')
+          configExists=$(sudo ls ${configFile} 2>/dev/null | grep -c 'raspiblitz.conf')
           if [ ${configExists} -eq 0 ]; then
      
             # create file and use init values from raspiblitz.info
@@ -72,7 +72,7 @@ if [ ${existsHDD} -gt 0 ]; then
 
             # sanity check on IP data
             # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-            echo "-> sanity check of IP data: ${freshPublicIP}"
+            echo "-> sanity check of IP data:"
             if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
               echo "OK IPv6"
             elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
@@ -87,7 +87,7 @@ if [ ${existsHDD} -gt 0 ]; then
               echo "WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
               freshPublicIP="${localIP}"
             fi
-            echo "publicIP=${freshPublicIP}" >> $configFile
+            echo "publicIP='${freshPublicIP}'" >> $configFile
 
           fi
 

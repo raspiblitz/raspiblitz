@@ -43,6 +43,7 @@ else
 
     # just delete selective
     echo "selective delete ... (please wait)"
+    sudo rm -f -r /mnt/hdd/backup_lnd
     sudo rm -f -r /mnt/hdd/lnd
     sudo rm -f -r /mnt/hdd/ssh
     sudo rm -f /mnt/hdd/swapfile
@@ -62,6 +63,8 @@ else
     sudo rm -f -r /mnt/hdd/lost+found
     sudo rm -f -r /mnt/hdd/download
     sudo rm -f -r /mnt/hdd/tor
+    sudo rm -f -r /mnt/hdd/temp
+    sudo rm -f -r /mnt/hdd/backup_lnd
     sudo rm -f /mnt/hdd/raspiblitz.conf
     sudo rm -f /home/admin/raspiblitz.info
     

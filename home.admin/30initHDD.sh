@@ -71,6 +71,22 @@ if [ ${existsHDD} -eq 1 ]; then
     echo "If you really want to reinit the HDD, then unmount the HDD first and try again"
   else  
     echo ""
+    dialog --title "Format HDD" --yes-button "Yes" --no-button "Cancel" --yesno "RaspiBlitz detected a Hard Disk Drive (HDD).
+It will get formatted to EXT4 to be usefull.
+This will DELETE ALL FORMER DATA on the HDD.
+
+Is it OK to delete HDD for fresh RaspiBlitz?
+      " 10 48
+    if [ $? -eq 1 ]; then
+      dialog --title "Replace HDD" --msgbox "OK. RaspiBlitz will shutdown now.
+Please disconnect Power then. 
+Backup HDD data or connect another one.
+Then Power up again." 8 39
+      sudo shutdown now
+      exit 1
+    fi
+    clear
+    echo ""
     echo "*** Formatting the HDD ***"
     echo "WARNING ALL DATA ON HDD WILL GET DELETED - CAN TAKE SOME TIME"
     echo "Wait until you get a OK or FAIL"

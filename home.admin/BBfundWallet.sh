@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
@@ -10,61 +11,71 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
-command="lncli --chain=${network} --network=${chain}net newaddress np2wkh"
-
-clear
-echo "******************************"
-echo "Fund your Blockchain Wallet"
-echo "******************************"
-echo ""
-echo "COMMAND LINE: "
-echo $command
-echo ""
-echo "RESULT:"
-
 # PRECHECK) check if chain is in sync
-chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
-if [ ${chainInSync} -eq 0 ]; then
-  command=""
-  result="FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+chainOutSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": false' -c)
+if [ ${chainOutSync} -eq 1 ]; then
+  echo "FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+  echo ""
+  echo "PRESS ENTER to return to menu"
+  read key
+  exit 1
 fi
 
 # execute command
-if [ ${#command} -gt 0 ]; then
-  result=$($command)
-fi
+echo "calling lncli ... please wait"
+command="lncli --chain=${network} --network=${chain}net newaddress np2wkh"
+echo "${command}"
+result=$($command)
+echo "$result"
 
 # on no result
 if [ ${#result} -eq 0 ]; then
-  echo "Sorry something went wrong - thats unusual."
+  echo "Empty result - sorry something went wrong - thats unusual."
   echo ""
+  echo "PRESS ENTER to return to menu"
+  read key
   exit 1
 fi
  
-# when result is available
-echo "$result"
-
-# get address from result
+# parse address from result
 address=$( echo "$result" | grep "address" | cut -d '"' -f4)
 
 # prepare coin info
-coininfo="REAL Bitcoin"
+coininfo="Bitcoin"
 if [ "$network" = "litecoin" ]; then
-  coininfo="REAL Litecoin"
+  coininfo="Litecoin"
 fi
 if [ "$chain" = "test" ]; then
   coininfo="TESTNET Bitcoin"
 fi
 
-# output info
-echo ""
-echo "******************************"
-echo "TODO"
-echo "******************************"
-echo "Send ${coininfo} to address --> ${address}"
+msg="Send ${coininfo} to address --> ${address}\n\nScan the QR code on the LCD with your mobile wallet or copy paste the address.\nThe wallet you sending from needs to support Segwit addresses."
 if [ "$chain" = "test" ]; then
-  echo "get some testnet coins from https://testnet-faucet.mempool.co"
+  msg="${msg} \n\n Get some testnet coins from https://testnet-faucet.mempool.co"
 fi
-echo "Whats next? --> Wait for confirmations. You can use info on LCD to check if funds have arrived."
-echo "If you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
-echo ""
+
+echo "generating QR code ... please wait"
+echo -e "$network:${address}" > qr.txt
+/home/admin/XXdisplayQRlcd.sh
+
+# dialog with instructions while QR code is shown on LCD
+whiptail --backtitle "Fund your on chain wallet" \
+	 --title "Send ${coininfo}" \
+	 --yes-button "DONE" \
+	 --no-button "Show QR Code" \
+	 --yesno "${msg}" 0 0
+
+# display QR code
+if [ $? -eq 1 ]; then
+    /home/admin/XXdisplayQR.sh
+fi
+
+# clean up
+shred qr.txt
+rm -f qr.txt
+/home/admin/XXdisplayQRlcd_hide.sh
+
+# follow up info
+whiptail --backtitle "Fund your on chain wallet" \
+       --title "What's next?" \
+       --msgbox "Wait for confirmations. \n\nYou can use info on LCD to check if funds have arrived. \n\nIf you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'" 0 0 

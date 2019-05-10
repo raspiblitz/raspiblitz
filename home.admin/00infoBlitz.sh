@@ -6,7 +6,8 @@ source /home/admin/_version.info
 # set colors
 color_red='\033[0;31m'
 color_green='\033[0;32m'
-color_yellow='\033[0;33m'
+color_amber='\033[0;33m'
+color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
 color_purple='\033[0;35m'
 
@@ -50,13 +51,14 @@ load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
 
 # get CPU temp
 cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
-temp=$((cpu/1000))
+tempC=$((cpu/1000))
+tempF=$(((cpu/1000) * (9/5) + 32))
 
 # get memory
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
 ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
 
-if [ ${ram_avail} -lt 100 ]; then
+if [ ${ram_avail} -lt 50 ]; then
   color_ram="${color_red}\e[7m"
 else
   color_ram=${color_green}
@@ -73,8 +75,15 @@ else
 fi
 
 # get network traffic
-network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+# ifconfig does not show eth0 on Armbian - get first traffic info 
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+if [ ${isArmbian} -gt 0 ]; then
+  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+else
+  network_rx=$(ifconfig eth0 | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig eth0 | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+fi
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
@@ -90,7 +99,7 @@ if [ -n ${btc_path} ]; then
     block_diff=$(expr ${block_chain} - ${block_verified})
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-    sync_percentage=$(printf "%.2f%%" "$(echo $progress | awk '{print 100 * $1}')")
+    sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
 
     if [ ${block_diff} -eq 0 ]; then    # fully synced
       sync="OK"
@@ -174,18 +183,10 @@ else
   if [ $public_check = "0" ]; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    public_color="${color_yellow}"
+    public_color="${color_amber}"
   else
     public=""
     public_color="${color_red}"
-  fi
-  if [ ${#public_addr} -gt 25 ]; then
-    # if a IPv6 address dont show peers to save space
-    networkConnectionsInfo=""
-  fi
-  if [ ${#public_addr} -gt 35 ]; then
-    # if a LONG IPv6 address dont show "Public" in front to save space
-    public_addr_pre=""
   fi
 
   # DynDNS
@@ -196,14 +197,22 @@ else
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
       public_color="${color_red}"
     else
-      public_color="${color_yellow}"
+      public_color="${color_amber}"
     fi
 
     # replace IP display with dynDNS
     public_addr_pre="DynDNS "
-    networkConnectionsInfo=""
     public_addr="${dynDomain}"
+  fi
 
+  if [ ${#public_addr} -gt 25 ]; then
+    # if a IPv6 address dont show peers to save space
+    networkConnectionsInfo=""
+  fi
+
+  if [ ${#public_addr} -gt 35 ]; then
+    # if a LONG IPv6 address dont show "Public" in front to save space
+    public_addr_pre=""
   fi
 
 fi
@@ -234,7 +243,7 @@ else
    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    ln_publicColor="${color_yellow}"
+    ln_publicColor="${color_amber}"
   else
     ln_publicColor="${color_red}"
   fi
@@ -268,19 +277,38 @@ else
   fi
 fi
 
+# STATUS SINALING: Backup Torrent Seeding
+torrentBaseStatus=""
+torrentUpdateStatus=""
+if [ "${backupTorrentSeeding}" == "on" ]; then
+  torrentBaseStatus="•"
+  torrentUpdateStatus="•"
+  source <(sudo -u admin /home/admin/50torrentHDD.sh status)
+  if [ "${baseComplete}" == "1" ]; then
+    torrentBaseStatus="↑"
+  elif [ "${baseSeeding}" == "1" ]; then
+    torrentBaseStatus="↓"
+  fi
+  if [ "${updateComplete}" == "1" ]; then
+    torrentUpdateStatus="↑"
+  elif [ "${updateSeeding}" == "1" ]; then
+    torrentUpdateStatus="↓"
+  fi
+fi
+
 sleep 5
 printf "
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
-${color_yellow}               ${color_yellow}%s ${color_green} ${ln_alias}
+${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, CPU %s°C
+${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} (%s)
+${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s${torrentBaseStatus}${torrentUpdateStatus}
 ${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
@@ -291,9 +319,12 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_red}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
-"load average:${load##up*,  }" "${temp}" \
+"CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
+source /home/admin/stresstest.report 2>/dev/null
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
-  echo "${undervoltageReports} undervoltage reports found - maybe upgrade power supply"
+  echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
+elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
+  echo "Weak power supply detected - run 'Hardware Test' in menu"
 fi

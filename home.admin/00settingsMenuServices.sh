@@ -11,6 +11,7 @@ if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
+if [ ${#backupTorrentSeeding} -eq 0 ]; then backupTorrentSeeding="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -41,6 +42,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
+7 'Backup Torrent Seeding' ${backupTorrentSeeding} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 echo "done dialog"
@@ -209,6 +211,49 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   l4="possible change in macaroon / TLS cert"
   dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 60
   needsReboot=1
+else
+  echo "LND Autounlock Setting unchanged."
+fi
+
+# Backup Torrent Seeding
+choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${backupTorrentSeeding}" != "${choice}" ]; then
+  echo "BACKUP TORRENT SEEDING Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+
+  whiptail --title "Experimental Feature" --yes-button "Activate" --no-button "Dont Activate" --yesno "The Backup Torrent Seeding is still a very early
+experimental feature and could compromise your
+Lightning Node stability.
+
+Are you sure that you want to activate it?
+    " 11 54
+    if [ $? -eq 0 ]; then
+      /home/admin/50torrentHDD.sh backup-torrent-hosting
+      dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
+BACKUP TORRENT SEEDING IS NOW ACTIVE
+-------------------------------------
+If possible forward ports 49200-49250
+from your router to this RaspiBlitz.
+
+During initial torrent download your
+RaspiBlitz can be slow.
+
+" 13 42
+    else
+      echo
+      echo "Skipping Backup Torrent Seeding ..."
+      echo
+      sleep 3
+    fi
+
+  else
+    echo "Stopping Torrents and Cleaning Up ..."
+    /home/admin/50torrentHDD.sh cleanup
+    echo "BACKUP TORRENT SEEDING IS NOW OFF"
+    needsReboot=1
+  fi
 else
   echo "LND Autounlock Setting unchanged."
 fi

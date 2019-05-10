@@ -46,6 +46,7 @@ ACTUAL/OLD Password C to re-activate the
 Auto-Unlock feature. Enter a empty password
 to deactivate the Auto-Unlock feature.
 " 10 52
+  echo "Activating Auto-Unlock (please wait) .."
   sudo /home/admin/config.scripts/lnd.autounlock.sh on
   dialog --backtitle "RaspiBlitz" --msgbox "FINAL REBOOT IS NEEDED." 6 52
 

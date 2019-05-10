@@ -59,6 +59,7 @@ while [ ${finished} -eq 0 ]
   blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
   progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   #progress=$(echo "${progress}*100" | bc)
+  progress=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
   inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
   if [ "${inprogress}" = "false" ]; then
     finished=1
@@ -97,6 +98,6 @@ echo "*************************"
 sudo -u bitcoin ${network}-cli stop
 sleep 4
 # clean logs (to prevent a false reindex detection)
-sudo rm /mnt/hdd/${network}/debug.log
+sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # reboot
 sudo shutdown -r now

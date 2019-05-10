@@ -22,33 +22,32 @@ if [ ${#openChannels} -eq 0 ]; then
   echo "Still starting up, is locked or is not running?"
   echo "Try later, try reboot or check ./XXdebugLogs.sh"
   echo "************************************************"
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
+
 if [ ${openChannels} -gt 0 ]; then
-   dialog --title 'Info' --msgbox 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved.' 7 58
-   echo "please wait ..."
+   whiptail --title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved' 10 56
+   if [ $? -eq 1 ]; then
+     exit 1
+   fi
+   echo "..."
 fi
 
 # check if money is waiting to get confirmed
 unconfirmed=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"unconfirmed_balance"' | cut -d '"' -f4)
 if [ ${unconfirmed} -gt 0 ]; then
-   dialog --title 'Info' --msgbox "Still waiting confirmation for ${unconfirmed} sat.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
-   echo "please wait ..."
-fi
-
-# get available amount in on-chain wallet
-maxAmount=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
-if [ ${maxAmount} -eq 0 ]; then
-   dialog --title 'Info' --msgbox "You have 0 moveable funds available.\nNOTICE: Just confirmed on-chain funds can be moved." 6 58
-   exit 1
+   whiptail --title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno "Still waiting confirmation for (some of) your funds.\nNOTICE: Just confirmed on-chain funds can be moved." 8 58
+   if [ $? -eq 1 ]; then
+     exit 1
+   fi
+   echo "..."
 fi
 
 # let user enter the address
 l1="Enter on-chain address to send confirmed funds to:"
-l2="You will send: ${maxAmount} sat"
-l3="Maximal fee: 20000 sat (wil be subtracted)"
-dialog --title "Where to send funds?" \
---inputbox "$l1\n$l2\n$l3" 9 75 2>$_temp
+dialog --title "Where to send funds?" --inputbox "\n$l1\n" 9 75 2>$_temp
 if test $? -eq 0
 then
    echo "ok pressed"
@@ -60,63 +59,33 @@ address=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#address} -eq 0 ]; then
   echo "FAIL - not a valid address (${address})"
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
-# TODO: check address is valid for network and chain
-
 clear
 echo "******************************"
-echo "Send on-chain Funds"
+echo "Sweep all possible Funds"
 echo "******************************"
-tryAgain=1
-count=1
-while [ ${tryAgain} -eq 1 ]
-  do
-    sleep 1
-    fee=$(($count * 1000))
-    amount=$(($maxAmount - $fee))
-    echo ""
-    echo "TRY #${count} ---> with max fee ${fee} sat:"
 
-        # execute command
-    command="lncli --chain=${network} --network=${chain}net sendcoins --addr ${address} --amt ${amount} --conf_target 3"
-    echo "$command"
-    result=$($command 2>$_error)
-    error=`cat ${_error}`
-    #error="sim error: insufficient funds available to construct transaction"
-    #result=""
-    
-    if [ ${#result} -eq 0 ]; then
-      # fail - retry on 'insufficient funds available to construct transaction'
-      echo "FAIL: $error"
-      tryAgain=$(echo "${error}" | grep -c 'insufficient funds available to construct transaction')
-      if [ ${tryAgain} -eq 0 ]; then
-        echo ""
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        echo "FINAL FAIL --> Was not able to send transaction (see error above)"
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      fi
-    else
-      # success
-      echo "$result"
-      echo ""
-      echo "********************************************************************"
-      echo "OK --> send ${amount} sat to address + ${fee} sat fees max"
-      echo "********************************************************************"
-      tryAgain=0
-    fi
-    
-    # abort aftzer 20 tries
-    count=$(($count + 1))
-    if [ ${count} -gt 20 ]; then
-      echo ""
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo "FINAL FAIL --> Was not able to send transaction with max 20000 sat"
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      tryAgain=0
-    fi
-
-  done
-exit 1
+# execute command
+command="lncli --chain=${network} --network=${chain}net sendcoins --sweepall --addr=${address} --conf_target=6"
+echo "$command"
+result=$($command 2>$_error)
+error=`cat ${_error}`
 echo ""
+if [ ${#error} -gt 0 ]; then
+    echo "FAIL: $error"
+    echo ""
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "FAIL --> Was not able to send transaction (see error above)"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+else
+    echo "Result: $result"
+    echo ""
+    echo "********************************************************************"
+fi
+echo ""
+echo "Press ENTER to return to main menu."
+read key

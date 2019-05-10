@@ -27,12 +27,22 @@ if [ ${#setupStep} -eq 0 ];then
   setupStep=0
 fi
 
+# check if LND needs re-setup
+if [ ${setupStep} -gt 79 ];then
+  source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
+  if [ ${wallet} -eq 0 ] || [ ${macaroon} -eq 0 ] || [ ${config} -eq 0 ] || [ ${tls} -eq 0 ]; then
+      echo "WARN: LND needs re-setup"
+      sudo /home/admin/70initLND.sh
+      exit 0
+  fi
+fi
+
 # if setup if ready --> REBOOT
 if [ ${setupStep} -gt 89 ];then
   echo "FINISH by setupstep(${setupStep})"
   sleep 3
-  sudo ./90finishSetup.sh
-  sudo ./95finalSetup.sh
+  sudo /home/admin/90finishSetup.sh
+  sudo /home/admin/95finalSetup.sh
   exit 0
 fi
 
@@ -54,8 +64,8 @@ if [ ${lndRunning} -eq 1 ]; then
   fi
   if [ ${locked} -gt 0 ]; then
     # LND wallet is locked
-    ./AAunlockLND.sh
-    ./10setupBlitz.sh
+    /home/admin/AAunlockLND.sh
+    /home/admin/10setupBlitz.sh
     exit 0
   fi
 
@@ -71,12 +81,12 @@ if [ ${lndRunning} -eq 1 ]; then
   if [ ${chainSyncing} -eq 1 ]; then
     echo "Sync Chain ..."
     sleep 3
-    ./70initLND.sh
+    /home/admin/70initLND.sh
     exit 0
   fi
 
   # check if lnd is scanning blockchain
-  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo | grep "synced_to_chain")
+  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | grep "synced_to_chain")
   lndSyncing=1
   if [ ${#lndInfo} -gt 0 ];then
     lndSyncing=$(echo "${chainInfo}" | grep "false" -c)
@@ -84,15 +94,15 @@ if [ ${lndRunning} -eq 1 ]; then
   if [ ${lndSyncing} -eq 1 ]; then
     echo "Sync LND ..." 
     sleep 3
-    ./70initLND.sh
+    /home/admin/70initLND.sh
     exit 0
   fi
 
   # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
   echo "FINSIH ... "
   sleep 3
-  sudo ./90finishSetup.sh
-  sudo ./95finalSetup.sh
+  sudo /home/admin/90finishSetup.sh
+  sudo /home/admin/95finalSetup.sh
   exit 0
 
 fi #end - when lighting is running
@@ -113,7 +123,7 @@ fi
 if [ ${bitcoinRunning} -eq 1 ]; then
   echo "OK - ${network}d is running"
   echo "Next step run Lightning"
-  ./70initLND.sh
+  /home/admin/70initLND.sh
   exit 1
 else
  echo "${network} still not running"  
@@ -143,7 +153,7 @@ if [ ${mountOK} -eq 1 ]; then
 
   if [ ${blockchainDataExists} -eq 1 ]; then
     if [ ${configExists} -eq 1 ]; then
-      ./XXdebugLogs.sh
+      /home/admin/XXdebugLogs.sh
       echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
       echo "It seems that something went wrong during sync/download/copy of the blockchain."
       echo "Or something with the config is not correct."
@@ -151,7 +161,7 @@ if [ ${mountOK} -eq 1 ]; then
       exit 1
     else 
       echo "Got mounted blockchain, but no config and running service yet --> finish HDD"
-      ./60finishHDD.sh
+      /home/admin/60finishHDD.sh
       exit 1
     fi
   fi
@@ -163,7 +173,7 @@ if [ ${mountOK} -eq 1 ]; then
     noScreenSession=$(screen -ls | grep -c "No Sockets found")
     if [ ${noScreenSession} -eq 0 ]; then 
       echo "found torrent data .. resuming"
-      ./50torrentHDD.sh
+      /home/admin/50torrentHDD.sh
       exit 1
     fi
   fi
@@ -175,7 +185,7 @@ if [ ${mountOK} -eq 1 ]; then
     noScreenSession=$(screen -ls | grep -c "No Sockets found")
     if [ ${noScreenSession} -eq 0 ]; then 
       echo "found download in data .. resuming"
-      ./50downloadHDD.sh
+      /home/admin/50downloadHDD.sh
       exit 1
     fi
   fi
@@ -235,7 +245,7 @@ fi # end HDD is already auto-mountes
 if [ ${setupStep} -eq 0 ]; then
 
   # run initial user dialog
-  ./20setupDialog.sh
+  /home/admin/20setupDialog.sh
 
   # set SetupState
   sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
@@ -247,11 +257,11 @@ formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | gr
 if [ ${formatExt4OK} -eq 1 ]; then
   echo "HDD was already initialized/prepared"
   echo "Now needs to be mounted"
-  ./40addHDD.sh
+  /home/admin/40addHDD.sh
   exit 1
 fi
 
 # the HDD had no init yet
 echo "init HDD ..."
-./30initHDD.sh
+/home/admin/30initHDD.sh
 exit 1

@@ -4,6 +4,8 @@
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
+ echo "or just as a password enter dialog (result as file)"
+ echo "blitz.setpassword.sh [x] [text] [result-file]"
  echo "exits on 0 = needs reboot"
  exit 1
 fi
@@ -248,6 +250,63 @@ elif [ "${abcd}" = "d" ]; then
   echo "Sorry - the password D cannot be changed. Its the password you set on creating your wallet to protect your seed (the list of words)."
   exit 1
 
+############################
+# PASSWORD X
+elif [ "${abcd}" = "x" ]; then
+
+    # second parameter is the flexible text
+    text=$2
+    resultFile=$3
+    shred $3 2>/dev/null
+
+    # ask user for new password (first time)
+    dialog --backtitle "RaspiBlitz"\
+       --insecure --passwordbox "${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+
+    # get user input
+    password1=$( cat $_temp )
+    shred $_temp
+
+    # ask user for new password A (second time)
+    dialog --backtitle "RaspiBlitz - Setup"\
+       --insecure --passwordbox "Re-Enter the Password:\n(to test if typed in correctly)" 10 52 2>$_temp
+
+    # get user input
+    password2=$( cat $_temp )
+    shred $_temp
+
+    # check if passwords match
+    if [ "${password1}" != "${password2}" ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      exit 1
+    fi
+
+    # password zero
+    if [ ${#password1} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      exit 1
+    fi
+
+    # check that password does not contain bad characters
+    clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+    if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      exit 1
+    fi
+
+    # password longer than 8
+    if [ ${#password1} -lt 8 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      exit 1
+    fi
+
+    # store result is file
+    echo "${password1}" > ${resultFile}
+    
 # everything else
 else
   echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"

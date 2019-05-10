@@ -108,6 +108,9 @@ Check how much time is left to go thru the next steps of connecting to peers, fu
 
 Its also nice to add casual social open-end segment to the end of the workshop. So people can already go into personal conversations, music and beverages while some last nodes sync up, confirmations come in and people sending their first satoshis on some lightning chess or from node to node.
 
+Here are some videos that show what else is possible with the RaspiBlitz:
+- [Lightning Network LND API - Buying Stickers using Commandline](https://youtu.be/tocJFPU8sAc) 24min
+
 # Organisation Tasks
 
 *Which of the follwoing organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:*

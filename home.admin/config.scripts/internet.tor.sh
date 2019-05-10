@@ -245,7 +245,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable lnd
 
   echo "editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}/g" /etc/systemd/system/lnd.service
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
 
   sudo systemctl enable lnd
   echo "OK"

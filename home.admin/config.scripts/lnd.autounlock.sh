@@ -5,8 +5,8 @@ sudo pip install requests
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to autounlock lnd after restart"
- echo "lnd.autounlock.sh [on|off] [?passwordC]"
+ echo "# small config script to autounlock lnd after restart"
+ echo "# lnd.autounlock.sh [on|off] [?passwordC]"
  exit 1
 fi
 
@@ -32,19 +32,20 @@ Password C will be stored on the device.
   
   # test if empty
   if [ ${#passwordC} -eq 0 ]; then
-    echo "CANCEL input cannot be empty"
+    echo "# CANCEL input cannot be empty"
     sleep 3
     exit 1
   fi
-  
+
   # test if correct
-  echo "testing password .. please wait"
+  echo "# testing password .. please wait"
+  echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
   result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
   invalid=$(echo "${result}" | grep -c 'invalid')
   if [ ${invalid} -gt 0 ];then
-    echo "PASSWORD C is wrong - try again or cancel"
+    echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
     exit 1
@@ -61,7 +62,7 @@ lndConfig="/mnt/hdd/lnd/lnd.conf"
 # check if config file exists
 configExists=$(ls ${configFile} | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
- echo "FAIL - missing ${configFile}"
+ echo "err='missing ${configFile}''"
  exit 1
 fi
 
@@ -73,6 +74,9 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # get hash of lnd.conf before edit (to detect if changed later)
+  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
 
   # make sure config values are uncommented
   sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
@@ -92,32 +96,38 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
   sudo sed -i "s/^tlsextraip=.*/tlsextraip=0.0.0.0/g" /mnt/hdd/lnd/lnd.conf
 
-  # refresh TLS cert
-  sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  # refresh TLS cert (if lnd.conf was changed)
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
+  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
+    echo "# lnd.conf changed - TLS certs need refreshing"
+    sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  else
+    echo "# lnd.conf NOT changed - keep TLS certs"
+  fi
 
-  echo "switching the Auto-Unlock ON"
+  echo "# switching the Auto-Unlock ON"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=on/g" /mnt/hdd/raspiblitz.conf
 
   # password C needs to be stored on RaspiBlitz
-  echo "storing password for root in /root/lnd.autounlock.pwd"
+  echo "# storing password for root in /root/lnd.autounlock.pwd"
   sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
 
-  echo "Auto-Unlock is now ON"
-  echo "NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
+  echo "# Auto-Unlock is now ON"
+  echo "# NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  echo "switching the Auto-Unlock OFF"
+  echo "# switching the Auto-Unlock OFF"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
   # delete password C securly
-  echo "shredding password on for RaspiBlitz Auto-Unlock"
+  echo "# shredding password on for RaspiBlitz Auto-Unlock"
   sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 
-  echo "Auto-Unlock is now OFF"
+  echo "# Auto-Unlock is now OFF"
 fi

@@ -17,7 +17,7 @@ if [ ${#newName} -eq 0 ]; then
   dialog --backtitle "Set LND Name/Alias" --inputbox "ENTER the new Name/Alias for LND node:
 (free to choose, one word, use basic characters)
 " 8 52 2>./.tmp
-  newName=$( cat ./.tmp )
+  newName=$( cat ./.tmp | tr -dc '[:alnum:]\n\r' )
   if [ ${#newName} -eq 0 ]; then
     echo "FAIL input cannot be empty"
     exit 1
