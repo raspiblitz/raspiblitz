@@ -45,8 +45,8 @@ echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-isI386=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isI386} -eq 0 ] ; then
+isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isX86_32} -eq 0 ] ; then
   echo "!!! FAIL !!!"
   echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
   uname -m
@@ -363,7 +363,7 @@ if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
   bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
 fi
-if [ ${isI386} -eq 1 ] ; then
+if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
   bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
 fi
@@ -490,7 +490,7 @@ if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
   lndSHA256="860a5d0a56c1ec9eef33a5f29c20013221b95298468825a1b7793d13320cba70"
 fi 
-if [ ${isI386} -eq 1 ] ; then
+if [ ${isX86_32} -eq 1 ] ; then
   lndOSversion="386"
   lndSHA256="19bb8acec1d79c376363a7660b7ef75624829cfdb6e83841e84b7dc98bbb10bc"
 fi 
@@ -577,7 +577,7 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   goOSversion="amd64"
 fi 
-if [ ${isI386} -eq 1 ] ; then
+if [ ${isX86_32} -eq 1 ] ; then
   goOSversion="386"
 fi 
 
