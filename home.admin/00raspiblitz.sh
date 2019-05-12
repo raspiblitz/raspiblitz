@@ -306,18 +306,26 @@ if [ ${setupStep} -eq 0 ]; then
     HEIGHT=11
 
   else
+    isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+    if [ ${isRaspbian} -gt 0 ]; then
+      # show hardware test
+      /home/admin/05hardwareTest.sh
 
-    # show hardware test
-    /home/admin/05hardwareTest.sh
-
-    # start setup
-    BACKTITLE="RaspiBlitz - Setup"
-    TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-    OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-              LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-    HEIGHT=11
-
+      # start setup
+      BACKTITLE="RaspiBlitz - Setup"
+      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+      MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
+      HEIGHT=11
+    else
+      # start setup
+      BACKTITLE="RaspiBlitz - Setup"
+      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+      MENU="\nStart to setup your RaspiBlitz: \n "
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning")
+      HEIGHT=10
+    fi
   fi
 
 elif [ ${setupStep} -lt 100 ]; then
