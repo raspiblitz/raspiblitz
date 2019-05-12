@@ -86,7 +86,7 @@ Tested on:
 
 The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
-Detailed instructions for the RaspiBlitz-on-DietPi: [/dietpi/README.md](/dietpi/README.md)
+Detailed instructions for the RaspiBlitz-on-DietPi: [alternative.platforms/dietpi/README.md](/alternative.platforms/dietpi/README.md)
 
 ---
 Extras for advanced users and powerful hardware:

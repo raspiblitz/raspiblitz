@@ -1,5 +1,5 @@
 # To run this script on your RaspiBlitz, copy the following line to the ssh terminal (after the #):
-# wget https://raw.githubusercontent.com/openoms/raspiblitz/DietPi/dietpi/dietpi.display.sh && sudo chmod +x dietpi.display.sh && ./dietpi.display.sh
+# wget hhttps://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/dietpi.display.sh && sudo chmod +x dietpi.display.sh && ./dietpi.display.sh
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 echo "Detect Base Image ..." 
