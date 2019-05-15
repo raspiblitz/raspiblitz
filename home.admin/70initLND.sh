@@ -437,7 +437,7 @@ fi
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
-locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log | grep -c unlock)
+locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
   /home/admin/AAunlockLND.sh

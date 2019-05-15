@@ -44,9 +44,15 @@ The RaspiBlitz is build from the following parts:
 
 **All together under 160 USD / 140 EUR (depending on country & shop)**
 
-## Amazon Shopping Lists
+### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-These are the community currated shopping lists based on country:
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) *(pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)*
+
+*To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org*
+
+### International Shopping Lists (buy parts & build it yourself)
+
+The cheapest way is to buy ans assemble the single parts yourself. These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
