@@ -374,7 +374,7 @@ You dont need a LAN port on your laptop as long as you can connect over WLAN to 
 ## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
 
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you dont have a LAN-Router/Switch available see here:
-https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#prepare-wifi
+https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#prepare-wifi
 
 ## Can I directly connect the RaspiBlitz with my laptop?
 
@@ -681,7 +681,7 @@ The display is one of the nice features of the RaspiBlitz but the raspberry can 
 
 Normally with the LCD its easy to see your local IP changes and you can get started quickly. Without it needs a bit more digging thru your network - you can find a good tutorial on that on the RaspiBolt tutorial (origin of RaspiBlitz):
 
-https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#connecting-to-the-network
+https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#connecting-to-the-network
 
 *Please Note: Without a LCD-Hat you cannot simply use the HDMI as alternative, because screen signal is routed to the GPIO pins. On how to switch that back manually - see [waveshare documentation](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)).*
 
@@ -722,7 +722,7 @@ NOTE: On updates this change will get lost and you might need to redo it.
 ## How can I update LND or bitcoind even before the next RaspiBlitz update?
 
 Try updating before a official RaspiBlitz on your very own risk - you can find some info about that here:
-https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_faq.md#how-to-upgrade-bitcoin-core
+https://stadicus.github.io/RaspiBolt/raspibolt_faq.html#how-to-upgrade-bitcoin-core
 
 ## I cannot connect per SSH to my RaspiBlitz. What to do?
 
