@@ -21,7 +21,7 @@ pathTemplateHDD="/mnt/hdd/templateHDD"
 
 # 0 = ask before formatting/init new HDD
 # 1 = auto-formatting every new HDD that needs init
-autoformat=1
+nointeraction=1
 
 # override values if XXcopyStation.conf files exists
 # use when you run this outside RaspiBlitz
@@ -79,7 +79,7 @@ systemctl stop lnd 2>/dev/null
 systemctl stop background 2>/dev/null
 
 
-if [ "${autoformat}" == "1" ]; then
+if [ "${nointeraction}" == "1" ]; then
   echo "setting RaspiBlitz LCD info"
   sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
   sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
@@ -98,7 +98,7 @@ echo "OK - the following drives detected as system drives:"
 echo "$systemDrives"
 echo
 
-if [ "${autoformat}" == "1" ]; then
+if [ "${nointeraction}" == "1" ]; then
   sudo sed -i "s/^message=.*/message='Connect now target HDDs ..'/g" /home/admin/raspiblitz.info 2>/dev/null
   sleep 5
 fi
@@ -140,6 +140,8 @@ do
     # sync bitcoin
     echo "Syncing Bitcoin ..."
 
+    sudo sed -i "s/^message=.*/message='Updating Template: Bitcoin/g" /home/admin/raspiblitz.info 2>/dev/null
+
     # make sure the bitcoin directory in template folder exists
     if [ ! -d "$pathTemplateHDD/bitcoin" ]; then
       echo "creating the bitcoin subfolder in the template folder"
@@ -153,6 +155,8 @@ do
 
       # sync bitcoin
       echo "Syncing Litecoin ..."
+
+      sudo sed -i "s/^message=.*/message='Updating Template: Litecoin/g" /home/admin/raspiblitz.info 2>/dev/null
 
       # make sure the litecoin directory in template folder exists
       if [ ! -d "$pathTemplateHDD/litecoin" ]; then
@@ -229,8 +233,8 @@ Please remove device now.
             " 10 46
           else
 
-            # if config value "autoformat=1" default to format
-            if [ "${autoformat}" != "1" ]; then
+            # if config value "nointeraction=1" default to format
+            if [ "${nointeraction}" != "1" ]; then
               whiptail --title "Format HDD" --yes-button "Format" --no-button "Cancel" --yesno "
 Found new HDD. Do you want to FORMAT now?
 Please temp lable device with: ${formatPartition}
@@ -273,6 +277,9 @@ OK NO FORMAT - Please remove decive now.
         # rsync device
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
+          if [ "${nointeraction}" == "1" ]; then
+            sudo sed -i "s/^message=.*/message='Syncing from Template: ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
+          fi
           rsync -a --info=progress2 ${pathTemplateHDD}/* /mnt/hdd2
           chmod -r 777 /mnt/hdd2
           echo "${partition} " >> ./.syncinfo.tmp
@@ -298,7 +305,7 @@ OK NO FORMAT - Please remove decive now.
   echo ""
 
 
-  if [ "${autoformat}" == "1" ]; then
+  if [ "${nointeraction}" == "1" ]; then
     sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
   fi
 
