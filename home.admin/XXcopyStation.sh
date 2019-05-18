@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# Turns the RaspiBlitz into HDD CopyStation Mode"
  echo "# lightning is deactivated during CopyStationMode"
  echo "# reboot RaspiBlitz to set back to normal mode"
@@ -82,7 +82,7 @@ systemctl stop background 2>/dev/null
 if [ "${autoformat}" == "1" ]; then
   echo "setting RaspiBlitz LCD info"
   sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
-  sudo sed -i "s/^message=.*/message='Make sure target HDDs are not connected yet.\nContinue after 10 seconds ...'/g" /home/admin/raspiblitz.info 2>/dev/null
+  sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
   sleep 10
 else
   echo
@@ -99,7 +99,7 @@ echo "$systemDrives"
 echo
 
 if [ "${autoformat}" == "1" ]; then
-  sudo sed -i "s/^message=.*/message='Connect now HDDs to sync ..'/g" /home/admin/raspiblitz.info 2>/dev/null
+  sudo sed -i "s/^message=.*/message='Connect now target HDDs ..'/g" /home/admin/raspiblitz.info 2>/dev/null
   sleep 5
 fi
 
@@ -238,6 +238,7 @@ Please temp lable device with: ${formatPartition}
               choice=$?
             else
               choice=0
+              sudo sed -i "s/^message=.*/message='Formatting new HDD: ${formatPartition}'/g" /home/admin/raspiblitz.info 2>/dev/null
             fi
 
             # on cancel
@@ -298,7 +299,7 @@ OK NO FORMAT - Please remove decive now.
 
 
   if [ "${autoformat}" == "1" ]; then
-    sudo sed -i "s/^message=.*/message='Ready & Synced HDDs:\n${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
+    sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
   fi
 
   sleep 25
