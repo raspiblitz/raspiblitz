@@ -195,10 +195,9 @@ while :
     fi
 
     if [ "${state}" = "copystation" ]; then
-      l1="COPYSTATION MODE\n"
-      l2="${message}\n"
-      l3="reboot 4 back to normal"
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 6 ${boxwidth}
+      l1="COPY STATION MODE\n"
+      l2="${message}"
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2" 6 56
       sleep 2
       continue
     fi
