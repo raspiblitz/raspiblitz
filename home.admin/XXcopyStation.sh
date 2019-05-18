@@ -42,11 +42,11 @@ if [ "$1" != "-foreground" ]; then
   if [ ${#screenPID} -eq 0 ]; then
     # start copystation in sreen 
     echo "starting copystation screen session"
-    screen -S copystation -dm /home/admin/XXcopyStation.sh -foreground
+    screen -S copystation -dr /home/admin/XXcopyStation.sh -foreground
     exit 0
   else
     echo "changing into running copystation screen session"
-    screen -S copystation
+    screen -d -r
     exit 0
   fi
 fi
@@ -85,7 +85,7 @@ if [ "${nointeraction}" == "1" ]; then
   echo "setting RaspiBlitz LCD info"
   sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
   sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
-  sleep 10
+  sleep 30
 else
   echo
   echo "*** INIT HDD SCAN"
