@@ -43,9 +43,11 @@ if [ "$1" != "-foreground" ]; then
     # start copystation in sreen 
     echo "starting copystation screen session"
     screen -S copystation -dm /home/admin/XXcopyStation.sh -foreground
+    exit 0
   else
     echo "changing into running copystation screen session"
     screen -S copystation
+    exit 0
   fi
 fi
 
