@@ -42,7 +42,7 @@ if [ "$1" != "-foreground" ]; then
   if [ ${#screenPID} -eq 0 ]; then
     # start copystation in sreen 
     echo "starting copystation screen session"
-    screen -S copystation -dr /home/admin/XXcopyStation.sh -foreground
+    screen -S copystation -dR /home/admin/XXcopyStation.sh -foreground
     exit 0
   else
     echo "changing into running copystation screen session"
