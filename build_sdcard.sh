@@ -148,6 +148,12 @@ if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
   sudo adduser pi sudo
 fi
 
+# special prepare when Nvidia Jetson Nano 
+if [ "${baseImage}" = "ubuntu" ] && [ ${isAARCH64} -eq 1 ] ; then
+  # disable GUI on boot
+  sudo systemctl set-default multi-user.target
+fi
+
 echo ""
 echo "*** CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
