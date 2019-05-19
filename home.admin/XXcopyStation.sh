@@ -25,7 +25,13 @@ nointeraction=1
 
 # override values if XXcopyStation.conf files exists
 # use when you run this outside RaspiBlitz
+# - clean Ubuntu install
+# - install bitcoind as systemd service
+# - disable automount: https://askubuntu.com/questions/89244/how-to-disable-automount-in-nautiluss-preferences#102601
+# - clone the github to get script (or download)
+# - set your pathes bitcoin/template in conf file
 source ./XXcopyStation.conf 2>/dev/null
+# -- start script with parameter "-foreground"
 
 ####### SCRIPT #############
 
@@ -155,7 +161,7 @@ do
 
     rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/indexes ${pathBitcoinBlockchain}/blocks ${pathBitcoinBlockchain}/testnet3 ${pathTemplateHDD}/bitcoin
 
-    if [ ! -d "${pathLitecoinBlockchain}" ]; then
+    if [ -d "${pathLitecoinBlockchain}" ]; then
 
       # sync litecoin
       echo "Syncing Litecoin ..."
@@ -305,9 +311,7 @@ OK NO FORMAT - Please remove decive now.
   echo "To stop copystation script: CTRL+c"
   echo ""
 
-  if [ "${nointeraction}" == "1" ]; then
-    sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
-  fi
+  sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
 
   sleep 25
 
