@@ -157,17 +157,14 @@ do
 
     if [ ! -d "${pathLitecoinBlockchain}" ]; then
 
-      # sync bitcoin
+      # sync litecoin
       echo "Syncing Litecoin ..."
 
-      sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
+      echo "creating the litecoin subfolder in the template folder"
+      mkdir ${pathTemplateHDD}/litecoin 2>/dev/null
+      chmod 777 ${pathTemplateHDD}/litecoin 2>/dev/null
 
-      # make sure the litecoin directory in template folder exists
-      if [ ! -d "$pathTemplateHDD/litecoin" ]; then
-        echo "creating the litecoin subfolder in the template folder"
-        mkdir ${pathTemplateHDD}/litecoin
-        chmod 777 ${pathTemplateHDD}/litecoin
-      fi
+      sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
       rsync -a --info=progress2 ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/indexes ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
 
