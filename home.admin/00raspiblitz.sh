@@ -79,7 +79,7 @@ fi
 if [ "${state}" = "copystation" ]; then
   echo "Copy Station is Runnning ..."
   echo "reboot to return to normal"
-  /home/admin/XXcopyStation.sh
+  sudo /home/admin/XXcopyStation.sh
   exit
 fi
 

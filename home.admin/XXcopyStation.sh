@@ -144,7 +144,7 @@ do
     # sync bitcoin
     echo "Syncing Bitcoin ..."
 
-    sudo sed -i "s/^message=.*/message='Updating Template: Bitcoin/g" /home/admin/raspiblitz.info 2>/dev/null
+    sudo sed -i "s/^message=.*/message='Updating Template: Bitcoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
     # make sure the bitcoin directory in template folder exists
     if [ ! -d "$pathTemplateHDD/bitcoin" ]; then
@@ -160,7 +160,7 @@ do
       # sync bitcoin
       echo "Syncing Litecoin ..."
 
-      sudo sed -i "s/^message=.*/message='Updating Template: Litecoin/g" /home/admin/raspiblitz.info 2>/dev/null
+      sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
       # make sure the litecoin directory in template folder exists
       if [ ! -d "$pathTemplateHDD/litecoin" ]; then
