@@ -86,6 +86,7 @@ if [ "${nointeraction}" == "1" ]; then
   echo "setting RaspiBlitz LCD info"
   sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
   sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
+  echo "Disconnect target HDDs! .. 30ses until continue."
   sleep 30
 else
   echo
@@ -306,7 +307,6 @@ OK NO FORMAT - Please remove decive now.
   echo "Its safe to disconnect/remove HDDs now."
   echo "To stop copystation script: CTRL+c"
   echo ""
-
 
   if [ "${nointeraction}" == "1" ]; then
     sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
