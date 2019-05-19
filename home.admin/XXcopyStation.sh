@@ -289,6 +289,7 @@ OK NO FORMAT - Please remove decive now.
           fi
           rsync -a --info=progress2 ${pathTemplateHDD}/* /mnt/hdd2
           chmod -r 777 /mnt/hdd2
+          rm -r /mnt/hdd2/lost+found 2>/dev/null
           echo "${partition} " >> ./.syncinfo.tmp
         else
           echo "FAIL: was not able to mount --> ${partition}"
