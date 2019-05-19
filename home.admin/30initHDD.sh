@@ -50,6 +50,8 @@ if [ ${existsHDD} -eq 1 ]; then
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo "You HDD was detected with the size of ${isSize} bytes"
       echo "For ${network} at least ${minSize} bytes is recommended"
+      echo "If you know the HDD is bigger then detected, please"
+      echo "change HDD to 1 partition on another computer first," 
       echo "If you want to change to a bigger HDD:"
       echo "* Unplug power of RaspiBlitz"
       echo "* Make a fresh SD card again"
