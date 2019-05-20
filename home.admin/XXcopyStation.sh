@@ -312,7 +312,7 @@ OK NO FORMAT - Please remove decive now.
   echo "To stop copystation script: CTRL+c"
   echo ""
 
-  sudo sed -i "s/^message=.*/message='Ready & Synced HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
+  sudo sed -i "s/^message=.*/message='Ready HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
 
   sleep 25
 
