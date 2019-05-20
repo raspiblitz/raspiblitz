@@ -345,27 +345,32 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.18.0"
+# bitcoinVersion="0.18.0" # commented out checksums for this version until lnd version >0.5.1
+bitcoinVersion="0.17.1"
 
 # set OS version and checksum
 # needed to make sure download is not changed
-# calulate with sha256sum and also check with SHA256SUMS.asc
+# calculate with sha256sum and also check with SHA256SUMS.asc
 # https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
 if [ ${isARM} -eq 1 ] ; then
   bitcoinOSversion="arm-linux-gnueabihf"
-  bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
+  # bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
+  bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   bitcoinOSversion="aarch64-linux-gnu"
-  bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
+  # bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
+  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-  bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
+  # bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
+  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
 fi
 if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
-  bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
+  # bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
+  bitcoinSHA256="b1e1dcf8265521fef9021a9d49d8661833e3f844ca9a410a9dd12a617553dda1"
 fi
 
 echo ""
