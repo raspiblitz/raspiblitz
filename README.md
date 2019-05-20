@@ -120,6 +120,8 @@ Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win1
 
 ## Support
 
+Get get help on RaspiBlitz setup and to exchange on how to best manage/run your node - try the community managed telegram group: https://t.me/raspiblitz
+
 If you run into a problem or you have still a question, follow the steps below to get support. Also check the [setup documentation](#setup-process-detailed-documentation) for details.
 
 1. Lookup the [FAQ](FAQ.md) if you can find an answere to this question/problem.
