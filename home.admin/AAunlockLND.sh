@@ -30,5 +30,6 @@ while :
     echo ""
     echo "network(${network}) chain(${chain})"
     sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
-    echo "Wallet still locked - please try again or Cancel with CTRL+C"
+    echo "Wallet still locked - please try again or"
+    echo "Cancel with CTRL+C - back to setup with command: raspiblitz"
   done
