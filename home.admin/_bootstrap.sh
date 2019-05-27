@@ -148,17 +148,23 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   # detect for correct device name (the biggest partition)
   hddDeviceName="sda1"
   hddSecondPartitionExists=$(lsblk | grep -c sda2)
-  if [ ${hddSecondPartitionExists} -eq 1 ]; then
+  hddSecondDriveExists=$(lsblk | grep -c sdb)
+  if [ ${hddSecondPartitionExists} -eq 1 ] || [ ${hddSecondDriveExists} -eq 1 ] ; then
     echo "HDD has a second partition - choosing the bigger one ..." >> $logFile
     # get both with size
     size1=$(lsblk -o NAME,SIZE -b | grep "sda1" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
     echo "sda1(${size1})" >> $logFile
     size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
     echo "sda2(${size2})" >> $logFile
-    # chosse to run with the bigger one
+    size3=$(lsblk -o NAME,SIZE -b | grep "sdb" | awk '{ print substr( $0, 8, length($0)-2 ) }' | xargs)
+    echo "sdb(${size3})" >> $logFile
+    # choose to run with the bigger one
     if [ ${size2} -gt ${size1} ]; then
       echo "sda2 is BIGGER - run with this one" >> $logFile
       hddDeviceName="sda2"
+    elif [ ${size3} -gt ${size1} ]; then
+      echo "sdb is BIGGER - run with this one" >> $logFile
+      hddDeviceName="sdb"      
     else
       echo "sda1 is BIGGER - run with this one" >> $logFile
       hddDeviceName="sda1"
@@ -469,13 +475,38 @@ sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
 
 ################################
-# STRESSTEST HARDWARE
+# RECORD BASEIMAGE
 ################################
 
-# generate stresstest report on every startup (in case hardware has changed)
-sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
-sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+echo "baseimage=${baseImage}" >> $infoFile
 
-echo "DONE BOOTSTRAP" >> $logFile
-exit 0
+################################
+# STRESSTEST RASPBERRY PI
+################################
+
+if [ "${baseImage}" = "raspbian" ] ; then
+  # generate stresstest report on every startup (in case hardware has changed)
+  sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
+  sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
+  sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+
+  echo "DONE BOOTSTRAP" >> $logFile
+  exit 0
+fi

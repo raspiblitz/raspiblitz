@@ -49,8 +49,11 @@ lnd_macaroon_dir="/home/bitcoin/.lnd/data/chain/${network}/${chain}net"
 # get uptime & load
 load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
 
-# get CPU temp
-cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
+# get CPU temp - no measurement in a VM
+cpu=0
+if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
+  cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
+fi
 tempC=$((cpu/1000))
 tempF=$(((cpu/1000) * (9/5) + 32))
 
@@ -75,9 +78,9 @@ else
 fi
 
 # get network traffic
-# ifconfig does not show eth0 on Armbian - get first traffic info 
+# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info 
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ]; then
+if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
   network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
   network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 else
@@ -305,7 +308,7 @@ ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s
+${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s${color_gray}
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s${torrentBaseStatus}${torrentUpdateStatus}

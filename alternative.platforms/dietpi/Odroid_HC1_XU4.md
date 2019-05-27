@@ -34,13 +34,13 @@ The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootz
 https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
 2) Burn it to the SD card with [Etcher](https://www.balena.io/etcher/)
 
-3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/Automation_Custom_Script.sh)
+3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh)
 
 4) Copy them to the /boot directory of the DietPi SDcard
 
-    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/dev/dietpi#excerpts-from-the-customized-dietpitxt))
+    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/master/alternative.platforms/dietpi#excerpts-from-the-customized-dietpitxt))
 
-    [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
+    [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
     (Optionally open the file with a text editor and uncomment (remove the `#` from the front of) the line with the branch you want to build the SDcard from.) 
 
 5) Assemble and boot the Odroid
@@ -133,13 +133,13 @@ Changing the SSH server will change the SSH keys again. To clear:
 
 ### Run the RaspiBlitz build_sdcard.sh script
 
-* Format of the command to build the SDcard:  
+* Run this command to build from the master branch of @rootzoll:  
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`  
+This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
+
+* Format of the command to build the SDcard from an alternative branch:  
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
 If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
-
-* Example: run from the dev branch @rootzoll:  
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev rootzoll`  
-This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
 
 * Restart when done and log back in now as `admin`:  
 `ssh admin@[IP-OF-DROIDBLITZ]`  

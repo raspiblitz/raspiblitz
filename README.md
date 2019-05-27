@@ -44,9 +44,15 @@ The RaspiBlitz is build from the following parts:
 
 **All together under 160 USD / 140 EUR (depending on country & shop)**
 
-## Amazon Shopping Lists
+### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-These are the community currated shopping lists based on country:
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) *(pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)*
+
+*To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org*
+
+### International Shopping Lists (buy parts & build it yourself)
+
+The cheapest way is to buy ans assemble the single parts yourself. These are the community currated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
@@ -57,6 +63,7 @@ These are the community currated shopping lists based on country:
 * [China](shoppinglist_cn.md)
 * [Australia](shoppinglist_au.md)
 * [Czech](shoppinglist_cz.md)
+* [Italy](shoppinglist_it.md)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -119,6 +126,8 @@ Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win1
 * [I cannot connect per SSH to my RaspiBlitz. What to do?](FAQ.md#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
 
 ## Support
+
+Get get help on RaspiBlitz setup and to exchange on how to best manage/run your node - try the community managed telegram group: https://t.me/raspiblitz
 
 If you run into a problem or you have still a question, follow the steps below to get support. Also check the [setup documentation](#setup-process-detailed-documentation) for details.
 
