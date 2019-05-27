@@ -75,6 +75,14 @@ if [ "${state}" = "retorrent" ]; then
   exit
 fi
 
+# singal that copstation is running
+if [ "${state}" = "copystation" ]; then
+  echo "Copy Station is Runnning ..."
+  echo "reboot to return to normal"
+  sudo /home/admin/XXcopyStation.sh
+  exit
+fi
+
 # if pre-sync is running - stop it - before continue
 if [ "${state}" = "presync" ]; then
   # stopping the pre-sync

@@ -455,6 +455,8 @@ The RTL Webinterface is a LND Control Dashboard you can run in your browser with
 
 ![RTL](pictures/RTL-dashboard.png)
 
+Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
+
 Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RTL
 
 ##### LND Auto-Unlock
@@ -485,6 +487,8 @@ At the moment [ZAP (iOS)](https://github.com/LN-Zap/zap-iOS), [Shango (iOS/Andro
 and [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) are available.
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changeing IP of our Home-DSL.
+
+This youtube video explains the "port forwarding" on your router in more detail: https://www.youtube.com/watch?v=KESo7hHXQtg
 
 * [How do I shrink the QR code for connecting my Shango/Zap/Zeus mobile phone?](FAQ.md#how-do-i-shrink-the-qr-code-for-connecting-my-shangozap-mobile-phone)
 
