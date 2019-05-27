@@ -63,6 +63,7 @@ The cheapest way is to buy ans assemble the single parts yourself. These are the
 * [China](shoppinglist_cn.md)
 * [Australia](shoppinglist_au.md)
 * [Czech](shoppinglist_cz.md)
+* [Italy](shoppinglist_it.md)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning thru [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
