@@ -41,12 +41,14 @@ echo ""
 echo "*** CHECK BASE IMAGE ***"
 
 # armv7=32Bit , armv8=64Bit
-echo "Check if Linux ARM based ..." 
+echo "Detect CPU architecture ..." 
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] ; then
+isX86_64=$(uname -m | grep -c 'x86_64')
+isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isX86_32} -eq 0 ] ; then
   echo "!!! FAIL !!!"
-  echo "Can only build on ARM or aarch64, not on:"
+  echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
   uname -m
   exit 1
 else
@@ -338,24 +340,41 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
-echo ""
-echo "*** BITCOIN ***"
+# "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 # set version (change if update is available)
+# https://bitcoincore.org/en/download/
+# bitcoinVersion="0.18.0" # commented out checksums for this version until lnd version >0.5.1
 bitcoinVersion="0.17.1"
 
-# set OS version 
+# set OS version and checksum
+# needed to make sure download is not changed
+# calculate with sha256sum and also check with SHA256SUMS.asc
+# https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
 if [ ${isARM} -eq 1 ] ; then
   bitcoinOSversion="arm-linux-gnueabihf"
-  # needed to make sure download is not changed
-  # calulate with sha256sum and also check with SHA256SUMS.asc
+  # bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
   bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   bitcoinOSversion="aarch64-linux-gnu"
+  # bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
   bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
 fi
+if [ ${isX86_64} -eq 1 ] ; then
+  bitcoinOSversion="x86_64-linux-gnu"
+  # bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
+  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
+fi
+if [ ${isX86_32} -eq 1 ] ; then
+  bitcoinOSversion="i686-pc-linux-gnu"
+  # bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
+  bitcoinSHA256="b1e1dcf8265521fef9021a9d49d8661833e3f844ca9a410a9dd12a617553dda1"
+fi
+
+echo ""
+echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -427,51 +446,62 @@ if [ ${installed} -lt 1 ]; then
   exit 1
 fi
 
-echo ""
-echo "*** LITECOIN ***"
-# based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
-
-# set version (change if update is available)
-litecoinVersion="0.16.3"
-litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
-cd /home/admin/download
-
-# download
-binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
-sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
-
-# check download
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
-  exit 1
-fi
-
-# install
-sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
-installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
-if [ ${installed} -lt 1 ]; then
+if [ "${baseImage}" = "raspbian" ]; then
   echo ""
-  echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
-  exit 1
+  echo "*** LITECOIN ***"
+  # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
+
+  # set version (change if update is available)
+  litecoinVersion="0.16.3"
+  litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+  cd /home/admin/download
+
+  # download
+  binaryName="litecoin-${litecoinVersion}-arm-linux-gnueabihf.tar.gz"
+  sudo -u admin wget https://download.litecoin.org/litecoin-${litecoinVersion}/linux/${binaryName}
+
+  # check download
+  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  if [ "${binaryChecksum}" != "${litecoinSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded LITECOIN BINARY not matching SHA256 checksum: ${litecoinSHA256}"
+    exit 1
+  fi
+
+  # install
+  sudo -u admin tar -xvf ${binaryName}
+  sudo install -m 0755 -o root -g root -t /usr/local/bin litecoin-${litecoinVersion}/bin/*
+  installed=$(sudo -u admin litecoind --version | grep "${litecoinVersion}" -c)
+  if [ ${installed} -lt 1 ]; then
+    echo ""
+    echo "!!! BUILD FAILED --> Was not able to install litecoind version(${litecoinVersion})"
+    exit 1
+  fi
 fi
 
-echo ""
-echo "*** LND ***"
-
+# "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6-beta"
+lndVersion="0.6.1-beta"
 
 if [ ${isARM} -eq 1 ] ; then
   lndOSversion="armv7"
-  lndSHA256="effea372c207293fd42b0cc27800da3a70c22f8c9a0e7b5eb8dbe56b5b98e1a3"
+  lndSHA256="5541959c7fde98d76d88cc8070ca626c681ba38c44afcb85bf417a9a677e23c2"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   lndOSversion="arm64"
-  lndSHA256="2f31b13a4da6217ed7e27a44e1705103d7ed846aa2f599b7e5de0e6033a66c19"
+  lndSHA256="d5f7280c324ebc1d322435a0eac4c42dca73ebc6a613878d9e0d33a68276da5c"
 fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256="c55367edb82955dc942baf9f48f79fadde1eee0e86c1d59d2fe1993140ec1b3f"
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256="00a7cd0ca657bb242b0f3acb5f4e26a13fd789946fab73c252118e3f89c1cf57"
+fi 
+
+echo ""
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -534,22 +564,41 @@ fi
 # 
 echo ""
 echo "*** LND API for Python ***"
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 2
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 3
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
 echo "to switch between python2/3: sudo update-alternatives --config python"
 sudo apt-get -f -y install virtualenv
-sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
+sudo -u admin bash -c "cd; sudo virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; sudo pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
+# "*** Installing Go ***"
 # Go is needed for ZAP connect later
-echo "*** Installing Go ***"
-wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
+# see https://golang.org/dl/
+goVersion="1.12.5"
+if [ ${isARM} -eq 1 ] ; then
+  goOSversion="armv6l"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  goOSversion="arm64"
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  goOSversion="amd64"
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  goOSversion="386"
+fi 
+
+echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
+
+# wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
+wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
+if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
 then
     echo "!!! FAIL !!! Download not success."
     exit 1
 fi
-sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go${goVersion}.linux-${goOSversion}.tar.gz
 sudo rm *.gz
 sudo mkdir /usr/local/gocode
 sudo chmod 777 /usr/local/gocode

@@ -1,7 +1,7 @@
 # ⚡️ Alternative platforms for the RaspiBlitz ⚡️
 
 Minimum requirements:
-* ARM V7 or V8 processor architecture (32 or 64 bit)
+* ARMv7, ARMv8 or x86 processor (32 or 64 bit)
 * 1 GB RAM
 * \> 300 GB HDD
 
@@ -30,7 +30,7 @@ Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/).
 
 Assemble and boot.
 
-`ssh root@192.168.1.122`
+`ssh root@192.168.x.x`
 
 password: 1234
 
@@ -51,7 +51,7 @@ Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/).
 
 Assemble and boot.
 
-`ssh root@192.168.1.122`
+`ssh root@192.168.x.x`
 
 password: odroid
 
@@ -86,7 +86,7 @@ Tested on:
 
 The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
 
-Detailed instructions for the RaspiBlitz-on-DietPi: [/dietpi/README.md](/dietpi/README.md)
+Detailed instructions for the RaspiBlitz-on-DietPi: [alternative.platforms/dietpi/README.md](/alternative.platforms/dietpi/README.md)
 
 ---
 Extras for advanced users and powerful hardware:
