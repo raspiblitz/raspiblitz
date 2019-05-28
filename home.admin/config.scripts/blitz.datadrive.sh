@@ -105,7 +105,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # mount the BTRFS drive
   echo "Mounting under /mnt/data ..."
   sudo mkdir -p /mnt/data
-  sudo mount /dev/${dev1} /mnt/data
+  sudo mount barrier=1 /dev/${dev1} /mnt/data
   echo "OK"
   echo ""
 

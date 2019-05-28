@@ -53,14 +53,10 @@ while :
     fi
 
     # get config info if already available
+    source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
-    fi
-
-    # if setup not marked as done (=100) load boostrap info file
-    if [ "${setupStep}" != "100" ]; then
-      source ${infoFile}
     fi
 
     # if no information available from files - set default
@@ -87,8 +83,7 @@ while :
 
       # when in presync - get more info on progress
       elif [ "${state}" = "presync" ]; then
-        # get blockchain sync progress
-        blockchaininfo="$(sudo -u root ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null)"
+        blockchaininfo="$(sudo -u root bitcoin-cli --conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
         message="starting"
         if [ ${#blockchaininfo} -gt 0 ]; then
           message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
@@ -195,6 +190,14 @@ while :
       boxwidth=$((${#localip} + 28))
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
       sleep 3
+      continue
+    fi
+
+    if [ "${state}" = "copystation" ]; then
+      l1="COPY STATION MODE\n"
+      l2="${message}"
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2" 6 56
+      sleep 2
       continue
     fi
 

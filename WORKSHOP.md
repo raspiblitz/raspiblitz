@@ -135,7 +135,7 @@ Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README.
 
 ## Prepare HDDs with Blockchain Data
 
-This is the most time consuming part of the preparation. Try it once to get a feel for how much time you need to prepare one HDD.
+This is the most time consuming part of the preparation. Try it once to get a feel for how much time you need to prepare one HDD. If you prepare more then one HDD check out the "Copystation" script below.
 
 A prepared HDD is formatted in EXT4 and named "BLOCKCHAIN". In folder called `bitcoin` it contains a copy of the following data folders from a running Bitcoin core client (same version on RaspiBlitz).
 
@@ -160,6 +160,20 @@ The easiest way to get a "template" of such HDD is to setup a fresh RaspiBlitz (
 Once you have that "template" you can make a image from that and write that image to the other HDDs. This works for HDDs that all habe
 
 ## Prepare Blockchain Copy Station
+
+In the RaspiBlitz Github repo and also on every RaspiBlitz (since v1.3) you can find the script:
+`/home/admin/CCcopyStation.sh`
+
+This can be used to prepare and keep multiple HDDs in snyc with blockchain data in preparation of a workshop. You can start it directly on a RaspiBlitz and turn it into "Copy Station Mode" with executing on the command line:
+
+`sudo /home/admin/CCcopyStation.sh`
+
+*Beware that it will not run as a Lightning Node during that time (LND is stopped). And to reset it back into normal mode you need to stop the script with `CTLR+c` and the reboot with `sudo shutdown -r now`.*
+
+In "COpy Station Mode" the RaspiBlitz will just run the bitcoind (so it needs network connection), copy fresh blockchain data over to a template folder on the HDD called `/mnt/hdd/templateHDD` and from there syncs it to further HDDs that get connected to it.
+
+If you run it in a setup lke on this photo with an extra powered USB hub, you can connect up to 10 HDDs at once to be synced with an almost up-to-date blockchain.
+
 
 At the moment the "Blockchain Copy Station" is just a computer (laptop - not a RaspberryPi) having a image of a "template" HDD (see above) and you can attach (with a USB3.0 Hub) multiple fresh HHDs to it and start writing in the template image to that.
 
