@@ -278,6 +278,7 @@ sudo -H pip3 install redis
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
 sudo apt-get install -y python-pip
+sudo apt-get install -y python-dev
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
@@ -293,6 +294,7 @@ sudo apt install -y openssh-client
 sudo apt install -y openssh-sftp-server
 # install killall, fuser
 sudo apt-get install -y psmisc
+
 sudo apt-get clean
 sudo apt-get -y autoremove
 
