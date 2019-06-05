@@ -7,6 +7,12 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+if [ ${isRaspbian} -eq 0 ]; then
+  echo "the OS is not Raspbian - the stresstest is only for the Raspberry Pi"
+  exit 0
+fi
+
 # Based on https://github.com/bamarni/pi64/issues/4#issuecomment-292707581
 # sysbench manual: http://imysql.com/wp-content/uploads/2014/10/sysbench-manual.pdf
 
