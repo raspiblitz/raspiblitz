@@ -564,7 +564,8 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
 echo "to switch between python2/3: sudo update-alternatives --config python"
 sudo apt-get -f -y install virtualenv
-sudo -u admin bash -c "cd; sudo virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; sudo pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
+sudo chown -R admin /home/admin
+sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
 # "*** Installing Go ***"
