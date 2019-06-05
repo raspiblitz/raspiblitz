@@ -4,10 +4,10 @@
 # RASPBIAN STRETCH WITH DESKTOP (2019-04-09)
 # https://www.raspberrypi.org/downloads/raspbian/
 # SHA256: 7e10a446f8e57210d0e9ad02f0c833aabb86e58187b4dc02431aff5a3f1ccb83
-# 
+#
 # or download the image for your ARM based SBC on https://DietPi.com
 ##########################################################################
-# setup fresh SD card with image above - login per SSH and run this script: 
+# setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
 echo ""
@@ -41,7 +41,7 @@ echo ""
 echo "*** CHECK BASE IMAGE ***"
 
 # armv7=32Bit , armv8=64Bit
-echo "Detect CPU architecture ..." 
+echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
@@ -56,7 +56,7 @@ else
 fi
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
-echo "Detect Base Image ..." 
+echo "Detect Base Image ..."
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -67,7 +67,7 @@ if [ ${isRaspbian} -gt 0 ]; then
 fi
 if [ ${isArmbian} -gt 0 ]; then
   baseImage="armbian"
-fi 
+fi
 if [ ${isUbuntu} -gt 0 ]; then
 baseImage="ubuntu"
 fi
@@ -143,7 +143,7 @@ fi
 
 # special prepare when Ubuntu or Armbian
 if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
-  # make user pi and add to sudo 
+  # make user pi and add to sudo
   sudo adduser --disabled-password --gecos "" pi
   sudo adduser pi sudo
 fi
@@ -269,11 +269,6 @@ sudo apt-get install -y fbi
 
 # prepare for powertest
 sudo apt install -y sysbench
-
-# prepare dor display service
-# see https://github.com/rootzoll/raspiblitz/issues/88#issuecomment-471342311
-sudo apt-get install -y redis-server
-sudo -H pip3 install redis
 
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
@@ -431,7 +426,7 @@ fi
 
 # correct versions for install if needed
 # just if an small update shows a different formatted version number
-if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
+if [ "${bitcoinVersion}" = "0.17.0.1" ]; then
  bitcoinVersion="0.17.0"
 fi
 
@@ -494,11 +489,11 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
   lndSHA256="c55367edb82955dc942baf9f48f79fadde1eee0e86c1d59d2fe1993140ec1b3f"
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   lndOSversion="386"
   lndSHA256="00a7cd0ca657bb242b0f3acb5f4e26a13fd789946fab73c252118e3f89c1cf57"
-fi 
+fi
 
 echo ""
 echo "*** LND v${lndVersion} for ${lndOSversion} ***"
@@ -506,7 +501,7 @@ echo "*** LND v${lndVersion} for ${lndOSversion} ***"
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
-# bitconner 
+# bitconner
 #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
@@ -561,7 +556,7 @@ fi
 
 # prepare python for lnd api use
 # https://dev.lightning.community/guides/python-grpc/
-# 
+#
 echo ""
 echo "*** LND API for Python ***"
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 3
@@ -584,10 +579,10 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   goOSversion="amd64"
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   goOSversion="386"
-fi 
+fi
 
 echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
 
@@ -781,7 +776,7 @@ echo ""
 
 # install default LCD on DietPi without reboot to allow automatic build
 if [ "${baseImage}" = "dietpi" ]; then
-  echo "Installing the default display available from Amazon" 
+  echo "Installing the default display available from Amazon"
   # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
   cd /home/admin/
   # sudo apt-mark hold raspberrypi-bootloader
@@ -820,7 +815,7 @@ if [ "${baseImage}" = "raspbian" ]; then
 
     # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
     # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-    
+
     echo "--> LCD DEFAULT"
     cd /home/admin/
     sudo apt-mark hold raspberrypi-bootloader
