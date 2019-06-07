@@ -62,6 +62,7 @@ isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
 fi
@@ -149,7 +150,7 @@ if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
 fi
 
 # special prepare when Nvidia Jetson Nano 
-if [ "${baseImage}" = "ubuntu" ] && [ ${isAARCH64} -eq 1 ] ; then
+if [ ${isNvidia} -eq 1 ] ; then
   # disable GUI on boot
   sudo systemctl set-default multi-user.target
 fi
