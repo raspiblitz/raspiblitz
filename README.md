@@ -12,4 +12,13 @@ Command to build your own SD card on any compatible hardware:
 
 Please read and use the issues for discussion.
 
+---
+My main node currently is an Odroid HC1:
+
+Connections are welcome: 
+028a2cb8d51e44d7d7e108c2e80a98cc069145e05a6d2025cf554bd8866fe32993@ddrw66yjyrcc5ryk.onion:9735
+
+https://1ml.com/node/028a2cb8d51e44d7d7e108c2e80a98cc069145e05a6d2025cf554bd8866fe32993
+
+![Odroid HC1](alternative.platforms/dietpi/pictures/DroidBlitz.jpg)
 
