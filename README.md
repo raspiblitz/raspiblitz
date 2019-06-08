@@ -1,4 +1,4 @@
-This a Friendly and Cooperative fork of https://github.com/rootzoll/raspiblitz to focus building on more powerful (and costly) hardware than the Raspberry Pi.
+This is a Friendly and Cooperative fork of https://github.com/rootzoll/raspiblitz to focus building on more powerful (and costly) hardware than the Raspberry Pi.
 
 See the original readme for the description of features: [README.original.md](README.original.md)
 
