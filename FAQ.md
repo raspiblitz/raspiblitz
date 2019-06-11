@@ -772,6 +772,8 @@ To switch this SSH tunneling off again use:
 
 `/home/admin/config.scripts/internet.sshtunnel.py off` and also deactivate the DynamicDNS again. 
 
+To check if a tunnel is running on the tunneling server check: `netstat -tulpn`
+
 ## How to setup just a port-forwarding user on my public server?
 
 Make sure the `/etc/ssh/sshd_config` has the following lines at the end:
