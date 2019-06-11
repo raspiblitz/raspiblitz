@@ -67,11 +67,12 @@ else
   color_ram=${color_green}
 fi
 
-# get free HDD ratio
-hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')" 2>/dev/null)
-hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
+# HDD usage
+hdd_used_space=$(df -h | grep "/dev/sda1" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
+hdd_used_ratio=$(df -h | grep "/dev/sda1" | sed -e's/  */ /g' | cut -d" " -f 5| tr -dc '0-9' 2>/dev/null)
+hdd="${hdd_used_space} (${hdd_used_ratio}%)"
 
-if [ ${hdd_free_ratio} -lt 10 ]; then
+if [ ${hdd_used_ratio} -gt 90 ]; then
   color_hdd="${color_red}\e[7m"
 else
   color_hdd=${color_green}
@@ -308,7 +309,7 @@ ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s${color_gray}
+${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s${torrentBaseStatus}${torrentUpdateStatus}
