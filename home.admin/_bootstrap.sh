@@ -40,7 +40,9 @@ echo "***********************************************" >> $logFile
 
 # display 3 secs logo - try to kickstart LCD
 # see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
+# see https://github.com/rootzoll/raspiblitz/issues/647
+randnum=$(shuf -i 0-8 -n 1)
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
 sudo killall -3 fbi
 
