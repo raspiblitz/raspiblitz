@@ -55,7 +55,7 @@ if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
 fi
 tempC=$((cpu/1000))
-tempF=$((((cpu / 1000) * 18 + 320) / 10))
+tempF=$(((((cpu / 1000) * 18 + 320) + 5) / 10))
 
 # get memory
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
