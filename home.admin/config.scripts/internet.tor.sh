@@ -234,6 +234,7 @@ EOF
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
 
     echo "*** Enable TOR service ***"
+    sudo systemctl daemon-reload
     sudo systemctl enable tor@default
     echo ""
 
