@@ -209,16 +209,18 @@ EOF
     if [ ${networkIsTor} -eq 0 ]; then
 
       echo "Only Connect thru TOR"
-      echo "onlynet=onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
 
+      sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+      echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
       if [ "${network}" = "bitcoin" ]; then
         echo "Adding some bitcoin onion nodes to connect to"
-        echo "addnode=fno4aakpl6sg6y47.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=toguvy5upyuctudx.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=ndndword5lpb7eex.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=6m2iqgnqjxh7ulyk.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=5tuxetn7tar3q5kp.onion" | sudo tee --append /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
       fi
+      sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
       sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
       sudo chown admin:admin /home/admin/.${network}/${network}.conf
@@ -268,14 +270,23 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo ""
 
   echo "*** Changing ${network} Config ***"
-  sudo cat /home/bitcoin/.${network}/${network}.conf | grep -Ev 'onlynet=onion|.onion' | sudo tee /home/bitcoin/.${network}/${network}.conf
+  sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+  startLineNumber=$(cat /home/bitcoin/.${network}/${network}.conf | grep -n 'onlynet=onion' | sed 's/^\([0-9]\+\):.*$/\1/')
+  startLineNumber=$(($startLineNumber-1))
+  if [ ${startLineNumber} -gt 0 ]; then
+    sed -n '1,${startLineNumber}p' /home/bitcoin/.${network}/${network}.conf > /home/bitcoin/.${network}/${network}.conf
+  else
+    echo "FAIL: Was not able to remove TOR config vrom bitcoin.conf "
+    sleep 10
+  fi
+  # sudo cat /home/bitcoin/.${network}/${network}.conf | grep -Ev 'onlynet=onion|.onion' | sudo tee /home/bitcoin/.${network}/${network}.conf
+  sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
   sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
   sudo chown admin:admin /home/admin/.${network}/${network}.conf
   echo ""
 
   echo "*** Removing TOR from LND ***"
   sudo systemctl disable lnd
-
   echo "editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
 
