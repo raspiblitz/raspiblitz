@@ -16,3 +16,5 @@ https://detail.tmall.com/item.htm?id=38476523976&spm=a1z09.2.0.0.46982e8dibAzMc&
 
 LCD Display (68RMB) + case (10RMB):
 https://item.taobao.com/item.htm?spm=a1z09.2.0.0.c1ae2e8dcH0RsY&id=535900910794&_u=s1s69o9df261
+
+**OPTIONAL**: To reduce the risk of undervoltage causing data corruption on the HDD its recommended to add a **Powered USB 3 Hub between HDD and Raspberry Pi** as an additional power source between Raspberry Pi and the HDD. Any Powered USB 3 Hub should work.

@@ -7,6 +7,6 @@
 * LCD-Display: https://www.amazon.co.uk/dp/B01MRQTMTD or https://www.amazon.co.uk/dp/B07L42Z79L
 * Power >=3A: https://www.amazon.co.uk/dp/B017YW2CKM
 
-
-
 *NOTE: Please report if the power supplies above give you 'Undervoltage Reports' on the LCD.*
+
+**OPTIONAL**: To reduce the risk of undervoltage causing data corruption on the HDD its recommended to add a **Powered USB 3 Hub between HDD and Raspberry Pi** as an additional power source between Raspberry Pi and the HDD. Any Powered USB 3 Hub should work. For example this one: https://www.amazon.co.uk/dp/B07B2HJG8P

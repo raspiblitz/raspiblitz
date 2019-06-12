@@ -10,3 +10,5 @@
 **Warning**: This display is different from the one available at Amazon and needs a specific driver! You need to build your own sd card image and select "No" when asked by the building script if you have the default display!
 
 **Info**: Amazon.de (Germany) is also [delivering to Switzerland](https://www.amazon.de/gp/help/customer/display.html?nodeId=1055388) - consider the [German Shopping](shoppinglist_de.md) List because is its more standard and up to date.
+
+**OPTIONAL**: To reduce the risk of undervoltage causing data corruption on the HDD its recommended to add a **Powered USB 3 Hub between HDD and Raspberry Pi** as an additional power source between Raspberry Pi and the HDD. Any Powered USB 3 Hub should work.
