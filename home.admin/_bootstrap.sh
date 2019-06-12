@@ -508,7 +508,7 @@ if [ "${baseImage}" = "raspbian" ] ; then
   sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
   sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
   sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
-
-  echo "DONE BOOTSTRAP" >> $logFile
-  exit 0
 fi
+
+echo "DONE BOOTSTRAP" >> $logFile
+exit 0

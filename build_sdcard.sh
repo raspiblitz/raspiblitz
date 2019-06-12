@@ -62,6 +62,7 @@ isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
 fi
@@ -146,6 +147,12 @@ if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
   # make user pi and add to sudo
   sudo adduser --disabled-password --gecos "" pi
   sudo adduser pi sudo
+fi
+
+# special prepare when Nvidia Jetson Nano 
+if [ ${isNvidia} -eq 1 ] ; then
+  # disable GUI on boot
+  sudo systemctl set-default multi-user.target
 fi
 
 echo ""
@@ -273,6 +280,7 @@ sudo apt install -y sysbench
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
 sudo apt-get install -y python-pip
+sudo apt-get install -y python-dev
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
@@ -288,6 +296,7 @@ sudo apt install -y openssh-client
 sudo apt install -y openssh-sftp-server
 # install killall, fuser
 sudo apt-get install -y psmisc
+
 sudo apt-get clean
 sudo apt-get -y autoremove
 

@@ -18,7 +18,7 @@ Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 All testers are welcome. Open an issue for your specific board to collaborate and share your experience.
 
 ---
-## Armbian
+## Armbian Stretch
 Many SBC-s are supported:
 https://www.armbian.com/download/
 
@@ -40,12 +40,13 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 
 ---
 
-## Ubuntu
+## Ubuntu Bionic
 
 A common distro to be supplied by the manufacturer for various boards.
 
 Tested on:
 * Odroid XU4 with ubuntu-18.04.1-4.14-minimal image from https://de.eu.odroid.in/ubuntu_18.04lts/XU3_XU4_MC1_HC1_HC2
+* Nvidia Jetson Nano with Ubuntu Bionic image from https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write
 
 Burn the image to the SDCard with [Etcher](https://www.balena.io/etcher/).
 
