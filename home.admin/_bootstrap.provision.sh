@@ -117,6 +117,15 @@ else
     echo "Provisioning TESTNET - keep default" >> ${logFile}
 fi
 
+# TOR
+if [ "${runBehindTor}" = "on" ]; then
+    echo "Provisioning TOR - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
+    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
+else 
+    echo "Provisioning TOR - keep default" >> ${logFile}
+fi
+
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
@@ -152,15 +161,6 @@ if [ "${rtlWebinterface}" = "on" ]; then
     sudo systemctl disable RTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL - keep default" >> ${logFile}
-fi
-
-# TOR
-if [ "${runBehindTor}" = "on" ]; then
-    echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
-    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
-else 
-    echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
 # CUSTOM PORT

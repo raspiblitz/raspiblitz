@@ -92,7 +92,7 @@ fi
 sudo mkdir /etc/tor 2>/dev/null
 torrc="/etc/tor/torrc"
 
-# stop services
+# stop services (if running)
 echo "making sure services are not running"
 sudo systemctl stop lnd 2>/dev/null
 sudo systemctl stop ${network}d 2>/dev/null
@@ -197,47 +197,45 @@ EOF
       echo "NYX already installed"
     fi
     echo ""
-  
-    echo "*** Activating TOR system service ***"
+
     echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
-    sudo systemctl daemon-reload
-    sudo systemctl enable tor@default
-    echo ""
-
-    echo "*** Changing ${network} Config ***"
-    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-    if [ ${networkIsTor} -eq 0 ]; then
-
-      echo "Only Connect thru TOR"
-
-      sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
-      echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
-      if [ "${network}" = "bitcoin" ]; then
-        echo "Adding some bitcoin onion nodes to connect to"
-        echo "addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
-      fi
-      sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
-
-      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-      sudo chown admin:admin /home/admin/.${network}/${network}.conf
-
-    else
-      echo "Chain network already configured for TOR"
-    fi
 
   else
-    
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
+  fi
 
-    echo "*** Enable TOR service ***"
-    sudo systemctl daemon-reload
-    sudo systemctl enable tor@default
-    echo ""
+  # ACTIVATE TOR SERVICE
+  echo "*** Enable TOR Service ***"
+  sudo systemctl daemon-reload
+  sudo systemctl enable tor@default
+  echo ""
 
+  # ACTIVATE BITCOIN OVER TOR
+  echo "*** Changing ${network} Config ***"
+  networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
+  if [ ${networkIsTor} -eq 0 ]; then
+    
+    # clean all previous added nodes
+    sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+    
+    echo "Addding TOR config ..."
+    sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+    echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
+    if [ "${network}" = "bitcoin" ]; then
+      # adding some bitcoin onion nodes to connect to to make connection easier
+      echo "addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
+    fi
+    sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+
+    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
+  else
+    echo "Chain network already configured for TOR"
   fi
 
   # ACTIVATE LND OVER TOR
@@ -271,17 +269,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo ""
 
   echo "*** Changing ${network} Config ***"
-  sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
-  startLineNumber=$(cat /home/bitcoin/.${network}/${network}.conf | grep -n 'onlynet=onion' | sed 's/^\([0-9]\+\):.*$/\1/')
-  startLineNumber=$(($startLineNumber-1))
-  if [ ${startLineNumber} -gt 0 ]; then
-    sed -n '1,${startLineNumber}p' /home/bitcoin/.${network}/${network}.conf > /home/bitcoin/.${network}/${network}.conf
-  else
-    echo "FAIL: Was not able to remove TOR config vrom bitcoin.conf "
-    sleep 10
-  fi
-  # sudo cat /home/bitcoin/.${network}/${network}.conf | grep -Ev 'onlynet=onion|.onion' | sudo tee /home/bitcoin/.${network}/${network}.conf
-  sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
   sudo chown admin:admin /home/admin/.${network}/${network}.conf
   echo ""
