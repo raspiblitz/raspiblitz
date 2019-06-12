@@ -69,7 +69,7 @@ fi
 
 # HDD usage
 hdd_used_space=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
-hdd_used_ratio=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 5| tr -dc '0-9' 2>/dev/null)
+hdd_used_ratio=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
 hdd="${hdd_used_space} (${hdd_used_ratio}%)"
 
 if [ ${hdd_used_ratio} -gt 90 ]; then
