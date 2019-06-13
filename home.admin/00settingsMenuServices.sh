@@ -157,14 +157,63 @@ else
   echo "Dynamic Domain unchanged."
 fi
 
+# UPnP
+choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${networkUPnP}" != "${choice}" ]; then
+  echo "BTC UPnP Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+    echo "Starting BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh on
+    networkUPnP="on"
+    needsReboot=1
+  else
+    echo "Stopping BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh off
+    networkUPnP="off"
+    needsReboot=1
+  fi
+else
+  echo "BTC UPnP Setting unchanged."
+fi
+
+# AutoNAT
+choice="off"; check=$(echo "${CHOICES}" | grep -c "8")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${autoNatDiscovery}" != "${choice}" ]; then
+  echo "AUTO NAT Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+    echo "Starting autoNAT ..."
+    /home/admin/config.scripts/lnd.autonat.sh on
+    autoNatDiscovery="on"
+    needsReboot=1
+  else
+    echo "Stopping autoNAT ..."
+    /home/admin/config.scripts/lnd.autonat.sh off
+    autoNatDiscovery="off"
+    needsReboot=1
+  fi
+else
+  echo "LND AUTONAT Setting unchanged."
+fi
+
 # TOR process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
+
+  # make sure AutoNAT & UPnP is off
+  /home/admin/config.scripts/lnd.autonat.sh off 
+  /home/admin/config.scripts/network.upnp.sh off
+
+  # change TOR
   anychange=1
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
   needsReboot=1
+
 else 
   echo "TOR Setting unchanged."
 fi
@@ -215,44 +264,6 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
-fi
-
-# UPnP
-choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${networkUPnP}" != "${choice}" ]; then
-  echo "BTC UPnP Setting changed .."
-  anychange=1
-  if [ "${choice}" = "on" ]; then
-    echo "Starting BTC UPNP ..."
-    /home/admin/config.scripts/network.upnp.sh on
-    needsReboot=1
-  else
-    echo "Stopping BTC UPNP ..."
-    /home/admin/config.scripts/network.upnp.sh off
-    needsReboot=1
-  fi
-else
-  echo "BTC UPnP Setting unchanged."
-fi
-
-# AutoNAT
-choice="off"; check=$(echo "${CHOICES}" | grep -c "8")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoNatDiscovery}" != "${choice}" ]; then
-  echo "AUTO NAT Setting changed .."
-  anychange=1
-  if [ "${choice}" = "on" ]; then
-    echo "Starting autoNAT ..."
-    /home/admin/config.scripts/lnd.autonat.sh on
-    needsReboot=1
-  else
-    echo "Stopping autoNAT ..."
-    /home/admin/config.scripts/lnd.autonat.sh off
-    needsReboot=1
-  fi
-else
-  echo "LND AUTONAT Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
