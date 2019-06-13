@@ -2,7 +2,7 @@
 echo ""
 
 # add bonus scripts (auto install deactivated to reduce third party repos)
-# /home/admin/91addBonus.sh
+/home/admin/91addBonus.sh
 
 ###### SWAP & FS
 echo ""
