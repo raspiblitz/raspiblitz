@@ -17,7 +17,7 @@ if [ ${#network} -eq 0 ]; then
 fi
 
 # check lnd.conf exits 
-confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '${network}.conf')
+confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
 if [ ${confExists} -eq 0 ]; then
   echo "FAIL - /mnt/hdd/${network}/${network}.conf"
   exit 1
