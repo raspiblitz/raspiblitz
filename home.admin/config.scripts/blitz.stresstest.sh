@@ -65,7 +65,7 @@ for (( n=0; n<15; ++n )); do
       ((powerFAIL=powerFAIL+1))
       echo "--> Power CRITICAL detected" >&2
     fi
-    if [ ${voltInt} -lt 1250000 ]; then
+    if [ ${voltInt} -lt 1230000 ]; then
       ((powerWARN=powerWARN+1))
       echo "--> Power WARN detected" >&2
     fi
