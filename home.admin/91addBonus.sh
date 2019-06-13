@@ -5,7 +5,7 @@ cd
 cd /home/admin/assets
 chmod +x lnbalance.sh
 chmod +x lnchannels.sh
-sudo cp lnchannels.sh /usr/local/bin/lnchannels
+sudo cp lnbalance.sh /usr/local/bin/lnbalance
 sudo cp lnchannels.sh /usr/local/bin/lnchannels
 echo "OK"
 
