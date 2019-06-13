@@ -19,7 +19,7 @@ fi
 # check lnd.conf exits 
 confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '${network}.conf')
 if [ ${confExists} -eq 0 ]; then
-  echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"
+  echo "FAIL - /mnt/hdd/${network}/${network}.conf"
   exit 1
 fi
 
