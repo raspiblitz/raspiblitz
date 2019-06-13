@@ -35,6 +35,14 @@ if [ ${mountOK} -eq 1 ]; then
    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
    echo "OK - ${network} setup ready"
 
+   ###### ACTIVATE TOR IF SET DURING SETUP
+   if [ "${runBehindTor}" = "on" ]; then
+     echo "TOR was selected ..."
+     sudo /home/admin/config.scripts/internet.tor.sh on
+   else
+     echo "TOR was not selected"
+   fi
+
    ###### START NETWORK SERVICE
    echo ""
    echo "*** Start ${network} ***"

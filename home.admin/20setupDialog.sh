@@ -64,4 +64,18 @@ sudo /home/admin/config.scripts/blitz.setpassword.sh b
 
 # success info dialog
 dialog --backtitle "RaspiBlitz" --msgbox "OK - RPC password changed \n\nNow starting the Setup of your RaspiBlitz." 7 52
+
+###################
+# TOR BY DEFAULT 
+# https://github.com/rootzoll/raspiblitz/issues/592
+###################
+
+whiptail --title ' Privacy Level - How do you want to run your node? ' --yes-button='Public IP' --no-button='TOR NETWORK' --yesno "
+Running your node with your Public IP is the default but might reveal your personal identity and location.\n
+You can better protect your privacy with running your node as a Hidden Service within the TOR network, but that makes it harder to connect with other non-TOR nodes and remote mobile apps.
+  " 14 75
+if [ $? -eq 1 ]; then
+  echo "runBehindTor=on" >> /home/admin/raspiblitz.info
+fi
+
 clear

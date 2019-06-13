@@ -90,17 +90,28 @@ else
 fi
 echo ""
 
-###### Start LND
+###### Init LND service & start
 
-echo "*** Starting LND ***"
+echo "*** Init LND Service & Start ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
+
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
+
   sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
   sudo chmod +x /etc/systemd/system/lnd.service
+
+  ###### ACTIVATE TOR IF SET DURING SETUP
+  if [ "${runBehindTor}" = "on" ]; then
+    echo "TOR was selected ..."
+    sudo /home/admin/config.scripts/internet.tor.sh lndconf
+  else
+    echo "TOR was not selected"
+  fi
+
   sudo systemctl enable lnd
   sudo systemctl start lnd
   echo ""
