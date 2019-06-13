@@ -36,16 +36,18 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
-1 'Channel Autopilot' ${autoPilot} \
+OPTIONS+=(1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
-8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
-2>&1 >/dev/tty)
+)
+if [ "${runBehindTor}" = "off" ]; then
+  OPTIONS+=(7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
+8 'LND UPnP (AutoNAT)' ${autoNatDiscovery})  
+fi
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 ${OPTIONS[@]} 2>&1 >/dev/tty)
 dialogcancel=$?
 echo "done dialog"
 clear
