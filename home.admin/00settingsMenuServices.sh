@@ -36,7 +36,7 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 7 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
