@@ -12,6 +12,7 @@ if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
+if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -42,7 +43,8 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-7 'AutoNAT / UPnP' ${autoNatDiscovery} \
+7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
+8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 2>&1 >/dev/tty)
 dialogcancel=$?
 echo "done dialog"
@@ -215,8 +217,27 @@ else
   echo "LND Autounlock Setting unchanged."
 fi
 
-# AutoNAT
+# UPnP
 choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${networkUPnP}" != "${choice}" ]; then
+  echo "BTC UPnP Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+    echo "Starting BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh on
+    needsReboot=1
+  else
+    echo "Stopping BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh off
+    needsReboot=1
+  fi
+else
+  echo "BTC UPnP Setting unchanged."
+fi
+
+# AutoNAT
+choice="off"; check=$(echo "${CHOICES}" | grep -c "8")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoNatDiscovery}" != "${choice}" ]; then
   echo "AUTO NAT Setting changed .."

@@ -135,9 +135,18 @@ else
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
 fi
 
-# AUTO NAT DISCOVERY
+# NETWORK UPNP
+if [ "${networkUPnP}" = "on" ]; then
+    echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup UPnP'/g" ${infoFile}
+    sudo /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
+else 
+    echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
+fi
+
+# LND AUTO NAT DISCOVERY
 if [ "${autoNatDiscovery}" = "on" ]; then
-    echo "Provisioning AUTO NAT DISCOVERY - run config script" >> ${logFile}
+    echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else 
