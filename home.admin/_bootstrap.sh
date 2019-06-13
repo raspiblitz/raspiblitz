@@ -510,7 +510,8 @@ if [ "${baseImage}" = "raspbian" ] ; then
   sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
   source /home/admin/stresstest.report
   if [ "${powerWARN}" = "0" ]; then
-    sudo rm /var/log/syslog
+    # https://github.com/rootzoll/raspiblitz/issues/576
+    echo "" > /var/log/syslog
   fi
 fi
 
