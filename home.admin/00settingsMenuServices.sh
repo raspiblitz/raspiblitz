@@ -45,8 +45,6 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
-8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
@@ -56,6 +54,8 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
+7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
+8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 2>&1 >/dev/tty)
 fi
 
