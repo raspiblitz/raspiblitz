@@ -22,6 +22,31 @@ if [ "${extraParameter}" = "-all" ]; then
     echo "cleaning HDD ... (please wait)"
     sudo rm -rfv /mnt/hdd/*
 
+elif [ "${extraParameter}" = "-blockchain" ]; then
+
+    echo "!!!! This will DELETE JUST your blockchain from the HDD."
+    echo "--> It will keep your LND data and other setups."
+    echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
+    read key
+
+    echo "stopping services ... (please wait)"
+    echo "- swap"
+    sudo dphys-swapfile swapoff
+    echo "- background"
+    sudo systemctl stop background 2>/dev/null
+    echo "- lnd"
+    sudo systemctl stop lnd.service 2>/dev/null
+    echo "- blockchain"
+    sudo systemctl stop bitcoind.service 2>/dev/null
+    sudo systemctl stop litecoind.service 2>/dev/null
+
+    echo "DELETING ..."
+    sudo rm -f -r /mnt/hdd/bitcoin 2>/dev/null
+    sudo rm -f -r /mnt/hdd/litecoin 2>/dev/null
+
+    echo "Starting Repair Options ..."
+    /home/admin/XXrepairBlockchain.sh
+    
 else
 
     echo "!!!! This will DELETE your personal data & POSSIBLE FUNDS from the HDD !!!!"
