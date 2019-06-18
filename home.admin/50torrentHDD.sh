@@ -22,8 +22,12 @@ source /home/admin/raspiblitz.info
 # in directory /home.admin/assets/
 # WITHOUT THE '.torrent' ENDING
 
-bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
-bitcoinUpdate="raspiblitz-bitcoin1-2019-04-09-update"
+#bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
+#bitcoinUpdate="raspiblitz-bitcoin1-2019-04-09-update"
+# taken from https://getbitcoinblockchain.com/
+# TODO later first try to download from that website and have local torrent files for backup
+bitcoinBase="bitcoin2-base"
+bitcoinUpdate="bitcoin2-update"
 
 litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
 litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
