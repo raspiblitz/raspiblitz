@@ -11,7 +11,7 @@ OPTIONS=(HARDWARE "Run Hardwaretest" \
          CLEANHDD "Delete Data - keep Blockchian"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 15 50 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 10 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
