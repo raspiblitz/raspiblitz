@@ -580,7 +580,7 @@ echo ""
 # "*** Installing Go ***"
 # Go is needed for ZAP connect later
 # see https://golang.org/dl/
-goVersion="1.12.5"
+goVersion="1.12.6"
 if [ ${isARM} -eq 1 ] ; then
   goOSversion="armv6l"
 fi
