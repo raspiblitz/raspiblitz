@@ -207,7 +207,7 @@ To run a BACKUP of funds & channels first is recommended.
 " 13 65
 
           clear
-          /home/admin/XXrepairBlockchain.sh
+          /home/admin/98repairBlockchain.sh
           /home/admin/00raspiblitz.sh
           exit
 

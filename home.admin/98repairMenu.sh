@@ -7,7 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
-         BLOCKCHAIN "Redownload Blockchain" \
+         BLOCKCHAIN "Delete Blockchain & Re-Download" \
          CLEANHDD "Delete Data - keep Blockchain"
 	)
 
@@ -16,21 +16,50 @@ CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 12 60 5 "${OPTIONS[
 clear
 case $CHOICE in
   HARDWARE)
-    sudo ./05hardwareTest.sh
-    ./00mainMenu.sh
+    sudo /home/admin/05hardwareTest.sh
+    /home/admin/00mainMenu.sh
     ;;
   SOFTWARE)
-    sudo ./XXdebugLogs.sh
+    sudo /home/admin/XXdebugLogs.sh
     echo "Press ENTER to return to main menu."
     read key
-    ./00mainMenu.sh
+    /home/admin/00mainMenu.sh
     ;;
   BLOCKCHAIN)
-    ./XXcleanHDD.sh -blockchain
+    /home/admin/XXcleanHDD.sh -blockchain
     exit 1;
     ;;
   CLEANHDD)
-    ./XXcleanHDD.sh
+  
+    whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
+Before deleting your data on HDD, do you
+want to make a backup of all your LND Data
+and download that file to your laptop.
+
+Do you want to download LND Data Backup now?
+      " 12 58
+    if [ $? -eq 0 ]; then
+      clear
+      echo "*************************************"
+      echo "* PREPARING LND BACKUP DOWNLOAD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      /home/admin/config.scripts/lnd.rescue.sh backup
+      echo
+      echo "PRESS ENTER to continue once your done downloading."
+      read key
+    else
+      clear
+      echo "*************************************"
+      echo "* JUST MAKING BACKUP TO OLD SD CARD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      /home/admin/config.scripts/lnd.rescue.sh backup no-download
+    fi
+
+    /home/admin/XXcleanHDD.sh
     exit 1;
     ;;
 esac

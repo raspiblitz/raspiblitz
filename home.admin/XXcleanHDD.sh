@@ -24,8 +24,9 @@ if [ "${extraParameter}" = "-all" ]; then
 
 elif [ "${extraParameter}" = "-blockchain" ]; then
 
-    echo "!!!! This will DELETE JUST your blockchain from the HDD."
+    echo "This will DELETE JUST your blockchain from the HDD."
     echo "--> It will keep your LND data and other setups."
+    echo "--> You will get presented re-download options."
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
 
@@ -39,13 +40,13 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
     sudo systemctl stop litecoind.service 2>/dev/null
-
+    echo ""
     echo "DELETING ..."
     sudo rm -f -r /mnt/hdd/bitcoin 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin 2>/dev/null
 
     echo "Starting Repair Options ..."
-    /home/admin/XXrepairBlockchain.sh
+    /home/admin/98repairBlockchain.sh
     
 else
 
