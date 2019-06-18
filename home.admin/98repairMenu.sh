@@ -26,7 +26,7 @@ case $CHOICE in
     ./00mainMenu.sh
     ;;
   BLOCKCHAIN)
-    ./XXcleanHDD.sh --blockchain
+    ./XXcleanHDD.sh -blockchain
     exit 1;
     ;;
   CLEANHDD)

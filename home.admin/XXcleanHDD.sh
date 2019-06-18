@@ -51,7 +51,6 @@ else
 
     echo "!!!! This will DELETE your personal data & POSSIBLE FUNDS from the HDD !!!!"
     echo "--> It will keep Blockchain data - so you dont have to download/copy again."
-    echo "--> If you want to delete also blockchain data, please run with '-all' parameter."
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
 
