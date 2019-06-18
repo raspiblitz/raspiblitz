@@ -6,33 +6,31 @@ source /mnt/hdd/raspiblitz.conf
 
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
-         SOFTWARE "Run Softwaretest" \
+         SOFTWARE "Run Softwaretest (DebugReport)" \
          BLOCKCHAIN "Redownload Blockchain" \
-         CLEANHDD "Delete Data - keep Blockchian"
+         CLEANHDD "Delete Data - keep Blockchain"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 10 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 12 60 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
   HARDWARE)
-    echo "HARDWARE"
-    read key
-    exit 1;
+    sudo ./05hardwareTest.sh
+    ./00mainMenu.sh
     ;;
   SOFTWARE)
-    echo "SOFTWARE"
+    sudo ./XXdebugLogs.sh
+    echo "Press ENTER to return to main menu."
     read key
-    exit 1;
+    ./00mainMenu.sh
     ;;
   BLOCKCHAIN)
-    echo "BLOCKCHAIN"
-    read key
+    ./XXcleanHDD.sh --blockchain
     exit 1;
     ;;
   CLEANHDD)
-    echo "CLEANHDD"
-    read key
+    ./XXcleanHDD.sh
     exit 1;
     ;;
 esac
