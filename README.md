@@ -1,5 +1,11 @@
 This is a Friendly and Cooperative fork of https://github.com/rootzoll/raspiblitz to focus building on more powerful (and costly) hardware than the Raspberry Pi.
 
+---
+## Published SDcard images:
+
+[RaspiBlitz1.0_OdroidHC1_DietPi6.21.1.img](https://mega.nz/#F!EVNAAQiB!ZyLHP2dJMRSVjZOTCQMIYA)
+
+---
 See the original readme for the description of features: [README.original.md](README.original.md)
 
 Readme for the alternative platforms: [/alternative.platforms/README.md](/alternative.platforms/README.md)
