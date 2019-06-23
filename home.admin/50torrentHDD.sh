@@ -344,6 +344,10 @@ fi
 # the path torrent was download to
 targetPath1="${targetDir}/${baseTorrentFile}"
 targetPath2="${targetDir}/${updateTorrentFile}"
+if [ "$network" = "bitcoin" ]; then
+  targetPath1="${targetDir}/blockchain"
+  targetPath2="${targetDir}/update/blockchain"
+fi
 
 # check that path exists
 contentPath1=$(sudo ls ${targetPath1} 2>/dev/null)
