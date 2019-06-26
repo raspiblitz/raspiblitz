@@ -164,7 +164,7 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      minSize=250000000000
+      minSize=230000000000
       if [ "${network}" = "litecoin" ]; then
         minSize=20000000000
       fi
