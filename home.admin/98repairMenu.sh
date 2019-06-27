@@ -55,7 +55,7 @@ OPTIONS=(HARDWARE "Run Hardwaretest" \
          RESET-ALL "Delete HDD completly to start fresh"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 14 60 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 14 62 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
