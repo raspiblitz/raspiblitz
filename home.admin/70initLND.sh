@@ -215,7 +215,9 @@ if [ ${walletExists} -eq 0 ]; then
       fi
     done
 
-    sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
+    if [ ${setupStep} -lt 100 ]; then
+      sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
+    fi
 
   else
 
@@ -457,9 +459,21 @@ else
 fi
 echo ""
 
-# set SetupState (scan is done - so its 80%)
-sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
+if [ ${setupStep} -lt 100 ]; then
 
-###### finishSetup
-sudo /home/admin/90finishSetup.sh
-sudo /home/admin/95finalSetup.sh
+  # set SetupState (scan is done - so its 80%)
+  sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
+
+  ###### finishSetup
+  sudo /home/admin/90finishSetup.sh
+  sudo /home/admin/95finalSetup.sh
+
+else
+
+  whiptail --title "RESET DONE" --msgbox "
+OK LND Reset is done.
+System will restart now.
+" 10 35
+  sudo shutdown -r now
+
+fi
