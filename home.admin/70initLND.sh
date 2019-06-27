@@ -75,6 +75,9 @@ while [ ${chainIsReady} -eq 0 ]
 echo "*** Check LND Config ***"
 configExists=$( sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
+  echo "Creating LND config ..."
+  sudo mkdir /mnt/hdd/lnd 2> /dev/null
+  sudo chown -r bitcoin:bitcoin /mnt/hdd/lnd/
   sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
   source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
   sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf
