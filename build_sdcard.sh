@@ -1,11 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2019-04-09)
+# Raspbian Buster Lite (2019-06-20)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 7e10a446f8e57210d0e9ad02f0c833aabb86e58187b4dc02431aff5a3f1ccb83
-#
-# or download the image for your ARM based SBC on https://DietPi.com
+# SHA256: 9009409a9f969b117602d85d992d90563f181a904bc3812bdd880fc493185234
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
