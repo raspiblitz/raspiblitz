@@ -48,7 +48,7 @@ if [ ${mountOK} -eq 1 ]; then
    echo "*** Start ${network} ***"
    echo "This can take a while .."
    sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-   sudo chmod +x /etc/systemd/system/${network}d.service
+   #sudo chmod +x /etc/systemd/system/${network}d.service
    sudo systemctl daemon-reload
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service

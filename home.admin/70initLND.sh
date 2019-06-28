@@ -105,7 +105,7 @@ if [ ${lndRunning} -eq 0 ]; then
   sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
-  sudo chmod +x /etc/systemd/system/lnd.service
+  #sudo chmod +x /etc/systemd/system/lnd.service
 
   ###### ACTIVATE TOR IF SET DURING SETUP
   if [ "${runBehindTor}" = "on" ]; then
