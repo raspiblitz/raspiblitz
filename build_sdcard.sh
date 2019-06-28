@@ -833,6 +833,7 @@ if [ "${baseImage}" = "raspbian" ]; then
     sudo chmod -R 755 LCD-show
     sudo chown -R admin:admin LCD-show
     cd LCD-show/
+    git reset --hard ce52014
     sudo ./LCD35-show
 
   else
