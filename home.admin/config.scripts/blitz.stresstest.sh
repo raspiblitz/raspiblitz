@@ -45,8 +45,8 @@ else
   # raspberryPi 4 and up (USB-C power connector)
   voltWARN=866000
   voltFAIL=866000
-  tempWARNING=6500
-  tempCRTICAL=6999
+  tempWARNING=6900
+  tempCRTICAL=7799
 fi
 
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
