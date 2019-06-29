@@ -369,6 +369,7 @@ if [ ${torrentError} -gt 0 ]; then
   case $response in
     1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;
   esac
+  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
   ./00raspiblitz.sh
   exit 1;
   
