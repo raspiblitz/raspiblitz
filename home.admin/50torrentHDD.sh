@@ -38,11 +38,6 @@ updateTorrentFile=${bitcoinUpdate}
 if [ "$network" = "litecoin" ]; then
   baseTorrentFile=${litecoinBase}
   updateTorrentFile=${litecoinUpdate}
-else
-
-  # try download latest getbitcoinblockchain.com torrent files
-  
-
 fi
 echo "# TORRENT-FILES"
 echo "baseTorrent='${baseTorrentFile}'"
