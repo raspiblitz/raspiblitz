@@ -142,7 +142,6 @@ A prepared HDD is formatted in EXT4 and named "BLOCKCHAIN". In folder called `bi
 ```
 /bitcoin/blocks
 /bitcoin/chainstate
-/bitcoin/indexes
 ```
 
 optionaly you can add also the testnet data:
@@ -150,7 +149,6 @@ optionaly you can add also the testnet data:
 ```
 /bitcoin/testnet3/blocks
 /bitcoin/testnet3/chainstate
-/bitcoin/testnet3/indexes
 ```
 
 The bitcoin core client the folders are from needs to have `txindex=1` in the bitcoin.conf and needs to be stopped while the data is copied to the HDD.

@@ -5,12 +5,31 @@ source /home/admin/raspiblitz.info
 
 # only show warning when bitcoin
 if [ "$network" = "bitcoin" ]; then
-  msg=" The RaspberryPi has very limited CPU power.\n"
-  msg="$msg To sync & validate the complete blockchain\n"
-  msg="$msg can take multiple days - even weeks!\n"
-  msg="$msg Its recommended to use another option.\n"
-  msg="$msg \n"
-  msg="$msg So do you really want start syncing now?"
+
+  # detect hardware version of RaspberryPi
+  # https://www.unixtutorial.org/command-to-confirm-raspberry-pi-model
+  raspberryPi=$(cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g')
+  if [ ${#raspberryPi} -eq 0 ]; then
+    raspberryPi=0
+  fi
+  echo "RaspberryPi Model Version: ${raspberryPi}"
+  if [ ${raspberryPi} -lt 4 ]; then
+    # raspberryPi 3 and lower
+    msg=" This old RaspberryPi has very limited CPU power.\n"
+    msg="$msg To sync & validate the complete blockchain\n"
+    msg="$msg can take multiple days - even weeksn"
+    msg="$msg Its recommended to use another option.\n"
+    msg="$msg \n"
+    msg="$msg So do you really want start syncing now?"
+  else
+    # raspberryPi 4 and up
+    msg=" Your RaspiBlitz will sync and validate\n"
+    msg="$msg the complete blockchain by itself.\n"
+    msg="$msg This can take multiple days, but\n"
+    msg="$msg its the best to do it this way.\n"
+    msg="$msg \n"
+    msg="$msg So do you want start syncing now?"
+  fi
   
   dialog --title " WARNING " --yesno "${msg}" 11 57
   response=$?
@@ -21,11 +40,19 @@ if [ "$network" = "bitcoin" ]; then
   esac
 
   clear
-  echo "********************************"
-  echo "This is madness. This is Sparta!"
-  echo "********************************"
-  echo ""
-  sleep 3
+  if [ ${raspberryPi} -lt 4 ]; then
+    echo "********************************"
+    echo "This is madness. This is Sparta!"
+    echo "********************************"
+    echo ""
+    sleep 3
+  else
+    echo "**********************************"
+    echo "Dont Trust, verify - starting sync"
+    echo "**********************************"
+    echo ""
+    sleep 3
+  fi
 
 fi  
 

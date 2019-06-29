@@ -105,23 +105,8 @@ fi
 echo ""
 echo "*** Copy Blockchain ***"
 sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/chainstate /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/indexes /mnt/hdd/bitcoin
 sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/testnet3 /mnt/hdd/bitcoin
 sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/hdd/bitcoin
-
-# echo "cleaning up - ok if files do not exists"
-# sudo rm /mnt/hdd/${network}/${network}.conf
-# sudo rm /mnt/hdd/${network}/${network}.pid
-# sudo rm /mnt/hdd/${network}/banlist.dat
-# sudo rm /mnt/hdd/${network}/debug.log
-# sudo rm /mnt/hdd/${network}/fee_estimates.dat
-# sudo rm /mnt/hdd/${network}/mempool.dat
-# sudo rm /mnt/hdd/${network}/peers.dat
-# sudo rm /mnt/hdd/${network}/testnet3/banlist.dat
-# sudo rm /mnt/hdd/${network}/testnet3/debug.log
-# sudo rm /mnt/hdd/${network}/testnet3/fee_estimates.dat
-# sudo rm /mnt/hdd/${network}/testnet3/mempool.dat
-# sudo rm /mnt/hdd/${network}/testnet3/peers.dat
 
 sudo umount -l /mnt/genesis
 echo "OK - Copy done :)"
@@ -159,17 +144,6 @@ if [ ${count} -gt 0 ]; then
 fi
 if [ ${count} -lt 1400 ]; then
   echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
-  quickCheckOK=0
-fi
-count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | grep -c '.ldb')
-if [ ${count} -gt 0 ]; then
-   echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
-   anyDataAtAll=1
-fi
-# if [ ${count} -lt 5200 ]; then
-#  echo "FAIL: less then 5200 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
-if [ ${count} -lt 2300 ]; then
-  echo "FAIL: less then 2300 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
   quickCheckOK=0
 fi
 

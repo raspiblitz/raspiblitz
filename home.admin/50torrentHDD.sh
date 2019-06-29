@@ -26,8 +26,8 @@ source /home/admin/raspiblitz.info
 #bitcoinUpdate="raspiblitz-bitcoin1-2019-04-09-update"
 # taken from https://getbitcoinblockchain.com/
 # TODO later first try to download from that website and have local torrent files for backup
-bitcoinBase="bitcoin2-base"
-bitcoinUpdate="bitcoin2-update"
+bitcoinBase="raspiblitz-bitcoin2-2019-05-01-base"
+bitcoinUpdate="raspiblitz-bitcoin2-2019-06-29-update"
 
 litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
 litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
@@ -38,6 +38,11 @@ updateTorrentFile=${bitcoinUpdate}
 if [ "$network" = "litecoin" ]; then
   baseTorrentFile=${litecoinBase}
   updateTorrentFile=${litecoinUpdate}
+else
+
+  # try download latest getbitcoinblockchain.com torrent files
+  
+
 fi
 echo "# TORRENT-FILES"
 echo "baseTorrent='${baseTorrentFile}'"

@@ -178,18 +178,6 @@ if [ ${mountOK} -eq 1 ]; then
     fi
   fi
 
-  # check if there is ftp data to continue
-  downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
-  if [ ${downloadProgressExists} -eq 1 ]; then
-    # check if there is a running screen session to return to
-    noScreenSession=$(screen -ls | grep -c "No Sockets found")
-    if [ ${noScreenSession} -eq 0 ]; then 
-      echo "found download in data .. resuming"
-      /home/admin/50downloadHDD.sh
-      exit 1
-    fi
-  fi
-
   # HDD is empty - get Blockchain
 
   #Bitcoin

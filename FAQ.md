@@ -176,7 +176,6 @@ You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself b
 ```
 /bitcoin/blocks
 /bitcoin/chainstate
-/bitcoin/indexes
 ```
 
 optional you can add also the testnet data:
@@ -184,7 +183,6 @@ optional you can add also the testnet data:
 ```
 /bitcoin/testnet3/blocks
 /bitcoin/testnet3/chainstate
-/bitcoin/testnet3/indexes
 ```
 
 To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack (like in picture below) or choose a external HDD with its own power supply.
@@ -547,7 +545,6 @@ Now change to your computer where you package the torrent files and transfere th
 ```
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blocks
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./chainstate
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/indexes ./indexes
 ```
 
 Also have an almost 100% synced bitcoind TESTNET with txindex=1 on a RaspiBlitz
@@ -574,7 +571,6 @@ Now change again to your computer where you package the torrent files and transf
 mkdir testnet3
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
 scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/indexes ./testnet3/indexes
 ```
 
 (Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). The update torrentfile should always have the following naming schema:
