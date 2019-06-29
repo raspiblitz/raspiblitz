@@ -29,11 +29,15 @@ echo "updateTorrent='${updateTorrentFile}'"
 targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 
-# make sure folders exist
+# make sure folders exist & permissions are set
 sudo mkdir ${sessionDir} 2>/dev/null
+sudo chmod 777 ${sessionDir} 2>/dev/null
 sudo mkdir ${targetDir} 2>/dev/null
+sudo chmod 777 ${targetDir} 2>/dev/null
 sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
+sudo chmod 777 ${sessionDir}/blockchain/ 2>/dev/null
 sudo mkdir ${sessionDir}/update/ 2>/dev/null
+sudo chmod 777 ${sessionDir}/update/ 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
