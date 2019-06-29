@@ -136,10 +136,9 @@ if [ ${showHeatImproveInfo} -gt 0 ]; then
  
     whiptail --backtitle "RaspiBlitz v${codeVersion}" --title " What todo on Heat Issues " --msgbox "
 To improve on heat issues an upgrade of the casing is recommended.
-Check if you have the latest casing listed in your shopping list.
-The lastest casing is a big heat sink to prevent overheating.
-If you have that one, check if its applied correctly to CPU.
-Alternative casings should add some passive/active heat sinks.
+Check if you have the latest casing options in your shopping list.
+Use a big passive heat sink or fan to prevent overheating.
+If you have already one, check if its applied correctly to CPU.
 In extreme cases consider some external fan helping out.
 
 Again a RaspiBlitz getting hot can be tolerated. But it is
