@@ -39,13 +39,13 @@ if [ ${raspberryPi} -lt 4 ]; then
   # raspberryPi 3 and lower (microUSB power connector)
   voltWARN=1230000
   voltFAIL=1200100
-  tempWARN=6500
+  tempWARNING=6500
   tempCRTICAL=6999
 else
   # raspberryPi 4 and up (USB-C power connector)
   voltWARN=871800
   voltFAIL=871800
-  tempWARN=7599
+  tempWARNING=7599
   tempCRTICAL=7799
 fi
 
@@ -103,7 +103,7 @@ for (( n=0; n<15; ++n )); do
       ((tempFAIL=tempFAIL+1))
       echo "--> Temp CRITICAL detected" >&2
     fi
-    if [ ${tempInt} -gt ${tempWARN} ]; then
+    if [ ${tempInt} -gt ${tempWARNING} ]; then
       ((tempWARN=tempWARN+1))
       echo "--> Temp WARN detected" >&2
     fi
