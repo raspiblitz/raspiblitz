@@ -34,7 +34,7 @@ raspberryPi=$(cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g'
 if [ ${#raspberryPi} -eq 0 ]; then
   raspberryPi=0
 fi
-echo "RaspberryPi Model Version:  ${raspberryPi}"
+echo "RaspberryPi Model Version: ${raspberryPi}"
 if [ ${raspberryPi} -lt 4 ]; then
   # raspberryPi 3 and lower (microUSB power connector)
   voltWARN=1230000
@@ -43,10 +43,10 @@ if [ ${raspberryPi} -lt 4 ]; then
   tempCRTICAL=6999
 else
   # raspberryPi 4 and up (USB-C power connector)
-  voltWARN=871800
-  voltFAIL=871800
-  tempWARNING=7599
-  tempCRTICAL=7799
+  voltWARN=866000
+  voltFAIL=866000
+  tempWARNING=6500
+  tempCRTICAL=6999
 fi
 
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
