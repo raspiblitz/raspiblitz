@@ -498,13 +498,16 @@ On details how to set port forwarding on your router model see: https://portforw
 
 ## What is the "Base Torrent File"?
 
-Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - that will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
+Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - those blocks will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
 
-At the moment (Baseiteration=1) this is just the bitcoin blk and rev files up to the number:
-- /blocks : 01390
-- /testnet3/blocks: 00152
+At the moment (Baseiteration=2) this is just the bitcoin blk and rev files up to the number:
+blockchain/blocks/blk00000.dat - blk01357.dat
+blockchain/blocks/rev00000.dat - rev01357.dat
+(no testnet data)
 
-For litecoin (Baseiteration=1) its blk and rev files up to the number:
+For litecoin (Baseiteration=2) its blk and rev files up to the number:
+blockchain/blocks/blk00000.dat - blk01357.dat
+blockchain/blocks/rev00000.dat - rev01357.dat
 - /blocks : 00124
 
 The base torrent file should always have the following naming scheme:
@@ -515,62 +518,33 @@ So for example the second version of the base torrent for litecoin created on 20
 
 ## What is the "Update Torrent File" and how to create it?
 
-All the rest of the files get packaged into a second torrent file. This file will be updated much more often. The seeding is expected to be not that good and download may be slower, but that's OK because it's a much smaller file.
+All the rest of the blocks and needed files get packaged into a second torrent file. This file will be updated much more often. The seeding is expected to be not that good and download may be slower, but that's OK because it's a much smaller file.
 
 This way a good balance between good seeding and up-to-date blockchain can be reached.
 
 To create the Update Torrent file, follow the following step ...
 
-Have a almost 100% synced bitcoind MAINNET with txindex=1 on a RaspiBlitz
-(remove all funds from this node - because blockchain get messed with)
+Have a almost 100% synced bitcoind MAINNET on a RaspiBlitz
+(if you have funds on there, make backup first and calculate with about 1 day of offtime to repair blockchain after this)
 
 Stop bitcoind with:
 ```
 sudo systemctl stop bitcoind
 ```
 
-Delete base torrent blk-files with:
+Delete base torrent files:
 ```
 sudo rm /mnt/hdd/bitcoin/blocks/blk00*.dat
-sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1390}.dat
-```
-
-Delete base torrent rev-files with:
-```
+sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1357}.dat
 sudo rm /mnt/hdd/bitcoin/blocks/rev00*.dat
-sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1390}.dat
+sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1357}.dat
 ```
 
-Now change to your computer where you package the torrent files and transfere the three directories into your torrent base directory (should be your current working directory):
+Now change to your computer where you package the torrent files and transfere the two directories into your torrent base directory (should be your current working directory):
 ```
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blocks
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./chainstate
-```
-
-Also have an almost 100% synced bitcoind TESTNET with txindex=1 on a RaspiBlitz
-
-Stop bitcoind with:
-```
-sudo systemctl stop bitcoind
-```
-
-Delete base torrent blk-files with:
-```
-sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk000*.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/blocks/blk00{100..152}.dat
-```
-
-Delete base torrent rev-files with:
-```
-sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev000*.dat
-sudo rm /mnt/hdd/bitcoin/testnet3/blocks/rev00{100..152}.dat
-```
-
-Now change again to your computer where you package the torrent files and transfer the three directories into your torrent base directory (should be your current working directory):
-```
-mkdir testnet3
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/blocks ./testnet3/blocks
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/testnet3/chainstate ./testnet3/chainstate
+mkdir ./blockchain
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blockchain/blocks
+scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./blockchain/chainstate
 ```
 
 (Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). The update torrentfile should always have the following naming schema:
@@ -592,13 +566,15 @@ udp://open.demonii.si:1337/announce
 udp://denis.stalker.upeer.me:6969/announce
 ```
 
-After successful creation of the torrent file:
-* copy to `/home.admin/assets`
-* push to master
+After successful creation of the torrent file - edit the RaspiBlitz code:
+* copy to torrent file to `/home.admin/assets`
+* push to git
 * change in `50torrentHDD.sh script`
 * add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120)
 * seed at home and at services like justseed.it
 * update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
+
+Now to repair your RaspiBlitz Blockchain start mainmenu `./00mainMenu.sh` and choose `REPAIR` > `RESET-CHAIN`.
 
 ## What is the process of creating a new sd card image release?
 
