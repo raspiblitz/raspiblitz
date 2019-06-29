@@ -40,13 +40,13 @@ if [ ${raspberryPi} -lt 4 ]; then
   voltWARN=1230000
   voltFAIL=1200100
   tempWARN=6500
-  tempFAIL=6999
+  tempCRTICAL=6999
 else
   # raspberryPi 4 and up (USB-C power connector)
   voltWARN=871800
   voltFAIL=871800
   tempWARN=7599
-  tempFAIL=7799
+  tempCRTICAL=7799
 fi
 
 echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
@@ -99,7 +99,7 @@ for (( n=0; n<15; ++n )); do
     tempFloat=$(echo "${Temp/\'C/}*100" | bc)
     tempInt=${tempFloat/.*}
     #echo "T -> ${tempFloat}/${tempInt}"
-    if [ ${tempInt} -gt ${tempFAIL} ]; then
+    if [ ${tempInt} -gt ${tempCRTICAL} ]; then
       ((tempFAIL=tempFAIL+1))
       echo "--> Temp CRITICAL detected" >&2
     fi
