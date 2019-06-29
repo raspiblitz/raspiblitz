@@ -30,7 +30,7 @@ echo "RaspiBlitz Hardwaretest v0.2" >&2
 
 # detect hardware version of RaspberryPi
 # https://www.unixtutorial.org/command-to-confirm-raspberry-pi-model
-raspberryPi=${cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g'}
+raspberryPi=$(cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g')
 if [ ${#raspberryPi} -eq 0 ]; then
   raspberryPi=0
 fi
