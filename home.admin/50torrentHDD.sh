@@ -31,13 +31,13 @@ sessionDir="/home/admin/.rtorrent.session"
 
 # make sure folders exist & permissions are set
 sudo mkdir ${sessionDir} 2>/dev/null
-sudo chmod 777 ${sessionDir} 2>/dev/null
+#sudo chmod 777 ${sessionDir} 2>/dev/null
 sudo mkdir ${targetDir} 2>/dev/null
-sudo chmod 777 ${targetDir} 2>/dev/null
+#sudo chmod 777 ${targetDir} 2>/dev/null
 sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
-sudo chmod 777 ${sessionDir}/blockchain/ 2>/dev/null
+#sudo chmod 777 ${sessionDir}/blockchain/ 2>/dev/null
 sudo mkdir ${sessionDir}/update/ 2>/dev/null
-sudo chmod 777 ${sessionDir}/update/ 2>/dev/null
+#sudo chmod 777 ${sessionDir}/update/ 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
@@ -66,7 +66,7 @@ if [ ${torrentComplete1} -eq 0 ]; then
     # start torrent download in screen session
     echo "starting torrent: blockchain"
     command1="sudo rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
-    screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
+    screenCommand="screen -S blockchain -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
   fi
@@ -90,7 +90,7 @@ if [ ${torrentComplete2} -eq 0 ]; then
     # start torrent download in screen session
     echo "starting torrent: update"
     command2="sudo rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
-    screenCommand="screen -S update -L screen.log -dm ${command2}"
+    screenCommand="screen -S update -dm ${command2}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
 
