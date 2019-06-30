@@ -34,10 +34,6 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     fi
 
     echo "stopping services ... (please wait)"
-    echo "- swap"
-    sudo dphys-swapfile swapoff
-    echo "- background"
-    sudo systemctl stop background 2>/dev/null
     echo "- lnd"
     sudo systemctl stop lnd.service 2>/dev/null
     echo "- blockchain"
