@@ -63,7 +63,7 @@ echo "OK - sync is activated"
 if [ "${setupStep}" = "100" ]; then
 
   # set so that 10raspiblitz.sh has a flag to see that resync is running
-  sudo sed -i "s/^state=.*/state=resync/g" $infoFile
+  sudo sed -i "s/^state=.*/state=resync/g" /home/admin/raspiblitz.info
 
 else
 
