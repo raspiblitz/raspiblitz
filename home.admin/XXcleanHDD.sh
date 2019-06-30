@@ -45,11 +45,12 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo systemctl stop litecoind.service 2>/dev/null
     echo ""
     echo "DELETING ..."
-    sudo rm -f -r /mnt/hdd/bitcoin 2>/dev/null
-    sudo rm -f -r /mnt/hdd/litecoin 2>/dev/null
+    sudo rm -f -r /mnt/hdd/bitcoin/blocks 2>/dev/null
+    sudo rm -f -r /mnt/hdd/bitcoin/chainstate 2>/dev/null
+    sudo rm -f -r /mnt/hdd/litecoin/blocks 2>/dev/null
+    sudo rm -f -r /mnt/hdd/litecoin/chainstate 2>/dev/null
 
-    echo "Starting Repair Options ..."
-    /home/admin/98repairBlockchain.sh
+    echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
     
 else
 
