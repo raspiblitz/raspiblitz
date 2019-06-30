@@ -144,14 +144,7 @@ A prepared HDD is formatted in EXT4 and named "BLOCKCHAIN". In folder called `bi
 /bitcoin/chainstate
 ```
 
-optionaly you can add also the testnet data:
-
-```
-/bitcoin/testnet3/blocks
-/bitcoin/testnet3/chainstate
-```
-
-The bitcoin core client the folders are from needs to have `txindex=1` in the bitcoin.conf and needs to be stopped while the data is copied to the HDD.
+The bitcoin core client (0.17.1 or higher) needs to be stopped while the data is copied to the HDD.
 
 The easiest way to get a "template" of such HDD is to setup a fresh RaspiBlitz (without channel and fundings) and then run the script `/home/admin/XXcleanHDD.sh` and manually delete all rest data from the HDD and just leave those folders. 
 
