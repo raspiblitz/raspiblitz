@@ -45,6 +45,8 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo rm -f -r /mnt/hdd/bitcoin/chainstate 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin/blocks 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin/chainstate 2>/dev/null
+    sudo rm -f /mnt/hdd/bitcoin/debug.log 2>/dev/null  
+    sudo rm -f /mnt/hdd/litecoin/debug.log 2>/dev/null
 
     echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
     
