@@ -12,8 +12,8 @@ source /home/admin/raspiblitz.info
 bitcoinBase="raspiblitz-bitcoin2-2019-05-01-base"
 bitcoinUpdate="raspiblitz-bitcoin2-2019-06-29-update"
 
-litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
-litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
+litecoinBase="raspiblitz-litecoin2-2019-06-29-base"
+litecoinUpdate="raspiblitz-litecoin2-2019-06-29-update"
 
 # set final based on selected network
 baseTorrentFile=${bitcoinBase}
@@ -233,8 +233,8 @@ if [ ${torrentComplete2} -eq 0 ]; then
 fi
 
 # the path torrent was download to
-targetPath1="${targetDir}/${baseTorrentFile}"
-targetPath2="${targetDir}/${updateTorrentFile}"
+targetPath1="${targetDir}/${baseTorrentFile}/blockchain"
+targetPath2="${targetDir}/${updateTorrentFile}/blockchain"
 if [ "$network" = "bitcoin" ]; then
   targetPath1="${targetDir}/blockchain"
   targetPath2="${targetDir}/${updateTorrentFile}/blockchain"

@@ -484,11 +484,11 @@ The best way would be to build the sd card yourself. You use the script `build_s
 
 ## Is downloading the blockchain from a third party secure?
 
-To download a blockchain from a third party (torrent/ftp) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'.
+To download a blockchain from a third party (torrent) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'.
 
 The downloaded blockchain is pre-indexed and pre-validated. That should be practically secure enough, because if the user gets a "manipulated" blockchain it would not work after setup. The beginning of the downloaded blockchain needs to fit the genesis block (in bitcoind software) and the end of the downloaded blockchain needs not match with the rest of the bitcoin network state - hashes of new block distrubuted within the peer-2-peer network need to match the downloaded blockchain head. So if you downloaded a manipulated blockchain it simply wouldn't work in practice. As long as you are not in a totally hostile environment where someone would be able to fake a whole network of peers and miners around you - this is secure enough for running a small funded full node to try out the lightning network.
 
-If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then don't use the torrent/ftp download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, verified and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
+If you dont trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then don't use the torrent download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, verified and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
 
 ## Why is taking my torrent download of the blockchain so long?
 
@@ -506,9 +506,8 @@ blockchain/blocks/rev00000.dat - rev01357.dat
 (no testnet data)
 
 For litecoin (Baseiteration=2) its blk and rev files up to the number:
-blockchain/blocks/blk00000.dat - blk01357.dat
-blockchain/blocks/rev00000.dat - rev01357.dat
-- /blocks : 00124
+blockchain/blocks/blk00000.dat - blk00150.dat
+blockchain/blocks/rev00000.dat - rev00150.dat
 
 The base torrent file should always have the following naming scheme:
 
