@@ -2,11 +2,11 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.3 with lnd 0.6.1-beta and bitcoin 0.17.1 or litecoin 0.16.3.`
+`Version 1.3 with lnd 0.7-beta and bitcoin 0.17.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi3 - with a 1TB HDD and an nice Display for easy setup & monitoring.**
+**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a 1TB HDD and an nice Display for easy setup & monitoring.**
 
 Its mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
@@ -34,16 +34,15 @@ If you start at home ordering the parts from Amazon (see shopping list below) th
 
 ## Hardware Needed
 
-The RaspiBlitz is build from the following parts:
+The RaspiBlitz is build from the following minimal parts:
 
-* RaspBerryPi 3 B+
-* 1TB Hard Drive
-* LCD-Display
-* Micro SD-Card (min 16GB - go for quality)
-* Powersupply >=3A (choose big & stable output)
-* Case with Heatsink
+* RaspBerryPi 3B/4B
+* 500GB USB Hard Drive
+* LCD-Display HAT
+* 16GB Micro SD-Card
+* Powersupply >=3A (stable output is important)
 
-**All together under 160 USD / 140 EUR (depending on country & shop)**
+**All parts together are at around 150 USD - based on shops and location.**
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
