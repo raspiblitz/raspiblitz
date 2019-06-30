@@ -2,9 +2,16 @@
 
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
-# command: raspiblitz
-# calls the the raspiblitz mainmenu
-function raspiblitz() {
+# command: raspiblitz 
+# calls the the raspiblitz mainmenu (legacy)
+function raspiblitz() { 
+  cd /home/admin
+  ./00raspiblitz.sh
+}
+
+# command: blitz
+# calls the the raspiblitz mainmenu (shortcut)
+function blitz() {
   cd /home/admin
   ./00raspiblitz.sh
 }
@@ -18,7 +25,7 @@ function menu() {
 
 # command: repair
 # calls directly the repair menu
-function menu() {
+function repair() {
   cd /home/admin
   ./98repairMenu.sh
 }
