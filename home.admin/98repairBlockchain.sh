@@ -19,18 +19,18 @@ if [ "${CHOICE}" = "TORRENT" ]; then
     echo "Starting TORRENT ..."
     sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
     /home/admin/50torrentHDD.sh
-    sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+    sudo sed -i "s/^state=.*/state=na/g" /home/admin/raspiblitz.info
 
 elif [ "${CHOICE}" = "COPY" ]; then
     echo "Starting COPY ..."
     sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
     /home/admin/50copyHDD.sh
-    sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+    sudo sed -i "s/^state=.*/state=na/g" /home/admin/raspiblitz.info
 
 elif [ "${CHOICE}" = "RESYNC" ]; then
     echo "Starting RESYNC ..."
     /home/admin/50syncHDD.sh
-    /home/
+    /home/admin/00raspiblitz.sh
 
 elif [ "${CHOICE}" = "REINDEX" ]; then
     echo "Starting REINDEX ..."

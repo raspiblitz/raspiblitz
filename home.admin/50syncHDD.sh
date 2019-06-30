@@ -65,6 +65,7 @@ sudo /home/admin/XXcleanHDD.sh -blockchain -force
 
 # set so that 10raspiblitz.sh has a flag to see that resync is running
 sudo touch /mnt/hdd/${network}/blocks/.selfsync
+sudo sed -i "s/^state=.*/state=sync/g" /home/admin/raspiblitz.info
 
 echo "OK - sync is activated"
 
