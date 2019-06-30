@@ -35,8 +35,8 @@ if [ "$network" = "bitcoin" ]; then
   response=$?
   case $response in
      0) echo "--> OK";;
-     1) ./10setupBlitz.sh; exit 1;;
-     255) ./10setupBlitz.sh; exit 1;;
+     1) exit 1;;
+     255) exit 1;;
   esac
 
   clear
@@ -57,11 +57,20 @@ if [ "$network" = "bitcoin" ]; then
 fi  
 
 echo "*** Activating Blockain Sync ***"
-sudo mkdir /mnt/hdd/${network}
+sudo mkdir /mnt/hdd/${network} 2>/dev/null
 echo "OK - sync is activated"
 
-# set SetupState
-sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
+if [ "${setupStep}" = "100" ]; then
 
-# continue setup
-./60finishHDD.sh
+  # set so that 10raspiblitz.sh has a flag to see that resync is running
+  sudo sed -i "s/^state=.*/state=resync/g" $infoFile
+
+else
+
+  # set SetupState
+  sudo sed -i "s/^setupStep=.*/setupStep=50/g" /home/admin/raspiblitz.info
+
+  # continue setup
+  ./60finishHDD.sh
+
+fi

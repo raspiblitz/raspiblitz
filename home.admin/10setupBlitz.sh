@@ -220,6 +220,7 @@ if [ ${mountOK} -eq 1 ]; then
               ;;              
           S)
               /home/admin/50syncHDD.sh
+              /home/admin/10setupBlitz.sh
               ;;
   esac
   exit 1

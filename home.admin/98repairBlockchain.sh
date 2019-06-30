@@ -1,10 +1,14 @@
 #!/bin/bash
 echo ""
 
+# load raspiblitz config data
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
+
 # Basic Options
 OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
          COPY "Copy from another Computer (SKILLED)" \
-         REINDEX "Resync thru ${network}d (TAKES VERY VERY LONG)" \
+         RESYNC "Resync thru Peer2Peer Network (TRUSTLESS)" \
          BACKUP "Run Backup LND data first (optional)"
 )
 
@@ -22,6 +26,11 @@ elif [ "${CHOICE}" = "COPY" ]; then
     sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
     /home/admin/50copyHDD.sh
     sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+
+elif [ "${CHOICE}" = "RESYNC" ]; then
+    echo "Starting RESYNC ..."
+    /home/admin/50syncHDD.sh
+    /home/
 
 elif [ "${CHOICE}" = "REINDEX" ]; then
     echo "Starting REINDEX ..."

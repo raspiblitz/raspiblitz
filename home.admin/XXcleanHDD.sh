@@ -1,6 +1,7 @@
 #!/bin/bash
 echo ""
 extraParameter="$1"
+forceParameter="$2"
 if [ "${extraParameter}" = "-all" ]; then
 
     echo "!!!! This will DELETE ALL DATA & POSSIBLE FUNDS from the HDD !!!!"
@@ -24,11 +25,13 @@ if [ "${extraParameter}" = "-all" ]; then
 
 elif [ "${extraParameter}" = "-blockchain" ]; then
 
-    echo "This will DELETE JUST your blockchain from the HDD."
-    echo "--> It will keep your LND data and other setups."
-    echo "--> You will get presented re-download options."
-    echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
-    read key
+    if [ "${forceParameter}" != "-force" ]; then
+      echo "This will DELETE JUST your blockchain from the HDD."
+      echo "--> It will keep your LND data and other setups."
+      echo "--> You will get presented re-download options."
+      echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
+      read key
+    fi
 
     echo "stopping services ... (please wait)"
     echo "- swap"

@@ -171,10 +171,17 @@ waitUntilChainNetworkIsReady()
       blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
-          echo "blockchainsize(${blockchainsize})"
-          echo "Missing Blockchain Data (<${minSize}) ..."
-          clienterror="missing blockchain"
-          sleep 3
+          if [ "${state}" != "resync" ]; then
+            echo "blockchainsize(${blockchainsize})"
+            echo "Missing Blockchain Data (<${minSize}) ..."
+            clienterror="missing blockchain"
+            sleep 3
+          else
+            echo "RE-SYNC is running"
+            /home/admin/80scanLND.sh
+            sleep 10
+            exit 0;
+          fi
         fi
       fi
 
@@ -196,20 +203,27 @@ waitUntilChainNetworkIsReady()
           sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
           sleep 3
 
-          dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
+          whiptail --title "RaspiBlitz - Repair Script" --yes-button "DELETE+REPAIR" --no-button "Ignore" --yesno "Your blockchain data needs to be repaired.
 This can be due to power problems or a failing HDD.
-Please check the FAQ on RaspiBlitz Github
-'My blockchain data is corrupted - what can I do?'
-https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
+For more info see: https://raspiblitz.com -> FAQ
 
-The RaspiBlitz will now try to help you on with the repair.
-To run a BACKUP of funds & channels first is recommended.
+Before RaspiBlitz can offer you repair options the old
+corrupted blockchain needs to be deleted while your LND
+funds and channel stay safe (just expect some off-time).
+
+How do you want to continue?
 " 13 65
-
-          clear
-          /home/admin/98repairBlockchain.sh
-          /home/admin/00raspiblitz.sh
-          exit
+          if [ $? -eq 0 ]; then
+            #delete+repair
+            clear
+            /home/admin/XXcleanHDD.sh -blockchain -force
+            /home/admin/98repairBlockchain.sh
+            /home/admin/00raspiblitz.sh
+            exit
+          else
+            # ignore - just delete blockchain logfile
+            clear
+          fi
 
         fi
 
