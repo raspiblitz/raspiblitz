@@ -178,10 +178,6 @@ waitUntilChainNetworkIsReady()
             sleep 3
           else
             echo "RE-SYNC is running"
-            /home/admin/80scanLND.sh
-            sleep 10
-            /home/admin/00raspiblitz.sh
-            exit 0;
           fi
         fi
       fi

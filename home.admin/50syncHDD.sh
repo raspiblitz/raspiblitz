@@ -57,14 +57,16 @@ if [ "$network" = "bitcoin" ]; then
 fi  
 
 echo "*** Activating Blockain Sync ***"
+
 sudo mkdir /mnt/hdd/${network} 2>/dev/null
 sudo /home/admin/XXcleanHDD.sh -blockchain -force
+
+# set so that 10raspiblitz.sh has a flag to see that resync is running
+sudo sed -i "s/^state=.*/state=resync/g" /home/admin/raspiblitz.info
+
 echo "OK - sync is activated"
 
 if [ "${setupStep}" = "100" ]; then
-
-  # set so that 10raspiblitz.sh has a flag to see that resync is running
-  sudo sed -i "s/^state=.*/state=resync/g" /home/admin/raspiblitz.info
 
   # start servives
   sudo systemctl start bitcoind
