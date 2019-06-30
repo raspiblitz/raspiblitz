@@ -176,8 +176,6 @@ waitUntilChainNetworkIsReady()
             echo "Missing Blockchain Data (<${minSize}) ..."
             clienterror="missing blockchain"
             sleep 3
-          else
-            echo "RE-SYNC is running"
           fi
         fi
       fi
