@@ -180,6 +180,17 @@ if [ ${mountOK} -eq 1 ]; then
 
   # HDD is empty - get Blockchain
 
+  # detect hardware version of RaspberryPi
+  # https://www.unixtutorial.org/command-to-confirm-raspberry-pi-model
+  raspberryPi=$(cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g')
+  if [ ${#raspberryPi} -eq 0 ]; then
+    raspberryPi=0
+  fi
+  syncComment="ULTRA SLOW"
+  if [ ${syncComment} -gt 3 ]; then
+    syncComment="BEST+SLOW"
+  fi
+
   #Bitcoin
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"
@@ -188,7 +199,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
     N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
-    S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
+    S "SYNC     --> MAINNET thru Bitcoin Network (${syncComment})" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
