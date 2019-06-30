@@ -118,7 +118,13 @@ if [ ${lndRunning} -eq 0 ]; then
   sudo systemctl enable lnd
   sudo systemctl start lnd
   echo ""
-  dialog --pause "  Starting LND - please wait .." 8 58 120
+  echo "waiting ."
+  sleep 10
+  echo "waiting .."
+  sleep 10
+  echo "waiting ..."
+  sleep 10
+  dialog --pause "  Starting LND - please wait .." 8 58 90
 fi
 
 ###### Check LND starting
@@ -410,7 +416,13 @@ else
   echo "OK - LND wallet already exists."
 fi
 
-dialog --pause "  Waiting for LND - please wait .." 8 58 60
+echo "waiting ."
+sleep 10
+echo "waiting .."
+sleep 10
+echo "waiting ..."
+sleep 10
+dialog --pause "  Waiting for LND - please wait .." 8 58 30
 
 ############################
 # Copy LND macaroons to admin
