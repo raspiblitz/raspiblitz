@@ -182,6 +182,7 @@ waitUntilChainNetworkIsReady()
       fi
 
       if [ ${#clienterror} -gt 0 ]; then
+        echo "clienterror(${clienterror})"
 
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log 2>/dev/null | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
