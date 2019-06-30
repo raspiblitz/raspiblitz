@@ -59,9 +59,9 @@ fi
 echo "*** Activating Blockain Sync ***"
 
 sudo mkdir /mnt/hdd/${network} 2>/dev/null
+sudo /home/admin/XXcleanHDD.sh -blockchain -force
 sudo mkdir /mnt/hdd/${network}/blocks 2>/dev/null
 sudo mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
-sudo /home/admin/XXcleanHDD.sh -blockchain -force
 
 # set so that 10raspiblitz.sh has a flag to see that resync is running
 sudo touch /mnt/hdd/${network}/blocks/.selfsync
