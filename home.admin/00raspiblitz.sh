@@ -168,10 +168,10 @@ waitUntilChainNetworkIsReady()
       if [ "${network}" = "litecoin" ]; then
         minSize=20000000000
       fi
+      isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync | grep -c '.selfsync')
       blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
-          isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync | grep -c '.selfsync')
           if [ ${isSyncing} -eq 0 ]; then
             echo "blockchainsize(${blockchainsize})"
             echo "Missing Blockchain Data (<${minSize}) ..."
@@ -192,6 +192,9 @@ waitUntilChainNetworkIsReady()
           if [ ${futureBlock} -gt 0 ]; then
             blockchainBroken=0
             echo "-> Ignore reindex - its just a future block"
+          fi
+          if [ ${isSyncing} -gt 0 ]; then
+            reindex=0
           fi
         fi
         if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
