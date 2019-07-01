@@ -72,9 +72,7 @@ echo "OK - sync is activated"
 if [ "${setupStep}" = "100" ]; then
 
   # start servives
-  echo "starting services .."
-  sudo systemctl start ${network}d
-  sudo systemctl start lnd
+  echo "reboot needed: shutdown -r now"
 
 else
 
