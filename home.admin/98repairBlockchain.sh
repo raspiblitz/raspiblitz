@@ -30,7 +30,10 @@ elif [ "${CHOICE}" = "COPY" ]; then
 elif [ "${CHOICE}" = "RESYNC" ]; then
     echo "Starting RESYNC ..."
     /home/admin/50syncHDD.sh
-    /home/admin/00raspiblitz.sh
+    dialog --pause "OK. System will reboot to activate changes." 8 58 8
+    clear
+    echo "rebooting .. (please wait)"
+    sudo shutdown -r now
 
 elif [ "${CHOICE}" = "REINDEX" ]; then
     echo "Starting REINDEX ..."
