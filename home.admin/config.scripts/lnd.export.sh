@@ -152,7 +152,7 @@ elif [ "${exportType}" = "reset" ]; then
   echo "- restarting LND ... wait 10 secs"
   sudo systemctl start lnd
   sleep 10
-  sudo -u bitcoin lncli unlock
+  sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock
   echo "- creating new macaroons ... wait 10 secs"
   sleep 10
   echo "- copy new macaroons to admin user"

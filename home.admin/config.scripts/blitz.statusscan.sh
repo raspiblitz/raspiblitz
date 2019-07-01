@@ -124,7 +124,7 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
   lndRPCReady=1
-  lndinfo=$(sudo -u bitcoin lncli getinfo 2>/mnt/hdd/temp/.lnd.error)
+  lndinfo=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>/mnt/hdd/temp/.lnd.error)
 
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
