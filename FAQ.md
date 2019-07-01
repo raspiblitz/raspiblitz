@@ -569,7 +569,7 @@ After successful creation of the torrent file - edit the RaspiBlitz code:
 * copy to torrent file to `/home.admin/assets`
 * push to git
 * change in `50torrentHDD.sh script`
-* add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120)
+* add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/blob/master/home.admin/assets/raspiblitz-torrents-rss.xml)
 * seed at home and at services like justseed.it
 * update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
 
