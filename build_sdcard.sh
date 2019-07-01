@@ -828,10 +828,12 @@ if [ "${baseImage}" = "raspbian" ]; then
     cd /home/admin/
     sudo apt-mark hold raspberrypi-bootloader
     git clone https://github.com/goodtft/LCD-show.git
+    cd LCD-show/
+    sudo git reset --hard ce52014
+    cd ..
     sudo chmod -R 755 LCD-show
     sudo chown -R admin:admin LCD-show
     cd LCD-show/
-    git reset --hard ce52014
     sudo ./LCD35-show
 
   else
