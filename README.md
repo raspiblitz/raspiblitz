@@ -678,7 +678,7 @@ A ready to use SD card image of the RaspiBlitz for your RaspberryPi is provided 
 * Add a file called `ssh` to the root of the SD card when mounted to enable SSH login
 * Start card in Raspi and login per SSH with `ssh pi@[IP-OF-YOUR-RASPI]` password is `raspberry`
 
-Now you are ready to start the SD card build script - copy the following command into your terminal and execute:
+Now you are ready to start the SD card build script (check the code if every installs and config is OK for you) - copy the following command into your terminal and execute:
 
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh`
 

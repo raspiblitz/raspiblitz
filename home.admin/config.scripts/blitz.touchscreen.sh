@@ -29,8 +29,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo raspi-config nonint do_boot_behaviour B4
 
   # set user pi as autologin for lightdm
-  sudo sed -i s'/autologin-user=root/autologin-user=pi/' /etc/lightdm/lightdm.conf
+  sudo sed -i "s/^autologin-user=.*/autologin-user=pi/g" /etc/lightdm/lightdm.conf
   sudo sed -i s'/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  sudo sed -i s'/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
   # write new LXDE autostart config
   sudo mv /etc/xdg/lxsession/LXDE-pi/autostart /etc/xdg/lxsession/LXDE-pi/autostart.bak
