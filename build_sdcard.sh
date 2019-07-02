@@ -483,23 +483,23 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6.1-beta"
+lndVersion="0.7.0-beta"
 
 if [ ${isARM} -eq 1 ] ; then
   lndOSversion="armv7"
-  lndSHA256="5541959c7fde98d76d88cc8070ca626c681ba38c44afcb85bf417a9a677e23c2"
+  lndSHA256="ac51d96ee9b57bfcab0b05dbcfcd9ce3bd42a216354c0972e97c1a1c86c2479a"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   lndOSversion="arm64"
-  lndSHA256="d5f7280c324ebc1d322435a0eac4c42dca73ebc6a613878d9e0d33a68276da5c"
+  lndSHA256="c995fa67d6b23e547723801de49817dda34188fba78d0fe8ae506774e54c0afd"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
-  lndSHA256="c55367edb82955dc942baf9f48f79fadde1eee0e86c1d59d2fe1993140ec1b3f"
+  lndSHA256="2e7ed105b9e57103645bda30501cbf3386909cfed19a2fabcc3dc9117ce99a8f"
 fi
 if [ ${isX86_32} -eq 1 ] ; then
   lndOSversion="386"
-  lndSHA256="00a7cd0ca657bb242b0f3acb5f4e26a13fd789946fab73c252118e3f89c1cf57"
+  lndSHA256="47be6c3391fadbc5a169fa1dd6dd13031d759b3d42c71a2d556751746b705c48"
 fi
 
 echo ""
