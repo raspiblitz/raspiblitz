@@ -49,6 +49,7 @@ RaspiBlitz image to your SD card.
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
+         BACKUP "Backup your LND data" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
@@ -65,6 +66,12 @@ case $CHOICE in
     ;;
   SOFTWARE)
     sudo /home/admin/XXdebugLogs.sh
+    echo "Press ENTER to return to main menu."
+    read key
+    /home/admin/00mainMenu.sh
+    ;;
+  BACKUP)
+    sudo /home/admin/config.scripts/lnd.rescue.sh backup
     echo "Press ENTER to return to main menu."
     read key
     /home/admin/00mainMenu.sh
