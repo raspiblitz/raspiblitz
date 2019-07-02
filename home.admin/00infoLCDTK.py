@@ -105,36 +105,48 @@ def main():
     setup_logging()
     log.info("Starting 00infoLCDTK.py")
 
+    # LCD root
     root = tk.Tk()
     root.config(bg=COLOR)
     root.overrideredirect(1)
     root.geometry("480x320+0+0")
-    root.title("RaspiBlitz 1.x")
+    root.title("RaspiBlitz")
 
+    # but LCD on canvas
     entry = tk.Entry(root)
     entry.config(bg=COLOR, highlightbackground=COLOR)
+    entry.pack(side="bottom", fill="x")
 
-    frame1 = tk.Frame(entry, width=60, background="black")
-    frame2 = tk.Frame(entry, width=420, background="grey")
+    # button frame
+    frame1 = tk.Frame(entry, width=80, background="black")
+    frame1.pack(side="left", fill="both", expand=True)
 
+    # button 1
     button1 = tk.Button(frame1, text='\u0397', fg='black', command=callback_b1)
-    button2 = tk.Button(frame1, text='\u0399', fg='black', command=callback_b2)
-    label3 = tk.Label(frame1, text='1.x', bg=COLOR, fg='white')
-    button4 = tk.Button(frame1,  text='\N{BLACK CIRCLE}', fg='red', command=callback_b4)
-
     button1.pack(pady=24)
+
+    # button 2
+    button2 = tk.Button(frame1, text='\u0399', fg='black', command=callback_b2)
     button2.pack(pady=24)
+
+    # button 3
+    label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
     label3.pack(pady=24)
+
+    # button 4
+    button4 = tk.Button(frame1,  text='\N{BLACK CIRCLE}', fg='red', command=callback_b4)
     button4.pack(pady=24)
 
-    entry.pack(side="bottom", fill="x")
-    frame1.pack(side="left", fill="both", expand=True)
+    # content frame
+    frame2 = tk.Frame(entry, width=400, background="grey")
     frame2.pack(side="right", fill="both", expand=True)
 
+    # run terminal in 
     WINFO = frame2.winfo_id()
     if sys.platform != "win32":
         os.system("xterm -fn fixed -into %d +sb -hold /home/admin/00infoLCD.sh &" % WINFO)
 
+    # run
     root.mainloop()
 
 
