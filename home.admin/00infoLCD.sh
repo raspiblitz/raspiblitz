@@ -210,7 +210,13 @@ while :
     fi
 
     # no special case - show status display
+    clear
 	  /home/admin/00infoBlitz.sh
+    if [ "${touchscreen}" != "1" ]; then
+      echo ""
+      echo ""
+      echo ""
+    fi
 	  sleep 5
 
   done

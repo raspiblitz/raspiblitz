@@ -4,6 +4,9 @@
 # see issue: https://github.com/rootzoll/raspiblitz/issues/646
 # to work it needs to be based on Raspbian Desktop base image
 
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "STILL EXPERIMENTAL - NOT FINISHED"
