@@ -24,12 +24,16 @@ echo ""
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "Turn ON: Touchscreen"
+
+  # switch to desktop login
   sudo raspi-config nonint do_boot_behaviour B4
 
+  # set user pi as autologin for lightdm
   sudo sed -i s'/autologin-user=root/autologin-user=pi/' /etc/lightdm/lightdm.conf
   sudo sed -i s'/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-  mv /etc/xdg/lxsession/LXDE-pi/autostart /etc/xdg/lxsession/LXDE-pi/autostart.bak
+  # write new LXDE autostart config
+  sudo mv /etc/xdg/lxsession/LXDE-pi/autostart /etc/xdg/lxsession/LXDE-pi/autostart.bak
   cat << EOF | sudo tee /etc/xdg/lxsession/LXDE-pi/autostart >/dev/null
 @xscreensaver -no-splash
 @unclutter -idle 0
@@ -48,6 +52,12 @@ EOF
   # Remove 00infoLCD.sh from .bashrc of pi user
   sudo sed -i s'/exec $SCRIPT/#exec $SCRIPT/' /home/pi/.bashrc
 
+  # mark touchscreen as switched ON in config
+  if [ ${#touchscreen} -eq 0 ]; then
+    echo "touchscreen=0" >> /mnt/hdd/raspiblitz.conf
+  fi
+  sudo sed -i "s/^touchscreen=.*/touchscreen=1/g" /mnt/hdd/raspiblitz.conf
+
   echo "OK - a restart is needed: sudo shutdown -r now"
 
 fi
@@ -59,9 +69,23 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "Turn OFF: Touchscreen"
+
+  # switch back to console login
   sudo raspi-config nonint do_boot_behaviour B2
+
+  # move back old LXDE autostart config
+  sudp rm /etc/xdg/lxsession/LXDE-pi/autostart
+  sudo mv /etc/xdg/lxsession/LXDE-pi/autostart.bak /etc/xdg/lxsession/LXDE-pi/autostart
 
   # add again 00infoLCD.sh to .bashrc of pi user
   sudo sed -i s'/#exec $SCRIPT/exec $SCRIPT/' /home/pi/.bashrc
+
+  # remove old pi autostart
+  sudo rm /home/pi/autostart.sh
+
+  # mark touchscreen as switched OFF in config
+  sudo sed -i "s/^touchscreen=.*/touchscreen=0/g" /mnt/hdd/raspiblitz.conf
+
+  echo "OK - a restart is needed: sudo shutdown -r now"
 
 fi

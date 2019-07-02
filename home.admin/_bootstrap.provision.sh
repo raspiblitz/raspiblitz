@@ -216,6 +216,15 @@ else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
+# TOCHSCREEN
+if [ "${#touchscreen}" -gt 0 ]; then
+    echo "Provisioning Touchscreen - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup Touchscreen'/g" ${infoFile}
+    sudo /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
+else 
+    echo "Provisioning Touchscreen - not active" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
