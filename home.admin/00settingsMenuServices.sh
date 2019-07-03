@@ -13,7 +13,7 @@ if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
-if [ ${#tochscreen} -eq 0 ]; then touchscreen="0"; fi
+if [ ${#tochscreen} -eq 0 ]; then touchscreen=0; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -25,6 +25,12 @@ dynDomainMenu='DynamicDNS'
 if [ ${#dynDomain} -gt 0 ]; then 
   domainValue="on"
   dynDomainMenu="${dynDomain}"
+fi
+
+echo "map touchscreen to on/off"
+tochscreenMenu='on'
+if [ ${tochscreen} -gt 0 ]; then 
+  tochscreenMenu='off'
 fi
 
 echo "check autopilot by lnd.conf"
@@ -46,7 +52,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-9 'Touchscreen' ${touchscreen} \
+9 'Touchscreen' ${tochscreenMenu} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 16 45 9 \
@@ -58,7 +64,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
-9 'Touchscreen' ${touchscreen} \
+9 'Touchscreen' ${tochscreenMenu} \
 2>&1 >/dev/tty)
 fi
 
