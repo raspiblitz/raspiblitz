@@ -127,15 +127,15 @@ def main():
     frame1.pack(side="left", fill="both", expand=True)
 
     # button 1 - no action yet (placeholder)
-    button1 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b1, height = 20, width = 20)
+    button1 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b1, height = 1, width = 1)
     button1.pack(pady=24)
 
     # button 2 - no action yet (placeholder)
-    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 30, width = 30)
+    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 2, width = 2)
     button2.pack(pady=24)
 
     # button 3 - no action yet (placeholder)
-    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 15, width = 15)
+    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 3, width = 2)
     button3.pack(pady=24)
     #label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
     #label3.pack(pady=24)
