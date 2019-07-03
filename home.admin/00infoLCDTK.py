@@ -131,17 +131,17 @@ def main():
     button1.pack(pady=24)
 
     # button 2 - no action yet (placeholder)
-    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 2, width = 2)
+    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 1, width = 1)
     button2.pack(pady=24)
 
     # button 3 - no action yet (placeholder)
-    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 3, width = 2)
+    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 1, width = 1)
     button3.pack(pady=24)
     #label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
     #label3.pack(pady=24)
 
     # button 4 - no action yet (power down)
-    button4 = tk.Button(frame1,  text='\N{BLACK CIRCLE}', fg='red', command=callback_b4)
+    button4 = tk.Button(frame1,  text='\N{BLACK CIRCLE}', fg='red', command=callback_b4, height = 1, width = 1)
     button4.pack(pady=24)
 
     # content frame
