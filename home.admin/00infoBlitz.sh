@@ -282,6 +282,7 @@ else
 fi
 
 sleep 5
+clear
 printf "
 ${color_yellow}
 ${color_yellow}
