@@ -211,7 +211,7 @@ while :
 
     # no special case - show status display
 	  /home/admin/00infoBlitz.sh
-    if [ "${touchscreen}" != "1" ]; then
+    if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
       echo ""
       echo ""
       echo ""
