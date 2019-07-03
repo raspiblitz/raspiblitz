@@ -13,6 +13,7 @@ if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
+if [ ${#tochscreen} -eq 0 ]; then touchscreen="0"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -45,6 +46,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
+9 'Touchscreen' ${touchscreen} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
@@ -56,6 +58,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
+9 'Touchscreen' ${touchscreen} \
 2>&1 >/dev/tty)
 fi
 
@@ -277,6 +280,18 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
+fi
+
+# touchscreen
+choice="0"; check=$(echo "${CHOICES}" | grep -c "9")
+if [ ${check} -eq 1 ]; then choice="1"; fi
+if [ "${touchscreen}" != "${choice}" ]; then
+  echo "Touchscreen Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.touchscreen.sh ${choice}
+  needsReboot=1
+else
+  echo "Touchscreen Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
