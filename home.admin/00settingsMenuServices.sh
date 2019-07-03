@@ -28,9 +28,9 @@ if [ ${#dynDomain} -gt 0 ]; then
 fi
 
 echo "map touchscreen to on/off"
-tochscreenMenu='on'
-if [ ${tochscreen} -gt 0 ]; then 
-  tochscreenMenu='off'
+tochscreenMenu='off'
+if [ ${touchscreen} -gt 0 ]; then 
+  tochscreenMenu='on'
 fi
 
 echo "check autopilot by lnd.conf"
