@@ -81,17 +81,22 @@ def setup_logging(default_path='00infoLCDw.json'):
 
 def callback_b1():
     global WINFO
-    log.info("clicked b1")
-    if sys.platform != "win32":
-        os.system("xterm -fn fixed -into %d +sb -hold /home/admin/00infoLCD.sh &" % WINFO)
+    log.info("clicked b1 - no action yet (placeholder)")
+    #if sys.platform != "win32":
+    #    os.system("xterm -fn fixed -into %d +sb -hold /home/admin/00infoLCD.sh &" % WINFO)
 
 
 def callback_b2():
     global WINFO
-    log.info("clicked b2")
-    if sys.platform != "win32":
-        os.system("xterm -fn fixed -into %d +sb -hold /home/admin/XXbutton2.sh &" % WINFO)
+    log.info("clicked b2 - no action yet (placeholder)")
+    #if sys.platform != "win32":
+    #    os.system("xterm -fn fixed -into %d +sb -hold /home/admin/XXbutton2.sh &" % WINFO)
 
+def callback_b3():
+    global WINFO
+    log.info("clicked b3 - no action yet")
+    #if sys.platform != "win32":
+    #    os.system("xterm -fn fixed -into %d +sb -hold /home/admin/XXbutton3.sh &" % WINFO)
 
 def callback_b4():
     global WINFO
@@ -121,19 +126,21 @@ def main():
     frame1 = tk.Frame(entry, width=80, background="black")
     frame1.pack(side="left", fill="both", expand=True)
 
-    # button 1
-    button1 = tk.Button(frame1, text='\u0397', fg='black', command=callback_b1)
+    # button 1 - no action yet (placeholder)
+    button1 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b1)
     button1.pack(pady=24)
 
-    # button 2
-    button2 = tk.Button(frame1, text='\u0399', fg='black', command=callback_b2)
+    # button 2 - no action yet (placeholder)
+    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2)
     button2.pack(pady=24)
 
-    # button 3
-    label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
-    label3.pack(pady=24)
+    # button 3 - no action yet (placeholder)
+    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3)
+    button3.pack(pady=24)
+    #label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
+    #label3.pack(pady=24)
 
-    # button 4
+    # button 4 - no action yet (power down)
     button4 = tk.Button(frame1,  text='\N{BLACK CIRCLE}', fg='red', command=callback_b4)
     button4.pack(pady=24)
 

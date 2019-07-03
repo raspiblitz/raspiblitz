@@ -214,7 +214,6 @@ while :
     if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
       echo ""
       echo ""
-      echo ""
     fi
 	  sleep 5
 
