@@ -13,7 +13,7 @@ if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
-if [ ${#tochscreen} -eq 0 ]; then touchscreen=0; fi
+if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 
 echo "map chain to on/off"
 chainValue="off"
