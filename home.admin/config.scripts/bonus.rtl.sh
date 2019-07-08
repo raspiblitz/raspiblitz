@@ -33,16 +33,38 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # install latest nodejs
+    # as in: https://github.com/nodejs/help/wiki/Installation
     echo "*** Install NodeJS ***"
-    cd /home/admin
-    curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    echo "Detect CPU architecture ..."
+    isARM=$(uname -m | grep -c 'arm')
+    isAARCH64=$(uname -m | grep -c 'aarch64')
+    isX86_64=$(uname -m | grep -c 'x86_64')
+    isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+    VERSION=v10.16.0
+    if [ ${isARM} -eq 1 ] ; then
+      DISTRO="linux-armv7l"   
+    fi
+    if [ ${isAARCH64} -eq 1 ] ; then
+      DISTRO="linux-arm64"
+    fi
+    if [ ${isX86_64} -eq 1 ] ; then
+      DISTRO="linux-x64"
+    fi
+    if [ ${isX86_32} -eq 1 ] ; then
+      echo "Error - No X86 32bit build available - will abort setup"
+      exit 1
+    fi
+    echo "*** Install NodeJS $VERSION-$DISTRO ***"
+    wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
+    sudo mkdir -p /usr/local/lib/nodejs
+    sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs 
+    export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
     echo ""
 
     # check if nodeJS was installed 
-    nodeJSInstalled=$(node -v | grep -c "v11.")
+    nodeJSInstalled=$(node -v | grep -c "v1")
     if [ ${nodeJSInstalled} -eq 0 ]; then
-      echo "FAIL - Was not able to install nodeJS 11"
+      echo "FAIL - Was not able to install nodeJS"
       echo "ABORT - RTL install"
       exit 1
     fi
