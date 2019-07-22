@@ -715,6 +715,8 @@ To start your Deep Dive into the RaspiBlitz project, the following YouTube video
 
 YouTube-Link: [https://youtu.be/R_ggGj7Hk1w](https://youtu.be/R_ggGj7Hk1w)
 
+[![Watch the RaspiBlitz DeepDive](pictures/raspiblitz-deepdive.png)](https://youtu.be/R_ggGj7Hk1w)
+
 Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi which was the base work the RaspiBlitz was developed on - so much thx to Stadicus :)
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at a upcomming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by on of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
