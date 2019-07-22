@@ -709,11 +709,7 @@ You have still more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
 Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in progress. [Check the issues](https://github.com/rootzoll/raspiblitz/issues) if you wanna help out or add new ideas. You find the scripts used for RaspiBlitz interactions on the device at `/home/admin` or in this git repo in the subfolder `home.admin`.
 
-To start your Deep Dive into the RaspiBlitz project, the following YouTube video from the London Bitcoin Dev Meetup (July 2019) is recommended:
-
-![RaspiBlitz](pictures/raspiblitz-deepdive.png)
-
-YouTube-Link: [https://youtu.be/R_ggGj7Hk1w](https://youtu.be/R_ggGj7Hk1w)
+To start your Deep Dive into the RaspiBlitz project, the following YouTube video from the London Bitcoin Dev Meetup (July 2019) is recommended: [https://youtu.be/R_ggGj7Hk1w](https://youtu.be/R_ggGj7Hk1w)
 
 [![Watch the RaspiBlitz DeepDive](pictures/raspiblitz-deepdive.png)](https://youtu.be/R_ggGj7Hk1w)
 
