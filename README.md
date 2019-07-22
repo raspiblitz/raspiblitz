@@ -85,6 +85,8 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.2:**
 
+*NOTICE: Version 1.2 Release is not working in the RaspberryPi 4. If you have a RaspberryPi 4 you can try the early [RaspiBlitz for v1.3 Release Candidate from the v1.3 branch here](https://github.com/rootzoll/raspiblitz/blob/v1.3/README.md#installing-the-software).*
+
 HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-05-02.img.gz
 
 Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.2/raspiblitz-v1.2-2019-05-02.torrent
