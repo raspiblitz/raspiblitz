@@ -712,7 +712,8 @@ Everybody is welcome to join, improve and extend the RaspiBlitz - its a work in 
 To start your Deep Dive into the RaspiBlitz project, the following YouTube video from the London Bitcoin Dev Meetup (July 2019) is recommended:
 
 ![RaspiBlitz](pictures/raspiblitz-deepdive.png)
-[https://youtu.be/R_ggGj7Hk1w](https://youtu.be/R_ggGj7Hk1w)
+
+YouTube-Link: [https://youtu.be/R_ggGj7Hk1w](https://youtu.be/R_ggGj7Hk1w)
 
 Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi which was the base work the RaspiBlitz was developed on - so much thx to Stadicus :)
 
