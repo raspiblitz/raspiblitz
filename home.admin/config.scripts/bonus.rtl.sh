@@ -61,8 +61,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
     echo ""
 
-    # check if nodeJS was installed 
-    nodeJSInstalled=$(node -v | grep -c "v1")
+    # check if nodeJS was installed (v11)
+    nodeJSInstalled=$(node -v | grep -c "v11.")
     if [ ${nodeJSInstalled} -eq 0 ]; then
       echo "FAIL - Was not able to install nodeJS"
       echo "ABORT - RTL install"

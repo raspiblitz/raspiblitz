@@ -122,7 +122,7 @@ if [ ${anyDataAtAll} -eq 1 ]; then
   else
 
     echo "OK -> DATA LOOKS GOOD :D"
-    sudo rm /mnt/hdd/bitcoin/debug.log
+    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
 
   fi
 
