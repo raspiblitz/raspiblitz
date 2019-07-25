@@ -72,7 +72,7 @@ fi
 # details see here: https://github.com/btcontract/lnwallet/issues/52
 minSat=20000
 if [ "${network}" = "bitcoin" ]; then
-  minSat=250000
+  minSat=50000
 fi
 _error="./.error.out"
 lncli --chain=${network} openchannel --network=${chain}net ${CHOICE} 1 0 2>$_error
