@@ -39,8 +39,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get install -y nodejs
     echo ""
 
-    # check if nodeJS was installed 
+    # check if nodeJS was installed (v11 or v10)
     nodeJSInstalled=$(node -v | grep -c "v11.")
+    if [ ${nodeJSInstalled} -eq 0 ]; then
+      nodeJSInstalled=$(node -v | grep -c "v10.")
+    fi
     if [ ${nodeJSInstalled} -eq 0 ]; then
       echo "FAIL - Was not able to install nodeJS 11"
       echo "ABORT - RTL install"
