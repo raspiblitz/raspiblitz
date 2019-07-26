@@ -677,6 +677,10 @@ sudo apt-get -y install screen
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
 sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
+# install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+sudo apt-get -y install fzf
+sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+
 # *** SHELL SCRIPTS AND ASSETS
 
 # move files from gitclone
