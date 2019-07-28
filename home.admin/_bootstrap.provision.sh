@@ -57,6 +57,14 @@ fi
 sudo rm -rf /etc/ssh >> ${logFile} 2>&1
 sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
 
+# optimze if RAM >1GB
+kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+if [ ${kbSizeRAM} -gt 1500000 ]; then
+  echo "Detected RAM >1GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^dbcache=.*/dbcache=600/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
+fi
+
 # link and copy HDD content into new OS
 echo "Link HDD content for user bitcoin" >> ${logFile}
 sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
