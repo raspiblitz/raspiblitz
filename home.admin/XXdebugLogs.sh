@@ -39,16 +39,16 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
-echo "*** BCLOCKHAIN SYSTEMD STATUS ***"
+echo "*** BLOCKCHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
 
-echo "*** LAST BCLOCKHAIN ERROR LOGS ***"
+echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
 cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo ""
-echo "*** LAST BCLOCKHAIN 20 INFO LOGS ***"
+echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
   pathAdd="/testnet3"
