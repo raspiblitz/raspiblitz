@@ -309,16 +309,16 @@ else
   echo "Touchscreen Setting unchanged."
 fi
 
-# touchscreen
+# lcd rotate
 choice="0"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="1"; fi
-if [ "${touchscreen}" != "${choice}" ]; then
+if [ "${lcdrotate}" != "${choice}" ]; then
   echo "LCD Rotate Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${choice}
   needsReboot=1
 else
-  echo "Touchscreen Setting unchanged."
+  echo "LCD Rotate Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
