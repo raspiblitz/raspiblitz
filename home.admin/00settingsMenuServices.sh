@@ -316,7 +316,7 @@ else
 fi
 
 if [ ${anychange} -eq 0 ]; then
-     dialog --pause "Hint: Use Spacebar to check/uncheck services." 8 58 5
+     dialog --msgbox "NOTHING CHANGED! Use Spacebar to check/uncheck services." 8 58
      exit 0
 fi
 
