@@ -28,6 +28,12 @@ if [ ${#dynDomain} -gt 0 ]; then
   dynDomainMenu="${dynDomain}"
 fi
 
+echo "map lcdrotate to on/off"
+lcdrotateMenu='off'
+if [ ${lcdrotate} -gt 0 ]; then 
+  lcdrotateMenu='on'
+fi
+
 echo "map touchscreen to on/off"
 tochscreenMenu='off'
 if [ ${touchscreen} -gt 0 ]; then 
@@ -54,7 +60,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${tochscreenMenu} \
-r 'LCD Rotate' ${lcdrotate} \
+r 'LCD Rotate' ${lcdrotateMenu} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 16 45 9 \
@@ -67,7 +73,7 @@ CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to a
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 9 'Touchscreen' ${tochscreenMenu} \
-r 'LCD Rotate' ${lcdrotate} \
+r 'LCD Rotate' ${lcdrotateMenu} \
 2>&1 >/dev/tty)
 fi
 
