@@ -41,12 +41,18 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo systemctl stop litecoind.service 2>/dev/null
     echo ""
     echo "DELETING ..."
-    sudo rm -f -r /mnt/hdd/bitcoin/blocks 2>/dev/null
-    sudo rm -f -r /mnt/hdd/bitcoin/chainstate 2>/dev/null
-    sudo rm -f -r /mnt/hdd/litecoin/blocks 2>/dev/null
-    sudo rm -f -r /mnt/hdd/litecoin/chainstate 2>/dev/null
-    sudo rm -f /mnt/hdd/bitcoin/debug.log 2>/dev/null  
-    sudo rm -f /mnt/hdd/litecoin/debug.log 2>/dev/null
+
+    # delete bitcoin blockchain (but keep config)
+    sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin.conf
+    sudo rm -f -r /mnt/hdd/bitcoin/*
+    sudo mv /mnt/hdd/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+
+    # delete litecoin blockchain (but keep config)
+    sudo mv /mnt/hdd/litecoin/litecoin.conf /mnt/hdd/litecoin.conf
+    sudo rm -f -r /mnt/hdd/litecoin/*
+    sudo mv /mnt/hdd/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
 
     echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
     
@@ -58,43 +64,47 @@ else
     read key
 
     echo "stopping services ... (please wait)"
+    
     echo "- swap"
     sudo dphys-swapfile swapoff
+
     echo "- background"
     sudo systemctl stop background 2>/dev/null
+
     echo "- lnd"
     sudo systemctl stop lnd.service 2>/dev/null
+
     echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
     sudo systemctl stop litecoind.service 2>/dev/null
 
     # just delete selective
     echo "selective delete ... (please wait)"
-    sudo rm -f /mnt/hdd/swapfile
-    sudo rm -f /mnt/hdd/bitcoin/bitcoin.conf
-    sudo rm -f /mnt/hdd/bitcoin/bitcoin.pid
-    sudo rm -f /mnt/hdd/bitcoin/*.dat
-    sudo rm -f /mnt/hdd/bitcoin/*.log
-    sudo rm -f /mnt/hdd/bitcoin/*.pid
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/*.dat
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/*.log
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/.lock
-    sudo rm -f /mnt/hdd/litecoin/litecoin.conf
-    sudo rm -f /mnt/hdd/litecoin/litecoin.pid
-    sudo rm -f /mnt/hdd/litecoin/*.dat
-    sudo rm -f /mnt/hdd/litecoin/*.log
-    sudo rm -f /mnt/hdd/litecoin/*.pid
+
+    # bitcoin mainnet (clean working files)
+    sudo rm -f /mnt/hdd/bitcoin/*.*
+    sudo rm -f -r /mnt/hdd/bitcoin/database
+
+    # bitcoin testnet (clean working files)
+    sudo rm -f /mnt/hdd/bitcoin/testnet3/*.*
+    sudo rm -f -r /mnt/hdd/bitcoin/testnet/database
+
+    # litecoin mainnet (clean working files)
+    sudo rm -f /mnt/hdd/litecoin/*.*
+    sudo rm -f -r /mnt/hdd/litecoin/database
+
+    # lnd (delet all)
+    sudo rm -f -r /mnt/hdd/lnd
+    sudo rm -f -r /mnt/hdd/backup_lnd
+
+    # mixed other files and folders (all)
     sudo rm -f -r /mnt/hdd/lost+found
     sudo rm -f -r /mnt/hdd/download
     sudo rm -f -r /mnt/hdd/tor
     sudo rm -f -r /mnt/hdd/temp
-    sudo rm -f -r /mnt/hdd/backup_lnd
-    sudo rm -f -r /mnt/hdd/backup_lnd
-    sudo rm -f -r /mnt/hdd/lnd
     sudo rm -f -r /mnt/hdd/ssh
-    sudo rm -f /mnt/hdd/raspiblitz.conf
-    sudo rm -f /home/admin/raspiblitz.info
-    
+    sudo rm -f /mnt/hdd/swapfile
+    sudo rm -f /mnt/hdd/*.*
 
 fi
 
