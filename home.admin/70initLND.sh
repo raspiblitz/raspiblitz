@@ -189,6 +189,7 @@ if [ ${walletExists} -eq 0 ]; then
     fi
 
     # generate wallet with seed and set passwordC
+    clear
     echo "Generating new Wallet ...."
     source /home/admin/python-env-lnd/bin/activate
     python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
