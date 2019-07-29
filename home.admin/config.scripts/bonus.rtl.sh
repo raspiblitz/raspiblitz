@@ -78,6 +78,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "FAIL: The checksum of node-$VERSION-$DISTRO.tar.xz is NOT ${CHECKSUM}"
       exit 1
     fi
+    echo "OK CHECKSUM of nodeJS is OK"
+    sleep 3
 
     # install
     sudo mkdir -p /usr/local/lib/nodejs
