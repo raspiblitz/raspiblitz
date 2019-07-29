@@ -70,9 +70,6 @@ else
 
     # just delete selective
     echo "selective delete ... (please wait)"
-    sudo rm -f -r /mnt/hdd/backup_lnd
-    sudo rm -f -r /mnt/hdd/lnd
-    sudo rm -f -r /mnt/hdd/ssh
     sudo rm -f /mnt/hdd/swapfile
     sudo rm -f /mnt/hdd/bitcoin/bitcoin.conf
     sudo rm -f /mnt/hdd/bitcoin/bitcoin.pid
@@ -92,6 +89,9 @@ else
     sudo rm -f -r /mnt/hdd/tor
     sudo rm -f -r /mnt/hdd/temp
     sudo rm -f -r /mnt/hdd/backup_lnd
+    sudo rm -f -r /mnt/hdd/backup_lnd
+    sudo rm -f -r /mnt/hdd/lnd
+    sudo rm -f -r /mnt/hdd/ssh
     sudo rm -f /mnt/hdd/raspiblitz.conf
     sudo rm -f /home/admin/raspiblitz.info
     
