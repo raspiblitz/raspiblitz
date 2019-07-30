@@ -195,7 +195,7 @@ if [ ${mountOK} -eq 1 ]; then
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 5 options:" 13 75 5 \
+    --menu "You need a copy of the Bitcoin Blockchain - you have 4 options:" 13 75 5 \
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
     N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
@@ -205,7 +205,7 @@ if [ ${mountOK} -eq 1 ]; then
   elif [ ${network} = "litecoin" ]; then
     echo "Litecoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Litecoin Blockchain - you have 3 options:" 13 75 4 \
+    --menu "You need a copy of the Litecoin Blockchain - you have 2 options:" 13 75 4 \
     T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
     S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
 
