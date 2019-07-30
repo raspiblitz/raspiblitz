@@ -217,17 +217,18 @@ if [ ${lndRunning} -eq 1 ]; then
 
     # lnd scan progress
     scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
+    nowTimestamp=$(date +%s)
+    if [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
+      scanTimestamp=${nowTimestamp}
+    fi
     if [ ${#scanTimestamp} -gt 0 ]; then
       echo "scanTimestamp=${scanTimestamp}"
-      scanDate=$(date -d @${scanTimestamp})
+      scanDate=$(date -d @${scanTimestamp} 2>/dev/null)
       echo "scanDate='${scanDate}'"
-
+      
       # calculate LND scan progress by seconds since Genesisblock
       genesisTimestamp=1230940800
-      nowTimestamp=$(date +%s)
-      if [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
-        scanTimestamp=${nowTimestamp}
-      fi
+
       totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)
       scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
       scanProgress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
