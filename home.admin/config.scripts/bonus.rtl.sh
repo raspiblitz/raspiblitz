@@ -98,7 +98,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     rm -r ./RTL 2>/dev/null
-    git clone https://github.com/ShahanaFarooqui/RTL.git
+    git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd RTL
     git reset --hard v0.4.2
     # check if node_modles exists now
