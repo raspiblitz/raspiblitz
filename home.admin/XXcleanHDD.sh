@@ -43,15 +43,15 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     echo "DELETING ..."
 
     # delete bitcoin blockchain (but keep config)
-    sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin.conf
+    sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin.conf 2>/dev/null
     sudo rm -f -r /mnt/hdd/bitcoin/*
-    sudo mv /mnt/hdd/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+    sudo mv /mnt/hdd/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
 
     # delete litecoin blockchain (but keep config)
-    sudo mv /mnt/hdd/litecoin/litecoin.conf /mnt/hdd/litecoin.conf
+    sudo mv /mnt/hdd/litecoin/litecoin.conf /mnt/hdd/litecoin.conf 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin/*
-    sudo mv /mnt/hdd/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
+    sudo mv /mnt/hdd/litecoin.conf /mnt/hdd/litecoin/litecoin.conf 2>/dev/null
     sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
 
     echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
