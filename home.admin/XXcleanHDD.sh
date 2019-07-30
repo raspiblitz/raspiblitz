@@ -64,7 +64,7 @@ else
     read key
 
     echo "stopping services ... (please wait)"
-    
+
     echo "- swap"
     sudo dphys-swapfile swapoff
 
@@ -82,15 +82,18 @@ else
     echo "selective delete ... (please wait)"
 
     # bitcoin mainnet (clean working files)
-    sudo rm -f /mnt/hdd/bitcoin/*.*
+    sudo rm -f /mnt/hdd/bitcoin/* 2>/dev/null
+    sudo rm -f /mnt/hdd/bitcoin/.* 
     sudo rm -f -r /mnt/hdd/bitcoin/database
 
     # bitcoin testnet (clean working files)
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/*.*
+    sudo rm -f /mnt/hdd/bitcoin/testnet3/* 2>/dev/null
+    sudo rm -f /mnt/hdd/bitcoin/testnet3/.*
     sudo rm -f -r /mnt/hdd/bitcoin/testnet/database
 
     # litecoin mainnet (clean working files)
-    sudo rm -f /mnt/hdd/litecoin/*.*
+    sudo rm -f /mnt/hdd/litecoin/* 2>/dev/null
+    sudo rm -f /mnt/hdd/litecoin/.*
     sudo rm -f -r /mnt/hdd/litecoin/database
 
     # lnd (delet all)
