@@ -99,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Get the RTL Source Code ***"
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
-    cd RTL
+    cd /home/admin/RTL
     git reset --hard v0.4.2
     # check if node_modles exists now
     if [ -d "/home/admin/RTL" ]; then
