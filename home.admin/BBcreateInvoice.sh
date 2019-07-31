@@ -83,7 +83,7 @@ else
   echo
   echo "${payReq}"
   echo
-  echo "Monitoring Incomming Payment with:"
+  echo "Monitoring the Incoming Payment with:"
   echo "lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}"
   echo "Press x and hold to skip to menu."
 
