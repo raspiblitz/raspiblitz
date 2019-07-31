@@ -483,27 +483,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.7.0-beta"
-
-if [ ${isARM} -eq 1 ] ; then
-  lndOSversion="armv7"
-  lndSHA256="ac51d96ee9b57bfcab0b05dbcfcd9ce3bd42a216354c0972e97c1a1c86c2479a"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  lndOSversion="arm64"
-  lndSHA256="c995fa67d6b23e547723801de49817dda34188fba78d0fe8ae506774e54c0afd"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  lndOSversion="amd64"
-  lndSHA256="2e7ed105b9e57103645bda30501cbf3386909cfed19a2fabcc3dc9117ce99a8f"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  lndOSversion="386"
-  lndSHA256="47be6c3391fadbc5a169fa1dd6dd13031d759b3d42c71a2d556751746b705c48"
-fi
-
-echo ""
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+lndVersion="0.7.1-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -514,13 +494,37 @@ PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
 cd /home/admin/download
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -O /home/admin/download/pgp_keys.asc ${PGPpkeys}
 
-# check binary is was not manipulated (checksum test)
+# get lndOSversion and lndSHA256 for the corresponding platform
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+if [ ${isARM} -eq 1 ] ; then
+  lndOSversion="armv7"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  lndOSversion="arm64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+echo ""
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+echo "SHA256 hash: $lndSHA256"
+echo ""
+
+# get LND binary
+binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+
+# check binary was not manipulated (checksum test)
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
@@ -529,7 +533,7 @@ fi
 
 # check gpg finger print
 gpg ./pgp_keys.asc
-fingerprint=$(sudo gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
+fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
@@ -542,11 +546,11 @@ sleep 3
 verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${olaoluwaPGP}" -c)
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
 fi
 
