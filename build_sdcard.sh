@@ -490,43 +490,12 @@ PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
 # get LND resources
 cd /home/admin/download
 
-# get lndOSversion and lndSHA256 for the corresponding platform
+# download lnd binary checksum manifest
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-if [ ${isARM} -eq 1 ] ; then
-  lndOSversion="armv7"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  lndOSversion="arm64"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  lndOSversion="amd64"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
-if [ ${isX86_32} -eq 1 ] ; then
-  lndOSversion="386"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
-echo ""
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
-echo "SHA256 hash: $lndSHA256"
-echo ""
 
-# get LND binary
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
-
-# check binary was not manipulated (checksum test)
+# check if checksums are signed by lnd dev team
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
 sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
-  exit 1
-fi
-
-# check gpg finger print
 gpg ./pgp_keys.asc
 fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
@@ -546,6 +515,40 @@ echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+  exit 1
+fi
+
+# get the lndSHA256 for the corresponding platform from manifest file
+if [ ${isARM} -eq 1 ] ; then
+  lndOSversion="armv7"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  lndOSversion="arm64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+
+echo ""
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+echo "SHA256 hash: $lndSHA256"
+echo ""
+
+# get LND binary
+binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+
+# check binary was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
   exit 1
 fi
 
