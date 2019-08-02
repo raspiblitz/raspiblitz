@@ -261,7 +261,7 @@ HiddenServicePort 80 127.0.0.1:80
 HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
 HiddenServicePort 80 127.0.0.1:10009
 
-# Hidden Service v3 for LND incomming connections (just in case)
+# Hidden Service v3 for LND incoming connections (just in case)
 # https://trac.torproject.org/projects/tor/wiki/doc/NextGenOnions#Howtosetupyourownprop224service
 HiddenServiceDir /mnt/hdd/tor/lnd9735
 HiddenServiceVersion 3

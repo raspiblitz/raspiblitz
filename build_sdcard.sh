@@ -347,8 +347,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-# bitcoinVersion="0.18.0" # commented out checksums for this version until lnd version >0.5.1
-bitcoinVersion="0.17.1"
+bitcoinVersion="0.18.0"
 
 # set OS version and checksum
 # needed to make sure download is not changed
@@ -356,23 +355,19 @@ bitcoinVersion="0.17.1"
 # https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
 if [ ${isARM} -eq 1 ] ; then
   bitcoinOSversion="arm-linux-gnueabihf"
-  # bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
-  bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
+  bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
 fi
 if [ ${isAARCH64} -eq 1 ] ; then
   bitcoinOSversion="aarch64-linux-gnu"
-  # bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
-  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
+  bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-  # bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
-  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
+  bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
 fi
 if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
-  # bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
-  bitcoinSHA256="b1e1dcf8265521fef9021a9d49d8661833e3f844ca9a410a9dd12a617553dda1"
+  bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
 fi
 
 echo ""
@@ -483,27 +478,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.7.0-beta"
-
-if [ ${isARM} -eq 1 ] ; then
-  lndOSversion="armv7"
-  lndSHA256="ac51d96ee9b57bfcab0b05dbcfcd9ce3bd42a216354c0972e97c1a1c86c2479a"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  lndOSversion="arm64"
-  lndSHA256="c995fa67d6b23e547723801de49817dda34188fba78d0fe8ae506774e54c0afd"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  lndOSversion="amd64"
-  lndSHA256="2e7ed105b9e57103645bda30501cbf3386909cfed19a2fabcc3dc9117ce99a8f"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  lndOSversion="386"
-  lndSHA256="47be6c3391fadbc5a169fa1dd6dd13031d759b3d42c71a2d556751746b705c48"
-fi
-
-echo ""
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+lndVersion="0.7.1-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -514,13 +489,37 @@ PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
 
 # get LND resources
 cd /home/admin/download
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -O /home/admin/download/pgp_keys.asc ${PGPpkeys}
 
-# check binary is was not manipulated (checksum test)
+# get lndOSversion and lndSHA256 for the corresponding platform
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+if [ ${isARM} -eq 1 ] ; then
+  lndOSversion="armv7"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  lndOSversion="arm64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+echo ""
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+echo "SHA256 hash: $lndSHA256"
+echo ""
+
+# get LND binary
+binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+
+# check binary was not manipulated (checksum test)
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
@@ -529,7 +528,7 @@ fi
 
 # check gpg finger print
 gpg ./pgp_keys.asc
-fingerprint=$(sudo gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
+fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
@@ -542,11 +541,11 @@ sleep 3
 verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${olaoluwaPGP}" -c)
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
 fi
 
