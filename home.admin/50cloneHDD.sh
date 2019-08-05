@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# CLODE HDD
+# Script to use the HDD of another RaspiBlitz (Ext4) or from another desktop computer (ExFAT)
+# and copy blocckhain data over to RaspiBlitz HDD/SSD
+
 ## get basic info
 source /home/admin/raspiblitz.info
 
@@ -38,8 +42,8 @@ echo "*** Clone Blockchain form a second HDD ***"
 echo ""
 echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
 echo ""
-echo "You can use a Y cable for the second HDD to inject extra power."
-echo "Like this one: https://www.amazon.de/dp/B00ZJBIHVY"
+echo "You can use a Y cable for the second HDD to inject extra power"
+echo "or add a USB Hub with extra power between Raspi and 2n HDD."
 echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
 echo ""
 echo "You can use the HDD of another RaspiBlitz for this."
@@ -95,6 +99,8 @@ mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "FAIL - not able to mount the 2nd HDD"
   echo "only ext4 and exfat possible"
+  echo "PRESS ENTER to return to menu"
+  read key
   sleep 4
   ./10setupBlitz.sh
   exit 1
