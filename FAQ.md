@@ -777,3 +777,13 @@ The `[CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]` you get when running the `internet
 To check if a tunnel is running on on server check: `netstat -tulpn`
 
 To check for any errors on RaspiBlitz after restart check logs: `sudo journalctl -f -u autossh-tunnel.service`
+
+## How to connect a UPS to the RaspiBlitz?
+
+A UPS (Uninterruptible Power Supply) is used to protect the RaspiBlitz against power outages. Normally you put it just between your normal power outlet and your RaspiBlitz and you are good. But some UPS offer a way to communicate with devices. This can be very useful for example if on a longer power outage the battery of the UPS runs low the RaspiBlitz could detect this and power down in a clean way - instead of just the power goes out and risking data loss or corruption.
+
+There is an experimental script to connect the RaspiBlitz to a UPS over USB cable build by APC - the Model tested with was [APC Back-UPS BX - BX700U-GR](https://www.amazon.de/APC-Back-UPS-Unterbrechungsfreie-Stromversorgung-BX700U-GR/dp/B00T7BYRCK) but it should work with every APC model offering a USB port.
+
+To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on apcusb`
+
+If you have other UPS models or ways to connect ... feel free to extend this script. 
