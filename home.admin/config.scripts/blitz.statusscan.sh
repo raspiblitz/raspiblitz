@@ -33,8 +33,8 @@ echo "uptime=${uptime}"
 
 # get UPS info (if configured)
 if [ ${#ups} -gt 0 ]; then
-  source /home/admin/config.scripts/blitz.ups.sh status
-  echo "upsStatus='${upsStatus}'"
+  # echos 'upsStatus='
+  /home/admin/config.scripts/blitz.ups.sh status
 fi
 
 # count restarts of bitcoind/litecoind
