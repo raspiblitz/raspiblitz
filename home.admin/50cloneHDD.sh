@@ -43,7 +43,7 @@ echo ""
 echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
 echo ""
 echo "You can use a Y cable for the second HDD to inject extra power"
-echo "or add a USB Hub with extra power between Raspi and 2n HDD."
+echo "or add a USB Hub with extra power between Raspi and 2nd HDD."
 echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
 echo ""
 echo "You can use the HDD of another RaspiBlitz for this."
@@ -73,7 +73,7 @@ while [ ${ready} -eq 0 ]
 
 echo ""
 echo "*** Mounting 2nd HDD ***"
-sudo mkdir /mnt/genesis
+sudo mkdir /mnt/genesis 2>/dev/null
 echo "try ext4 on sdb1 .."
 sudo mount -t ext4 /dev/sdb1 /mnt/genesis
 sleep 2
@@ -110,10 +110,7 @@ fi
 
 echo ""
 echo "*** Copy Blockchain ***"
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/chainstate /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/testnet3 /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/hdd/bitcoin
-
+sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/genesis/bitcoin/chainstate /mnt/hdd/bitcoin
 sudo umount -l /mnt/genesis
 echo "OK - Copy done :)"
 echo ""
