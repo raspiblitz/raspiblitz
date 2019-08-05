@@ -40,6 +40,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s/^UPSTYPE.*/UPSTYPE usb/g" /etc/apcupsd/apcupsd.conf
     sudo sed -i "s/^DEVICE.*/DEVICE/g" /etc/apcupsd/apcupsd.conf
     sudo sed -i "s/^MINUTES.*/MINUTES 10/g" /etc/apcupsd/apcupsd.conf
+    sudo sed -i "s/^ISCONFIGURED=.*/ISCONFIGURED=yes/g" /etc/default/apcupsd
+    sudo sed -i "s/^SHUTDOWN=.*/SHUTDOWN=\/home\/admin\/XXshutdown.sh/g" /etc/apcupsd/apccontrol
+    sudo sed -i "s/^WALL=.*/#WALL=wall/g" /etc/apcupsd/apccontrol
     sudo systemctl start apcupsd
 
     # add default 'ups' raspiblitz.conf if needed
