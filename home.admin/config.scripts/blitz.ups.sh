@@ -7,6 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Configure a UPS (Uninterruptible Power Supply)"
  echo "blitz.ups.sh on apcusb"
+ echo "blitz.ups.sh status"
  echo "blitz.ups.sh off"
  exit 1
 fi
@@ -54,6 +55,39 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   else
     echo "FAIL: unknown or missing second parameter 'UPSTYPE'"
     exit 1
+  fi
+
+fi
+
+###################
+# STATUS
+###################
+
+if [ "$1" = "status" ]; then
+  
+  # check if already activated
+  if [ ${#ups} -eq 0 ]; then
+    echo "upsStatus='OFF'"
+    exit 0
+  fi
+
+  if [ "${ups}" = "apcusb" ]; then
+    status=$(apcaccess -p STATUS)
+    if [ ${#status} -eq 0 ]; then
+      echo "upsStatus='n/a'"
+    else
+      # get battery level if possible
+      if [ "${status}" = "ONLINE" ] || [ "${status}" = "ONLINE" ]; then
+        status=$(apcaccess -p BCHARGE | cut -d "." -f1)
+        echo "upsStatus='${status}%'"
+      else
+        echo "upsStatus='${status}'"
+      fi
+    fi
+    exit 0
+  else
+    echo "upsStatus='CONFIG'"
+    exit 0
   fi
 
 fi
