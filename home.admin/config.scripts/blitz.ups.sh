@@ -79,12 +79,11 @@ if [ "$1" = "status" ]; then
     if [ ${#status} -eq 0 ]; then
       echo "upsStatus='n/a'"
     else
+      echo "upsStatus='${status}'"
       # get battery level if possible
       if [ "${status}" = "ONLINE" ] || [ "${status}" = "ONBATT" ]; then
-        status=$(apcaccess -p BCHARGE | xargs | cut -d "." -f1)
-        echo "upsStatus='${status}%'"
-      else
-        echo "upsStatus='${status}'"
+        battery=$(apcaccess -p BCHARGE | xargs | cut -d "." -f1)
+        echo "upsBattery='${battery}%'"
       fi
     fi
     exit 0

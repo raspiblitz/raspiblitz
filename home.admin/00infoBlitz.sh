@@ -15,6 +15,16 @@ color_purple='\033[0;35m'
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
+# get UPS info
+source <(/home/admin/config.scripts/blitz.ups.sh status)
+upsInfo=""
+if [ "${upsStatus}" = "ONLINE" ]; then
+  upsInfo="${color_gray}${upsBattery}"
+fi
+if [ "${upsStatus}" = "ONBATT" ]; then
+  upsInfo="${color_red}${upsBattery}"
+fi
+
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 
@@ -287,7 +297,7 @@ printf "
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
-${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
+${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
