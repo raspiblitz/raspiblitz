@@ -71,7 +71,7 @@ echo "*** Mounting 2nd HDD ***"
 sudo mkdir /mnt/genesis 2>/dev/null
 echo "try ext4 on sdb1 .."
 sudo mount -t ext4 /dev/sdb1 /mnt/genesis
-sleep 2
+sleep 4
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try exfat on sdb1 .."
