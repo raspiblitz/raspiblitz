@@ -59,8 +59,8 @@ echo "then cancel (CTRL+c) and reboot."
 ready=0
 while [ ${ready} -eq 0 ]
   do
-    found=$(lsblk | grep -c sdb)
-    if [ ${found} -eq 1 ]; then
+    found=$(lsblk | grep part | grep -c sdb)
+    if [ ${found} -gt 0 ]; then
       echo "OK - 2nd HDD found as part of sdb"
       ready=1
     fi
