@@ -72,13 +72,13 @@ if [ "$1" = "status" ]; then
   fi
 
   if [ "${ups}" = "apcusb" ]; then
-    status=$(apcaccess -p STATUS)
+    status=$(apcaccess -p STATUS | xargs)
     if [ ${#status} -eq 0 ]; then
       echo "upsStatus='n/a'"
     else
       # get battery level if possible
       if [ "${status}" = "ONLINE" ] || [ "${status}" = "ONLINE" ]; then
-        status=$(apcaccess -p BCHARGE | cut -d "." -f1)
+        status=$(apcaccess -p BCHARGE | xargs | cut -d "." -f1)
         echo "upsStatus='${status}%'"
       else
         echo "upsStatus='${status}'"
