@@ -59,14 +59,9 @@ echo "then cancel (CTRL+c) and reboot."
 ready=0
 while [ ${ready} -eq 0 ]
   do
-    hddC=$(lsblk | grep -c sdb1)
-    if [ ${hddC} -eq 1 ]; then
-      echo "OK - 2nd HDD found as sdb1"
-      ready=1
-    fi
-    hddD=$(lsblk | grep -c sdb)
-    if [ ${hddD} -eq 1 ]; then
-      echo "OK - 2nd HDD found as sdb"
+    found=$(lsblk | grep -c sdb)
+    if [ ${found} -eq 1 ]; then
+      echo "OK - 2nd HDD found as part of sdb"
       ready=1
     fi
   done
@@ -81,19 +76,19 @@ mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try exfat on sdb1 .."
   sudo mount -t exfat /dev/sdb1 /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try ext4 on sdb .."
   sudo mount -t ext4 /dev/sdb /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try exfat on sdb.."
   sudo mount -t exfat /dev/sdb /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
@@ -101,7 +96,6 @@ if [ ${mountOK} -eq 0 ]; then
   echo "only ext4 and exfat possible"
   echo "PRESS ENTER to return to menu"
   read key
-  sleep 4
   ./10setupBlitz.sh
   exit 1
 else
