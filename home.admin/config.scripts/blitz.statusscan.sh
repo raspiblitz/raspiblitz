@@ -31,6 +31,12 @@ fi
 uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
 echo "uptime=${uptime}"
 
+# get UPS info (if configured)
+if [ ${#ups} -gt 0 ]; then
+  source /home/admin/config.scripts/blitz.ups.sh status
+  echo "upsStatus=${upsStatus}"
+fi
+
 # count restarts of bitcoind/litecoind
 startcountBlockchain=$(cat /home/admin/systemd.blockchain.log 2>/dev/null | grep -c "STARTED")
 echo "startcountBlockchain=${startcountBlockchain}"
