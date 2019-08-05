@@ -242,6 +242,15 @@ else
     echo "Provisioning Touchscreen - not active" >> ${logFile}
 fi
 
+# UPS
+if [ "${#ups}" -gt 0 ]; then
+    echo "Provisioning UPS - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup UPS'/g" ${infoFile}
+    sudo /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
+else 
+    echo "Provisioning UPS - not active" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
