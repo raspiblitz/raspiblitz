@@ -106,6 +106,7 @@ activateBitcoinOverTOR()
       fi
       sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
+      # copy new bitcoin.conf to admin user for cli access
       sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
       sudo chown admin:admin /home/admin/.${network}/${network}.conf
 
@@ -171,7 +172,8 @@ if [ ${#network} -eq 0 ]; then
 fi
 
 # add default value to raspi config if needed
-if [ ${#runBehindTor} -eq 0 ]; then
+checkTorEntry=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor")
+if [ ${checkTorEntry} -eq 0 ]; then
   echo "runBehindTor=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
