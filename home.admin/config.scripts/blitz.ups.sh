@@ -78,7 +78,7 @@ if [ "$1" = "status" ]; then
   fi
 
   if [ "${ups}" = "apcusb" ]; then
-    status=$(apcaccess -p STATUS | xargs)
+    status=$(apcaccess -p STATUS 2>/dev/null | xargs)
     if [ ${#status} -eq 0 ]; then
       echo "upsStatus='n/a'"
     else
