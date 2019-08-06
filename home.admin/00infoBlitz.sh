@@ -24,6 +24,9 @@ fi
 if [ "${upsStatus}" = "ONBATT" ]; then
   upsInfo="${color_red}${upsBattery}"
 fi
+if [ "${upsStatus}" = "SHUTTING DOWN" ]; then
+  upsInfo="${color_red}DOWN"
+fi
 
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
