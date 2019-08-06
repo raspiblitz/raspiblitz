@@ -326,6 +326,6 @@ if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; the
   echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
 elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
   echo "Weak power supply detected - run 'Hardware Test' in menu"
-elif [ "${upsStatus}" = "n/a" ]; then
-  echo "UPS service needs reinstall - after possible Power-Emergency Shutdown"
+elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
+  echo "Power-Emergency Shutdown may happend - reinstall UPS service"
 fi
