@@ -236,16 +236,20 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
 
-  # inform user about privacy risk
-  whiptail --title " PRIVACY NOTICE " --msgbox "
+  # special actions if TOR is turned on
+  if [ "${choice}" = "on" ]; then
+
+    # inform user about privacy risk
+    whiptail --title " PRIVACY NOTICE " --msgbox "
 RaspiBlitz will now install/activate TOR & after reboot run behind it.
 
 Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind TOR. To unlink you from that IP history its recommended that after the switch/reboot to TOR you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
 " 16 76
 
-  # make sure AutoNAT & UPnP is off
-  /home/admin/config.scripts/lnd.autonat.sh off 
-  /home/admin/config.scripts/network.upnp.sh off
+    # make sure AutoNAT & UPnP is off
+    /home/admin/config.scripts/lnd.autonat.sh off 
+    /home/admin/config.scripts/network.upnp.sh off
+  fi
 
   # change TOR
   anychange=1
