@@ -84,9 +84,27 @@ case $CHOICE in
     ;;
   RESET-LND)
     askBackupCopy
+    # ask for a new name so that network analysis has harder time to connect new node id with old
+    result=""
+    while [ ${#result} -eq 0 ]
+    do
+        l1="Please enter the new name of your LND node:\n"
+        l2="different name is better for a fresh identity\n"
+        l3="one word, keep characters basic & not too long"
+        dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2$l3" 13 52 2>$_temp
+        result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
+        shred $_temp
+        echo "processing ..."
+        sleep 3
+    done
+    # prepare new name
+    sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
+    sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
+
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
     /home/admin/70initLND.sh
+
     exit 1;
     ;;
   RESET-HDD)
