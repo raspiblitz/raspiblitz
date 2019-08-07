@@ -27,7 +27,7 @@ Download LND Data Backup now?
     else
       clear
       echo "*************************************"
-      echo "* JUST MAKING BACKUP TO OLD SD CARD"
+      echo "* JUST MAKING BACKUP TO SD CARD"
       echo "*************************************"
       echo "please wait .."
       sleep 2
@@ -99,8 +99,8 @@ case $CHOICE in
         sleep 3
     done
     # prepare new name
-    sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
-    sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
+    sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
 
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
