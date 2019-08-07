@@ -122,6 +122,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop apcupsd
     sudo systemctl disable apcupsd
     sudo apt-get remove -y apcupsd
+    sudo rm -R /etc/apcupsd
     sudo sed -i "s/^ups=.*/ups=/g" /mnt/hdd/raspiblitz.conf
   else
     echo "FAIL: unknown UPSTYPE: ${ups}"
