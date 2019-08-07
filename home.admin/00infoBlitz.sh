@@ -327,5 +327,5 @@ if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; the
 elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
   echo "Weak power supply detected - run 'Hardware Test' in menu"
 elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
-  echo "Power-Emergency Shutdown may happend - reinstall UPS service"
+  echo "UPS service activated but not running"
 fi

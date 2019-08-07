@@ -36,6 +36,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # edit config: /etc/apcupsd/apcupsd.conf
     sudo systemctl stop apcupsd
+    sudo systemctl disable apcupsd
+
+    # make service autostart
+    sudo sed -i '3iAfter=background.service' /lib/systemd/system/apcupsd.service
+    sudo sed -i '3iWants=background.service' /lib/systemd/system/apcupsd.service
+
     sudo sed -i "s/^UPSCABLE.*/UPSCABLE usb/g" /etc/apcupsd/apcupsd.conf
     sudo sed -i "s/^UPSTYPE.*/UPSTYPE usb/g" /etc/apcupsd/apcupsd.conf
     sudo sed -i "s/^DEVICE.*/DEVICE/g" /etc/apcupsd/apcupsd.conf
@@ -46,6 +52,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s/^ISCONFIGURED=.*/ISCONFIGURED=yes/g" /etc/default/apcupsd
     sudo sed -i "s/^SHUTDOWN=.*/SHUTDOWN=\/home\/admin\/XXshutdown.sh/g" /etc/apcupsd/apccontrol
     sudo sed -i "s/^WALL=.*/#WALL=wall/g" /etc/apcupsd/apccontrol
+    sudo systemctl enable apcupsd
     sudo systemctl start apcupsd
 
     # add default 'ups' raspiblitz.conf if needed
