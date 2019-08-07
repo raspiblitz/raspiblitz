@@ -490,6 +490,11 @@ else
 OK LND Reset is done.
 System will restart now.
 " 10 35
+
+  # make sure host is named like in the raspiblitz config
+  echo "Setting the Name/Alias/Hostname .."
+  sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
+
   sudo shutdown -r now
 
 fi
