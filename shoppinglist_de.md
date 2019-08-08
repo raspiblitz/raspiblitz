@@ -23,7 +23,7 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 
 Basic Parts for all minimal variants:
 * 1TB Hard Drive: [amazon.de](https://www.amazon.de/dp/B07997KKSK?th=1)
-* Micro SD-Card 32GB: [amazon.de](https://www.amazon.de/dp/B073JWXGNT)
+* Micro SD-Card 16GB: [amazon.de](https://www.amazon.de/dp/B073JWXGNT)
 * LCD-Display: [amazon.de](https://www.amazon.de/gp/product/B06X191RX7)
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
