@@ -68,6 +68,7 @@ else
   sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/${network}.conf
 fi
 
+echo ""
 echo "*** Activating Blockain Sync ***"
 
 sudo mkdir /mnt/hdd/${network} 2>/dev/null
