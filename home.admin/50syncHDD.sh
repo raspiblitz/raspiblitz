@@ -63,15 +63,15 @@ echo "dont forget to reduce dbcache once IBD is done" > "/home/admin/selfsync.fl
 # RP4 4GB
 if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >=4GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=3072/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^dbcache=.*/dbcache=3072/g" /home/admin/assets/${network}.conf
 # RP4 2GB
 elif [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >=2GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^dbcache=.*/dbcache=1536/g" /home/admin/assets/${network}.conf
 # RP3/4 1GB
 else
   echo "Detected RAM <=1GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=768/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^dbcache=.*/dbcache=768/g" /home/admin/assets/${network}.conf
 fi
 
 echo "*** Activating Blockain Sync ***"
