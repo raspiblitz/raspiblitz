@@ -11,7 +11,7 @@ swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
   echo "SWAP on HDD already exists"
 else
-  echo "No SWAP found ... creating 1GB SWAP on HDD"
+  echo "No SWAP found ... creating 2GB SWAP on HDD"
   sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
   # comment or delete the CONF_SWAPSIZE line. It will then be created dynamically 
   sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
