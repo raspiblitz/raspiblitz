@@ -407,7 +407,7 @@ case $CHOICE in
             kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
             if [ ${kbSizeRAM} -gt 1500000 ]; then
               echo "Detected RAM >1GB --> optimizing ${network}.conf"
-              sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /home/admin/assets/bitcoin.conf
+              sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/bitcoin.conf
               sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /home/admin/assets/bitcoin.conf
             fi
             /home/admin/10setupBlitz.sh
@@ -421,7 +421,7 @@ case $CHOICE in
             kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
             if [ ${kbSizeRAM} -gt 1500000 ]; then
               echo "Detected RAM >1GB --> optimizing ${network}.conf"
-              sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /home/admin/assets/litecoin.conf
+              sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/litecoin.conf
               sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /home/admin/assets/litecoin.conf
             fi
             /home/admin/10setupBlitz.sh
