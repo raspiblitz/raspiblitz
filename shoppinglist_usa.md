@@ -1,8 +1,10 @@
 # Shopping List: USA
 
+*__NOTICE: This shopping list still needs testing of listed components__ - [please report](https://github.com/rootzoll/raspiblitz/issues/691) if you have bad experiences or ideas for better cheaper updates.*
+
 The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
-## Package: Standard (around 200 EUR)
+## Package: Standard (around 250 USD)
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
@@ -14,13 +16,13 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 * LCD-Display: [amazon.com](https://www.amazon.com/gp/product/B01CNJVG8K) or [amazon.com](https://www.amazon.com/dp/B06X191RX7) or [sparkfun.com](https://www.sparkfun.com/products/14776)
 * RaspberryPi-Case: [thecryptocloak.com](https://thecryptocloak.com/product/lightningshell/) (SELECT Rpi4!)
 
-## Package: Minimal (around 150 EUR)
+## Package: Minimal (around 180 USD)
 
 *The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
 Basic Parts for all minimal variants:
 * 1TB Hard Drive: [amazon.com](https://www.amazon.com/dp/B079D359S6)
-* Micro SD-Card 32GB: [amazon.com](https://www.amazon.com/dp/B07B98GXQT)
+* Micro SD-Card 16GB: [amazon.com](https://www.amazon.com/Sandisk-Ultra-Micro-UHS-I-Adapter/dp/B073K14CVB)
 * LCD-Display: [amazon.com](https://www.amazon.com/gp/product/B01CNJVG8K) or [amazon.com](https://www.amazon.com/dp/B06X191RX7) or [sparkfun.com](https://www.sparkfun.com/products/14776)
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
@@ -28,10 +30,10 @@ If you have already a used RaspberryPi 3 B+ you can reuse with the following par
 * Power >=3A: [amazon.com](https://www.amazon.com/dp/B07MC7B9X3)
 * Heatsink-Case: [amazon.com](https://www.amazon.com/dp/B07M8SH8TM)
 
-Or if you order new go with the RaspberryPi 4 1GB and the following parts:
+Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 * RaspBerry Pi 4 2GB + Power: [amazon.com](https://www.amazon.com/CanaKit-Raspberry-Basic-Kit-2GB/dp/B07TYK4RL8)
 * ShimFan Cooling: [amazon.com](https://www.amazon.com/Pimoroni-Fan-Shim-Raspberry-PI/dp/B07TTTCN8H/)
-* RaspberryPi-Case: [thecryptocloak.com](https://thecryptocloak.com/product/lightningshell/) (SELECT Rpi4!)
+* RaspberryPi-Case: (waiting for a cheap RP4 case from thecryptocloak.com - you can run without for now)
 
 ## Package: Maximal
 

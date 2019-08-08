@@ -1,5 +1,7 @@
 # Shopping List: Germany
 
+*__NOTICE: This shopping list had just basic testing of components__ - [please report](https://github.com/rootzoll/raspiblitz/issues/691) if you have bad experiences or ideas for better cheaper updates.*
+
 The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
 ## Package: Standard (around 200 EUR)
