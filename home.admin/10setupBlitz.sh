@@ -187,7 +187,7 @@ if [ ${mountOK} -eq 1 ]; then
     raspberryPi=0
   fi
   syncComment="ULTRA SLOW"
-  if [ ${syncComment} -gt 3 ]; then
+  if [ ${raspberryPi} -gt 3 ]; then
     syncComment="BEST+SLOW"
   fi
 
