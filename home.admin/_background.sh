@@ -271,16 +271,16 @@ do
     # check if flag exists (got created on 50syncHDD.sh)
     flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-      finishedIBD=$(bitcoin-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      finishedIBD=$(${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
-        echo "CHECK FOR END OF IBD --> reduce RAM and restart bitcoind"
-        
+        echo "CHECK FOR END OF IBD --> reduce RAM and restart ${network}d"
+
         # remove flag
         rm /home/admin/selfsync.flag
 
         # stop bitcoind
-        sudo systemctl stop bitcoind
+        sudo systemctl stop ${network}d
 
         # set dbcache back to normal (to give room for other apps)
         kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
@@ -293,7 +293,7 @@ do
         fi
 
         # restart bitcoind
-        sudo systemctl start bitcoind
+        sudo systemctl start ${network}d
 
       fi
     fi
