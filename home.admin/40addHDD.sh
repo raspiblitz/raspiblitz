@@ -122,6 +122,7 @@ If you dont trust that data you can now choose to delete it - but keep in mind t
   " 14 75
               if [ $? -eq 1 ]; then
                 # DELETE
+                echo "Deleting old blockchain data .."
                 sudo rm -R /mnt/hdd/bitcoin 2>/dev/null
                 sudo rm -R /mnt/hdd/litecoin 2>/dev/null
                 # HDD is now empty - let setupBlitz - display next options
