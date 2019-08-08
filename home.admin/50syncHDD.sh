@@ -56,6 +56,24 @@ if [ "$network" = "bitcoin" ]; then
 
 fi  
 
+echo "*** Optimizing RAM for Sync ***"
+
+kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+echo "dont forget to reduce dbcache once IBD is done" > "/home/admin/selfsync.flag"
+# RP4 4GB
+if [ ${kbSizeRAM} -gt 3500000 ]; then
+  echo "Detected RAM >=4GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^dbcache=.*/dbcache=3072/g" /mnt/hdd/${network}/${network}.conf
+# RP4 2GB
+elif [ ${kbSizeRAM} -gt 1500000 ]; then
+  echo "Detected RAM >=2GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
+# RP3/4 1GB
+else
+  echo "Detected RAM <=1GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^dbcache=.*/dbcache=768/g" /mnt/hdd/${network}/${network}.conf
+fi
+
 echo "*** Activating Blockain Sync ***"
 
 sudo mkdir /mnt/hdd/${network} 2>/dev/null

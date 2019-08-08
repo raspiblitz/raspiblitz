@@ -261,6 +261,44 @@ do
     fi
   fi
 
+  ####################################################
+  # CHECK FOR END OF IBD (self validation)
+  ####################################################
+
+  # check every 60secs
+  recheckIBD=$((($counter % 60)+1))
+  if [ ${recheckIBD} -eq 1 ]; then
+    # check if flag exists (got created on 50syncHDD.sh)
+    flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+    if [ ${flagExists} -eq 1 ]; then
+      finishedIBD=$(bitcoin-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      if [ ${finishedIBD} -eq 1 ]; then
+
+        echo "CHECK FOR END OF IBD --> reduce RAM and restart bitcoind"
+        
+        # remove flag
+        rm /home/admin/selfsync.flag
+
+        # stop bitcoind
+        sudo systemctl stop bitcoind
+
+        # set dbcache back to normal (to give room for other apps)
+        kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+        if [ ${kbSizeRAM} -gt 1500000 ]; then
+          echo "Detected RAM >1GB --> optimizing ${network}.conf"
+          sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
+        else
+          echo "Detected RAM 1GB --> optimizing ${network}.conf"
+          sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+        fi
+
+        # restart bitcoind
+        sudo systemctl start bitcoind
+
+      fi
+    fi
+  fi
+
   ###############################
   # Prepare next loop
   ###############################
