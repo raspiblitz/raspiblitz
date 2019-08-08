@@ -17,28 +17,31 @@ if [ "$network" = "bitcoin" ]; then
     # raspberryPi 3 and lower
     msg=" This old RaspberryPi has very limited CPU power.\n"
     msg="$msg To sync & validate the complete blockchain\n"
-    msg="$msg can take multiple days - even weeksn"
+    msg="$msg can take multiple days - even weeks\n"
     msg="$msg Its recommended to use another option.\n"
     msg="$msg \n"
     msg="$msg So do you really want start syncing now?"
-  else
-    # raspberryPi 4 and up
-    msg=" Your RaspiBlitz will sync and validate\n"
-    msg="$msg the complete blockchain by itself.\n"
-    msg="$msg This can take multiple days, but\n"
-    msg="$msg its the best to do it this way.\n"
-    msg="$msg \n"
-    msg="$msg So do you want start syncing now?"
+    dialog --title " WARNING " --yesno "${msg}" 11 57
+    response=$?
+    case $response in
+      0) echo "--> OK";;
+      1) exit 1;;
+      255) exit 1;;
+    esac
+  fi
+
+  # ask if really sync behind TOR
+  if [ "${runBehindTor}" = "on" ]; then
+    whiptail --title ' Sync Blockchain from behind TOR? ' --yes-button='Public-Sync' --no-button='TOR-Sync' --yesno "You decided to run your node behind TOR and validate the blockchain with your RaspiBlitz - thats good. But downloading the complete blockchain thru TOR can add some extra time (maybe a day) to the process and adds a heavy load on the TOR network.\n
+Your RaspiBlitz can just run the initial blockchain download with your public IP (Public-Sync) but keep your Lighting node safe behind TOR.
+It would speed up the self-validation while not revealing your Lightning node identity. But for most privacy choose (TOR-Sync).
+  " 15 76
+    if [ $? -eq 0 ]; then
+      # set flag to not run bitcoin behind TOR during IDB
+      echo "ibdBehindTor=off" >> /home/admin/raspiblitz.info
+    fi
   fi
   
-  dialog --title " WARNING " --yesno "${msg}" 11 57
-  response=$?
-  case $response in
-     0) echo "--> OK";;
-     1) exit 1;;
-     255) exit 1;;
-  esac
-
   clear
   if [ ${raspberryPi} -lt 4 ]; then
     echo "********************************"
@@ -71,7 +74,7 @@ elif [ ${kbSizeRAM} -gt 1500000 ]; then
 # RP3/4 1GB
 else
   echo "Detected RAM <=1GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=768/g" /home/admin/assets/${network}.conf
+  sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/${network}.conf
 fi
 
 echo "*** Activating Blockain Sync ***"

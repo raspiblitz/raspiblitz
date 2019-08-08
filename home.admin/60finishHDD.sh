@@ -37,10 +37,21 @@ if [ ${mountOK} -eq 1 ]; then
 
    ###### ACTIVATE TOR IF SET DURING SETUP
    if [ "${runBehindTor}" = "on" ]; then
-     echo "TOR was selected ..."
+     
+     echo "runBehindTor --> ON"
      sudo /home/admin/config.scripts/internet.tor.sh on
+
+     # but if IBD is allowed to be public switch off TOR just fro bitcoin 
+     # until IBD is done. background service will after that switch TOR on
+     if [ "${ibdBehindTor}" = "off" ]; then
+       echo "ibdBehindTor --> OFF"
+       sudo /home/admin/config.scripts/internet.tor.sh btcconf-off
+     else
+       echo "ibdBehindTor --> ON"
+     fi
+
    else
-     echo "TOR was not selected"
+     echo "runBehindTor --> OFF"
    fi
 
    ###### START NETWORK SERVICE
