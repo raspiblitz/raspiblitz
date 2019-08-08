@@ -191,9 +191,6 @@ if [ ${mountOK} -eq 1 ]; then
     syncComment="BEST+SLOW"
   fi
 
-  # set default dbcache in asset
-  sudo sed -i "s/^dbcache=.*/dbcache=128/g" /home/admin/assets/${network}.conf
-
   #Bitcoin
   if [ ${network} = "bitcoin" ]; then
     echo "Bitcoin Options"

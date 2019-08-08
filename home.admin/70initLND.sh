@@ -110,7 +110,7 @@ if [ ${lndRunning} -eq 0 ]; then
   ###### ACTIVATE TOR IF SET DURING SETUP
   if [ "${runBehindTor}" = "on" ]; then
     echo "TOR was selected ..."
-    sudo /home/admin/config.scripts/internet.tor.sh lndconf
+    sudo /home/admin/config.scripts/internet.tor.sh lndconf-on
   else
     echo "TOR was not selected"
   fi

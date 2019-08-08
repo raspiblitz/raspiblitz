@@ -1,8 +1,8 @@
-## Shopping List: Germany
+# Shopping List: Germany
 
 The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
-### Standard Shopping list (under 200 EUR)
+## Standard Shopping list (under 200 EUR)
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
@@ -37,4 +37,4 @@ Or if you order new go with the RaspberryPi 4 1GB and the following parts:
 
 ## Package: Maximal
 
-*The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD.*
+*The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*

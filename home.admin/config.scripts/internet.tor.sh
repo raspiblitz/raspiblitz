@@ -8,7 +8,16 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off|prepare|btcconf|lndconf]"
+ echo "internet.tor.sh [on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ exit 1
+fi
+
+# check and load raspiblitz config
+# to know which network is running
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
+if [ ${#network} -eq 0 ]; then
+ echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
  exit 1
 fi
 
@@ -114,9 +123,19 @@ activateBitcoinOverTOR()
     echo "Chain network already configured for TOR"
   fi
   else
-    echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf' again later" 
+    echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf-on' again later" 
   fi
 
+}
+
+deactivateBitcoinOverTOR()
+{
+  echo "*** Changing ${network} Config ***"
+  sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
+  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+  sudo chown admin:admin /home/admin/.${network}/${network}.conf
 }
 
 activateLndOverTOR()
@@ -139,7 +158,7 @@ activateLndOverTOR()
     echo ""
 
   else
-    echo "LND service not found (yet) -  try with 'internet.tor.sh lndconf' again later" 
+    echo "LND service not found (yet) -  try with 'internet.tor.sh lndconf-on' again later" 
   fi
 
 }
@@ -151,24 +170,21 @@ if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
 fi
 
 # if started with prepare 
-if [ "$1" = "btcconf" ]; then
+if [ "$1" = "btcconf-on" ]; then
   activateBitcoinOverTOR
   exit 0
 fi
 
 # if started with prepare 
-if [ "$1" = "lndconf" ]; then
-  activateLndOverTOR
+if [ "$1" = "btcconf-off" ]; then
+  deactivateBitcoinOverTOR
   exit 0
 fi
 
-# check and load raspiblitz config
-# to know which network is running
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
+# if started with prepare 
+if [ "$1" = "lndconf-on" ]; then
+  activateLndOverTOR
+  exit 0
 fi
 
 # add default value to raspi config if needed
@@ -323,12 +339,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable tor@default
   echo ""
 
-  echo "*** Changing ${network} Config ***"
-  sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
-  sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-  sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
-  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-  sudo chown admin:admin /home/admin/.${network}/${network}.conf
+  # DEACTIVATE BITCOIN OVER TOR (function call)
+  deactivateBitcoinOverTOR
   echo ""
 
   echo "*** Removing TOR from LND ***"
