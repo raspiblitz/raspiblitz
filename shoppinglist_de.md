@@ -2,7 +2,7 @@
 
 The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
-## Standard Shopping list (under 200 EUR)
+## Package: Standard (around 200 EUR)
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
@@ -15,7 +15,7 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 * Micro SD-Card 32GB: [amazon.de](https://www.amazon.de/dp/B07CY3QSST)
 * LCD-Display: [amazon.de](https://www.amazon.de/gp/product/B06X191RX7)
 
-## Package: Minimal (under 150 EUR)
+## Package: Minimal (around 150 EUR)
 
 *The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
