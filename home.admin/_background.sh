@@ -271,7 +271,7 @@ do
     # check if flag exists (got created on 50syncHDD.sh)
     flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-      finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo --chain=${network} --network=${chain}net | grep "initialblockdownload" | grep -c "false")
+      finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
         echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"
