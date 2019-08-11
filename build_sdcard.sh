@@ -118,7 +118,7 @@ fi
 echo ""
 echo "*** UPDATE DEBIAN ***"
 sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
+sudo apt-get upgrade -f -y
 
 echo ""
 echo "*** PREPARE ${baseImage} ***"
