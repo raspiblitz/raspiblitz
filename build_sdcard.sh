@@ -352,57 +352,12 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.18.0"
-
-# set OS version and checksum
-# needed to make sure download is not changed
-# calculate with sha256sum and also check with SHA256SUMS.asc
-# https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
-if [ ${isARM} -eq 1 ] ; then
-  bitcoinOSversion="arm-linux-gnueabihf"
-  bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  bitcoinOSversion="aarch64-linux-gnu"
-  bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  bitcoinOSversion="x86_64-linux-gnu"
-  bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  bitcoinOSversion="i686-pc-linux-gnu"
-  bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
-fi
-
-echo ""
-echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
+bitcoinVersion="0.18.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
-# prepare directories
-sudo rm -r /home/admin/download
-sudo -u admin mkdir /home/admin/download
-cd /home/admin/download
-
-# download resources
-binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-if [ ! -f "./${binaryName}" ]
-then
-    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
-    exit 1
-fi
-
-# check binary is was not manipulated (checksum test)
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-  exit 1
-fi
-
-# check gpg finger print
+# download, check and import signer key
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
 then
@@ -419,6 +374,9 @@ if [ ${fingerprint} -lt 1 ]; then
   read key
 fi
 gpg --import ./laanwj-releases.asc
+
+
+# download signed binary sha256 hash sum file and check
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
@@ -431,10 +389,43 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   exit 1
 fi
 
-# correct versions for install if needed
-# just if an small update shows a different formatted version number
-if [ "${bitcoinVersion}" = "0.17.0.1" ]; then
- bitcoinVersion="0.17.0"
+# get the sha256 value for the corresponding platform from signed hash sum file
+if [ ${isARM} -eq 1 ] ; then
+  bitcoinOSversion="arm-linux-gnueabihf"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  bitcoinOSversion="aarch64-linux-gnu"
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  bitcoinOSversion="x86_64-linux-gnu"
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  bitcoinOSversion="i686-pc-linux-gnu"
+fi
+bitcoinSHA256=$(grep -i "$lndOSversion" SHA256SUMS.asc | cut -d " " -f1)
+
+echo ""
+echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
+
+# prepare directories
+sudo rm -r /home/admin/download
+sudo -u admin mkdir /home/admin/download
+cd /home/admin/download
+
+# download resources
+binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]
+then
+    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+    exit 1
+fi
+
+# check binary checksum test
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  exit 1
 fi
 
 # install
