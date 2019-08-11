@@ -573,87 +573,6 @@ sudo chown -R admin /home/admin
 sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
-# "*** Installing Go ***"
-# Go is needed for ZAP connect later
-# see https://golang.org/dl/
-goVersion="1.12.6"
-if [ ${isARM} -eq 1 ] ; then
-  goOSversion="armv6l"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  goOSversion="arm64"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  goOSversion="amd64"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  goOSversion="386"
-fi
-
-echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
-
-# wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
-wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
-if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
-then
-    echo "!!! FAIL !!! Download not success."
-    exit 1
-fi
-sudo tar -C /usr/local -xzf go${goVersion}.linux-${goOSversion}.tar.gz
-sudo rm *.gz
-sudo mkdir /usr/local/gocode
-sudo chmod 777 /usr/local/gocode
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-export GOPATH=/usr/local/gocode
-export PATH=$PATH:$GOPATH/bin
-echo ""
-
-##### Build from Source
-## To quickly catch up get latest patches if needed
-#repo="github.com/lightningnetwork/lnd"
-#commit="3f57f65bf0cb710159b0182391d1d75e9e3005bc"
-## BUILDING LND FROM SOURCE
-#echo "*** Installing Go ***"
-#wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-#if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
-#then
-#    echo "!!! FAIL !!! Download not success."
-#    exit 1
-#fi
-#sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
-#sudo rm *.gz
-#sudo mkdir /usr/local/gocode
-#sudo chmod 777 /usr/local/gocode
-#export GOROOT=/usr/local/go
-#export PATH=$PATH:$GOROOT/bin
-#export GOPATH=/usr/local/gocode
-#export PATH=$PATH:$GOPATH/bin
-#echo ""
-#echo "*** Build LND from Source ***"
-#go get -d $repo
-## make sure to always have the same code (commit) to build
-## TODO: To update lnd -> change to latest commit
-#cd $GOPATH/src/$repo
-#sudo git checkout $commit
-#make && make install
-#sudo chmod 555 /usr/local/gocode/bin/lncli
-#sudo chmod 555 /usr/local/gocode/bin/lnd
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
-#lndVersionCheck=$(lncli --version)
-#echo "LND VERSION: ${lndVersionCheck}"
-#if [ ${#lndVersionCheck} -eq 0 ]; then
-#  echo "FAIL - Something went wrong with building LND from source."
-#  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
-#  exit 1
-#fi
-#echo ""
-#echo "** Link to /usr/local/bin ***"
-#sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
-#sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
-
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
@@ -692,13 +611,6 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
-
-# profile path for admin
-sudo bash -c "echo '' >> /home/admin/.profile"
-sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
-sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
