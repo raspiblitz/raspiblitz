@@ -78,7 +78,7 @@ echo ""
 echo ""
 echo "*** Update System ***"
 sudo apt-mark hold raspberrypi-bootloader
-sudo apt-get update
+sudo apt-get update -y
 echo "OK - System is now up to date"
 
 # mark setup is done

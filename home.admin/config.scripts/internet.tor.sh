@@ -233,7 +233,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     prepareTorSources
 
     echo "*** Updating System ***"
-    sudo apt-get update
+    sudo apt-get update -y
     echo ""
 
     echo "*** Install Tor ***"

@@ -117,7 +117,7 @@ fi
 # update debian
 echo ""
 echo "*** UPDATE DEBIAN ***"
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get upgrade -f -y
 
 echo ""
