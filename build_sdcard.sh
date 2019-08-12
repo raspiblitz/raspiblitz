@@ -352,12 +352,20 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 # "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
+echo ""
+echo "*** PREPARING BITCOIN & Co ***"
+
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
 bitcoinVersion="0.18.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
+
+# prepare directories
+sudo rm -r /home/admin/download
+sudo -u admin mkdir /home/admin/download
+cd /home/admin/download
 
 # download, check and import signer key
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
@@ -376,7 +384,6 @@ if [ ${fingerprint} -lt 1 ]; then
   read key
 fi
 gpg --import ./laanwj-releases.asc
-
 
 # download signed binary sha256 hash sum file and check
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
@@ -408,11 +415,6 @@ bitcoinSHA256=$(grep -i "$lndOSversion" SHA256SUMS.asc | cut -d " " -f1)
 
 echo ""
 echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
-
-# prepare directories
-sudo rm -r /home/admin/download
-sudo -u admin mkdir /home/admin/download
-cd /home/admin/download
 
 # download resources
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
