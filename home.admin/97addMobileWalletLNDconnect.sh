@@ -139,7 +139,7 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "continue" \
 	 --no-button "show QR code" \
-	 --yesno "${msg}" 20 65
+	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   lndconnect --host=${host} --port=${port}
   echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
