@@ -411,7 +411,7 @@ fi
 if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
 fi
-bitcoinSHA256=$(grep -i "$lndOSversion" SHA256SUMS.asc | cut -d " " -f1)
+bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
 
 echo ""
 echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
