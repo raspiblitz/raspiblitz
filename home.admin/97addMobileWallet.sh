@@ -42,14 +42,15 @@ when your are on the same LOCAL NETWORK?
 fi
 
 # Basic Options
-OPTIONS=(ZAP "Zap Wallet (iOS)" \
+OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
+        ZAP_ANDROID "Zap Wallet (Android)" \
         SHANGO_IOS "Shango Wallet (iOS)" \
         SHANGO_ANDROID "Shango Wallet (Android)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 15 50 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 ./XXdisplayQRlcd_hide.sh
 
@@ -95,7 +96,7 @@ case $CHOICE in
     ./97addMobileWalletShango.sh
     exit 1;
     ;;
-  ZAP)
+  ZAP_IOS)
 	  echo "https://testflight.apple.com/join/P32C380R" > qr.txt
 		./XXdisplayQRlcd.sh
 	    
@@ -103,6 +104,25 @@ case $CHOICE in
 			--yes-button "continue" \
 		  --no-button "link as QR code" \
 		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+
+	  if [ $? -eq 1 ]; then
+			/home/admin/XXdisplayQR.sh
+	  fi
+	  shred qr.txt
+	  rm -f qr.txt
+	  /home/admin/XXdisplayQRlcd_hide.sh
+
+  	./97addMobileWalletLNDconnect.sh RPC
+    exit 1;
+    ;;
+  ZAP_ANDROID)
+	  echo "https://play.google.com/store/apps/details?id=zapsolutions.zap" > qr.txt
+		./XXdisplayQRlcd.sh
+	    
+	  whiptail --title "Install Zap from PlayStore on your Android device" \
+			--yes-button "continue" \
+		  --no-button "link as QR code" \
+		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=zapsolutions.zap\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
