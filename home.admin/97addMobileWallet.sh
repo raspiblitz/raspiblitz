@@ -50,7 +50,7 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 ./XXdisplayQRlcd_hide.sh
 
