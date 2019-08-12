@@ -55,6 +55,7 @@ CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OP
 ./XXdisplayQRlcd_hide.sh
 
 clear
+echo "creating install info ..."
 case $CHOICE in
   CLOSE)
   	exit 1;
@@ -122,7 +123,7 @@ case $CHOICE in
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
 			--yes-button "continue" \
 		  --no-button "link as QR code" \
-		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=zapsolutions.zap\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		  --yesno "Find & install the Zap Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=zapsolutions.zap\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
@@ -159,7 +160,7 @@ case $CHOICE in
 	  whiptail --title "Install Shango on your Android Phone" \
 			--yes-button "continue" \
 			--no-button "link as QR code" \
-		  --yesno "Find the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		  --yesno "Find and install the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 	  if [ $? -eq 1 ]; then
 			/home/admin/XXdisplayQR.sh
 	  fi
