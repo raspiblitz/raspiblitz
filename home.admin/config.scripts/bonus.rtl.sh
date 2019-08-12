@@ -85,6 +85,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /usr/local/lib/nodejs
     sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs 
     export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
+    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/node /usr/bin/node
+    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm
+    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npx /usr/bin/npx
     echo ""
 
     # check if nodeJS was installed
