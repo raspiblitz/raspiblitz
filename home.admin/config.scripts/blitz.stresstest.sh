@@ -44,7 +44,7 @@ if [ ${raspberryPi} -lt 4 ]; then
 else
   # raspberryPi 4 and up (USB-C power connector)
   voltWARN=852000
-  voltFAIL=850000
+  voltFAIL=849000
   tempWARNING=6900
   tempCRTICAL=7799
 fi
