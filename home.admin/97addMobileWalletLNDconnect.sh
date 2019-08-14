@@ -32,7 +32,7 @@ goVersion="1.11"
 echo "### Check Framework: GO ###"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
-  goVersion="1.12.6"
+  goVersion="1.12.8"
   if [ ${isARM} -eq 1 ] ; then
     goOSversion="armv6l"
   fi
