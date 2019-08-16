@@ -641,6 +641,9 @@ Work Nodes for the process of producing a new sd card image release:
 * Run tests with new image
 * Upload new image to Download Server
 * Copy SHA256-String into GutHub README and update downloadlink
+## How do I return to the menu after exiting to the command line
+Type the command 'raspiblitz' to return to the main menu if you exited to the command line.
+
 
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
