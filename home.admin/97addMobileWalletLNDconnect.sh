@@ -27,6 +27,12 @@ if [ ${#GOPATH} -eq 0 ]; then
   export PATH=$PATH:$GOPATH/bin
 fi
 
+# get cpu architecture
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+
 # make sure go is installed
 goVersion="1.11"
 echo "### Check Framework: GO ###"
