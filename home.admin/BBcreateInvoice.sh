@@ -19,16 +19,25 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-# let user enter the invoice
-l1="Enter the AMOUNT IN SATOSHI of the invoice:"
-l2="1 ${network} = 100 000 000 SAT"
-dialog --title "Pay thru Lightning Network" \
---inputbox "$l1\n$l2" 9 50 2>$_temp
-amount=$(cat $_temp | xargs | tr -dc '0-9')
-shred $_temp
-if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
-  exit 1
+if [ -z "$1" ]
+then
+  echo "no SAT value  given"
+
+  # let user enter the invoice
+  l1="Enter the AMOUNT IN SATOSHI of the invoice:"
+  l2="1 ${network} = 100 000 000 SAT"
+  dialog --title "Pay thru Lightning Network" \
+  --inputbox "$l1\n$l2" 9 50 2>$_temp
+  amount=$(cat $_temp | xargs | tr -dc '0-9')
+  shred $_temp
+  if [ ${#amount} -eq 0 ]; then
+    echo "FAIL - not a valid input (${amount})"
+    exit 1
+  fi
+
+else
+  echo "given SAT value is \$1"
+  amount=$1
 fi
 
 # TODO let user enter a description
@@ -87,13 +96,16 @@ else
   echo "lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}"
   echo "Press x and hold to skip to menu."
 
-  while :
+  timeOutCounter=0
+
+  # wait for n-times 2 seconds to expire
+  while [ ${timeOutCounter} -lt 150 ]
     do
 
     result=$(lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash})
     wasPayed=$(echo $result | grep -c '"settled": true')
     if [ ${wasPayed} -gt 0 ]; then
-      echo 
+      echo
       echo $result
       echo
       echo "Returning to menu - OK Invoice payed."
@@ -102,13 +114,14 @@ else
       sleep 2
       break
     fi
- 
+
     # wait 2 seconds for key input
     read -n 1 -t 2 keyPressed
+    timeOutCounter=$((${timeOutCounter} + 1))
 
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
-      echo 
+      echo
       echo $result
       echo
       echo "Returning to menu - invoice was not payed yet."
