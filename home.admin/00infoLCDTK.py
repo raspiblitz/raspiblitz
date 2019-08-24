@@ -81,10 +81,9 @@ def setup_logging(default_path='00infoLCDw.json'):
 
 def callback_b1():
     global WINFO
-    log.info("clicked b1 - no action yet (placeholder)")
-    #if sys.platform != "win32":
-    #    os.system("xterm -fn fixed -into %d +sb -hold /home/admin/00infoLCD.sh &" % WINFO)
-
+    log.info("clicked b1 - Donations")
+    if sys.platform != "win32":
+        os.system("xterm -fn fixed -into %d +sb -hold /home/admin/XXbutton1.sh &" % WINFO)
 
 def callback_b2():
     global WINFO
@@ -126,17 +125,17 @@ def main():
     frame1 = tk.Frame(entry, width=80, background="black")
     frame1.pack(side="left", fill="both", expand=True)
 
-    # button 1 - no action yet (placeholder)
-    button1 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b1, height = 1, width = 1)
+    # button 1 - Donations
+    button1 = tk.Button(frame1, text=r'Donations', fg='black', command=callback_b1, wraplength=1, height = 10, width = 1)
     button1.pack(pady=24)
 
     # button 2 - no action yet (placeholder)
-    button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 1, width = 1)
-    button2.pack(pady=24)
+    #button2 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b2, height = 1, width = 1)
+    #button2.pack(pady=24)
 
     # button 3 - no action yet (placeholder)
-    button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 1, width = 1)
-    button3.pack(pady=24)
+    #button3 = tk.Button(frame1, text='\u002d', fg='black', command=callback_b3, height = 1, width = 1)
+    #button3.pack(pady=24)
     #label3 = tk.Label(frame1, text='1.3', bg=COLOR, fg='white')
     #label3.pack(pady=24)
 
@@ -148,7 +147,7 @@ def main():
     frame2 = tk.Frame(entry, width=400, background="grey")
     frame2.pack(side="right", fill="both", expand=True)
 
-    # run terminal in 
+    # run terminal in
     WINFO = frame2.winfo_id()
     if sys.platform != "win32":
         os.system("xterm -fn fixed -into %d +sb -hold /home/admin/00infoLCD.sh &" % WINFO)
