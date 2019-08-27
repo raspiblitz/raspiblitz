@@ -39,8 +39,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # write new LXDE autostart config
   sudo mv /etc/xdg/lxsession/LXDE-pi/autostart /etc/xdg/lxsession/LXDE-pi/autostart.bak
   cat << EOF | sudo tee /etc/xdg/lxsession/LXDE-pi/autostart >/dev/null
-@xscreensaver -no-splash
 @unclutter -idle 0
+@xset s noblank
+@xset s off
+@xset -dpms
 @sh /home/pi/autostart.sh
 EOF
 
