@@ -19,7 +19,7 @@ goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
   goVersion="1.12.8"
   if [ ${isARM} -eq 1 ] ; then
-    goOSversion="armv7l"
+    goOSversion="armv6l"
   fi
   if [ ${isAARCH64} -eq 1 ] ; then
     goOSversion="arm64"
