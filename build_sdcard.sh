@@ -90,9 +90,9 @@ if [ "${baseImage}" = "ubuntu" ]; then
   dnsconfFile="/etc/dhcp/dhcpd.conf"
 fi
 # comment out any static dns entry if one is active
-sudo sed -i "s/^static domain_name_servers=.*/#static domain_name_servers=/g" /etc/dhcpcd.conf
+sudo sed -i "s/^static domain_name_servers=.*/#static domain_name_servers=/g" "$dnsconfFile"
 # add new dns config to conf file
-echo "static domain_name_servers=1.1.1.1 8.8.8.8" | sudo tee -a /etc/dhcpcd.conf
+echo "static domain_name_servers=1.1.1.1 8.8.8.8" | sudo tee -a "$dnsconfFile"
 # reload to activate for following network operations
 systemctl daemon-reload
 
