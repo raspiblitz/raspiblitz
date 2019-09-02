@@ -34,13 +34,13 @@ isX86_64=$(uname -m | grep -c 'x86_64')
 isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
 
 # make sure go is installed
-goVersion="1.11"
+goVersion="1.12.8"
 echo "### Check Framework: GO ###"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
   goVersion="1.12.8"
   if [ ${isARM} -eq 1 ] ; then
-    goOSversion="armv7l"
+    goOSversion="armv6l"
   fi
   if [ ${isAARCH64} -eq 1 ] ; then
     goOSversion="arm64"
