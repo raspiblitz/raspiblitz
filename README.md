@@ -2,13 +2,13 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.3 with lnd 0.7-beta and bitcoin 0.17.1 or litecoin 0.16.3.`
+`Version 1.3 with lnd 0.7.1-beta and bitcoin 0.18.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a 1TB HDD and an nice Display for easy setup & monitoring.**
+**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice Display for easy setup & monitoring.**
 
-Its mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
+Its mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
 ## Feature Overview
 
@@ -37,12 +37,12 @@ If you start at home ordering the parts from Amazon (see shopping list below) th
 The RaspiBlitz is build from the following minimal parts:
 
 * RaspBerryPi 3B/4B
-* 500GB USB Hard Drive
+* 500GB USB HDD or SSD
 * LCD-Display HAT
 * 16GB Micro SD-Card
 * Powersupply >=3A (stable output is important)
 
-**All parts together are at around 150 USD - based on shops and location.**
+**All parts together are at around 150-200 USD - based on shops and location.**
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
@@ -71,13 +71,17 @@ The cheapest way is to buy ans assemble the single parts yourself. These are the
 
 ## Assemble your RaspiBlitz
 
-If your RaspiBlitz is not assembled yet, put the RaspberryPi board into the case. If you have the Geekworm Heatsink-Case - [see video on how to install](https://www.youtube.com/watch?v=2QDlbAorJKw).
+If you are going with the Standard/Maximal-RaspberryPi4 Setup you need to:
 
-Add the display on top with the pins like in picture below. Connect the HDD to one of the USB ports. PlugIn the network cable. In the end your RaspiBlitz should look like this:
+- Assemble the Shim-Fan and connect it to the GPIO pins: [see instructions](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-fan-shim)
+- Fit the RaspberryPi to the PiBow case: [see instructions](https://www.youtube.com/watch?v=utk3cjzCLog)
+- Put the SSD into the HDD USB & may get some rubber bands
+
+Add the display on top with the pins like in picture below. PlugIn the network cable. In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
-* [How to attach the RaspberryPi to the HDD?](FAQ.md#how-to-attach-the-raspberrypi-to-the-hdd)
+*If you are going with the Minimal-RaspberryPi3 Setup just apply the Geekworm Heatsink-Case and connect everything- [see instructions](https://www.youtube.com/watch?v=2QDlbAorJKw).*
 
 ## Installing the Software
 
@@ -98,8 +102,7 @@ SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13
 if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
 * [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
-* [Whats new in Version 1.1 of RaspiBlitz?](FAQ.md#whats-new-in-version-11-of-raspiblitz)
-* [Can I still get version 1.0 of RaspiBlitz?](FAQ.md#can-i-still-get-version-10-of-raspiblitz)
+* [Whats new in Version 1.3 of RaspiBlitz?](FAQ.md#whats-new-in-version-13-of-raspiblitz)
 
 ## Boot your RaspiBlitz
 

@@ -1,11 +1,11 @@
 # FAQ - Frequently Asked Questions
 
-## Whats new in Version 1.2 of RaspiBlitz?
+## Whats new in Version 1.3 of RaspiBlitz?
 
-Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
+Version 1.3 is using the new Raspbian Buster that is ready to use with the RaspberryPi 4 (also still works with RaspberryPi 3).
 
-- Update: LND version 0.6-beta
-- Update: RTL (Ride the Lightning) Web UI version 0.2.16-beta
+- Update: LND version 0.7.1-beta
+- Update: RTL (Ride the Lightning) Web UI version 0.4.16 -beta
 - Update: Shopping Lists (new Heatsink Case lowers 10°)
 - Update: New Torrent Update file (reducing blockchain sync time)
 - Fix: LND scanning stuck on ? (better error handling)
@@ -63,6 +63,35 @@ Yes - it was tested one time and worked. Just follow the normal update mechanism
 ## Can I downgrade from v1.2 to v1.1?
 
 Not tested - but LND 0.6 changed some data structure - so its not recommended.
+
+## Whats new in Version 1.2 of RaspiBlitz?
+
+Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
+
+- Update: LND version 0.6-beta
+- Update: RTL (Ride the Lightning) Web UI version 0.2.16-beta
+- Update: Shopping Lists (new Heatsink Case lowers 10°)
+- Update: New Torrent Update file (reducing blockchain sync time)
+- Fix: LND scanning stuck on ? (better error handling)
+- Fix: Cash out all funds
+- Fix: Keep TLS certs stable on update
+- New: Support Zeus Mobile Wallet
+- New: Show QR codes on LCD
+- New: Support LND Static Channel Backup
+- New: Remote-Backup of channel.backup file (SCP & Dropbox)
+- New: Recover Node from LND rescue backup file
+- New: Run Hardware Test on setup and main menu
+- New: Run Software Test (DebugLogs) from main manu
+- New: SSH-Forward Tunneling (commandline)
+- New: Set fixed IP/domain for RaspiBlitz (commandline)
+- New: Set DNS server (commandline)
+- New: Run LND on different port (commandline)
+- New: Ask before formatting HDD
+- New: Better Update support (from main menu)
+- New: Temp in Fahrenheit on the LCD
+- Experimental: Backup Torrent Seeding (Service)
+
+For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
 
 ## Whats new in Version 1.1 of RaspiBlitz?
 
