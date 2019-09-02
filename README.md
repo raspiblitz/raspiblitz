@@ -73,15 +73,15 @@ The cheapest way is to buy ans assemble the single parts yourself. These are the
 
 If you are going with the Standard/Maximal-RaspberryPi4 Setup you need to:
 
-- Assemble the Shim-Fan and connect it to the GPIO pins: [see instructions](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-fan-shim)
-- Fit the RaspberryPi to the PiBow case: [see instructions](https://www.youtube.com/watch?v=utk3cjzCLog)
+- Assemble the Shim-Fan and connect it to the GPIO pins: [detail instructions](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-fan-shim)
+- Fit the RaspberryPi to the PiBow case: [detail instructions](https://www.youtube.com/watch?v=utk3cjzCLog)
 - Put the SSD into the HDD USB & may get some rubber bands
 
 Add the display on top with the pins like in picture below. PlugIn the network cable. In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
-*If you are going with the Minimal-RaspberryPi3 Setup just apply the Geekworm Heatsink-Case and connect everything- [see instructions](https://www.youtube.com/watch?v=2QDlbAorJKw).*
+*If you are going with the Minimal-RaspberryPi3 Setup just apply the Geekworm Heatsink-Case and connect everything- [detail instructions](https://www.youtube.com/watch?v=2QDlbAorJKw).*
 
 ## Installing the Software
 
