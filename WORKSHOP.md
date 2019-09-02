@@ -27,6 +27,8 @@ These are the following steps you need to prepare (follow links for details):
 * [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 * [Pre-Sync RaspiBlitzes at Workshop Location]()
 
+*NOTE: You will already take 2 hours to setup the RaspiBlitz software. For groups that are interested in getting experience on the Lightning Network and dont want to take the node home after the workshop. It may make sense to prepare the RaspiBlitz even more, having it full setup on testnet with RTL turned on. Then you can directly start with funding the node with testnet coins, give intro and build channels over the RTL UI.*
+
 ## B) Provide a RaspiBlitz Hardware-Kit
 
 Estimated Duration: 3 hours
