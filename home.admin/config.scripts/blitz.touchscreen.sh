@@ -58,6 +58,22 @@ EOF
   # Remove 00infoLCD.sh from .bashrc of pi user
   sudo sed -i s'/exec $SCRIPT/#exec $SCRIPT/' /home/pi/.bashrc
 
+  # rotate touchscreen based on if LCD is rotated
+  if [ "${lcdrotate}" = "1" ]; then
+    echo "LCD is rotated into default - no touchscreen rotate"
+  else
+    echo "Activate Touchscreen Rotate"
+    cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+Section "InputClass"
+        Identifier "libinput touchscreen catchall"
+        MatchIsTouchscreen "on"
+        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+EndSection
+EOF
+  fi
+
   # mark touchscreen as switched ON in config
   if [ ${#touchscreen} -eq 0 ]; then
     echo "touchscreen=0" >> /mnt/hdd/raspiblitz.conf
@@ -92,6 +108,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # remove old pi autostart
   sudo rm /home/pi/autostart.sh
+
+  # delete possible touchscreen rotate
+  sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
   # mark touchscreen as switched OFF in config
   sudo sed -i "s/^touchscreen=.*/touchscreen=0/g" /mnt/hdd/raspiblitz.conf

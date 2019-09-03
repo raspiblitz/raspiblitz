@@ -101,7 +101,7 @@ SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13
 
 if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
 
-* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-after-version-098)
+* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
 * [Whats new in Version 1.3 of RaspiBlitz?](FAQ.md#whats-new-in-version-13-of-raspiblitz)
 
 ## Boot your RaspiBlitz
@@ -144,7 +144,9 @@ If you run into a problem or you have still a question, follow the steps below t
 
 4. Check the RaspiBlot Troubleshoort guide: https://stadicus.github.io/RaspiBolt/raspibolt_70_troubleshooting.html (RaspiBolt is very similar to the RaspiBlitz)
 
-5. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
+5. There is a Telegram Group of RaspiBlitz users helping each other: https://t.me/raspiblitz 
+
+6. If you havent found an answere yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If its a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
 
 ## Setup Process (Detailed Documentation)
 
