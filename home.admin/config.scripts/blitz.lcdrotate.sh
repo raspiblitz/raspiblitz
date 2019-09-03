@@ -26,6 +26,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
   sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
+
+  # delete possible touchscreen rotate
+  sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+
   echo "OK - a restart is needed: sudo shutdown -r now"
 
 fi
@@ -37,8 +41,24 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "Turn OFF: LCD ROTATE"
+
   sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
   sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
+
+  # if touchscreen is on
+  if [ "${touchscreen}" = "1" ]; then
+    echo "Also rotate touchscreen ..."
+    cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+Section "InputClass"
+        Identifier "libinput touchscreen catchall"
+        MatchIsTouchscreen "on"
+        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+EndSection
+EOF
+  fi
+
   echo "OK - a restart is needed: sudo shutdown -r now"
 
 fi
