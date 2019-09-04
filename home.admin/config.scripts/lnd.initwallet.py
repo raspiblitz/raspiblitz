@@ -150,7 +150,7 @@ elif mode=="seed":
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=250,
+        recovery_window=5000,
         aezeed_passphrase=seedpassword
     )
     
@@ -180,7 +180,7 @@ elif mode=="scb":
     request = ln.InitWalletRequest(
         wallet_password=walletpassword,
         cipher_seed_mnemonic=seedwords,
-        recovery_window=250,
+        recovery_window=5000,
         aezeed_passphrase=seedpassword,
         channel_backups=scbHexString
     )
