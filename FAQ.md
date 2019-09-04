@@ -60,6 +60,24 @@ When update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED`
 
 After your RaspiBlitz is done with catching up the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
 
+## How to verify the released image after download?
+
+You can do a quick check if the sha256 hash of the file you downloaded is the same as mentioned below the download link or use the torrent download which will also check the file for checksum after download. But this does not prove to you that the image was actually build by the lead developer of the RaspiBlitz project.
+
+To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
+
+```
+curl https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
+```
+
+Then download the signature file for the download. Its the same download link as for the image file - just added a `.sig` at the end. You should also find the download link for the signature file always in the README right below the image download link following the `SIGNATURE` link.
+
+If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
+
+```
+gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
+```
+
 ## Whats new in Version 1.2 of RaspiBlitz?
 
 Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
