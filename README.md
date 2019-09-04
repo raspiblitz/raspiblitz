@@ -95,11 +95,14 @@ HTTP: https://raspiblitz.com/raspiblitz-v1.3RC5-2019-08-13.img.gz
 
 Torrent: [TO BE RELEASED]
 
-SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13
+SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.3RC5-2019-08-13.img.gz.sig)
+
+* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
 
 **Write the SD-Card image to your SD Card**
 
-if you need details, see here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+You need to write the dowloaded sd card image (the img.gz-file) to your sd card - you can use the very easy tool Balena Etcher for this:
+https://www.balena.io/etcher/ .. its available for Win, Mac & Linux.
 
 * [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
 * [Whats new in Version 1.3 of RaspiBlitz?](FAQ.md#whats-new-in-version-13-of-raspiblitz)
