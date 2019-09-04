@@ -13,6 +13,15 @@
     <link>https://raspiblitz.com/raspiblitz-torrents-rss.xml</link>
 
     <item>
+      <guid>https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent</guid>
+      <title>raspiblitz-v1.3-2019-09-05.torrent</title>
+      <enclosure 
+        url="https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
       <guid>http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-bitcoin2-2019-05-01-base.torrent</guid>
       <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
       <enclosure 
