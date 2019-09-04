@@ -619,12 +619,22 @@ Now to repair your RaspiBlitz Blockchain start mainmenu `./00mainMenu.sh` and ch
 
 ## What is the process of creating a new sd card image release?
 
+4 devcies needed:
+* An Ubuntu Live USB stick - 
+
 Work Nodes for the process of producing a new sd card image release:
 
 * Start `Ubuntu LIVE` from USB stick on Build Computer (press F12 on startup)
-* Connect secure WIFI (hardware switch on)
-* Download latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/) to the NTFS formatted data USB stick
-* Open terminal and compare checksum `shasum -a 256 /media/ubuntu/...[DOWNLOADED-RASPBIAN]`
+* Connect secure WIFI (hardware switch on) or LAN
+* Download latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/)
+* From browser see All-Downloads-Details and on context Copy Download-Link
+* Paste download link into new browser tab and add ".sig" at the end (also download) 
+* From browser see All-Downloads-Details and on context open target folder in file manager
+* On file manager (white sapce) from context menu: Open in Terminal
+* compare checksum on https download site with `shasum -a 256 ./[DOWNLOADED-RASPBIAN]`
+* `wget https://www.distrowatch.com/keys/raspbian/956F460C+raspberry@rasbian | gpg --import`
+* `gpg --verify [DOWNLOADED-RASPBIAN].sig`
+
 * Use in file manager context on NTFS USB stick `extract here` to unzip
 * Connect sd card reader with 8GB sd card
 * Use in file manager context on img-file `write image` write to sd card
