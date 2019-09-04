@@ -396,6 +396,12 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> BITCOIN MANIFEST IS CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # get the sha256 value for the corresponding platform from signed hash sum file
@@ -430,6 +436,12 @@ binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # install
@@ -516,6 +528,12 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> SIGNATURE LND MANIFEST IS CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # get the lndSHA256 for the corresponding platform from manifest file
@@ -550,6 +568,12 @@ binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # install
