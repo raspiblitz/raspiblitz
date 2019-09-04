@@ -632,8 +632,11 @@ Work Nodes for the process of producing a new sd card image release:
 * From browser see All-Downloads-Details and on context open target folder in file manager
 * On file manager (white sapce) from context menu: Open in Terminal
 * compare checksum on https download site with `shasum -a 256 ./[DOWNLOADED-RASPBIAN]`
-* `wget https://www.distrowatch.com/keys/raspbian/956F460C+raspberry@rasbian | gpg --import`
-* `gpg --verify [DOWNLOADED-RASPBIAN].sig`
+* Now to check the signature run the command:
+
+```
+sudo apt-get update && sudo apt-get install -f curl && curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig
+```
 
 * Use in file manager context on NTFS USB stick `extract here` to unzip
 * Connect sd card reader with 8GB sd card
