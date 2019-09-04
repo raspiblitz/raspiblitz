@@ -97,7 +97,7 @@ Torrent: [TO BE RELEASED]
 
 SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.3RC5-2019-08-13.img.gz.sig)
 
-* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
+* [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 **Write the SD-Card image to your SD Card**
 
