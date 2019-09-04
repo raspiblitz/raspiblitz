@@ -89,8 +89,6 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.3:**
 
-THIS IS JUST THE RELEASE CANDIDATE 1 for v1.3 - just use if you are reckless with your funds and want to help testing!
-
 HTTP: https://raspiblitz.com/raspiblitz-v1.3-2019-09-05.img.gz
 
 Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent
