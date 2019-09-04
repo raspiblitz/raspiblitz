@@ -90,11 +90,11 @@ echo "*** Setup ***"
 echo ""
 echo "Installing lndconnect. Please wait..."
 echo ""
-echo "Getting github.com/LN-Zap/lndconnect (please wait - can take several minutes) ..."
-go get -d github.com/LN-Zap/lndconnect
-cd $GOPATH/src/github.com/LN-Zap/lndconnect
+echo "Getting github.com/rootzoll/lndconnect (please wait - can take several minutes) ..."
+go get -d github.com/rootzoll/lndconnect
+cd $GOPATH/src/github.com/rootzoll/lndconnect
 echo ""
-echo "Building github.com/LN-Zap/lndconnect ..."
+echo "Building github.com/rootzoll/lndconnect ..."
 make
 cd
 sleep 3
