@@ -140,7 +140,7 @@ Code: https://github.com/rootzoll/raspiblitz/tree/v1.2
 
 ## Can I still get version 1.1 of RaspiBlitz?
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/master/raspiblitz-v1.1-2019-03-18.torrent
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.1/raspiblitz-v1.1-2019-03-18.torrent
 
 SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
 

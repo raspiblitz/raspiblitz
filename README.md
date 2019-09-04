@@ -91,11 +91,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 THIS IS JUST THE RELEASE CANDIDATE 1 for v1.3 - just use if you are reckless with your funds and want to help testing!
 
-HTTP: https://raspiblitz.com/raspiblitz-v1.3RC5-2019-08-13.img.gz
+HTTP: https://raspiblitz.com/raspiblitz-v1.3-2019-09-05.img.gz
 
-Torrent: [TO BE RELEASED]
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent
 
-SHA-256: d62dad4c93b581153554bd02ce7566d37c0d9fd213a7865bc11deb5fe3115b13 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.3RC5-2019-08-13.img.gz.sig)
+SHA-256: ab35ca7e8c05a02e26b90bcabe82f3e7c0f0bdf104df2bda3fde574e2ff5a72a or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.3-2019-09-05.img.gz.sig)
 
 **Write the SD-Card image to your SD Card**
 
