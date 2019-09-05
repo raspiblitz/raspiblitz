@@ -1,4 +1,4 @@
-# Shopping List: Spain
+# Shopping List: France
 
 *__NOTICE: This shopping list had just basic testing of components__ - [please report](https://github.com/rootzoll/raspiblitz/issues/691) if you have bad experiences or ideas for better cheaper updates.*
 
