@@ -15,12 +15,13 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 - New: Switch on TOR during setup
 - New: Support Zap Mobile for Android
 - New: Repair Options in main menu
-- New: UPNP support in services
+- New: UPNP (AutoNAT) support in services menu
+- New: LCD rotate 180 degrees in services menu
 - Fix: TOR switch on/off
 - Fix: Zap iOS Mobile Wallet connect
 - Fix: Shango Mobile Wallet connect
 - Experimental: LCD Touchscreen Support
-- Experimental: UPS support (APC)
+- Experimental: UPS support (APC) [details](FAQ.md#how-to-connect-a-ups-to-the-raspiblitz)
 
 For full details see issue list of [Release 1.3 Milestone](https://github.com/rootzoll/raspiblitz/milestone/6?closed=1).
 
@@ -198,36 +199,6 @@ If everything of the above is prepared, start the setup of the new RaspiBlitz wi
 
 Once you finished all the transferes the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfer. Check further FAQ answeres if you get stuck or see a final sync with a value below 90%.
 
-## How do I clone the Blockchain from a 2nd HDD?
-
-During setup, when you start with an empty HDD you need to get a copy of the blockchain. One option available is to connect a 2nd HDD to the RaspiBlitz that contains already the blockchain data and start to copy/clone.
-
-If you choose this option, the console requests you to connect the second HDD and will autmatically detect it:
-
-![SSH6b](pictures/ssh6b-copy.png)
-
-You can simply use the HDD of another RaspiBlitz or you prepare a HDD yourself by:
-
-* format second HDD with exFAT (availbale on Windows and Mac)
-* copy an indexed Blockchain into the root folder "bitcoin"
-* when your HDD is ready the content of your folder bitcoin should look like this:
-
-```
-/bitcoin/blocks
-/bitcoin/chainstate
-```
-
-optional you can add also the testnet data:
-
-```
-/bitcoin/testnet3/blocks
-/bitcoin/testnet3/chainstate
-```
-
-To connect the 2nd HDD to the RaspiBlitz, the use of a Y cable to provide extra power is recommended (see optional shopping list). Because the RaspiBlitz cannot run 2 HDDs without extra power. For extra power you can use a battery pack (like in picture below) or choose a external HDD with its own power supply.
-
-![ExtraPower](pictures/extrapower.png)
-
 ## How do I generate a Debug Report?
 
 If your RaspiBlitz is not working right and you like to get help from the community, its good to provide more debug information, so other can better diagnose your problem - please follow the following steps to generate a debug report:
@@ -385,13 +356,17 @@ Make the fonts smaller until the QR code fits into your (fullscreen) terminal. I
 
 The bitcoin IP is red, when the RaspiBlitz detects that it cannot reach the port of bitcoin node from the outside. This means the bitcoin node can peer with other bitcoin nodes, but other bitcoin nodes cannot initiate a peering with you. Dont worry, you dont need a publicly reachable bitcoin node to run a (public) lightning node. If you want to change this however, you need to forward port 8333 on your router to the the RaspiBlitz. How to do this is different on every router.
 
-On details how to set port forwarding on your router model see: https://portforward.com
+Some routers support a feature called UPnP where devices can automatically request a forwarding to be publically reachable. By turning on `BTC UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
+
+On details how to set port forwarding manually on your router model see: https://portforward.com
 
 ## Why is my node address on the display red?
 
 The node address is red, when the RaspiBlitz detects that it cannot reach the port of the LND node from the outside - when the device is behind a NAT or firewall of the the router. Your node is not publicly reachable. This means you can peer+openChannel with other public nodes, but other nodes cannot peer+openChannel with you. To change this you need to forward port 9735 on your router to the the RaspiBlitz. How to do this is different on every router.
 
-On details how to set port forwarding on your router model see: https://portforward.com
+Some routers support a feature called UPnP where devices can automatically request a forwarding to be publically reachable. By turning on `LND UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
+
+On details how to set port forwarding manually on your router model see: https://portforward.com
 
 ## Why is my node address on the display yellow (not green)?
 
