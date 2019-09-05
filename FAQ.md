@@ -648,6 +648,10 @@ Work Nodes for the process of producing a new sd card image release:
 * Upload new image to Download Server - put sig-file next to it
 * Copy SHA256-String into GutHub README and update downloadlink
 
+## How do I return to the menu after exiting to the command line
+
+Type the command `raspiblitz` to return to the main menu if you exited to the command line.
+
 ## Can I run RaspiBlitz on other computers than RaspberryPi?
 
 There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [alternative.platforms/README.md](alternative.platforms/README.md)

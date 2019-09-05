@@ -155,15 +155,15 @@ Once you have that "template" you can make a image from that and write that imag
 ## Prepare Blockchain Copy Station
 
 In the RaspiBlitz Github repo and also on every RaspiBlitz (since v1.3) you can find the script:
-`/home/admin/CCcopyStation.sh`
+`/home/admin/XXcopyStation.sh`
 
 This can be used to prepare and keep multiple HDDs in snyc with blockchain data in preparation of a workshop. You can start it directly on a RaspiBlitz and turn it into "Copy Station Mode" with executing on the command line:
 
-`sudo /home/admin/CCcopyStation.sh`
+`sudo /home/admin/XXcopyStation.sh`
 
 *Beware that it will not run as a Lightning Node during that time (LND is stopped). And to reset it back into normal mode you need to stop the script with `CTLR+c` and the reboot with `sudo shutdown -r now`.*
 
-In "COpy Station Mode" the RaspiBlitz will just run the bitcoind (so it needs network connection), copy fresh blockchain data over to a template folder on the HDD called `/mnt/hdd/templateHDD` and from there syncs it to further HDDs that get connected to it.
+In "Copy Station Mode" the RaspiBlitz will just run the bitcoind (so it needs network connection), copy fresh blockchain data over to a template folder on the HDD called `/mnt/hdd/templateHDD` and from there syncs it to further HDDs that get connected to it.
 
 If you run it in a setup lke on this photo with an extra powered USB hub, you can connect up to 10 HDDs at once to be synced with an almost up-to-date blockchain.
 
