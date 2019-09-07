@@ -596,57 +596,56 @@ Now to repair your RaspiBlitz Blockchain start mainmenu `./00mainMenu.sh` and ch
 
 ## What is the process of creating a new sd card image release?
 
-Work Nodes for the process of producing a new sd card image release:
+Work notes for the process of producing a new sd card image release:
 
-* Start `Ubuntu LIVE` from USB stick on Build Computer (press F12 on startup)
-* Connect secure WIFI (hardware switch on) or LAN
-* Download latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/)
-* From browser see All-Downloads-Details and on context Copy Download-Link
-* Paste download link into new browser tab and add ".sig" at the end (also download) 
-* From browser see All-Downloads-Details and on context open target folder in file manager
-* On that file manager (white sapce) from context menu: Open in Terminal
-* compare checksum on https download site with `shasum -a 256 *.zip`
+* Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick on Build Computer (press F12 on startup)
+* Connect to a secure WiFi (hardware switch on) or LAN
+* Download the latest Raspbian Desktop (without recommended software) from [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/)
+* From the browser `Show All Downloads` and from the context menu select `Copy Download Link`
+* Paste the Download Link into a new browser tab and add ".sig" at the end (also download)
+* From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
+* On that file manager open context (right click) on the white space and select `Open in Terminal`
+* Compare checksum with: [raspberrypi.org](https://www.raspberrypi.org/downloads/raspbian/) with `shasum -a 256 *.zip`
 * Install curl if needed `sudo apt-get update && sudo apt-get install -f curl net-tools`
-* Check signature`curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
+* Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
 * The result should say "correct signature" and fingerprint should end with `8738 CD6B 956F 460C`
-* Now insert the NTFS formatted USB stick and use file manager to move all files to there
+* Insert an NTFS formatted USB stick and use the file manager to move all files to there
 * Use in file manager context on NTFS USB stick `extract here` to unzip
-* Connect sd card reader with 8GB sd card
-* Use in file manager context on img-file `write image` write to sd card
-* Use in file manager context on `boot` drive free space `open in terminal`
-* Run command `touch ssh` and `exit`
+* Connect SD card reader with a 8GB SD card
+* In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
+* In the file manager open context on `boot` drive free space `open in terminal`
+* Run the commands: `touch ssh` and `exit`
 * Eject the `boot` and the `NTFS` volume
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
-* Find IP if RaspiBlitz (arp -a or check router)
+* Find the IP of the RaspiBlitz (arp -a or check router)
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
 * `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh '[BRANCH]'`
-* Monitior/Check outputs for warnings/errors - install LCD
-* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw:raspiblitz) and run `./XXprepareRelease.sh`
-* Diconnect Wifi/LAN on build laptop (hardware switch off) and shutdown
-* Remove `Ubuntu LIVE` USB stick and cut power on RaspberryPi
-
-* Connect USB stick with latest `TAILS` (make it stays offline)
-* PowerOn Build Laptop (press F12 for boot menu)
+* Monitor/Check outputs for warnings/errors - install LCD
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
+* Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
+* Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
+* Connect USB stick with latest `TAILS` (make it stay offline)
+* Power on the Build Laptop (press F12 for boot menu)
 * Connect USB stick with GPG signing keys
 * Open that USB stick in filemanager and on white space context menu --> open terminal
 * Run `gpg --import ./sub.key`, check and `exit`
-* Disconnect USB stick with GPG keys 
-* Take sd card from RaspberryPi and connect with a external sd card reader to aptop
-* Click on `boot` volume once in the filemanger
-* Connect and open in Filemenager NTFS and delete old files
-* In that file manager in context menu on white scace -> open terminal
-* Run `df` to check on card device name (`boot` - ignore last partition number)
+* Disconnect USB stick with GPG keys
+* Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
+* Click on `boot` volume once in the file manger
+* Connect the NTFS USB stick, open in file manager and delete old files
+* In that file manager in context menu on white space -> open terminal
+* Run `df` to check on the SD card device name (`boot` - ignore last partition number)
 * `dd if=/dev/[sdcarddevice] | gzip > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * When finshed you should see that more then 7GB were copied
 * Then run `shasum -a 256 *.gz > sha256.txt`
 * Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
 * Shutdown build computer
-* Connect NTFS USB stick to MacOS (its just readonly)
-* Run tests with new image
-* Upload new image to Download Server - put sig-file next to it
-* Copy SHA256-String into GutHub README and update downloadlink
+* Connect the NTFS USB stick to MacOS (it is just readonly)
+* Run tests on the new image
+* Upload the new image to the Download Server - put sig-file next to it
+* Copy SHA256-String into GitHub README and update the download link
 
 ## How do I return to the menu after exiting to the command line
 
@@ -658,9 +657,9 @@ There is an experimental section in this GitHub that tries to build for other Si
 
 ## Can I flip the screen?
 
-There is now an option unser `SERVICES to rotate the screen. 
+There is now an option under `SERVICES to rotate the screen. 
 
-Todo it manual: For the default 3.5" LCD you need to edit the /boot/config.txt. Run `sudo nano /boot/config.txt`
+Todo it manually: For the default 3.5" LCD you need to edit the /boot/config.txt. Run `sudo nano /boot/config.txt`
 look for the line `dtoverlay=tft35a:rotate=270` towards the end. To flip the screen with 180 degrees change the line to `dtoverlay=tft35a:rotate=90` and reboot with `sudo reboot`. Reference: https://github.com/goodtft/LCD-show/issues/34
 
 ## How to setup fresh/clean/reset and not getting into recovery mode?
