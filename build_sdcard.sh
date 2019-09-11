@@ -461,8 +461,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
   # set version (change if update is available)
-  litecoinVersion="0.16.3"
-  litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+  litecoinVersion="0.17.1"
+  litecoinSHA256="7e6f5a1f0b190de01aa20ecf5c5a2cc5a64eb7ede0806bcba983bcd803324d8a"
   cd /home/admin/download
 
   # download
