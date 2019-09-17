@@ -340,7 +340,7 @@ else
   if [ ${gotSCB} -eq 1 ]; then
 
     echo "*** channel.backup Recovery ***"
-    lncli restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
+    lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
     error=`cat /home/admin/.error.tmp`
     rm /home/admin/.error.tmp 2>/dev/null
 
@@ -365,7 +365,7 @@ else
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo 
       echo "You can try after full setup to restore channel.backup file again with:"
-      echo "lncli restorechanbackup --multi_file=/home/admin/channel.backup"
+      echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
       echo
       echo "Press ENTER to continue for now ..."
       read key
