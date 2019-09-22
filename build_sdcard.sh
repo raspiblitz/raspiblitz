@@ -264,7 +264,7 @@ echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
+sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile
 
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
@@ -594,6 +594,10 @@ sudo apt-get -y install cpulimit
 # for background downloading
 sudo apt-get -y install screen
 
+# for multiple (detachable/background) sessions when using SSH
+sudo apt-get -y install tmux
+sudo -u admin git clone https://github.com/gpakosz/.tmux.git /home/admin/
+
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
 sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
@@ -619,8 +623,11 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
-sudo bash -c "echo './00raspiblitz.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
   # bash autostart for pi
