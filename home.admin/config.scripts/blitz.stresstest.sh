@@ -49,7 +49,7 @@ else
   tempCRTICAL=7799
 fi
 
-echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=10000)" >&2
+echo "Starting sysbench to run for 60 seconds (--max-time=60 --cpu-max-prime=100000)" >&2
 
 # result values
 powerWARN=0
@@ -60,7 +60,7 @@ tempFAIL=0
 tempMAX=0
 
 # starting bench mark
-sysbench --max-time=60 --test=cpu --cpu-max-prime=10000 --num-threads=4 run 1>/dev/null 2>&1 & 
+sysbench --max-time=60 --test=cpu --cpu-max-prime=100000 --num-threads=4 run 1>/dev/null 2>&1 & 
 
 # keep monitoring in the background
 Maxfreq=$(( $(awk '{printf ("%0.0f",$1/1000); }'  </sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq) -15 ))
