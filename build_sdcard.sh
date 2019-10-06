@@ -596,7 +596,8 @@ sudo apt-get -y install screen
 
 # for multiple (detachable/background) sessions when using SSH
 sudo apt-get -y install tmux
-sudo -u admin wget -o ~/.tmux.conf https://github.com/gpakosz/.tmux/raw/01c91ba5231eb2e7b32cc2f47ac9022efae87962/.tmux.conf
+cd /home/admin
+sudo -u admin wget https://github.com/gpakosz/.tmux/raw/01c91ba5231eb2e7b32cc2f47ac9022efae87962/.tmux.conf
 
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
