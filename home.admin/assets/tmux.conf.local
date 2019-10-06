@@ -294,3 +294,6 @@ set -g mouse on
 
 # move status line to top
 #set -g status-position top
+
+# re-set/update environment - useful for SSH agent
+bind-key s send-keys "eval $(tmux show-environment -s)" Enter

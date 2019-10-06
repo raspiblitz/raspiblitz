@@ -90,7 +90,6 @@ sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${lo
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 #sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
-sudo ln -s -f /home/admin/.tmux/.tmux.conf /home/admin/.tmux.conf >> ${logFile} 2>&1
 sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1

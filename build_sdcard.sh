@@ -154,7 +154,7 @@ if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
   sudo adduser pi sudo
 fi
 
-# special prepare when Nvidia Jetson Nano 
+# special prepare when Nvidia Jetson Nano
 if [ ${isNvidia} -eq 1 ] ; then
   # disable GUI on boot
   sudo systemctl set-default multi-user.target
@@ -407,7 +407,7 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
 fi
@@ -530,11 +530,11 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
   lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   lndOSversion="386"
   lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
+fi
 
 echo ""
 echo "*** LND v${lndVersion} for ${lndOSversion} ***"
@@ -596,7 +596,7 @@ sudo apt-get -y install screen
 
 # for multiple (detachable/background) sessions when using SSH
 sudo apt-get -y install tmux
-sudo -u admin git clone https://github.com/gpakosz/.tmux.git /home/admin/
+sudo -u admin wget -o ~/.tmux.conf https://github.com/gpakosz/.tmux/raw/01c91ba5231eb2e7b32cc2f47ac9022efae87962/.tmux.conf
 
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
