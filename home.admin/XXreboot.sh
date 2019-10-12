@@ -11,8 +11,9 @@ source ${infoFile}
 source ${configFile}
 
 echo ""
+echo "Going down for reboot."
 echo "LCD turns white when shutdown complete."
-echo "Then wait 5 seconds and disconnect power."
+echo "Will power up again automatically after ~5 seconds."
 echo "-----------------------------------------------"
 echo "stop lnd - please wait .."
 sudo systemctl stop lnd
