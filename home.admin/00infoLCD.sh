@@ -4,6 +4,57 @@
 # this script gets started by the autologin of the pi user and
 # and its output is gets displayed on the LCD or the RaspiBlitz
 
+function usage() {
+  echo -e "This script gets started by the autologin of the pi user and "
+  echo -e "and its output is gets displayed on the LCD or the RaspiBlitz."
+  echo -e ""
+  echo -e "Usage: $0 [-h|--help] [-v*|--verbose] [-p|--pause STRING]"
+  echo -e ""
+  echo -e "  -h, --help\t\tprint this help message"
+  echo -e "  -v, --verbose\t\tbe more verbose"
+  echo -e "  -p, --pause STRING\ttime in seconds to pause"
+  echo -e ""
+}
+
+# Default Values
+verbose=0
+pause=12
+
+while [[ "$1" == -* ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -v*)
+      (( verbose += ${#1} - 1 ))
+      ;;
+    --verbose)
+      (( verbose++ ))
+      ;;
+   -p|--pause)
+      shift
+      pause="$1"
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+    echo "Unrecognized option $1."
+    echo ""
+    usage
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+if ! [[ "$pause" =~ ^[[:digit:]]+$ ]]; then
+  echo "pause must be a positive integer or 0." >&2
+  exit 1
+fi
+
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
@@ -18,7 +69,9 @@ fi
 
 # display a 10s startup time
 source /home/admin/_version.info
-dialog --pause "  Starting RaspiBlitz v${codeVersion} ..." 8 58 12
+if [ "$pause" -ne "0" ]; then
+    dialog --pause "  Starting RaspiBlitz v${codeVersion} ..." 8 58 ${pause}
+fi
 
 # DISPLAY LOOP
 chain=""
@@ -220,7 +273,7 @@ while :
     fi
 
     # no special case - show status display
-	  /home/admin/00infoBlitz.sh
+    /home/admin/00infoBlitz.sh
     if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
       echo ""
       echo ""
