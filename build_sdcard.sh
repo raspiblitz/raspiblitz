@@ -490,11 +490,11 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.7.1-beta"
+lndVersion="0.8.0-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
+PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
 # bitconner
 #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
