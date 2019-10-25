@@ -11,7 +11,10 @@ if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
-if [ ${#backupTorrentSeeding} -eq 0 ]; then backupTorrentSeeding="off"; fi
+if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
+if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
+if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
+if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -25,6 +28,18 @@ if [ ${#dynDomain} -gt 0 ]; then
   dynDomainMenu="${dynDomain}"
 fi
 
+echo "map lcdrotate to on/off"
+lcdrotateMenu='off'
+if [ ${lcdrotate} -gt 0 ]; then 
+  lcdrotateMenu='on'
+fi
+
+echo "map touchscreen to on/off"
+tochscreenMenu='off'
+if [ ${touchscreen} -gt 0 ]; then 
+  tochscreenMenu='on'
+fi
+
 echo "check autopilot by lnd.conf"
 lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
 if [ ${lndAutoPilotOn} -eq 1 ]; then
@@ -35,15 +50,33 @@ fi
 
 # show select dialog
 echo "run dialog ..."
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 7 \
+
+if [ "${runBehindTor}" = "on" ]; then
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-7 'Backup Torrent Seeding' ${backupTorrentSeeding} \
+9 'Touchscreen' ${tochscreenMenu} \
+r 'LCD Rotate' ${lcdrotateMenu} \
 2>&1 >/dev/tty)
+else
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 16 45 9 \
+1 'Channel Autopilot' ${autoPilot} \
+2 'Testnet' ${chainValue} \
+3 ${dynDomainMenu} ${domainValue} \
+4 'Run behind TOR' ${runBehindTor} \
+5 'RTL Webinterface' ${rtlWebinterface} \
+6 'LND Auto-Unlock' ${autoUnlock} \
+7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
+8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
+9 'Touchscreen' ${tochscreenMenu} \
+r 'LCD Rotate' ${lcdrotateMenu} \
+2>&1 >/dev/tty)
+fi
+
 dialogcancel=$?
 echo "done dialog"
 clear
@@ -155,14 +188,74 @@ else
   echo "Dynamic Domain unchanged."
 fi
 
+# UPnP
+choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${networkUPnP}" != "${choice}" ]; then
+  echo "BTC UPnP Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+    echo "Starting BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh on
+    networkUPnP="on"
+    needsReboot=1
+  else
+    echo "Stopping BTC UPNP ..."
+    /home/admin/config.scripts/network.upnp.sh off
+    networkUPnP="off"
+    needsReboot=1
+  fi
+else
+  echo "BTC UPnP Setting unchanged."
+fi
+
+# AutoNAT
+choice="off"; check=$(echo "${CHOICES}" | grep -c "8")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${autoNatDiscovery}" != "${choice}" ]; then
+  echo "AUTO NAT Setting changed .."
+  anychange=1
+  if [ "${choice}" = "on" ]; then
+    echo "Starting autoNAT ..."
+    /home/admin/config.scripts/lnd.autonat.sh on
+    autoNatDiscovery="on"
+    needsReboot=1
+  else
+    echo "Stopping autoNAT ..."
+    /home/admin/config.scripts/lnd.autonat.sh off
+    autoNatDiscovery="off"
+    needsReboot=1
+  fi
+else
+  echo "LND AUTONAT Setting unchanged."
+fi
+
 # TOR process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
+
+  # special actions if TOR is turned on
+  if [ "${choice}" = "on" ]; then
+
+    # inform user about privacy risk
+    whiptail --title " PRIVACY NOTICE " --msgbox "
+RaspiBlitz will now install/activate TOR & after reboot run behind it.
+
+Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind TOR. To unlink you from that IP history its recommended that after the switch/reboot to TOR you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
+" 16 76
+
+    # make sure AutoNAT & UPnP is off
+    /home/admin/config.scripts/lnd.autonat.sh off 
+    /home/admin/config.scripts/network.upnp.sh off
+  fi
+
+  # change TOR
   anychange=1
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
   needsReboot=1
+
 else 
   echo "TOR Setting unchanged."
 fi
@@ -215,51 +308,32 @@ else
   echo "LND Autounlock Setting unchanged."
 fi
 
-# Backup Torrent Seeding
-choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${backupTorrentSeeding}" != "${choice}" ]; then
-  echo "BACKUP TORRENT SEEDING Setting changed .."
+# touchscreen
+choice="0"; check=$(echo "${CHOICES}" | grep -c "9")
+if [ ${check} -eq 1 ]; then choice="1"; fi
+if [ "${touchscreen}" != "${choice}" ]; then
+  echo "Touchscreen Setting changed .."
   anychange=1
-  if [ "${choice}" = "on" ]; then
-
-  whiptail --title "Experimental Feature" --yes-button "Activate" --no-button "Dont Activate" --yesno "The Backup Torrent Seeding is still a very early
-experimental feature and could compromise your
-Lightning Node stability.
-
-Are you sure that you want to activate it?
-    " 11 54
-    if [ $? -eq 0 ]; then
-      /home/admin/50torrentHDD.sh backup-torrent-hosting
-      dialog --backtitle "RaspiBlitz Settings" --title " OK " --msgbox "
-BACKUP TORRENT SEEDING IS NOW ACTIVE
--------------------------------------
-If possible forward ports 49200-49250
-from your router to this RaspiBlitz.
-
-During initial torrent download your
-RaspiBlitz can be slow.
-
-" 13 42
-    else
-      echo
-      echo "Skipping Backup Torrent Seeding ..."
-      echo
-      sleep 3
-    fi
-
-  else
-    echo "Stopping Torrents and Cleaning Up ..."
-    /home/admin/50torrentHDD.sh cleanup
-    echo "BACKUP TORRENT SEEDING IS NOW OFF"
-    needsReboot=1
-  fi
+  sudo /home/admin/config.scripts/blitz.touchscreen.sh ${choice}
+  needsReboot=1
 else
-  echo "LND Autounlock Setting unchanged."
+  echo "Touchscreen Setting unchanged."
+fi
+
+# lcd rotate
+choice="0"; check=$(echo "${CHOICES}" | grep -c "r")
+if [ ${check} -eq 1 ]; then choice="1"; fi
+if [ "${lcdrotate}" != "${choice}" ]; then
+  echo "LCD Rotate Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${choice}
+  needsReboot=1
+else
+  echo "LCD Rotate Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
-     dialog --pause "Hint: Use Spacebar to check/uncheck services." 8 58 5
+     dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
      exit 0
 fi
 

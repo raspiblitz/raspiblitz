@@ -164,21 +164,25 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      minSize=250000000000
+      minSize=210000000000
       if [ "${network}" = "litecoin" ]; then
         minSize=20000000000
       fi
+      isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
       blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
-          echo "blockchainsize(${blockchainsize})"
-          echo "Missing Blockchain Data (<${minSize}) ..."
-          clienterror="missing blockchain"
-          sleep 3
+          if [ ${isSyncing} -eq 0 ]; then
+            echo "blockchainsize(${blockchainsize})"
+            echo "Missing Blockchain Data (<${minSize}) ..."
+            clienterror="missing blockchain"
+            sleep 3
+          fi
         fi
       fi
 
       if [ ${#clienterror} -gt 0 ]; then
+        #echo "clienterror(${clienterror})"
 
         # analyse LOGS for possible reindex
         reindex=$(sudo cat /mnt/hdd/${network}/debug.log 2>/dev/null | grep -c 'Please restart with -reindex or -reindex-chainstate to recover')
@@ -189,64 +193,36 @@ waitUntilChainNetworkIsReady()
             blockchainBroken=0
             echo "-> Ignore reindex - its just a future block"
           fi
+          if [ ${isSyncing} -gt 0 ]; then
+            reindex=0
+          fi
         fi
         if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
-          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."
+    
+          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."          
           sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
           sleep 3
 
-          dialog --backtitle "RaspiBlitz - Repair Script" --msgbox "Your blockchain data needs to be repaired.
+          whiptail --title "RaspiBlitz - Repair Script" --yes-button "DELETE+REPAIR" --no-button "Ignore" --yesno "Your blockchain data needs to be repaired.
 This can be due to power problems or a failing HDD.
-Please check the FAQ on RaspiBlitz Github
-'My blockchain data is corrupted - what can I do?'
-https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md
+For more info see: https://raspiblitz.com -> FAQ
 
-The RaspiBlitz will now try to help you on with the repair.
-To run a BACKUP of funds & channels first is recommended.
+Before RaspiBlitz can offer you repair options the old
+corrupted blockchain needs to be deleted while your LND
+funds and channel stay safe (just expect some off-time).
+
+How do you want to continue?
 " 13 65
-
-          clear
-          # Basic Options
-          OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
-                   COPY "Copy from another Computer (SKILLED)" \
-                   REINDEX "Resync thru ${network}d (TAKES VERY VERY LONG)" \
-                   BACKUP "Run Backup LND data first (optional)"
-          )
-
-          CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Repair Blockchain Data" --menu "Choose a repair/recovery option:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
-
-          clear
-          if [ "${CHOICE}" = "TORRENT" ]; then
-            echo "Starting TORRENT ..."
-            sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
-            /home/admin/50torrentHDD.sh
-            sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+          if [ $? -eq 0 ]; then
+            #delete+repair
+            clear
+            /home/admin/XXcleanHDD.sh -blockchain -force
+            /home/admin/98repairBlockchain.sh
             /home/admin/00raspiblitz.sh
             exit
-
-          elif [ "${CHOICE}" = "COPY" ]; then
-            echo "Starting COPY ..."
-            sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
-            /home/admin/50copyHDD.sh
-            sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
-            /home/admin/00raspiblitz.sh
-            exit
-
-          elif [ "${CHOICE}" = "REINDEX" ]; then
-            echo "Starting REINDEX ..."
-            sudo /home/admin/config.scripts/network.reindex.sh
-            exit
-
-          elif [ "${CHOICE}" = "BACKUP" ]; then
-            sudo /home/admin/config.scripts/lnd.rescue.sh backup
-            echo "PRESS ENTER to return to menu."
-            read key
-            /home/admin/00raspiblitz.sh
-            exit
-
           else
-            echo "CANCEL"
-            exit
+            # ignore - just delete blockchain logfile
+            clear
           fi
 
         fi
@@ -364,7 +340,7 @@ else
   if [ ${gotSCB} -eq 1 ]; then
 
     echo "*** channel.backup Recovery ***"
-    lncli restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
+    lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
     error=`cat /home/admin/.error.tmp`
     rm /home/admin/.error.tmp 2>/dev/null
 
@@ -389,7 +365,7 @@ else
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo 
       echo "You can try after full setup to restore channel.backup file again with:"
-      echo "lncli restorechanbackup --multi_file=/home/admin/channel.backup"
+      echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
       echo
       echo "Press ENTER to continue for now ..."
       read key
@@ -424,14 +400,30 @@ case $CHOICE in
             exit 1;
             ;;
         BITCOIN)
+            # set network info
             sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
             sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+            ###### OPTIMIZE IF RAM >1GB
+            kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+            if [ ${kbSizeRAM} -gt 1500000 ]; then
+              echo "Detected RAM >1GB --> optimizing ${network}.conf"
+              sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/bitcoin.conf
+              sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /home/admin/assets/bitcoin.conf
+            fi
             /home/admin/10setupBlitz.sh
             exit 1;
             ;;
         LITECOIN)
+            # set network info
             sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
             sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+            ###### OPTIMIZE IF RAM >1GB
+            kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+            if [ ${kbSizeRAM} -gt 1500000 ]; then
+              echo "Detected RAM >1GB --> optimizing ${network}.conf"
+              sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/litecoin.conf
+              sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /home/admin/assets/litecoin.conf
+            fi
             /home/admin/10setupBlitz.sh
             exit 1;
             ;;

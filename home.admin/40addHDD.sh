@@ -113,9 +113,26 @@ if [ ${existsHDD} -gt 0 ]; then
               echo "OK HDD got added ... returning to provisioning"
               exit 1
             else
-              # when normal setup
-              echo "Continuing with finishing the system setup ..."
-              ./60finishHDD.sh
+
+              # ask user if prepared blockchain is to use or self-validate
+              whiptail --title ' Use Blockchain from HDD/SSD? ' --yes-button='Continue' --no-button='DELETE' --yesno "
+On the HDD/SSD Blockchain data was found.\n
+Continue if you trust that data to be valid.\n
+If you dont trust that data you can now choose to delete it - but keep in mind that this can add multiple days of waiting time to your setup process to regain or self-validate the initial blockchain data.
+  " 14 75
+              if [ $? -eq 1 ]; then
+                # DELETE
+                echo "Deleting old blockchain data .."
+                sudo rm -R /mnt/hdd/bitcoin 2>/dev/null
+                sudo rm -R /mnt/hdd/litecoin 2>/dev/null
+                # HDD is now empty - let setupBlitz - display next options
+                ./10setupBlitz.sh
+              else
+                # CONTINUE
+                echo "Continuing with finishing the system setup ..."
+                ./60finishHDD.sh
+              fi
+
             fi
 
           else

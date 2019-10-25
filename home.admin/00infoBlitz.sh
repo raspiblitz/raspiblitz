@@ -15,6 +15,19 @@ color_purple='\033[0;35m'
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
+# get UPS info
+source <(/home/admin/config.scripts/blitz.ups.sh status)
+upsInfo=""
+if [ "${upsStatus}" = "ONLINE" ]; then
+  upsInfo="${color_gray}${upsBattery}"
+fi
+if [ "${upsStatus}" = "ONBATT" ]; then
+  upsInfo="${color_red}${upsBattery}"
+fi
+if [ "${upsStatus}" = "SHUTTING DOWN" ]; then
+  upsInfo="${color_red}DOWN"
+fi
+
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 
@@ -55,7 +68,7 @@ if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
 fi
 tempC=$((cpu/1000))
-tempF=$(((cpu/1000) * (9/5) + 32))
+tempF=$(((tempC * 18 + 325) / 10))
 
 # get memory
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
@@ -67,11 +80,12 @@ else
   color_ram=${color_green}
 fi
 
-# get free HDD ratio
-hdd_free_ratio=$(printf "%d" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4/$2*100 }')" 2>/dev/null)
-hdd=$(printf "%s (%s%%)" "$(df -h | grep '/mnt/hdd$' | awk '{ print $4 }')" "${hdd_free_ratio}")
+# HDD usage
+hdd_used_space=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
+hdd_used_ratio=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+hdd="${hdd_used_space} (${hdd_used_ratio}%)"
 
-if [ ${hdd_free_ratio} -lt 10 ]; then
+if [ ${hdd_used_ratio} -gt 90 ]; then
   color_hdd="${color_red}\e[7m"
 else
   color_hdd=${color_green}
@@ -271,47 +285,32 @@ else
     if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
     if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
     ln_channelbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+    ln_channelbalance_pending="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
+    if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
+    if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
     ln_channels_total="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
-    ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat"
+    ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
     ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
   fi
 fi
 
-# STATUS SINALING: Backup Torrent Seeding
-torrentBaseStatus=""
-torrentUpdateStatus=""
-if [ "${backupTorrentSeeding}" == "on" ]; then
-  torrentBaseStatus="•"
-  torrentUpdateStatus="•"
-  source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-  if [ "${baseComplete}" == "1" ]; then
-    torrentBaseStatus="↑"
-  elif [ "${baseSeeding}" == "1" ]; then
-    torrentBaseStatus="↓"
-  fi
-  if [ "${updateComplete}" == "1" ]; then
-    torrentUpdateStatus="↑"
-  elif [ "${updateSeeding}" == "1" ]; then
-    torrentUpdateStatus="↓"
-  fi
-fi
-
 sleep 5
+clear
 printf "
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}
-${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias}
+${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} Free HDD ${color_hdd}%s${color_gray}
-${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} ▼${network_rx} ▲${network_tx}
+${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
+${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s${torrentBaseStatus}${torrentUpdateStatus}
+${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
 ${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
@@ -330,4 +329,6 @@ if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; the
   echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
 elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
   echo "Weak power supply detected - run 'Hardware Test' in menu"
+elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
+  echo "UPS service activated but not running"
 fi

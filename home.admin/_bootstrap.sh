@@ -40,7 +40,9 @@ echo "***********************************************" >> $logFile
 
 # display 3 secs logo - try to kickstart LCD
 # see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/logoraspiblitz.png
+# see https://github.com/rootzoll/raspiblitz/issues/647
+randnum=$(shuf -i 0-7 -n 1)
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
 sudo killall -3 fbi
 
@@ -506,6 +508,11 @@ if [ "${baseImage}" = "raspbian" ] ; then
   sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
   sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
   sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
+  source /home/admin/stresstest.report
+  if [ "${powerWARN}" = "0" ]; then
+    # https://github.com/rootzoll/raspiblitz/issues/576
+    echo "" > /var/log/syslog
+  fi
 fi
 
 echo "DONE BOOTSTRAP" >> $logFile

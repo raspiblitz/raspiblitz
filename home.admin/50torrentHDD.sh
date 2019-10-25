@@ -1,19 +1,4 @@
 #!/bin/bash
-
-# POSSOBLE PARAMETERS:
-
-# backup-torrent-hosting
-# to just kick of the torrent downloads in the background during 
-# regular RaspiBlitz running. So you support torrent hosting and have a blockchain backup ready just in case.
-
-# cleanup
-# to stop background torrents and clean up
-
-# status
-# to get info backround torrent hosting
-
-# stop
-# just stopping the download - not switching off
  
 ## get basic info
 source /home/admin/raspiblitz.info
@@ -22,11 +7,13 @@ source /home/admin/raspiblitz.info
 # in directory /home.admin/assets/
 # WITHOUT THE '.torrent' ENDING
 
-bitcoinBase="raspiblitz-bitcoin1-2018-10-13-base"
-bitcoinUpdate="raspiblitz-bitcoin1-2019-04-09-update"
+# using https://getbitcoinblockchain.com/ as abase
+# and make my own upt-to-date update file becuase they dont do that anymore
+bitcoinBase="raspiblitz-bitcoin2-2019-05-01-base"
+bitcoinUpdate="raspiblitz-bitcoin2-2019-06-29-update"
 
-litecoinBase="raspiblitz-litecoin1-2018-11-18-base"
-litecoinUpdate="raspiblitz-litecoin1-2018-11-18-update"
+litecoinBase="raspiblitz-litecoin2-2019-06-29-base"
+litecoinUpdate="raspiblitz-litecoin2-2019-06-29-update"
 
 # set final based on selected network
 baseTorrentFile=${bitcoinBase}
@@ -42,68 +29,15 @@ echo "updateTorrent='${updateTorrentFile}'"
 targetDir="/mnt/hdd/torrent"
 sessionDir="/home/admin/.rtorrent.session"
 
-# BACKUP TORRENT SEEDING
-if [ "$1" == "stop" ] || [ "$1" == "cleanup" ]; then
-  echo "Stopping Torrents ..."
-  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    sudo pkill -P ${sessionPID}
-  fi
-  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    sudo pkill -P ${sessionPID}
-  fi
-fi
-if [ "$1" == "stop" ] || [ "$1" == "cleanup" ]; then
-  echo "Stopping Torrents ..."
-  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    sudo pkill -P ${sessionPID}
-  fi
-  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    sudo pkill -P ${sessionPID}
-  fi
-  if [ "$1" == "stop" ]; then
-    exit 0
-  fi
-  echo "Deleting all possible old (version) torrent data ..."
-  sudo rm -r /home/admin/.rtorrent.session 2>/dev/null
-  sudo rm -r /mnt/hdd/torrent 2>/dev/null
-  echo "Changing config ..."
-  sudo sed -i "s/^backupTorrentSeeding=.*/backupTorrentSeeding=off/g" /mnt/hdd/raspiblitz.conf
-  echo "DONE"
-  exit
-fi
-if [ "$1" == "status" ]; then
-  echo "# BASE TORRENT - for details call:"
-  echo "# screen -S blockchain -X hardcopy .temp.out && cat ./.temp.out && rm ./.temp.out"
-  sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    echo "baseSeeding=1"
-  else
-    echo "baseSeeding=0"
-  fi
-  torrentComplete=$(cat ${sessionDir}/blockchain/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
-  echo "baseComplete=${torrentComplete}"
-  echo "# UPDATE TORRENT - for details call:"
-  echo "# screen -S update -X hardcopy .temp.out && cat ./.temp.out && rm ./.temp.out"
-  sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
-  if [ ${#sessionPID} -gt 0 ]; then
-    echo "updateSeeding=1"
-  else
-    echo "updateSeeding=0"
-  fi
-  torrentComplete=$(cat ${sessionDir}/update/*.torrent.rtorrent 2>/dev/null | grep ':completei1' -c)
-  echo "updateComplete=${torrentComplete}"
-  exit
-fi
-
-# make sure folders exist
+# make sure folders exist & permissions are set
 sudo mkdir ${sessionDir} 2>/dev/null
+#sudo chmod 777 ${sessionDir} 2>/dev/null
 sudo mkdir ${targetDir} 2>/dev/null
+#sudo chmod 777 ${targetDir} 2>/dev/null
 sudo mkdir ${sessionDir}/blockchain/ 2>/dev/null
+#sudo chmod 777 ${sessionDir}/blockchain/ 2>/dev/null
 sudo mkdir ${sessionDir}/update/ 2>/dev/null
+#sudo chmod 777 ${sessionDir}/update/ 2>/dev/null
 
 # make sure rtorrent is available
 sudo apt-get install rtorrent -y 1>/dev/null 2>/dev/null
@@ -131,8 +65,8 @@ if [ ${torrentComplete1} -eq 0 ]; then
 
     # start torrent download in screen session
     echo "starting torrent: blockchain"
-    command1="sudo nice -n 10 chrt -r 1 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
-    screenCommand="screen -S blockchain -L screen.log -dm ${command1}"
+    command1="sudo rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/blockchain/ /home/admin/assets/${baseTorrentFile}.torrent"
+    screenCommand="screen -S blockchain -dm ${command1}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
   fi
@@ -155,53 +89,14 @@ if [ ${torrentComplete2} -eq 0 ]; then
     
     # start torrent download in screen session
     echo "starting torrent: update"
-    command2="sudo nice -n 10 chrt -r 1 rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
-    screenCommand="screen -S update -L screen.log -dm ${command2}"
+    command2="sudo rtorrent -n -p 49200-49250 -d ${targetDir} -s ${sessionDir}/update/ /home/admin/assets/${updateTorrentFile}.torrent"
+    screenCommand="screen -S update -dm ${command2}"
     echo "${screenCommand}"
     bash -c "${screenCommand}"
 
   fi
 fi
 sleep 2
-
-##############################
-# BACKUP TORRENT SEEDING
-##############################
-# just let torrent start and run in the background
-
-if [ "$1" == "backup-torrent-hosting" ]; then
-
-  # changing config - so it can be startup again after a reboot by bootstrap
-  source /mnt/hdd/raspiblitz.conf
-  if [ ${#backupTorrentSeeding} -eq 0 ]; then 
-    echo "backupTorrentSeeding=on" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^backupTorrentSeeding=.*/backupTorrentSeeding=on/g" /mnt/hdd/raspiblitz.conf
-  fi
-
-  # set the torrents processes to cpulimit 25%
-  sleep 6
-  echo ""
-  rtorrentPIDs=$(ps axf | grep "rtorrent" | awk '{$1=$1;print}' | cut -d' ' -f1)
-  while read -r pid ; do
-    ps ${pid} | grep "rtorrent"
-    echo "---> reducing this rTorrent process to 25% CPU"
-    sudo cpulimit -p ${pid} -l 25 &
-    echo ""
-  done < <(echo "${rtorrentPIDs}")
-  sleep 6
-
-  # set the torrents processes to cpulimit 20%
-  #sessionPID=$(screen -ls | grep "blockchain" | cut -d "." -f1 | xargs)
-  #echo "Putting rTorrent blockchain 'BASE' (PID=${sessionPID}) to background ... (please wait)"
-  #sudo cpulimit -p ${sessionPID} -l 25 &
-  #sessionPID=$(screen -ls | grep "update" | cut -d "." -f1 | xargs)
-  #echo "Putting rTorrent blockchain 'UPDATE' (PID=${sessionPID}) to background ... (please wait)"
-  #sudo cpulimit -p ${sessionPID} -l 25 &
-
-  echo "Done BACKUP TORRENT HOSTING"
-  exit
-fi
 
 ##############################
 # MONITOR PROGRESS
@@ -338,8 +233,12 @@ if [ ${torrentComplete2} -eq 0 ]; then
 fi
 
 # the path torrent was download to
-targetPath1="${targetDir}/${baseTorrentFile}"
-targetPath2="${targetDir}/${updateTorrentFile}"
+targetPath1="${targetDir}/${baseTorrentFile}/blockchain"
+targetPath2="${targetDir}/${updateTorrentFile}/blockchain"
+if [ "$network" = "bitcoin" ]; then
+  targetPath1="${targetDir}/blockchain"
+  targetPath2="${targetDir}/${updateTorrentFile}/blockchain"
+fi
 
 # check that path exists
 contentPath1=$(sudo ls ${targetPath1} 2>/dev/null)
@@ -361,6 +260,7 @@ if [ ${torrentError} -gt 0 ]; then
   case $response in
     1) sudo rm -rf ${targetDir}; sudo rm -rf ${sessionDir} ;;
   esac
+  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
   ./00raspiblitz.sh
   exit 1;
   

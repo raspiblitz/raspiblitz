@@ -8,41 +8,51 @@
     <description>Help on seeding the lastest RaspiBlitz Torrent Seeds</description>
     <language>en-en</language>
 
-    <!-- Upload new versions to wiki.fulmo.org -->
-    <link>http://wiki.fulmo.org/downloads/raspiblitz-torrents-rss.xml</link>
+    <!-- Replace with the latest torrents - use download links from branch -->
+    <!-- Upload new versions to raspiblitz.com (you can use plesk for upload) -->
+    <link>https://raspiblitz.com/raspiblitz-torrents-rss.xml</link>
 
     <item>
-      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent</guid>
+      <guid>https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent</guid>
+      <title>raspiblitz-v1.3-2019-09-05.torrent</title>
+      <enclosure 
+        url="https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-bitcoin2-2019-05-01-base.torrent</guid>
       <title>raspiblitz-bitcoin1-2018-10-13-base.torrent</title>
       <enclosure 
-        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2018-10-13-base.torrent" 
+        url="http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-bitcoin2-2019-05-01-base.torrent" 
         type="application/x-bittorrent" 
       />
     </item>
 
     <item>
-      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent</guid>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-bitcoin2-2019-06-29-update.torrent</guid>
       <title>raspiblitz-bitcoin1-2019-01-16-update.torrent</title>
       <enclosure 
-        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-bitcoin1-2019-01-16-update.torrent" 
+        url="http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-bitcoin2-2019-06-29-update.torrent" 
         type="application/x-bittorrent" 
       />
     </item>
 
     <item>
-      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-base.torrent</guid>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-litecoin2-2019-06-29-base.torrent</guid>
       <title>raspiblitz-litecoin1-2018-11-18-base.torrent</title>
       <enclosure 
-        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-base.torrent" 
+        url="http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-litecoin2-2019-06-29-base.torrent" 
         type="application/x-bittorrent" 
       />
     </item>
 
     <item>
-      <guid>http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-update.torrent</guid>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-litecoin2-2019-06-29-update.torrent</guid>
       <title>raspiblitz-litecoin1-2018-11-18-update.torrent</title>
       <enclosure 
-        url="http://github.com/rootzoll/raspiblitz/raw/master/home.admin/assets/raspiblitz-litecoin1-2018-11-18-update.torrent" 
+        url="http://github.com/rootzoll/raspiblitz/raw/v1.3/home.admin/assets/raspiblitz-litecoin2-2019-06-29-update.torrent" 
         type="application/x-bittorrent" 
       />
     </item>

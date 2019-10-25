@@ -22,10 +22,6 @@ fi
 
 echo "_background.sh STARTED"
 
-# monitor lost LND sync
-syncedSince=0
-lastSyncState=0
-
 counter=0
 while [ 1 ]
 do
@@ -216,86 +212,6 @@ do
   fi
 
   ###############################
-  # LND MONITOR LOST SYNC
-  ###############################
-
-  # check every 5min
-  recheckSync=$(($counter % 300))
-  if [ ${recheckSync} -eq 1 ]; then
-    source ${configFile}
-    #echo "LND MONITOR LOST SYNC ..."
-    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-    #echo "lndSynced(${lndSynced})"
-    #echo "syncedSince(${syncedSince})"
-    #echo "lastSyncState(${lastSyncState})"
-    if [ ${lndSynced} -eq ${lastSyncState} ]; then
-
-      echo "no sync change"
-      if [ ${lndSynced} -eq 1 ]; then
-        #echo "all is good - LND still in sync now for:"
-        actualSecondsTimestamp=$(date +%s)
-        secondsInSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
-        #echo "${secondsInSync} seconds"
-
-        # when >10min in sync
-        if [ ${secondsInSync} -gt 3600 ]; then
-          #echo "LND in sync for longer then 1 hour"
-          if [ "${backupTorrentSeeding}" == "on" ]; then
-            #echo "Backup Torrent Seeding is ON - check if already running"
-            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-            if [ "${baseSeeding}" == "0" ] || [ "${updateSeeding}" == "0" ]; then
-              echo "---> STARTING Backup Torrent Seeding"
-              sudo -u admin /home/admin/50torrentHDD.sh backup-torrent-hosting
-            fi
-          fi
-        fi
-
-      else
-        #echo "still not in sync"
-        if [ ${syncedSince} -gt 0 ]; then
-
-          echo "was in sync at least once since rinning but lost now for:"
-          actualSecondsTimestamp=$(date +%s)
-          secondsOutOfSync=$(echo "${actualSecondsTimestamp}-"${syncedSince} | bc)
-          echo "${secondsOutOfSync} seconds"
-
-          # when >1h out of sync
-          #if [ ${secondsOutOfSync} -gt 3600 ]; then
-          #   echo "!!!! LND fell out of sync for longer then 1 hour !!!"
-          #   TODO: When auto-unlock is ON --> consider implementing restart (this sometimes help)
-          #fi
-          
-        fi
-      fi
-
-    else
-      echo "sync change detected"
-      if [ ${lastSyncState} -eq 1 ] && [ ${lndSynced} -eq 0 ]; then
-        echo "--> LND SYNC LOST"
-
-          if [ "${backupTorrentSeeding}" == "on" ]; then
-            #echo "Backup Torrent Seeding is ON - check if still running"
-            source <(sudo -u admin /home/admin/50torrentHDD.sh status)
-            if [ "${baseSeeding}" == "1" ] || [ "${updateSeeding}" == "1" ]; then
-              echo "---> STOPPING Backup Torrent Seeding"
-              sudo -u admin /home/admin/50torrentHDD.sh stop
-            fi
-          fi
-
-      else
-        if [ ${syncedSince} -eq 0 ]; then
-          echo "--> LND SYNC GAINED"
-        else
-          echo "--> LND SYNC RECOVERED"
-        fi
-        syncedSince=$(date +%s)
-      fi
-    fi
-  
-    lastSyncState=${lndSynced}
-  fi
-
-  ###############################
   # LND AUTO-UNLOCK
   ###############################
 
@@ -342,6 +258,52 @@ do
       curl --connect-timeout 6 ${dynUpdateUrl}
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
+    fi
+  fi
+
+  ####################################################
+  # CHECK FOR END OF IBD (self validation)
+  ####################################################
+
+  # check every 60secs
+  recheckIBD=$((($counter % 60)+1))
+  if [ ${recheckIBD} -eq 1 ]; then
+    # check if flag exists (got created on 50syncHDD.sh)
+    flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+    if [ ${flagExists} -eq 1 ]; then
+      finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      if [ ${finishedIBD} -eq 1 ]; then
+
+        echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"
+
+        # remove flag
+        sudo rm /home/admin/selfsync.flag
+
+        # stop bitcoind
+        sudo systemctl stop ${network}d
+
+        # set dbcache back to normal (to give room for other apps)
+        kbSizeRAM=$(sudo cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+        if [ ${kbSizeRAM} -gt 1500000 ]; then
+          echo "Detected RAM >1GB --> optimizing ${network}.conf"
+          sudo sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+        else
+          echo "Detected RAM 1GB --> optimizing ${network}.conf"
+          sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+        fi
+
+        # if TOR was activated during setup make sure bitcoin runs behind TOR latest from now on
+        if [ "${runBehindTor}" = "on" ]; then
+          echo "TOR is ON -> make sure bitcoin is running behind TOR after IBD"
+          sudo /home/admin/config.scripts/internet.tor.sh btcconf-on
+        else
+           echo "TOR is OFF after IBD"
+        fi
+
+        # restart bitcoind
+        sudo systemctl start ${network}d
+
+      fi
     fi
   fi
 

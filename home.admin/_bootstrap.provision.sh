@@ -57,6 +57,14 @@ fi
 sudo rm -rf /etc/ssh >> ${logFile} 2>&1
 sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
 
+# optimze if RAM >1GB
+kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+if [ ${kbSizeRAM} -gt 1500000 ]; then
+  echo "Detected RAM >1GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
+fi
+
 # link and copy HDD content into new OS
 echo "Link HDD content for user bitcoin" >> ${logFile}
 sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
@@ -76,11 +84,11 @@ sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&
 sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
+#sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
+#sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
@@ -117,6 +125,15 @@ else
     echo "Provisioning TESTNET - keep default" >> ${logFile}
 fi
 
+# TOR
+if [ "${runBehindTor}" = "on" ]; then
+    echo "Provisioning TOR - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
+    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
+else 
+    echo "Provisioning TOR - keep default" >> ${logFile}
+fi
+
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
@@ -126,9 +143,18 @@ else
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
 fi
 
-# AUTO NAT DISCOVERY
+# NETWORK UPNP
+if [ "${networkUPnP}" = "on" ]; then
+    echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup UPnP'/g" ${infoFile}
+    sudo /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
+else 
+    echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
+fi
+
+# LND AUTO NAT DISCOVERY
 if [ "${autoNatDiscovery}" = "on" ]; then
-    echo "Provisioning AUTO NAT DISCOVERY - run config script" >> ${logFile}
+    echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else 
@@ -152,15 +178,6 @@ if [ "${rtlWebinterface}" = "on" ]; then
     sudo systemctl disable RTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL - keep default" >> ${logFile}
-fi
-
-# TOR
-if [ "${runBehindTor}" = "on" ]; then
-    echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
-    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
-else 
-    echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
 # CUSTOM PORT
@@ -207,12 +224,31 @@ else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
-# BACKUP TORRENT HOSTING
-if [ "${backupTorrentHosting}" == "on" ]; then
-    echo "Backup Torrent Hosting - clean up possible old torrent data" >> ${logFile}
-    sudo /home/admin/50torrentHDD.sh backup-torrent-hosting-cleanup
-else
-    echo "Backup Torrent Hosting - not active" >> ${logFile}
+# LCD ROTATE
+if [ "${#lcdrotate}" -gt 0 ]; then
+    echo "Provisioning LCD rotate - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
+    sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
+else 
+    echo "Provisioning LCD rotate - not active" >> ${logFile}
+fi
+
+# TOCHSCREEN
+if [ "${#touchscreen}" -gt 0 ]; then
+    echo "Provisioning Touchscreen - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup Touchscreen'/g" ${infoFile}
+    sudo /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
+else 
+    echo "Provisioning Touchscreen - not active" >> ${logFile}
+fi
+
+# UPS
+if [ "${#ups}" -gt 0 ]; then
+    echo "Provisioning UPS - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup UPS'/g" ${infoFile}
+    sudo /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
+else 
+    echo "Provisioning UPS - not active" >> ${logFile}
 fi
 
 # replay backup LND conf & tlscerts

@@ -1,18 +1,16 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# RASPBIAN STRETCH WITH DESKTOP (2019-04-09)
+# Raspbian Buster Desktop (2019-06-20)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 7e10a446f8e57210d0e9ad02f0c833aabb86e58187b4dc02431aff5a3f1ccb83
-# 
-# or download the image for your ARM based SBC on https://DietPi.com
+# SHA256: 49a6b840ec2cb3e220f9a02bbceed91d21d20a7eeaac32f103923fdbdc9490a9
 ##########################################################################
-# setup fresh SD card with image above - login per SSH and run this script: 
+# setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.2   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.3   *"
 echo "*****************************************"
 echo ""
 
@@ -41,7 +39,7 @@ echo ""
 echo "*** CHECK BASE IMAGE ***"
 
 # armv7=32Bit , armv8=64Bit
-echo "Detect CPU architecture ..." 
+echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
@@ -56,7 +54,7 @@ else
 fi
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
-echo "Detect Base Image ..." 
+echo "Detect Base Image ..."
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -68,7 +66,7 @@ if [ ${isRaspbian} -gt 0 ]; then
 fi
 if [ ${isArmbian} -gt 0 ]; then
   baseImage="armbian"
-fi 
+fi
 if [ ${isUbuntu} -gt 0 ]; then
 baseImage="ubuntu"
 fi
@@ -85,16 +83,18 @@ else
 fi
 
 # setting static DNS server
+# comment this block out if you are sure that your DNS conf works reliable
 # see https://github.com/rootzoll/raspiblitz/issues/322#issuecomment-466733550
-# check /etc/dhcpd.conf and /etc/dhcp/dhcpd.conf
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
-  sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcpcd.conf
-  systemctl daemon-reload
-fi
+dnsconfFile="/etc/dhcpcd.conf"
 if [ "${baseImage}" = "ubuntu" ]; then
-  sudo sed -i "s/^#static domain_name_servers=192.168.0.1*/static domain_name_servers=1.1.1.1/g" /etc/dhcp/dhcpd.conf
-  systemctl daemon-reload
+  dnsconfFile="/etc/dhcp/dhcpd.conf"
 fi
+# comment out any static dns entry if one is active
+sudo sed -i "s/^static domain_name_servers=.*/#static domain_name_servers=/g" "$dnsconfFile"
+# add new dns config to conf file
+echo "static domain_name_servers=1.1.1.1 8.8.8.8" | sudo tee -a "$dnsconfFile"
+# reload to activate for following network operations
+systemctl daemon-reload
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   # fixing locales for build
@@ -103,19 +103,24 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
   echo ""
   echo "*** FIXING LOCALES FOR BUILD ***"
+
   sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   sudo locale-gen
   export LANGUAGE=en_GB.UTF-8
   export LANG=en_GB.UTF-8
   export LC_ALL=en_GB.UTF-8
+
+  # https://github.com/rootzoll/raspiblitz/issues/684
+  sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
+
 fi
 
 # update debian
 echo ""
 echo "*** UPDATE DEBIAN ***"
-sudo apt-get update
-sudo apt-get upgrade -f -y --allow-change-held-packages
+sudo apt-get update -y
+sudo apt-get upgrade -f -y
 
 echo ""
 echo "*** PREPARE ${baseImage} ***"
@@ -144,7 +149,7 @@ fi
 
 # special prepare when Ubuntu or Armbian
 if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
-  # make user pi and add to sudo 
+  # make user pi and add to sudo
   sudo adduser --disabled-password --gecos "" pi
   sudo adduser pi sudo
 fi
@@ -277,11 +282,6 @@ sudo apt-get install -y fbi
 # prepare for powertest
 sudo apt install -y sysbench
 
-# prepare dor display service
-# see https://github.com/rootzoll/raspiblitz/issues/88#issuecomment-471342311
-sudo apt-get install -y redis-server
-sudo -H pip3 install redis
-
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
 sudo apt-get install -y python-pip
@@ -352,38 +352,12 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 # "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
+echo ""
+echo "*** PREPARING BITCOIN & Co ***"
+
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-# bitcoinVersion="0.18.0" # commented out checksums for this version until lnd version >0.5.1
-bitcoinVersion="0.17.1"
-
-# set OS version and checksum
-# needed to make sure download is not changed
-# calculate with sha256sum and also check with SHA256SUMS.asc
-# https://bitcoincore.org/bin/bitcoin-core-0.18.0/SHA256SUMS.asc
-if [ ${isARM} -eq 1 ] ; then
-  bitcoinOSversion="arm-linux-gnueabihf"
-  # bitcoinSHA256="3d7eb57290b2f14c495a24ecbab8100b35861f0c81bc10d86e5c0a8ec8284b27"
-  bitcoinSHA256="aab3c1fb92e47734fadded1d3f9ccf0ac5a59e3cdc28c43a52fcab9f0cb395bc"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  bitcoinOSversion="aarch64-linux-gnu"
-  # bitcoinSHA256="bfc3b8fddbb7ab9b532c9866859fc507ec959bdb82954966f54c8ebf8c7bb53b"
-  bitcoinSHA256="5659c436ca92eed8ef42d5b2d162ff6283feba220748f9a373a5a53968975e34"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  bitcoinOSversion="x86_64-linux-gnu"
-  # bitcoinSHA256="5146ac5310133fbb01439666131588006543ab5364435b748ddfc95a8cb8d63f"
-  bitcoinSHA256="53ffca45809127c9ba33ce0080558634101ec49de5224b2998c489b6d0fc2b17"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  bitcoinOSversion="i686-pc-linux-gnu"
-  # bitcoinSHA256="36ce9ffb375f6ee280df5a86e61038e3c475ab9dee34f6f89ea82b65a264183b"
-  bitcoinSHA256="b1e1dcf8265521fef9021a9d49d8661833e3f844ca9a410a9dd12a617553dda1"
-fi
-
-echo ""
-echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
+bitcoinVersion="0.18.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -393,23 +367,7 @@ sudo rm -r /home/admin/download
 sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
-# download resources
-binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-if [ ! -f "./${binaryName}" ]
-then
-    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
-    exit 1
-fi
-
-# check binary is was not manipulated (checksum test)
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-  exit 1
-fi
-
-# check gpg finger print
+# download, check and import signer key
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
 if [ ! -f "./laanwj-releases.asc" ]
 then
@@ -426,6 +384,8 @@ if [ ${fingerprint} -lt 1 ]; then
   read key
 fi
 gpg --import ./laanwj-releases.asc
+
+# download signed binary sha256 hash sum file and check
 sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
@@ -436,12 +396,52 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> BITCOIN MANIFEST IS CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
-# correct versions for install if needed
-# just if an small update shows a different formatted version number
-if [ "${bitcoinVersion}" = "0.17.0.1" ]; then 
- bitcoinVersion="0.17.0"
+# get the sha256 value for the corresponding platform from signed hash sum file
+if [ ${isARM} -eq 1 ] ; then
+  bitcoinOSversion="arm-linux-gnueabihf"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  bitcoinOSversion="aarch64-linux-gnu"
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  bitcoinOSversion="x86_64-linux-gnu"
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  bitcoinOSversion="i686-pc-linux-gnu"
+fi
+bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
+
+echo ""
+echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
+
+# download resources
+binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
+sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]
+then
+    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+    exit 1
+fi
+
+# check binary checksum test
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # install
@@ -461,8 +461,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
   # set version (change if update is available)
-  litecoinVersion="0.16.3"
-  litecoinSHA256="fc6897265594985c1d09978b377d51a01cc13ee144820ddc59fbb7078f122f99"
+  litecoinVersion="0.17.1"
+  litecoinSHA256="7e6f5a1f0b190de01aa20ecf5c5a2cc5a64eb7ede0806bcba983bcd803324d8a"
   cd /home/admin/download
 
   # download
@@ -490,53 +490,26 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.6.1-beta"
-
-if [ ${isARM} -eq 1 ] ; then
-  lndOSversion="armv7"
-  lndSHA256="5541959c7fde98d76d88cc8070ca626c681ba38c44afcb85bf417a9a677e23c2"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  lndOSversion="arm64"
-  lndSHA256="d5f7280c324ebc1d322435a0eac4c42dca73ebc6a613878d9e0d33a68276da5c"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  lndOSversion="amd64"
-  lndSHA256="c55367edb82955dc942baf9f48f79fadde1eee0e86c1d59d2fe1993140ec1b3f"
-fi 
-if [ ${isX86_32} -eq 1 ] ; then
-  lndOSversion="386"
-  lndSHA256="00a7cd0ca657bb242b0f3acb5f4e26a13fd789946fab73c252118e3f89c1cf57"
-fi 
-
-echo ""
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+lndVersion="0.7.1-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="BD599672C804AF2770869A048B80CD2BB8BD8132"
-# bitconner 
+PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+# bitconner
 #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
 cd /home/admin/download
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -O /home/admin/download/pgp_keys.asc ${PGPpkeys}
 
-# check binary is was not manipulated (checksum test)
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
-  exit 1
-fi
+# download lnd binary checksum manifest
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
 
-# check gpg finger print
+# check if checksums are signed by lnd dev team
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
 gpg ./pgp_keys.asc
-fingerprint=$(sudo gpg /home/admin/download/pgp_keys.asc 2>/dev/null | grep "${PGPcheck}" -c)
+fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
   echo ""
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
@@ -549,12 +522,58 @@ sleep 3
 verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${olaoluwaPGP}" -c)
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> SIGNATURE LND MANIFEST IS CORRECT"
+  echo "****************************************"
+  echo ""
+fi
+
+# get the lndSHA256 for the corresponding platform from manifest file
+if [ ${isARM} -eq 1 ] ; then
+  lndOSversion="armv7"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+  lndOSversion="arm64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+  lndOSversion="amd64"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+if [ ${isX86_32} -eq 1 ] ; then
+  lndOSversion="386"
+  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+fi 
+
+echo ""
+echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+echo "SHA256 hash: $lndSHA256"
+echo ""
+
+# get LND binary
+binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+
+# check binary was not manipulated (checksum test)
+binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+  exit 1
+else
+  echo ""
+  echo "****************************************"
+  echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
+  echo "****************************************"
+  echo ""
 fi
 
 # install
@@ -570,7 +589,7 @@ fi
 
 # prepare python for lnd api use
 # https://dev.lightning.community/guides/python-grpc/
-# 
+#
 echo ""
 echo "*** LND API for Python ***"
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 3
@@ -581,87 +600,6 @@ sudo apt-get -f -y install virtualenv
 sudo chown -R admin /home/admin
 sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
-
-# "*** Installing Go ***"
-# Go is needed for ZAP connect later
-# see https://golang.org/dl/
-goVersion="1.12.5"
-if [ ${isARM} -eq 1 ] ; then
-  goOSversion="armv6l"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  goOSversion="arm64"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  goOSversion="amd64"
-fi 
-if [ ${isX86_32} -eq 1 ] ; then
-  goOSversion="386"
-fi 
-
-echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
-
-# wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
-wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
-if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
-then
-    echo "!!! FAIL !!! Download not success."
-    exit 1
-fi
-sudo tar -C /usr/local -xzf go${goVersion}.linux-${goOSversion}.tar.gz
-sudo rm *.gz
-sudo mkdir /usr/local/gocode
-sudo chmod 777 /usr/local/gocode
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-export GOPATH=/usr/local/gocode
-export PATH=$PATH:$GOPATH/bin
-echo ""
-
-##### Build from Source
-## To quickly catch up get latest patches if needed
-#repo="github.com/lightningnetwork/lnd"
-#commit="3f57f65bf0cb710159b0182391d1d75e9e3005bc"
-## BUILDING LND FROM SOURCE
-#echo "*** Installing Go ***"
-#wget https://storage.googleapis.com/golang/go1.11.linux-armv6l.tar.gz
-#if [ ! -f "./go1.11.linux-armv6l.tar.gz" ]
-#then
-#    echo "!!! FAIL !!! Download not success."
-#    exit 1
-#fi
-#sudo tar -C /usr/local -xzf go1.11.linux-armv6l.tar.gz
-#sudo rm *.gz
-#sudo mkdir /usr/local/gocode
-#sudo chmod 777 /usr/local/gocode
-#export GOROOT=/usr/local/go
-#export PATH=$PATH:$GOROOT/bin
-#export GOPATH=/usr/local/gocode
-#export PATH=$PATH:$GOPATH/bin
-#echo ""
-#echo "*** Build LND from Source ***"
-#go get -d $repo
-## make sure to always have the same code (commit) to build
-## TODO: To update lnd -> change to latest commit
-#cd $GOPATH/src/$repo
-#sudo git checkout $commit
-#make && make install
-#sudo chmod 555 /usr/local/gocode/bin/lncli
-#sudo chmod 555 /usr/local/gocode/bin/lnd
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/admin/.bashrc"
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/pi/.bashrc"
-#sudo bash -c "echo 'export PATH=$PATH:/usr/local/gocode/bin/' >> /home/bitcoin/.bashrc"
-#lndVersionCheck=$(lncli --version)
-#echo "LND VERSION: ${lndVersionCheck}"
-#if [ ${#lndVersionCheck} -eq 0 ]; then
-#  echo "FAIL - Something went wrong with building LND from source."
-#  echo "Sometimes it may just be a connection issue. Reset to fresh Rasbian and try again?"
-#  exit 1
-#fi
-#echo ""
-#echo "** Link to /usr/local/bin ***"
-#sudo ln -s /usr/local/gocode/bin/lncli /usr/local/bin/lncli
-#sudo ln -s /usr/local/gocode/bin/lnd /usr/local/bin/lnd
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
@@ -684,6 +622,10 @@ sudo apt-get -y install screen
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
 sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
+# install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+sudo apt-get -y install fzf
+sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+
 # *** SHELL SCRIPTS AND ASSETS
 
 # move files from gitclone
@@ -697,13 +639,6 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
-
-# profile path for admin
-sudo bash -c "echo '' >> /home/admin/.profile"
-sudo bash -c "echo 'GOROOT=/usr/local/go' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin' >> /home/admin/.profile"
-sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /home/admin/.profile"
-sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin' >> /home/admin/.profile"
 
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
@@ -791,7 +726,7 @@ echo ""
 
 # install default LCD on DietPi without reboot to allow automatic build
 if [ "${baseImage}" = "dietpi" ]; then
-  echo "Installing the default display available from Amazon" 
+  echo "Installing the default display available from Amazon"
   # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
   cd /home/admin/
   # sudo apt-mark hold raspberrypi-bootloader
@@ -830,11 +765,14 @@ if [ "${baseImage}" = "raspbian" ]; then
 
     # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
     # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-    
+
     echo "--> LCD DEFAULT"
     cd /home/admin/
     sudo apt-mark hold raspberrypi-bootloader
     git clone https://github.com/goodtft/LCD-show.git
+    cd LCD-show/
+    sudo git reset --hard ce52014
+    cd ..
     sudo chmod -R 755 LCD-show
     sudo chown -R admin:admin LCD-show
     cd LCD-show/

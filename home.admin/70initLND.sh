@@ -75,6 +75,9 @@ while [ ${chainIsReady} -eq 0 ]
 echo "*** Check LND Config ***"
 configExists=$( sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c lnd.conf )
 if [ ${configExists} -eq 0 ]; then
+  echo "Creating LND config ..."
+  sudo mkdir /mnt/hdd/lnd 2> /dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
   source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
   sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf
@@ -90,21 +93,38 @@ else
 fi
 echo ""
 
-###### Start LND
+###### Init LND service & start
 
-echo "*** Starting LND ***"
+echo "*** Init LND Service & Start ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
+
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
+
   sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service
   sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
-  sudo chmod +x /etc/systemd/system/lnd.service
+  #sudo chmod +x /etc/systemd/system/lnd.service
+
+  ###### ACTIVATE TOR IF SET DURING SETUP
+  if [ "${runBehindTor}" = "on" ]; then
+    echo "TOR was selected"
+    sudo /home/admin/config.scripts/internet.tor.sh lndconf-on
+  else
+    echo "TOR was not selected"
+  fi
+
   sudo systemctl enable lnd
   sudo systemctl start lnd
   echo ""
-  dialog --pause "  Starting LND - please wait .." 8 58 120
+  echo "waiting ."
+  sleep 10
+  echo "waiting .."
+  sleep 10
+  echo "waiting ..."
+  sleep 10
+  dialog --pause "  Starting LND - please wait .." 8 58 90
 fi
 
 ###### Check LND starting
@@ -169,6 +189,7 @@ if [ ${walletExists} -eq 0 ]; then
     fi
 
     # generate wallet with seed and set passwordC
+    clear
     echo "Generating new Wallet ...."
     source /home/admin/python-env-lnd/bin/activate
     python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
@@ -204,7 +225,9 @@ if [ ${walletExists} -eq 0 ]; then
       fi
     done
 
-    sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
+    if [ ${setupStep} -lt 100 ]; then
+      sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
+    fi
 
   else
 
@@ -394,7 +417,13 @@ else
   echo "OK - LND wallet already exists."
 fi
 
-dialog --pause "  Waiting for LND - please wait .." 8 58 60
+echo "waiting ."
+sleep 10
+echo "waiting .."
+sleep 10
+echo "waiting ..."
+sleep 10
+dialog --pause "  Waiting for LND - please wait .." 8 58 30
 
 ############################
 # Copy LND macaroons to admin
@@ -446,9 +475,26 @@ else
 fi
 echo ""
 
-# set SetupState (scan is done - so its 80%)
-sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
+if [ ${setupStep} -lt 100 ]; then
 
-###### finishSetup
-sudo /home/admin/90finishSetup.sh
-sudo /home/admin/95finalSetup.sh
+  # set SetupState (scan is done - so its 80%)
+  sudo sed -i "s/^setupStep=.*/setupStep=80/g" /home/admin/raspiblitz.info
+
+  ###### finishSetup
+  sudo /home/admin/90finishSetup.sh
+  sudo /home/admin/95finalSetup.sh
+
+else
+
+  whiptail --title "RESET DONE" --msgbox "
+OK LND Reset is done.
+System will restart now.
+" 10 35
+
+  # make sure host is named like in the raspiblitz config
+  echo "Setting the Name/Alias/Hostname .."
+  sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
+
+  sudo shutdown -r now
+
+fi

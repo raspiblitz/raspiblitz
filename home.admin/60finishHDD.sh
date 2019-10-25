@@ -35,12 +35,31 @@ if [ ${mountOK} -eq 1 ]; then
    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
    echo "OK - ${network} setup ready"
 
+   ###### ACTIVATE TOR IF SET DURING SETUP
+   if [ "${runBehindTor}" = "on" ]; then
+     
+     echo "runBehindTor --> ON"
+     sudo /home/admin/config.scripts/internet.tor.sh on
+
+     # but if IBD is allowed to be public switch off TOR just fro bitcoin 
+     # until IBD is done. background service will after that switch TOR on
+     if [ "${ibdBehindTor}" = "off" ]; then
+       echo "ibdBehindTor --> OFF"
+       sudo /home/admin/config.scripts/internet.tor.sh btcconf-off
+     else
+       echo "ibdBehindTor --> ON"
+     fi
+
+   else
+     echo "runBehindTor --> OFF"
+   fi
+
    ###### START NETWORK SERVICE
    echo ""
    echo "*** Start ${network} ***"
    echo "This can take a while .."
    sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-   sudo chmod +x /etc/systemd/system/${network}d.service
+   #sudo chmod +x /etc/systemd/system/${network}d.service
    sudo systemctl daemon-reload
    sudo systemctl enable ${network}d.service
    sudo systemctl start ${network}d.service

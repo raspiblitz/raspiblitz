@@ -178,19 +178,18 @@ if [ ${mountOK} -eq 1 ]; then
     fi
   fi
 
-  # check if there is ftp data to continue
-  downloadProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "download" -c)
-  if [ ${downloadProgressExists} -eq 1 ]; then
-    # check if there is a running screen session to return to
-    noScreenSession=$(screen -ls | grep -c "No Sockets found")
-    if [ ${noScreenSession} -eq 0 ]; then 
-      echo "found download in data .. resuming"
-      /home/admin/50downloadHDD.sh
-      exit 1
-    fi
-  fi
-
   # HDD is empty - get Blockchain
+
+  # detect hardware version of RaspberryPi
+  # https://www.unixtutorial.org/command-to-confirm-raspberry-pi-model
+  raspberryPi=$(cat /proc/device-tree/model | cut -d " " -f 3 | sed 's/[^0-9]*//g')
+  if [ ${#raspberryPi} -eq 0 ]; then
+    raspberryPi=0
+  fi
+  syncComment="ULTRA SLOW"
+  if [ ${raspberryPi} -gt 3 ]; then
+    syncComment="BEST+SLOW"
+  fi
 
   #Bitcoin
   if [ ${network} = "bitcoin" ]; then
@@ -200,7 +199,7 @@ if [ ${mountOK} -eq 1 ]; then
     T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
     C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
     N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
-    S "SYNC     --> MAINNET thru Bitcoin Network (ULTRA SLOW)" 2>&1 >/dev/tty)
+    S "SYNC     --> MAINNET thru Bitcoin Network (${syncComment})" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -232,6 +231,7 @@ if [ ${mountOK} -eq 1 ]; then
               ;;              
           S)
               /home/admin/50syncHDD.sh
+              /home/admin/10setupBlitz.sh
               ;;
   esac
   exit 1

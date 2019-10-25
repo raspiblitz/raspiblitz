@@ -60,28 +60,28 @@ echo "**************************************************************************
 echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another computer"
 echo "************************************************************************************"
 echo ""
-echo "You can use the blockchain from another bitcoin-core client with version greater or equal"
-echo "to 0.17.1 with transaction index switched on (txindex=1 in the bitcoin.conf)."
+echo "You can use the blockchain from another bitcoin-core client with version"
+echo "greater or equal to 0.17.1."
 echo ""
 echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
 echo "to be connected to the same local network."
 echo ""
 echo "Open a terminal on the source computer and change into the directory that contains the"
-echo "blockchain data. You should see directories 'blocks', 'chainstate' & 'indexes'".
+echo "blockchain data. You should see directories 'blocks', 'chainstate'".
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
 if [ "${CHOICE}" = "WINDOWS" ]; then
-  echo "sudo scp -r ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo "sudo scp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 else
-  echo "sudo rsync -avhW --progress ./chainstate ./indexes ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 fi
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."
 echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
-echo "PRESS ENTER if transfers is done OR if you want to choose another another option."
+echo "PRESS ENTER if transfers is done OR if you want to choose another option."
 sleep 2
 read key
 
@@ -106,15 +106,6 @@ if [ ${count} -lt 1400 ]; then
   echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
   quickCheckOK=0
 fi
-count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | grep -c '.ldb')
-if [ ${count} -gt 0 ]; then
-   echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
-   anyDataAtAll=1
-fi
-if [ ${count} -lt 500 ]; then
-  echo "FAIL: less then 500 .ldb files (${count}) in /mnt/hdd/bitcoin/indexes/txindex (transfere seems invalid)"
-  quickCheckOK=0
-fi
 
 echo "*********************************************"
 echo "QUICK CHECK RESULT"
@@ -131,7 +122,7 @@ if [ ${anyDataAtAll} -eq 1 ]; then
   else
 
     echo "OK -> DATA LOOKS GOOD :D"
-    sudo rm /mnt/hdd/bitcoin/debug.log
+    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
 
   fi
 

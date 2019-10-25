@@ -16,7 +16,7 @@ Also if your group is lager then 5 participants, calculate some extra time for i
 
 Estimated Duration: 2 hours
 
-Sure one part of the fun for participents is to assemble the hardware themselves. But if you aim for the shortest workshop possible, by keeping it at around 2 hours lenght, then this is your way to go. Because if you have the RaspiBlitz already assembled to be operational at the workshop, you can utilize one big time saver feature: "The Pre-Sync" - before the workshop starts you can already plug a assembled RaspiBlitz into power+network and when there is a preloaded bitcoin blockchain on the HDD it will already start catching up. So your participants start with a on-the-spot synced blockchain and will just have to deal with waiting times during the lightning node setup. But keep in mind that you need budget to buy all the hardware and lots of time in preparation for this - order the parts two weeks before and start peparing at least 3 days before the workshop.
+Sure one part of the fun for participents is to assemble the hardware themselves. But if you aim for the shortest workshop possible, by keeping it at around 2 hours lenght, then this is your way to go. Because if you have the RaspiBlitz already assembled to be operational at the workshop, you can utilize one big time saver feature: "The Pre-Sync" - before the workshop starts you can already plug a assembled RaspiBlitz into power+network and when there is a preloaded bitcoin blockchain on the HDD it will already start catching up. So your participants start with an on-the-spot synced blockchain and will just have to deal with waiting times during the lightning node setup. But keep in mind that you need budget to buy all the hardware and lots of time in preparation for this - order the parts two weeks before and start peparing at least 3 days before the workshop.
 
 These are the following steps you need to prepare (follow links for details):
 
@@ -26,6 +26,8 @@ These are the following steps you need to prepare (follow links for details):
 * [Prepare SD cards with latest RaspiBlitz image](WORKSHOP.md#prepare-sd-cards-with-latest-raspiblitz-image)
 * [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 * [Pre-Sync RaspiBlitzes at Workshop Location]()
+
+*NOTE: You will already take 2 hours to setup the RaspiBlitz software. For groups that are interested in getting experience on the Lightning Network and dont want to take the node home after the workshop. It may make sense to prepare the RaspiBlitz even more, having it full setup on testnet with RTL turned on. Then you can directly start with funding the node with testnet coins, give intro and build channels over the RTL UI.*
 
 ## B) Provide a RaspiBlitz Hardware-Kit
 
@@ -40,7 +42,7 @@ These are the following steps you need to prepare (follow links for details):
 * [Prepare SD cards with latest RaspiBlitz image](WORKSHOP.md#prepare-sd-cards-with-latest-raspiblitz-image)
 * [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 
-Variation: If you dont have a big bugdet to prefinance the part shoppings or people have already hardware they want to bring to can just buy the HHDs and SD cards and prepare them to run this scenario.
+Variation: If you dont have a big bugdet to prefinance the part shoppings or people have already hardware they want to bring to can just buy the HDDs and SD cards and prepare them to run this scenario.
 
 ## C) Bring your own Hardware
 
@@ -131,7 +133,7 @@ In all scenarios make sure people bring their laptops.
 
 ## Assemble all the Hardware
 
-Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README. Think of a safe way to transport the assambled devices to the workshop location - HHDs like it soft.
+Basically you follow the assemble instructions on the RaspiBlitz GuitHUb README. Think of a safe way to transport the assambled devices to the workshop location - HDDs like it soft.
 
 ## Prepare HDDs with Blockchain Data
 
@@ -142,18 +144,9 @@ A prepared HDD is formatted in EXT4 and named "BLOCKCHAIN". In folder called `bi
 ```
 /bitcoin/blocks
 /bitcoin/chainstate
-/bitcoin/indexes
 ```
 
-optionaly you can add also the testnet data:
-
-```
-/bitcoin/testnet3/blocks
-/bitcoin/testnet3/chainstate
-/bitcoin/testnet3/indexes
-```
-
-The bitcoin core client the folders are from needs to have `txindex=1` in the bitcoin.conf and needs to be stopped while the data is copied to the HDD.
+The bitcoin core client (0.17.1 or higher) needs to be stopped while the data is copied to the HDD.
 
 The easiest way to get a "template" of such HDD is to setup a fresh RaspiBlitz (without channel and fundings) and then run the script `/home/admin/XXcleanHDD.sh` and manually delete all rest data from the HDD and just leave those folders. 
 

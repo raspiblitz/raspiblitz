@@ -11,6 +11,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 source /home/admin/_version.info
 
 # show info to user
+sudo sed -i "s/^state=.*/state=reboot/g" /home/admin/raspiblitz.info
 dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " --msgbox "
     After reboot RaspiBlitz
     needs to be unlocked and

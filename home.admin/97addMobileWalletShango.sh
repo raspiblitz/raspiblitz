@@ -31,7 +31,7 @@ if [ ${#sshtunnel} -gt 0 ]; then
 fi
 
 # write qr code data to text file
-echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon)," > qr.txt
+echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in ./.lnd/tls.cert -noout)" > qr.txt
 
 # display qr code on LCD
 ./XXdisplayQRlcd.sh

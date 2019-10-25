@@ -20,6 +20,18 @@ https://dietpi.com/survey/#benchmark
 * 5V/2.5A DC power input
 * Power-over-Ethernet (PoE) support (requires separate PoE HAT)
 
+### Raspberry Pi 4
+
+* SoC: Broadcom BCM2711B0 quad-core A72 (ARMv8-A) 64-bit @ 1.5GHz
+* GPU: Broadcom VideoCore VI
+* Networking: 2.4 GHz and 5 GHz 802.11b/g/n/ac wireless LAN
+* RAM: 1GB, 2GB, or 4GB LPDDR4 SDRAM
+* Bluetooth: Bluetooth 5.0, Bluetooth Low Energy (BLE)
+* GPIO: 40-pin GPIO header, populated
+* Storage: microSD
+* Ports: 2 × micro-HDMI 2.0, 3.5 mm analogue audio-video jack, 2 ×* USB 2.0, 2 × USB 3.0, Gigabit Ethernet, Camera Serial Interface* (CSI), Display Serial Interface (DSI)
+* Dimensions: 88 mm × 58 mm × 19.5 mm, 46 g
+
 ### Odroid HC1
 
 * Samsung Exynos5422 Octa core CPU 4x Cortex-A15 2Ghz and 4x Cortex-A7 1.5GHz
@@ -31,6 +43,8 @@ https://dietpi.com/survey/#benchmark
 * Size : 147 x 85 x 29 mm approx.(including Aluminium cooling frame)
 * Linux server OS images based on modern Kernel 4.14 LTS
 
+![HC1](/alternative.platforms/pictures/HC1.jpg)
+
 ### Odroid XU4
 
 * Samsung Exynos5422 Octa core CPU 4x Cortex-A15 2Ghz and 4x Cortex-A7 1.5GHz
@@ -41,13 +55,4 @@ https://dietpi.com/survey/#benchmark
 * Network Ethernet RJ-45
 * Input Power 5V
 
-### Rock64
-
-ROCK64 is a credit card size 4K60P HDR Single Board Computer powered by 
-
-* Rockchip RK3328 Quad-Core ARM Cortex A53 64-Bit CPU
-* 1 - 4GB 1600MHz LPDDR3 RAM
-* eMMC module socket
-* MicroSD Card slot
-* Pi-2 Bus
-* Pi-P5+ Bus
+![XU4](/alternative.platforms/pictures/XU4.jpg)

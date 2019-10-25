@@ -2,7 +2,7 @@
 echo ""
 
 # add bonus scripts (auto install deactivated to reduce third party repos)
-# /home/admin/91addBonus.sh
+/home/admin/91addBonus.sh
 
 ###### SWAP & FS
 echo ""
@@ -11,15 +11,16 @@ swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
 if [ ${swapExists} -eq 1 ]; then
   echo "SWAP on HDD already exists"
 else
-  echo "No SWAP found ... creating 1GB SWAP on HDD"
+  echo "No SWAP found ... creating 2GB SWAP on HDD"
   sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
-  sudo sed -i "16s/.*/CONF_SWAPSIZE=1024/" /etc/dphys-swapfile
+  # comment or delete the CONF_SWAPSIZE line. It will then be created dynamically 
+  sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
   echo "OK - edited /etc/dphys-swapfile"
   echo "Creating file ... this can take some seconds .."
-  sudo dd if=/dev/zero of=/mnt/hdd/swapfile bs=1024 count=1024000
+  sudo dd if=/dev/zero of=/mnt/hdd/swapfile count=2048 bs=1MiB
+  sudo chmod 0600 /mnt/hdd/swapfile
   sudo mkswap /mnt/hdd/swapfile
   sudo dphys-swapfile setup
-  sudo chmod 0600 /mnt/hdd/swapfile
   sudo dphys-swapfile swapon
 
   # expand FS of SD
@@ -77,7 +78,7 @@ echo ""
 echo ""
 echo "*** Update System ***"
 sudo apt-mark hold raspberrypi-bootloader
-sudo apt-get update
+sudo apt-get update -y
 echo "OK - System is now up to date"
 
 # mark setup is done

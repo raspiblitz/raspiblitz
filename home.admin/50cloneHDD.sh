@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# CLODE HDD
+# Script to use the HDD of another RaspiBlitz (Ext4) or from another desktop computer (ExFAT)
+# and copy blocckhain data over to RaspiBlitz HDD/SSD
+
 ## get basic info
 source /home/admin/raspiblitz.info
 
@@ -38,8 +42,8 @@ echo "*** Clone Blockchain form a second HDD ***"
 echo ""
 echo "WARNING: The RaspiBlitz cannot run 2 HDDs without extra Power!"
 echo ""
-echo "You can use a Y cable for the second HDD to inject extra power."
-echo "Like this one: https://www.amazon.de/dp/B00ZJBIHVY"
+echo "You can use a Y cable for the second HDD to inject extra power"
+echo "or add a USB Hub with extra power between Raspi and 2nd HDD."
 echo "If you see on LCD a error on connecting the 2nd HDD do a restart."
 echo ""
 echo "You can use the HDD of another RaspiBlitz for this."
@@ -55,47 +59,43 @@ echo "then cancel (CTRL+c) and reboot."
 ready=0
 while [ ${ready} -eq 0 ]
   do
-    hddC=$(lsblk | grep -c sdb1)
-    if [ ${hddC} -eq 1 ]; then
-      echo "OK - 2nd HDD found as sdb1"
-      ready=1
-    fi
-    hddD=$(lsblk | grep -c sdb)
-    if [ ${hddD} -eq 1 ]; then
-      echo "OK - 2nd HDD found as sdb"
+    found=$(lsblk | grep part | grep -c sdb)
+    if [ ${found} -gt 0 ]; then
+      echo "OK - 2nd HDD found as part of sdb"
       ready=1
     fi
   done
 
 echo ""
 echo "*** Mounting 2nd HDD ***"
-sudo mkdir /mnt/genesis
+sudo mkdir /mnt/genesis 2>/dev/null
 echo "try ext4 on sdb1 .."
 sudo mount -t ext4 /dev/sdb1 /mnt/genesis
-sleep 2
+sleep 4
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try exfat on sdb1 .."
   sudo mount -t exfat /dev/sdb1 /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try ext4 on sdb .."
   sudo mount -t ext4 /dev/sdb /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "try exfat on sdb.."
   sudo mount -t exfat /dev/sdb /mnt/genesis
-  sleep 2
+  sleep 4
 fi
 mountOK=$(lsblk | grep -c /mnt/genesis)
 if [ ${mountOK} -eq 0 ]; then
   echo "FAIL - not able to mount the 2nd HDD"
   echo "only ext4 and exfat possible"
-  sleep 4
+  echo "PRESS ENTER to return to menu"
+  read key
   ./10setupBlitz.sh
   exit 1
 else
@@ -104,25 +104,7 @@ fi
 
 echo ""
 echo "*** Copy Blockchain ***"
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/chainstate /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/indexes /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/testnet3 /mnt/hdd/bitcoin
-sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/hdd/bitcoin
-
-# echo "cleaning up - ok if files do not exists"
-# sudo rm /mnt/hdd/${network}/${network}.conf
-# sudo rm /mnt/hdd/${network}/${network}.pid
-# sudo rm /mnt/hdd/${network}/banlist.dat
-# sudo rm /mnt/hdd/${network}/debug.log
-# sudo rm /mnt/hdd/${network}/fee_estimates.dat
-# sudo rm /mnt/hdd/${network}/mempool.dat
-# sudo rm /mnt/hdd/${network}/peers.dat
-# sudo rm /mnt/hdd/${network}/testnet3/banlist.dat
-# sudo rm /mnt/hdd/${network}/testnet3/debug.log
-# sudo rm /mnt/hdd/${network}/testnet3/fee_estimates.dat
-# sudo rm /mnt/hdd/${network}/testnet3/mempool.dat
-# sudo rm /mnt/hdd/${network}/testnet3/peers.dat
-
+sudo rsync --append --info=progress2 -a /mnt/genesis/bitcoin/blocks /mnt/genesis/bitcoin/chainstate /mnt/hdd/bitcoin
 sudo umount -l /mnt/genesis
 echo "OK - Copy done :)"
 echo ""
@@ -159,17 +141,6 @@ if [ ${count} -gt 0 ]; then
 fi
 if [ ${count} -lt 1400 ]; then
   echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
-  quickCheckOK=0
-fi
-count=$(sudo ls /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | grep -c '.ldb')
-if [ ${count} -gt 0 ]; then
-   echo "Found data in /mnt/hdd/bitcoin/indexes/txindex"
-   anyDataAtAll=1
-fi
-# if [ ${count} -lt 5200 ]; then
-#  echo "FAIL: less then 5200 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
-if [ ${count} -lt 2300 ]; then
-  echo "FAIL: less then 2300 .ldb files (${count}) in /mnt/hdd/bitcoin/chainstate (transfere seems invalid)"
   quickCheckOK=0
 fi
 

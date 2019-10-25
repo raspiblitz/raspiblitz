@@ -159,7 +159,7 @@ do
       chmod 777 ${pathTemplateHDD}/bitcoin
     fi
 
-    rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/indexes ${pathBitcoinBlockchain}/blocks ${pathBitcoinBlockchain}/testnet3 ${pathTemplateHDD}/bitcoin
+    rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathBitcoinBlockchain}/testnet3 ${pathTemplateHDD}/bitcoin
 
     if [ -d "${pathLitecoinBlockchain}" ]; then
 
@@ -172,7 +172,7 @@ do
 
       sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
-      rsync -a --info=progress2 ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/indexes ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
+      rsync -a --info=progress2 ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
 
     fi
 

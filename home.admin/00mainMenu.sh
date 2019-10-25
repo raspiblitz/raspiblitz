@@ -66,8 +66,7 @@ if [ "${runBehindTor}" == "on" ]; then
 fi
 
 # final Options
-OPTIONS+=(HARDWARE "Run Hardwaretest")
-OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
+OPTIONS+=(REPAIR "Repair Options")
 OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
 OPTIONS+=(OFF "PowerOff RaspiBlitz")
 OPTIONS+=(X "Console / Terminal")
@@ -193,14 +192,8 @@ case $CHOICE in
               ./00mainMenu.sh
             fi
             ;;
-        HARDWARE)
-            sudo ./05hardwareTest.sh
-            ./00mainMenu.sh
-            ;;
-        SOFTWARE)
-            sudo ./XXdebugLogs.sh
-            echo "Press ENTER to return to main menu."
-            read key
+        REPAIR)
+            ./98repairMenu.sh
             ./00mainMenu.sh
             ;;
         PASSWORD)
