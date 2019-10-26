@@ -23,7 +23,6 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("err='missing parameters'")
     sys.exit(1)
 
-
 mode = sys.argv[1]
 
 
@@ -109,7 +108,7 @@ def seed(stub, wallet_password="", seed_words="", seed_password=""):
         sys.exit(1)
 
 
-def sbc(stub, wallet_password="", seed_words="", seed_password="", file_path_scb=""):
+def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb=""):
     with open(file_path_scb, 'rb') as f:
         content = f.read()
     scb_hex_str = binascii.hexlify(content)
@@ -231,7 +230,7 @@ def main():
         seed(stub, wallet_password, seed_words, seed_password)
 
     elif mode == "scb":
-        sbc(stub, wallet_password, seed_words, seed_password, file_path_scb)
+        scb(stub, wallet_password, seed_words, seed_password, file_path_scb)
 
 
 if __name__ == '__main__':
