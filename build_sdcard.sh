@@ -154,7 +154,7 @@ if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
   sudo adduser pi sudo
 fi
 
-# special prepare when Nvidia Jetson Nano 
+# special prepare when Nvidia Jetson Nano
 if [ ${isNvidia} -eq 1 ] ; then
   # disable GUI on boot
   sudo systemctl set-default multi-user.target
@@ -264,7 +264,7 @@ echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get install -y htop git curl bash-completion jq dphys-swapfile
+sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile
 
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
@@ -413,7 +413,7 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   bitcoinOSversion="i686-pc-linux-gnu"
 fi
@@ -548,11 +548,11 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
   lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
+fi
 if [ ${isX86_32} -eq 1 ] ; then
   lndOSversion="386"
   lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi 
+fi
 
 echo ""
 echo "*** LND v${lndVersion} for ${lndOSversion} ***"
@@ -618,6 +618,11 @@ sudo apt-get -y install cpulimit
 # for background downloading
 sudo apt-get -y install screen
 
+# for multiple (detachable/background) sessions when using SSH
+sudo apt-get -y install tmux
+cd /home/admin
+sudo -u admin wget https://github.com/gpakosz/.tmux/raw/01c91ba5231eb2e7b32cc2f47ac9022efae87962/.tmux.conf
+
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
 sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
@@ -643,8 +648,11 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 # bash autostart for admin
 sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
 sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-sudo bash -c "echo '# automatically start main menu for admin' >> /home/admin/.bashrc"
-sudo bash -c "echo './00raspiblitz.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
   # bash autostart for pi

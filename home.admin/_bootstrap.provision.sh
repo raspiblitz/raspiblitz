@@ -3,7 +3,7 @@
 # This script gets called from a fresh SD card
 # starting up that has an config file on HDD
 # from old RaspiBlitz or manufacturer to
-# to install and config services 
+# to install and config services
 
 # LOGFILE - store debug logs of bootstrap
 logFile="/home/admin/raspiblitz.log"
@@ -90,10 +90,14 @@ sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${lo
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 #sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
+sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
+sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
+sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
+
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "*** Make backup of LND directory" >> ${logFile}
-sudo rm -r  /mnt/hdd/backup_lnd 
+sudo rm -r  /mnt/hdd/backup_lnd
 sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
 numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
 if [ ${numOfDiffers} -gt 0 ]; then
@@ -121,7 +125,7 @@ if [ "${chain}" = "test" ]; then
     echo "Provisioning TESTNET - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Provisioning Testnet'/g" ${infoFile}
     sudo /home/admin/config.scripts/network.chain.sh testnet >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning TESTNET - keep default" >> ${logFile}
 fi
 
@@ -130,7 +134,7 @@ if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
 
@@ -139,7 +143,7 @@ if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup AutoPilot'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
 fi
 
@@ -148,7 +152,7 @@ if [ "${networkUPnP}" = "on" ]; then
     echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup UPnP'/g" ${infoFile}
     sudo /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
 fi
 
@@ -157,7 +161,7 @@ if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
@@ -220,7 +224,7 @@ if [ "${#sshtunnel}" -gt 0 ]; then
     echo "Provisioning SSH Tunnel - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup SSH Tunnel'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
@@ -229,7 +233,7 @@ if [ "${#lcdrotate}" -gt 0 ]; then
     echo "Provisioning LCD rotate - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
     sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning LCD rotate - not active" >> ${logFile}
 fi
 
@@ -238,7 +242,7 @@ if [ "${#touchscreen}" -gt 0 ]; then
     echo "Provisioning Touchscreen - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Touchscreen'/g" ${infoFile}
     sudo /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning Touchscreen - not active" >> ${logFile}
 fi
 
@@ -247,7 +251,7 @@ if [ "${#ups}" -gt 0 ]; then
     echo "Provisioning UPS - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup UPS'/g" ${infoFile}
     sudo /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
-else 
+else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
 
@@ -282,7 +286,7 @@ if [ ${#hostname} -gt 0 ]; then
   else
     echo "WARNING: hostname in raspiblitz.conf contains just special chars" >> ${logFile}
   fi
-else 
+else
   echo "No hostname set." >> ${logFile}
 fi
 
