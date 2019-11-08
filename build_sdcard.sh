@@ -742,6 +742,7 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo chmod -R 755 LCD-show
   sudo chown -R admin:admin LCD-show
   cd LCD-show/
+  sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
   # sudo ./LCD35-show
   sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
   sudo mkdir /etc/X11/xorg.conf.d
@@ -784,6 +785,7 @@ if [ "${baseImage}" = "raspbian" ]; then
     sudo chmod -R 755 LCD-show
     sudo chown -R admin:admin LCD-show
     cd LCD-show/
+    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
     sudo ./LCD35-show
 
   else
