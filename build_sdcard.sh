@@ -599,6 +599,10 @@ echo "to switch between python2/3: sudo update-alternatives --config python"
 sudo apt-get -f -y install virtualenv
 sudo chown -R admin /home/admin
 sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
+
+# This Python3 virtualenv includes the site-packages because access to the PyQt5
+# libs - which are installed system-wide (via apt-get) - is needed for TouchUI.
+sudo -u admin bash -c "cd; virtualenv -p python3 --system-site-packages python3-env-lnd"
 echo ""
 
 echo ""

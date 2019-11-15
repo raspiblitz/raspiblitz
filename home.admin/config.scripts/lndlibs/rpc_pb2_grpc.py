@@ -280,6 +280,11 @@ class LightningStub(object):
         request_serializer=rpc__pb2.OpenChannelRequest.SerializeToString,
         response_deserializer=rpc__pb2.OpenStatusUpdate.FromString,
         )
+    self.ChannelAcceptor = channel.stream_stream(
+        '/lnrpc.Lightning/ChannelAcceptor',
+        request_serializer=rpc__pb2.ChannelAcceptResponse.SerializeToString,
+        response_deserializer=rpc__pb2.ChannelAcceptRequest.FromString,
+        )
     self.CloseChannel = channel.unary_stream(
         '/lnrpc.Lightning/CloseChannel',
         request_serializer=rpc__pb2.CloseChannelRequest.SerializeToString,
@@ -425,6 +430,11 @@ class LightningStub(object):
         request_serializer=rpc__pb2.ChannelBackupSubscription.SerializeToString,
         response_deserializer=rpc__pb2.ChanBackupSnapshot.FromString,
         )
+    self.BakeMacaroon = channel.unary_unary(
+        '/lnrpc.Lightning/BakeMacaroon',
+        request_serializer=rpc__pb2.BakeMacaroonRequest.SerializeToString,
+        response_deserializer=rpc__pb2.BakeMacaroonResponse.FromString,
+        )
 
 
 class LightningServicer(object):
@@ -435,7 +445,7 @@ class LightningServicer(object):
     """* lncli: `walletbalance`
     WalletBalance returns total unspent outputs(confirmed and unconfirmed), all
     confirmed unspent outputs and all unconfirmed unspent outputs under control
-    of the wallet. 
+    of the wallet.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -600,7 +610,7 @@ class LightningServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def SubscribeChannelEvents(self, request, context):
-    """* lncli: `subscribechannelevents`
+    """*
     SubscribeChannelEvents creates a uni-directional stream from the server to
     the client in which any updates relevant to the state of the channels are
     sent over. Events include new active channels, inactive channels, and closed
@@ -612,7 +622,7 @@ class LightningServicer(object):
 
   def ClosedChannels(self, request, context):
     """* lncli: `closedchannels`
-    ClosedChannels returns a description of all the closed channels that 
+    ClosedChannels returns a description of all the closed channels that
     this node was a participant in.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -637,6 +647,18 @@ class LightningServicer(object):
     blocks that the funding transaction should be confirmed in, or a manual fee
     rate to us for the funding transaction. If neither are specified, then a
     lax block confirmation target is used.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ChannelAcceptor(self, request_iterator, context):
+    """*
+    ChannelAcceptor dispatches a bi-directional streaming RPC in which
+    OpenChannel requests are sent to the client and the client responds with
+    a boolean that tells LND whether or not to accept the channel. This allows
+    node operators to specify their own criteria for accepting inbound channels
+    through a single persistent connection.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -822,7 +844,7 @@ class LightningServicer(object):
     """* lncli: `queryroutes`
     QueryRoutes attempts to query the daemon's Channel Router for a possible
     route to a target destination capable of carrying a specific amount of
-    satoshis. The retuned route contains the full details required to craft and
+    satoshis. The returned route contains the full details required to craft and
     send an HTLC, also including the necessary information that should be
     present within the Sphinx packet encapsulated within the HTLC.
     """
@@ -967,6 +989,16 @@ class LightningServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def BakeMacaroon(self, request, context):
+    """* lncli: `bakemacaroon`
+    BakeMacaroon allows the creation of a new macaroon with custom read and
+    write permissions. No first-party caveats are added since this can be done
+    offline.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_LightningServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -1074,6 +1106,11 @@ def add_LightningServicer_to_server(servicer, server):
           servicer.OpenChannel,
           request_deserializer=rpc__pb2.OpenChannelRequest.FromString,
           response_serializer=rpc__pb2.OpenStatusUpdate.SerializeToString,
+      ),
+      'ChannelAcceptor': grpc.stream_stream_rpc_method_handler(
+          servicer.ChannelAcceptor,
+          request_deserializer=rpc__pb2.ChannelAcceptResponse.FromString,
+          response_serializer=rpc__pb2.ChannelAcceptRequest.SerializeToString,
       ),
       'CloseChannel': grpc.unary_stream_rpc_method_handler(
           servicer.CloseChannel,
@@ -1219,6 +1256,11 @@ def add_LightningServicer_to_server(servicer, server):
           servicer.SubscribeChannelBackups,
           request_deserializer=rpc__pb2.ChannelBackupSubscription.FromString,
           response_serializer=rpc__pb2.ChanBackupSnapshot.SerializeToString,
+      ),
+      'BakeMacaroon': grpc.unary_unary_rpc_method_handler(
+          servicer.BakeMacaroon,
+          request_deserializer=rpc__pb2.BakeMacaroonRequest.FromString,
+          response_serializer=rpc__pb2.BakeMacaroonResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
