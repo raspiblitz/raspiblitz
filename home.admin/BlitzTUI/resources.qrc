@@ -1,0 +1,23 @@
+<RCC>
+  <qresource prefix="RaspiBlitz">
+    <file>images/blank_318x318.png</file>
+    <file>images/Paid_Stamp.png</file>
+    <file>images/RaspiBlitz_Logo_Berry.png</file>
+    <file>images/RaspiBlitz_Logo_Condensed.png</file>
+    <file>images/RaspiBlitz_Logo_Condensed_90.png</file>
+    <file>images/RaspiBlitz_Logo_Condensed_270.png</file>
+    <file>images/RaspiBlitz_Logo_Condensed_Negative.png</file>
+    <file>images/RaspiBlitz_Logo_Icon.png</file>
+    <file>images/RaspiBlitz_Logo_Icon_Negative.png</file>
+    <file>images/RaspiBlitz_Logo_Main.png</file>
+    <file>images/RaspiBlitz_Logo_Main_90.png</file>
+    <file>images/RaspiBlitz_Logo_Main_270.png</file>
+    <file>images/RaspiBlitz_Logo_Main_Negative.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked_90.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked_270.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked_Negative.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked_Negative_90.png</file>
+    <file>images/RaspiBlitz_Logo_Stacked_Negative_270.png</file>
+  </qresource>
+</RCC>
