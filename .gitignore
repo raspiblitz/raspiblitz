@@ -1,6 +1,7 @@
 .DS_Store
 home.admin/.DS_Store
 *.log
+*.pyc
 __pycache__
 rpc_pb2.pyc
 rpc_pb2_grpc.pyc
