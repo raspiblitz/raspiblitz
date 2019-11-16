@@ -27,7 +27,7 @@ Basic Parts for all minimal variants:
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
 * RaspBerry Pi 3: [amazon.com](https://www.amazon.com/dp/B07BDR5PDW)
-* Power >=3A: [amazon.com](https://www.amazon.com/dp/B07MC7B9X3)
+* Power >=3A: [amazon.com](https://www.amazon.com/Raspberry-Micro-USB-Charger-Raspberry-Pi-Adapter/dp/B00L88M8TE)
 * Heatsink-Case: [amazon.com](https://www.amazon.com/dp/B07M8SH8TM)
 
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
