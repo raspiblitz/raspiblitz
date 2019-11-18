@@ -64,6 +64,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
+    sudo -u electrs git reset --hard v0.8.0
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
     echo ""
