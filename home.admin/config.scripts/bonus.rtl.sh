@@ -90,6 +90,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   else 
     echo "RTL already installed."
+    # start service
+    echo "start service"
+    sudo systemctl start RTL 2>/dev/null
   fi
 
   # setting value in raspi blitz config
