@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch txindex on or off"
- echo "bitcoin.txindex.sh [on|off]"
+ echo "network.txindex.sh [on|off]"
  exit 1
 fi
 
@@ -16,7 +16,7 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  if [ "${#txindex}" -eq 0 ]; then
+  if [ ${txindex} == 0 ]; then
     sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/bitcoin/bitcoin.conf
     echo "switching txindex=1 and restarting bitcoind"
     sudo systemctl restart bitcoind
