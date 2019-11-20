@@ -131,16 +131,11 @@ WantedBy=multi-user.target
 EOF
 
     sudo mv /home/admin/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service 
-
     sudo systemctl enable btc-rpc-explorer
-    sudo systemctl start btc-rpc-explorer
-    echo "OK - BTC-RPC-explorer is now ACTIVE"
+    echo "OK - the BTC-RPC-explorer service is now enabled"
 
   else 
     echo "BTC-RPC-explorer already installed."
-    # start service
-    echo "start service"
-    sudo systemctl start btc-rpc-explorer 2>/dev/null
   fi
 
   # Enable BTCEXP_ADDRESS_API if electrs is active
@@ -153,6 +148,10 @@ EOF
     sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env
     sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env    
   fi
+
+  # start service
+  echo "Starting service"
+  sudo systemctl start btc-rpc-explorer 2>/dev/null
 
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCRPCexplorer=.*/BTCRPCexplorer=on/g" /mnt/hdd/raspiblitz.conf
