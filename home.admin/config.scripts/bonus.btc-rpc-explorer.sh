@@ -168,7 +168,7 @@ EOF
 # Hidden Service for BTC-RPC-explorer
 HiddenServiceDir /mnt/hdd/tor/btc-rpc-explorer
 HiddenServiceVersion 3
-HiddenServicePort 3002 127.0.0.1:3002
+HiddenServicePort 80 127.0.0.1:3002
       " | sudo tee -a /etc/tor/torrc
 
       sudo systemctl restart tor
@@ -189,7 +189,7 @@ HiddenServicePort 3002 127.0.0.1:3002
     echo ""
     echo "***"
     echo "The Tor Hidden Service address for btc-rpc-explorer is:"
-    echo "$TOR_ADDRESS:3002"
+    echo "$TOR_ADDRESS"
     echo "***"
     echo "" 
   fi

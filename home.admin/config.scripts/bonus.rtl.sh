@@ -108,7 +108,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Hidden Service for RTL
 HiddenServiceDir /mnt/hdd/tor/RTL
 HiddenServiceVersion 3
-HiddenServicePort 3000 127.0.0.1:3000
+HiddenServicePort 80 127.0.0.1:3000
       " | sudo tee -a /etc/tor/torrc
   
       sudo systemctl restart tor
@@ -130,7 +130,7 @@ HiddenServicePort 3000 127.0.0.1:3000
     echo ""
     echo "***"
     echo "The Tor Hidden Service address for RTL is:"
-    echo "$TOR_ADDRESS:3000"
+    echo "$TOR_ADDRESS"
     echo "***"
     echo "" 
   fi
