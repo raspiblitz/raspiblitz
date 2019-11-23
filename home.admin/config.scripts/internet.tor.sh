@@ -137,6 +137,10 @@ deactivateBitcoinOverTOR()
   echo "*** Changing ${network} Config ***"
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^bind=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^dnsseed=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^dns=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
   sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
   sudo chown admin:admin /home/admin/.${network}/${network}.conf
