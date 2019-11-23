@@ -362,8 +362,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop electrs
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
-    sudo rm -rf /home/electrs/.cargo
     sudo rm -rf /home/electrs/electrs
+    sudo rm -rf /home/electrs/.cargo
+    sudo rm -rf /home/electrs/.rustup
+    sudo rm -rf /home/electrs/.profile
     echo "OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
