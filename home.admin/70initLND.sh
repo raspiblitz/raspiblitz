@@ -191,7 +191,7 @@ if [ ${walletExists} -eq 0 ]; then
     # generate wallet with seed and set passwordC
     clear
     echo "Generating new Wallet ...."
-    source /home/admin/python-env-lnd/bin/activate
+    source /home/admin/python3-env-lnd/bin/activate
     python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
     sudo shred /home/admin/.pass.tmp 2>/dev/null
@@ -353,7 +353,7 @@ to protect the seed words. Most users did not set this.
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # trigger wallet recovery
-      source /home/admin/python-env-lnd/bin/activate
+      source /home/admin/python3-env-lnd/bin/activate
       source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD})
 
       # check if wallet was created for real
