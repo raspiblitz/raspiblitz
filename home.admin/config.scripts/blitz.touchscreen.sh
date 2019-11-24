@@ -36,7 +36,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/python3-env-lnd/bin/pip install BlitzTUI
   echo ""
 
-  # patch lndlibs for Python3
+  # make sure lndlibs are patched for compatibility for both Python2 and Python3
   if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
     sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
   fi
