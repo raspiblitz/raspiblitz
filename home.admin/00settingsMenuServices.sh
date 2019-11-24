@@ -10,6 +10,7 @@ if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
+if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -52,23 +53,25 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 15 45 8 \
-1 'Channel Autopilot' ${autoPilot} \
-2 'Testnet' ${chainValue} \
-3 ${dynDomainMenu} ${domainValue} \
-4 'Run behind TOR' ${runBehindTor} \
-5 'RTL Webinterface' ${rtlWebinterface} \
-6 'LND Auto-Unlock' ${autoUnlock} \
-9 'Touchscreen' ${tochscreenMenu} \
-r 'LCD Rotate' ${lcdrotateMenu} \
-2>&1 >/dev/tty)
-else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 16 45 9 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
+b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+6 'LND Auto-Unlock' ${autoUnlock} \
+9 'Touchscreen' ${tochscreenMenu} \
+r 'LCD Rotate' ${lcdrotateMenu} \
+2>&1 >/dev/tty)
+else
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 17 45 10 \
+1 'Channel Autopilot' ${autoPilot} \
+2 'Testnet' ${chainValue} \
+3 ${dynDomainMenu} ${domainValue} \
+4 'Run behind TOR' ${runBehindTor} \
+5 'RTL Webinterface' ${rtlWebinterface} \
+b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
@@ -266,26 +269,82 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/bonus.rtl.sh ${choice}
+  /home/admin/config.scripts/bonus.rtl.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      l1="RTL web service will be ready AFTER NEXT REBOOT:"
-      l2="Try to open the following URL in your local web browser"
-      l3="and login with your PASSWORD B."
-      l4="---> http://${localip}:3000"
-      dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 65
+      if [ "${runBehindTor}" = "on" ]; then
+        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
+        l1="Open the following URL in your local web browser"
+        l2="and login with your PASSWORD B."
+        l3="---> http://${localip}:3000"
+        l4=""
+        l5="The Hidden Service address to be used in the Tor Browser:"
+        l6="${TOR_ADDRESS}"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}" 11 66        
+      else
+        l1="Open the following URL in your local web browser"
+        l2="and login with your PASSWORD B."
+        l3="---> http://${localip}:3000"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
+      fi
     else
       l1="!!! FAIL on RTL install !!!"
-      l2="Try manual install on terminal after rebootwith:"
-      l3="sudo /home/admin/config.scripts/bonus.rtl.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 10 65
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=1
+  needsReboot=0
 else
   echo "RTL Webinterface Setting unchanged."
+fi
+
+# BTC-RPC-Explorer process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "b")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${BTCRPCexplorer}" != "${choice}" ]; then
+  echo "RTL Webinterface Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      if [ "${runBehindTor}" = "on" ]; then
+        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
+        l1="The txindex needs to be created before BTC-RPC-Explorer can be active"
+        l2="Takes ~7 h on a RPi4 with SSD. Monitor with:"
+        l3="'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'"
+        l4=""
+        l5="Open the following URL in your local web browser"
+        l6="To login leave the username empty and use your PASSWORD B"
+        l7="---> http://${localip}:3002"
+        l8=""
+        l9="The Hidden Service address to be used in the Tor Browser:"
+        l10="${TOR_ADDRESS}"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}\n${l7}\n${l8}\n${l9}\n${l10}" 15 75        
+      else
+        l1="The txindex needs to be created before BTC-RPC-Explorer can be active"
+        l2="Takes ~7 h on a RPi4 with SSD. Monitor with:"
+        l3="'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'"
+        l4=""
+        l5="When finished open the following URL in your local web browser"
+        l6="To login leave the username empty and use your PASSWORD B"
+        l7="---> http://${localip}:3002"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}\n${l7}" 11 75
+      fi
+    else
+      l1="!!! FAIL on BTC-RPC-Explorer install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.btc-rpc-explorer.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+  needsReboot=0
+else
+  echo "BTC-RPC-Explorer Setting unchanged."
 fi
 
 # LND Auto-Unlock
