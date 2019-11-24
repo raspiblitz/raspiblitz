@@ -398,6 +398,9 @@ RestartSec=60
     sudo systemctl start btcpayserver 2>/dev/null
   fi
 
+  # setting value in raspiblitz config
+  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=on/g" /mnt/hdd/raspiblitz.conf
+
   # Hidden Service for BTCPay if Tor active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
