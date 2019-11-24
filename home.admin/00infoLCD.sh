@@ -149,7 +149,7 @@ while :
 
       # when no HDD - improve message
       elif [ "${state}" = "nohdd" ]; then
-          message="Connect HDD"
+          message="Connect external HDD/SSD"
       fi
       
       # setup process has not started yet
