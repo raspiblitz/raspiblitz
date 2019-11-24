@@ -14,11 +14,12 @@ fi
 
 # check and load raspiblitz config
 # to know which network is running
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
+if [ -f "/home/admin/raspiblitz.info" ]; then
+  source /home/admin/raspiblitz.info
+fi
+
+if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  source /mnt/hdd/raspiblitz.conf
 fi
 
 echo "Detect Base Image ..." 
@@ -169,19 +170,25 @@ if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
   exit 0
 fi
 
-# if started with prepare 
+# make sure the network was set (by sourcing raspiblitz.conf)
+if [ ${#network} -eq 0 ]; then
+ echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
+ exit 1
+fi
+
+# if started with btcconf-on 
 if [ "$1" = "btcconf-on" ]; then
   activateBitcoinOverTOR
   exit 0
 fi
 
-# if started with prepare 
+# if started with btcconf-off
 if [ "$1" = "btcconf-off" ]; then
   deactivateBitcoinOverTOR
   exit 0
 fi
 
-# if started with prepare 
+# if started with lndconf-on
 if [ "$1" = "lndconf-on" ]; then
   activateLndOverTOR
   exit 0
@@ -356,6 +363,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Paramter $1"
+echo "FAIL - Unknown Parameter $1"
 echo "may needs reboot to run normal again"
 exit 1
