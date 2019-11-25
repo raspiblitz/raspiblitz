@@ -18,9 +18,9 @@ if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
     print("# ! and run with with: python3 /home/admin/config.scripts/lnd.initwallet.py")
     print("# ! Or: /home/admin/python3-env-lnd/bin/python3 /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
-    print("# lnd.winitwallet.py new [walletpassword] [?seedpassword]")
-    print("# lnd.winitwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
-    print("# lnd.winitwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
+    print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
+    print("# lnd.initwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
     print("err='missing parameters'")
     sys.exit(1)
 
