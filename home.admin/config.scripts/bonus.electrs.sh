@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch the Electrum Rust Server on or off"
- echo "bonus.btc-rcp-explorer.sh [on|off]"
+ echo "bonus.electrs.sh [on|off]"
  exit 1
 fi
 
@@ -63,6 +63,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
+    sudo -u electrs git reset --hard v0.8.0
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
     echo ""
@@ -283,11 +284,14 @@ WantedBy=multi-user.target
     echo ""
 
   else 
-    echo "ElectRS already installed."
+    echo "ElectRS is already installed."
     # start service
     echo "start service"
     sudo systemctl start electrs 2>/dev/null
   fi
+
+  # setting value in raspiblitz config
+  sudo sed -i "s/^ElectRS=.*/ElectRS=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
@@ -298,7 +302,7 @@ WantedBy=multi-user.target
 HiddenServiceDir /mnt/hdd/tor/electrs
 HiddenServiceVersion 3
 HiddenServicePort 50002 127.0.0.1:50002
-      " | sudo tee -a /etc/tor/torrc
+" | sudo tee -a /etc/tor/torrc
 
       sudo systemctl restart tor
       sleep 2
@@ -311,10 +315,10 @@ HiddenServicePort 50002 127.0.0.1:50002
       echo "Waiting for the Hidden Service"
       sleep 10
       TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-        if [ -z "$TOR_ADDRESS" ]; then
+      if [ -z "$TOR_ADDRESS" ]; then
         echo " FAIL - The Hidden Service address could not be found - Tor error?"
         exit 1
-        fi
+      fi
     fi    
     echo ""
     echo "***"
@@ -360,8 +364,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop electrs
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
-    sudo rm -rf /home/electrs/.cargo
     sudo rm -rf /home/electrs/electrs
+    sudo rm -rf /home/electrs/.cargo
+    sudo rm -rf /home/electrs/.rustup
+    sudo rm -rf /home/electrs/.profile
     echo "OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
@@ -371,7 +377,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env    
     fi
   else 
-    echo "ELectRS is not installed."
+    echo "ElectRS is not installed."
   fi
   exit 0
 fi
