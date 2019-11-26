@@ -290,7 +290,7 @@ else
   echo "No hostname set." >> ${logFile}
 fi
 
-echo "DONE - Give raspi some cool off time after hard building .... 20 secs sleep" >> ${logFile}
-sleep 20
+echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
+sleep 5
 
 echo "END Provisioning" >> ${logFile}
