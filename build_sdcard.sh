@@ -288,8 +288,6 @@ sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
-#sudo apt-get install -y python-pip  # TODO(frennkie) check!
-#sudo apt-get install -y python-dev  # TODO(frennkie) check!
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
