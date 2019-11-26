@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspbian Buster Desktop (2019-06-20)
+# Raspbian Buster Desktop (2019-09-26)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 49a6b840ec2cb3e220f9a02bbceed91d21d20a7eeaac32f103923fdbdc9490a9
+# SHA256: 2c4067d59acf891b7aa1683cb1918da78d76d2552c02749148d175fa7f766842
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -117,7 +117,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packagestaht are not needed
-sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python2
+sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
 sudo apt-get clean
 sudo apt-get -y autoremove
 
@@ -644,6 +644,15 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 
+# make sure lndlibs are patched for compatibility for both Python2 and Python3
+if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
+
+if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
+
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
@@ -729,7 +738,7 @@ echo ""
 echo "After final reboot - your SD Card Image is ready."
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
 echo ""
 echo "to continue: reboot with \`sudo shutdown -r now\` and login with user:admin password:raspiblitz"
 echo ""
