@@ -684,13 +684,32 @@ You can backup your channel and wallet data, make a complete fresh RaspiBlitz an
 
 ## Can I run the RaspiBlitz without a display/LCD?
 
-The display is one of the nice features of the RaspiBlitz but the raspberry can run without it. Maybe not all add-on feature could be used to the full extend, but you can get started without the LCD and even plug it on later.
+The display is one of the nice features of the RaspiBlitz but the raspberry can run without it. Maybe not all add-on feature could be used to the full extend, but you can get started without the LCD and even plug it on later. Enabling VNC provides a reasonable compromise.
 
 Normally with the LCD it's easy to see your local IP changes and you can get started quickly. Without it needs a bit more digging thru your network - you can find a good tutorial on that on the RaspiBolt tutorial (origin of RaspiBlitz):
 
 https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#connecting-to-the-network
 
 *Please Note: Without a LCD-Hat you cannot simply use the HDMI as alternative, because screen signal is routed to the GPIO pins. On how to switch that back manually - see [waveshare documentation](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)).*
+
+## How do I set up VNC?
+
+Enter the Console/Terminal by selecting the last option from the Raspiblitz menu
+Enable the VNC server using raspi-config:
+sudo raspi-config > Interface Options > VNC > Enable. Reboot.
+Set a password for the VNC Server:
+sudo vncpasswd -service
+Set the Authentication parameter:
+sudo echo "Authentication=VncAuth" > /etc/vnc/config.d/common.custom
+Restart the VNC Server for settings to take effect
+sudo systemctl restart vncserver-x11-serviced
+Open the relevant port in the firewall (ufw):
+sudo ufw allow vnc
+
+Note: You may have to set the resolution through raspi-config in certain situations:
+sudo raspi-config > Advance Options > Resolution
+
+Hint: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app
 
 ## I have two RaspiBlitz in my network - can they both be public?
 
