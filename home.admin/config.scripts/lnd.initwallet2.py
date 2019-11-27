@@ -1,22 +1,21 @@
-#!/usr/bin/env python3
-import binascii
+#!/usr/bin/python
 import os
 import sys
-from pathlib import Path
-
+import binascii
 import grpc
 from lndlibs import rpc_pb2 as ln
 from lndlibs import rpc_pb2_grpc as lnrpc
+from pathlib2 import Path
 
-if sys.version_info < (3, 0):
-    print("Can't run on Python2")
+print("This is the legacy - Python2 only - version.")
+if sys.version_info > (3, 0):
+    print("Can't run on Python3")
     sys.exit()
 
 # display config script info
-if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
-    print("# ! always activate virtual env first: source /home/admin/python3-env-lnd/bin/activate")
-    print("# ! and run with with: python3 /home/admin/config.scripts/lnd.initwallet.py")
-    print("# ! Or: /home/admin/python3-env-lnd/bin/python3 /home/admin/config.scripts/lnd.initwallet.py")
+if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
+    print("# ! always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
+    print("# ! and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
     print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
     print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
@@ -54,57 +53,57 @@ def new(stub, wallet_password="", seed_entropy=None):
 
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print(code, file=sys.stderr)
+        print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError GenSeedRequest'")
         print("errMore='" + details + "'")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
-        print(e, file=sys.stderr)
+        print >> sys.stderr, e
         print("err='GenSeedRequest'")
         sys.exit(1)
 
     request = ln.InitWalletRequest(
-        wallet_password=wallet_password.encode(),
+        wallet_password=wallet_password,
         cipher_seed_mnemonic=seed_words
     )
     try:
         response = stub.InitWallet(request)
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print(code, file=sys.stderr)
+        print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
         print("errMore='" + details + "'")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
-        print(e, file=sys.stderr)
+        print >> sys.stderr, e
         print("err='InitWallet'")
         sys.exit(1)
 
 
 def seed(stub, wallet_password="", seed_words="", seed_password=""):
     request = ln.InitWalletRequest(
-        wallet_password=wallet_password.encode(),
-        cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
-        aezeed_passphrase=seed_password.encode()
+        wallet_password=wallet_password,
+        cipher_seed_mnemonic=seed_words,
+        recovery_window=250,
+        aezeed_passphrase=seed_password
     )
 
     try:
         response = stub.InitWallet(request)
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print(code, file=sys.stderr)
+        print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
         print("errMore='" + details + "'")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
-        print(e, file=sys.stderr)
+        print >> sys.stderr, e
         print("err='InitWallet'")
         sys.exit(1)
 
@@ -116,29 +115,28 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
     print(scb_hex_str)
 
     request = ln.InitWalletRequest(
-        wallet_password=wallet_password.encode(),
-        cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
-        aezeed_passphrase=seed_password.encode(),
-        channel_backups=scb_hex_str.encode()
+        wallet_password=wallet_password,
+        cipher_seed_mnemonic=seed_words,
+        recovery_window=250,
+        aezeed_passphrase=seed_password,
+        channel_backups=scb_hex_str
     )
 
     try:
         response = stub.InitWallet(request)
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print(code, file=sys.stderr)
+        print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
         print("errMore='" + details + "'")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
-        print(e, file=sys.stderr)
+        print >> sys.stderr, e
         print("err='InitWallet'")
         sys.exit(1)
 
-    # TODO(rootzoll) implement creating from seed/scb
     print("err='TODO: implement creating from seed/scb'")
     sys.exit(1)
 
@@ -150,6 +148,9 @@ def parse_args():
     filepath_scb = ""
 
     if mode == "new":
+
+        print("# *** CREATING NEW LND WALLET ***")
+
         if len(sys.argv) > 2:
             wallet_password = sys.argv[2]
             if len(wallet_password) < 8:
@@ -214,24 +215,21 @@ def parse_args():
 
 
 def main():
+    wallet_password, seed_words, seed_password, file_path_scb = parse_args()
+
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
     cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
     channel = grpc.secure_channel('localhost:10009', ssl_creds)
     stub = lnrpc.WalletUnlockerStub(channel)
 
-    wallet_password, seed_words, seed_password, file_path_scb = parse_args()
-
     if mode == "new":
-        print("# *** CREATING NEW LND WALLET ***")
         new(stub, wallet_password)
 
     elif mode == "seed":
-        print("# *** RECOVERING LND WALLET FROM SEED ***")
         seed(stub, wallet_password, seed_words, seed_password)
 
     elif mode == "scb":
-        print("# *** RECOVERING LND WALLET FROM SEED + SCB ***")
         scb(stub, wallet_password, seed_words, seed_password, file_path_scb)
 
 

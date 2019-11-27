@@ -43,7 +43,7 @@ pip install BlitzTUI
 **or** consider using a virtual environment
 
 ```
-virtualenv -p python3 --system-site-packages venv
+python3 -m venv --system-site-packages venv
 source venv/bin/activate
 pip install BlitzTUI
 ```
