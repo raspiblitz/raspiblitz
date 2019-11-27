@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# INFO deleting all partitions of a drive: sudo wipefs -a -f /dev/sda
+# using fdisk non-interactive: https://www.unix.com/shell-programming-and-scripting/207169-non-interactive-fdisk-partition-script.html
+# using parted non-interactive: https://unix.stackexchange.com/questions/170258/delete-labelled-partition-non-interactively-with-one-command
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "STILL EXPERIMENTAL - NOT FINISHED"
