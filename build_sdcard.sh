@@ -116,7 +116,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 
 fi
 
-# remove some (big) packagestaht are not needed
+# remove some (big) packages that are not needed
 sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
 sudo apt-get clean
 sudo apt-get -y autoremove
@@ -599,6 +599,7 @@ sudo chown -R admin /home/admin
 # This Python3 virtualenv includes the site-packages because access to the PyQt5
 # libs - which are installed system-wide (via apt-get) - is needed for TouchUI.
 sudo -u admin bash -c "cd; python3 -m venv --system-site-packages python3-env-lnd"
+sudo -u admin bash -c "/home/admin/python3-env-lnd/bin/python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
 echo ""
