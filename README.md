@@ -52,7 +52,7 @@ If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBl
 
 ### International Shopping Lists (buy parts & build it yourself)
 
-The cheapest way is to buy ans assemble the single parts yourself. These are the community curated shopping lists based on country:
+The cheapest way is to buy and assemble the single parts yourself. These are the community curated shopping lists based on country:
 
 * [Germany](shoppinglist_de.md) *(reference shopping list)*
 * [USA](shoppinglist_usa.md)
