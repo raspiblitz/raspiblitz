@@ -404,21 +404,8 @@ RestartSec=60
   # Hidden Service for BTCPay if Tor active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    isTor=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 'btcpay')
-    if [ ${isTor} -eq 0 ]; then
-        echo "
-# Hidden Service for BTCPayServer
-HiddenServiceDir /mnt/hdd/tor/btcpay
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:23000
-" | sudo tee -a /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
 
-      sudo systemctl restart tor
-      sleep 2
-    else
-      echo "The Hidden Service is already installed"
-    fi
-    
     TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
     if [ -z "$TOR_ADDRESS" ]; then
       echo "Waiting for the Hidden Service"

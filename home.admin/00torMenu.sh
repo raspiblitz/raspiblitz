@@ -5,7 +5,7 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# correct Hidden Services for RTL and BTC-RPC-Explorer
+# correct old Hidden Services for RTL and BTC-RPC-Explorer
 if [ $(sudo cat /etc/tor/torrc | grep "HiddenServicePort 3000" -c) -eq 1 ]; then
   torNeedsRestart=1
   sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
@@ -21,17 +21,6 @@ if [ $torNeedsRestart -eq 1 ]; then
   echo "Restarting Tor after fixing Hidden Service ports"
   sleep 5
 fi
-
-# add value for ElectRS to raspi config if needed
-if [ ${#ElectRS} -eq 0 ]; then
-  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
-fi
-isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
-if [ ${isInstalled} -eq 1 ]; then
- # setting value in raspiblitz config
-  sudo sed -i "s/^ElectRS=.*/ElectRS=on/g" /mnt/hdd/raspiblitz.conf
-fi
-source /mnt/hdd/raspiblitz.conf
 
 echo "Run dialog ..."
 echo "Installing the QR code generator (qrencode)"

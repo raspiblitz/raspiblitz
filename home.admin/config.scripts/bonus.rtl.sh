@@ -102,21 +102,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    isRTLTor=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 'RTL')
-    if [ ${isRTLTor} -eq 0 ]; then
-      echo "
-# Hidden Service for RTL
-HiddenServiceDir /mnt/hdd/tor/RTL
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:3000
-" | sudo tee -a /etc/tor/torrc
-  
-      sudo systemctl restart tor
-      sleep 2
-    else
-      echo "The Hidden Service is already installed"
-    fi
-  
+    # correct old Hidden Service with port
+    sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
+
     TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
     if [ -z "$TOR_ADDRESS" ]; then
       echo "Waiting for the Hidden Service"

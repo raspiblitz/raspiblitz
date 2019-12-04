@@ -295,20 +295,8 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    isElectrsTor=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 'electrs')
-    if [ ${isElectrsTor} -eq 0 ]; then
-      echo "
-# Hidden Service for Electrum Server
-HiddenServiceDir /mnt/hdd/tor/electrs
-HiddenServiceVersion 3
-HiddenServicePort 50002 127.0.0.1:50002
-" | sudo tee -a /etc/tor/torrc
-
-      sudo systemctl restart tor
-      sleep 2
-    else
-      echo "The Hidden Service is already installed"
-    fi
+    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002
+    /home/admin/config.scripts/internet.hiddenservice.sh electrsTCP 50001 50001    
     
     TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
     if [ -z "$TOR_ADDRESS" ]; then
