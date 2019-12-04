@@ -58,7 +58,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     /home/admin/config.scripts/network.txindex.sh on
 
-    npm install -g btc-rpc-explorer
+    npm install -g btc-rpc-explorer@1.1.3
 
     # prepare .env file
     echo "getting RPC credentials from the bitcoin.conf"
@@ -103,7 +103,7 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3002
+    sudo ufw allow 3002 comment 'btc-rpc-explorer'
     sudo ufw --force enable
     echo ""
 
@@ -169,7 +169,7 @@ EOF
 HiddenServiceDir /mnt/hdd/tor/btc-rpc-explorer
 HiddenServiceVersion 3
 HiddenServicePort 80 127.0.0.1:3002
-      " | sudo tee -a /etc/tor/torrc
+" | sudo tee -a /etc/tor/torrc
 
       sudo systemctl restart tor
       sleep 2

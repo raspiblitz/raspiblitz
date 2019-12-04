@@ -16,6 +16,7 @@ if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
+if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -53,7 +54,7 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 16 45 9 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 17 45 10 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -63,9 +64,10 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${tochscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
+p 'BTCPayServer' ${BTCPayServer} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 17 45 10 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 18 45 11 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -77,6 +79,7 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 9 'Touchscreen' ${tochscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
+p 'BTCPayServer' ${BTCPayServer} \
 2>&1 >/dev/tty)
 fi
 
@@ -389,6 +392,44 @@ if [ "${lcdrotate}" != "${choice}" ]; then
   needsReboot=1
 else
   echo "LCD Rotate Setting unchanged."
+fi
+
+# BTCPayServer process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${BTCPayServer}" != "${choice}" ]; then
+  echo "BTCPayServer setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      source /home/btcpay/.btcpayserver/Main/settings.config
+      if [ "${runBehindTor}" = "on" ]; then
+        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
+        l1="Open the following URL in your local web browser"
+        l2="and register your admin account: "
+        l3="---> ${externalurl}"
+        l4=""
+        l5="The Hidden Service address to be used in the Tor Browser:"
+        l6="${TOR_ADDRESS}"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}" 11 66        
+      else
+        l1="Open the following URL in your local web browser"
+        l2="and register your admin account: "
+        l3="---> ${externalurl}"
+        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
+      fi
+    else
+      l1="!!! FAIL on BTCPayServer install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+  needsReboot=0
+else
+  echo "BTCPayServer setting not changed."
 fi
 
 if [ ${anychange} -eq 0 ]; then
