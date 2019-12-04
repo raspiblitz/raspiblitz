@@ -13,27 +13,10 @@ fi
 ./config.scripts/internet.hiddenservice.sh lnd_REST 8080 8080
 
 # make sure Go is installed
-/home/admin/config.scripts/go.install.sh
+/home/admin/config.scripts/bonus.go.sh
 
-# make sure latest lndconnect is installed
-isInstalled=$(lndconnect -h | grep "nocert" -c)
-if [ $isInstalled -eq 0 ]; then
-  echo "Installing lndconnect.."
-  # Install latest lndconnect from source:
-  go get -d github.com/LN-Zap/lndconnect
-  # locate lndconnect download dir on different blitz versions
-  if [ -d /home/admin/go/src/github.com/LN-Zap/lndconnect ] ; then
-    cd /home/admin/go/src/github.com/LN-Zap/lndconnect
-  elif [ -d /usr/local/gocode/src/github.com/LN-Zap/lndconnect ] ; then 
-    cd /usr/local/gocode/src/github.com/LN-Zap/lndconnect
-  else
-    echo "path to lndconnect is unknown"
-    exit 1
-  fi
-  make
-else
-  echo "lndconnect is already installed" 
-fi
+# make sure lndconnect is installed
+/home/admin/config.scripts/bonus.lndconnect.sh
 
 if [ $1 == zeus ]; then
   echo ""
