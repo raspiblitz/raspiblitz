@@ -17,6 +17,7 @@ if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
+if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -54,7 +55,7 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 17 45 10 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 18 45 10 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -64,10 +65,11 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${tochscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
+e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 18 45 11 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 19 45 11 \
 1 'Channel Autopilot' ${autoPilot} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -79,6 +81,7 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
 9 'Touchscreen' ${tochscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
+e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 2>&1 >/dev/tty)
 fi
@@ -279,13 +282,12 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-        l1="Open the following URL in your local web browser"
-        l2="and login with your PASSWORD B."
-        l3="---> http://${localip}:3000"
-        l4=""
-        l5="The Hidden Service address to be used in the Tor Browser:"
-        l6="${TOR_ADDRESS}"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}" 11 66        
+        whiptail --title " Installed RTL " --msgbox "\
+Open the following URL in your local web browser and login with your PASSWORD B.\n
+---> http://${localip}:3000 \n
+The Hidden Service address to be used in the Tor Browser is:\n
+${TOR_ADDRESS}
+" 14 66 
       else
         l1="Open the following URL in your local web browser"
         l2="and login with your PASSWORD B."
@@ -317,26 +319,23 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
-        l1="The txindex needs to be created before BTC-RPC-Explorer can be active"
-        l2="Takes ~7 h on a RPi4 with SSD. Monitor with:"
-        l3="'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'"
-        l4=""
-        l5="Open the following URL in your local web browser"
-        l6="To login leave the username empty and use your PASSWORD B"
-        l7="---> http://${localip}:3002"
-        l8=""
-        l9="The Hidden Service address to be used in the Tor Browser:"
-        l10="${TOR_ADDRESS}"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}\n${l7}\n${l8}\n${l9}\n${l10}" 15 75        
+        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
+The txindex needs to be created before BTC-RPC-Explorer can be active.
+Takes ~7 hours on a RPi4 with SSD. Monitor in the terminal with:
+'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'\n
+BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
+---> http://${localip}:3002\n
+The Hidden Service address to be used in the Tor Browser is:\n
+${TOR_ADDRESS}
+" 18 75 
       else
-        l1="The txindex needs to be created before BTC-RPC-Explorer can be active"
-        l2="Takes ~7 h on a RPi4 with SSD. Monitor with:"
-        l3="'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'"
-        l4=""
-        l5="When finished open the following URL in your local web browser"
-        l6="To login leave the username empty and use your PASSWORD B"
-        l7="---> http://${localip}:3002"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}\n${l7}" 11 75
+        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
+The txindex needs to be created before BTC-RPC-Explorer can be active.
+Takes ~7 hours on a RPi4 with SSD. Monitor in the terminal with:
+'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'\n
+BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
+---> http://${localip}:3002
+" 14 75 
       fi
     else
       l1="!!! FAIL on BTC-RPC-Explorer install !!!"
@@ -394,6 +393,64 @@ else
   echo "LCD Rotate Setting unchanged."
 fi
 
+# ElectRS process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${ElectRS}" != "${choice}" ]; then
+  echo "ElectRS Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.electrs.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+      if [ "${runBehindTor}" = "on" ]; then
+        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        echo "Electrs now starts indexing the transaction data in the background. 
+This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
+See more more info about how to monitor the process:
+https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"        
+        echo ""
+        echo "The Tor Hidden Service address for electrs is:"
+        echo "$TOR_ADDRESS"
+        echo ""
+        echo "To connect the Electrum wallet through Tor open the Tor Browser and start Electrum with the options:" 
+        echo "\`electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150\`"
+        echo ""
+        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
+        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
+        echo "" 
+        echo "scan the QR to use the Tor address in Electrum on mobile:"
+        qrencode -t ANSI256 $TOR_ADDRESS
+        echo "Press ENTER to return to the menu"
+        read key
+      else
+        echo "Electrs now starts indexing the transaction data in the background. 
+This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
+See more more info about how to monitor the process:
+https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"  
+        echo ""
+        echo "To connect through the Electrum wallet to your own Electrum Rust Server:"
+        echo "Start the wallet with the options \`electrum --oneserver --server $localip:50002:s\`"
+        echo ""
+        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
+        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
+        echo "" 
+        echo "Press ENTER to return to the menu"
+        read key
+      fi
+    else
+      l1="!!! FAIL on ElectRS install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.electrs.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+  needsReboot=0
+else
+  echo "ElectRS Setting unchanged."
+fi
+
 # BTCPayServer process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -407,13 +464,13 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-        l1="Open the following URL in your local web browser"
-        l2="and register your admin account: "
-        l3="---> ${externalurl}"
-        l4=""
-        l5="The Hidden Service address to be used in the Tor Browser:"
-        l6="${TOR_ADDRESS}"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}\n${l5}\n${l6}" 11 66        
+        whiptail --title " Installed BTCPAY Server " --msgbox "\
+Open the following URL in your local web browser
+and register your admin account:\n 
+---> ${externalurl}\n
+The Hidden Service address to be used in the Tor Browser:\n
+${TOR_ADDRESS}
+" 15 75 
       else
         l1="Open the following URL in your local web browser"
         l2="and register your admin account: "
