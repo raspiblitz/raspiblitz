@@ -137,7 +137,7 @@ EOF
 
     # Only generate if there is none. Or Electrum will not connect if the cert changed.
     if [ -f /etc/ssl/certs/localhost.crt ] ; then
-        echo "skiping self signed SSL certificate" 
+        echo "skipping self signed SSL certificate" 
     else
         echo ""
         echo "***"

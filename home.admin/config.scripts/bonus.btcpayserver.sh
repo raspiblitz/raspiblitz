@@ -16,10 +16,10 @@ if [ ${#BTCPayServer} -eq 0 ]; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
 fi
     
-  # stop service
-  echo "making sure services are not running"
-  sudo systemctl stop btcpayserver 2>/dev/null
-  sudo systemctl disable btcpayserver 2>/dev/null
+# stop service
+echo "making sure services are not running"
+sudo systemctl stop btcpayserver 2>/dev/null
+sudo systemctl disable btcpayserver 2>/dev/null
   
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
