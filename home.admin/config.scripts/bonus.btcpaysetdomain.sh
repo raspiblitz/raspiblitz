@@ -3,17 +3,53 @@
 # script to set up nginx and the SSL certificate for BTCPay Server
 # calls the config.scripts/internet.hiddenservice.sh for the Tor connection
 
-whiptail --title 'Install BTCPayServer' --yes-button='Own Domain' --no-button='Tor only' --yesno "
-Choose 'Own Domain' if you want to use a Domain Name or dynamicDNS \
-pointing to your public IP.
-You will need the ports 80, 443 and 9735 forwarded to your RaspiBlitz \
-and an email address to be used for communication about the SSL certificate.\n
-Choose 'Tor only' if you want to set up BTCPayServer \
-as a Tor Hidden service and use a self signed SSL certificate.\n
+HEIGHT=20
+WIDTH=73
+CHOICE_HEIGHT=2
+BACKTITLE="RaspiBlitz"
+TITLE=""
+MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS 
+pointing to your public IP.\n
+You will need the ports 80, 443 and 9735 forwarded to your RaspiBlitz
+and an email address to be used for communication about the SSL certificate.\n\n
+Choose 'TOR' if you want to set up BTCPayServer
+as a Tor Hidden service and use a self signed SSL certificate.\n\n
 Find more information about using the BTCPayServer on the RaspiBlitz here:
-https://github.com/openoms/bitcoin-tutorials/tree/master/BTCPayServer
-https://openoms.gitbook.io/bitcoin-tutorials/btcpayserver
-" 19 73
+https://github.com/openoms/bitcoin-tutorials/tree/master/BTCPayServer"
+OPTIONS=(DOMAIN "use a Domain Name or dynamicDNS" \
+          TOR "Tor access and a self-signed certificate")
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+dialogcancel=$?
+echo "done dialog"
+clear
+
+# check if user canceled dialog
+echo "dialogcancel(${dialogcancel})"
+if [ ${dialogcancel} -eq 1 ]; then
+  echo "user canceled"
+  exit 1
+fi
+
+clear
+case $CHOICE in
+
+        DOMAIN)
+            echo "setting up with own domain"
+            ownDomain=1
+            ;;
+        TOR) 
+            echo "setting up for Tor only"
+            ownDomain=0
+            ;;
+esac
 
 if [ $? -eq 0 ]; then
   echo "setting up with own domain"
@@ -32,17 +68,20 @@ echo ""
 if [ $ownDomain -eq 1 ]; then
   echo ""
   echo "***"
-  echo "Confirm that the port 80, 443 and 9735 are forwarded to the IP of the RaspiBlitz by pressing [ENTER]" 
+  echo "Confirm that the port 80, 443 and 9735 are forwarded to the IP of the RaspiBlitz by pressing [ENTER]"
+  echo "Use CTRL + C to EXIT" 
   read key
   
   echo ""
   echo "***"
   echo "Type the domain/ddns you want to use for BTCPayServer and press [ENTER]"
+  echo "Use CTRL + C to EXIT" 
   read YOUR_DOMAIN
   
   echo ""
   echo "***"
   echo "Type an email address that will be used to register the SSL certificate and press [ENTER]"
+  echo "Use CTRL + C to EXIT" 
   read YOUR_EMAIL
   
   echo ""
