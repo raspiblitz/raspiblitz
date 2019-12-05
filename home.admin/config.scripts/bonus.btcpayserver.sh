@@ -228,8 +228,12 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
 " | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
 
     sudo systemctl restart btcpayserver
-
-  
+  else 
+    echo "BTCPay Server is already installed."
+    # start service
+    echo "start service"
+    sudo systemctl start btcpayserver 2>/dev/null
+  fi 
   exit 0
 fi
 
