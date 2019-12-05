@@ -7,10 +7,13 @@ whiptail --title 'Install BTCPayServer' --yes-button='Own Domain' --no-button='T
 Choose 'Own Domain' if you want to use a Domain Name or dynamicDNS \
 pointing to your public IP.
 You will need the ports 80, 443 and 9735 forwarded to your RaspiBlitz \
-and an email address to br used for communication about your SSL certificate.\n
+and an email address to be used for communication about the SSL certificate.\n
 Choose 'Tor only' if you want to set up BTCPayServer \
-as a Tor Hidden service and use a self signed SSL certificate.
-" 17 62
+as a Tor Hidden service and use a self signed SSL certificate.\n
+Find more information about using the BTCPayServer on the RaspiBlitz here:
+https://github.com/openoms/bitcoin-tutorials/tree/master/BTCPayServer
+https://openoms.gitbook.io/bitcoin-tutorials/btcpayserver
+" 19 73
 
 if [ $? -eq 0 ]; then
   echo "setting up with own domain"

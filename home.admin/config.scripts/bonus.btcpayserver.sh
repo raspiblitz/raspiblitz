@@ -234,6 +234,9 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
     echo "start service"
     sudo systemctl start btcpayserver 2>/dev/null
   fi 
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=on/g" /mnt/hdd/raspiblitz.conf
   exit 0
 fi
 

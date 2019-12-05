@@ -462,6 +462,12 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
+      if [ ${externalurl} = "https://" ]; then
+        localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+        externalurl="https://$localip\n
+Will need to accept the self-signed certificate in the \
+browser to be able to connect from the outside of the Tor Network."
+      fi
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
         whiptail --title " Installed BTCPAY Server " --msgbox "\
@@ -470,7 +476,7 @@ and register your admin account:\n
 ---> ${externalurl}\n
 The Hidden Service address to be used in the Tor Browser:\n
 ${TOR_ADDRESS}
-" 15 75 
+" 17 75 
       else
         l1="Open the following URL in your local web browser"
         l2="and register your admin account: "
