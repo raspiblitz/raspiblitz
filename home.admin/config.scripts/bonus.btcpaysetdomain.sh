@@ -34,7 +34,7 @@ clear
 # check if user canceled dialog
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
-  echo "user canceled"
+  echo "user cancelled"
   exit 1
 fi
 
@@ -44,21 +44,16 @@ case $CHOICE in
         DOMAIN)
             echo "setting up with own domain"
             ownDomain=1
-            exit 0
             ;;
         TOR) 
             echo "setting up for Tor only"
             ownDomain=0
-            exit 0
             ;;
 esac
 
-if [ $? -eq 0 ]; then
-  echo "setting up with own domain"
-  ownDomain=1
-else
-  echo "setting up for Tor only"
-  ownDomain=0
+if [ ${#ownDomain} -eq 0 ]; then
+  echo "user cancelled"
+  exit 1
 fi
 
 echo ""
@@ -70,20 +65,21 @@ echo ""
 if [ $ownDomain -eq 1 ]; then
   echo ""
   echo "***"
-  echo "Confirm that the port 80, 443 and 9735 are forwarded to the IP of the RaspiBlitz by pressing [ENTER]"
-  echo "Use CTRL + C to EXIT" 
+  echo "Confirm that the port 80, 443 and 9735 are forwarded to the IP of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
   read key
   
   echo ""
   echo "***"
-  echo "Type the domain/ddns you want to use for BTCPayServer and press [ENTER]"
-  echo "Use CTRL + C to EXIT" 
+  echo "Type your domain/ddns pointing to your public IP and press [ENTER] or use [CTRL + C] to exit"
+  echo "example:"
+  echo "btcpay.example.com"
   read YOUR_DOMAIN
   
   echo ""
   echo "***"
-  echo "Type an email address that will be used to register the SSL certificate and press [ENTER]"
-  echo "Use CTRL + C to EXIT" 
+  echo "Type an email address that will be used to message about the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
+  echo "example:"
+  echo "name@email.com"
   read YOUR_EMAIL
   
   echo ""
