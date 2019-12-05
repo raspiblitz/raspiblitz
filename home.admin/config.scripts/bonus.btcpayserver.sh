@@ -4,9 +4,9 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch BTCPay Server on or off"
- echo "bonus.btcpayserver.sh [on|off]"
- exit 1
+  echo "config script to switch BTCPay Server on or off"
+  echo "bonus.btcpayserver.sh [on|off]"
+  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -26,7 +26,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
 
   # setting up nginx and the SSL certificate    
-  /home/admin/config.scripts/bonus.btcpaysetdomain.sh  
+  /home/admin/config.scripts/bonus.btcpaysetdomain.sh
+  errorOnInstall=$?
+  if [ ${errorOnInstall} -eq 1 ]; then
+   echo "exiting as user cancelled BTCPayServer installation"  
+   exit 1
+  fi 
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then

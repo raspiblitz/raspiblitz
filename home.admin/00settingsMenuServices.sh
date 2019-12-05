@@ -484,8 +484,8 @@ ${TOR_ADDRESS}
         dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
       fi
     else
-      l1="!!! FAIL on BTCPayServer install !!!"
-      l2="Try manual install on terminal after reboot with:"
+      l1="BTCPayServer installation is cancelled"
+      l2="Try again from the menu or install from the terminal with:"
       l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi

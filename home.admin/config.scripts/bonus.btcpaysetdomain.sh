@@ -44,10 +44,12 @@ case $CHOICE in
         DOMAIN)
             echo "setting up with own domain"
             ownDomain=1
+            exit 0
             ;;
         TOR) 
             echo "setting up for Tor only"
             ownDomain=0
+            exit 0
             ;;
 esac
 
