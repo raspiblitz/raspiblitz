@@ -231,8 +231,14 @@ RestartSec=60
   sudo systemctl enable certbot.timer
     
 elif [ $ownDomain -eq 0 ]; then
-
   YOUR_DOMAIN=localhost
+  
+  # disable certbot
+  sudo systemctl stop certbot.timer 2>/dev/null
+  sudo systemctl disable certbot.timer 2>/dev/null
+  sudo systemctl stop certbot 2>/dev/null
+  sudo systemctl disable certbot 2>/dev/null
+  
   # create a self-signed ssl certificate
   /home/admin/config.scripts/internet.selfsignedcert.sh
   # set nginx
