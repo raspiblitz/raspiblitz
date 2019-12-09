@@ -58,7 +58,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     /home/admin/config.scripts/network.txindex.sh on
 
-    npm install -g btc-rpc-explorer
+    npm install -g btc-rpc-explorer@1.1.3
 
     # prepare .env file
     echo "getting RPC credentials from the bitcoin.conf"
@@ -103,7 +103,7 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3002
+    sudo ufw allow 3002 comment 'btc-rpc-explorer'
     sudo ufw --force enable
     echo ""
 
@@ -162,20 +162,10 @@ EOF
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    isBtcRpcExplorerTor=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 'btc-rpc-explorer')
-    if [ ${isBtcRpcExplorerTor} -eq 0 ]; then
-      echo "
-# Hidden Service for BTC-RPC-explorer
-HiddenServiceDir /mnt/hdd/tor/btc-rpc-explorer
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:3002
-      " | sudo tee -a /etc/tor/torrc
-
-      sudo systemctl restart tor
-      sleep 2
-    else
-      echo "The Hidden Service is already installed"
-    fi
+    # correct old Hidden Service with port
+    sudo sed -i "s/^HiddenServicePort 3002 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3002
+    
     TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
     if [ -z "$TOR_ADDRESS" ]; then
       echo "Waiting for the Hidden Service"
