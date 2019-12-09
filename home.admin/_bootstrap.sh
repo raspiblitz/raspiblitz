@@ -242,7 +242,9 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "state=recovered" >> /home/admin/raspiblitz.recover.info
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
-    sudo shutdown -r now
+    echo "shutdown in 1min" >> $logFile
+    sync
+    sudo shutdown -r -F +1
     exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile

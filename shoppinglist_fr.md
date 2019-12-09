@@ -10,7 +10,7 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 
 * RaspBerry Pi 4 2GB: [pimoroni.com](https://shop.pimoroni.com/products/raspberry-pi-4?variant=29157087412307)
 * ShimFan Cooling: [pimoroni.com](https://shop.pimoroni.com/products/fan-shim) (order later if sold out)
-* Power USBC: [pimoroni.com](https://shop.pimoroni.com/products/raspberry-pi-official-usb-c-power-supply-eu?variant=29392393371750) or [pimoroni.com](https://shop.pimoroni.com/products/universal-usb-c-power-supply-5-1v-3a)
+* Power USBC: [pimoroni.com](https://shop.pimoroni.com/products/universal-usb-c-power-supply-5-1v-3a)
 * RaspberryPi-Case: [pimoroni.com](https://shop.pimoroni.com/products/pibow-coupe-4?variant=29210100105299)
 * 500GB SSD: [amazon.fr](https://www.amazon.fr/Crucial-CT500MX500SSD1-interne-MX500-pouces/dp/B0786QNS9B)
 * SSD-Case: [amazon.fr](https://www.amazon.fr/UGREEN-Boîtier-Externe-Pouces-Compatible/dp/B07D2BHVBD)

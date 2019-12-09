@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspbian Buster Desktop (2019-06-20)
+# Raspbian Buster Desktop (2019-09-26)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 49a6b840ec2cb3e220f9a02bbceed91d21d20a7eeaac32f103923fdbdc9490a9
+# SHA256: 2c4067d59acf891b7aa1683cb1918da78d76d2552c02749148d175fa7f766842
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -116,6 +116,14 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 
 fi
 
+# remove some (big) packages that are not needed
+sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+sudo apt-get clean
+sudo apt-get -y autoremove
+
+# make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+
 # update debian
 echo ""
 echo "*** UPDATE DEBIAN ***"
@@ -141,10 +149,6 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config nonint do_wifi_country US
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
   echo "max_usb_current=1" | sudo tee -a /boot/config.txt
-  # extra: remove some big packages not needed
-  sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi python-pygame
-  sudo apt-get clean
-  sudo apt-get -y autoremove
 fi
 
 # special prepare when Ubuntu or Armbian
@@ -284,8 +288,6 @@ sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt-get install -y build-essential
-sudo apt-get install -y python-pip
-sudo apt-get install -y python-dev
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
@@ -357,13 +359,13 @@ echo "*** PREPARING BITCOIN & Co ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.18.1"
+bitcoinVersion="0.19.0.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # prepare directories
-sudo rm -r /home/admin/download
+sudo rm -rf /home/admin/download
 sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
@@ -490,7 +492,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.8.0-beta"
+lndVersion="0.8.1-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -589,16 +591,15 @@ fi
 
 # prepare python for lnd api use
 # https://dev.lightning.community/guides/python-grpc/
-#
+
 echo ""
 echo "*** LND API for Python ***"
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 3
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
-echo "to switch between python2/3: sudo update-alternatives --config python"
-sudo apt-get -f -y install virtualenv
 sudo chown -R admin /home/admin
-sudo -u admin bash -c "cd; virtualenv python-env-lnd; source /home/admin/python-env-lnd/bin/activate; pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
+
+# This Python3 virtualenv includes the site-packages because access to the PyQt5
+# libs - which are installed system-wide (via apt-get) - is needed for TouchUI.
+sudo -u admin bash -c "cd; python3 -m venv --system-site-packages python3-env-lnd"
+sudo -u admin bash -c "/home/admin/python3-env-lnd/bin/python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
 echo ""
@@ -641,6 +642,15 @@ sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
+
+# make sure lndlibs are patched for compatibility for both Python2 and Python3
+if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
+
+if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
 
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
@@ -687,7 +697,7 @@ echo "*** HARDENING ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
 
 # fail2ban (no config required)
-sudo apt-get install -y fail2ban
+sudo apt-get install -y --no-install-recommends python3-systemd fail2ban
 
 # *** BOOTSTRAP ***
 # see background README for details
@@ -708,10 +718,6 @@ sudo systemctl enable background
 echo "*** Prepare TOR source+keys ***"
 sudo /home/admin/config.scripts/internet.tor.sh prepare
 echo ""
-echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-echo "If you see fails above .. please run again later on:"
-echo "sudo /home/admin/config.scripts/internet.tor.sh prepare"
-echo ""
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -727,7 +733,7 @@ echo ""
 echo "After final reboot - your SD Card Image is ready."
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "login once after reboot without HDD and run 'XXprepareRelease.sh'"
+echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
 echo ""
 echo "to continue: reboot with \`sudo shutdown -r now\` and login with user:admin password:raspiblitz"
 echo ""

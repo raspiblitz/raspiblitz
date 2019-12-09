@@ -1,204 +1,239 @@
-#!/usr/bin/python
-import codecs, os, sys, base64
-
-# display config script info
-if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
-    print("# ! always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
-    print("# ! and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
-    print("# creating or recovering the LND wallet")
-    print("# lnd.winitwallet.py new [walletpassword] [?seedpassword]")
-    print("# lnd.winitwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
-    print("# lnd.winitwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
-    print("err='missing parameters'")
-    sys.exit(1)
+#!/usr/bin/env python3
+import binascii
+import os
+import sys
+from pathlib import Path
 
 import grpc
 from lndlibs import rpc_pb2 as ln
 from lndlibs import rpc_pb2_grpc as lnrpc
-from pathlib2 import Path
 
-walletpassword=""
-seedwords=""
-seedpassword=""
-filepathSCB=""
+if sys.version_info < (3, 0):
+    print("Can't run on Python2")
+    sys.exit()
 
-mode=sys.argv[1]
-
-if mode=="new":
-
-    print("# *** CREATING NEW LND WALLET ***")
-
-    if len(sys.argv)>2:
-        walletpassword=sys.argv[2]
-        if len(walletpassword)<8:
-            print("err='wallet password is too short'")
-            sys.exit(1)
-    else:
-        print("err='wallet password is too short'")
-        sys.exit(1)
-
-    if len(sys.argv)>3:
-        seedpassword=sys.argv[3]
-
-elif mode=="seed" or mode=="scb":
-
-    if len(sys.argv)>2:
-        walletpassword=sys.argv[2]
-        if len(walletpassword)<8:
-            print("err='wallet password is too short'")
-            sys.exit(1)
-    else:
-        print("err='not correct amount of parameter - missing wallet password'")
-        sys.exit(1)
-
-    if len(sys.argv)>3:
-        seedwordString=sys.argv[3]
-        seedwords=seedwordString.split(" ")
-        if len(seedwords)<24:
-            print("err='not 24 seed words seperated by just spaces (surrounded with \")'")
-            sys.exit(1)
-    else:
-        print("err='not correct amount of parameter  - missing seed string'")
-        sys.exit(1)
-
-    if mode=="seed":
-
-        if len(sys.argv)>4:
-            seedpassword=sys.argv[4]
-
-    elif mode=="scb":
-
-        if len(sys.argv)>4:
-            filepathSCB=sys.argv[4]
-            scbFile = Path(filepathSCB)
-            if scbFile.is_file():
-                print("# OK SCB file exists")
-            else:
-                print("err='the given filepathSCB - file does not exists or no permission'")
-                sys.exit(1)
-        else:
-            print("err='not correct amount of parameter  - missing seed filepathSCB'")
-            sys.exit(1)
-
-        if len(sys.argv)>5:
-            seedpassword=sys.argv[4]
-
-else:
-
-    print("err='unkown mode parameter - run without any parameters to see options'")
+# display config script info
+if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
+    print("# ! always activate virtual env first: source /home/admin/python3-env-lnd/bin/activate")
+    print("# ! and run with with: python3 /home/admin/config.scripts/lnd.initwallet.py")
+    print("# ! Or: /home/admin/python3-env-lnd/bin/python3 /home/admin/config.scripts/lnd.initwallet.py")
+    print("# creating or recovering the LND wallet")
+    print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
+    print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
+    print("# lnd.initwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("err='missing parameters'")
     sys.exit(1)
 
-os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
-ssl_creds = grpc.ssl_channel_credentials(cert)
-channel = grpc.secure_channel('localhost:10009', ssl_creds)
-stub = lnrpc.WalletUnlockerStub(channel)
-if mode=="new":
+mode = sys.argv[1]
 
-    request = ln.GenSeedRequest()
+
+def new(stub, wallet_password="", seed_entropy=None):
+    if seed_entropy:
+        # provide 16-bytes of static data to get reproducible seeds for TESTING!)
+        print("WARNING: Use this for testing only!!")
+        request = ln.GenSeedRequest(seed_entropy=seed_entropy)
+    else:
+        request = ln.GenSeedRequest()
+
     try:
         response = stub.GenSeed(request)
-        seedwords = response.cipher_seed_mnemonic
-        seedwordsString=', '.join(seedwords)
-        print("seedwords='"+seedwordsString+"'")
+        seed_words = response.cipher_seed_mnemonic
+        seed_words_str = ', '.join(seed_words)
+        print("seedwords='" + seed_words_str + "'")
 
         # add a 6x4 formatted version to the output
-        seedwords6x4=""
-        for i in range(0,len(seedwords)):
+        seed_words_6x4 = ""
+        for i in range(0, len(seed_words)):
             if i % 6 == 0 and i != 0:
-                seedwords6x4=seedwords6x4+"\n"
-            singleWord=str(i+1)+":"+seedwords[i]
-            while len(singleWord)<12:
-                singleWord=singleWord+" "
-            seedwords6x4=seedwords6x4+singleWord
-        print("seedwords6x4='"+seedwords6x4+"'")
+                seed_words_6x4 = seed_words_6x4 + "\n"
+            single_word = str(i + 1) + ":" + seed_words[i]
+            while len(single_word) < 12:
+                single_word = single_word + " "
+            seed_words_6x4 = seed_words_6x4 + single_word
+        print("seedwords6x4='" + seed_words_6x4 + "'")
 
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print >> sys.stderr, code
-        details = rpc_error_call.details()  
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
         print("err='RPCError GenSeedRequest'")
-        print("errMore='"+details+"'")
+        print("errMore='" + details + "'")
         sys.exit(1)
-    except: 
+    except:
         e = sys.exc_info()[0]
-        print >> sys.stderr, e
+        print(e, file=sys.stderr)
         print("err='GenSeedRequest'")
         sys.exit(1)
 
     request = ln.InitWalletRequest(
-        wallet_password=walletpassword,
-        cipher_seed_mnemonic=seedwords
+        wallet_password=wallet_password.encode(),
+        cipher_seed_mnemonic=seed_words
     )
-    try:
-      response = stub.InitWallet(request)
-    except grpc.RpcError as rpc_error_call:
-        code = rpc_error_call.code()
-        print >> sys.stderr, code
-        details = rpc_error_call.details()  
-        print("err='RPCError InitWallet'")
-        print("errMore='"+details+"'")
-        sys.exit(1)
-    except: 
-        e = sys.exc_info()[0]
-        print >> sys.stderr, e
-        print("err='InitWallet'")
-        sys.exit(1)
-
-elif mode=="seed":
-
-    request = ln.InitWalletRequest(
-        wallet_password=walletpassword,
-        cipher_seed_mnemonic=seedwords,
-        recovery_window=5000,
-        aezeed_passphrase=seedpassword
-    )
-    
     try:
         response = stub.InitWallet(request)
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print >> sys.stderr, code
-        details = rpc_error_call.details()  
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
-        print("errMore='"+details+"'")
-        sys.exit(1)
-    except: 
-        e = sys.exc_info()[0]
-        print >> sys.stderr, e
-        print("err='InitWallet'")
-        sys.exit(1)
-
-elif mode=="scb":
-
-    import binascii
-    with open(filepathSCB, 'rb') as f:
-        content = f.read()
-    scbHexString=binascii.hexlify(content)
-    print(scbHexString)
-
-    request = ln.InitWalletRequest(
-        wallet_password=walletpassword,
-        cipher_seed_mnemonic=seedwords,
-        recovery_window=5000,
-        aezeed_passphrase=seedpassword,
-        channel_backups=scbHexString
-    )
-
-    try:
-        response = stub.InitWallet(request)
-    except grpc.RpcError as rpc_error_call:
-        code = rpc_error_call.code()
-        print >> sys.stderr, code
-        details = rpc_error_call.details()  
-        print("err='RPCError InitWallet'")
-        print("errMore='"+details+"'")
+        print("errMore='" + details + "'")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
-        print >> sys.stderr, e
+        print(e, file=sys.stderr)
         print("err='InitWallet'")
         sys.exit(1)
 
+
+def seed(stub, wallet_password="", seed_words="", seed_password=""):
+    request = ln.InitWalletRequest(
+        wallet_password=wallet_password.encode(),
+        cipher_seed_mnemonic=[x.encode() for x in seed_words],
+        recovery_window=5000,
+        aezeed_passphrase=seed_password.encode()
+    )
+
+    try:
+        response = stub.InitWallet(request)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
+        print("err='RPCError InitWallet'")
+        print("errMore='" + details + "'")
+        sys.exit(1)
+    except:
+        e = sys.exc_info()[0]
+        print(e, file=sys.stderr)
+        print("err='InitWallet'")
+        sys.exit(1)
+
+
+def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb=""):
+    with open(file_path_scb, 'rb') as f:
+        content = f.read()
+    scb_hex_str = binascii.hexlify(content)
+    print(scb_hex_str)
+
+    request = ln.InitWalletRequest(
+        wallet_password=wallet_password.encode(),
+        cipher_seed_mnemonic=[x.encode() for x in seed_words],
+        recovery_window=5000,
+        aezeed_passphrase=seed_password.encode(),
+        channel_backups=scb_hex_str.encode()
+    )
+
+    try:
+        response = stub.InitWallet(request)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
+        print("err='RPCError InitWallet'")
+        print("errMore='" + details + "'")
+        sys.exit(1)
+    except:
+        e = sys.exc_info()[0]
+        print(e, file=sys.stderr)
+        print("err='InitWallet'")
+        sys.exit(1)
+
+    # TODO(rootzoll) implement creating from seed/scb
     print("err='TODO: implement creating from seed/scb'")
     sys.exit(1)
+
+
+def parse_args():
+    wallet_password = ""
+    seed_words = ""
+    seed_password = ""
+    filepath_scb = ""
+
+    if mode == "new":
+        if len(sys.argv) > 2:
+            wallet_password = sys.argv[2]
+            if len(wallet_password) < 8:
+                print("err='wallet password is too short'")
+                sys.exit(1)
+        else:
+            print("err='wallet password is too short'")
+            sys.exit(1)
+
+        if len(sys.argv) > 3:
+            seed_password = sys.argv[3]
+
+    elif mode == "seed" or mode == "scb":
+
+        if len(sys.argv) > 2:
+            wallet_password = sys.argv[2]
+            if len(wallet_password) < 8:
+                print("err='wallet password is too short'")
+                sys.exit(1)
+        else:
+            print("err='not correct amount of parameter - missing wallet password'")
+            sys.exit(1)
+
+        if len(sys.argv) > 3:
+            seed_word_str = sys.argv[3]
+            seed_words = seed_word_str.split(" ")
+            if len(seed_words) < 24:
+                print("err='not 24 seed words separated by just spaces (surrounded with \")'")
+                sys.exit(1)
+        else:
+            print("err='not correct amount of parameter  - missing seed string'")
+            sys.exit(1)
+
+        if mode == "seed":
+
+            if len(sys.argv) > 4:
+                seed_password = sys.argv[4]
+
+        elif mode == "scb":
+
+            if len(sys.argv) > 4:
+                filepath_scb = sys.argv[4]
+                scb_file = Path(filepath_scb)
+                if scb_file.is_file():
+                    print("# OK SCB file exists")
+                else:
+                    print("err='the given filepathSCB - file does not exists or no permission'")
+                    sys.exit(1)
+            else:
+                print("err='not correct amount of parameter  - missing seed filepathSCB'")
+                sys.exit(1)
+
+            if len(sys.argv) > 5:
+                seed_password = sys.argv[4]
+
+    else:
+
+        print("err='unknown mode parameter - run without any parameters to see options'")
+        sys.exit(1)
+
+    return wallet_password, seed_words, seed_password, filepath_scb
+
+
+def main():
+    os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+    cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
+    ssl_creds = grpc.ssl_channel_credentials(cert)
+    channel = grpc.secure_channel('localhost:10009', ssl_creds)
+    stub = lnrpc.WalletUnlockerStub(channel)
+
+    wallet_password, seed_words, seed_password, file_path_scb = parse_args()
+
+    if mode == "new":
+        print("# *** CREATING NEW LND WALLET ***")
+        new(stub, wallet_password)
+
+    elif mode == "seed":
+        print("# *** RECOVERING LND WALLET FROM SEED ***")
+        seed(stub, wallet_password, seed_words, seed_password)
+
+    elif mode == "scb":
+        print("# *** RECOVERING LND WALLET FROM SEED + SCB ***")
+        scb(stub, wallet_password, seed_words, seed_password, file_path_scb)
+
+
+if __name__ == '__main__':
+    main()
