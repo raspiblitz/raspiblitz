@@ -106,6 +106,10 @@ activateBitcoinOverTOR()
       echo "Addding TOR config ..."
       sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
       echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
+      echo "bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf 
+      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf 
       if [ "${network}" = "bitcoin" ]; then
         # adding some bitcoin onion nodes to connect to to make connection easier
         echo "addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
@@ -134,6 +138,10 @@ deactivateBitcoinOverTOR()
   echo "*** Changing ${network} Config ***"
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^bind=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^dnsseed=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^dns=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
   sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
   sudo chown admin:admin /home/admin/.${network}/${network}.conf
@@ -151,7 +159,7 @@ activateLndOverTOR()
     sudo systemctl disable lnd 2>/dev/null
 
     echo "editing /etc/systemd/system/lnd.service"
-    sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.v2 --listen=127\.0\.0\.1\:9735/g" /etc/systemd/system/lnd.service
+    sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735/g" /etc/systemd/system/lnd.service
   
     echo "Enable LND again"
     sudo systemctl enable lnd
