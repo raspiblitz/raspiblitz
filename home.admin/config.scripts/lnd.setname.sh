@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a alias of LND (and hostname of raspi)"
- echo "lnd.setname.sh [?newName]"
+ echo "lnd.setname.sh [?newName] [?forceHostname]"
  exit 1
 fi
 
@@ -43,6 +43,12 @@ if [ ${entryExists} -eq 0 ]; then
   echo "hostname=" >> ${blitzConfig}
 fi
 
+# make sure entry line for 'setnetworkname' exists 
+entryExists=$(cat ${blitzConfig} | grep -c 'setnetworkname=')
+if [ ${entryExists} -eq 0 ]; then
+  echo "setnetworkname=" >> ${blitzConfig}
+fi
+
 # check if lnd config file exists
 configExists=$(ls ${lndConfig} | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
@@ -66,8 +72,15 @@ sudo sed -i "s/^alias=.*/alias=${newName}/g" ${lndConfig}
 # raspiblitz.conf: change name
 sudo sed -i "s/^hostname=.*/hostname=${newName}/g" ${blitzConfig}
 
-# OS: change hostname
-sudo raspi-config nonint do_hostname ${newName}
+# set name in local network just if forced (not anymore by default)
+# see https://github.com/rootzoll/raspiblitz/issues/819
+if [ "$2" = "alsoNetwork" ]; then
+  # OS: change hostname
+  sudo raspi-config nonint do_hostname ${newName}
+  sudo sed -i "s/^setnetworkname=.*/setnetworkname=1/g" ${blitzConfig}
+else
+  sudo sed -i "s/^setnetworkname=.*/setnetworkname=0/g" ${blitzConfig}
+fi
 
 echo "needs reboot to run normal again"
 exit 0

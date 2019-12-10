@@ -276,13 +276,22 @@ echo "" >> ${logFile}
 
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
-# set the local network hostname
+# set the local network hostname (just if set in config - will not be set anymore by default in newer version)
 # have at the end - see https://github.com/rootzoll/raspiblitz/issues/462
+# see also https://github.com/rootzoll/raspiblitz/issues/819
 if [ ${#hostname} -gt 0 ]; then
   hostnameSanatized=$(echo "${hostname}"| tr -dc '[:alnum:]\n\r')
   if [ ${#hostnameSanatized} -gt 0 ]; then
-    echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
-    sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+    # by default set hostname for older versions on update
+    if [ ${#setnetworkname} -eq 0 ]; then
+      setnetworkname=1
+    fi
+    if [ "${setnetworkname}" = "1" ]; then
+      echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
+      sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+    else
+      echo "Not setting local network hostname" >> ${logFile}
+    fi
   else
     echo "WARNING: hostname in raspiblitz.conf contains just special chars" >> ${logFile}
   fi
