@@ -719,37 +719,26 @@ echo "*** Prepare TOR source+keys ***"
 sudo /home/admin/config.scripts/internet.tor.sh prepare
 echo ""
 
-# *** RASPIBLITZ IMAGE READY ***
-echo ""
-echo "**********************************************"
-echo "ALMOST READY"
-echo "**********************************************"
-echo ""
-echo "Your SD Card Image for RaspiBlitz is almost ready."
-echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-echo ""
-echo "Maybe take the chance and look thru the output above if you can spot any errror."
-echo ""
-echo "After final reboot - your SD Card Image is ready."
-echo ""
-echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
-echo ""
-echo "to continue: reboot with \`sudo shutdown -r now\` and login with user:admin password:raspiblitz"
-echo ""
+# *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
+# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
+echo "*** LCD DRIVER ***"
 
-# install default LCD on DietPi without reboot to allow automatic build
+echo "--> Downloading LCD Driver from Github"
+cd /home/admin/
+git clone https://github.com/goodtft/LCD-show.git
+sudo chmod -R 755 LCD-show
+sudo chown -R admin:admin LCD-show
+cd LCD-show/
+# set comit hard to a8de38f (7 Nov 2019) for security
+sudo git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
+
+# install xinput calibrator package
+  echo "--> install xinput calibrator package"
+sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+
+# make dietpi preparations
 if [ "${baseImage}" = "dietpi" ]; then
-  echo "Installing the default display available from Amazon"
-  # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-  cd /home/admin/
-  # sudo apt-mark hold raspberrypi-bootloader
-  git clone https://github.com/goodtft/LCD-show.git
-  sudo chmod -R 755 LCD-show
-  sudo chown -R admin:admin LCD-show
-  cd LCD-show/
-  sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
-  # sudo ./LCD35-show
+  echo "--> dietpi preparations"
   sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
   sudo mkdir /etc/X11/xorg.conf.d
   sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
@@ -761,77 +750,31 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo cp ./boot/config-35.txt /DietPi/config.txt
   # make LCD screen rotation correct
   sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-  echo "to continue reboot with \`sudo shutdown -r now \` and login with admin"
+
 fi
 
-# ask about LCD only on Raspbian
-if [ "${baseImage}" = "raspbian" ]; then
-  echo "Press ENTER to install LCD and reboot ..."
-  read key
+# *** RASPIBLITZ IMAGE READY ***
+echo ""
+echo "**********************************************"
+echo "SD CARD BUILD DONE"
+echo "**********************************************"
+echo ""
+echo "Your SD Card Image for RaspiBlitz is almost ready."
+echo "Last step is to install LCD drivers. This will reboot your Pi when done."
+echo ""
+echo "Take the chance & look thru the output above if you can spot any errror."
+echo ""
+echo "After final reboot - your SD Card Image is ready."
+echo ""
+echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
+echo "REMEMBER for login now use --> user:admin password:raspiblitz"
+echo ""
 
-  # give Raspi a default hostname (optional)
-  sudo raspi-config nonint do_hostname "RaspiBlitz"
-
-  # *** Display selection ***
-  dialog --title "Display" --yesno "Are you using the default display available from Amazon?\nSelect 'No' if you are using the Swiss version from play-zone.ch!" 6 80
-  defaultDisplay=$?
-
-  if [ "${defaultDisplay}" = "0" ]; then
-
-    # *** RASPIBLITZ / LCD (at last - because makes a reboot) ***
-    # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-
-    echo "--> LCD DEFAULT"
-    cd /home/admin/
-    sudo apt-mark hold raspberrypi-bootloader
-    git clone https://github.com/goodtft/LCD-show.git
-    cd LCD-show/
-    sudo git reset --hard ce52014
-    cd ..
-    sudo chmod -R 755 LCD-show
-    sudo chown -R admin:admin LCD-show
-    cd LCD-show/
-    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
-    sudo ./LCD35-show
-
-  else
-
-    # Download and install the driver
-    # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
-
-    echo "--> LCD ALTERNATIVE"
-    cd /boot
-    sudo wget http://www.raspberrypiwiki.com/download/RPI-HD-35-INCH-TFT/dt-blob-For-3B-plus.bin
-    sudo mv dt-blob-For-3B-plus.bin dt-blob.bin
-    cat <<EOF >> config.txt
-
-  dtparam=spi=off
-  dtparam=i2c_arm=off
-
-  # Set screen size and any overscan required
-  overscan_left=0
-  overscan_right=0
-  overscan_top=0
-  overscan_bottom=0
-  framebuffer_width=800
-  framebuffer_height=480
-
-
-  enable_dpi_lcd=1
-  display_default_lcd=1
-  dpi_group=2
-  dpi_mode=87
-  dpi_output_format=0x6f015
-
-  # set up the size to 800x480
-  hdmi_timings=480 0 16 16 24 800 0 4 2 2 0 0 0 60 0 32000000 6
-
-  #rotate screen
-  display_rotate=3
-
-  dtoverlay=i2c-gpio,i2c_gpio_scl=24,i2c_gpio_sda=23
-  fi
-EOF
-    init 6
-  fi
+# activate LCD and trigger reboot
+# dont do this on dietpi to allow for automatic build
+if [ "${baseImage}" != "dietpi" ]; then
+  cd /home/admin/LCD-show/
+  sudo apt-mark hold raspberrypi-bootloader
+  sudo ./LCD35-show
 fi
