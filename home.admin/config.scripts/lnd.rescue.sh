@@ -96,7 +96,7 @@ elif [ ${mode} = "restore" ]; then
         echo "To make upload open a new terminal on your laptop,"
         echo "change into the directory where your lnd-rescue file is and"
         echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-        echo "scp -r './lnd-rescue-*.tar.gz' admin@${localip}:/home/admin/"
+        echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
         echo "Use password A to authenticate file transfere."
         echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
