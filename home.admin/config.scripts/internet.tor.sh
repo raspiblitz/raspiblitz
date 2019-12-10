@@ -12,16 +12,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# check and load raspiblitz config
-# to know which network is running
-if [ -f "/home/admin/raspiblitz.info" ]; then
-  source /home/admin/raspiblitz.info
-fi
-
-if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-  source /mnt/hdd/raspiblitz.conf
-fi
-
 echo "Detect Base Image ..." 
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
@@ -176,6 +166,16 @@ activateLndOverTOR()
 if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
   prepareTorSources
   exit 0
+fi
+
+# check and load raspiblitz config
+# to know which network is running
+if [ -f "/home/admin/raspiblitz.info" ]; then
+  source /home/admin/raspiblitz.info
+fi
+
+if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  source /mnt/hdd/raspiblitz.conf
 fi
 
 # make sure the network was set (by sourcing raspiblitz.conf)
