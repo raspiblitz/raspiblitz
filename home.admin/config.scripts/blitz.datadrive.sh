@@ -107,7 +107,7 @@ if [ "$1" = "status" ]; then
 
         # temp storage data drive
         sudo mkdir -p /mnt/storage
-        if [ "${hddFormat}" = "btrfs"]; then
+        if [ "${hddFormat}" = "btrfs" ]; then
           # in btrfs setup the third partition is storage partition
           sudo mount /dev/${hdd}3 /mnt/storage
         else
