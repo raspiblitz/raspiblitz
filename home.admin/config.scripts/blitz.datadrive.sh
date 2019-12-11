@@ -738,6 +738,7 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
+  echo "hdd=${hdd}"
   if [ ${#hdd} -eq 0 ]; then
     echo "error='no hddCandidate'"
     exit 1
