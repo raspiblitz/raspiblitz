@@ -797,13 +797,16 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
+  # trigger linking
+  doLinking=1
+
 fi
 
 ########################################
 # LINKING all directories with ln
 ########################################
 
-if [ "$1" = "link" ]; then
+if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
 
   if [ ${isMounted} -eq 0 ]; then
     echo "error='no data drive mounted'"
