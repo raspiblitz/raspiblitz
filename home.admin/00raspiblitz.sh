@@ -84,47 +84,6 @@ if [ "${state}" = "copystation" ]; then
   exit
 fi
 
-# if pre-sync is running - stop it - before continue
-if [ "${state}" = "presync" ]; then
-  # stopping the pre-sync
-  echo ""
-  # analyse if blockchain was detected broken by pre-sync
-  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
-  if [ ${blockchainBroken} -eq 1 ]; then  
-    # dismiss if its just a date thing
-    futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
-    if [ ${futureBlock} -gt 0 ]; then
-      blockchainBroken=0
-      echo "-> Ignore reindex - its just a future block"
-    fi
-  fi
-  if [ ${blockchainBroken} -eq 1 ]; then
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "Detected corrupted blockchain on pre-sync !"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "Deleting blockchain data ..."
-    echo "(needs to get downloaded fresh during setup)"
-    sudo rm -f -r /mnt/hdd/bitcoin
-  else
-    echo "************************************"
-    echo "Preparing ... pls wait (up to 1min) "
-    echo "************************************"
-    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop 2>/dev/null
-    echo "Calling presync to finish up .."
-    sleep 50
-  fi
-
-  # unmount the temporary mount
-  echo "Unmount HDD .."
-  sudo umount -l /mnt/hdd
-  sleep 3
-
-  # update info file
-  state=waitsetup
-  sudo sed -i "s/^state=.*/state=waitsetup/g" $infoFile
-  sudo sed -i "s/^message=.*/message='Pre-Sync Stopped'/g" $infoFile
-fi
-
 # if state=ready -> setup is done or started
 if [ "${state}" = "ready" ]; then
   configExists=$(ls ${configFile} | grep -c '.conf')

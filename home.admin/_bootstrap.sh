@@ -226,6 +226,7 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
       sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf
     fi
   fi
+  
   # if config is still valid ...
   if [ ${configExists} -eq 1 ]; then
     echo "Found valid configuration" >> $logFile
@@ -248,54 +249,6 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
-  fi
-
-  # check if HDD contains existing LND data (old RaspiBlitz Version)
-  echo "Check if HDD contains existing LND data .." >> $logFile
-  lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
-  if [ ${lndDataExists} -eq 1 ]; then
-    echo "Found existing LND data - old RaspiBlitz?" >> $logFile
-    sed -i "s/^state=.*/state=olddata/g" ${infoFile}
-    sed -i "s/^message=.*/message='No Auto-Update possible'/g" ${infoFile}
-    # keep HDD mounted if user wants to copy data
-    exit 0
-  else 
-    echo "OK - No LND data found" >> $logFile
-  fi
-
-  # check if HDD contains pre-loaded blockchain data
-  echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-
-  # check if node can go into presync (only for bitcoin)
-  if [ ${bitcoinDataExists} -eq 1 ]; then
-
-    # update info file
-    sed -i "s/^state=.*/state=presync/g" ${infoFile}
-    sed -i "s/^message=.*/message='starting presync'/g" ${infoFile}
-
-    # activating presync
-    # so that on a hackathon you can just connect a RaspiBlitz
-    # to the network and have it up-to-date for setting up
-    echo "Found pre-loaded blockchain" >> $logFile
-
-    # check if pre-sync was already activated on last power-on
-    #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
-    echo "starting pre-sync in background" >> $logFile
-    # make sure that debug file is clean, so just pre-sync gets analysed on stop
-    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
-    # starting in background, because this scripts is part of systemd
-    # so to change systemd needs to happen after delay in seperate process
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
-    sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
-    echo "OK Started bitcoind for presync" >> $logFile
-    sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
-    # after admin login, presync will be stopped and HDD unmounted
-    exit 0
-  
-  else
-    echo "OK - No bitcoin blockchain data found" >> $logFile
   fi
 
   # if it got until here: HDD is empty ext4
