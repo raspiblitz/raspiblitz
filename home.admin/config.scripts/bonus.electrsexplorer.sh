@@ -56,8 +56,8 @@ EOF
      sudo sed -i "s/^ExecStart=\/home\/bitcoin\/btc-rpc-explorer.run.sh/ExecStart=\/usr\/local\/lib\/nodejs\/node-$(node -v)-$DISTRO\/bin\/btc-rpc-explorer/g" /etc/systemd/system/btc-rpc-explorer.service
      sudo systemctl daemon-reload
      sudo systemctl restart btc-rpc-explorer
-
    fi
+
 else
   ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
   if [ "${BTCRPCexplorer}" = "on" ]; then
