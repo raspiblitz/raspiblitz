@@ -738,7 +738,7 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  if [ ${#hddCandidate} -eq 0 ]; then
+  if [ ${#hdd} -eq 0 ]; then
     echo "error='no hddCandidate'"
     exit 1
   fi
@@ -747,7 +747,7 @@ if [ "$1" = "tempmount" ]; then
 
     # do EXT4 temp mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
-    sudo mount /dev/${hddCandidate}1 /mnt/hdd
+    sudo mount /dev/${hdd}1 /mnt/hdd
 
     # check result
     isMounted=$(df | grep -c "/mnt/hdd")
@@ -766,8 +766,8 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/temp 1>/dev/null
 
     # pre temp mount
-    sudo mount /dev/${hddCandidate}1 /mnt/hdd
-    sudo mount /dev/${hddCandidate}2 /mnt/storage
+    sudo mount /dev/${hdd}1 /mnt/hdd
+    sudo mount /dev/${hdd}2 /mnt/storage
 
     # get subvolume UUIDS
     hddUUID=$(sudo btrfs subvolume list -u /mnt/hdd/ | grep "path WORKINGDIR" | awk '$1=$1' | cut -d " " -f 9)
@@ -782,7 +782,7 @@ if [ "$1" = "tempmount" ]; then
     # temp mount 
     sudo mount -t btrfs -o subvol=machines,defaults,nodatacow /dev/disk/by-uuid/${hddUUID} /mnt/hdd
     sudo mount -t btrfs -o subvol=machines,defaults,nodatacow /dev/disk/by-uuid/${storageUUID} /mnt/storage
-    sudo mount /dev/${hddCandidate}3 /mnt/temp
+    sudo mount /dev/${hdd}3 /mnt/temp
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
