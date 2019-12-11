@@ -834,10 +834,12 @@ if [ "$1" = "link" ]; then
     echo "# - linking storage into /mnt/hdd"
     sudo mkdir -p /mnt/storage/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/storage/app-storage
+    sudo rm /mnt/hdd/app-storage 2>/dev/null
     sudo ln -s /mnt/storage/app-storage /mnt/hdd/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage 
 
     echo "# - linking temp into /mnt/hdd"
+    sudo rm /mnt/hdd/temp 2>/dev/null
     sudo ln -s /mnt/temp /mnt/hdd/temp
     sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
 
