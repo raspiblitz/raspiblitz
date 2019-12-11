@@ -751,7 +751,7 @@ if [ "$1" = "tempmount" ]; then
 
     # check result
     isMounted=$(df | grep -c "/mnt/hdd")
-    if { ${isMounted} -eq 0 }; then
+    if [ ${isMounted} -eq 0 ]; then
       echo "error='temp mount failed'"
     else
       echo "isMounted=1"
@@ -760,21 +760,39 @@ if [ "$1" = "tempmount" ]; then
     
   elif [ "${hddFormat}" = "btrfs" ]; then
 
-    # do BTRFS temp mount
+    # prepare mount dirctores
     sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
 
+    # pre temp mount
     sudo mount /dev/${hddCandidate}1 /mnt/hdd
-    sudo mount /dev/${hddCandidate}3 /mnt/storage
+    sudo mount /dev/${hddCandidate}2 /mnt/storage
+
+    # get subvolume UUIDS
+    hddUUID=$(sudo btrfs subvolume list -u /mnt/hdd/ | grep "path WORKINGDIR" | awk '$1=$1' | cut -d " " -f 9)
+    storageUUID=$(sudo btrfs subvolume list -u /mnt/storage/ | grep "path WORKINGDIR" | awk '$1=$1' | cut -d " " -f 9)
+    echo "hddUUID='${hddUUID}'"
+    echo "storageUUID='${storageUUID}'"
+
+     # pre temp unmount
+    sudo umount /mnt/hdd
+    sudo umount /mnt/storage
+
+    # temp mount 
+    sudo mount -t btrfs -o subvol=machines,defaults,nodatacow /dev/disk/by-uuid/${hddUUID} /mnt/hdd
+    sudo mount -t btrfs -o subvol=machines,defaults,nodatacow /dev/disk/by-uuid/${storageUUID} /mnt/storage
+    sudo mount /dev/${hddCandidate}3 /mnt/temp
 
     # check result
-    isMounted=$(df | grep -c "/mnt/hdd")
-    if { ${isMounted} -eq 0 }; then
+    isMountedA=$(df | grep -c "/mnt/hdd")
+    isMountedB=$(df | grep -c "/mnt/storage")
+    isMountedC=$(df | grep -c "/mnt/temp")
+    if [ ${isMountedA} -eq 0 ] && [ ${isMountedB} -eq 0 ] && [ ${isMountedC} -eq 0 ]; then
       echo "error='temp mount failed'"
     else
       echo "isMounted=1"
-      echo "isBTRFS=0"
+      echo "isBTRFS=1"
     fi
 
   else
