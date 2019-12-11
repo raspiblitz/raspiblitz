@@ -92,13 +92,19 @@ while :
       source ${configFile}
     fi
 
-    # waiting for IP in general
-    if [ "${state}" = "noIP" ]; then
-      l1="Waiting for Network ...\n"
-      l2="Not able to get local IP.\n"
-      l3="Is LAN cable connected?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
-      sleep 1
+    # reboot info
+    if [ "${state}" = "reboot" ]; then
+      l1="Waiting for Reboot ...\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1" 3 40
+      sleep 20
+      continue
+    fi
+
+    # shutdown info
+    if [ "${state}" = "shutdown" ]; then
+      l1="Waiting for Shutdown ...\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1" 3 40
+      sleep 20
       continue
     fi
 
