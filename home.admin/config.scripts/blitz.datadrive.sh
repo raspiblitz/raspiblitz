@@ -91,7 +91,14 @@ if [ "$1" = "status" ]; then
 
       # if 'ext4' or 'btrfs' then temp mount and investigate content
       if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
-        
+
+        # BTRFS is working with subvolumnes for snapshots / ext4 has no SubVolumes
+        subVolumeDir=""
+        if [ "${hddFormat}" = "btrfs" ]; then
+          subVolumeDir="/WORKINGDIR"
+        fi
+        echo "subVolumeDir='${subVolumeDir}'"
+
         # temp mount data drive
         sudo mkdir -p /mnt/hdd
         sudo mount /dev/${hdd}1 /mnt/hdd
@@ -101,7 +108,7 @@ if [ "$1" = "status" ]; then
           echo "hddError='data mount failed'"
         else
           # check for recoverable RaspiBlitz data (if config file exists)
-          hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
+          hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
           echo "hddRaspiData='${hddRaspiData}'"
           sudo umount /mnt/hdd
         fi
@@ -120,9 +127,9 @@ if [ "$1" = "status" ]; then
           echo "hddError='storage mount failed'"
         else
           # check for blockchain data on storage
-          hddBlocksBitcoin=$(ls /mnt/storage/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksBitcoin=$(ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin='${hddBlocksBitcoin}'"
-          hddBlocksLitecoin=$(ls /mnt/storage/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksLitecoin=$(ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksLitecoin='${hddBlocksLitecoin}'"
           sudo umount /mnt/storage
         fi
