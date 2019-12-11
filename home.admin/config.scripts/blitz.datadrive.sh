@@ -132,7 +132,11 @@ if [ "$1" = "status" ]; then
           echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
           sudo umount /mnt/storage
         fi
-
+      else
+        # if not ext4 or btrfs - there is no usable data
+        echo "hddRaspiData=0"
+        echo "hddBlocksBitcoin=0"
+        echo "hddBlocksLitecoin=0"
       fi
     fi
     echo ""  
