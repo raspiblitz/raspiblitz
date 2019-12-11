@@ -119,8 +119,8 @@ if [ "$1" = "status" ]; then
           echo "hddError='storage mount failed'"
         else
           # check for blockchain data on storage
-          hddChainBitcoin=$(ls /mnt/storage/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-          hddChainLitecoin=$(ls /mnt/storage/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksBitcoin=$(ls /mnt/storage/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksLitecoin=$(ls /mnt/storage/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           sudo umount /mnt/storage
         fi
 
