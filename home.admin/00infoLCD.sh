@@ -110,7 +110,7 @@ while :
     if [ "${state}" = "noDHCP" ]; then
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
-      l3="Will try reboot every 5min.\n"
+      l3="Check you router if constant.\n"
       dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
       sleep 1
       continue
