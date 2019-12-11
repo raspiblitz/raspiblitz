@@ -821,14 +821,18 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
     echo "# Creating BTRFS setup links"
     
     echo "# - linking blockchains into /mnt/hdd"
-    sudo mkdir -p /mnt/storage/bitcoin
-    sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
-    sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
-    sudo mkdir -p /mnt/storage/litecoin
-    sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
-    sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
+    if [ $(ls /mnt/hdd/bitcoin | grep -c 'bitcoin') -eq 0 ]; then
+      sudo mkdir -p /mnt/storage/bitcoin
+      sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
+      sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
+      sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+    fi
+    if [ $(ls /mnt/hdd/litecoin | grep -c 'litecoin') -eq 0 ]; then
+      sudo mkdir -p /mnt/storage/litecoin
+      sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
+      sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
+      sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
+    fi
 
     echo "# - linking blockchain for user bitcoin"
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
@@ -851,8 +855,8 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
     sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
 
     echo "# - creating snapshots folder"
-    sudo mkdir /mnt/hdd/snapshots
-    sudo mkdir /mnt/storage/snapshots
+    sudo mkdir -p /mnt/hdd/snapshots
+    sudo mkdir -p /mnt/storage/snapshots
 
   else
     echo "# Creating EXT4 setup links"
