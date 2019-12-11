@@ -157,6 +157,11 @@ WantedBy=multi-user.target
       do
         echo "Waiting for nbxplorer to start - CTRL+C to abort"
         sleep 10
+        hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
+        if [ ${hasFailed} -eq 1 ]; then
+          echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
+          echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+        fi
     done
     
     echo ""
