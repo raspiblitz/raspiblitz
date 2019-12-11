@@ -112,7 +112,7 @@ if [ "$1" = "status" ]; then
           sudo mount /dev/${hdd}3 /mnt/storage
         else
           # in ext4 setup the first partition is also the storage partition
-          sudo mount /dev/${hdd}3 /mnt/storage
+          sudo mount /dev/${hdd}1 /mnt/storage
         fi
         isTempMounted=$(df | grep /mnt/storage | grep -c ${hdd})
         if [ ${isTempMounted} -eq 0 ]; then
