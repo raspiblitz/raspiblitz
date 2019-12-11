@@ -5,15 +5,23 @@
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
 
-# use to detect multiple starts of service
-#uid=$(date +%s)
-#echo "started" > /home/admin/${uid}.boot
+################################
+# BOOT LOGO
+################################
+
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+# see https://github.com/rootzoll/raspiblitz/issues/647
+randnum=$(shuf -i 0-7 -n 1)
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+sleep 5
+sudo killall -3 fbi
 
 # load codeVersion
 source /home/admin/_version.info
 
 ################################
-# FILES TO WORK WITH
+# BASIC SETTINGS
 ################################
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -37,14 +45,6 @@ echo "***********************************************" >> $logFile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
-
-# display 3 secs logo - try to kickstart LCD
-# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-# see https://github.com/rootzoll/raspiblitz/issues/647
-randnum=$(shuf -i 0-7 -n 1)
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-sleep 5
-sudo killall -3 fbi
 
 # set default values for raspiblitz.info
 network=""
@@ -125,17 +125,39 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
 fi
 
 ################################
+# WAIT FOR LOCAL NETWORK
+################################
+
+# wait until raspberry pi gets a local IP
+gotLocalIP=0
+until [ ${gotLocalIP} -eq 1 ]
+do
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  if [ ${#localip} -eq 0 ]; then
+    # display user to connect LAN
+    sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+    sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
+  elif [ "${localip:0:4}" = "169." ]; then
+    # display user waiting for DHCP
+    sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
+    sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
+  else
+    gotLocalIP=1
+  fi
+  sleep 1
+done
+
+################################
 # HDD CHECK & PRE-INIT
 ################################
  
-# TODO: waiting for local network loop
 # TODO: use in this waiting loop the new script -> blitz.datadrive.sh status
 
 hddExists=$(lsblk | grep -c sda1)
 while [ ${hddExists} -eq 0 ]
   do
     # display will ask user to connect a HDD
-    sed -i "s/^state=.*/state=nohdd/g" ${infoFile}
+    sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
     sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
     sleep 5
     # retry to find HDD
