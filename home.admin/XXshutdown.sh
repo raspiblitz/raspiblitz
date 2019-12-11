@@ -1,20 +1,31 @@
 #!/bin/bash
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
-# MAIN MENU AFTER SETUP
-source ${infoFile}
-source ${configFile}
+# get network info from config
+source ${infoFile} 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+if [ ${#network} -eq 0 ]; then
+  network=bitcoin
+if
 
-network=bitcoin
-
+# display info
 echo ""
 echo "LCD turns white when shutdown complete."
-echo "Then wait 5 seconds and disconnect power."
+if [ "$1" = "reboot" ]; then
+  shutdownParams="-h -r now"
+  echo "It will then reboot again automatically."
+  sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sed -i "s/^message=.*/message=''/g" ${infoFile}
+else
+  shutdownParams="-h now"
+  echo "Then wait 5 seconds and disconnect power."
+  sed -i "s/^state=.*/state=shutdown/g" ${infoFile}
+  sed -i "s/^message=.*/message=''/g" ${infoFile}
+fi
+
+# do shutdown/reboot
 echo "-----------------------------------------------"
 echo "stop lnd - please wait .."
 sudo systemctl stop lnd
@@ -26,5 +37,5 @@ sudo systemctl stop ${network}d
 sleep 3
 sync
 echo "starting shutdown ..."
-sudo shutdown -h now
+sudo shutdown ${shutdownParams}
 exit 0

@@ -503,7 +503,7 @@ class AppWindow(QMainWindow):
 
         process = QProcess(self)
         process.start('xterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
-                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXreboot.sh\"'])
+                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXshutdown.sh reboot\"'])
 
     def create_new_invoice(self, memo="Pay to RaspiBlitz", amt=0):
         if IS_DEV_ENV:
