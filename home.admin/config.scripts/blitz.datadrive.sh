@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- echo "# blitz.datadrive.sh [status|format|raid|link|swap|clean|snapshots]"
+ echo "# blitz.datadrive.sh [status|tempmount|format|raid|link|swap|clean|snapshots]"
  echo "ERROR='missing parameters'"
  exit 1
 fi
@@ -724,6 +724,66 @@ if [ "$1" = "snapshot" ]; then
     exit 1 
   fi
 
+
+fi
+
+###################
+# TEMP MOUNT
+###################
+
+if [ "$1" = "tempmount" ]; then
+  
+  if [ ${isMounted} -eq 1 ]; then
+    echo "error='already mounted'"
+    exit 1
+  fi
+
+  if [ ${#hddCandidate} -eq 0 ]; then
+    echo "error='no hddCandidate'"
+    exit 1
+  fi
+
+  if [ "${hddFormat}" = "ext4" ]; then
+
+    # do EXT4 temp mount
+    sudo mkdir -p /mnt/hdd 1>/dev/null
+    sudo mount /dev/${hddCandidate}1 /mnt/hdd
+
+    # check result
+    isMounted=$(df | grep -c "/mnt/hdd")
+    if { ${isMounted} -eq 0 }; then
+      echo "error='temp mount failed'"
+    else
+      echo "isMounted=1"
+      echo "isBTRFS=0"
+    fi
+    
+  elif [ "${hddFormat}" = "btrfs" ]; then
+
+    # do BTRFS temp mount
+    sudo mkdir -p /mnt/hdd 1>/dev/null
+    sudo mkdir -p /mnt/storage 1>/dev/null
+    sudo mkdir -p /mnt/temp 1>/dev/null
+
+    sudo mount /dev/${hddCandidate}1 /mnt/hdd
+    sudo mount /dev/${hddCandidate}3 /mnt/storage
+
+    # check result
+    isMounted=$(df | grep -c "/mnt/hdd")
+    if { ${isMounted} -eq 0 }; then
+      echo "error='temp mount failed'"
+    else
+      echo "isMounted=1"
+      echo "isBTRFS=0"
+    fi
+
+  else
+    echo "error='no supported hdd format'"
+    exit 1
+  fi
+
+  # make sure all linkings are correct
+  $1="link"
 
 fi
 
