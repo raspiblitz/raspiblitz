@@ -821,13 +821,13 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
     echo "# Creating BTRFS setup links"
     
     echo "# - linking blockchains into /mnt/hdd"
-    if [ $(ls /mnt/hdd/bitcoin | grep -c 'bitcoin') -eq 0 ]; then
+    if [ $(ls /mnt/hdd/bitcoin 2>/dev/null | grep -c 'bitcoin') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/bitcoin
       sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
       sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
     fi
-    if [ $(ls /mnt/hdd/litecoin | grep -c 'litecoin') -eq 0 ]; then
+    if [ $(ls /mnt/hdd/litecoin 2>/dev/null | grep -c 'litecoin') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/litecoin
       sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
       sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
@@ -835,10 +835,20 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
     fi
 
     echo "# - linking blockchain for user bitcoin"
-    sudo rm /home/bitcoin/.bitcoin 2>/dev/null
+    if [ $(sudo ls -la /home/bitcoin/ | grep .bitcoin | grep -c "^l") -eq 0 ]; then
+      echo "# /home/bitcoin/.bitcoin -> is not a link, cleaning"
+      sudo rm -r /home/bitcoin/.bitcoin 2>/dev/null
+    else
+      sudo rm /home/bitcoin/.bitcoin 2>/dev/null
+    fi
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
-    sudo rm /home/bitcoin/.litecoin 2>/dev/null
+    if [ $(sudo ls -la /home/bitcoin/ | grep .litecoin | grep -c "^l") -eq 0 ]; then
+      echo "# /home/bitcoin/.litecoin -> is not a link, cleaning"
+      sudo rm -r /home/bitcoin/.litecoin 2>/dev/null
+    else
+      sudo rm /home/bitcoin/.litecoin 2>/dev/null
+    fi
     sudo ln -s /mnt/storage/litecoin /home/bitcoin/.litecoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
