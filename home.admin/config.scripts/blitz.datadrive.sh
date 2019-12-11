@@ -766,8 +766,8 @@ if [ "$1" = "tempmount" ]; then
       echo "error='temp mount failed'"
       exit 1
     else
-      echo "isMounted=1"
-      echo "isBTRFS=0"
+      isMounted=1
+      isBTRFS=0
     fi
     
   elif [ "${hddFormat}" = "btrfs" ]; then
@@ -788,14 +788,18 @@ if [ "$1" = "tempmount" ]; then
       echo "error='temp mount failed'"
       exit 1
     else
-      echo "isMounted=1"
-      echo "isBTRFS=1"
+      isMounted=1
+      isBTRFS=1
     fi
 
   else
     echo "error='no supported hdd format'"
     exit 1
   fi
+
+  # outputting change state
+  echo "isMounted=${isMounted}"
+  echo "isBTRFS=${isBTRFS}"
 
   # trigger linking
   doLinking=1
@@ -808,7 +812,7 @@ fi
 
 if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
 
-  if [ ${isMounted} -eq 0 ]; then
+  if [ ${isMounted} -eq 0 ] ; then
     echo "error='no data drive mounted'"
     exit 1
   fi
