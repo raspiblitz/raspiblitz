@@ -85,7 +85,7 @@ while :
     # get the local network IP to be displayed on the lCD
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
-    # get config info if already available
+    # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
@@ -94,16 +94,14 @@ while :
 
     # reboot info
     if [ "${state}" = "reboot" ]; then
-      l1="Waiting for Reboot ...\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1" 3 40
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Reboot ..." 3 30
       sleep 20
       continue
     fi
 
     # shutdown info
     if [ "${state}" = "shutdown" ]; then
-      l1="Waiting for Shutdown ...\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1" 3 40
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Shutdown ..." 3 30
       sleep 20
       continue
     fi
