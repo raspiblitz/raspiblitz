@@ -78,12 +78,12 @@ if [ "$1" = "status" ]; then
       # check size in bytes and GBs
       size=$(lsblk -o NAME,SIZE -b | grep "^${hdd}" | awk '$1=$1' | cut -d " " -f 2)
       echo "hddBytes=${size}"
-      hddGBstr=$(echo "scale=2; ${size}/1024/1024/1024" | bc -l)
-      echo "hddGBstr='${hddGBstr}'"
+      hddGigaBytes=$(echo "scale=0; ${size}/1024/1024/1024" | bc -l)
+      echo "hddGigaBytes=${hddGigaBytes}"
   
       # check if single drive with that size
       hddCount=$(lsblk -o NAME,SIZE -b | grep "^sd" | grep -c ${size})
-      echo "hddCount='${hddCount}'"
+      echo "hddCount=${hddCount}"
 
       # check format of devices first partition
       hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hdd}1" | cut -d " " -f 1)
@@ -97,7 +97,6 @@ if [ "$1" = "status" ]; then
         if [ "${hddFormat}" = "btrfs" ]; then
           subVolumeDir="/WORKINGDIR"
         fi
-        echo "subVolumeDir='${subVolumeDir}'"
 
         # temp mount data drive
         sudo mkdir -p /mnt/hdd
@@ -109,7 +108,7 @@ if [ "$1" = "status" ]; then
         else
           # check for recoverable RaspiBlitz data (if config file exists)
           hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
-          echo "hddRaspiData='${hddRaspiData}'"
+          echo "hddRaspiData=${hddRaspiData}"
           sudo umount /mnt/hdd
         fi
 
@@ -128,9 +127,9 @@ if [ "$1" = "status" ]; then
         else
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-          echo "hddBlocksBitcoin='${hddBlocksBitcoin}'"
+          echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
           hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-          echo "hddBlocksLitecoin='${hddBlocksLitecoin}'"
+          echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
           sudo umount /mnt/storage
         fi
 
