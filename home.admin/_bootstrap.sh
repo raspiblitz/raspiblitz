@@ -128,7 +128,11 @@ fi
 # HDD CHECK & PRE-INIT
 ################################
  
-# waiting for HDD to connect
+# TODO: waiting for local network loop
+# TODO: use in this waiting loop the new script -> blitz.datadrive.sh status
+echo "Exit for Test Debug" >> $logFile
+exit 1
+
 hddExists=$(lsblk | grep -c sda1)
 while [ ${hddExists} -eq 0 ]
   do
