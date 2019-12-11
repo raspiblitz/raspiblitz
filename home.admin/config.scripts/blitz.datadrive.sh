@@ -738,9 +738,19 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  echo "hdd=${hdd}"
+  # get device to temp mount
+  hdd=$2
   if [ ${#hdd} -eq 0 ]; then
-    echo "error='no hddCandidate'"
+    echo "# FAIL which device shozld be temp mounted (e.g. sda)"
+    echo "# run 'status' to see device candidates"
+    echo "error='missing second parameter'"
+    exit 1
+  fi
+
+  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+  if [ ${#hddFormat} -eq 0 ]; then
+    echo "# FAIL given device not found"
+    echo "error='device not found'"
     exit 1
   fi
 
