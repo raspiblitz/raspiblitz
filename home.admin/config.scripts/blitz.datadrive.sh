@@ -889,7 +889,13 @@ if [ "$1" = "clean" ]; then
 
   echo "# RASPIBLITZ DATA DRIVES - CLEANING"
 
-  echo "# Make sure 'secure-delete' is installed"
+  if [ ${isMounted} -eq 0 ]; then
+    echo "# FAIL: cannot clean - the drive is not mounted'"
+    echo "error='not mounted'"
+    exit 1
+  fi
+
+  echo "# Making sure 'secure-delete' is installed ..."
   sudo apt-get install -y secure-delete 1>/dev/null
 
   # DELETE ALL DATA (with option to keep blockchain)
