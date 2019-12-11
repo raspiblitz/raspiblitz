@@ -38,4 +38,4 @@ echo "Setup done. Rebooting now."
 sudo -u bitcoin ${network}-cli stop
 
 sleep 3
-sudo shutdown -r now
+sudo /home/admin/XXshutdown.sh reboot

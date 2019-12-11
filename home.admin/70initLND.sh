@@ -495,6 +495,6 @@ System will restart now.
   echo "Setting the Name/Alias/Hostname .."
   sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
-  sudo shutdown -r now
+  sudo /home/admin/XXshutdown.sh reboot
 
 fi

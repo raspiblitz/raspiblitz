@@ -54,4 +54,4 @@ else
   dialog --backtitle "RaspiBlitz" --msgbox "OK - SSH password A set.\nFINAL REBOOT IS NEEDED." 6 52
 fi
 
-sudo shutdown -r now
+sudo /home/admin/XXshutdown.sh reboot

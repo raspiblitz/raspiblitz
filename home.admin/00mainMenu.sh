@@ -188,7 +188,7 @@ case $CHOICE in
               sudo -u bitcoin ${network}-cli stop
               echo "Press ENTER to Reboot."
               read key
-              sudo shutdown -r now
+              sudo /home/admin/XXshutdown.sh reboot
             else
               ./00mainMenu.sh
             fi
@@ -201,10 +201,9 @@ case $CHOICE in
             sudo /home/admin/config.scripts/blitz.setpassword.sh
             noreboot=$?
             if [ "${noreboot}" = "0" ]; then
-              sudo -u bitcoin ${network}-cli stop
               echo "Press ENTER to Reboot .."
               read key
-              sudo shutdown -r now
+              sudo /home/admin/XXshutdown.sh reboot
             else
               echo "Press ENTER to return to main menu .."
               read key
@@ -231,7 +230,7 @@ case $CHOICE in
             ;;
         DELETE)
             sudo ./XXcleanHDD.sh
-            sudo shutdown -r now
+            sudo /home/admin/XXshutdown.sh reboot
             exit 0
             ;;   
         UPDATE)

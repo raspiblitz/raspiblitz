@@ -418,7 +418,7 @@ case $CHOICE in
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh
-            sudo shutdown -r now
+            sudo /home/admin/XXshutdown.sh reboot
             exit 0
             ;;   
         X)
