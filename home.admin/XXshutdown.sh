@@ -8,7 +8,7 @@ source ${infoFile} 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
   network=bitcoin
-if
+fi
 
 # display info
 echo ""
