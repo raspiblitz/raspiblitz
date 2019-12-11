@@ -54,6 +54,81 @@ if [ "$1" = "status" ]; then
   echo "isBTRFS=${isBTRFS}"
   echo
 
+  # if HDD is not mounted system is in the pre-setup phase
+  # deliver all the detailes needed about the data drive
+  # and it content for the setup dialogs
+  if [ ${isMounted} -eq 0 ]; then
+    echo "# SETUP INFO"
+
+    # find the HDD (biggest single device)
+    size=0
+    lsblk -o NAME | grep "^sd" | while read -r usbdevice ; do
+      testsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdevice}" | awk '$1=$1' | cut -d " " -f 2)
+      if [ ${testsize} -gt ${size} ]; then
+        size=${testsize}
+        echo "${usbdevice}" > .hdd.tmp
+      fi
+    done
+    hdd=$(cat .hdd.tmp 2>/dev/null)
+    rm -f .hdd.tmp 1>/dev/null 2>/dev/null
+    echo "hddCandidate='${hdd}'"
+
+    if [ ${#hdd} -gt 0 ]; then
+
+      # check size in bytes and GBs
+      size=$(lsblk -o NAME,SIZE -b | grep "^${hdd}" | awk '$1=$1' | cut -d " " -f 2)
+      echo "hddBytes=${size}"
+      hddGBstr=$(echo "scale=2; ${size}/1024/1024/1024" | bc -l)
+      echo "hddGBstr='${hddGBstr}'"
+  
+      # check if single drive with that size
+      hddCount=$(lsblk -o NAME,SIZE -b | grep "^sd" | grep -c ${size})
+      echo "hddCount='${hddCount}'"
+
+      # check format of devices first partition
+      hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hdd}1" | cut -d " " -f 1)
+      echo "hddFormat='${hddFormat}'"
+
+      # if 'ext4' or 'btrfs' then temp mount and investigate content
+      if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
+        
+        # temp mount data drive
+        sudo mkdir -p /mnt/hdd
+        sudo mount /dev/${hdd}1 /mnt/hdd
+
+        isTempMounted=$(df | grep /mnt/hdd | grep -c ${hdd})
+        if [ ${isTempMounted} -eq 0 ]; then
+          echo "hddError='data mount failed'"
+        else
+          # check for recoverable RaspiBlitz data (if config file exists)
+          hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
+          sudo umount /mnt/hdd
+        fi
+
+        # temp storage data drive
+        sudo mkdir -p /mnt/storage
+        if [ "${hddFormat}" = "btrfs"]; then
+          # in btrfs setup the third partition is storage partition
+          sudo mount /dev/${hdd}3 /mnt/storage
+        else
+          # in ext4 setup the first partition is also the storage partition
+          sudo mount /dev/${hdd}3 /mnt/storage
+        fi
+        isTempMounted=$(df | grep /mnt/storage | grep -c ${hdd})
+        if [ ${isTempMounted} -eq 0 ]; then
+          echo "hddError='storage mount failed'"
+        else
+          # check for blockchain data on storage
+          hddChainBitcoin=$(ls /mnt/storage/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddChainLitecoin=$(ls /mnt/storage/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          sudo umount /mnt/storage
+        fi
+
+      fi
+    fi
+    
+  fi
+
   echo "# RAID"
   echo "isRaid=${isRaid}"
   # extra information about not mounted drives (if raid is off)
@@ -109,48 +184,22 @@ if [ "$1" = "format" ]; then
     exit 1
   fi
 
-  # get minimal size in GB (optional)
-  minSizeGB="200"
-  parameter3=$(echo "$3" | sed 's/[^0-9]*//g')
-  if [ ${#parameter3} -gt 0 ]; then
-    minSizeGB="${parameter3}"
-  fi
-  echo "# minimal size needs to be ${minSizeGB} GB"
-
-  # find the HDD (biggest single device)
-  size=0
-  lsblk -o NAME | grep "^sd" | while read -r usbdevice ; do
-    testsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdevice}" | awk '$1=$1' | cut -d " " -f 2)
-    if [ ${testsize} -gt ${size} ]; then
-      size=${testsize}
-      echo "${usbdevice}" > .hdd.tmp
-    fi
-  done
-  hdd=$(cat .hdd.tmp 2>/dev/null)
-  rm -f .hdd.tmp 1>/dev/null 2>/dev/null
-
-  # check if any device was found
+  # get device name to format
+  hdd=$3
   if [ ${#hdd} -eq 0 ]; then
-    echo "error='no device found"
+    echo "# missing valid third parameter as the device (like 'sda')"
+    echo "# run 'status' to see cadidate devices"
+    echo "error='missing parameter'"
     exit 1
-  else
-    echo "# HDD/SSD found --> ${hdd}"
   fi
 
-  # check that its a minimal HDD/SSD size
-  size=$(lsblk -o NAME,SIZE -b | grep "^${hdd}" | awk '$1=$1' | cut -d " " -f 2)
-  echo "# Size in Bytes --> ${size}"
-  if [ ${size} -lt ${minSizeGB}000000000 ]; then
-    echo "error='HDD/SSD too small'"
-    exit 1  
-  fi
-
-  # check that there is only one device with that size
-  counthdd=$(lsblk -o NAME,SIZE -b | grep "^sd" | grep -c ${size})
-  if [ ${counthdd} -gt 1 ]; then
-    echo "# FAIL: There are more then one devices with the same size - cannot decide"
-    echo "error='multiple SSD/HDD'"
-    exit 1  
+  # check if device is existing and a disk (not a partition)
+  isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
+  if [ ${isValid} -eq 0 ]; then
+    echo "# either given device was not found"
+    echo "# or is not of type disk - see 'lsblk'"
+    echo "error='device not valid'"
+    exit 1
   fi
 
   echo "# Checking on SWAP"
@@ -168,6 +217,7 @@ if [ "$1" = "format" ]; then
     sync
   done
   sudo mount -a
+
   # unmount drives
   sudo umount /mnt/hdd 2>/dev/null
   sudo umount /mnt/temp 2>/dev/null
