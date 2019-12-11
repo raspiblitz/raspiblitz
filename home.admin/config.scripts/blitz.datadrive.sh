@@ -102,6 +102,7 @@ if [ "$1" = "status" ]; then
         else
           # check for recoverable RaspiBlitz data (if config file exists)
           hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
+          echo "hddRaspiData='${hddRaspiData}'"
           sudo umount /mnt/hdd
         fi
 
@@ -120,13 +121,15 @@ if [ "$1" = "status" ]; then
         else
           # check for blockchain data on storage
           hddBlocksBitcoin=$(ls /mnt/storage/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          echo "hddBlocksBitcoin='${hddBlocksBitcoin}'"
           hddBlocksLitecoin=$(ls /mnt/storage/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          echo "hddBlocksLitecoin='${hddBlocksLitecoin}'"
           sudo umount /mnt/storage
         fi
 
       fi
     fi
-    
+    echo ""  
   fi
 
   echo "# RAID"
