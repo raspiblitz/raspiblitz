@@ -116,8 +116,8 @@ if [ "$1" = "status" ]; then
         # temp storage data drive
         sudo mkdir -p /mnt/storage
         if [ "${hddFormat}" = "btrfs" ]; then
-          # in btrfs setup the third partition is storage partition
-          sudo mount /dev/${hdd}3 /mnt/storage
+          # in btrfs setup the second partition is storage partition
+          sudo mount /dev/${hdd}2 /mnt/storage
         else
           # in ext4 setup the first partition is also the storage partition
           sudo mount /dev/${hdd}1 /mnt/storage
@@ -127,9 +127,9 @@ if [ "$1" = "status" ]; then
           echo "hddError='storage mount failed'"
         else
           # check for blockchain data on storage
-          hddBlocksBitcoin=$(ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin='${hddBlocksBitcoin}'"
-          hddBlocksLitecoin=$(ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksLitecoin='${hddBlocksLitecoin}'"
           sudo umount /mnt/storage
         fi
