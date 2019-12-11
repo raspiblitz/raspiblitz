@@ -836,7 +836,7 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
 
     echo "# - linking blockchain for user bitcoin"
     if [ $(sudo ls -la /home/bitcoin/ | grep -c "bitcoin ->") -eq 0 ]; then
-      echo "# /home/bitcoin/.bitcoin -> is not a link, cleaning"
+      echo "# - /home/bitcoin/.bitcoin -> is not a link, cleaning"
       sudo rm -r /home/bitcoin/.bitcoin 2>/dev/null
     else
       sudo rm /home/bitcoin/.bitcoin 2>/dev/null
@@ -844,7 +844,7 @@ if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
     if [ $(sudo ls -la /home/bitcoin/ | grep -c "litecoin ->") -eq 0 ]; then
-      echo "# /home/bitcoin/.litecoin -> is not a link, cleaning"
+      echo "# - /home/bitcoin/.litecoin -> is not a link, cleaning"
       sudo rm -r /home/bitcoin/.litecoin 2>/dev/null
     else
       sudo rm /home/bitcoin/.litecoin 2>/dev/null
