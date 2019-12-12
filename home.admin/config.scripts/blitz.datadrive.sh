@@ -1,10 +1,24 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- echo "# blitz.datadrive.sh [status|tempmount|format|raid|link|swap|clean|snapshots]"
+ echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshots]"
  echo "ERROR='missing parameters'"
  exit 1
 fi
+
+###################
+# BASICS
+###################
+
+# TO UNDERSTAND THE BTFS HDD LAYOUT:
+####################################
+# 1) BLITZDATA - a BTRFS partion for all RaspiBlitz data - 30GB
+#    here put all files of LND, app, etc that need backup
+# 2) BLITZSTORE - a BTFRS partion for mostly Blockchain data
+#    all data here can get lost and rebuild if needed (Blockchain, Indexes, etc)
+# 3) BLITZTEMP - a FAT partition just for SWAP & Exchange - 34GB
+#    used for SWAP file and easy to read from Win32/MacOS for exchange
+#    this directory should get cleaned on every start (except from swap)
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
@@ -318,59 +332,12 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
     fi
   done
 
-  # loop until the uuids are available
-  uuid1=""
-  loopcount=0
-  while [ ${#uuid1} -eq 0 ]
-  do
-    echo "# waiting until uuid gets available"
-    sleep 2
-    sync
-    uuid1=$(lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
-    loopcount=$(($loopcount +1))
-    if [ ${loopcount} -gt 10 ]; then
-      echo "error='no uuid after format'"
-      exit 1
-    fi
-  done
-
-  # write new /etc/fstab & mount
-  echo "# updating /etc/fstab & mount"
-  sudo mkdir -p /mnt/hdd 1>2&
-  sudo sed "3 a UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
-  sync
-  sudo mount -a 1>/dev/null
-
-  # loop mounts are available
-  mountactive1=0
-  loopcount=0
-  while [ ${mountactive1} -eq 0 ]
-  do
-    echo "# waiting until mounting is active"
-    sleep 2
-    sync
-    mountactive1=$(df | grep -c /mnt/hdd)
-    loopcount=$(($loopcount +1))
-    if [ ${loopcount} -gt 10 ]; then
-      echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
-      echo "needsReboot=1"
-      exit 0
-    fi
-  done
-
-  echo "# OK EXT 4  format done"
+  echo "# OK EXT 4 format done"
   exit 0
 
 fi
 
 # formatting new: BTRFS layout - this consists of 3 volmunes:
-# 1) BLITZDATA - a BTRFS partion for all RaspiBlitz data - 30GB
-#    here put all files of LND, app, etc that need backup
-# 2) BLITZSTORE - a BTFRS partion for mostly Blockchain data
-#    all data here can get lost and rebuild if needed (Blockchain, Indexes, etc)
-# 3) BLITZTEMP - a FAT partition just for SWAP & Exchange - 34GB
-#    used for SWAP file and easy to read from Win32/MacOS for exchange
-#    this directory should get cleaned on every start (except from swap)
 if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
 
   # prepare temo mount point
@@ -392,9 +359,6 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     exit 1
   fi
   echo "# OK BLITZDATA exists now"
-  uuidDATA=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZDATA" | cut -d " " -f 1 | grep "-")
-
-  echo "# UUID -> ${uuidDATA}"
   
   echo "# Creating SubVolume for Snapshots"
   sudo mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
@@ -406,7 +370,6 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
   sudo btrfs subvolume create WORKINGDIR
   subVolDATA=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
   cd && sudo umount /tmp/btrfs
-  echo "# SubvolumeID -> ${subVolDATA}"
 
   echo "# Creating BLITZSTORAGE"
   sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
@@ -424,8 +387,6 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     exit 1
   fi
   echo "# OK BLITZSTORAGE exists now"
-  uuidSTORAGE=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZSTORAGE" | cut -d " " -f 1 | grep "-")
-  echo "# UUID -> ${uuidSTORAGE}"
   
   echo "# Creating SubVolume for Snapshots"
   sudo mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
@@ -435,9 +396,7 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
   fi
   cd /tmp/btrfs
   sudo btrfs subvolume create WORKINGDIR
-  subVolSTORAGE=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
   cd && sudo umount /tmp/btrfs
-  echo "# SubvolumeID -> ${subVolSTORAGE}"
 
   echo "# Creating the FAT32 partion"
   sudo parted -s -a optimal -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
@@ -457,45 +416,183 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     exit 1
   fi
   echo "# OK BLITZTEMP exists now"
-  uuidTEMP=$(lsblk -o LABEL,UUID | grep "BLITZTEMP" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
-  echo "# UUID TEMP -> ${uuidTEMP}"
-
-  # write new /etc/fstab & mount
-  echo "# Updating /etc/fstab & mount"
-  sudo mkdir -p /mnt/hdd 1>/dev/null
-  fstabAdd1="UUID=${uuidDATA} /mnt/hdd btrfs noexec,defaults,subvolid=${subVolDATA} 0 2"
-  sudo sed "3 a ${fstabAdd1}" -i /etc/fstab 1>/dev/null
-  sudo mkdir -p /mnt/storage 1>/dev/null
-  fstabAdd2="UUID=${uuidSTORAGE} /mnt/storage btrfs noexec,defaults,subvolid=${subVolSTORAGE} 0 2"
-  sudo sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
-  sudo mkdir -p /mnt/temp 1>/dev/null
-  fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults 0 2"
-  sudo sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
-  sync && sudo mount -a 1>/dev/null
-
-  # loop mounts are available
-  mountactive1=0
-  mountactive2=0
-  mountactive3=0   
-  loopcount=0
-  while [ ${mountactive1} -eq 0 ] || [ ${mountactive2} -eq 0 ] || [ ${mountactive3} -eq 0 ]
-  do
-    echo "# waiting until mountings are active"
-    sleep 2
-    sync
-    mountactive1=$(df | grep -c /mnt/hdd)
-    mountactive2=$(df | grep -c /mnt/temp)
-    mountactive3=$(df | grep -c /mnt/storage)  
-    loopcount=$(($loopcount +1))
-    if [ ${loopcount} -gt 10 ]; then
-      echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
-      echo "needsReboot=1"
-      exit 1
-    fi
-  done
 
   echo "# OK BTRFS format done"
   exit 0
+fi
+
+########################################
+# Refresh FSTAB for permanent mount
+########################################
+
+if [ "$1" = "fstab" ]; then
+  
+  # get device to temp mount
+  hdd=$2
+  if [ ${#hdd} -eq 0 ]; then
+    echo "# FAIL which device should be temp mounted (e.g. sda)"
+    echo "# run 'status' to see device candidates"
+    echo "error='missing second parameter'"
+    exit 1
+  fi
+
+  # check is exist and which format
+  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+  if [ ${#hddFormat} -eq 0 ]; then
+    echo "# FAIL given device not found"
+    echo "error='device not found'"
+    exit 1
+  fi
+
+  # unmount
+  if [ ${isMounted} -eq 1 ]; then
+    echo "# unmounting all drives"
+    sudo umount /mnt/hdd 2>/dev/null
+    sudo umount /mnt/storage 2>/dev/null
+    sudo umount /mnt/temp 2>/dev/null
+  fi
+
+  if [ "${hddFormat}" = "ext4" ]; then
+
+    ### EXT4 ###
+
+    # loop until the uuids are available
+    uuid1=""
+    loopcount=0
+    while [ ${#uuid1} -eq 0 ]
+    do
+      echo "# waiting until uuid gets available"
+      sleep 2
+      sync
+      uuid1=$(lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
+      loopcount=$(($loopcount +1))
+      if [ ${loopcount} -gt 10 ]; then
+        echo "error='no uuid'"
+        exit 1
+      fi
+    done
+
+    # write new /etc/fstab & mount
+    echo "# updating /etc/fstab & mount"
+    sudo mkdir -p /mnt/hdd 1>2&
+    sudo sed "3 a UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
+    sync
+    sudo mount -a 1>/dev/null
+
+    # loop mounts are available
+    mountactive1=0
+    loopcount=0
+    while [ ${mountactive1} -eq 0 ]
+    do
+      echo "# waiting until mounting is active"
+      sleep 2
+      sync
+      mountactive1=$(df | grep -c /mnt/hdd)
+      loopcount=$(($loopcount +1))
+      if [ ${loopcount} -gt 10 ]; then
+        echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        echo "needsReboot=1"
+        exit 0
+      fi
+    done
+
+    echo "# OK - fstab updated for EXT4 layout"
+
+  elif [ "${hddFormat}" = "btrfs" ]; then
+
+    ### BTRFS ###
+    echo "# BTRFS: Updating /etc/fstab & mount"
+
+    # get info on: Data Drive
+    uuidDATA=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZDATA" | cut -d " " -f 1 | grep "-")
+    sudo mkdir -p /tmp/btrfs
+    sudo mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
+    if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
+      echo "error='mount ${hdd}1 failed'"
+      exit 1
+    fi
+    cd /tmp/btrfs
+    subVolDATA=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+    cd && sudo umount /tmp/btrfs
+    echo "uuidDATA='${uuidDATA}'"
+    echo "subVolDATA='${subVolDATA}'"
+    if [ ${#uuidDATA} -eq 0 ] || [ ${#subVolDATA} -eq 0 ]; then
+      echo "error='no datadrive uuids'"
+      exit 1
+    fi
+  
+    # get info on: Storage Drive
+    uuidSTORAGE=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZSTORAGE" | cut -d " " -f 1 | grep "-")
+    sudo mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
+    if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
+      echo "error='mount ${hdd}2 failed'"
+      exit 1
+    fi
+    cd /tmp/btrfs
+    subVolSTORAGE=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+    cd && sudo umount /tmp/btrfs
+    echo "uuidSTORAGE='${uuidSTORAGE}'"
+    echo "subVolSTORAGE='${subVolSTORAGE}'"
+    if [ ${#uuidSTORAGE} -eq 0 ] || [ ${#subVolSTORAGE} -eq 0 ]; then
+      echo "error='no storagedrive uuids'"
+      exit 1
+    fi
+
+    # get info on: Temp Drive
+    uuidTEMP=$(lsblk -o LABEL,UUID | grep "BLITZTEMP" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
+    echo "uuidTEMP='${uuidTEMP}'"
+    if [ ${#uuidTEMP} -eq 0 ]; then
+      echo "error='no tempdrive uuids'"
+      exit 1
+    fi
+
+    # remove old entries from fstab
+    lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-" | while read -r uuid ; do
+      echo "# Cleaning /etc/fstab from ${uuid}"
+      sudo sed -i "/UUID=${uuid}/d" /etc/fstab
+      sync
+    done
+
+    # modifying /etc/fstab & mount
+    sudo mkdir -p /mnt/hdd 1>/dev/null
+    fstabAdd1="UUID=${uuidDATA} /mnt/hdd btrfs noexec,defaults,subvolid=${subVolDATA} 0 2"
+    sudo sed "3 a ${fstabAdd1}" -i /etc/fstab 1>/dev/null
+    sudo mkdir -p /mnt/storage 1>/dev/null
+    fstabAdd2="UUID=${uuidSTORAGE} /mnt/storage btrfs noexec,defaults,subvolid=${subVolSTORAGE} 0 2"
+    sudo sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
+    sudo mkdir -p /mnt/temp 1>/dev/null
+    fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults 0 2"
+    sudo sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
+    sync && sudo mount -a 1>/dev/null
+
+    # test mount
+    mountactive1=0
+    mountactive2=0
+    mountactive3=0
+    loopcount=0
+    while [ ${mountactive1} -eq 0 ] || [ ${mountactive2} -eq 0 ] || [ ${mountactive3} -eq 0 ]
+    do
+      echo "# waiting until mountings are active"
+      sleep 2
+      sync
+      mountactive1=$(df | grep -c /mnt/hdd)
+      mountactive2=$(df | grep -c /mnt/temp)
+      mountactive3=$(df | grep -c /mnt/storage)  
+      loopcount=$(($loopcount +1))
+      if [ ${loopcount} -gt 10 ]; then
+        echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        echo "needsReboot=1"
+        exit 1
+      fi
+    done
+
+    echo "# OK - fstab updated for BTRFS layout"
+
+  else
+    echo "error='wrong hdd format'"
+    exit 1
+  fi
+
 fi
 
 ########################################
@@ -801,16 +898,13 @@ if [ "$1" = "tempmount" ]; then
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
 
-  # trigger linking
-  doLinking=1
-
 fi
 
 ########################################
 # LINKING all directories with ln
 ########################################
 
-if [ "$1" = "link" ] || [ ${doLinking} -eq 1 ]; then
+if [ "$1" = "link" ]; then
 
   if [ ${isMounted} -eq 0 ] ; then
     echo "error='no data drive mounted'"
