@@ -7,31 +7,6 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
-# check if HDD is connected
-hddExists=$(lsblk | grep -c sda1)
-if [ ${hddExists} -eq 0 ]; then
-
-  # check if there is maybe a HDD but woth no partitions
-  noPartition=$(lsblk | grep -c sda)
-  if [ ${noPartition} -eq 1 ]; then
-    echo "***********************************************************"
-    echo "WARNING: HDD HAS NO PARTITIONS"
-    echo "***********************************************************"
-    echo "Press ENTER to create a Partition - or CTRL+C to abort"
-    read key
-    echo "Creating Partition ..."
-    sudo parted -s /dev/sda mklabel msdos
-    sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
-    echo "DONE."
-    sleep 3
-  else 
-    echo "***********************************************************"
-    echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
-    echo "***********************************************************"
-    exit
-  fi
-fi
-
 # check data from _bootstrap.sh that was running on device setup
 bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
 if [ ${bootstrapInfoExists} -eq 0 ]; then
