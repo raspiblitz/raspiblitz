@@ -212,6 +212,28 @@ do
   fi
 
   ###############################
+  # RAID data check (BRTFS)
+  ###############################
+  # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
+
+  # check every hour
+  recheckRAID=$((($counter % 360)+1))
+  if [ ${recheckRAID} -eq 1 ]; then
+    
+    # check if raid is active
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+    if [ ${isRaid} -eq 1 ]; then
+
+      # will run in the background
+      echo "STARTING BTRFS RAID DATA CHECK ..."
+      sudo btrfs scrub start /mnt/hdd/
+
+    fi
+
+  fi
+
+
+  ###############################
   # LND AUTO-UNLOCK
   ###############################
 
