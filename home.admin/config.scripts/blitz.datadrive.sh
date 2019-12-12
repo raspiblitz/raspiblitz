@@ -948,6 +948,11 @@ if [ "$1" = "link" ]; then
       sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
     fi
 
+    echo "# linking lnd for user bitcoin"
+    sudo rm /home/bitcoin/.lnd 2>/dev/null
+    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+
     echo "# - linking blockchain for user bitcoin"
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
@@ -987,12 +992,22 @@ if [ "$1" = "link" ]; then
     sudo ln -s /mnt/hdd/litecoin /home/bitcoin/.litecoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
+    echo "# linking lnd for user bitcoin"
+    sudo rm /home/bitcoin/.lnd 2>/dev/null
+    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+
     echo "# creating default storage folders"
     sudo mkdir -p /mnt/hdd/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage   
     sudo mkdir -p /mnt/hdd/temp
 
   fi
+
+  # fix ownership of linked files
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 2>/dev/null
 
   echo "# OK - all symbolic links build"
   exit 0
