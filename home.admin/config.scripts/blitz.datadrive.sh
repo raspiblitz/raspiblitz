@@ -66,12 +66,12 @@ if [ "$1" = "status" ]; then
   echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
-  echo
 
   # if HDD is not mounted system is in the pre-setup phase
   # deliver all the detailes needed about the data drive
   # and it content for the setup dialogs
   if [ ${isMounted} -eq 0 ]; then
+    echo
     echo "# SETUP INFO"
 
     # find the HDD (biggest single device)
@@ -153,9 +153,13 @@ if [ "$1" = "status" ]; then
         echo "hddBlocksLitecoin=0"
       fi
     fi
-    echo ""  
+  else
+    # output data drive
+    datadisk=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3 | sed 's/[0-9]*//g')
+    echo "datadisk='${datadisk}'"
   fi
 
+  echo
   echo "# RAID"
   echo "isRaid=${isRaid}"
   # extra information about not mounted drives (if raid is off)
