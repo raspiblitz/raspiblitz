@@ -149,6 +149,9 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config nonint do_wifi_country US
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
   echo "max_usb_current=1" | sudo tee -a /boot/config.txt
+  # run fsck on sd boot partition on every startup to prevent "maintenance login" screen
+  # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
+  sudo tune2fs -c 1 /dev/mmcblk0p2
 fi
 
 # special prepare when Ubuntu or Armbian
