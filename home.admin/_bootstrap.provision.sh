@@ -41,11 +41,6 @@ sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
 sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
 
-# auto-mount HDD
-sudo umount -l /mnt/hdd >> ${logFile} 2>&1
-echo "Auto-Mounting HDD - calling script" >> ${logFile}
-/home/admin/40addHDD.sh >> ${logFile} 2>&1
-
 # link old SSH PubKeys
 # so that client ssh_known_hosts is not complaining after update
 if [ -d "/mnt/hdd/ssh" ]; then
@@ -65,14 +60,7 @@ if [ ${kbSizeRAM} -gt 1500000 ]; then
   sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
 fi
 
-# link and copy HDD content into new OS
-echo "Link HDD content for user bitcoin" >> ${logFile}
-sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
-sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >> ${logFile} 2>&1
-sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network} >> ${logFile} 2>&1
-sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd >> ${logFile} 2>&1
-sudo chown -R bitcoin:bitcoin /home/bitcoin/.${network} >> ${logFile} 2>&1
-sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd >> ${logFile} 2>&1
+# link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
 sudo mkdir /home/admin/.${network} >> ${logFile} 2>&1
 sudo cp /mnt/hdd/${network}/${network}.conf /home/admin/.${network}/${network}.conf >> ${logFile} 2>&1
@@ -84,11 +72,9 @@ sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&
 sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-#sudo chmod +x /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
 sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-#sudo chmod +x /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
 sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
@@ -298,6 +284,15 @@ if [ ${#hostname} -gt 0 ]; then
 else
   echo "No hostname set." >> ${logFile}
 fi
+
+# PERMANENT MOUNT OF HDD/SSD
+# always at the end, because data drives will be just available again after a reboot
+echo "Prepare fstab for permanent data drive mounting .." >> ${logFile}
+# get info on data drive
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+# update /etc/fstab
+echo "datadisk --> ${datadisk}" >> ${logFile}
+sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5

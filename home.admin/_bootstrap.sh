@@ -6,23 +6,11 @@
 # For more details see background_raspiblitzSettings.md
 
 ################################
-# BOOT LOGO
+# BASIC SETTINGS
 ################################
-
-# display 3 secs logo - try to kickstart LCD
-# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-# see https://github.com/rootzoll/raspiblitz/issues/647
-randnum=$(shuf -i 0-7 -n 1)
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-sleep 5
-sudo killall -3 fbi
 
 # load codeVersion
 source /home/admin/_version.info
-
-################################
-# BASIC SETTINGS
-################################
 
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
@@ -88,6 +76,30 @@ else
 fi
 echo ""
 
+###############################
+# RAID data check (BRTFS)
+###############################
+# see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
+
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${isRaid} -eq 1 ]; then
+  echo "TRIGGERING BTRFS RAID DATA CHECK ..."
+  echo "Check status with: sudo btrfs scrub status /mnt/hdd/"
+  sudo btrfs scrub start /mnt/hdd/
+fi
+
+################################
+# BOOT LOGO
+################################
+
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+# see https://github.com/rootzoll/raspiblitz/issues/647
+randnum=$(shuf -i 0-7 -n 1)
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+sleep 5
+sudo killall -3 fbi
+
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
 # on first boot up
@@ -151,82 +163,59 @@ done
 # HDD CHECK & PRE-INIT
 ################################
  
-# TODO: use in this waiting loop the new script -> blitz.datadrive.sh status
-
-hddExists=$(lsblk | grep -c sda1)
-while [ ${hddExists} -eq 0 ]
-  do
-    # display will ask user to connect a HDD
+# wait loop until HDD is connected
+until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
+do
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
     sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
-    sleep 5
-    # retry to find HDD
-    hddExists=$(lsblk | grep -c sda1)
-  done
+  fi
+  sleep 2
+done
+
+# get fresh info about data drive to continue
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
-hddIsAutoMounted=$(sudo cat /etc/fstab | grep -c '/mnt/hdd')
-if [ ${hddIsAutoMounted} -eq 0 ]; then
+if [ ${isMounted} -eq 0 ]; then
 
-  echo "HDD is there but not AutoMounted yet." >> $logFile
-  echo "Analysing the situation ..." >> $logFile
+  echo "HDD is there but not AutoMounted yet - checking Setup" >> $logFile
 
-  # detect for correct device name (the biggest partition)
-  hddDeviceName="sda1"
-  hddSecondPartitionExists=$(lsblk | grep -c sda2)
-  hddSecondDriveExists=$(lsblk | grep -c sdb)
-  if [ ${hddSecondPartitionExists} -eq 1 ] || [ ${hddSecondDriveExists} -eq 1 ] ; then
-    echo "HDD has a second partition - choosing the bigger one ..." >> $logFile
-    # get both with size
-    size1=$(lsblk -o NAME,SIZE -b | grep "sda1" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
-    echo "sda1(${size1})" >> $logFile
-    size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
-    echo "sda2(${size2})" >> $logFile
-    size3=$(lsblk -o NAME,SIZE -b | grep "sdb" | awk '{ print substr( $0, 8, length($0)-2 ) }' | xargs)
-    echo "sdb(${size3})" >> $logFile
-    # choose to run with the bigger one
-    if [ ${size2} -gt ${size1} ]; then
-      echo "sda2 is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sda2"
-    elif [ ${size3} -gt ${size1} ]; then
-      echo "sdb is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sdb"      
-    else
-      echo "sda1 is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sda1"
-    fi
-  fi
-
-  # check if HDD is formatted EXT4
-  hddExt4=$(lsblk -o NAME,FSTYPE -b /dev/${hddDeviceName} | grep -c "ext4")
-  if [ ${hddExt4} -eq 0 ]; then
-    echo "HDD is NOT formatted in ext4." >> $logFile
-    # stop the bootstrap here ...
-    # display will ask user to run setup
+  # when format is not EXT4 or BTRFS - stop bootstrap and await user setup
+  if [ "${hddFormat}" != "ext4" ] && [ "${hddFormat}" != "btrfs" ]; then
+    echo "HDD is NOT formatted in ${hddFormat} .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
     sed -i "s/^message=.*/message='HDD needs SetUp (1)'/g" ${infoFile}
     exit 0
   fi
 
-  # temp-mount the HDD
-  echo "temp-mounting the HDD .." >> $logFile
-  sudo mkdir /mnt/hdd
-  sudo mount -t ext4 /dev/${hddDeviceName} /mnt/hdd
-  mountOK=$(lsblk | grep -c '/mnt/hdd')
-  if [ ${mountOK} -eq 0 ]; then
-    echo "FAIL - not able to temp-mount HDD" >> $logFile
+  # when error on analysing HDD - stop bootstrap and await user setup
+  if [ ${#hddError} -gt 0 ]; then
+    echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='HDD failed Mounting'/g" ${infoFile}
-    # no need to unmount the HDD, it failed mounting
+    sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
     exit 0
-  else 
-     echo "OK - HDD available under /mnt/hdd" >> $logFile
   fi
+
+  # temp mount the HDD
+  echo "Temp mounting data drive" >> $logFile
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  if [ ${#error} -gt 0 ]; then
+    echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
+    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+    sed -i "s/^message=.*/message='${error}'/g" ${infoFile}
+    exit 0
+  fi
+
+  # make sure all links between directories/drives are correct
+  echo "Refreshing links between directories/drives .." >> $logFile
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # UPDATE MIGRATION & CONFIG PROVISIONING 
   # check if HDD contains already a configuration
-  echo "Check if HDD contains already a configuration .." >> $logFile
   configExists=$(ls ${configFile} | grep -c '.conf')
+  echo "HDD contains already a configuration: ${configExists}" >> $logFile
   if [ ${configExists} -eq 1 ]; then
     echo "Found existing configuration" >> $logFile
     source ${configFile}
@@ -283,7 +272,11 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   sudo umount -l /mnt/hdd
   exit 0
 
-fi # END - no automount
+fi # END - no automount - after this HDD is mounted
+
+# make sure all links between directories/drives are correct
+echo "Refreshing links between directories/drives .." >> $logFile
+sudo /home/admin/config.scripts/blitz.datadrive.sh link >> $logFile
 
 #####################################
 # UPDATE HDD CONFIG FILE (if exists)
@@ -455,8 +448,20 @@ sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
 
+#####################################
+# CLEAN HDD TEMP
+#####################################
+
+echo "CLEANING TEMP DRIVE/FOLDER" >> $logFile
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh clean temp)
+if [ ${#error} -gt 0 ]; then
+  echo "FAIL: ${error}" >> $logFile
+else
+  echo "OK: Temp cleaned" >> $logFile
+fi
+
 ################################
-# RECORD BASEIMAGE
+# IDENTIFY BASEIMAGE
 ################################
 
 baseImage="?"
