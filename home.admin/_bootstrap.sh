@@ -216,7 +216,6 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
-  # UPDATE MIGRATION & CONFIG PROVISIONING 
   # check if HDD contains already a configuration
   configExists=$(ls ${configFile} | grep -c '.conf')
   echo "HDD contains already a configuration: ${configExists}" >> $logFile
@@ -244,7 +243,7 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
   
-  # if config is still valid ...
+  # UPDATE MIGRATION & CONFIG PROVISIONING 
   if [ ${configExists} -eq 1 ]; then
     echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
@@ -277,6 +276,14 @@ if [ ${isMounted} -eq 0 ]; then
   exit 0
 
 fi # END - no automount - after this HDD is mounted
+
+# config should exist now
+configExists=$(ls ${configFile} | grep -c '.conf')
+if [ ${configExists} -eq 0 ]; then
+  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+  sed -i "s/^message=.*/message='no config'/g" ${infoFile}
+  exit 0
+fi
 
 # make sure all links between directories/drives are correct
 echo "Refreshing links between directories/drives .." >> $logFile
