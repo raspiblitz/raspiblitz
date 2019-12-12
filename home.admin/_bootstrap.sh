@@ -173,6 +173,7 @@ do
   fi
   sleep 2
 done
+sed -i "s/^state=.*/state=boostrap/g" ${infoFile}
 
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
