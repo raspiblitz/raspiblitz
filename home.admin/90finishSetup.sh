@@ -4,43 +4,18 @@ echo ""
 # add bonus scripts (auto install deactivated to reduce third party repos)
 /home/admin/91addBonus.sh
 
-###### SWAP & FS
-echo ""
-echo "*** SWAP file ***"
-swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
-if [ ${swapExists} -eq 1 ]; then
-  echo "SWAP on HDD already exists"
-else
-  echo "No SWAP found ... creating 2GB SWAP on HDD"
-  sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
-  # comment or delete the CONF_SWAPSIZE line. It will then be created dynamically 
-  sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
-  echo "OK - edited /etc/dphys-swapfile"
-  echo "Creating file ... this can take some seconds .."
-  sudo dd if=/dev/zero of=/mnt/hdd/swapfile count=2048 bs=1MiB
-  sudo chmod 0600 /mnt/hdd/swapfile
-  sudo mkswap /mnt/hdd/swapfile
-  sudo dphys-swapfile setup
-  sudo dphys-swapfile swapon
+###### SWAP File
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${isSwapExternal} -eq 0 ]; then
 
-  # expand FS of SD
-  echo "*** Expand RootFS ***"
-  sudo raspi-config --expand-rootfs
-  echo ""
+  echo "No external SWAP found - creating ... "
+  sudo /home/admin/config.scripts/blitz.datadrive.sh swap on
+
+else
+  echo "SWAP already OK"
 fi
 
-swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
-if [ ${swapExists} -eq 1 ]; then
-  echo "OK - SWAP is working"
-else
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "WARNING - Not able to to build SWAP on HDD"
-  echo "This is not critical ... but try to fix later."
-  echo "--> will continue in 60 seconds <--"
-  sleep 60
-fi
-
-# firewall - just install (not configure)
+####### FIREWALL - just install (not configure)
 echo ""
 echo "*** Setting and Activating Firewall ***"
 sudo apt-get install -y ufw
