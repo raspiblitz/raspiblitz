@@ -173,7 +173,10 @@ do
   fi
   sleep 2
 done
-sed -i "s/^state=.*/state=boostrap/g" ${infoFile}
+
+# write info for LCD
+sed -i "s/^state=.*/state=booting/g" ${infoFile}
+sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
