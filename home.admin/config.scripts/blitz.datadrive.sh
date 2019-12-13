@@ -184,7 +184,7 @@ if [ "$1" = "status" ]; then
     elif [ ${#blockchainType} -gt 0 ]; then
       echo "hddGotBlockchain=0"
     fi
-    
+
   fi
 
   echo
@@ -942,6 +942,7 @@ if [ "$1" = "tempmount" ]; then
   # outputting change state
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
+  exit 1
 
 fi
 
