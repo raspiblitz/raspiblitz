@@ -60,10 +60,10 @@ isSwapExternal=$(swapon -s | grep -c "${externalSwapPath}")
 # output and exit if just status action
 if [ "$1" = "status" ]; then
 
-  >&2 echo "# RASPIBLITZ DATA DRIVE Status"  
+  echo "# RASPIBLITZ DATA DRIVE Status"  
   echo
 
-  >&2 echo "# BASICS"
+  echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
 
@@ -72,7 +72,7 @@ if [ "$1" = "status" ]; then
   # and it content for the setup dialogs
   if [ ${isMounted} -eq 0 ]; then
     echo
-    >&2 echo "# SETUP INFO"
+    echo "# SETUP INFO"
 
     # find the HDD (biggest single device)
     size=0
@@ -160,7 +160,7 @@ if [ "$1" = "status" ]; then
   fi
 
   echo
-  >&2 echo "# RAID"
+  echo "# RAID"
   echo "isRaid=${isRaid}"
   if [ ${isRaid} -eq 1 ] && [ ${isMounted} -eq 1 ] && [ ${isBTRFS} -eq 1 ]; then
 
@@ -196,7 +196,7 @@ if [ "$1" = "status" ]; then
   fi
 
   echo
-  >&2 echo "# SWAP"
+  echo "# SWAP"
   echo "isSwapExternal=${isSwapExternal}"
   if [ ${isSwapExternal} -eq 1 ]; then
     echo "SwapExternalPath='${externalSwapPath}'"
