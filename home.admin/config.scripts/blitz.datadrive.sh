@@ -165,9 +165,26 @@ if [ "$1" = "status" ]; then
       fi
     fi
   else
+
+    # STATUS INFO WHEN MOUNTED
+
     # output data drive
     hdd=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3 | sed 's/[0-9]*//g')
     echo "datadisk='${hdd}'"
+
+    # check if blockchain data is available
+    hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+    echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
+    hddBlocksLitecoin=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+    echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
+    if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
+      echo "hddGotBlockchain=1"
+    elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
+      echo "hddGotBlockchain=1"
+    elif [ ${#blockchainType} -gt 0 ]; then
+      echo "hddGotBlockchain=0"
+    fi
+    
   fi
 
   echo
