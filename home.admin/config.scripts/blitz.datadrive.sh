@@ -542,6 +542,7 @@ if [ "$1" = "fstab" ]; then
     done
 
     >&2 echo "# OK - fstab updated for EXT4 layout"
+    exit 1
 
   elif [ "${hddFormat}" = "btrfs" ]; then
 
@@ -632,6 +633,7 @@ if [ "$1" = "fstab" ]; then
     done
 
     >&2 echo "# OK - fstab updated for BTRFS layout"
+    exit 1
 
   else
     echo "error='wrong hdd format'"

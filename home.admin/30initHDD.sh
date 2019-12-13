@@ -66,6 +66,7 @@ echo " OK"
 
 # format drive if it does not have any blockchain or blitz data on it
 # to be sure that HDD has no faulty partions, etc.
+echo
 echo "# --> Check HDD/SSD for Blockchain ..."
 echo "# hddGotBlockchain=${hddGotBlockchain}"
 if [ ${hddGotBlockchain}  -eq 0 ]; then
