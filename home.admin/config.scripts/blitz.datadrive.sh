@@ -1,8 +1,8 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshots]"
- echo "ERROR='missing parameters'"
+ >&2 echo "# managing the data drive(s) with old EXT4 or new BTRFS"
+ >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshots]"
+ echo "error='missing parameters'"
  exit 1
 fi
 
@@ -29,7 +29,7 @@ fi
 # install BTRFS if needed
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
-  echo "# Installing BTRFS ..."
+  >&2 echo "# Installing BTRFS ..."
   sudo apt-get install -y btrfs-tools 1>/dev/null
 fi
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
@@ -60,10 +60,10 @@ isSwapExternal=$(swapon -s | grep -c "${externalSwapPath}")
 # output and exit if just status action
 if [ "$1" = "status" ]; then
 
-  echo "# RASPIBLITZ DATA DRIVE Status"  
+  >&2 echo "# RASPIBLITZ DATA DRIVE Status"  
   echo
 
-  echo "# BASICS"
+  >&2 echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
 
@@ -72,7 +72,7 @@ if [ "$1" = "status" ]; then
   # and it content for the setup dialogs
   if [ ${isMounted} -eq 0 ]; then
     echo
-    echo "# SETUP INFO"
+    >&2 echo "# SETUP INFO"
 
     # find the HDD (biggest single device)
     size=0
@@ -160,7 +160,7 @@ if [ "$1" = "status" ]; then
   fi
 
   echo
-  echo "# RAID"
+  >&2 echo "# RAID"
   echo "isRaid=${isRaid}"
   if [ ${isRaid} -eq 1 ] && [ ${isMounted} -eq 1 ] && [ ${isBTRFS} -eq 1 ]; then
 
@@ -196,7 +196,7 @@ if [ "$1" = "status" ]; then
   fi
 
   echo
-  echo "# SWAP"
+  >&2 echo "# SWAP"
   echo "isSwapExternal=${isSwapExternal}"
   if [ ${isSwapExternal} -eq 1 ]; then
     echo "SwapExternalPath='${externalSwapPath}'"
@@ -215,11 +215,11 @@ if [ "$1" = "format" ]; then
   
   # check valid format
   if [ "$2" = "btrfs" ]; then
-    echo "# DATA DRIVE - FORMATTING to new BTRFS layout (new)"
+    >&2 echo "# DATA DRIVE - FORMATTING to new BTRFS layout (new)"
   elif [ "$2" = "ext4" ]; then
-    echo "# DATA DRIVE - FORMATTING to new EXT4 layout (old)"
+    >&2 echo "# DATA DRIVE - FORMATTING to new EXT4 layout (old)"
   else
-    echo "# missing valid second parameter: 'btrfs' or 'ext4'"
+    >&2 echo "# missing valid second parameter: 'btrfs' or 'ext4'"
     echo "error='missing parameter'"
     exit 1
   fi
@@ -227,8 +227,8 @@ if [ "$1" = "format" ]; then
   # get device name to format
   hdd=$3
   if [ ${#hdd} -eq 0 ]; then
-    echo "# missing valid third parameter as the device (like 'sda')"
-    echo "# run 'status' to see cadidate devices"
+    >&2 echo "# missing valid third parameter as the device (like 'sda')"
+    >&2 echo "# run 'status' to see cadidate devices"
     echo "error='missing parameter'"
     exit 1
   fi
@@ -236,23 +236,23 @@ if [ "$1" = "format" ]; then
   # check if device is existing and a disk (not a partition)
   isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
   if [ ${isValid} -eq 0 ]; then
-    echo "# either given device was not found"
-    echo "# or is not of type disk - see 'lsblk'"
+    >&2 echo "# either given device was not found"
+    >&2 echo "# or is not of type disk - see 'lsblk'"
     echo "error='device not valid'"
     exit 1
   fi
 
-  echo "# Checking on SWAP"
+  >&2 echo "# Checking on SWAP"
   if [ ${isSwapExternal} -eq 1 ]; then
-    echo "# Switching off external SWAP"
+    >&2 echo "# Switching off external SWAP"
     sudo dphys-swapfile swapoff 1>/dev/null
     sudo dphys-swapfile uninstall 1>/dev/null
   fi
 
-  echo "# Unmounting all data drives"
+  >&2 echo "# Unmounting all data drives"
   # remove device from all system mounts (also fstab)
   lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-" | while read -r uuid ; do
-    echo "# Cleaning /etc/fstab from ${uuid}"
+    >&2 echo "# Cleaning /etc/fstab from ${uuid}"
     sudo sed -i "/UUID=${uuid}/d" /etc/fstab
     sync
   done
@@ -279,7 +279,7 @@ if [ "$1" = "format" ]; then
   fi
 
   # wipe all partitions and write fresh GPT
-  echo "# Wiping all partitions"
+  >&2 echo "# Wiping all partitions"
   for v_partition in $(parted -s /dev/${hdd} print|awk '/^ / {print $1}')
   do
    sudo parted -s /dev/${hdd} rm ${v_partition}
@@ -300,7 +300,7 @@ fi
 if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
   # write new EXT4 partition
-  echo "# Creating the one big partion"
+  >&2 echo "# Creating the one big partion"
   sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>/dev/null 2>/dev/null
   sleep 6
   sync
@@ -309,7 +309,7 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
   loopcount=0
   while [ ${done} -eq 0 ]
   do
-    echo "# waiting until the partion gets available"
+    >&2 echo "# waiting until the partion gets available"
     sleep 2
     sync
     done=$(lsblk -o NAME | grep -c ${hdd}1)
@@ -328,13 +328,13 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
     exit 1
   fi
 
-  echo "# Formatting"
+  >&2 echo "# Formatting"
   sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
   done=0
   loopcount=0
   while [ ${done} -eq 0 ]
   do
-    echo "# waiting until formatted drives gets available"
+    >&2 echo "# waiting until formatted drives gets available"
     sleep 2
     sync
     done=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
@@ -345,7 +345,7 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
     fi
   done
 
-  echo "# OK EXT 4 format done"
+  >&2 echo "# OK EXT 4 format done"
   exit 0
 
 fi
@@ -356,7 +356,7 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
   # prepare temo mount point
   sudo mkdir -p /tmp/btrfs 1>/dev/null
 
-  echo "# Creating BLITZDATA"
+  >&2 echo "# Creating BLITZDATA"
   sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
   sync && sleep 3
   win=$(lsblk -o NAME | grep -c ${hdd}1)
@@ -371,9 +371,9 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     echo "error='formatting failed'"
     exit 1
   fi
-  echo "# OK BLITZDATA exists now"
+  >&2 echo "# OK BLITZDATA exists now"
   
-  echo "# Creating SubVolume for Snapshots"
+  >&2 echo "# Creating SubVolume for Snapshots"
   sudo mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
   if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
     echo "error='mount ${hdd}1 failed'"
@@ -384,7 +384,7 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
   subVolDATA=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
   cd && sudo umount /tmp/btrfs
 
-  echo "# Creating BLITZSTORAGE"
+  >&2 echo "# Creating BLITZSTORAGE"
   sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
   sync && sleep 3
   win=$(lsblk -o NAME | grep -c ${hdd}2)
@@ -399,9 +399,9 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     echo "error='formatting failed'"
     exit 1
   fi
-  echo "# OK BLITZSTORAGE exists now"
+  >&2 echo "# OK BLITZSTORAGE exists now"
   
-  echo "# Creating SubVolume for Snapshots"
+  >&2 echo "# Creating SubVolume for Snapshots"
   sudo mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
   if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
     echo "error='mount ${hdd}2 failed'"
@@ -411,7 +411,7 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
   sudo btrfs subvolume create WORKINGDIR
   cd && sudo umount /tmp/btrfs
 
-  echo "# Creating the FAT32 partion"
+  >&2 echo "# Creating the FAT32 partion"
   sudo parted -s -a optimal -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
   sync && sleep 3
   win=$(lsblk -o NAME | grep -c ${hdd}3)
@@ -420,7 +420,7 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     exit 1
   fi
  
-  echo "# Creating Volume BLITZTEMP (format)"
+  >&2 echo "# Creating Volume BLITZTEMP (format)"
   sudo mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
   sync && sleep 3
   win=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
@@ -428,9 +428,9 @@ if [ "$1" = "format" ] && [ "$2" = "btrfs" ]; then
     echo "error='formatting failed'"
     exit 1
   fi
-  echo "# OK BLITZTEMP exists now"
+  >&2 echo "# OK BLITZTEMP exists now"
 
-  echo "# OK BTRFS format done"
+  >&2 echo "# OK BTRFS format done"
   exit 0
 fi
 
@@ -443,8 +443,8 @@ if [ "$1" = "fstab" ]; then
   # get device to temp mount
   hdd=$2
   if [ ${#hdd} -eq 0 ]; then
-    echo "# FAIL which device should be temp mounted (e.g. sda)"
-    echo "# run 'status' to see device candidates"
+    >&2 echo "# FAIL which device should be temp mounted (e.g. sda)"
+    >&2 echo "# run 'status' to see device candidates"
     echo "error='missing second parameter'"
     exit 1
   fi
@@ -452,14 +452,14 @@ if [ "$1" = "fstab" ]; then
   # check is exist and which format
   hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
   if [ ${#hddFormat} -eq 0 ]; then
-    echo "# FAIL given device not found"
+    >&2 echo "# FAIL given device not found"
     echo "error='device not found'"
     exit 1
   fi
 
   # unmount
   if [ ${isMounted} -eq 1 ]; then
-    echo "# unmounting all drives"
+    >&2 echo "# unmounting all drives"
     sudo umount /mnt/hdd 2>/dev/null
     sudo umount /mnt/storage 2>/dev/null
     sudo umount /mnt/temp 2>/dev/null
@@ -474,7 +474,7 @@ if [ "$1" = "fstab" ]; then
     loopcount=0
     while [ ${#uuid1} -eq 0 ]
     do
-      echo "# waiting until uuid gets available"
+      >&2 echo "# waiting until uuid gets available"
       sleep 2
       sync
       uuid1=$(lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
@@ -486,7 +486,7 @@ if [ "$1" = "fstab" ]; then
     done
 
     # write new /etc/fstab & mount
-    echo "# updating /etc/fstab & mount"
+    >&2 echo "# updating /etc/fstab & mount"
     sudo mkdir -p /mnt/hdd 1>2&
     sudo sed "3 a UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
     sync
@@ -497,24 +497,24 @@ if [ "$1" = "fstab" ]; then
     loopcount=0
     while [ ${mountactive1} -eq 0 ]
     do
-      echo "# waiting until mounting is active"
+      >&2 echo "# waiting until mounting is active"
       sleep 2
       sync
       mountactive1=$(df | grep -c /mnt/hdd)
       loopcount=$(($loopcount +1))
       if [ ${loopcount} -gt 10 ]; then
-        echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        >&2 echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
         echo "needsReboot=1"
         exit 0
       fi
     done
 
-    echo "# OK - fstab updated for EXT4 layout"
+    >&2 echo "# OK - fstab updated for EXT4 layout"
 
   elif [ "${hddFormat}" = "btrfs" ]; then
 
     ### BTRFS ###
-    echo "# BTRFS: Updating /etc/fstab & mount"
+    >&2 echo "# BTRFS: Updating /etc/fstab & mount"
 
     # get info on: Data Drive
     uuidDATA=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZDATA" | cut -d " " -f 1 | grep "-")
@@ -561,7 +561,7 @@ if [ "$1" = "fstab" ]; then
 
     # remove old entries from fstab
     lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-" | while read -r uuid ; do
-      echo "# Cleaning /etc/fstab from ${uuid}"
+      >&2 echo "# Cleaning /etc/fstab from ${uuid}"
       sudo sed -i "/UUID=${uuid}/d" /etc/fstab
       sync
     done
@@ -585,7 +585,7 @@ if [ "$1" = "fstab" ]; then
     loopcount=0
     while [ ${mountactive1} -eq 0 ] || [ ${mountactive2} -eq 0 ] || [ ${mountactive3} -eq 0 ]
     do
-      echo "# waiting until mountings are active"
+      >&2 echo "# waiting until mountings are active"
       sleep 2
       sync
       mountactive1=$(df | grep -c /mnt/hdd)
@@ -593,13 +593,13 @@ if [ "$1" = "fstab" ]; then
       mountactive3=$(df | grep -c /mnt/storage)  
       loopcount=$(($loopcount +1))
       if [ ${loopcount} -gt 10 ]; then
-        echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        >&2 echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
         echo "needsReboot=1"
         exit 1
       fi
     done
 
-    echo "# OK - fstab updated for BTRFS layout"
+    >&2 echo "# OK - fstab updated for BTRFS layout"
 
   else
     echo "error='wrong hdd format'"
@@ -623,18 +623,18 @@ if [ "$1" = "raid" ]; then
   # checking parameter
   if [ "$2" = "on" ]; then
      if [ ${isRaid} -eq 1 ]; then
-       echo "# OK - already ON"
+       >&2 echo "# OK - already ON"
        exit
      fi
-     echo "# RAID - Adding raid drive to RaspiBlitz data drive"
+     >&2 echo "# RAID - Adding raid drive to RaspiBlitz data drive"
   elif [ "$2" = "off" ]; then
      if [ ${isRaid} -eq 0 ]; then
-       echo "# OK - already OFF"
+       >&2 echo "# OK - already OFF"
        exit
      fi
-     echo "# RAID - Removing raid drive to RaspiBlitz data drive"  
+     >&2 echo "# RAID - Removing raid drive to RaspiBlitz data drive"  
   else
-     echo "# possible 2nd parameter is 'on' or 'off'"  
+     >&2 echo "# possible 2nd parameter is 'on' or 'off'"  
      echo "error='unkown parameter'"
      exit 1
   fi
@@ -649,7 +649,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # second parameter - like its named: lsblk
   usbdev=$3
   if [ ${#usbdev} -eq 0 ]; then
-    echo "# FAIL third parameter is missing with the name of the usb device to add"
+    >&2 echo "# FAIL third parameter is missing with the name of the usb device to add"
     echo "error='missing parameter'"
     exit 1
   fi
@@ -657,12 +657,12 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # check that dev exists and is unique
   usbdevexists=$(lsblk -o NAME,UUID | grep -c "^${usbdev}")
   if [ ${usbdevexists} -eq 0 ]; then
-    echo "# FAIL not found: ${usbdev}"
+    >&2 echo "# FAIL not found: ${usbdev}"
     echo "error='dev not found'"
     exit 1
   fi
   if [ ${usbdevexists} -gt 1 ]; then
-    echo "# FAIL multiple matches: ${usbdev}"
+    >&2 echo "# FAIL multiple matches: ${usbdev}"
     echo "error='dev not unique'"
     exit 1
   fi
@@ -685,8 +685,8 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   if [ ${usbdevBTRFS} -eq 1 ]; then
     # edge case: already contains BTRFS data
     # TODO: once implemented -> also make sure that dev1 is named "DATASTORE" and if 2nd is other -> format and add as raid
-    echo "# ERROR: !! NOT IMPLEMENTED YET -> devices seem contain old data"
-    echo "# if you dont care about that data: format on other computer with FAT"
+    >&2 echo "# ERROR: !! NOT IMPLEMENTED YET -> devices seem contain old data"
+    >&2 echo "# if you dont care about that data: format on other computer with FAT"
     echo "error='old data on dev'"
     exit 1
   fi
@@ -700,17 +700,17 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # check if usb device is at least 30GB groß
   usbdevsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdev}" | awk '$1=$1' | cut -d " " -f 2)
   if [ ${usbdevsize} -lt 30000000000 ]; then
-    echo "# FAIL ${usbdev} is smaller then the minumum 30GB"
+    >&2 echo "# FAIL ${usbdev} is smaller then the minumum 30GB"
     echo "error='dev too small'"
     exit 1
   fi
 
   # add usb device as raid for data
-  echo "# adding ${usbdev} as BTRFS raid1 for /mnt/hdd"
+  >&2 echo "# adding ${usbdev} as BTRFS raid1 for /mnt/hdd"
   sudo btrfs device add -f /dev/${usbdev} /mnt/hdd 1>/dev/null
   sudo btrfs filesystem balance start -dconvert=raid1 -mconvert=raid1 /mnt/hdd 1>/dev/null
   
-  echo "# OK - ${usbdev} is now part of a RAID1 for your RaspiBlitz data"
+  >&2 echo "# OK - ${usbdev} is now part of a RAID1 for your RaspiBlitz data"
   exit 0
 
 fi
@@ -725,11 +725,11 @@ if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
     exit 1
   fi
 
-  echo "# removing USB DEV from RAID"
+  >&2 echo "# removing USB DEV from RAID"
   sudo btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
   sudo btrfs device remove /dev/${raidUsbDev} /mnt/hdd 1>/dev/null
   
-  echo "# OK - RaspiBlitz data is not running in RAID1 anymore - you can remove ${raidUsbDev}"
+  >&2 echo "# OK - RaspiBlitz data is not running in RAID1 anymore - you can remove ${raidUsbDev}"
   exit 0
 
 fi
@@ -763,19 +763,19 @@ if [ "$1" = "snapshot" ]; then
     subvolumeESC="\/mnt\/storage"
     uuid=$(lsblk -o LABEL,UUID | grep "BLITZSTORAGE" | awk '$1=$1' | cut -d " " -f 2 | grep "-")
   else
-    echo "# second parameter needs to be 'data' or 'storage'"
+    >&2 echo "# second parameter needs to be 'data' or 'storage'"
     echo "error='unknown parameter'"
     exit 1
   fi
   
-  echo "# RASPIBLITZ SNAPSHOTS"
+  >&2 echo "# RASPIBLITZ SNAPSHOTS"
   partition=$(df | grep "${subvolume}" | cut -d " " -f 1)
   echo "subvolume='${subvolume}'"
   echo "partition='${partition}'"
 
   if [ "$3" = "create" ]; then
 
-    echo "# Preparing Snapshot ..."
+    >&2 echo "# Preparing Snapshot ..."
 
     # make sure backup folder exists
     sudo mkdir -p ${subvolume}/snapshots
@@ -783,17 +783,17 @@ if [ "$1" = "snapshot" ]; then
     # delete old backup if existing
     oldBackupExists=$(sudo ls ${subvolume}/snapshots | grep -c backup)
     if [ ${oldBackupExists} -gt 0 ]; then
-      echo "# Deleting old snapshot"
+      >&2 echo "# Deleting old snapshot"
       sudo btrfs subvolume delete ${subvolume}/snapshots/backup 1>/dev/null
     fi
 
-    echo "# Creating Snapshot ..."
+    >&2 echo "# Creating Snapshot ..."
     sudo btrfs subvolume snapshot ${subvolume} ${subvolume}/snapshots/backup 1>/dev/null
     if [ $(sudo btrfs subvolume list ${subvolume} | grep -c snapshots/backup) -eq 0 ]; then
       echo "error='not created'"
       exit 1
     else
-      echo "# OK - Snapshot created"
+      >&2 echo "# OK - Snapshot created"
       exit 0
     fi
 
@@ -806,7 +806,7 @@ if [ "$1" = "snapshot" ]; then
       exit 1
     fi
 
-    echo "# Resetting state to old Snapshot ..."
+    >&2 echo "# Resetting state to old Snapshot ..."
     sudo umount ${subvolume}
     sudo mkdir -p /tmp/btrfs 1>/dev/null
     sudo mount ${partition} /tmp/btrfs
@@ -821,7 +821,7 @@ if [ "$1" = "snapshot" ]; then
     sudo mount -a
     sync
     if [ $(df | grep -c "${subvolume}") -eq 0 ]; then
-      echo "# check drive setting ... rollback seemed to "
+      >&2 echo "# check drive setting ... rollback seemed to "
       echo "error='failed rollback'"
       exit 1
     fi
@@ -829,7 +829,7 @@ if [ "$1" = "snapshot" ]; then
     exit 0
 
   else
-    echo "# third parameter needs to be 'create' or 'rollback'"
+    >&2 echo "# third parameter needs to be 'create' or 'rollback'"
     echo "error='unknown parameter'"
     exit 1 
   fi
@@ -851,15 +851,15 @@ if [ "$1" = "tempmount" ]; then
   # get device to temp mount
   hdd=$2
   if [ ${#hdd} -eq 0 ]; then
-    echo "# FAIL which device shozld be temp mounted (e.g. sda)"
-    echo "# run 'status' to see device candidates"
+    >&2 echo "# FAIL which device shozld be temp mounted (e.g. sda)"
+    >&2 echo "# run 'status' to see device candidates"
     echo "error='missing second parameter'"
     exit 1
   fi
 
   hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
   if [ ${#hddFormat} -eq 0 ]; then
-    echo "# FAIL given device not found"
+    >&2 echo "# FAIL given device not found"
     echo "error='device not found'"
     exit 1
   fi
@@ -926,22 +926,22 @@ if [ "$1" = "link" ]; then
 
   # cleanups
   if [ $(sudo ls -la /home/bitcoin/ | grep -c "bitcoin ->") -eq 0 ]; then
-    echo "# - /home/bitcoin/.bitcoin -> is not a link, cleaning"
+    >&2 echo "# - /home/bitcoin/.bitcoin -> is not a link, cleaning"
     sudo rm -r /home/bitcoin/.bitcoin 2>/dev/null
   else
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
   fi
   if [ $(sudo ls -la /home/bitcoin/ | grep -c "litecoin ->") -eq 0 ]; then
-    echo "# - /home/bitcoin/.litecoin -> is not a link, cleaning"
+    >&2 echo "# - /home/bitcoin/.litecoin -> is not a link, cleaning"
     sudo rm -r /home/bitcoin/.litecoin 2>/dev/null
   else
     sudo rm /home/bitcoin/.litecoin 2>/dev/null
   fi
 
   if [ ${isBTRFS} -eq 1 ]; then
-    echo "# Creating BTRFS setup links"
+    >&2 echo "# Creating BTRFS setup links"
     
-    echo "# - linking blockchains into /mnt/hdd"
+    >&2 echo "# - linking blockchains into /mnt/hdd"
     if [ $(ls /mnt/hdd/bitcoin 2>/dev/null | grep -c 'bitcoin') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/bitcoin
       sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
@@ -957,43 +957,43 @@ if [ "$1" = "link" ]; then
       sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
     fi
 
-    echo "# linking lnd for user bitcoin"
+    >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
-    echo "# - linking blockchain for user bitcoin"
+    >&2 echo "# - linking blockchain for user bitcoin"
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
     sudo ln -s /mnt/storage/litecoin /home/bitcoin/.litecoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
-    echo "# - linking storage into /mnt/hdd"
+    >&2 echo "# - linking storage into /mnt/hdd"
     sudo mkdir -p /mnt/storage/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/storage/app-storage
     sudo rm /mnt/hdd/app-storage 2>/dev/null
     sudo ln -s /mnt/storage/app-storage /mnt/hdd/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage 
 
-    echo "# - linking temp into /mnt/hdd"
+    >&2 echo "# - linking temp into /mnt/hdd"
     sudo rm /mnt/hdd/temp 2>/dev/null
     sudo ln -s /mnt/temp /mnt/hdd/temp
     sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
 
-    echo "# - creating snapshots folder"
+    >&2 echo "# - creating snapshots folder"
     sudo mkdir -p /mnt/hdd/snapshots
     sudo mkdir -p /mnt/storage/snapshots
 
   else
-    echo "# Creating EXT4 setup links"
+    >&2 echo "# Creating EXT4 setup links"
 
-    echo "# opening blockchain into /mnt/hdd"
+    >&2 echo "# opening blockchain into /mnt/hdd"
     sudo mkdir -p /mnt/hdd/bitcoin
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
     sudo mkdir -p /mnt/hdd/litecoin
     sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
 
-    echo "# linking blockchain for user bitcoin"
+    >&2 echo "# linking blockchain for user bitcoin"
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
     sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
@@ -1001,12 +1001,12 @@ if [ "$1" = "link" ]; then
     sudo ln -s /mnt/hdd/litecoin /home/bitcoin/.litecoin
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
-    echo "# linking lnd for user bitcoin"
+    >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
-    echo "# creating default storage folders"
+    >&2 echo "# creating default storage folders"
     sudo mkdir -p /mnt/hdd/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage   
     sudo mkdir -p /mnt/hdd/temp
@@ -1018,7 +1018,7 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 2>/dev/null
 
-  echo "# OK - all symbolic links build"
+  >&2 echo "# OK - all symbolic links build"
   exit 0
 
 fi
@@ -1029,7 +1029,7 @@ fi
 
 if [ "$1" = "swap" ]; then
 
-  echo "# RASPIBLITZ DATA DRIVES - SWAP FILE"
+  >&2 echo "# RASPIBLITZ DATA DRIVES - SWAP FILE"
 
   if [ ${isMounted} -eq 0 ]; then
     echo "error='no data drive mounted'"
@@ -1039,67 +1039,67 @@ if [ "$1" = "swap" ]; then
   if [ "$2" = "on" ]; then
 
     if [ ${isSwapExternal} -eq 1 ]; then
-      echo "# OK - already ON"
+      >&2 echo "# OK - already ON"
       exit 1
     fi
 
-    echo "# Switch off/uninstall old SWAP"
+    >&2 echo "# Switch off/uninstall old SWAP"
     sudo dphys-swapfile swapoff 1>/dev/null
     sudo dphys-swapfile uninstall 1>/dev/null
 
     if [ ${isBTRFS} -eq 1 ]; then
 
-      echo "# Rewrite external SWAP config for BTRFS setup"
+      >&2 echo "# Rewrite external SWAP config for BTRFS setup"
       sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/" /etc/dphys-swapfile
       sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile  
     
     else
 
-      echo "# Rewrite external SWAP config for EXT4 setup"
+      >&2 echo "# Rewrite external SWAP config for EXT4 setup"
       sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
       sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
 
     fi
 
-    echo "# Creating SWAP file .."
+    >&2 echo "# Creating SWAP file .."
     sudo dd if=/dev/zero of=$externalSwapPath count=2048 bs=1MiB 1>/dev/null
     sudo chmod 0600 $externalSwapPath 1>/dev/null
 
-    echo "# Activating new SWAP"
+    >&2 echo "# Activating new SWAP"
     sudo mkswap $externalSwapPath
     sudo dphys-swapfile setup 
     sudo dphys-swapfile swapon
 
-    echo "# OK - Swap is now ON external"
+    >&2 echo "# OK - Swap is now ON external"
     exit 0
 
   elif [ "$2" = "off" ]; then
   
     if [ ${isSwapExternal} -eq 0 ]; then
-      echo "# OK - already OFF"
+      >&2 echo "# OK - already OFF"
       exit 1
     fi
 
-    echo "# Switch off/uninstall old SWAP"
+    >&2 echo "# Switch off/uninstall old SWAP"
     sudo dphys-swapfile swapoff 1>/dev/null
     sudo dphys-swapfile uninstall 1>/dev/null
 
-    echo "# Rewrite SWAP config"
+    >&2 echo "# Rewrite SWAP config"
     sudo sed -i "12s/.*/CONF_SWAPFILE=\/var\/swap/" /etc/dphys-swapfile
     sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
     sudo dd if=/dev/zero of=/var/swap count=256 bs=1MiB 1>/dev/null
     sudo chmod 0600 /var/swap
 
-    echo "# Create and switch on new SWAP" 
+    >&2 echo "# Create and switch on new SWAP" 
     sudo mkswap /var/swap 1>/dev/null
     sudo dphys-swapfile setup 1>/dev/null
     sudo dphys-swapfile swapon 1>/dev/null
 
-    echo "# OK - Swap is now OFF external"
+    >&2 echo "# OK - Swap is now OFF external"
     exit 0
 
   else
-    echo "# FAIL unkown second parameter - try 'on' or 'off'"
+    >&2 echo "# FAIL unkown second parameter - try 'on' or 'off'"
     echo "error='unkown parameter'"
     exit 1
   fi
@@ -1112,15 +1112,15 @@ fi
 
 if [ "$1" = "clean" ]; then
 
-  echo "# RASPIBLITZ DATA DRIVES - CLEANING"
+  >&2 echo "# RASPIBLITZ DATA DRIVES - CLEANING"
 
   if [ ${isMounted} -eq 0 ]; then
-    echo "# FAIL: cannot clean - the drive is not mounted'"
+    >&2 echo "# FAIL: cannot clean - the drive is not mounted'"
     echo "error='not mounted'"
     exit 1
   fi
 
-  echo "# Making sure 'secure-delete' is installed ..."
+  >&2 echo "# Making sure 'secure-delete' is installed ..."
   sudo apt-get install -y secure-delete 1>/dev/null
 
   # DELETE ALL DATA (with option to keep blockchain)
@@ -1128,7 +1128,7 @@ if [ "$1" = "clean" ]; then
     
     if [ "$3" = "-total" ] || [ "$3" = "-keepblockchain" ]; then
 
-      echo "# Deleting personal Data .."
+      >&2 echo "# Deleting personal Data .."
 
         # make sure swap is off
         sudo dphys-swapfile swapoff 1>/dev/null
@@ -1137,7 +1137,7 @@ if [ "$1" = "clean" ]; then
 
         # if delete total - rm blockchain blocks quick for performance
         if [ "$3" = "-total" ]; then
-          echo "# Quick Deleting blockchain block data (non-sensitive)"
+          >&2 echo "# Quick Deleting blockchain block data (non-sensitive)"
           sudo rm -R /mnt/hdd/bitcoin/blocks 1>/dev/null 2>/dev/null
           sudo rm -R /mnt/hdd/bitcoin/chainstate 1>/dev/null 2>/dev/null
           sudo rm -R /mnt/hdd/litecoin/blocks 1>/dev/null 2>/dev/null
@@ -1161,15 +1161,15 @@ if [ "$1" = "clean" ]; then
           if [ ${delete} -eq 1 ]; then
 
             if [ -d "/mnt/hdd/$entry" ]; then
-              echo "# shredding DIR  : ${entry}"
+              >&2 echo "# shredding DIR  : ${entry}"
               sudo srm -r /mnt/hdd/$entry
             else
-              echo "# shredding FILE : ${entry}"
+              >&2 echo "# shredding FILE : ${entry}"
               sudo srm /mnt/hdd/$entry
             fi
 
           else
-            echo "# keeping: ${entry}"
+            >&2 echo "# keeping: ${entry}"
           fi
 
         done
@@ -1190,14 +1190,14 @@ if [ "$1" = "clean" ]; then
               # delete or keep
               if [ ${delete} -eq 1 ]; then
                 if [ -d "/mnt/hdd/${chain}/$entry" ]; then
-                  echo "# shredding DIR  : /mnt/hdd/${chain}/${entry}"
+                  >&2 echo "# shredding DIR  : /mnt/hdd/${chain}/${entry}"
                   sudo srm -r /mnt/hdd/${chain}/$entry
                 else
-                  echo "# shredding FILE : /mnt/hdd/${chain}/${entry}"
+                  >&2 echo "# shredding FILE : /mnt/hdd/${chain}/${entry}"
                   sudo srm /mnt/hdd/${chain}/$entry
                 fi
               else
-                echo "# keeping: ${entry}"
+                >&2 echo "# keeping: ${entry}"
               fi
             done
           done
@@ -1206,19 +1206,19 @@ if [ "$1" = "clean" ]; then
         # In a BTRFS setup more is to be done to clean sensitive data
         # TODO: secure wipe BLITZDATA & RAID1 if needed (maybe)
         if [  ${isBTRFS} -eq 1 ]; then
-          echo "# WARNING! BTRFS may still need a secure delete - crash with hammer if needed:"
-          echo "# 1) Your HDD/SSD"
+          >&2 echo "# WARNING! BTRFS may still need a secure delete - crash with hammer if needed:"
+          >&2 echo "# 1) Your HDD/SSD"
           if [ ${isRaid} -eq 1 ]; then
-            echo "# 2) Your RAID USB device"
+            >&2 echo "# 2) Your RAID USB device"
           fi
-          echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
+          >&2 echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
         fi
 
-      echo "# OK cleaning done."
+      >&2 echo "# OK cleaning done."
       exit 1
 
     else
-      echo "# FAIL unkown third parameter try '-total' or '-keepblockchain'"
+      >&2 echo "# FAIL unkown third parameter try '-total' or '-keepblockchain'"
       echo "error='unkown parameter'"
       exit 1    
     fi
@@ -1227,7 +1227,7 @@ if [ "$1" = "clean" ]; then
   elif [ "$2" = "blockchain" ]; then  
 
     # here is no secure delete needed - because not sensitive data
-    echo "# Deleting all Blockchain Data (blocks/chainstate) from storage .."
+    >&2 echo "# Deleting all Blockchain Data (blocks/chainstate) from storage .."
 
     # set path based on EXT4/BTRFS
     basePath="/mnt/hdd"
@@ -1241,13 +1241,13 @@ if [ "$1" = "clean" ]; then
     sudo rm -R ${basePath}/litecoin/blocks 1>/dev/null 2>/dev/null
     sudo rm -R ${basePath}/litecoin/chainstate 1>/dev/null 2>/dev/null
 
-    echo "# OK cleaning done."
+    >&2 echo "# OK cleaning done."
     exit 1
   
   # RESET TEMP (keep swapfile)
   elif [ "$2" = "temp" ]; then  
 
-    echo "# Deleting the temp folder/drive (keeping SWAP file) .."  
+    >&2 echo "# Deleting the temp folder/drive (keeping SWAP file) .."  
 
     # set path based on EXT4/BTRFS
     tempPath="/mnt/hdd/temp"
@@ -1269,23 +1269,23 @@ if [ "$1" = "clean" ]; then
       if [ ${delete} -eq 1 ]; then
 
         if [ -d "${tempPath}/$entry" ]; then
-          echo "# shredding DIR  : ${entry}"
+          >&2 echo "# shredding DIR  : ${entry}"
           sudo srm -r ${tempPath}/$entry
         else
-          echo "# shredding FILE : ${entry}"
+          >&2 echo "# shredding FILE : ${entry}"
           sudo srm ${tempPath}/$entry
         fi
 
       else
-        echo "# keeping: ${entry}"
+        >&2 echo "# keeping: ${entry}"
       fi
     done
 
-    echo "# OK cleaning done."
+    >&2 echo "# OK cleaning done."
     exit 1
   
   else
-    echo "# FAIL unkown second parameter - try 'all','blockchain' or 'temp'"
+    >&2 echo "# FAIL unkown second parameter - try 'all','blockchain' or 'temp'"
     echo "error='unkown parameter'"
     exit 1
   fi
