@@ -129,9 +129,18 @@ else
  echo "${network} still not running"  
 fi #end - when bitcoin is running
 
+# --- so neither bitcoin or lnd or running yet --> find the earlier step in the setup process:
+
+# use blitz.datadrive.sh to analyse HDD situation
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status ${network})
+if [ ${#error} -gt 0 ]; then
+  echo "# FAIL blitz.datadrive.sh status --> ${error}"
+  echo "# Please report issue to the raspiblitz github."
+  exit 1
+fi
+
 # check if HDD is auto-mounted
-mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
-if [ ${mountOK} -eq 1 ]; then
+if [ ${isMounted} -eq 1 ]; then
   
   # FAILSAFE: check if raspiblitz.conf is available
   configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c '.conf')
@@ -239,22 +248,22 @@ if [ ${mountOK} -eq 1 ]; then
 fi # end HDD is already auto-mountes
 
 
-# the HDD is not auto-mounted --> very early stage of setup
+# --- the HDD is not auto-mounted --> very early stage of setup
 
 # if the script is called for the first time
 if [ ${setupStep} -eq 0 ]; then
-
   # run initial user dialog
   /home/admin/20setupDialog.sh
+fi
 
-  # set SetupState
-  sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
-
+# if the script is called for the first time
+if [ ${setupStep} -eq 20 ]; then
+  # run initial user dialog
+  /home/admin/30initHDD.sh
 fi
 
 # the HDD is already ext4 formated and called blockchain
-formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
-if [ ${formatExt4OK} -eq 1 ]; then
+if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
   echo "HDD was already initialized/prepared"
   echo "Now needs to be mounted"
   /home/admin/40addHDD.sh

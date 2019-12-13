@@ -77,4 +77,7 @@ if [ $? -eq 1 ]; then
   echo "runBehindTor=on" >> /home/admin/raspiblitz.info
 fi
 
+# set SetupState
+sudo sed -i "s/^setupStep=.*/setupStep=20/g" /home/admin/raspiblitz.info
+
 clear
