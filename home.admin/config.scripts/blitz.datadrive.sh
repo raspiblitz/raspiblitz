@@ -162,27 +162,33 @@ if [ "$1" = "status" ]; then
   echo
   echo "# RAID"
   echo "isRaid=${isRaid}"
-  # extra information about not mounted drives (if raid is off)
-  if [ ${isMounted} -eq 1 ] && [ ${isBTRFS} -eq 1 ]; then
-    if [ ${isRaid} -eq 0 ]; then
-      drivecounter=0
-      for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
-      do
-        isMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-        if [ ${isMounted} -eq 0 ]; then
-          mountoption=$(lsblk -o NAME,SIZE,VENDOR | grep "^$disk" | awk '$1=$1')
-          echo "raidCandidate[${drivecounter}]='${mountoption}'"
-          drivecounter=$(($drivecounter +1))
-        fi
-      done
-      echo "raidCandidates=${drivecounter}"
-    else
-      # identify RAID devices (if RAID is active)
-      raidHddDev=$(lsblk -o NAME,MOUNTPOINT | grep "/mnt/hdd" | awk '$1=$1' | cut -d " " -f 1 | sed 's/[^0-9a-z]*//g')
-      raidUsbDev=$(sudo btrfs filesystem show /mnt/hdd | grep -F -v "${raidHddDev}" | grep "/dev/" | cut -d "/" --f 3)
-      echo "raidHddDev='${raidHddDev}'"
-      echo "raidUsbDev='${raidUsbDev}'"
-    fi
+  if [ ${isRaid} -eq 1 ] && [ ${isMounted} -eq 1 ] && [ ${isBTRFS} -eq 1 ]; then
+
+    # RAID is ON - give information about running raid setup
+
+    # show devices used for raid
+    raidHddDev=$(lsblk -o NAME,MOUNTPOINT | grep "/mnt/hdd" | awk '$1=$1' | cut -d " " -f 1 | sed 's/[^0-9a-z]*//g')
+    raidUsbDev=$(sudo btrfs filesystem show /mnt/hdd | grep -F -v "${raidHddDev}" | grep "/dev/" | cut -d "/" --f 3)
+    echo "raidHddDev='${raidHddDev}'"
+    echo "raidUsbDev='${raidUsbDev}'"
+
+  else
+
+    # RAID is OFF - give information about possible drives to activate
+
+    # find the possible drives that can be used as 
+    drivecounter=0
+    for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
+    do
+      devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
+      if [ ${devMounted} -eq 0 ]; then
+        mountoption=$(lsblk -o NAME,SIZE,VENDOR | grep "^$disk" | awk '$1=$1')
+        echo "raidCandidate[${drivecounter}]='${mountoption}'"
+        drivecounter=$(($drivecounter +1))
+      fi
+    done
+    echo "raidCandidates=${drivecounter}"
+
   fi
 
   echo
