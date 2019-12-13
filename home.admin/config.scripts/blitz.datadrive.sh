@@ -185,7 +185,7 @@ if [ "$1" = "status" ]; then
       if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
-        vedorname=$(lsblk -o NAME,VENDOR | grep "^sda" | awk '$1=$1' | cut -d " " -f 2)
+        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
         echo "raidCandidate[${drivecounter}]='${mountoption}'"
         drivecounter=$(($drivecounter +1))
@@ -195,12 +195,7 @@ if [ "$1" = "status" ]; then
 
   fi
 
-      size=
-      echo "hddBytes=${size}"
-      
-
   echo
-
   echo "# SWAP"
   echo "isSwapExternal=${isSwapExternal}"
   if [ ${isSwapExternal} -eq 1 ]; then
