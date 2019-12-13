@@ -260,6 +260,7 @@ fi
 if [ ${setupStep} -eq 20 ]; then
   # run initial user dialog
   /home/admin/30initHDD.sh
+  exit 1
 fi
 
 # the HDD is already ext4 formated and called blockchain
