@@ -155,8 +155,8 @@ if [ "$1" = "status" ]; then
     fi
   else
     # output data drive
-    datadisk=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3 | sed 's/[0-9]*//g')
-    echo "datadisk='${datadisk}'"
+    hdd=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3 | sed 's/[0-9]*//g')
+    echo "datadisk='${hdd}'"
   fi
 
   echo
@@ -181,7 +181,8 @@ if [ "$1" = "status" ]; then
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      if [ ${devMounted} -eq 0 ]; then
+      # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
         mountoption=$(lsblk -o NAME,SIZE,VENDOR | grep "^$disk" | awk '$1=$1')
         echo "raidCandidate[${drivecounter}]='${mountoption}'"
         drivecounter=$(($drivecounter +1))
