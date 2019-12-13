@@ -3,6 +3,7 @@
 ## get basic info
 source /home/admin/raspiblitz.info
 
+clear
 echo ""
 echo "# *** 30initHDD.sh ***"
 echo
