@@ -4,6 +4,9 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
+echo ""
+echo "*** 60finishHDD.sh ***"
+
 # CHECK #########
 
 echo "*** Check Basic Config ***"

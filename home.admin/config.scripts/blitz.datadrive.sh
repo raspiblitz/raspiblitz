@@ -971,6 +971,9 @@ if [ "$1" = "link" ]; then
     sudo rm /home/bitcoin/.litecoin 2>/dev/null
   fi
 
+  # make sure lnd base directory exits
+  sudo mkdir -p /mnt/storage/app-storage
+
   if [ ${isBTRFS} -eq 1 ]; then
     >&2 echo "# Creating BTRFS setup links"
     
