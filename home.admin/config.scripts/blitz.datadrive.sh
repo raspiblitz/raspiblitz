@@ -60,6 +60,9 @@ isSwapExternal=$(swapon -s | grep -c "${externalSwapPath}")
 # output and exit if just status action
 if [ "$1" = "status" ]; then
 
+  # optional second parameter can be 'bitcoin' or 'litecoin'
+  blockchainType=$2
+
   echo "# RASPIBLITZ DATA DRIVE Status"  
   echo
 
@@ -145,12 +148,20 @@ if [ "$1" = "status" ]; then
           hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
           sudo umount /mnt/storage
+          if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
+            echo "hddGotBlockchain=1"
+          elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
+            echo "hddGotBlockchain=1"
+          elif [ ${#blockchainType} -gt 0 ]; then
+            echo "hddGotBlockchain=0"
+          fi
         fi
       else
         # if not ext4 or btrfs - there is no usable data
         echo "hddRaspiData=0"
         echo "hddBlocksBitcoin=0"
         echo "hddBlocksLitecoin=0"
+        echo "hddGotBlockchain=0"
       fi
     fi
   else
@@ -344,6 +355,10 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
       exit 1
     fi
   done
+
+  # setting fsk check intervall to 1
+  # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
+  sudo tune2fs -c 1 /dev/sda1
 
   >&2 echo "# OK EXT 4 format done"
   exit 0
