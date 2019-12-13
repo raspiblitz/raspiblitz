@@ -198,7 +198,7 @@ if [ ${isMounted} -eq 0 ]; then
   if [ ${#hddError} -gt 0 ]; then
     echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='-${hddError}'/g" ${infoFile}
+    sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
     exit 0
   fi
 
