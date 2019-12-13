@@ -117,7 +117,7 @@ if [ ${bitcoinRunning} -eq 0 ]; then
   fi
   dialog --pause "  Double checking for ${network}d - please wait .." 8 58 ${seconds}
   clear
-  bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+  bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
 else
   echo "${network} is running"  
 fi
