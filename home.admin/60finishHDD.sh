@@ -2,7 +2,7 @@
 
 ## get basic info
 source /home/admin/raspiblitz.info
-source /mnt/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 echo ""
 echo "*** 60finishHDD.sh ***"
@@ -58,20 +58,18 @@ sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.s
 sudo systemctl daemon-reload
 sudo systemctl enable ${network}d.service
 sudo systemctl start ${network}d.service
-echo "- Started ... wait 20 secs"	
-sleep 20
 
 # check if bitcoin has started
 bitcoinRunning=0
 loopcount=0
 while [ ${bitcoinRunning} -eq 0 ]
 do
-  >&2 echo "# (${loopcount}/50) checking if ${network}d is running ... "
+  >&2 echo "# (${loopcount}/100) checking if ${network}d is running ... "
   bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
   sleep 2
   sync
   loopcount=$(($loopcount +1))
-  if [ ${loopcount} -gt 50 ]; then
+  if [ ${loopcount} -gt 100 ]; then
     /home/admin/XXdebugLogs.sh
     echo "***********************************"
     echo "FAIL: ${network} failed to start :("
