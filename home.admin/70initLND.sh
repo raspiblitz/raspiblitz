@@ -195,13 +195,13 @@ if [ ${walletExists} -eq 0 ]; then
     clear
     echo "Generating new Wallet ...."
     source /home/admin/python3-env-lnd/bin/activate
-    python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
+    python3 /home/admin/config.scripts/lnd.initwallet2.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
     sudo shred /home/admin/.pass.tmp 2>/dev/null
 
     # in case of error - retry
     if [ ${#err} -gt 0 ]; then
-      whiptail --title "lnd.initwallet.py - ERROR" --msgbox "${err}" 8 50
+      whiptail --title "lnd.initwallet2.py - ERROR" --msgbox "${err}" 8 50
       /home/admin/70initLND.sh
       exit 1
     else

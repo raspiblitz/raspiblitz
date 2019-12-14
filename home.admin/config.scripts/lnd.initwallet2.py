@@ -17,9 +17,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# ! always activate virtual env first: source /home/admin/python-env-lnd/bin/activate")
     print("# ! and run with with: python /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
-    print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
-    print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
-    print("# lnd.initwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("# lnd.initwallet2.py new [walletpassword] [?seedpassword]")
+    print("# lnd.initwallet2.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
+    print("# lnd.initwallet2.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
     print("err='missing parameters'")
     sys.exit(1)
 
