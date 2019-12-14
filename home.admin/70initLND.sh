@@ -118,8 +118,10 @@ if [ ${lndRunning} -eq 0 ]; then
     echo "TOR was not selected"
   fi
 
+  echo "Starting LND Service ..."
   sudo systemctl enable lnd
   sudo systemctl start lnd
+
   echo ""
   echo "waiting ."
   sleep 10
