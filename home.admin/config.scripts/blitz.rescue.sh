@@ -65,8 +65,11 @@ if [ "$1" = "export" ]; then
   echo "/mnt/hdd/bitcoin" >> ~/.exclude.temp 
   echo "/mnt/hdd/litecoin" >> ~/.exclude.temp 
   echo "/mnt/hdd/swapfile" >> ~/.exclude.temp 
-  echo "/mnt/hdd/temp" >> ~/.exclude.temp 
+  echo "/mnt/hdd/temp" >> ~/.exclude.temp
+  echo "/mnt/hdd/lost+found" >> ~/.exclude.temp 
   echo "/mnt/hdd/snapshots" >> ~/.exclude.temp 
+  echo "/mnt/hdd/torrent" >> ~/.exclude.temp 
+  echo "/mnt/hdd/app-storage" >> ~/.exclude.temp
 
   # clean old backups from temp
   rm /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
