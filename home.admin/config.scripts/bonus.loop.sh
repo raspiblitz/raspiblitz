@@ -53,10 +53,10 @@ RestartSec=60
 WantedBy=multi-user.target
 " | sudo tee -a /etc/systemd/system/loopd.service
     sudo systemctl enable loopd
-    echo "OK - the the Lightning Loop service is now enabled"
+    echo "OK - the Lightning Loop service is now enabled"
 
   else 
-    echo "RTL already installed."
+    echo "Loop service already installed."
   fi
   
   # start service
@@ -65,6 +65,8 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
+
+  echo "Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
 
   exit 0
 fi
@@ -75,12 +77,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=off/g" /mnt/hdd/raspiblitz.conf
 
-  isInstalled=$(sudo ls /etc/systemd/system/loop.service 2>/dev/null | grep -c 'loop.service')
+  isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING LIGHTNING LOOP SERVICE ***"
-    sudo systemctl stop loop
-    sudo systemctl disable loop
-    sudo rm /etc/systemd/system/loop.service
+    sudo systemctl stop loopd
+    sudo systemctl disable loopd
+    sudo rm /etc/systemd/system/loopd.service
     sudo rm -rf /home/bitcoin/loop
     echo "OK, the Loop Service is removed."
   else 
