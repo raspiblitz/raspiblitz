@@ -158,7 +158,7 @@ if [ ${isMounted} -eq 1 ]; then
 
   # are there any signs of blockchain data and activity
   # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
-  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
   if [ ${blockchainDataExists} -eq 1 ]; then
