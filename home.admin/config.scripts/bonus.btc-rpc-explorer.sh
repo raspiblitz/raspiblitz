@@ -95,8 +95,8 @@ BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
 # If electrumx set, the BTCEXP_ELECTRUMX_SERVERS variable must also be
 # set.
 # Default: none
-# BTCEXP_ADDRESS_API=electrumx
-# BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
+BTCEXP_ADDRESS_API=none
+BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
 EOF
     sudo mv /home/admin/btc-rpc-explorer.env /home/bitcoin/.config/btc-rpc-explorer.env
     sudo chown bitcoin:bitcoin /home/bitcoin/.config/btc-rpc-explorer.env
@@ -138,17 +138,6 @@ EOF
     echo "BTC-RPC-explorer already installed."
   fi
 
-  # Enable BTCEXP_ADDRESS_API if electrs is active
-  if [ $(sudo -u bitcoin lsof -i | grep -c 50001) -eq 1 ]; then
-    echo "electrs is active - switching support on"
-    sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^#//g' /home/bitcoin/.config/btc-rpc-explorer.env
-    sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^#//g' /home/bitcoin/.config/btc-rpc-explorer.env
-  else
-    echo "electrs is not active - switching support off"
-    sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env
-    sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env    
-  fi
-
   # start service
   echo "Starting service"
   sudo systemctl start btc-rpc-explorer 2>/dev/null
@@ -158,6 +147,9 @@ EOF
   
   echo "needs to finish creating txindex to be functional"
   echo "monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+
+  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
+  /home/admin/config.scripts/bonus.electrsexplorer.sh
 
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf

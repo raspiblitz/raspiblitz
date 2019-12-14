@@ -7,6 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
+if [ ${#loop} -eq 0 ]; then loop="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
@@ -55,8 +56,9 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 19 45 11 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
+l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
@@ -69,8 +71,9 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
 1 'Channel Autopilot' ${autoPilot} \
+l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
 4 'Run behind TOR' ${runBehindTor} \
@@ -110,6 +113,18 @@ if [ "${autoPilot}" != "${choice}" ]; then
   needsReboot=1
 else 
   echo "Autopilot Setting unchanged."
+fi
+
+# LOOP process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${loop}" != "${choice}" ]; then
+  echo "Loop Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/bonus.loop.sh ${choice}
+  needsReboot=0
+else 
+  echo "Loop Setting unchanged."
 fi
 
 # TESTNET process choice
