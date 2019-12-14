@@ -328,7 +328,7 @@ fi
 if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
   # write new EXT4 partition
-  >&2 echo "# Creating the one big partion"
+  >&2 echo "# Creating the one big partition"
   sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>/dev/null 2>/dev/null
   sleep 6
   sync

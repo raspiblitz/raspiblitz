@@ -69,11 +69,17 @@ echo " OK"
 echo
 echo "# --> Check HDD/SSD for Blockchain ..."
 echo "# hddGotBlockchain=${hddGotBlockchain}"
+raidDevice=$(echo "${raidCandidate[0]}" | cut -d " " -f 1) 
+raidSizeGB=$(echo "${raidCandidate[0]}" | cut -d " " -f 2) 
+echo "# raidCandidates=${raidCandidates}"
+echo "# raidDevice='${raidDevice}'"
+echo "# raidSizeGB=${raidSizeGB}"
 if [ ${hddGotBlockchain}  -eq 0 ]; then
 
   # test feature: if there is a USB stick as a raid connected, then format in BTRFS an not in EXT4
   format="ext4"
   if [ ${raidCandidates} -eq 1 ]; then
+
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# EXPERIMENTAL FEATURE: BTRFS + RAID"
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -84,6 +90,19 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
     echo "# CTRL+C, remove device & call ./30initHDD.sh again."
     read key
     format="btrfs"
+
+    # check that raid cadidate is big enough
+    # a 32GB drive gets shown with 28GB in mby tests
+    if [ ${raidSizeGB} -lt 27 ]; then
+      echo "# FAIL the raid device needs to be at least a 32GB thumb drive."
+      echo "# Please remove or replace and call ./30initHDD.sh again"
+      exit 1
+    fi
+
+  elif [ ${raidCandidates} -gt 1 ]; then
+    echo "# FAIL more then one USB raid drive candidate connected."
+    echo "# Please max one extra usb drive and the call ./30initHDD.sh again"
+    exit 1
   fi
 
   # now partition/format HDD
@@ -94,6 +113,22 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
     echo "# FAIL blitz.datadrive.sh format --> ${error}"
     echo "# Please report issue to the raspiblitz github."
     exit 1
+  fi
+
+  # adding RAID drive
+  if [ "${format}" = "btrfs" ] && [ ${raidCandidates} -eq 1 ]; then
+
+    echo
+    echo "# --> Adding Raid Drive ..."
+    echo "# raidDevice='${raidDevice}'"
+    echo "# raidSizeGB=${raidSizeGB}"
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh raid on ${raidDevice})
+    if [ ${#error} -gt 0 ]; then
+      echo "# FAIL blitz.datadrive.sh raid on --> ${error}"
+      echo "# Please report issue to the raspiblitz github."
+      exit 1
+    fi
+
   fi
 
 fi
