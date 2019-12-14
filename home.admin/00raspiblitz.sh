@@ -7,6 +7,22 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
+# use blitz.datadrive.sh to analyse HDD situation
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${#error} -gt 0 ]; then
+  echo "# FAIL blitz.datadrive.sh status --> ${error}"
+  echo "# Please report issue to the raspiblitz github."
+  exit 1
+fi
+
+# check if HDD is connected
+if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
+    echo "***********************************************************"
+    echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
+    echo "***********************************************************"
+    exit
+fi
+
 # check data from _bootstrap.sh that was running on device setup
 bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
 if [ ${bootstrapInfoExists} -eq 0 ]; then
