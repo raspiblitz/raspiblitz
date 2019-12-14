@@ -44,6 +44,28 @@ if [ ${#error} -gt 0 ]; then
   exit 1
 fi
 
+# adding RAID drive
+echo "# isBTRFS=${isBTRFS}"
+echo "# raidCandidates=${raidCandidates}"
+if [ ${isBTRFS} -eq 1 ] && [ ${raidCandidates} -eq 1 ]; then
+
+    # example string: 'sdb 28 GB SanDisk'
+    raidDevice=$(echo "${raidCandidate[0]}" | cut -d " " -f 1) 
+    raidSizeGB=$(echo "${raidCandidate[0]}" | cut -d " " -f 2) 
+
+    echo
+    echo "# --> Adding Raid Drive ..."
+    echo "# raidDevice='${raidDevice}'"
+    echo "# raidSizeGB=${raidSizeGB}"
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh raid on ${raidDevice})
+    if [ ${#error} -gt 0 ]; then
+      echo "# FAIL blitz.datadrive.sh raid on --> ${error}"
+      echo "# Please report issue to the raspiblitz github."
+      exit 1
+    fi
+
+ fi
+
 # init the RASPIBLITZ Config
 echo
 echo "# --> Init raspiblitz.conf ..."

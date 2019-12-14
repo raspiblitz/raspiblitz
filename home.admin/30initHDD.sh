@@ -69,10 +69,8 @@ echo " OK"
 echo
 echo "# --> Check HDD/SSD for Blockchain ..."
 echo "# hddGotBlockchain=${hddGotBlockchain}"
-raidDevice=$(echo "${raidCandidate[0]}" | cut -d " " -f 1) 
 raidSizeGB=$(echo "${raidCandidate[0]}" | cut -d " " -f 2) 
 echo "# raidCandidates=${raidCandidates}"
-echo "# raidDevice='${raidDevice}'"
 echo "# raidSizeGB=${raidSizeGB}"
 if [ ${hddGotBlockchain}  -eq 0 ]; then
 
@@ -80,6 +78,7 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
   format="ext4"
   if [ ${raidCandidates} -eq 1 ]; then
 
+    echo
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# EXPERIMENTAL FEATURE: BTRFS + RAID"
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -113,22 +112,6 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
     echo "# FAIL blitz.datadrive.sh format --> ${error}"
     echo "# Please report issue to the raspiblitz github."
     exit 1
-  fi
-
-  # adding RAID drive
-  if [ "${format}" = "btrfs" ] && [ ${raidCandidates} -eq 1 ]; then
-
-    echo
-    echo "# --> Adding Raid Drive ..."
-    echo "# raidDevice='${raidDevice}'"
-    echo "# raidSizeGB=${raidSizeGB}"
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh raid on ${raidDevice})
-    if [ ${#error} -gt 0 ]; then
-      echo "# FAIL blitz.datadrive.sh raid on --> ${error}"
-      echo "# Please report issue to the raspiblitz github."
-      exit 1
-    fi
-
   fi
 
 fi
