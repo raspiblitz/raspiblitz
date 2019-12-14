@@ -330,6 +330,18 @@ do
   fi
 
   ###############################
+  # Set the address API use for BTC-RPC-Explorer depending on Electrs status
+  ###############################
+
+  # check every 10 minutes
+  electrsExplorer=$((($counter % 600)+1))
+  if [ ${electrsExplorer} -eq 1 ]; then
+    if [ "${BTCRPCexplorer}" = "on" ] & [ "${ElectRS}" = "on" ]; then
+      /home/admin/config.scripts/bonus.electrsexplorer.sh
+    fi
+  fi
+
+  ###############################
   # Prepare next loop
   ###############################
 

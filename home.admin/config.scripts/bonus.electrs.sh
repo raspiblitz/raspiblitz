@@ -102,6 +102,8 @@ timestamp = true
 jsonrpc_import = true
 db_dir = "/mnt/hdd/electrs/db"
 cookie = "$RPC_USER:$PASSWORD_B"
+# allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
+txid_limit = 0
 EOF
     sudo mv /home/admin/config.toml /home/electrs/.electrs/config.toml
     sudo chown electrs:electrs /home/electrs/.electrs/config.toml
@@ -263,19 +265,8 @@ WantedBy=multi-user.target
   fi
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  if [ "${BTCRPCexplorer}" = "on" ]; then
-      # Enable BTCEXP_ADDRESS_API if electrs is active
-      if [ $(sudo -u bitcoin lsof -i | grep -c 50001) -eq 1 ]; then
-        echo "electrs is active - switching support on"
-        sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^#//g' /home/bitcoin/.config/btc-rpc-explorer.env
-        sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^#//g' /home/bitcoin/.config/btc-rpc-explorer.env
-      else
-        echo "electrs is not active - switching support off"
-        sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env
-        sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env    
-      fi
-  fi
-
+  /home/admin/config.scripts/bonus.electrsexplorer.sh
+  
   echo ""
   echo "To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo "Electrum wallet: start with the options \`electrum --oneserver --server RaspiBlitz_IP:50002:s\`"
@@ -303,11 +294,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-    if [ "${BTCRPCexplorer}" = "on" ]; then
-      echo "electrs is not active - switching support off"
-      sudo -u bitcoin sed -i '/BTCEXP_ADDRESS_API=electrumx/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env
-      sudo -u bitcoin sed -i '/BTCEXP_ELECTRUMX_SERVERS=/s/^/#/g' /home/bitcoin/.config/btc-rpc-explorer.env    
-    fi
+    /home/admin/config.scripts/bonus.electrsexplorer.sh
   else 
     echo "ElectRS is not installed."
   fi
