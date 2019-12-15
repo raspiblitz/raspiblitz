@@ -1170,11 +1170,13 @@ if [ "$1" = "clean" ]; then
   >&2 echo "# Making sure 'secure-delete' is installed ..."
   sudo apt-get install -y secure-delete 1>/dev/null
 
+  >&2 echo
   >&2 echo "# IMPORTANT: There is no 100% garantue that sensitive data is completely deleted!"
   >&2 echo "# see: https://www.davescomputers.com/securely-deleting-files-solid-state-drive/"
   >&2 echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
   >&2 echo "# --> Dont resell or gift data drive. Destroy physically if needed."
-  
+  >&2 echo  
+
   # DELETE ALL DATA (with option to keep blockchain)
   if [ "$2" = "all" ]; then
     
