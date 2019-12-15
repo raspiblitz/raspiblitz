@@ -1016,7 +1016,6 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     sudo rm /mnt/hdd/temp 2>/dev/null
     sudo ln -s /mnt/temp /mnt/hdd/temp
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
 
     >&2 echo "# - creating snapshots folder"
     sudo mkdir -p /mnt/hdd/snapshots
@@ -1048,13 +1047,15 @@ if [ "$1" = "link" ]; then
     sudo mkdir -p /mnt/hdd/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage   
     sudo mkdir -p /mnt/hdd/temp
-
+    
   fi
 
   # fix ownership of linked files
   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 2>/dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
+  sudo chmod -R 666 /mnt/hdd/temp
 
   >&2 echo "# OK - all symbolic links build"
   exit 0

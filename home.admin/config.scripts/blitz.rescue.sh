@@ -32,11 +32,7 @@ fi
 isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
 
 # set place where zipped TAR file gets stored
-defaultZipPath="/mnt/hdd"
-if [ ${isBTRFS} -gt 0 ]; then
-  # on BTRFS setups, use the blockchain drive
-  defaultZipPath="/mnt/temp"
-fi
+defaultZipPath="/mnt/hdd/temp"
 
 # SCP download and upload links
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
