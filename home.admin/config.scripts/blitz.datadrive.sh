@@ -973,8 +973,9 @@ if [ "$1" = "link" ]; then
     sudo rm /home/bitcoin/.litecoin 2>/dev/null
   fi
 
-  # make sure lnd base directory exits
-  sudo mkdir -p /mnt/storage/app-storage
+  # make sure common base directory exits
+  sudo mkdir -p /mnt/hdd/lnd
+  sudo mkdir -p /mnt/hdd/app-data
 
   if [ ${isBTRFS} -eq 1 ]; then
     >&2 echo "# Creating BTRFS setup links"
@@ -984,34 +985,28 @@ if [ "$1" = "link" ]; then
       sudo mkdir -p /mnt/storage/bitcoin
       sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
-      sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
       sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
     if [ $(ls /mnt/hdd/litecoin 2>/dev/null | grep -c 'litecoin') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/litecoin
       sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
       sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
-      sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
       sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
     fi
 
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
     >&2 echo "# - linking blockchain for user bitcoin"
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
     sudo ln -s /mnt/storage/litecoin /home/bitcoin/.litecoin
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
     >&2 echo "# - linking storage into /mnt/hdd"
     sudo mkdir -p /mnt/storage/app-storage
     sudo chown -R bitcoin:bitcoin /mnt/storage/app-storage
     sudo rm /mnt/hdd/app-storage 2>/dev/null
     sudo ln -s /mnt/storage/app-storage /mnt/hdd/app-storage
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage 
 
     >&2 echo "# - linking temp into /mnt/hdd"
     sudo rm /mnt/hdd/temp 2>/dev/null
@@ -1026,36 +1021,47 @@ if [ "$1" = "link" ]; then
 
     >&2 echo "# opening blockchain into /mnt/hdd"
     sudo mkdir -p /mnt/hdd/bitcoin
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
     sudo mkdir -p /mnt/hdd/litecoin
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
 
     >&2 echo "# linking blockchain for user bitcoin"
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
     sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+    
     sudo rm /home/bitcoin/.litecoin 2>/dev/null
     sudo ln -s /mnt/hdd/litecoin /home/bitcoin/.litecoin
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
 
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
-    sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
-    >&2 echo "# creating default storage folders"
+    >&2 echo "# creating default storage & temp folders"
     sudo mkdir -p /mnt/hdd/app-storage
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage   
     sudo mkdir -p /mnt/hdd/temp
     
   fi
 
   # fix ownership of linked files
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 2>/dev/null
-  sudo chown -R admin:admin /mnt/hdd/temp 
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+  sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
+  sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
   sudo chmod -R 766 /mnt/hdd/temp
+
+  # write info files about what directories are for
+
+  echo "The /mnt/hdd/temp directrory is for short time data and will get cleaned up on very start. Dont work with data here thats bigger then 25GB - because on BTRFS hdd layout this is a own partition with limited space. Also on BTRFS hdd layout the temp partition is an FAT format - so it can be easily mounted on Windows and OSx laptops by just connecting it to such laptops. Use this for easy export data. To import data make sure to work with the data before bootstrap is deleting the directory on startup." > ./README.txt
+  sudo mv ./README.txt /mnt/hdd/temp/README.txt
+
+  echo "The /mnt/hdd/app-data directrory should be used by additional/optinal apps and services installed to the RaspiBlitz for their data that should survive an import/export/backup. Data that can be reproduced (indexes, etc.) should be stored in app-storage." > ./README.txt
+  sudo mv ./README.txt /mnt/hdd/app-data/README.txt
+
+  echo "The /mnt/hdd/app-storage directrory should be used by additional/optinal apps and services installed to the RaspiBlitz for their non-critical and reproducable data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
+  sudo mv ./README.txt /mnt/hdd/app-storage/README.txt
 
   >&2 echo "# OK - all symbolic links build"
   exit 0

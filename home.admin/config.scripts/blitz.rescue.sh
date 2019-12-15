@@ -36,8 +36,8 @@ defaultZipPath="/mnt/hdd/temp"
 
 # SCP download and upload links
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-scpDownload="scp -r 'admin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpUpload="scp -r './raspiblitz-*.tar.gz' admin@${localip}:${defaultZipPath}"
+scpDownload="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
+scpUpload="scp -r './raspiblitz-*.tar.gz' bitcoin@${localip}:${defaultZipPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
@@ -112,6 +112,7 @@ if [ "$1" = "export" ]; then
   echo "filename='${name}'"
   sudo ${defaultZipPath}/raspiblitz-export-temp.tar.gz
   mv ${defaultZipPath}/raspiblitz-export-temp.tar.gz ${defaultZipPath}/${name}
+  sudo chown bitcoin:bitcoin ${defaultZipPath}/${name}
 
   # delete temp files
   rm ~/.exclude.temp
