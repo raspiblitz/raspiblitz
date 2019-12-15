@@ -37,7 +37,7 @@ defaultZipPath="/mnt/hdd/temp"
 # SCP download and upload links
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 scpDownload="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpUpload="scp -r './raspiblitz-*.tar.gz' bitcoin@${localip}:${defaultZipPath}"
+scpUpload="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
