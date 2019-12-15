@@ -1214,7 +1214,7 @@ if [ "$1" = "clean" ]; then
           fi
           # on SSDs never shredd
           # https://www.davescomputers.com/securely-deleting-files-solid-state-drive/
-          if [ ${isSSD} -eq 1]; then
+          if [ ${isSSD} -eq 1 ]; then
             whenDeleteSchredd=0
           fi
 
