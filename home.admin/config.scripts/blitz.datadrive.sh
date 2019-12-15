@@ -601,6 +601,10 @@ if [ "$1" = "fstab" ]; then
       sync
     done
 
+    # get user and grouid if usr/group bitcoin
+    bitcoinUID=$(id -u bitcoin)
+    bitcoinGID=$(id -g bitcoin)
+
     # modifying /etc/fstab & mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
     fstabAdd1="UUID=${uuidDATA} /mnt/hdd btrfs noexec,defaults,subvolid=${subVolDATA} 0 2"
@@ -609,7 +613,7 @@ if [ "$1" = "fstab" ]; then
     fstabAdd2="UUID=${uuidSTORAGE} /mnt/storage btrfs noexec,defaults,subvolid=${subVolSTORAGE} 0 2"
     sudo sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
     sudo mkdir -p /mnt/temp 1>/dev/null
-    fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults 0 2"
+    fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults,uid=${bitcoinUID},gid=${bitcoinGID} 0 2"
     sudo sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
     sync && sudo mount -a 1>/dev/null
 
@@ -923,8 +927,8 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
     sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage
-    sudo mount /dev/${hdd}3 /mnt/temp
+    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage uid=bitcoin -o gid=bitcoin
+    sudo mount /dev/${hdd}3 /mnt/temp uid=bitcoin -o gid=bitcoin
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1013,6 +1017,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     sudo rm /mnt/hdd/temp 2>/dev/null
     sudo ln -s /mnt/temp /mnt/hdd/temp
+    sudo chown -R bitcoin:bitcoin /mnt/temp 
 
     >&2 echo "# - creating snapshots folder"
     sudo mkdir -p /mnt/hdd/snapshots
