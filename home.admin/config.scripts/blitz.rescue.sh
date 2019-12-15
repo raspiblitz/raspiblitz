@@ -67,6 +67,20 @@ if [ "$1" = "export" ]; then
   echo "/mnt/hdd/torrent" >> ~/.exclude.temp 
   echo "/mnt/hdd/app-storage" >> ~/.exclude.temp
 
+  # copy bitcoin data files to backup dir (if bitcoin active)
+  if [ -f "/mnt/hdd/bitcoin/bitcoin.conf" ]; then
+    sudo mkdir -p /mnt/hdd/backup_bitcoin
+    sudo cp /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/backup_bitcoin/bitcoin.conf
+    sudo cp /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/backup_bitcoin/wallet.dat 2>/dev/null
+  fi
+
+  # copy litecoin data files to backup dir (if litecoin active)
+  if [ -f "/mnt/hdd/litecoin/litecoin.conf" ]; then
+    sudo mkdir -p /mnt/hdd/backup_litecoin
+    sudo cp /mnt/hdd/bitcoin/litecoin.conf /mnt/hdd/backup_litecoin/litecoin.conf
+    sudo cp /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/backup_litecoin/wallet.dat 2>/dev/null
+  fi
+
   # clean old backups from temp
   rm /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
 
@@ -179,14 +193,22 @@ if [ "$1" = "import" ]; then
   echo "# Importing (overwrite) (can take some time) .."
   sudo tar -xf ${importFile} -C /
 
-  echo "# Reset raspiblitz.info based on imported config .."
-  source /mnt/hdd/raspiblitz.conf 2>/dev/null
-  infoFile="/home/admin/raspiblitz.info"
-  echo "state=imported" > $infoFile
-  echo "network=${network}" >> $infoFile
-  echo "chain=${chain}" >> $infoFile
-  echo "setupStep=100" >> $infoFile
-  
+  # copy bitcoin/litecoin data backups back to orgplaces (if part of backup)
+  if [ -d "/mnt/hdd/backup_bitcoin" ]; then
+    echo "# Copying back bitcoin backup data .."
+    sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+    sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
+  fi
+  if [ -d "/mnt/hdd/backup_litecoin" ]; then
+    echo "# Copying back litecoin backup data .."
+    sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
+    sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
+  fi
+
+  echo "# OK done - you may now want to:"
+  echo "# make sure that HDD is not registered in /etc/fstab & reboot"
+  echo "# to kickstart recovering system based in imported data"
+
   exit 0
 fi
 
