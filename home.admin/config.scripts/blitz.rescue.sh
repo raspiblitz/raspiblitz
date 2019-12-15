@@ -178,6 +178,14 @@ if [ "$1" = "import" ]; then
 
   echo "# Importing (overwrite) (can take some time) .."
   sudo tar -xf ${importFile} -C /
+
+  echo "# Reset raspiblitz.info based on imported config .."
+  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  infoFile="/home/admin/raspiblitz.info"
+  echo "state=imported" > $infoFile
+  echo "network=${network}" >> $infoFile
+  echo "chain=${chain}" >> $infoFile
+  echo "setupStep=100" >> $infoFile
   
   exit 0
 fi
