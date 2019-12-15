@@ -922,13 +922,17 @@ if [ "$1" = "tempmount" ]; then
     
   elif [ "${hddFormat}" = "btrfs" ]; then
 
+    # get user and grouid if usr/group bitcoin
+    bitcoinUID=$(id -u bitcoin)
+    bitcoinGID=$(id -g bitcoin)
+
     # do BTRFS temp mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
     sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage uid=bitcoin -o gid=bitcoin
-    sudo mount /dev/${hdd}3 /mnt/temp uid=bitcoin -o gid=bitcoin
+    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage
+    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hdd}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
