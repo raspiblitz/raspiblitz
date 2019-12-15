@@ -1054,8 +1054,8 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin 2>/dev/null
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 2>/dev/null
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
-  sudo chmod -R 666 /mnt/hdd/temp
+  sudo chown -R admin:admin /mnt/hdd/temp 
+  sudo chmod -R 766 /mnt/hdd/temp
 
   >&2 echo "# OK - all symbolic links build"
   exit 0
@@ -1287,12 +1287,7 @@ if [ "$1" = "clean" ]; then
   elif [ "$2" = "temp" ]; then  
 
     >&2 echo "# Deleting the temp folder/drive (keeping SWAP file) .."  
-
-    # set path based on EXT4/BTRFS
     tempPath="/mnt/hdd/temp"
-    if [ ${isBTRFS} -eq 1 ]; then
-      tempPath="/mnt/temp"
-    fi
 
     # better do secure delete, because temp is used for backups
     # secure-delete works because - also in BTRFS setup, temp is EXT4
