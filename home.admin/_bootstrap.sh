@@ -285,10 +285,6 @@ if [ ${configExists} -eq 0 ]; then
   exit 0
 fi
 
-# make sure all links between directories/drives are correct
-echo "Refreshing links between directories/drives .." >> $logFile
-sudo /home/admin/config.scripts/blitz.datadrive.sh link >> $logFile
-
 #####################################
 # UPDATE HDD CONFIG FILE (if exists)
 # needs to be done before starting LND
