@@ -260,6 +260,19 @@ else
 fi
 echo "" >> ${logFile}
 
+# repair Bitcoin conf if needed
+echo "*** Repair Bitcioin Conf (if needed)" >> ${logFile}
+confExists="$(sudo ls /mnt/hdd/${network} | grep -c "${network}.conf")"
+if [ ${confExists} -eq 0 ]; then
+  echo "Doing init of ${network}.conf" >> ${logFile}
+  sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+  sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
+fi
+echo "Aligning lnd.conf & ${network}.conf" >> ${logFile}
+rpcpass=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "${network}d.rpcpass" | cut -d "=" -f2)
+sudo sed -i "s/^rpcpassword=.*/rpcpassword=${rpcpass}/g" /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
+
+# singal setup done
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
 # set the local network hostname (just if set in config - will not be set anymore by default in newer version)
