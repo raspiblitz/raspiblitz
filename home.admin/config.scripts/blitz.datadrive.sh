@@ -49,6 +49,7 @@ fi
 isMounted=$(sudo df | grep -c /mnt/hdd)
 isBTRFS=$(sudo btrfs subvolume list /mnt/hdd 2>/dev/null | grep -c "WORKINGDIR")
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+isSSD=$(sudo cat /sys/block/sda/queue/rotational | grep -c 0)
 
 # determine if swap is external on or not
 externalSwapPath="/mnt/hdd/swapfile"
@@ -69,6 +70,7 @@ if [ "$1" = "status" ]; then
   echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
+  echo "isSSD=${isBTRFS}"
 
   # if HDD is not mounted system is in the pre-setup phase
   # deliver all the detailes needed about the data drive
@@ -1168,6 +1170,11 @@ if [ "$1" = "clean" ]; then
   >&2 echo "# Making sure 'secure-delete' is installed ..."
   sudo apt-get install -y secure-delete 1>/dev/null
 
+  >&2 echo "# IMPORTANT: There is no 100% garantue that sensitive data is completely deleted!"
+  >&2 echo "# see: https://www.davescomputers.com/securely-deleting-files-solid-state-drive/"
+  >&2 echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
+  >&2 echo "# --> Dont resell or gift data drive. Destroy physically if needed."
+  
   # DELETE ALL DATA (with option to keep blockchain)
   if [ "$2" = "all" ]; then
     
@@ -1180,15 +1187,6 @@ if [ "$1" = "clean" ]; then
         sudo dphys-swapfile uninstall 1>/dev/null
         sync
 
-        # if delete total - rm blockchain blocks quick for performance
-        if [ "$3" = "-total" ]; then
-          >&2 echo "# Quick Deleting blockchain block data (non-sensitive)"
-          sudo rm -R /mnt/hdd/bitcoin/blocks 1>/dev/null 2>/dev/null
-          sudo rm -R /mnt/hdd/bitcoin/chainstate 1>/dev/null 2>/dev/null
-          sudo rm -R /mnt/hdd/litecoin/blocks 1>/dev/null 2>/dev/null
-          sudo rm -R /mnt/hdd/litecoin/chainstate 1>/dev/null 2>/dev/null
-        fi
-
         # for all other data shred files selectivly
         for entry in $(ls -A1 /mnt/hdd)
         do
@@ -1196,15 +1194,28 @@ if [ "$1" = "clean" ]; then
           delete=1
           whenDeleteSchredd=1
 
-          # sorting file
+          # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then
-            # deactivate delete if a blockchain directory
-            if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
-              whenDeleteSchredd=0
+            if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+              delete=0
             fi
           fi
+
+          # decide when to shredd or just delete - just delete unsensitive data
+          if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
+            whenDeleteSchredd=0
+          fi
           if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
-            delete=0
+            whenDeleteSchredd=0
+          fi
+          # if BTRFS just shred stuff in /mnt/hdd/temp (because thats EXT4)
+          if [ ${isBTRFS} -eq 1 ] && [ "${entry}" != "temp" ]; then
+            whenDeleteSchredd=0
+          fi
+          # on SSDs never shredd
+          # https://www.davescomputers.com/securely-deleting-files-solid-state-drive/
+          if [ ${isSSD} -eq 1]; then
+            whenDeleteSchredd=0
           fi
 
           # delete or keep
@@ -1240,6 +1251,11 @@ if [ "$1" = "clean" ]; then
           for chain in "${chains[@]}"
           do
             echo "Cleaning Blockchain: ${chain}"
+
+            # take extra care if wallet.db exists
+            sudo srm /mnt/hdd/${chain}/wallet.db 2>/dev/null
+
+            # the rest just delete (keep blocks and chainstate)
             for entry in $(ls -A1 /mnt/hdd/${chain} 2>/dev/null)
             do
               # sorting file
@@ -1250,28 +1266,17 @@ if [ "$1" = "clean" ]; then
               # delete or keep
               if [ ${delete} -eq 1 ]; then
                 if [ -d "/mnt/hdd/${chain}/$entry" ]; then
-                  >&2 echo "# shredding DIR  : /mnt/hdd/${chain}/${entry}"
-                  sudo srm -r /mnt/hdd/${chain}/$entry
+                  >&2 echo "# Deleting DIR  : /mnt/hdd/${chain}/${entry}"
+                  sudo rm -r /mnt/hdd/${chain}/$entry
                 else
-                  >&2 echo "# shredding FILE : /mnt/hdd/${chain}/${entry}"
-                  sudo srm /mnt/hdd/${chain}/$entry
+                  >&2 echo "# deleting FILE : /mnt/hdd/${chain}/${entry}"
+                  sudo rm /mnt/hdd/${chain}/$entry
                 fi
               else
                 >&2 echo "# keeping: ${entry}"
               fi
             done
           done
-        fi
-
-        # In a BTRFS setup more is to be done to clean sensitive data
-        # TODO: secure wipe BLITZDATA & RAID1 if needed (maybe)
-        if [  ${isBTRFS} -eq 1 ]; then
-          >&2 echo "# WARNING! BTRFS may still need a secure delete - crash with hammer if needed:"
-          >&2 echo "# 1) Your HDD/SSD"
-          if [ ${isRaid} -eq 1 ]; then
-            >&2 echo "# 2) Your RAID USB device"
-          fi
-          >&2 echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
         fi
 
       >&2 echo "# OK cleaning done."
