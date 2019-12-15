@@ -1193,24 +1193,39 @@ if [ "$1" = "clean" ]; then
         for entry in $(ls -A1 /mnt/hdd)
         do
 
-          # sorting file
           delete=1
+          whenDeleteSchredd=1
+
+          # sorting file
           if [ "$3" = "-keepblockchain" ]; then
             # deactivate delete if a blockchain directory
-            if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
-              delete=0
+            if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
+              whenDeleteSchredd=0
             fi
-          fi 
+          fi
+          if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+            delete=0
+          fi
 
           # delete or keep
           if [ ${delete} -eq 1 ]; then
 
             if [ -d "/mnt/hdd/$entry" ]; then
-              >&2 echo "# shredding DIR  : ${entry}"
-              sudo srm -r /mnt/hdd/$entry
+              if [ ${whenDeleteSchredd} -eq 1 ]; then
+                >&2 echo "# shredding DIR  : ${entry}"
+                sudo srm -r /mnt/hdd/$entry
+              else
+                >&2 echo "# deleting DIR  : ${entry}"
+                sudo rm -r /mnt/hdd/$entry
+              fi
             else
-              >&2 echo "# shredding FILE : ${entry}"
-              sudo srm /mnt/hdd/$entry
+              if [ ${whenDeleteSchredd} -eq 1 ]; then
+                >&2 echo "# shredding FILE : ${entry}"
+                sudo srm /mnt/hdd/$entry
+              else
+                >&2 echo "# deleting FILE : ${entry}"
+                sudo rm /mnt/hdd/$entry
+              fi
             fi
 
           else
