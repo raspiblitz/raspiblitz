@@ -1,7 +1,7 @@
 #!/bin/bash
 # $1 is the service name, same as the HiddenServiceDir in torrc
 # $2 is the port the Hidden Service forwards to (to be used in the Tor browser)
-# S3 is the port to be forwarded with the Hidden Service
+# $3 is the port to be forwarded with the Hidden Service
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -24,7 +24,7 @@ if [ ${#toPort} -eq 0 ]; then
   exit 1
 fi
 
-fromPort="$2"
+fromPort="$3"
 if [ ${#fromPort} -eq 0 ]; then
   echo "ERROR:the port to forward from is missing"
   exit 1
