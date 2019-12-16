@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  >&2 echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshots]"
+ >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshot]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -186,6 +186,22 @@ if [ "$1" = "status" ]; then
     elif [ ${#blockchainType} -gt 0 ]; then
       echo "hddGotBlockchain=0"
     fi
+
+    # used space - at the moment just string info to display
+    if [ ${isBTRFS} -eq 0 ]; then
+      # EXT4 calculations
+      hdd_used_space=$(df -h | grep "/dev/${hdd}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
+      hdd_used_ratio=$(df -h | grep "/dev/${hdd}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+    else
+      # BRTS calculations
+      # TODO: this is the final/correct way - make better later
+      # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
+      datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
+      storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
+      hddUsedInfo="${datadrive} & ${storageDrive}"
+    fi
+    echo "hddUsedInfo='${hddUsedInfo}'"
 
   fi
 
