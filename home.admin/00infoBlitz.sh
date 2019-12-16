@@ -15,6 +15,10 @@ color_purple='\033[0;35m'
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
+## get HDD/SSD info
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+hdd="${hddUsedInfo}"
+
 # get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
 upsInfo=""
@@ -78,17 +82,6 @@ if [ ${ram_avail} -lt 50 ]; then
   color_ram="${color_red}\e[7m"
 else
   color_ram=${color_green}
-fi
-
-# HDD usage
-hdd_used_space=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
-hdd_used_ratio=$(df -h | grep "/dev/sda" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
-hdd="${hdd_used_space} (${hdd_used_ratio}%)"
-
-if [ ${hdd_used_ratio} -gt 90 ]; then
-  color_hdd="${color_red}\e[7m"
-else
-  color_hdd=${color_green}
 fi
 
 # get network traffic
