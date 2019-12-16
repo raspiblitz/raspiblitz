@@ -119,7 +119,7 @@ waitUntilChainNetworkIsReady()
         minSize=20000000000
       fi
       isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
-      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
+      blockchainsize=$(sudo du -shbc /mnt/hdd/${network}/ 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
           if [ ${isSyncing} -eq 0 ]; then
