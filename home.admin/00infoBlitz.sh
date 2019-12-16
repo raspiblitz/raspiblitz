@@ -16,7 +16,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ## get HDD/SSD info
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
 # get UPS info
