@@ -19,6 +19,7 @@ if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
+if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -56,7 +57,7 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -69,9 +70,10 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
+m 'lndmanage' ${lndmanage} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 22 45 14 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -86,6 +88,7 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
+m 'lndmanage' ${lndmanage} \
 2>&1 >/dev/tty)
 fi
 
@@ -122,6 +125,10 @@ if [ "${loop}" != "${choice}" ]; then
   echo "Loop Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/bonus.loop.sh ${choice}
+  whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
+Start from the command line by typing 'loop' to see the options.
+" 10 75 
   needsReboot=0
 else 
   echo "Loop Setting unchanged."
@@ -508,6 +515,24 @@ ${TOR_ADDRESS}
   needsReboot=0
 else
   echo "BTCPayServer setting not changed."
+fi
+
+# LNDMANAGE process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lndmanage}" != "${choice}" ]; then
+  echo "lndmanage Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
+  whiptail --title " Installed lndmanage " --msgbox "\
+Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n
+Start with the line:
+'cd lndmanage & source venv/bin/activate & lndmanage'\n
+To exit: type 'deactivate' and press ENTER
+" 12 75 
+  needsReboot=0
+else 
+  echo "lndmanage setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
