@@ -18,6 +18,9 @@ fi
 # make sure lndconnect is installed
 /home/admin/config.scripts/bonus.lndconnect.sh
 
+# get Go vars
+source /etc/profile
+
 if [ $1 == zeus ]; then
   echo ""
   echo "Set up on your mobile: " 
