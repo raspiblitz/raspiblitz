@@ -125,10 +125,12 @@ if [ "${loop}" != "${choice}" ]; then
   echo "Loop Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/bonus.loop.sh ${choice}
-  whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
 Start from the command line by typing 'loop' to see the options.
-" 10 75 
+" 10 75
+  fi
   needsReboot=0
 else 
   echo "Loop Setting unchanged."
@@ -524,12 +526,14 @@ if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  whiptail --title " Installed lndmanage " --msgbox "\
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed lndmanage " --msgbox "\
 Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n
 Start with the line:
 'cd lndmanage & source venv/bin/activate & lndmanage'\n
 To exit: type 'deactivate' and press ENTER
-" 12 75 
+" 12 75
+  fi
   needsReboot=0
 else 
   echo "lndmanage setting unchanged."
