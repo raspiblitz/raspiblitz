@@ -48,6 +48,9 @@ if [ ${goInstalled} -eq 0 ];then
   sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /etc/profile"   
   sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin/' >> /etc/profile"
   
+  # set GOPATH https://github.com/golang/go/wiki/SettingGOPATH
+  go env -w GOPATH=/usr/local/gocode
+  
   goInstalled=$(go version 2>/dev/null | grep -c 'go')
 fi
 if [ ${goInstalled} -eq 0 ];then
