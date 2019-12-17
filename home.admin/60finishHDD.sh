@@ -29,6 +29,8 @@ sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
 sudo mkdir /home/admin/.${network} 2>/dev/null
 sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
 
+# make sure all files are linked correct
+sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
 ###### ACTIVATE TOR IF SET DURING SETUP
 if [ "${runBehindTor}" = "on" ]; then
