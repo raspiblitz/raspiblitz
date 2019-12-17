@@ -5,7 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 echo ""
-echo "*** 60finishHDD.sh ***"
+echo "*** 70initLND.sh ***"
 
 # CHECK #########
 
