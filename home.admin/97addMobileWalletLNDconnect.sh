@@ -23,6 +23,9 @@ source /mnt/hdd/raspiblitz.conf
 # make sure lndconnect is installed
 /home/admin/config.scripts/bonus.lndconnect.sh
 
+# get Go vars
+source /etc/profile
+
 # default host to local IP and port
 local=1
 localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')

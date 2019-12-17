@@ -22,8 +22,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 0 ]; then
-    /home/admin/config.scripts/go.install.sh
+    /home/admin/config.scripts/bonus.go.sh
     
+    # get Go vars
+    source /etc/profile
+
     cd /home/bitcoin
     sudo -u bitcoin git clone https://github.com/lightninglabs/loop.git
     cd /home/bitcoin/loop
@@ -32,7 +35,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     go install ./...
     
     # make systemd service
-    # sudo nano /etc/systemd/system/electrs.service 
+    # sudo nano /etc/systemd/system/loopd.service 
     echo "
 [Unit]
 Description=Loopd Service
