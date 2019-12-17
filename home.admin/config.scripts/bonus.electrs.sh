@@ -68,11 +68,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo ""
     echo "***"
-    echo "The electrs database will be built in /mnt/hdd/electrs/db. Takes ~18 hours and ~50Gb diskspace"
+    echo "The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
     echo "***"
     echo ""
-    sudo mkdir /mnt/hdd/electrs 2>/dev/null
-    sudo chown -R electrs:electrs /mnt/hdd/electrs
+    sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
+    sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
     echo ""
     echo "***"
@@ -100,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 verbose = 4
 timestamp = true
 jsonrpc_import = true
-db_dir = "/mnt/hdd/electrs/db"
+db_dir = "/mnt/hdd/app-storage/electrs/db"
 cookie = "$RPC_USER:$PASSWORD_B"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
 txid_limit = 0
