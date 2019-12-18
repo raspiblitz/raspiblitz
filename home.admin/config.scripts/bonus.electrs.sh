@@ -43,7 +43,7 @@ if [ "$1" = "status" ]; then
     else
       echo "isSynced=0"
     fi
-    echo "infoSync='${syncedToBlock}/${blockchainHeight}'"
+    echo "infoSync='Syncing ${syncedToBlock}/${blockchainHeight}'"
   else
     echo "isSynced=0"
   fi

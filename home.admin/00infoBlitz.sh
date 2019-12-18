@@ -309,7 +309,7 @@ ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}${color_red}
+${color_yellow}${ln_publicColor}${ln_external}${color_gray}
 
 " \
 "RaspiBlitz v${codeVersion}" \
@@ -333,7 +333,7 @@ else
   if [ "${ElectRS}" = "on" ]; then
     source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
     if [ "${isSynced}" = "0" ]; then
-      appInfoLine="${color_gray}Electrum Sync Info: ${infoSync}"
+      appInfoLine="Electrum: ${infoSync}"
     fi
   fi
 
