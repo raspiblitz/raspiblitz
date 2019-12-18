@@ -31,7 +31,7 @@ if [ "$1" = "status" ]; then
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 0 ]; then
-    echo "infoSync='Service not running - check: sudo journalctl -u electrs'"
+    echo "infoSync='Not running - check: sudo journalctl -u electrs'"
   fi
 
   if [ ${serviceRunning} -eq 1 ]; then
