@@ -26,12 +26,20 @@ if [ "$1" = "status" ]; then
   fi
 
   # try to gather if still indexing
-  indexedToBlock=$(sudo tail -n 100 /mnt/hdd/litecoin/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9)
+  indexedToBlock=$(sudo tail -n 100 /mnt/hdd/litecoin/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 sed 's/[^0-9]*//g')
   blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
+  echo "indexedToBlock=${indexedToBlock}"
+  echo "blockchainHeight=${blockchainHeight}"
   if [ ${#indexedToBlock} -eq 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
-    echo "isSynced=1"
+    echo "isIndexed=1"
+    indexInfo="OK"
   else
-    echo "isSynced=0"
+    echo "isIndexed=0"
+    if [ ${#indexedToBlock} -gt 0 ]; then
+      indexInfo="Indexing ${indexedToBlock}/${blockchainHeight} (please wait)"
+    else
+      indexInfo="Indexing is running (please wait)"
+    fi
   fi
   exit 0
 
