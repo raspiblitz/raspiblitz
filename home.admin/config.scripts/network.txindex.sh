@@ -26,7 +26,7 @@ if [ "$1" = "status" ]; then
   fi
 
   # try to gather if still indexing
-  indexedToBlock=$(sudo tail -n 100 /mnt/hdd/litecoin/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 sed 's/[^0-9]*//g')
+  indexedToBlock=$(sudo tail -n 100 /mnt/hdd/${network}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
   blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
   echo "indexedToBlock=${indexedToBlock}"
   echo "blockchainHeight=${blockchainHeight}"
