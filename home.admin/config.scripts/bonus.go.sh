@@ -48,11 +48,13 @@ if [ ${goInstalled} -eq 0 ];then
   export PATH=$PATH:$GOROOT/bin
   export GOPATH=/usr/local/gocode
   export PATH=$PATH:$GOPATH/bin
-  sudo bash -c "echo 'GOROOT=/usr/local/go' >> /etc/profile"
-  sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin/' >> /etc/profile"
-  sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /etc/profile"   
-  sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin/' >> /etc/profile"
-  
+  if [ $(cat /etc/profile | grep -c "GOROOT=") -eq 0 ]; then
+    sudo bash -c "echo 'GOROOT=/usr/local/go' >> /etc/profile"
+    sudo bash -c "echo 'PATH=\$PATH:\$GOROOT/bin/' >> /etc/profile"
+    sudo bash -c "echo 'GOPATH=/usr/local/gocode' >> /etc/profile"   
+    sudo bash -c "echo 'PATH=\$PATH:\$GOPATH/bin/' >> /etc/profile"
+  fi
+
   # set GOPATH https://github.com/golang/go/wiki/SettingGOPATH
   go env -w GOPATH=/usr/local/gocode
   
