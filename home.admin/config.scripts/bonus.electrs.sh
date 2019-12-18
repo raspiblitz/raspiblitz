@@ -327,17 +327,24 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "*** REMOVING ELECTRS ***"
+
     sudo systemctl stop electrs
     sudo systemctl disable electrs
+
     sudo rm /etc/systemd/system/electrs.service
+
     sudo rm -rf /home/electrs/electrs
     sudo rm -rf /home/electrs/.cargo
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
+
+    # delete also db (because in case HDD is full, deactivating should free data)
+    sudo rm -rf /mnt/hdd/app-storage/electrs/
+
     echo "OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-    /home/admin/config.scripts/bonus.electrsexplorer.sh
+    /home/admin/config.scripts/bonus.electrsexplorer.sh off
   else 
     echo "ElectRS is not installed."
   fi
