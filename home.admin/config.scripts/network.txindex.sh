@@ -40,6 +40,7 @@ if [ "$1" = "status" ]; then
     else
       indexInfo="Indexing is running (please wait)"
     fi
+    echo "indexInfo='${indexInfo}'"
   fi
   exit 0
 
