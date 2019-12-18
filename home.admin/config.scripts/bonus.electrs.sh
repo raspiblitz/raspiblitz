@@ -24,9 +24,15 @@ if [ "$1" = "status" ]; then
 
   serviceInstalled=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "electrs.service - Electrs")
   echo "serviceInstalled=${serviceInstalled}"
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "infoSync='Service not installed'"
+  fi
 
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
+  if [ ${serviceRunning} -eq 0 ]; then
+    echo "infoSync='Service not running - check: sudo journalctl -u electrs'"
+  fi
 
   if [ ${serviceRunning} -eq 1 ]; then
     # Experimental try to get sync Info
@@ -319,6 +325,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
+
     echo "*** REMOVING ELECTRS ***"
     sudo systemctl stop electrs
     sudo systemctl disable electrs

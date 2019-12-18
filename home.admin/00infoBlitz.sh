@@ -333,7 +333,7 @@ else
   if [ "${ElectRS}" = "on" ]; then
     source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
     if [ "${isSynced}" = "0" ]; then
-      appInfoLine="Electrum Sync: ${infoSync}"
+      appInfoLine="${color_gray}Electrum Sync Info: ${infoSync}"
     fi
   fi
 
