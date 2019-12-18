@@ -93,6 +93,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable loopd
     sudo rm /etc/systemd/system/loopd.service
     sudo rm -rf /home/bitcoin/loop
+    sudo rm  /usr/local/gocode/bin/loop
+    sudo rm  /usr/local/gocode/bin/loopd
     echo "OK, the Loop Service is removed."
   else 
     echo "Loop is not installed."
