@@ -324,4 +324,21 @@ elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
   echo "Weak power supply detected - run 'Hardware Test' in menu"
 elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
   echo "UPS service activated but not running"
+else
+
+  # cheching status of apps and display if in sync or problems
+  appInfoLine=""
+
+  # Electrum Server - electrs
+  if [ "${ElectRS}" = "on" ]; then
+    source <(sudo /home/admin/config.scripts/bonus.eletrs.sh status)
+    if [ ${isSnyed} -eq 0 ]; then
+      appInfoLine="Electrum Sync: ${infoSync}"
+    fi
+  fi
+
+  if [ ${#appInfoLine} -gt 0 ]; then
+    echo "${appInfoLine}"
+  fi
+  
 fi
