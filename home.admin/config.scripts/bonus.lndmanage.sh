@@ -45,8 +45,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^lndmanage=.*/lndmanage=off/g" /mnt/hdd/raspiblitz.conf
   
   echo "*** REMOVING LNDMANAGE ***"
-  deactivate 2>/dev/null
-  cd
   sudo rm -rf /home/admin/lndmanage
   echo "OK, lndmanage is removed."
   exit 0
