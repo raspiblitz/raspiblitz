@@ -30,8 +30,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
 
   echo "usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
-  echo "start with the line:"
-  echo "'cd lndmanage & source venv/bin/activate & lndmanage'"
+  echo "to start type on command line: lndmanage"
   echo "to exit type 'deactivate' and press ENTER"
 
   exit 0
