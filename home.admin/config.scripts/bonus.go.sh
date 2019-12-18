@@ -10,6 +10,10 @@ isX86_64=$(uname -m | grep -c 'x86_64')
 isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
 
 # make sure go is installed
+
+# get Go vars - needed if there was no log-out since Go installed
+source /etc/profile
+
 echo "Check Framework: Go"
 goInstalled=$(go version 2>/dev/null | grep -c 'go')
 if [ ${goInstalled} -eq 0 ];then
@@ -29,6 +33,7 @@ if [ ${goInstalled} -eq 0 ];then
   echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
 
   # wget https://storage.googleapis.com/golang/go${goVersion}.linux-${goOSversion}.tar.gz
+  sudo rm *.gz
   wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz
   if [ ! -f "./go${goVersion}.linux-${goOSversion}.tar.gz" ]
   then

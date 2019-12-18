@@ -124,12 +124,20 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${loop}" != "${choice}" ]; then
   echo "Loop Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/bonus.loop.sh ${choice}
+  /home/admin/config.scripts/bonus.loop.sh ${choice}
+  errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
-    whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+    if [ ${errorOnInstall} -eq 0 ]; then
+      whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
 Start from the command line by typing 'loop' to see the options.
 " 10 75
+    else
+      l1="FAILED to install Lightning LOOP"
+      l2="Try manual install in the terminal with:"
+      l3="/home/admin/config.scripts/bonus.loop.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
   fi
   needsReboot=0
 else 
