@@ -132,6 +132,7 @@ if [ "${loop}" != "${choice}" ]; then
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
 Start from the command line by typing 'loop' to see the options.
 " 10 75
+    source /etc/profile
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
