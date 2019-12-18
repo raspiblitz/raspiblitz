@@ -128,10 +128,19 @@ if [ "${loop}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+      # add Go vars to current session
+      if [ ${#GOPATH} -eq 0 ]; then
+        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
+Start a new terminal session (log in again with ssh) and
+start from the command line by typing 'loop' to see the options.
+" 11 75
+      else
+        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
 Start from the command line by typing 'loop' to see the options.
 " 10 75
+      fi
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
