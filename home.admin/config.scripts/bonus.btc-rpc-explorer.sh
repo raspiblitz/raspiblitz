@@ -7,11 +7,32 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch BTC-RPC-explorer on or off"
- echo "bonus.btc-rcp-explorer.sh [on|off]"
+ echo "bonus.btc-rcp-explorer.sh [status|on|off]"
  exit 1
 fi
 
+# add default value to raspi config if needed
+if [ ${#BTCRPCexplorer} -eq 0 ]; then
+  echo "BTCRPCexplorer=off" >> /mnt/hdd/raspiblitz.conf
+fi
 source /mnt/hdd/raspiblitz.conf
+
+# status
+if [ "$1" = "status" ]; then
+
+  if [ "${BTCRPCexplorer}" = "on" ]; then
+    echo "configured=1"
+
+    # check indexing
+    source <(sudo /home/admin/config.scripts/network.txindex.sh status)
+    echo "isIndexed=${isIndexed}"
+    echo "indexInfo=${indexInfo}"
+
+  else
+    echo "configured=0"
+  fi
+  exit 0
+fi
 
 # determine nodeJS DISTRO
 isARM=$(uname -m | grep -c 'arm')   
@@ -35,11 +56,6 @@ fi
 if [ ${#DISTRO} -eq 0 ]; then
 echo "FAIL: Was not able to determine architecture"
 exit 1
-fi
-
-# add default value to raspi config if needed
-if [ ${#BTCRPCexplorer} -eq 0 ]; then
-  echo "BTCRPCexplorer=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop service
