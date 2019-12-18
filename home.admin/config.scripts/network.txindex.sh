@@ -7,21 +7,22 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/bitcoin/bitcoin.conf
+source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/${network}/${network}.conf
 
 # add default value to bitcoin.conf if needed
 if [ ${#txindex} -eq 0 ]; then
-  echo "txindex=0" >> /mnt/hdd/bitcoin/bitcoin.conf
+  echo "txindex=0" >> /mnt/hdd/${network}/${network}.conf
 fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${txindex} == 0 ]; then
-    sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/bitcoin/bitcoin.conf
-    echo "switching txindex=1 and restarting bitcoind"
-    sudo systemctl restart bitcoind
+    sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/${network}/${network}.conf
+    echo "switching txindex=1 and restarting ${network}d"
+    sudo systemctl restart ${network}d
     echo "The indexing takes ~7h on an RPi4 with SSD"
-    echo "monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+    echo "monitor with: sudo tail -n 20 -f /mnt/hdd/${network}/debug.log"
     exit 0
   else
     echo "txindex is already active"
@@ -31,8 +32,8 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/bitcoin/bitcoin.conf
-  sudo systemctl restart bitcoind
+  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
+  sudo systemctl restart ${network}d
   exit 0
 fi
 
