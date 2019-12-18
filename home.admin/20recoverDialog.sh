@@ -31,6 +31,15 @@ sudo systemctl enable ${network}d.service
 if [ "${rtlWebinterface}" = "on" ]; then
   sudo systemctl enable RTL
 fi
+if [ "${loop}" = "on" ]; then
+  sudo systemctl enable loopd
+fi
+if [ "${BTCRPCexplorer}" = "on" ]; then
+  sudo systemctl enable btc-rpc-explorer
+fi
+if [ "${ElectRS}" = "on" ]; then
+  sudo systemctl enable electrs
+fi
 
 # remove flag that freshly recovered
 sudo rm /home/admin/raspiblitz.recover.info

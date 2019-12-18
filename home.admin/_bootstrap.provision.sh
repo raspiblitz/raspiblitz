@@ -170,6 +170,53 @@ else
     echo "Provisioning RTL - keep default" >> ${logFile}
 fi
 
+#LOOP
+if [ "${loop}" = "on" ]; then
+  echo "Provisioning Lightning Loop - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
+  /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
+  sudo systemctl disable loopd # will get enabled after recover dialog
+else
+  echo "Provisioning Lightning Loop - keep default" >> ${logFile}
+fi
+
+#BTC RPC EXPLORER
+if [ "${BTCRPCexplorer}" = "on" ]; then
+  echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup BTCRPCexplorer (takes time)'/g" ${infoFile}
+  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh on >> ${logFile} 2>&1
+  sudo systemctl disable btc-rpc-explorer # will get enabled after recover dialog
+else
+  echo "Provisioning BTCRPCexplorer - keep default" >> ${logFile}
+fi
+
+#ELECTRS
+if [ "${ElectRS}" = "on" ]; then
+  echo "Provisioning ElectRS - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup ElectRS (takes time)'/g" ${infoFile}
+  /home/admin/config.scripts/bonus.electrs.sh on >> ${logFile} 2>&1
+  sudo systemctl disable electrs # will get enabled after recover dialog
+else
+  echo "Provisioning ElectRS - keep default" >> ${logFile}
+fi
+
+# BTCPAYSERVER - not restored due to need for domain name and port forwarding
+if [ "${BTCPayServer}" = "on" ]; then
+  echo "Setting BTCPayServer to be off - will need to be reinstalled from the menu again" >> ${logFile}
+  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
+else
+  echo "Provisioning BTCPayServer - keep default" >> ${logFile}
+fi
+
+# LNDMANAGE
+if [ "${lndmanage}" = "on" ]; then
+  echo "Provisioning lndmanage - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
+  /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning ElectRS - keep default" >> ${logFile}
+fi
+
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}
 if [ ${#lndPort} -eq 0 ]; then
@@ -240,6 +287,8 @@ if [ "${#ups}" -gt 0 ]; then
 else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
+
+
 
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
