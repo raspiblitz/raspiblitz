@@ -14,11 +14,46 @@ source /mnt/hdd/raspiblitz.conf
 # add default value to raspi config if needed
 if [ ${#ElectRS} -eq 0 ]; then
   echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
+  ElectRS=off
 fi
 
 # stop service
 echo "making sure services are not running"
 sudo systemctl stop electrs 2>/dev/null
+
+# give status
+if [ "$1" = "status" ]; then
+
+  echo "##### STATUS ELECTRS SERVICE"
+
+  if [ "${ElectRS}" = "on" ]; then
+    echo "configured=1"
+  else
+    echo "configured=0"
+  fi
+
+  serviceInstalled=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "electrs.service - Electrs")
+  echo "serviceInstalled=${serviceInstalled}"
+
+  serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
+  echo "serviceRunning=${serviceRunning}"
+
+  if [ ${serviceRunning} -eq 1 ]; then
+    # Experimental try to get sync Info
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
+    blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
+    if [ "${syncedToBlock}" = "${blockchainHeight}" ]; then
+      echo "isSynced=1"
+    else
+      echo "isSynced=0"
+    fi
+    echo "infoSync='${syncedToBlock}/${blockchainHeight}'"
+  else
+    echo "isSynced=0"
+  fi
+
+  exit 0
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
