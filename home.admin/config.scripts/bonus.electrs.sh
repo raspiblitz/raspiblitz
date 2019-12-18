@@ -5,21 +5,11 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [on|off]"
+ echo "bonus.electrs.sh [status|on|off]"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if [ ${#ElectRS} -eq 0 ]; then
-  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
-  ElectRS=off
-fi
-
-# stop service
-echo "making sure services are not running"
-sudo systemctl stop electrs 2>/dev/null
 
 # give status
 if [ "$1" = "status" ]; then
@@ -54,6 +44,17 @@ if [ "$1" = "status" ]; then
 
   exit 0
 fi
+
+
+# add default value to raspi config if needed
+if [ ${#ElectRS} -eq 0 ]; then
+  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
+  ElectRS=off
+fi
+
+# stop service
+echo "making sure services are not running"
+sudo systemctl stop electrs 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
