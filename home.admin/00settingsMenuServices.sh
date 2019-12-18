@@ -138,7 +138,7 @@ start from the command line by typing 'loop' to see the options.
       else
         whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start from the command line by typing 'loop' to see the options.
+Use can use command 'loop' to see the options.
 " 10 75
       fi
     else
@@ -148,7 +148,6 @@ Start from the command line by typing 'loop' to see the options.
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else 
   echo "Loop Setting unchanged."
 fi
