@@ -337,6 +337,14 @@ else
     fi
   fi
 
+  # BTC RPC EXPLORER
+  if [ "${BTCRPCexplorer}" = "on" ]; then
+    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
+    if [ "${isIndexed}" = "0" ]; then
+      appInfoLine="BTC-RPC-Explorer: ${indexInfo}"
+    fi
+  fi
+
   if [ ${#appInfoLine} -gt 0 ]; then
     echo "${appInfoLine}"
   fi
