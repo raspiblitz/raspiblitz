@@ -68,9 +68,15 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
-
-  echo "Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
-
+  
+  isInstalled=$(loop | grep -c loop)
+  if [ ${isInstalled} -gt 0 ] ; then
+    echo "Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
+  else
+    echo " Failed to install Lightning Loop "
+    exit 1
+  fi
+  
   exit 0
 fi
 
