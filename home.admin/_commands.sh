@@ -30,12 +30,12 @@ function repair() {
   ./98repairMenu.sh
 }
 
-# command: lndmanage
-function lndmanage() {
+# command: manage
+function manage() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
-    cd lndmanage
+    cd /home/admin/lndmanage
     source venv/bin/activate
-    echo "starting .. to exit enter ---> deactivate"
+    echo "to exit (venv) enter ---> deactivate"
     lndmanage
   else
     echo "lndmanage not install - to install run:"
