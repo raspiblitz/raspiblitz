@@ -130,9 +130,9 @@ if [ "${loop}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start from the command line by typing 'loop' to see the options.
+After reboot: Use can use command 'loop' to see the options.
 " 10 75
-    source /etc/profile
+      needsReboot=1
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
@@ -140,7 +140,6 @@ Start from the command line by typing 'loop' to see the options.
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else 
   echo "Loop Setting unchanged."
 fi
