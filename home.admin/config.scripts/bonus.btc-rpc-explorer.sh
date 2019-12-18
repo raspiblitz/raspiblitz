@@ -27,7 +27,7 @@ if [ "$1" = "status" ]; then
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
-    echo "indexInfo=${indexInfo}"
+    echo "indexInfo='${indexInfo}'"
 
   else
     echo "configured=0"
