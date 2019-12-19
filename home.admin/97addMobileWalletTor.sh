@@ -79,6 +79,7 @@ rm -f qr.txt 2> /dev/null
 
 echo "------------------------------"
 echo "If the connection was not working:"
+echo "- try to refresh the TLS & macaroons: Main Menu 'EXPORT > 'RESET'"
 echo "- check issues: https://github.com/LN-Zap/lndconnect/issues"
 echo "- check issues: https://github.com/rootzoll/raspiblitz/issues"
 echo ""
