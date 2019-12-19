@@ -27,10 +27,8 @@ if [ ${justLocal} -eq 1 ]; then
 also from outside your local network you need to 
 activate 'Services' -> 'DynamicDNS' FIRST.
 Or use SSH tunnel forwarding for port 10009.
-
 For more details see chapter in GitHub README 
-on the service 'DynamicDNS'
-https://github.com/rootzoll/raspiblitz
+on the service 'DynamicDNS'.
 
 Do you JUST want to connect with your mobile
 when your are on the same LOCAL NETWORK?
