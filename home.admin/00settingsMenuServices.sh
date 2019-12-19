@@ -361,8 +361,8 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
         whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
 The txindex needs to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD. Monitor in the terminal with:
-'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'\n
+Takes ~7 hours on a RPi4 with SSD.
+Monitor the progress on the LCD or with 'INFO' in main menu.\n
 BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
 ---> http://${localip}:3002\n
 The Hidden Service address to be used in the Tor Browser is:\n
@@ -371,8 +371,8 @@ ${TOR_ADDRESS}
       else
         whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
 The txindex needs to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD. Monitor in the terminal with:
-'sudo tail -f -n 100 -f /mnt/hdd/bitcoin/debug.log | grep txindex'\n
+Takes ~7 hours on a RPi4 with SSD.
+Monitor the progress on the LCD or with 'INFO' in main menu.\n
 BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
 ---> http://${localip}:3002
 " 14 75 
