@@ -252,7 +252,7 @@ do
 
         # building REST command
         passwordC=$(sudo cat /root/lnd.autounlock.pwd)
-        command="sudo python /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
+        command="sudo python3 /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
         bash -c "${command}"
         
       fi
