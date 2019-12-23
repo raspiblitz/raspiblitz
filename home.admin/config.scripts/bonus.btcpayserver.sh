@@ -16,10 +16,10 @@ if [ ${#BTCPayServer} -eq 0 ]; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
 fi
     
-# stop service
+# stop services
 echo "making sure services are not running"
+sudo systemctl stop nbxplorer 2>/dev/null
 sudo systemctl stop btcpayserver 2>/dev/null
-sudo systemctl disable btcpayserver 2>/dev/null
   
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -38,37 +38,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo adduser --disabled-password --gecos "" btcpay 2>/dev/null
     cd /home/btcpay
-    
-    # store BTCpay data on HDD
-    sudo mkdir /mnt/hdd/.btcpayserver 2>/dev/null
-    
-    sudo mv -f /home/admin/.btcpayserver /mnt/hdd/ 2>/dev/null
-    sudo rm -rf /home/admin/.btcpayserver
-    sudo mv -f /home/btcpay/.btcpayserver /mnt/hdd/ 2>/dev/null
-    
-    sudo chown -R btcpay:btcpay /mnt/hdd/.btcpayserver
-    sudo ln -s /mnt/hdd/.btcpayserver /home/btcpay/ 2>/dev/null
-    
-    # clean when installed as admin
-    sudo rm -f /home/admin/dotnet-sdk*
-    sudo rm -f /home/admin/dotnet-sdk*
-    sudo rm -f /home/admin/.nbxplorer/Main/settings.config
-  
-    # cleanup previous installs
-    sudo rm -f /home/btcpay/dotnet-sdk*
-    sudo rm -f /home/btcpay/aspnetcore*
-    sudo rm -rf /home/btcpay/dotnet
-    sudo rm -f /usr/local/bin/dotnet
-    
-    sudo systemctl stop nbxplorer 2>/dev/null
-    sudo systemctl disable nbxplorer 2>/dev/null
-    sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
-    sudo rm -f /etc/systemd/system/nbxplorer.service
-    
-    sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
-    sudo rm -f /etc/systemd/system/btcpayserver.service
-    sudo rm -f /etc/nginx/sites-available/btcpayserver
-    
+
     echo ""
     echo "***"
     echo "Installing .NET"
@@ -242,6 +212,7 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
     echo "BTCPay Server is already installed."
     # start service
     echo "start service"
+    sudo systemctl start nbxplorer 2>/dev/null
     sudo systemctl start btcpayserver 2>/dev/null
   fi 
 
