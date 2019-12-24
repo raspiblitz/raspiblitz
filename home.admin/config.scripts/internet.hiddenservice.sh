@@ -34,11 +34,11 @@ if [ "${runBehindTor}" = "on" ]; then
   isHiddenService=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c $service)
   if [ ${isHiddenService} -eq 0 ]; then
     echo "
-  # Hidden Service for $service
-  HiddenServiceDir /mnt/hdd/tor/$service
-  HiddenServiceVersion 3
-  HiddenServicePort $toPort 127.0.0.1:$fromPort
-  " | sudo tee -a /etc/tor/torrc
+# Hidden Service for $service
+HiddenServiceDir /mnt/hdd/tor/$service
+HiddenServiceVersion 3
+HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
+
     echo "Restarting Tor to activate the Hidden Service..."
     sudo systemctl restart tor
     sleep 10

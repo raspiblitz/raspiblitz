@@ -241,6 +241,10 @@ elif [ $ownDomain -eq 0 ]; then
   
   # create a self-signed ssl certificate
   /home/admin/config.scripts/internet.selfsignedcert.sh
+  
+  # allow the HTTPS connection through the firewall
+  sudo ufw allow 443 comment 'Nginx'
+
   # set nginx
   sudo rm -f /etc/nginx/sites-enabled/default
   sudo rm -f /etc/nginx/sites-enabled/btcpayserver
