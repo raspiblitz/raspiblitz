@@ -52,6 +52,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # set user pi user for autostart
   sudo sed -i 's/^autologin-user=.*/autologin-user=pi/g' /etc/lightdm/lightdm.conf
+  
+  # disable display-setup script
+  if grep -Eq "^display-setup-script=" /etc/lightdm/lightdm.conf; then
+    sed -i -E 's/^(display-setup-script=.*)/#\1/' /etc/lightdm/lightdm.conf
+  fi
+  
   sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
   sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
