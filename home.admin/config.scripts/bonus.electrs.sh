@@ -4,7 +4,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch the Electrum Rust Server on or off"
+ echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh [status|on|off]"
  exit 1
 fi
@@ -70,9 +70,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     #cleanup
-    sudo systemctl stop electrs
-    sudo systemctl disable electrs
-    sudo rm -f /etc/systemd/system/electrs.service
     sudo rm -f /home/electrs/.electrs/config.toml 
 
     echo ""
@@ -113,6 +110,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
     echo "***"
     echo ""
+
+    # move old-database if present
+    if [ -d "/mnt/hdd/electrs/db" ]; then
+      echo "Moving existing ElectRS index to /mnt/hdd/app-storage/electrs..."
+      sudo mv -f /mnt/hdd/electrs /mnt/hdd/app-storage/
+    fi
+
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
