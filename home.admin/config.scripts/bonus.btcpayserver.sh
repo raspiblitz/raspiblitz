@@ -35,9 +35,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then
-
+    # create btcpay user
     sudo adduser --disabled-password --gecos "" btcpay 2>/dev/null
     cd /home/btcpay
+
+    # store BTCpay data on HDD
+    sudo mkdir /mnt/hdd/app-data/btcpayserver 2>/dev/null
+
+    # move old btcpay data to app-data
+    sudo mv -f /mnt/hdd/.btcpayserver/* /mnt/hdd/app-data/btcpayserver/ 2>/dev/null
+    sudo rm -f /mnt/hdd/.btcpayserver 2>/dev/null
+  
+    sudo chown -R btcpay:btcpay /mnt/hdd/app-data/btcpayserver
+    sudo ln -s /mnt/hdd/app-data/btcpayserver /home/btcpay/ 2>/dev/null
 
     echo ""
     echo "***"
