@@ -290,7 +290,6 @@ ${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${pu
 ${color_yellow}    /,'        ${color_gray}
 ${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
-${color_yellow}               ${color_gray}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_red}
