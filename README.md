@@ -89,7 +89,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.4:**
 
-*This is still an early Release Candidate image - just use if you have time to invest for testing and giving feedback. Everyone else it advised to wait for final version release before doing updates.*
+*This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
 HTTP: https://raspiblitz.com/raspiblitz-v1.4RC1-2019-12-25.img.gz
 
