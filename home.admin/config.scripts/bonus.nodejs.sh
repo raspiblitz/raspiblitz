@@ -57,6 +57,7 @@ if [ ${nodeJSInstalled} -eq 0 ]; then
     echo "*** Install NodeJS $VERSION-$DISTRO ***"
 
     # download
+    cd /home/admin/download
     wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
     # checksum
     isChecksumValid=$(sha256sum node-$VERSION-$DISTRO.tar.xz | grep -c "${CHECKSUM}")
