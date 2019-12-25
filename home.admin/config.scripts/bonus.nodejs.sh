@@ -57,11 +57,13 @@ if [ ${nodeJSInstalled} -eq 0 ]; then
     echo "*** Install NodeJS $VERSION-$DISTRO ***"
 
     # download
+    cd /home/admin/download
     wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
     # checksum
     isChecksumValid=$(sha256sum node-$VERSION-$DISTRO.tar.xz | grep -c "${CHECKSUM}")
     if [ ${isChecksumValid} -eq 0 ]; then
     echo "FAIL: The checksum of node-$VERSION-$DISTRO.tar.xz is NOT ${CHECKSUM}"
+    rm -f node-$VERSION-$DISTRO.tar.xz*
     exit 1
     fi
     echo "OK CHECKSUM of nodeJS is OK"
@@ -69,7 +71,8 @@ if [ ${nodeJSInstalled} -eq 0 ]; then
 
     # install
     sudo mkdir -p /usr/local/lib/nodejs
-    sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs 
+    sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs
+    rm -f node-$VERSION-$DISTRO.tar.xz* 
     export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
     sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/node /usr/bin/node
     sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm

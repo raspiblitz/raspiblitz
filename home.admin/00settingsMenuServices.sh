@@ -128,18 +128,20 @@ if [ "${loop}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      # add Go vars to current session
+      sudo systemctl start loopd
       if [ ${#GOPATH} -eq 0 ]; then
         whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start a new terminal session (log in again with ssh) and
-start from the command line by typing 'loop' to see the options.
-" 11 75
+Start from the command line after the reboot.
+Use the command 'loop' to see the options.
+" 11 56
+        needsReboot=1
       else
         whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Use can use command 'loop' to see the options.
-" 10 75
+Use the command 'loop' to see the options.
+" 10 56
+        needsReboot=0
       fi
     else
       l1="FAILED to install Lightning LOOP"
@@ -319,6 +321,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start RTL
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
@@ -356,6 +359,7 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
+      sudo sytemctl start btc-rpc-explorer
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
@@ -443,6 +447,7 @@ if [ "${ElectRS}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start electrs
       localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)

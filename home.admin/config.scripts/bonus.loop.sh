@@ -63,10 +63,6 @@ WantedBy=multi-user.target
   else 
     echo "Loop service already installed."
   fi
-  
-  # start service
-  echo "Starting service"
-  sudo systemctl start loopd 2>/dev/null
 
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf

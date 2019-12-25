@@ -93,10 +93,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "RTL already installed."
   fi
   
-  # start service
-  echo "Starting service"
-  sudo systemctl start RTL 2>/dev/null
-
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
