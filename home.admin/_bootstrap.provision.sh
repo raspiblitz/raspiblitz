@@ -164,7 +164,7 @@ fi
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
     sudo systemctl disable RTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL - keep default" >> ${logFile}
@@ -174,7 +174,7 @@ fi
 if [ "${loop}" = "on" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
-  /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
   sudo systemctl disable loopd # will get enabled after recover dialog
 else
   echo "Provisioning Lightning Loop - keep default" >> ${logFile}
@@ -184,7 +184,7 @@ fi
 if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup BTCRPCexplorer (takes time)'/g" ${infoFile}
-  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh on >> ${logFile} 2>&1
   sudo systemctl disable btc-rpc-explorer # will get enabled after recover dialog
 else
   echo "Provisioning BTCRPCexplorer - keep default" >> ${logFile}
@@ -194,7 +194,7 @@ fi
 if [ "${ElectRS}" = "on" ]; then
   echo "Provisioning ElectRS - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup ElectRS (takes time)'/g" ${infoFile}
-  /home/admin/config.scripts/bonus.electrs.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.electrs.sh on >> ${logFile} 2>&1
   sudo systemctl disable electrs # will get enabled after recover dialog
 else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
@@ -212,7 +212,7 @@ fi
 if [ "${lndmanage}" = "on" ]; then
   echo "Provisioning lndmanage - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
-  /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
