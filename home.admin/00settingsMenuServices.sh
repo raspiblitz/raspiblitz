@@ -132,15 +132,15 @@ if [ "${loop}" != "${choice}" ]; then
       if [ ${#GOPATH} -eq 0 ]; then
         whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start from the command line after the reboot
+Start from the command line after the reboot.
 Use the command 'loop' to see the options.
-" 11 75
+" 11 56
         needsReboot=1
       else
         whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
 Use the command 'loop' to see the options.
-" 10 75
+" 10 56
         needsReboot=0
       fi
     else
