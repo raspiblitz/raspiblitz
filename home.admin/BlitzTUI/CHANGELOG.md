@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.42.0] - 2019-12-25
+### Added
+- extend error logging
+
 ## [0.41.0] - 2019-11-15
 ### Added
 - reduce default channel check interval to 40
@@ -23,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.29.0] - 2019-11-02
 ### Added
 - almost all must-have features have been implemented
-
 
 ## [0.22.2] - 2019-10-27
 ### Added
