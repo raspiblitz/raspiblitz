@@ -307,7 +307,8 @@ WantedBy=multi-user.target
   fi
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  /home/admin/config.scripts/bonus.electrsexplorer.sh
+  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
+  # run every 10 min by _background.sh
   
   echo ""
   echo "To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
@@ -344,7 +345,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-    /home/admin/config.scripts/bonus.electrsexplorer.sh off
+    /home/admin/config.scripts/bonus.electrsexplorer.sh
   else 
     echo "ElectRS is not installed."
   fi

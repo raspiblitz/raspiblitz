@@ -163,7 +163,8 @@ EOF
   echo "monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  /home/admin/config.scripts/bonus.electrsexplorer.sh
+  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
+  # run every 10 min by _background.sh
 
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
