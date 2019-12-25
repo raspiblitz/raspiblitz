@@ -72,12 +72,15 @@ class AppWindow(QMainWindow):
 
         # read config and info files
         if not os.path.exists(lnd_cfg_abs_path):
+            log.error("file does not exist: {}".format(lnd_cfg_abs_path))
             raise Exception("file does not exist: {}".format(lnd_cfg_abs_path))
 
         if not os.path.exists(rb_cfg_abs_path):
+            log.error("file does not exist: {}".format(rb_cfg_abs_path))
             raise Exception("file does not exist: {}".format(rb_cfg_abs_path))
 
         if not os.path.exists(rb_info_abs_path):
+            log.error("file does not exist: {}".format(rb_info_abs_path))
             raise Exception("file does not exist: {}".format(rb_info_abs_path))
 
         self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
