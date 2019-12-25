@@ -266,7 +266,6 @@ RestartSec=60
 WantedBy=multi-user.target
     " | sudo tee -a /etc/systemd/system/electrs.service
     sudo systemctl enable electrs
-    sudo systemctl start electrs
     # manual start:
     # sudo -u electrs /home/electrs/.cargo/bin/cargo run --release -- --index-batch-size=10 --electrum-rpc-addr="0.0.0.0:50001"
     echo ""
@@ -277,9 +276,6 @@ WantedBy=multi-user.target
 
   else 
     echo "ElectRS is already installed."
-    # start service
-    echo "start service"
-    sudo systemctl start electrs 2>/dev/null
   fi
 
   # setting value in raspiblitz config

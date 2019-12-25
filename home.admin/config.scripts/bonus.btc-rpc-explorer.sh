@@ -156,10 +156,6 @@ EOF
     echo "BTC-RPC-explorer already installed."
   fi
 
-  # start service
-  echo "Starting service"
-  sudo systemctl start btc-rpc-explorer 2>/dev/null
-
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCRPCexplorer=.*/BTCRPCexplorer=on/g" /mnt/hdd/raspiblitz.conf
   
