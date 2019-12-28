@@ -72,25 +72,39 @@ class AppWindow(QMainWindow):
 
         # read config and info files
         if not os.path.exists(lnd_cfg_abs_path):
-            log.error("file does not exist: {}".format(lnd_cfg_abs_path))
-            raise Exception("file does not exist: {}".format(lnd_cfg_abs_path))
+            log.warning("file does not exist: {}".format(lnd_cfg_abs_path))
 
         if not os.path.exists(rb_cfg_abs_path):
-            log.error("file does not exist: {}".format(rb_cfg_abs_path))
-            raise Exception("file does not exist: {}".format(rb_cfg_abs_path))
+            log.warning("file does not exist: {}".format(rb_cfg_abs_path))
 
         if not os.path.exists(rb_info_abs_path):
-            log.error("file does not exist: {}".format(rb_info_abs_path))
-            raise Exception("file does not exist: {}".format(rb_info_abs_path))
+            log.warning("file does not exist: {}".format(rb_info_abs_path))
 
+        lnd_cfg_valid = False
         self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
-        self.lnd_cfg.reload()
+        try:
+            self.lnd_cfg.reload()
+            lnd_cfg_valid = True
+        except Exception as err:
+            pass
 
+        rb_cfg_valid = False
         self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
-        self.rb_cfg.reload()
+        try:
+            self.rb_cfg.reload()
+            lnd_cfg_valid = True
+        except Exception as err:
+            pass
 
+        rb_info_valid = False
         self.rb_info = RaspiBlitzInfo(rb_info_abs_path)
-        self.rb_info.reload()
+        try:
+            self.rb_info.reload()
+            rb_info_valid = True
+        except Exception as err:
+            pass
+
+        self.cfg_valid = lnd_cfg_valid and rb_cfg_valid and rb_info_valid
 
         # initialize attributes
         self.invoice_to_check = None
@@ -113,8 +127,9 @@ class AppWindow(QMainWindow):
 
         # initial updates
         self.update_uptime()
-        self.update_status_lnd()
-        self.update_status_lnd_channels()
+        if self.cfg_valid:
+            self.update_status_lnd()
+            self.update_status_lnd_channels()
 
         # initial update of Main Window Title Bar
         self.update_title_bar()
@@ -264,8 +279,9 @@ class AppWindow(QMainWindow):
 
     def process_beat(self, _):
         self.update_uptime()
-        self.update_status_lnd()
-        self.update_status_lnd_channels()
+        if self.cfg_valid:
+            self.update_status_lnd()
+            self.update_status_lnd_channels()
 
     def update_watched_attr(self):
         log.debug("updating: watched attributes")
