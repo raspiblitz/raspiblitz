@@ -263,14 +263,29 @@ while :
       continue
     fi
 
+    # perform config check
+    configCheck=$(/home/admin/config.scripts/blitz.configcheck.py)
+    if [ $? -eq 0 ]; then
+      configValid=1
+      # echo "Config Valid!"
+    else
+      configValid=0
+      # echo "Config Not Valid!"
+      l1="POTENTIAL CONFIG ERROR FOUND\n"
+      l2="ssh admin@${localip}\n"
+      l3="Use password: PasswordA\n"
+      l4="Then run /home/admin/config.scripts/blitz.configcheck.py -p"
+      dialog --backtitle "RaspiBlitz ${codeVersion} cfg-err ${localip}" --infobox "$l1$l2$l3$l4" 6 76
+      sleep 20
+      continue
+    fi
+
     # no special case - show status display
-	  /home/admin/00infoBlitz.sh
+    /home/admin/00infoBlitz.sh
     if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
       echo ""
       echo ""
     fi
-	  sleep 5
+    sleep 5
 
-  done
-
-fi
+done
