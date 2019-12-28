@@ -60,51 +60,7 @@ class AppWindow(QMainWindow):
         # translations..?!
         self._translate = QCoreApplication.translate
 
-        if IS_WIN32_ENV:
-            log.info("using dummy config on win32")
-            lnd_cfg_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(LND_CONF))
-            rb_cfg_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(RB_CONF))
-            rb_info_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(RB_INFO))
-        else:
-            lnd_cfg_abs_path = LND_CONF
-            rb_cfg_abs_path = RB_CONF
-            rb_info_abs_path = RB_INFO
-
-        # read config and info files
-        if not os.path.exists(lnd_cfg_abs_path):
-            log.warning("file does not exist: {}".format(lnd_cfg_abs_path))
-
-        if not os.path.exists(rb_cfg_abs_path):
-            log.warning("file does not exist: {}".format(rb_cfg_abs_path))
-
-        if not os.path.exists(rb_info_abs_path):
-            log.warning("file does not exist: {}".format(rb_info_abs_path))
-
-        lnd_cfg_valid = False
-        self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
-        try:
-            self.lnd_cfg.reload()
-            lnd_cfg_valid = True
-        except Exception as err:
-            pass
-
-        rb_cfg_valid = False
-        self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
-        try:
-            self.rb_cfg.reload()
-            lnd_cfg_valid = True
-        except Exception as err:
-            pass
-
-        rb_info_valid = False
-        self.rb_info = RaspiBlitzInfo(rb_info_abs_path)
-        try:
-            self.rb_info.reload()
-            rb_info_valid = True
-        except Exception as err:
-            pass
-
-        self.cfg_valid = lnd_cfg_valid and rb_cfg_valid and rb_info_valid
+        self.check_config()
 
         # initialize attributes
         self.invoice_to_check = None
@@ -200,6 +156,53 @@ class AppWindow(QMainWindow):
         process.start('xterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
                                 '+sb', '-hold', '-e', 'bash -c \"/home/admin/00infoLCD.sh --pause {}\"'.format(pause)])
 
+    def check_config(self):
+        if IS_WIN32_ENV:
+            log.info("using dummy config on win32")
+            lnd_cfg_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(LND_CONF))
+            rb_cfg_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(RB_CONF))
+            rb_info_abs_path = os.path.join(os.path.dirname(__file__), "..", "data", os.path.basename(RB_INFO))
+        else:
+            lnd_cfg_abs_path = LND_CONF
+            rb_cfg_abs_path = RB_CONF
+            rb_info_abs_path = RB_INFO
+
+        # read config and info files
+        if not os.path.exists(lnd_cfg_abs_path):
+            log.warning("file does not exist: {}".format(lnd_cfg_abs_path))
+
+        if not os.path.exists(rb_cfg_abs_path):
+            log.warning("file does not exist: {}".format(rb_cfg_abs_path))
+
+        if not os.path.exists(rb_info_abs_path):
+            log.warning("file does not exist: {}".format(rb_info_abs_path))
+
+        lnd_cfg_valid = False
+        self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
+        try:
+            self.lnd_cfg.reload()
+            lnd_cfg_valid = True
+        except Exception as err:
+            pass
+
+        rb_cfg_valid = False
+        self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
+        try:
+            self.rb_cfg.reload()
+            lnd_cfg_valid = True
+        except Exception as err:
+            pass
+
+        rb_info_valid = False
+        self.rb_info = RaspiBlitzInfo(rb_info_abs_path)
+        try:
+            self.rb_info.reload()
+            rb_info_valid = True
+        except Exception as err:
+            pass
+
+        self.cfg_valid = lnd_cfg_valid and rb_cfg_valid and rb_info_valid
+
     def check_invoice(self, flag, tick=0):
         log.info("checking invoice paid (Tick: {})".format(tick))
         self.invoice_to_check_flag = flag
@@ -278,6 +281,7 @@ class AppWindow(QMainWindow):
             # log.info("Uptime: {}".format(self.uptime))
 
     def process_beat(self, _):
+        self.check_config()
         self.update_uptime()
         if self.cfg_valid:
             self.update_status_lnd()
