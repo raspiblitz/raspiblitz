@@ -8,7 +8,7 @@ import sys
 from argparse import RawTextHelpFormatter
 from configparser import ConfigParser, DEFAULTSECT
 
-LND_CONF = "/mnt/hdd/lnd/lnd.conf2"
+LND_CONF = "/mnt/hdd/lnd/lnd.conf"
 RB_CONF = "/mnt/hdd/raspiblitz.conf"
 RB_INFO = "/home/admin/raspiblitz.info"
 
