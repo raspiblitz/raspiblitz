@@ -10,7 +10,7 @@ from pathlib import Path
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("forward ports from another server to raspiblitz with reverse SSH tunnel")
-    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
+    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER:PORT] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
     print("note that [INTERNAL-PORT]<[EXTERNAL-PORT] can one or multiple forwardings")
     sys.exit(1)
 
@@ -70,12 +70,21 @@ if sys.argv[1] == "on":
 
     # check server address
     if len(sys.argv) < 3:
-        print("[USER]@[SERVER] missing - use 'internet.sshtunnel.py -h' for help")
+        print("[USER]@[SERVER:PORT] missing - use 'internet.sshtunnel.py -h' for help")
         sys.exit(1)
     if sys.argv[2].count("@") != 1:
-        print("[USER]@[SERVER] wrong - use 'internet.sshtunnel.py -h' for help")
+        print("[USER]@[SERVER:PORT] wrong - use 'internet.sshtunnel.py -h' for help")
         sys.exit(1)
     ssh_server = sys.argv[2]
+    if ssh_server.count(":") == 0:
+        ssh_server_host = ssh_server
+        ssh_server_port = "22"
+    elif ssh_server.count(":") == 1:
+        ssh_server_split = ssh_server.split(":")
+        ssh_server_host = ssh_server_split[0]
+        ssh_server_port = ssh_server_split[1]
+    else:
+        print("[USER]@[SERVER:PORT] wrong - use 'internet.sshtunnel.py -h' for help")
 
     # genenate additional parameter for autossh (forwarding ports)
     if len(sys.argv) < 4:
@@ -106,17 +115,17 @@ if sys.argv[1] == "on":
             print("Detected LND Port Forwarding")
             forwardingLND = True
             if port_internal != port_external:
-                print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT,port_external))
+                print("FAIL: When tunneling your local LND port '%s' it needs to be the same on the external server, but is '%s'" % (LNDPORT, port_external))
                 print("Try again by using the same port. If you cant change the external port, change local LND port with: /home/admin/config.scripts/lnd.setport.sh")
                 sys.exit(1)
 
         ssh_ports = ssh_ports + "\"%s\" " % (sys.argv[i])
-        additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external,port_internal)
-        i=i+1
+        additional_parameters= additional_parameters + "-R %s:localhost:%s " % (port_external, port_internal)
+        i = i + 1
 
     # genenate additional parameter for autossh (server)
     ssh_ports = ssh_ports.strip()
-    additional_parameters= additional_parameters + ssh_server
+    additional_parameters = additional_parameters + "-p " + ssh_server_port  + " " + ssh_server_host
 
     # generate custom service config
     service_data = SERVICETEMPLATE.replace("[PLACEHOLDER]", additional_parameters)
