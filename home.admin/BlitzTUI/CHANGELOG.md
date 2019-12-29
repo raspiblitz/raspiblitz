@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- remove line break for longer TORv3 NodeURI
+
 
 ## [0.42.0] - 2019-12-25
 ### Added

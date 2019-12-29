@@ -320,7 +320,7 @@ class AppWindow(QMainWindow):
             pub = [(pub[i:i + n]) for i in range(0, len(pub), n)]
             host = [(host[i:i + n]) for i in range(0, len(host), n)]
             self.ui_qr_code.memo_value.show()
-            self.ui_qr_code.memo_value.setText("{} \n@\n{} \n:{}".format(" ".join(pub), " ".join(host), port))
+            self.ui_qr_code.memo_value.setText("{} \n@{} \n:{}".format(" ".join(pub), " ".join(host), port))
 
             self.ui_qr_code.status_key.hide()
             self.ui_qr_code.status_value.hide()
@@ -645,12 +645,6 @@ Keep on stacking SATs..! :-D"""
     parser.add_argument("-V", "--version",
                         help="print version", action="version",
                         version=__version__)
-    #
-    # parser.add_argument("-g", "--game",
-    #                     help="game binary", type=str)
-    #
-    # parser.add_argument("-s", "--skip",
-    #                     help="skip", action="store_true")
 
     # parse args
     args = parser.parse_args()
