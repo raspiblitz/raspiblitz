@@ -5,8 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.43.0] - 2019-12-29
+### Added
 - remove line break for longer TORv3 NodeURI
-- fix cfg_check
+- fix config check
 
 ## [0.42.0] - 2019-12-25
 ### Added
