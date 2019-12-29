@@ -189,7 +189,7 @@ class AppWindow(QMainWindow):
         self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
         try:
             self.rb_cfg.reload()
-            lnd_cfg_valid = True
+            rb_cfg_valid = True
         except Exception as err:
             pass
 
@@ -202,6 +202,7 @@ class AppWindow(QMainWindow):
             pass
 
         self.cfg_valid = lnd_cfg_valid and rb_cfg_valid and rb_info_valid
+        log.debug("checked cfg_valid with result: {}".format(self.cfg_valid))
 
     def check_invoice(self, flag, tick=0):
         log.info("checking invoice paid (Tick: {})".format(tick))
