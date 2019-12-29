@@ -44,7 +44,7 @@ if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "${servicePort}<")
   if [ ${isForwarded} -gt 0 ]; then
     local=0
-    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
+    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1 | cut -d ':' -f1)
     if [ "${servicePort}" == "10009" ]; then
       port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
     elif [ "${servicePort}" == "8080" ]; then
@@ -64,7 +64,7 @@ lndconnect --host=${host} --port=${port} --image
 
 # show pairing info dialog
 msg=""
-if [ ${local} -eq 1 ]; then 
+if [ ${local} -eq 1 ]; then
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
