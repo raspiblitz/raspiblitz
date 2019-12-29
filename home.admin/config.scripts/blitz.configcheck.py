@@ -167,8 +167,13 @@ def main():
     parser.add_argument("-p", "--print",
                         help="print parsed config", action="store_true")
 
+    parser.add_argument("-q", "--quiet",
+                        help="suppress normal output", action="store_true")
+
+
     # parse args
     args = parser.parse_args()
+
 
     # LND Config
     lnd_cfg_valid = False
@@ -177,15 +182,18 @@ def main():
     if os.path.exists(lnd_cfg.abs_path):
         try:
             lnd_cfg.reload()
-        
+
             lnd_cfg_valid = True
-            print("LND Config: \t\tOK")
+            if not args.quiet:
+                print("LND Config: \t\tOK")
         except Exception as err:
-            print("LND Config: \t\tERROR")
-            log.warning(err)
+            if not args.quiet:
+                print("LND Config: \t\tERROR")
+                log.warning(err)
 
     else:
-        print("LND Config: \t\tMISSING")
+        if not args.quiet:
+            print("LND Config: \t\tMISSING")
 
 
     # Raspi Config
@@ -197,13 +205,16 @@ def main():
             rb_cfg.reload()
 
             rb_cfg_valid = True
-            print("RaspiBlitz Config: \tOK")
+            if not args.quiet:
+                print("RaspiBlitz Config: \tOK")
         except Exception as err:
-            print("RaspiBlitz Config: \tERROR")
-            log.warning(err)
+            if not args.quiet:
+                print("RaspiBlitz Config: \tERROR")
+                log.warning(err)
 
     else:
-        print("RaspiBlitz Config: \tmissing")
+        if not args.quiet:
+            print("RaspiBlitz Config: \tMISSING")
 
 
 
@@ -216,25 +227,32 @@ def main():
             rb_info.reload()
 
             rb_info_valid = True
-            print("RaspiBlitz Info: \tOK")
+            if not args.quiet:
+                print("RaspiBlitz Info: \tOK")
         except Exception as err:
-            print("RaspiBlitz Info: \tERROR")
-            log.warning(err)
-            
+            if not args.quiet:
+                print("RaspiBlitz Info: \tERROR")
+                log.warning(err)
+
     else:
-        print("RaspiBlitz Info: \tmissing")
+        if not args.quiet:
+            print("RaspiBlitz Info: \tMISSING")
 
 
     if args.print:
+        print("=======\n= LND =\n=======")
         if lnd_cfg_valid:
-            print("=======\n= LND =\n=======")
             print("rpc_list: \t\t{}".format(lnd_cfg.rpc_listen))
             print("rpc_list_host: \t\t{}".format(lnd_cfg.rpc_listen_host))
             print("rpc_list_port: \t\t{}".format(lnd_cfg.rpc_listen_port))
             print("")
+        else:
+            print("invalid or missing")
+            print("")
 
+
+        print("====================\n= RaspiBlitzConfig =\n====================")
         if rb_cfg_valid:
-            print("====================\n= RaspiBlitzConfig =\n====================")
             print("auto_nat_discovery: \t\t{}".format(rb_cfg.auto_nat_discovery))
             print("auto_pilot: \t\t\t{}".format(rb_cfg.auto_pilot))
             print("auto_unlock: \t\t\t{}".format(rb_cfg.auto_unlock))
@@ -255,12 +273,19 @@ def main():
             print("touchscreen: \t\t\t{}".format(rb_cfg.touchscreen))
             print("version: \t\t\t{}".format(rb_cfg.version))
             print("")
-    
+        else:
+            print("invalid or missing")
+            print("")
 
+
+        print("==================\n= RaspiBlitzInfo =\n==================")
         if rb_info_valid:
-            print("==================\n= RaspiBlitzInfo =\n==================")
             print("state: \t\t{}".format(rb_info.state))
             print("")
+        else:
+            print("invalid or missing")
+            print("")
+
 
     if rb_cfg_valid:
         sys.exit(0)
