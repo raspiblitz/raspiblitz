@@ -3,7 +3,7 @@ clear
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf
 
 # default host to local IP & port 10009
 local=1
@@ -22,7 +22,7 @@ if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
   if [ ${isForwarded} -gt 0 ]; then
     local=0
-    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1)
+    host=$(echo $sshtunnel | cut -d '@' -f2 | cut -d ' ' -f1 | cut -d ':' -f1)
     port=$(echo $sshtunnel | awk '{split($0,a,"10009<"); print a[2]}' | cut -d ' ' -f1 | sed 's/[^0-9]//g')
     echo "port 10009 forwarding from port ${port} from server ${host}"
   else
@@ -39,7 +39,7 @@ echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}
 # show pairing info
 clear
 msg=""
-if [ ${local} -eq 1 ]; then 
+if [ ${local} -eq 1 ]; then
   msg="Once you have the app running make sure you are on the same local network (WLAN same as LAN).\n\n"
 fi
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}On Setup Step 'Choose LND Server Type' connect to 'DIY SELF HOSTED'\n\n(Or in the App go to --> 'Settings' > 'Connect to your LND Server') \n\nThere you see three 3 form fields to fill out. Skip those and go right to the buttons below.\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
