@@ -771,7 +771,7 @@ PubkeyAuthentication yes
 GatewayPorts yes
 AllowTcpForwarding yes
 ClientAliveInterval 60
-ClientAliveCountMax=2
+ClientAliveCountMax 2
 ```
 
 *Last two parameters were added as used in the ssh tunnel demo at #GPN19 https://media.ccc.de/v/gpn19-76-einen-server-daheim-ohne-ffentliche-ipv4-adresse#t=911*
