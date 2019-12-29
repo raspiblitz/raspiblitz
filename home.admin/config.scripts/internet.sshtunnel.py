@@ -168,11 +168,23 @@ if sys.argv[1] == "on":
     if restoringOnUpdate == False:
         serverdomain=ssh_server.split("@")[1]
 
+        ssh_server = serverdomain
+        if ssh_server.count(":") == 0:
+            ssh_server_host = ssh_server
+            ssh_server_port = "22"
+        elif ssh_server.count(":") == 1:
+            ssh_server_split = ssh_server.split(":")
+            ssh_server_host = ssh_server_split[0]
+            ssh_server_port = ssh_server_split[1]
+        else:
+            print("syntax error!")
+            sys.exit(1)
+
         # make sure serverdomain is set as tls alias 
         print("Setting server as tls alias")
         oldConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
         subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf", shell=True)
-        subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%s/g\" /mnt/hdd/lnd/lnd.conf" % (serverdomain), shell=True)
+        subprocess.call("sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain=%s/g\" /mnt/hdd/lnd/lnd.conf" % (ssh_server_host), shell=True)
         newConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
         if oldConfigHash != newConfigHash:
             print("lnd.conf changed ... generating new TLS cert")
@@ -183,7 +195,7 @@ if sys.argv[1] == "on":
         if forwardingLND:
             # setting server explicitly on LND if LND port is forwarded
             print("Setting fixed address for LND with raspiblitz lndAddress")
-            file_content = re.sub("lndAddress=.*", "lndAddress='%s'" % (serverdomain), file_content)
+            file_content = re.sub("lndAddress=.*", "lndAddress='%s'" % (ssh_server_host), file_content)
         else:
             print("No need to set fixed address for LND with raspiblitz lndAddress")
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
@@ -213,7 +225,7 @@ if sys.argv[1] == "on":
     print("https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md")
     print("- Tunnel service needs final reboot to start.")
     print("- After reboot check logs: sudo journalctl -f -u %s" % (SERVICENAME))
-    print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of %s :" % (ssh_server))
+    print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of %s:" % (ssh_server_host))
     print(ssh_pubkey)
     print()
 
