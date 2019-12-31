@@ -4,7 +4,7 @@
 # https://github.com/LN-Zap/lndconnect/commits/master
 commit=82d7103bb8c8dd3c8ae8de89e3bc061eef82bb8f
 
-isInstalled=$(lndconnect -h | grep "nocert" -c)
+isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ]; then
   echo "Installing lndconnect.."
   # get Go vars
