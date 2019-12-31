@@ -220,9 +220,9 @@ class AppWindow(QMainWindow):
                 res = True
 
         else:
-            stub_readonly = ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain)
-            res, amt_paid_sat = check_invoice_paid(stub_readonly, self.invoice_to_check)
-            log.debug("result of invoice check: {}".format(res))
+            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                res, amt_paid_sat = check_invoice_paid(stub_readonly, self.invoice_to_check)
+                log.debug("result of invoice check: {}".format(res))
 
         if res:
             log.debug("paid!")
@@ -244,15 +244,16 @@ class AppWindow(QMainWindow):
         # log.debug("update_status_lnd due: {}".format(self.status_lnd_due))
         if self.status_lnd_due <= self.uptime:
             log.debug("updating status_lnd")
-            stub_readonly = ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain)
-            pid_ok, listen_ok, unlocked, synced_to_chain, synced_to_graph = check_lnd(stub_readonly)
-            self.status_lnd_pid_ok = pid_ok
-            self.status_lnd_listen_ok = listen_ok
-            self.status_lnd_unlocked = unlocked
-            self.status_lnd_synced_to_chain = synced_to_chain
-            self.status_lnd_synced_to_graph = synced_to_graph
-            # set next due time
-            self.status_lnd_due = self.uptime + self.status_lnd_interval
+
+            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                pid_ok, listen_ok, unlocked, synced_to_chain, synced_to_graph = check_lnd(stub_readonly)
+                self.status_lnd_pid_ok = pid_ok
+                self.status_lnd_listen_ok = listen_ok
+                self.status_lnd_unlocked = unlocked
+                self.status_lnd_synced_to_chain = synced_to_chain
+                self.status_lnd_synced_to_graph = synced_to_graph
+                # set next due time
+                self.status_lnd_due = self.uptime + self.status_lnd_interval
 
     def update_status_lnd_channels(self):
         if IS_WIN32_ENV:
@@ -261,11 +262,12 @@ class AppWindow(QMainWindow):
         # log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))
         if self.status_lnd_channel_due <= self.uptime:
             log.debug("updating status_lnd_channels")
-            stub_readonly = ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain)
-            self.status_lnd_channel_total_active, self.status_lnd_channel_total_remote_balance = \
-                check_lnd_channels(stub_readonly)
-            # set next due time
-            self.status_lnd_channel_due = self.uptime + self.status_lnd_channel_interval
+
+            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                self.status_lnd_channel_total_active, self.status_lnd_channel_total_remote_balance = \
+                    check_lnd_channels(stub_readonly)
+                # set next due time
+                self.status_lnd_channel_due = self.uptime + self.status_lnd_channel_interval
 
     def update_title_bar(self):
         log.debug("updating: Main Window Title Bar")
@@ -544,8 +546,8 @@ class AppWindow(QMainWindow):
             new_invoice = FakeAddInvoiceResponse()
 
         else:
-            stub_invoice = InvoiceStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain)
-            new_invoice = create_invoice(stub_invoice, memo, amt)
+            with InvoiceStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_invoice:
+                new_invoice = create_invoice(stub_invoice, memo, amt)
 
         log.info("#{}: {}".format(new_invoice.add_index, new_invoice.payment_request))
 
@@ -559,12 +561,12 @@ class AppWindow(QMainWindow):
         if IS_DEV_ENV:
             return "535f209faaea75427949e3e6c1fc9edafbf751f08706506bb873fdc93ffc2d4e2c@pqcjuc47eqcv6mk2.onion:9735"
 
-        stub_readonly = ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain)
+        with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
 
-        res = get_node_uri(stub_readonly)
-        log.info("Node URI: : {}".format(res))
+            res = get_node_uri(stub_readonly)
+            log.info("Node URI: {}".format(res))
 
-        return res
+            return res
 
 
 class ClockStoppableThread(QThread):
