@@ -45,17 +45,35 @@ class AdminStub(lnrpc.LightningStub):
         self.channel = get_rpc_channel(macaroon_path=build_macaroon_path("admin", network=network, chain=chain))
         super().__init__(self.channel)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.channel.close()
+
 
 class ReadOnlyStub(lnrpc.LightningStub):
     def __init__(self, network="bitcoin", chain="main"):
         self.channel = get_rpc_channel(macaroon_path=build_macaroon_path("readonly", network=network, chain=chain))
         super().__init__(self.channel)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.channel.close()
+
 
 class InvoiceStub(lnrpc.LightningStub):
     def __init__(self, network="bitcoin", chain="main"):
         self.channel = get_rpc_channel(macaroon_path=build_macaroon_path("invoice", network=network, chain=chain))
         super().__init__(self.channel)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.channel.close()
 
 
 def convert_r_hash(r_hash):
