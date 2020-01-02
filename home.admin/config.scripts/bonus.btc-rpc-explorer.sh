@@ -7,7 +7,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch BTC-RPC-explorer on or off"
- echo "bonus.btc-rcp-explorer.sh [status|on|off]"
+ echo "bonus.btc-rpc-explorer.sh [status|on|off]"
  exit 1
 fi
 

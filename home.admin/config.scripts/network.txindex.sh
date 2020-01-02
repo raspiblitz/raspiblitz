@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch txindex on or off"
- echo "network.txindex.sh [on|off]"
+ echo "network.txindex.sh [on|off|status]"
  exit 1
 fi
 
@@ -38,7 +38,8 @@ if [ "$1" = "status" ]; then
   else
     echo "isIndexed=0"
     if [ ${#indexedToBlock} -gt 0 ]; then
-      indexInfo="Indexing ${indexedToBlock}/${blockchainHeight} (please wait)"
+      progressPercent=$(printf %.2f $(echo "${indexedToBlock}/${blockchainHeight}*100" | bc -l))
+      indexInfo="Indexing is at ${progressPercent}% (please wait)"
     else
       indexInfo="Indexing is running (please wait)"
     fi
