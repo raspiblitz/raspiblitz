@@ -88,22 +88,22 @@ read key
 # make quick check if data is there
 anyDataAtAll=0
 quickCheckOK=1
-count=$(sudo ls /mnt/hdd/bitcoin/blocks 2>/dev/null | grep -c '.dat')
+count=$(sudo find /mnt/hdd/bitcoin/ -iname *.dat -type f | wc -l)
 if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/blocks"
    anyDataAtAll=1
 fi
-if [ ${count} -lt 3000 ]; then
-  echo "FAIL: transfere seems invalid - less then 3000 .dat files (${count})"
+if [ ${count} -lt 300 ]; then
+  echo "FAIL: transfere seems invalid - less then 300 .dat files (${count})"
   quickCheckOK=0
 fi
-count=$(sudo ls /mnt/hdd/bitcoin/chainstate 2>/dev/null | grep -c '.ldb')
+count=$(sudo find /mnt/hdd/bitcoin/ -iname *.ldb -type f | wc -l)
 if [ ${count} -gt 0 ]; then
    echo "Found data in /mnt/hdd/bitcoin/chainstate"
    anyDataAtAll=1
 fi
-if [ ${count} -lt 1400 ]; then
-  echo "FAIL: transfere seems invalid - less then 1400 .ldb files (${count})"
+if [ ${count} -lt 700 ]; then
+  echo "FAIL: transfere seems invalid - less then 700 .ldb files (${count})"
   quickCheckOK=0
 fi
 

@@ -114,9 +114,20 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      minSize=210000000000
-      if [ "${network}" = "litecoin" ]; then
-        minSize=20000000000
+      if [ "${network}" = "bitcoin" ]; then
+        if [ "${chain}" = "main" ]; then
+          minSize=210000000000
+        else
+          minSize=27000000000
+        fi
+      elif [ "${network}" = "litecoin" ]; then
+        if [ "${chain}" = "main" ]; then
+          minSize=20000000000
+        else
+          minSize=27000000000
+        fi
+      else
+        minSize=210000000000000
       fi
       isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
       blockchainsize=$(sudo du -shbc /mnt/hdd/${network}/ 2>/dev/null | head -n1 | awk '{print $1;}')
