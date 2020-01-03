@@ -126,15 +126,15 @@ if [ ${configExists} -eq 1 ]; then
 
   # same for testnet
   if ! grep -Eq "^test.rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
-    echo "fix issue #950 -> adding test.rpcport=8332" >> ${logFile}
-    echo "test.rpcport=8332" >> /mnt/hdd/${network}/${network}.conf
+    echo "fix issue #950 -> adding test.rpcport=18332" >> ${logFile}
+    echo "test.rpcport=18332" >> /mnt/hdd/${network}/${network}.conf
   else
     echo "check issue #950 -> ok test.rpcport exists" >> ${logFile}
   fi
 
   if ! grep -Eq "^test.rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
-    echo "fix issue #950 -> adding test.rpcbind=127.0.0.1:8332" >> ${logFile}
-    echo "test.rpcbind=127.0.0.1:8332" >> /mnt/hdd/${network}/${network}.conf
+    echo "fix issue #950 -> adding test.rpcbind=127.0.0.1:18332" >> ${logFile}
+    echo "test.rpcbind=127.0.0.1:18332" >> /mnt/hdd/${network}/${network}.conf
   else
     echo "check issue #950 -> ok test.rpcbind exists" >> ${logFile}
   fi
