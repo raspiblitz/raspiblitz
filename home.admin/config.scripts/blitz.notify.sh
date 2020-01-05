@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
- echo "small script enabling/disabling and sending notification messages"
- echo "network.notify.sh [on|off]   - OR"
- echo "network.notify.sh send \"Message to be send via configured method\""
+ echo "script to enable/disabe and send notifications"
+ echo "blitz.notify.sh [on|off]   - OR"
+ echo "blitz.notify.sh send \"Message to be send via configured method\""
  exit 1
 fi
 
