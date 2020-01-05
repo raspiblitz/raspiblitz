@@ -1,8 +1,10 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
- echo "script to enable/disabe and send notifications"
- echo "blitz.notify.sh [on|off]   - OR"
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "script to enable/disable or send notifications"
+ echo "blitz.notify.sh on"
+ echo "blitz.notify.sh off"
  echo "blitz.notify.sh send \"Message to be send via configured method\""
  exit 1
 fi
@@ -132,7 +134,7 @@ if [ "$1" = "send" ]; then
     /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
   elif [ "${notifyMethod}" = "mail" ]; then
     if [ "${notifyMailEncrypt}" = "on" ]; then
-      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail --cert rhab.pem --encrypt ${notifyMailTo} "$2"
+      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail --cert ${notifyMailToCert} --encrypt ${notifyMailTo} "$2"
     else
       /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail ${notifyMailTo} "$2"
     fi
@@ -145,6 +147,6 @@ if [ "$1" = "send" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Paramter $1"
+echo "FAIL - Unknown Parameter $1"
 exit 1
 
