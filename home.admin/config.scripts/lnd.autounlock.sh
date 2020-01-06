@@ -20,6 +20,7 @@ passwordC=$2
 # run interactive if 'turn on' && no further parameters
 if [ "${turn}" = "on" ] && [ ${#passwordC} -eq 0 ]; then
 
+  echo "!!!CANCEL!!!" > ./.tmp
   dialog --backtitle "LND Auto-Unlock" --inputbox "ENTER your PASSWORD C:
 
 For more details see chapter in GitHub README 
@@ -30,10 +31,16 @@ Password C will be stored on the device.
 " 13 52 2>./.tmp
   passwordC=$( cat ./.tmp )
   
-  # test if empty
+  # test if empty or CANCEL
   if [ ${#passwordC} -eq 0 ]; then
-    echo "# CANCEL input cannot be empty"
+    echo "# input cannot be empty - repeat"
     sleep 3
+    sudo /home/admin/config.scripts/lnd.autounlock.sh on
+    exit 1
+  fi
+  if [ "${passwordC}" = "!!!CANCEL!!!" ]; then
+    echo "# CANCEL LND Auto-Unlock"
+    sleep 2
     exit 1
   fi
 
