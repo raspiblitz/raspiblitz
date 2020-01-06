@@ -4,7 +4,7 @@
 
 The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
-## Package: Standard (around 210 CHF)
+## Package: Standard (around 240 CHF)
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
@@ -12,19 +12,19 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 * ShimFan Cooling: [pi-shop.ch](https://www.pi-shop.ch/fan-shim-for-raspberry-pi) (order later if sold out)
 * Power USBC: [pi-shop.ch](https://www.pi-shop.ch/raspberry-pi-15w-power-supply-eu-schwarz)
 * RaspberryPi-Case: [pi-shop.ch](https://www.pi-shop.ch/rainbow-pibow-coupe-4-raspberry-pi-4-only)
-* 1TB SSD: [pi-shop.ch](https://www.pi-shop.ch/seagate-expansion-portable-2-5-1tb) or [Brack.ch](https://www.brack.ch/toshiba-externe-festplatte-canvio-basics-1-tb-813514)
-* SSD-Case: (not needed in case of [pi-shop.ch](https://www.pi-shop.ch/seagate-expansion-portable-2-5-1tb) solution)
+* 500GB SSD: [Digitec](https://www.digitec.ch/en/s1/product/crucial-mx500-500gb-25-ssd-7331523)
+* SSD-Case: [Digitec](https://www.digitec.ch/en/s1/product/icy-box-ib-ac703-u3-converters-6067574)
 * Micro SD-Card 32GB: [pi-shop.ch](https://www.pi-shop.ch/32gb-microsd-karte-class10-noobs-fuer-raspberry-pi-bereits-installiert)
-* LCD-Display: [pi-shop.ch](https://www.pi-shop.ch/3-5inch-rpi-lcd-b-ic-test-board)
+* LCD-Display: Original Display is not available in CH. You can by the original from [Amazon.de](https://www.amazon.de/gp/product/B06X191RX7) or us this [pi-shop.ch](https://www.pi-shop.ch/3-5inch-rpi-lcd-b-ic-test-board). If display from pi-shop.ch, you have to install the drivers manually.
 
-## Package: Minimal (around 180 CHF)
+## Package: Minimal (around 200 CHF)
 
-*The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services. 500GB SSD are in the same price range like 1TB, therefore go with 1TB*
+*The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
 Basic Parts for all minimal variants:
-* 1TB SSD: [pi-shop.ch](https://www.pi-shop.ch/seagate-expansion-portable-2-5-1tb) or [Brack.ch](https://www.brack.ch/toshiba-externe-festplatte-canvio-basics-1-tb-813514)
+* 1TB Hard Drive: [Digitec](https://www.digitec.ch/de/s1/product/toshiba-canvio-basics-1tb-externe-festplatte-3227990)
 * Micro SD-Card 16GB: [pi-shop.ch](https://www.pi-shop.ch/16-gb-microsd-karte-class10-noobs-fuer-raspberry-pi-bereits-installiert)
-* LCD-Display: [pi-shop.ch](https://www.pi-shop.ch/3-5inch-rpi-lcd-b-ic-test-board)
+* LCD-Display: Original Display is not available in CH. You can by the original from [Amazon.de](https://www.amazon.de/gp/product/B06X191RX7) or us this [pi-shop.ch](https://www.pi-shop.ch/3-5inch-rpi-lcd-b-ic-test-board). If display from pi-shop.ch, you have to install the drivers manually.
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
 * RaspBerry Pi 3: [pi-shop.ch](https://www.pi-shop.ch/raspberry-pi-3-model-b)

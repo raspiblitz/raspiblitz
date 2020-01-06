@@ -32,7 +32,7 @@ if [ ${existsHDD} -eq 1 ]; then
       device="sda2"
     elif [ ${size3} -gt ${size1} ]; then
       echo "sdb is BIGGER - run with this one"
-      device="sdb" 
+      device="sdb"
     else
       echo "sda1 is BIGGER - run with this one"
     fi
@@ -57,7 +57,7 @@ if [ ${existsHDD} -eq 1 ]; then
       echo "You HDD was detected with the size of ${isSize} bytes"
       echo "For ${network} at least ${minSize} bytes is recommended"
       echo "If you know the HDD is bigger then detected, please"
-      echo "change HDD to 1 partition on another computer first," 
+      echo "change HDD to 1 partition on another computer first,"
       echo "If you want to change to a bigger HDD:"
       echo "* Unplug power of RaspiBlitz"
       echo "* Make a fresh SD card again"
@@ -77,17 +77,17 @@ if [ ${existsHDD} -eq 1 ]; then
   if [ ${mountOK} -eq 1 ]; then
     echo "FAIL - HDD is mounted"
     echo "If you really want to reinit the HDD, then unmount the HDD first and try again"
-  else  
+  else
     echo ""
     dialog --title "Format HDD" --yes-button "Yes" --no-button "Cancel" --yesno "RaspiBlitz detected a Hard Disk Drive (HDD).
-It will get formatted to EXT4 to be usefull.
+It will get formatted to EXT4 to be useful.
 This will DELETE ALL FORMER DATA on the HDD.
 
 Is it OK to delete HDD for fresh RaspiBlitz?
       " 10 48
     if [ $? -eq 1 ]; then
       dialog --title "Replace HDD" --msgbox "OK. RaspiBlitz will shutdown now.
-Please disconnect Power then. 
+Please disconnect Power then.
 Backup HDD data or connect another one.
 Then Power up again." 8 39
       sudo shutdown now
@@ -102,7 +102,7 @@ Then Power up again." 8 39
     sudo mkfs.ext4 /dev/${device} -F -L BLOCKCHAIN
     echo "format ext4 done - wait 6 secs"
     sleep 6
-    formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4) 
+    formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
     if [ ${formatExt4OK} -eq 1 ]; then
       echo "OK - HDD is now formatted in ext4"
       sleep 1
