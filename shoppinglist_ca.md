@@ -8,8 +8,9 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB + Power: [amazon.com](https://www.amazon.com/CanaKit-Raspberry-Basic-Kit-2GB/dp/B07TYK4RL8) (shipping from USA)
-* ShimFan Cooling: [amazon.com](https://www.amazon.com/Pimoroni-Fan-Shim-Raspberry-PI/dp/B07TTTCN8H/) (shipping from USA)
+* RaspBerry Pi 4 2GB [amazon.ca](https://www.amazon.ca/Raspberry-Pi-Computer-Model-2GB/dp/B07W5BJ2CQ)
++ Power: [amazon.ca](https://www.amazon.ca/Official-Raspberry-Pi-Supply-Output/dp/B07W8XHMJZ)
+* ShimFan Cooling: [amazon.ca](https://www.amazon.ca/Pimoroni-Fan-SHIM-Raspberry-Expectancy/dp/B07TTTCN8H)
 * 500GB SSD: [amazon.ca](https://www.amazon.ca/Crucial-MX500-500GB-NAND-Internal/dp/B0786QNS9B)
 * SSD-Case: [amazon.ca](https://www.amazon.ca/UGREEN-Enclosure-External-Adapter-Housing/dp/B07D2BHVBD)
 * Micro SD-Card 32GB: [amazon.ca](https://www.amazon.ca/dp/B07DTFRNRJ)
