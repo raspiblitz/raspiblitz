@@ -91,7 +91,8 @@ activateBitcoinOverTOR()
     if [ ${networkIsTor} -eq 0 ]; then
     
       # clean all previous added nodes
-      sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+      sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+      sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
     
       echo "Addding TOR config ..."
       sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
