@@ -16,12 +16,18 @@ fi
 
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  if [ -d "/home/admin/lndmanage" ]; then
+    echo "LNDMANAGE already installed"
+    exit 1
+  fi
+  
   echo "*** INSTALL LNDMANAGE ***"
-  mkdir ~/lndmanage
-  cd ~/lndmanage
+  mkdir /home/admin/lndmanage
+  cd /home/admin/lndmanage
   # activate virtual environment
   python -m venv venv
-  source ~/lndmanage/venv/bin/activate
+  source /home/admin/lndmanage/venv/bin/activate
   # get dependencies
   sudo apt install -y python3-dev libatlas-base-dev
   python -m pip install wheel
