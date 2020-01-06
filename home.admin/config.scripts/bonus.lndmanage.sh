@@ -17,16 +17,15 @@ fi
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL LNDMANAGE ***"
-  mkdir lndmanage
-  cd lndmanage
+  mkdir ~/lndmanage
+  cd ~/lndmanage
   # activate virtual environment
-  sudo apt install -y python3-venv
-  python3 -m venv venv
-  source venv/bin/activate
+  python -m venv venv
+  source ~/lndmanage/venv/bin/activate
   # get dependencies
   sudo apt install -y python3-dev libatlas-base-dev
-  pip3 install wheel
-  pip3 install lndmanage==0.8.0.1
+  python -m pip install wheel
+  python -m pip install lndmanage==0.8.0.1
 
   # setting value in raspi blitz config
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
