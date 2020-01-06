@@ -109,8 +109,7 @@ case $CHOICE in
             ;;
         ELECTRS)
             clear
-            ./config.scripts/internet.hiddenservice.sh electrs 50002 50002
-            ./config.scripts/internet.hiddenservice.sh electrsTCP 50001 50001
+            ./config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
             TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
             echo ""
             echo "The Tor Hidden Service address for electrs is:"

@@ -283,8 +283,7 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002
-    /home/admin/config.scripts/internet.hiddenservice.sh electrsTCP 50001 50001    
+    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001    
     
     TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
     if [ -z "$TOR_ADDRESS" ]; then
