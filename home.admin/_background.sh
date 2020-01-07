@@ -91,6 +91,12 @@ do
   if [ ${#lndAddress} -gt 3 ]; then
     recheckPublicIP=0
   fi
+
+  # prevent also when runBehindTor is on
+  if [ "${runBehindTor}" = "1" ] || [ "${runBehindTor}" = "on" ]; then
+    recheckPublicIP=0
+  fi
+
   updateDynDomain=0
   if [ ${recheckPublicIP} -eq 1 ]; then
     echo "*** RECHECK PUBLIC IP ***"
