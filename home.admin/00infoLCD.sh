@@ -144,6 +144,10 @@ while :
         fi
 
       # when old data - improve message
+      elif [ "${state}" = "sdtoosmall" ]; then
+          message="SDCARD TOO SMALL - min 16GB"
+
+      # when old data - improve message
       elif [ "${state}" = "olddata" ]; then
           message="login for manual migration"
 

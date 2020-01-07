@@ -26,6 +26,40 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# check if file system was expanded to full capacity and sd card is bigger then 8GB
+# see: https://github.com/rootzoll/raspiblitz/issues/936
+source ${infoFile}
+if [ "${baseImage}" = "raspbian" ]; then
+  echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
+  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
+  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
+  if [ ${byteSizeSdCard} -lt 8192000 ]; then
+    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
+    if [ ${fsexpanded} -eq 1 ]; then
+      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
+      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
+      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+      exit 1
+    else
+      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+      sudo raspi-config --expand-rootfs
+      sleep 6
+      sudo shutdown -r now
+      exit 0
+    fi
+  else
+    echo "Size looks good. Bigger then 8GB card is used." >> ${logFile}
+  fi
+else
+  echo "Baseimage is ${baseImage} - not raspbian, skipping the sd card size check." >> ${logFile}
+fi
+
+
 # import config values
 sudo chmod 777 ${configFile}
 source ${configFile}
