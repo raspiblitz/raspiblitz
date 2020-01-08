@@ -1,6 +1,6 @@
 # RaspiBlitz Workshop Tutorial
 
-One goal of the RaspiBlitz project is to provide a open DIY platform for workshops - to setup your own lightning node and learn to manage it. This tutorial is collecting best practices on how to organise a RaspiBlitz workshop.
+One goal of the RaspiBlitz project is to provide an open DIY platform for workshops - to setup your own lightning node and learn to manage it. This tutorial is collecting best practices on how to organise a RaspiBlitz workshop.
 
 <br/>
 
@@ -8,17 +8,20 @@ One goal of the RaspiBlitz project is to provide a open DIY platform for worksho
 
 First thing on planning a RaspiBlitz workshop is to calculate the time needed correctly. For example, the setup from scratch with no further support is still a weekend project - mostly because downloading and syncing the blockchain takes a lot of time.
 
+
 So the time required for the workshop all depends on the preparation you as a workshop organizer are interested to provide ahead of the workshop. This document outlines three starting configurations... going from most preparation required to least.
 
 Note that the time estimates below are about getting a node to a "clean setup". They do not include the funding & setting up channels process - which is adding an additional 30 min to 1 hour to the calculation.
 
+
 Also, if your group is lager then 5 participants, calculate some extra time for individual support. You can compensate for that if you let two participants work together on one RaspiBlitz setup; this way you limit individual support and let them help each other.
+
 
 ## Workshop Scenario A) Provide a Ready-2-Go RaspiBlitz
 
 _Estimated Duration: 2 Hours_
 
-Sure, one part of the fun for participents is to assemble the hardware themselves. But if you aim for the shortest workshop possible, then this is the way to go (around 2 hours lenght). So your participants start with an almost on-the-spot synced blockchain (use copy station to keep HDDs presynced) and will just have to deal with waiting times during the lightning node setup. But keep in mind that you need budget to buy all the hardware and lots of time in preparation for this - order the parts two weeks before and start peparing at least 3 days before the workshop.
+Sure, one part of the fun for participants is to assemble the hardware themselves. But if you aim for the shortest workshop possible, then this is the way to go (around 2 hours length). If you have the RaspiBlitz already assembled to be operational at the workshop you should already set them up with a basic setup, maybe even transfer a small amount of coins onto them. This way you can give the workshop participants the A.B.C.D passwords on a sheet of paper and let them jump right into learning how to manage a node. While waiting for confirmations on the first channel opening you can use the time to explain how to build a RaspiBlitz from scratch and some Lightning basics.
 
 These are the following steps you need to prepare (follow links for details):
 
@@ -26,15 +29,18 @@ These are the following steps you need to prepare (follow links for details):
 - [Assemble all the Hardware](WORKSHOP.md#assemble-all-the-hardware)
 - [Prepare HDDs with Blockchain Data](WORKSHOP.md#prepare-hdds-with-blockchain-data)
 - [Prepare SD cards with latest RaspiBlitz image](WORKSHOP.md#prepare-sd-cards-with-latest-raspiblitz-image)
+- Run Basic Node Setup
 - [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 
-_NOTE: You will already take 2 hours to setup the RaspiBlitz software. For groups that are interested in getting experience on the Lightning Network and don't want to take the node home after the workshop, it may make sense to prepare the RaspiBlitz even more, having it fully setup on testnet with RTL turned on. Then you can directly start with funding the node with testnet coins, give intro and build channels over the RTL UI._
+_NOTE: Make sure that the blockchain of the RaspiBlitzes are synced before the workshop begins._
 
 ## Workshop Scenario B) Provide a RaspiBlitz Hardware-Kit
 
 _Estimated Duration: 3 Hours_
 
-In this workshop scenario you buy all the hardware but let participants assemble the RaspiBlitz themselves - that's half the fun and people get a feel for the gear. But to keep the blockchain sync time short and be able to keep in a 3 hour timeframe you need to prepare the HDDs with blockchain data not much older than one day. Start ordering the parts at least one week before the workshop (budget needed) and plan the day before completely for copying blockchain data to all those HDDs.
+
+In this workshop scenario you buy all the hardware but let participants assemble the RaspiBlitz themselves - that's half the fun and people get a feel for the gear. But to keep the blockchain sync time short and be able to keep in a 3 hour timeframe you need to prepare the HDDs with blockchain data not much older than one day. Start ordering the parts at least one week before the workshop (budget as needed) and plan the day before completely for copying blockchain data to all those HDDs.
+
 
 These are the following steps you need to prepare (follow links for details):
 
@@ -45,19 +51,25 @@ These are the following steps you need to prepare (follow links for details):
 
 Variation: If you don't have a big bugdet to prefinance the parts or people have already hardware they want to bring you can just buy the HDDs and SD cards and prepare them to run this scenario.
 
+
 ## Workshop Scenario C) Bring your own Hardware
+
 
 _Estimated Duration: 4–6 Hours_
 
 This scenario is advised only for small groups, or you'll need to bring multiple blockchain copy stations - see details on "Prepare HDDs with Blockchain Data". Otherwise it needs the least prepartion time and prefinance and can be announced to participants about 5 days beforehand, so that they have time to order all the parts online.
 
+
 - [Instruct Participants to bring Hardware](WORKSHOP.md#instruct-participants-to-bring-hardware)
 - [Prepare Blockchain Copy Station](WORKSHOP.md#prepare-blockchain-copy-station)
 - [Setup Workshop Environment](WORKSHOP.md#setup-workshop-environment)
 
+
 As soon as the participants arrive at the workhop, make sure to check their hardware list. We also suggest taking their HDDs and starting the blockchain copy process before official starting time.
 
+
 <br/>
+
 
 # Checklist for Running a Workshop
 
@@ -70,8 +82,8 @@ Make sure you have the following hardware and infrastructure ready for the works
 - Extra WLAN Router (if you are not sure if LAN & WLAN is not on the same network at location)
 - One or two USB SD card adapters
 - One or two USB-C to USB-A adapters
-- Some Tape, Marker & Pens always come in handy (also for participants to wirte down seeds & passwords)
-- Potentially some bitcoin funds (if people dont have their own to start small funding channels)
+- Some Tape, Markers & Pens always come in handy (also for participants to wirte down seeds & passwords)
+- Potentially some bitcoin funds (if people dont have their own to start funding channels)
 
 Participants need to bring at least their laptops.
 
@@ -83,7 +95,8 @@ _The basic structure of the workshop is set by the RaspiBlitz setup process. Sim
 
 ## Welcome and Intro
 
-In the beginning, it's great to give a small introduction to the Lightning Network and show the RaspiBlitz GitHub page to let everybody know where to find the basic info. But try to keep it around 10 min. to not waste time.
+In the beginning, it's great to give a small introduction to the Lightning Network and show the RaspiBlitz GitHub page to let everybody know where to find the basic info. But try to keep it around 10 min, in order to not waste time.
+
 
 Also, even before the intro, take care of the blockchain preparation. If people bring clean HDDs, hook them up to your blockchain copy station as soon as possible. If you have to copy on location, plan to spend time for some deeper educational intro while the HDDs get prepared.
 
@@ -93,17 +106,21 @@ If you hand out hardware kits or people bring their own hardware, it's time to p
 
 ## Basic Setup
 
+
 Connect everybody's laptop to the same local network the RaspiBlitzes are connected to. Be prepared to explain how to open a terminal - Windows' users especially need some help here (see README on this).
+
 
 Then everybody is SSHing into the RaspiBlitz and is following the setup dialog. Hand out paper and pens for people to write down their passwords and wallet seeds.
 
 ## Waiting Time
 
-After the lightning wallet setup comes the longest waiting time during the workshop - around 30 min. when you have a presynced ready-2-go or up to 1 hour for the other scenarios. It's the time when the node is syncing up the blockchain and LND is scanning. If you see someone's blockchain progress under 97%, something is wrong - possibly the HDD was not correctly prepared or the blockchain data is way to old to finish during workshop time.
+After the lightning wallet setup comes the longest waiting time during the workshop - around 30 min. When you have a presynced ready-2-go or up to 1 hour for the other scenarios. It's the time when the node is syncing up the blockchain and LND is scanning. If you see someone's blockchain progress under 97%, something is wrong - possibly the HDD was not correctly prepared or the blockchain data is way too old to finish during workshop time if you work with old RaspberryPi3. The new RaspberryPi4 with SSD can catch up much faster.
+
 
 Use this time for a more in-depth educational segment on lightning in general. This time can also be used to demo with one RaspiBlitz that is already on clean-setup (you prepared before the workshop) how the funding, setting up channels and the other features of the RaspiBlitz work. That way people see what are the next steps once their node is ready and even if your workshop time is over by then they can know the next steps to do at home.
 
-Also this time is good for troubleshooting in individal sessions. If someone is not able to finish the sync on location in time, shutdown the Raspiblitz from SSH terminal with CTRL+C and then `shutdown now`. If the device gets connected back up at home it should pickup the sync/scan process (let people know about the wallet unlock).
+Also this time is good for troubleshooting in individual sessions. If someone is not able to finish the sync on location in time shutdown the Raspiblitz from SSH terminal with CTRL+C and then `shutdown now`. If the device gets connected back up at home it should pickup the sync/scan process (let people know about the wallet unlock).
+
 
 ## Finalizing Setup
 
@@ -123,13 +140,17 @@ Here are some videos that show what else is possible with the RaspiBlitz:
 
 # Organisation Tasks
 
-_Which of the follwoing organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:_
+
+*Which of the following organisation tasks are relevant for you depends on which starting scenario you choose (see above). Here is the complete possible list with details:*
+
 
 ## Buy all the Hardware
 
 See the shopping list on the RaspiBlitz Github README. You need to buy all of those, and every participant also needs a short (about 1m) network cable.
 
+
 From experience start ordering two weeks before the workshop (if you need to assemble) and minimum one week if you're handing out hardware kits - even if you have Amazon Prime. There is always a shipment coming late, and it's a lot of packages.
+
 
 If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardwareset for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com)
 
@@ -141,7 +162,9 @@ In all scenarios make sure people bring their laptops.
 
 ## Assemble all the Hardware
 
-Basically you follow the assemble instructions on the RaspiBlitz GitHub README. Think of a safe way to transport the assembled devices to the workshop location - HDDs like it soft.
+
+Basically you follow the assembly instructions on the RaspiBlitz GitHUb README. Think of a safe way to transport the assembled devices to the workshop location - HDDs like it soft.
+
 
 ## Prepare HDDs with Blockchain Data
 
@@ -158,7 +181,10 @@ The bitcoin core client (0.17.1 or higher) needs to be stopped while the data is
 
 The easiest way to get a "template" of such HDD is to setup a fresh RaspiBlitz (without channel and fundings) and then run the script `/home/admin/XXcleanHDD.sh` and manually delete all rest data from the HDD and just leave those folders.
 
-Once you have that "template" you can make a image from that and write that image to the other HDDs.
+
+Once you have that "template" you can make an image from that and write that image to the other HDDs. 
+
+
 
 ## Prepare Blockchain Copy Station
 
@@ -171,11 +197,12 @@ This can be used to prepare and keep multiple HDDs in snyc with blockchain data 
 
 _Beware that it will not run as a Lightning Node during that time (LND is stopped). And to reset it back into normal mode you need to stop the script with `CTLR+c` and the reboot with `sudo shutdown -r now`._
 
+
 In "Copy Station Mode" the RaspiBlitz will just run the bitcoind (so it needs network connection), copy fresh blockchain data over to a template folder on the HDD called `/mnt/hdd/templateHDD` and from there sync it to further HDDs that get connected to it.
 
 If you run it in a setup like on this photo with an extra powered USB hub, you can connect up to 10 HDDs at once to be synced with an almost up-to-date blockchain.
 
-At the moment the "Blockchain Copy Station" is just a computer (laptop - not a RaspberryPi) having a image of a "template" HDD (see above) and you can attach (with a USB3.0 Hub) multiple fresh HHDs to it and start writing in the template image to that.
+At the moment the "Blockchain Copy Station" is just a computer (laptop - not a RaspberryPi) having an image of a "template" HDD (see above) and you can attach (with a USB3.0 Hub) multiple fresh HHDs to it and start writing in the template image to that.
 
 To update the "template" HDD for the next workshop use it for a fresh clean RaspiBllitz setup just days before, sync the blockchain to 100% and repeat the process above.
 
@@ -189,7 +216,7 @@ _If someone has a better idea for a 'Blockchain Copy Station', please feel free 
 
 ## Prepare SD Cards with Latest RaspiBlitz Image
 
-Download the latest RasopiBlitz SD card image from the README page. `Balena Etcher` is the best image writing softare forn this usecase because if you have multiple sd card adapters, you can write multiple cards at once,cutting down your preperation time.
+Download the latest RaspiBlitz SD card image from the README page. `Balena Etcher` is the best image writing software for this use case because if you have multiple sd card adapters, you can write multiple cards at once,cutting down your preparation time.
 
 ## Setup Workshop Environment
 

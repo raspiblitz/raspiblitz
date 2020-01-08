@@ -38,6 +38,7 @@ echo "***********************************************" >> $logFile
 network=""
 chain=""
 setupStep=0
+fsexpanded=0
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
@@ -48,6 +49,7 @@ echo "state=starting" > $infoFile
 echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
+echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile

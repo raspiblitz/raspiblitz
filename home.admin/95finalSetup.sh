@@ -30,6 +30,10 @@ cp $logFile /home/admin/raspiblitz.setup.log
 echo "Setting the Name/Alias/Hostname .."
 sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
+# expanding the root of the sd card
+sudo raspi-config --expand-rootfs
+sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
+
 # mark setup is done
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 

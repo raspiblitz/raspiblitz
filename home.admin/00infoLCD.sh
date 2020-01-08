@@ -138,6 +138,23 @@ while :
       if [ ${online} -eq 0 ]; then
         message="no internet connection"
 
+      # when in presync - get more info on progress
+      elif [ "${state}" = "presync" ]; then
+        blockchaininfo="$(sudo -u root bitcoin-cli --conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
+        message="starting"
+        if [ ${#blockchaininfo} -gt 0 ]; then
+          message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
+          message=$(echo $message | awk '{printf( "%.2f%%", 100 * $1)}')
+        fi
+
+      # when old data - improve message
+      elif [ "${state}" = "sdtoosmall" ]; then
+          message="SDCARD TOO SMALL - min 16GB"
+
+      # when old data - improve message
+      elif [ "${state}" = "olddata" ]; then
+          message="login for manual migration"
+
       # when no HDD - improve message
       elif [ "${state}" = "noHDD" ]; then
           message="Connect external HDD/SSD"
