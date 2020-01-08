@@ -629,13 +629,13 @@ Work notes for the process of producing a new sd card image release:
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Power on the Build Laptop (press F12 for boot menu)
 * Connect USB stick with GPG signing keys
-* Open that USB stick in filemanager and on white space context menu --> open terminal
+* Open Terminal and cd into directory of USB Stick under `/media/amnesia`
 * Run `gpg --import ./sub.key`, check and `exit`
 * Disconnect USB stick with GPG keys
 * Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
-* In that file manager in context menu on white space -> open terminal
+* Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
 * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
 * `dd if=/dev/[sdcarddevice] | gzip > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * When finished you should see that more then 7GB were copied

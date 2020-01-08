@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.4RC1 with lnd 0.8.2-beta and bitcoin 0.19.1 or litecoin 0.16.3.`
+`Version 1.4RC2 with lnd 0.8.2-beta and bitcoin 0.19.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -91,9 +91,9 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
-HTTP: https://raspiblitz.com/raspiblitz-v1.4RC1-2019-12-25.img.gz
+HTTP: https://raspiblitz.com/raspiblitz-v1.4RC2-2020-01-08.img.gz
 
-SHA-256: bcd6479c10d1219838784228fc5fde15fa1d6594163a8c65df3019c79ea7936d
+SHA-256: b4a0daefc9352711200093afa08998d649569e0cb4de90cb39db1f150b4130af
 
 To see what new features to test and the place to give feedback - see [Milestone v1.4 issues list](https://github.com/rootzoll/raspiblitz/issues?utf8=%E2%9C%93&q=is%3Aissue+milestone%3A%221.4+Release%22+).
 
