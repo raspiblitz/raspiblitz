@@ -434,6 +434,7 @@ dialog --pause "  Waiting for LND - please wait .." 8 58 30
 # Copy LND macaroons to admin
 ############################
 
+clear
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
