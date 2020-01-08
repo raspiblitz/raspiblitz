@@ -49,7 +49,7 @@ fi
 isMounted=$(sudo df | grep -c /mnt/hdd)
 isBTRFS=$(sudo btrfs subvolume list /mnt/hdd 2>/dev/null | grep -c "WORKINGDIR")
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
-isSSD=$(sudo cat /sys/block/sda/queue/rotational | grep -c 0)
+isSSD=$(sudo cat /sys/block/sda/queue/rotational 2>/dev/null | grep -c 0)
 
 # determine if swap is external on or not
 externalSwapPath="/mnt/hdd/swapfile"

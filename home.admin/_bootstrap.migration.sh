@@ -85,27 +85,60 @@ if [ ${configExists} -eq 1 ]; then
 
   # make sure to fix bitcoind RPC port if not done in old version
   # https://github.com/rootzoll/raspiblitz/issues/217
-  settingExists=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c 'rpcport=')
-  if [ ${settingExists} -eq 0 ]; then
-    echo "fix issue #217 -> adding rpcport=8332" >> ${logFile}
-    echo "rpcport=8332" >> /mnt/hdd/bitcoin/bitcoin.conf
-  else
-    echo "check issue #217 -> ok rpcport exists" >> ${logFile}
-  fi
-  settingExists=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c 'rpcallowip=')
-  if [ ${settingExists} -eq 0 ]; then
+  # https://github.com/rootzoll/raspiblitz/issues/950
+
+  if ! grep -Eq "^rpcallowip=.*" /mnt/hdd/${network}/${network}.conf; then
     echo "fix issue #217 -> adding rpcallowip=127.0.0.1" >> ${logFile}
-    echo "rpcallowip=127.0.0.1" >> /mnt/hdd/bitcoin/bitcoin.conf
+    echo "rpcallowip=127.0.0.1" >> /mnt/hdd/${network}/${network}.conf
   else
-    echo "check issue #217 -> ok rpcallowip exists" >> ${logFile}
+    echo "check issue #217 -> ok rpcallow exists" >> ${logFile}
   fi
-  settingExists=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c 'rpcbind=')
-  if [ ${settingExists} -eq 0 ]; then
-    echo "fix issue #217 -> adding rpcbind=127.0.0.1:8332" >> ${logFile}
-    echo "rpcbind=127.0.0.1:8332" >> /mnt/hdd/bitcoin/bitcoin.conf
+
+  # check whether "main." needs to be added to rpcport and rpcbind
+  if grep -Eq "^rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #950 -> change rpcport to main.rpcport" >> ${logFile}
+    sudo sed -i -E 's/^(rpcport=.*)/main.\1/g' /mnt/hdd/${network}/${network}.conf
   else
-    echo "check issue #217 -> ok rpcbind exists" >> ${logFile}
+    echo "check issue #950 -> ok ^rpcport does not exist" >> ${logFile}
   fi
+
+  if grep -Eq "^rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #950 -> change rpcbind to main.rpcbind" >> ${logFile}
+    sudo sed -i -E 's/^(rpcbind=.*)/main.\1/g' /mnt/hdd/${network}/${network}.conf
+  else
+    echo "check issue #950 -> ok ^rpcbind does not exist" >> ${logFile}
+  fi
+
+  # check whether right settings are there ("main.")
+  if ! grep -Eq "^main.rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #217 -> adding main.rpcport=8332" >> ${logFile}
+    echo "main.rpcport=8332" >> /mnt/hdd/${network}/${network}.conf
+  else
+    echo "check issue #217 -> ok main.rpcport exists" >> ${logFile}
+  fi
+
+  if ! grep -Eq "^main.rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #217 -> adding main.rpcbind=127.0.0.1:8332" >> ${logFile}
+    echo "main.rpcbind=127.0.0.1:8332" >> /mnt/hdd/${network}/${network}.conf
+  else
+    echo "check issue #217 -> ok main.rpcbind exists" >> ${logFile}
+  fi
+
+  # same for testnet
+  if ! grep -Eq "^test.rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #950 -> adding test.rpcport=18332" >> ${logFile}
+    echo "test.rpcport=18332" >> /mnt/hdd/${network}/${network}.conf
+  else
+    echo "check issue #950 -> ok test.rpcport exists" >> ${logFile}
+  fi
+
+  if ! grep -Eq "^test.rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+    echo "fix issue #950 -> adding test.rpcbind=127.0.0.1:18332" >> ${logFile}
+    echo "test.rpcbind=127.0.0.1:18332" >> /mnt/hdd/${network}/${network}.conf
+  else
+    echo "check issue #950 -> ok test.rpcbind exists" >> ${logFile}
+  fi
+
 fi
 
 echo "Version Code: ${codeVersion}" >> ${logFile}

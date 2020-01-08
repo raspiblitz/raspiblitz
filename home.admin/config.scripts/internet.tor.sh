@@ -91,22 +91,24 @@ activateBitcoinOverTOR()
     if [ ${networkIsTor} -eq 0 ]; then
     
       # clean all previous added nodes
-      sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+      sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+      sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
     
       echo "Addding TOR config ..."
       sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
       echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
       echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
-      echo "bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+      echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
       echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf 
       echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf 
       if [ "${network}" = "bitcoin" ]; then
         # adding some bitcoin onion nodes to connect to to make connection easier
-        echo "addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+        echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
       fi
       sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
@@ -127,9 +129,11 @@ deactivateBitcoinOverTOR()
 {
   echo "*** Changing ${network} Config ***"
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
-  sudo sed -i "s/^addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
-  sudo sed -i "s/^bind=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^main.bind=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^test.bind=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^dnsseed=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^dns=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
@@ -229,7 +233,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if TOR was already installed and is funtional
   echo ""
   echo "*** Check if TOR service is functional ***"
-  torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org | grep "Congratulations. This browser is configured to use Tor." -c)
+  torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
   if [ ${torRunning} -gt 0 ]; then
     clear
     echo "You are all good - TOR is already running."
