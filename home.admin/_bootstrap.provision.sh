@@ -28,8 +28,8 @@ fi
 
 # check if file system was expanded to full capacity and sd card is bigger then 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
-source ${infoFile}
-if [ "${baseImage}" = "raspbian" ]; then
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+if [ ${isRaspbian} -gt 0 ]; then
   echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
   byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
@@ -56,7 +56,7 @@ if [ "${baseImage}" = "raspbian" ]; then
     echo "Size looks good. Bigger then 8GB card is used." >> ${logFile}
   fi
 else
-  echo "Baseimage is ${baseImage} - not raspbian, skipping the sd card size check." >> ${logFile}
+  echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
 fi
 
 
