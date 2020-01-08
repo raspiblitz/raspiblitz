@@ -254,7 +254,7 @@ if [ ${isMounted} -eq 0 ]; then
     sudo /home/admin/_bootstrap.migration.sh
     echo "Calling Provisioning .." >> $logFile
     sudo /home/admin/_bootstrap.provision.sh
-    sed -i "s/^state=.*/state=recovered/g" ${infoFile}
+    sed -i "s/^state=.*/state=reboot/g" ${infoFile}
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
