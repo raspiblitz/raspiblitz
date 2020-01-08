@@ -164,6 +164,11 @@ while :
       l1="Login to your RaspiBlitz with:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
+
+      if [ "${state}" = "recovering" ]; then
+        l1="Recovering please wait - for debug:\n"
+      fi
+
       boxwidth=$((${#localip} + 24))
       sleep 3
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
