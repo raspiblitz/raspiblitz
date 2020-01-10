@@ -10,7 +10,7 @@ fi
 source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
-if [ ${#nodeJS} -eq 0 ]; then
+if ! grep -Eq "^nodeJS=" /mnt/hdd/raspiblitz.conf; then
   echo "nodeJS=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
