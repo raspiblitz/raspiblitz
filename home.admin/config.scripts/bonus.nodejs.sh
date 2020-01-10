@@ -10,12 +10,12 @@ fi
 source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
-if [ ${#nodeJS} -eq 0 ]; then
+if ! grep -Eq "^nodeJS=" /mnt/hdd/raspiblitz.conf; then
   echo "nodeJS=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # check if nodeJS was installed
-nodeJSInstalled=$(node -v | grep -c "v1.")
+nodeJSInstalled=$(node -v 2>/dev/null | grep -c "v1.")
 if [ ${nodeJSInstalled} -eq 0 ]; then
 
     # determine nodeJS VERSION and DISTRO
@@ -75,9 +75,9 @@ if [ ${nodeJSInstalled} -eq 0 ]; then
     sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs
     rm -f node-$VERSION-$DISTRO.tar.xz* 
     export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
-    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/node /usr/bin/node
-    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm
-    sudo ln -s /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npx /usr/bin/npx
+    sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/node /usr/bin/node
+    sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm
+    sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npx /usr/bin/npx
     # add to PATH permanently
     sudo bash -c "echo 'PATH=\$PATH:/usr/local/lib/nodejs/node-\$VERSION-\$DISTRO/bin/' >> /etc/profile"
     echo ""
