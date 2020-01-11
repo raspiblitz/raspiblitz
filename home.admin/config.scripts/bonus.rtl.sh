@@ -39,8 +39,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # check for Python2 (install if missing)
     # TODO remove Python2 ASAP!
+    echo "*** Check for Python2 ***"
     /usr/bin/which python2 &>/dev/null
-    if [ $? -eq 0 ]; then
+    if ! [ $? -eq 0 ]; then
+      echo "*** Install Python2 ***"
       sudo apt-get update
       sudo apt-get install -y python2
     fi
