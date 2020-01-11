@@ -16,8 +16,10 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+source /mnt/hdd/raspiblitz.conf
+
 # add default value to raspi config if needed
-if [ ${#rtlWebinterface} -eq 0 ]; then
+if ! grep -Eq "^rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
   echo "rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
 fi
 

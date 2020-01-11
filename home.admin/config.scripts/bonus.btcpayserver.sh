@@ -12,10 +12,10 @@ fi
 source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
-if [ ${#BTCPayServer} -eq 0 ]; then
+if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
 fi
-    
+
 # stop services
 echo "making sure services are not running"
 sudo systemctl stop nbxplorer 2>/dev/null

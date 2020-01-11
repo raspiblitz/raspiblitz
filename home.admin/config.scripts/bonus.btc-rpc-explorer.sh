@@ -11,11 +11,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# add default value to raspi config if needed
 source /mnt/hdd/raspiblitz.conf
-if [ ${#BTCRPCexplorer} -eq 0 ]; then
+
+# add default value to raspi config if needed
+if ! grep -Eq "^BTCRPCexplorer=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCRPCexplorer=off" >> /mnt/hdd/raspiblitz.conf
-  source /mnt/hdd/raspiblitz.conf
 fi
 
 # status
