@@ -81,6 +81,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     echo ""
 
+    # now remove Python2 again
+    echo "*** Now remove Python2 again ***"
+    sudo apt-get purge -y python2
+    sudo apt-get autoremove -y
+
     # prepare RTL.conf file
     echo "*** RTL.conf ***"
     cp ./RTL/sample-RTL.conf ./RTL/RTL.conf
