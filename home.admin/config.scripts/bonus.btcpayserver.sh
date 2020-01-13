@@ -32,6 +32,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
    echo "exiting as user cancelled BTCPayServer installation"  
    exit 1
   fi 
+  # check for $BTCPayDomain
+  source /mnt/hdd/raspiblitz.conf
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -40,14 +42,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcpay
 
     # store BTCpay data on HDD
-    sudo mkdir /mnt/hdd/app-data/btcpayserver 2>/dev/null
+    sudo mkdir /mnt/hdd/app-data/.btcpayserver 2>/dev/null
 
     # move old btcpay data to app-data
-    sudo mv -f /mnt/hdd/.btcpayserver/* /mnt/hdd/app-data/btcpayserver/ 2>/dev/null
-    sudo rm -f /mnt/hdd/.btcpayserver 2>/dev/null
+    sudo mv -f /mnt/hdd/.btcpayserver/* /mnt/hdd/app-data/.btcpayserver/ 2>/dev/null
+    sudo rm -rf /mnt/hdd/.btcpayserver 2>/dev/null
+
+    # clean dirty SDcard (from before v1.4)
+    sudo mv -f /home/btcpay/.btcpayserver/* /mnt/hdd/app-data/.btcpayserver/ 2>/dev/null
+    sudo rm -rf /home/btcpay/.btcpayserver 2>/dev/null
   
-    sudo chown -R btcpay:btcpay /mnt/hdd/app-data/btcpayserver
-    sudo ln -s /mnt/hdd/app-data/btcpayserver /home/btcpay/ 2>/dev/null
+    sudo chown -R btcpay:btcpay /mnt/hdd/app-data/.btcpayserver
+    sudo -u btcpay ln -s /mnt/hdd/app-data/.btcpayserver /home/btcpay/ 2>/dev/null
+    sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
     echo ""
     echo "***"
@@ -81,6 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcpay mkdir /home/btcpay/dotnet
     sudo -u btcpay tar -xvf ${dotnetName} -C /home/btcpay/dotnet
     sudo -u btcpay tar -xvf ${aspnetcoreName} -C /home/btcpay/dotnet
+    sudo rm -f *.tar.gz*
     
     # opt out of telemetry
     echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" | sudo tee -a /etc/environment
@@ -124,7 +132,7 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee -a /etc/systemd/system/nbxplorer.service
+" | sudo tee /etc/systemd/system/nbxplorer.service
   
     sudo systemctl daemon-reload
     # restart to create settings.config if was running already
@@ -173,9 +181,10 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git
     cd btcpayserver
     # https://github.com/btcpayserver/btcpayserver/releases 
-    sudo -u btcpay git reset --hard v1.0.3.144 
-    sudo -u btcpay ./build.sh
-    
+    sudo -u btcpay git reset --hard v1.0.3.146 
+    # sudo -u btcpay ./build.sh
+    sudo -u btcpay dotnet build -c Release BTCPayServer/BTCPayServer.csproj
+
     echo "
 [Unit]
 Description=BtcPayServer daemon
@@ -192,7 +201,7 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee -a /etc/systemd/system/btcpayserver.service
+" | sudo tee /etc/systemd/system/btcpayserver.service
   
     sudo systemctl daemon-reload
     sudo systemctl enable btcpayserver
@@ -210,7 +219,7 @@ network=mainnet
 ### Server settings ###
 port=23000
 bind=127.0.0.1
-externalurl=https://$YOUR_DOMAIN
+externalurl=https://$BTCPayDomain
 
 ### NBXplorer settings ###
 BTC.explorer.url=http://127.0.0.1:24444/
@@ -244,6 +253,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable btcpayserver
     sudo rm /etc/systemd/system/btcpayserver.service
    
+    sudo -u btcpay dotnet nuget locals all --clear
+
     sudo rm -f /home/btcpay/dotnet-sdk*
     sudo rm -f /home/btcpay/aspnetcore*
     sudo rm -rf /home/btcpay/dotnet

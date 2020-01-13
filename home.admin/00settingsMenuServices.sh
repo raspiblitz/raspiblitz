@@ -507,7 +507,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
-      if [ ${externalurl} = "https://" ]; then
+      if [ ${externalurl} = "https://localhost" ]; then
         localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         externalurl="https://$localip\n
 Will need to accept the self-signed certificate in the \
