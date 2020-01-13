@@ -550,10 +550,8 @@ if [ "${lndmanage}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed lndmanage " --msgbox "\
 Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n
-Start with the line:
-'cd lndmanage & source venv/bin/activate & lndmanage'\n
-To exit: type 'deactivate' and press ENTER
-" 12 75
+To start type: 'manage' in the command line.
+" 9 75
   fi
   needsReboot=0
 else 
