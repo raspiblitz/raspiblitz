@@ -42,10 +42,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd /home/admin/RTL
-    # git reset --hard v0.5.4
+    git reset --hard v0.6.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
-    git checkout 917feebfa4fb583360c140e817c266649307ef72
-    # check if node_modles exists now
+    # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/admin/RTL" ]; then
      echo "OK - RTL code copy looks good"
     else
@@ -59,9 +58,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
-    npm install
+    npm install --only=production
     cd ..
-    # check if node_modles exists now
+    # check if node_modules exist now
     if [ -d "/home/admin/RTL/node_modules" ]; then
      echo "OK - RTL install looks good"
     else
