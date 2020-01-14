@@ -32,10 +32,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL RTL ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
-  if [ ${isInstalled} -eq 0 ]; then
+  if ! [ ${isInstalled} -eq 0 ]; then
+    echo "RTL already installed."
 
+  else
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh
+
+    # check for Python2 (install if missing)
+    # TODO remove Python2 ASAP!
+    echo "*** Check for Python2 ***"
+    /usr/bin/which python2 &>/dev/null
+    if ! [ $? -eq 0 ]; then
+      echo "*** Install Python2 ***"
+      sudo apt-get update
+      sudo apt-get install -y python2
+    fi
 
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
@@ -71,6 +83,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     echo ""
 
+    # now remove Python2 again
+    echo "*** Now remove Python2 again ***"
+    sudo apt-get purge -y python2
+    sudo apt-get autoremove -y
+
     # prepare RTL.conf file
     echo "*** RTL.conf ***"
     cp ./RTL/sample-RTL.conf ./RTL/RTL.conf
@@ -93,8 +110,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
 
-  else 
-    echo "RTL already installed."
   fi
   
   # setting value in raspi blitz config
