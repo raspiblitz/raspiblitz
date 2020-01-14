@@ -14,7 +14,7 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 * SSD-Case: [amazon.com](https://www.amazon.com/UGREEN-Enclosure-External-Adapter-Housing/dp/B07D2BHVBD) or [amazon.com](https://www.amazon.com/UGREEN-External-Enclosure-Adapter-Housing/dp/B06XWRRMYX)
 * Micro SD-Card 32GB: [amazon.com](https://www.amazon.com/dp/B07B98GXQT)
 * LCD-Display: [amazon.com](https://www.amazon.com/gp/product/B01CNJVG8K) or [amazon.com](https://www.amazon.com/dp/B06X191RX7) or [sparkfun.com](https://www.sparkfun.com/products/14776)
-* RaspberryPi-Case: [thecryptocloak.com](https://thecryptocloak.com/product/lightningshell/) (SELECT Rpi4!)
+* RaspberryPi-Case: [cryptocloaks.com](https://www.cryptocloaks.com/product/lightningshell/) (SELECT Rpi4!)
 
 ## Package: Minimal (around 180 USD)
 
@@ -33,7 +33,7 @@ If you have already a used RaspberryPi 3 B+ you can reuse with the following par
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 * RaspBerry Pi 4 2GB + Power: [amazon.com](https://www.amazon.com/CanaKit-Raspberry-Basic-Kit-2GB/dp/B07TYK4RL8)
 * ShimFan Cooling: [amazon.com](https://www.amazon.com/Pimoroni-Fan-Shim-Raspberry-PI/dp/B07TTTCN8H/)
-* RaspberryPi-Case: (waiting for a cheap RP4 case from thecryptocloak.com - you can run without for now)
+* RaspberryPi-Case: https://www.cryptocloaks.com
 
 ## Package: Maximal
 

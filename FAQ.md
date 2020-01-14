@@ -477,13 +477,13 @@ You can replace the generic case in the shopping lists with a customized 3D prin
 
 ![LightningShell](pictures/lightningshell.png)
 
-https://thecryptocloak.com/product/lightningshell/
+https://www.cryptocloaks.com/product/lightningshell/
 
 Also there is a free & open source case you can 3D print:
 
 ![OpenCase](pictures/opencase.png)
 
-https://thecryptocloak.com/file-factory/
+https://www.cryptocloaks.com/file-factory/
 
 ## Are those "Under-Voltage detected" warnings a problem?
 
