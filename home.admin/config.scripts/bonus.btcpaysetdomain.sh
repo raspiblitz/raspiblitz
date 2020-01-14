@@ -56,6 +56,12 @@ if [ ${#ownDomain} -eq 0 ]; then
   exit 1
 fi
 
+# add default value to raspi config if needed
+if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
+  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+
 echo ""
 echo "***"
 echo "Setting up Nginx and Certbot"
@@ -65,16 +71,16 @@ echo ""
 if [ $ownDomain -eq 1 ]; then
   echo ""
   echo "***"
-  echo "Confirm that the port 80, 443 and 9735 are forwarded to the IP of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
+  echo "Confirm that the ports 80, 443 and 9735 are forwarded to the IP of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
   read key
   
   echo ""
   echo "***"
-  echo "Type your domain/ddns pointing to your public IP and press [ENTER] or use [CTRL + C] to exit"
+  echo "Type your domain or dynamicDNS pointing to your public IP and press [ENTER] or use [CTRL + C] to exit"
   echo "example:"
   echo "btcpay.example.com"
   read YOUR_DOMAIN
-  
+
   echo ""
   echo "***"
   echo "Type an email address that will be used to message about the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
@@ -96,7 +102,7 @@ if [ $ownDomain -eq 1 ]; then
   
   # get SSL cert
   sudo systemctl stop certbot 2>/dev/null
-  sudo certbot certonly -a standalone -m $YOUR_EMAIL --agree-tos -d $YOUR_DOMAIN --pre-hook "service nginx stop" --post-hook "service nginx start"
+  sudo certbot certonly -a standalone -m $YOUR_EMAIL --agree-tos -d $YOUR_DOMAIN -n --pre-hook "service nginx stop" --post-hook "service nginx start"
 
   # set nginx
   sudo rm -f /etc/nginx/sites-enabled/default
@@ -336,6 +342,9 @@ server {
   
   sudo systemctl restart nginx
 fi
+
+# setting value in raspi blitz config
+sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain=$YOUR_DOMAIN/g" /mnt/hdd/raspiblitz.conf
 
 if [ $ownDomain -eq 1 ]; then
   echo ""
