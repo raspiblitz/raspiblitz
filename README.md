@@ -91,7 +91,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
-HTTP: https://raspiblitz.com/raspiblitz-v1.4RC2-2020-01-08.img.gz
+HTTP: (offline)
 
 SHA-256: b4a0daefc9352711200093afa08998d649569e0cb4de90cb39db1f150b4130af
 
