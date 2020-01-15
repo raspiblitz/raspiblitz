@@ -687,10 +687,6 @@ if [ "$1" = "raid" ]; then
      fi
      >&2 echo "# RAID - Adding raid drive to RaspiBlitz data drive"
   elif [ "$2" = "off" ]; then
-     if [ ${isRaid} -eq 0 ]; then
-       >&2 echo "# OK - already OFF"
-       exit
-     fi
      >&2 echo "# RAID - Removing raid drive to RaspiBlitz data drive"  
   else
      >&2 echo "# possible 2nd parameter is 'on' or 'off'"  

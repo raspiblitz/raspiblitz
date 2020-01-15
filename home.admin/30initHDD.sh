@@ -104,6 +104,8 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
     exit 1
   fi
 
+  
+
   # now partition/format HDD
   echo
   echo "# --> Formatting HDD/SSD ..."
