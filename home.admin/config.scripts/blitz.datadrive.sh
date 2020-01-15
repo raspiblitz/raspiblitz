@@ -22,7 +22,7 @@ fi
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
-  echo "ERROR='missing sudo'"
+  echo "error='missing sudo'"
   exit 1
 fi
 
@@ -127,6 +127,7 @@ if [ "$1" = "status" ]; then
         else
           # check for recoverable RaspiBlitz data (if config file exists)
           hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+          isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
           echo "hddRaspiData=${hddRaspiData}"
           sudo umount /mnt/hdd
         fi
