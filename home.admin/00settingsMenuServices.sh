@@ -507,7 +507,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
-      if [ ${externalurl} = "https://" ]; then
+      if [ ${externalurl} = "https://localhost" ]; then
         localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         externalurl="https://$localip\n
 Will need to accept the self-signed certificate in the \
@@ -550,10 +550,8 @@ if [ "${lndmanage}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed lndmanage " --msgbox "\
 Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n
-Start with the line:
-'cd lndmanage & source venv/bin/activate & lndmanage'\n
-To exit: type 'deactivate' and press ENTER
-" 12 75
+To start type: 'manage' in the command line.
+" 9 75
   fi
   needsReboot=0
 else 

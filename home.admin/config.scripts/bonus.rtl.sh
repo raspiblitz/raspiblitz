@@ -16,7 +16,6 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
@@ -32,20 +31,31 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL RTL ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
-  if [ ${isInstalled} -eq 0 ]; then
+  if ! [ ${isInstalled} -eq 0 ]; then
+    echo "RTL already installed."
 
+  else
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh
+
+    # check for Python2 (install if missing)
+    # TODO remove Python2 ASAP!
+    echo "*** Check for Python2 ***"
+    /usr/bin/which python2 &>/dev/null
+    if ! [ $? -eq 0 ]; then
+      echo "*** Install Python2 ***"
+      sudo apt-get update
+      sudo apt-get install -y python2
+    fi
 
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd /home/admin/RTL
-    # git reset --hard v0.5.4
+    git reset --hard v0.6.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
-    git checkout 917feebfa4fb583360c140e817c266649307ef72
-    # check if node_modles exists now
+    # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/admin/RTL" ]; then
      echo "OK - RTL code copy looks good"
     else
@@ -59,9 +69,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
-    npm install
+    npm install --only=production
     cd ..
-    # check if node_modles exists now
+    # check if node_modules exist now
     if [ -d "/home/admin/RTL/node_modules" ]; then
      echo "OK - RTL install looks good"
     else
@@ -70,6 +80,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
+
+    # now remove Python2 again
+    echo "*** Now remove Python2 again ***"
+    sudo apt-get purge -y python2
+    sudo apt-get autoremove -y
 
     # prepare RTL.conf file
     echo "*** RTL.conf ***"
@@ -93,8 +108,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
 
-  else 
-    echo "RTL already installed."
   fi
   
   # setting value in raspi blitz config

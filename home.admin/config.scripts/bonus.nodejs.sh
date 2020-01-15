@@ -16,8 +16,9 @@ fi
 
 # check if nodeJS was installed
 nodeJSInstalled=$(node -v 2>/dev/null | grep -c "v1.")
-if [ ${nodeJSInstalled} -eq 0 ]; then
-
+if ! [ ${nodeJSInstalled} -eq 0 ]; then
+    echo "nodeJS is already installed"
+else
     # determine nodeJS VERSION and DISTRO
     echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
@@ -89,8 +90,6 @@ if [ ${nodeJSInstalled} -eq 0 ]; then
     echo "ABORT - nodeJs install"
     exit 1
     fi
-else
-    echo "nodeJS is already installed"
 fi
 
 # setting value in raspi blitz config

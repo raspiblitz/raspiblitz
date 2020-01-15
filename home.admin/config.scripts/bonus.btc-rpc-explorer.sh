@@ -76,7 +76,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
 
-    npm install -g btc-rpc-explorer@1.1.3
+    npm install -g btc-rpc-explorer@1.1.8
 
     # prepare .env file
     echo "getting RPC credentials from the ${network}.conf"
