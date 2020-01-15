@@ -119,7 +119,8 @@ if [ "$1" = "status" ]; then
 
         # temp mount data drive
         sudo mkdir -p /mnt/hdd
-        sudo mount /dev/${hdd}1 /mnt/hdd
+        errorOutput=$(sudo mount /dev/${hdd}1 /mnt/hdd 2>&1 >/dev/null)
+        echo "errorOutput='${errorOutput}'"
 
         isTempMounted=$(df | grep /mnt/hdd | grep -c ${hdd})
         if [ ${isTempMounted} -eq 0 ]; then
