@@ -47,7 +47,7 @@ fi
 
 # basics
 isMounted=$(sudo df | grep -c /mnt/hdd)
-isBTRFS=$(sudo btrfs subvolume list /mnt/hdd 2>/dev/null | grep -c "WORKINGDIR")
+isBTRFS=$(sudo btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
 isSSD=$(sudo cat /sys/block/sda/queue/rotational 2>/dev/null | grep -c 0)
 
