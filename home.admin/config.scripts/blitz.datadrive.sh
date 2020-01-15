@@ -949,7 +949,7 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
+    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
     sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage
     sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hdd}3 /mnt/temp 
 
