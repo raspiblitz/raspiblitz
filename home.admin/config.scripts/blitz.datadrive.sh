@@ -794,8 +794,15 @@ if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
   sudo btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
   sudo btrfs device remove ${deviceToBeRemoved} /mnt/hdd 1>/dev/null
   
-  >&2 echo "# OK - RaspiBlitz data is not running in RAID1 anymore - you can remove ${raidUsbDev}"
-  exit 0
+  isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+  if [ ${isRaid} -eq 0 ]; then
+    >&2 echo "# OK - RaspiBlitz data is not running in RAID1 anymore"
+    exit 0
+  else
+    >&2 echo "# FAIL - was not able to remove RAID device"
+    echo "error='fail'"
+    exit 1
+  fi
 
 fi
 
