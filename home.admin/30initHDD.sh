@@ -104,15 +104,22 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
     exit 1
   fi
 
-  
 
   # now partition/format HDD
   echo
-  echo "# --> Formatting HDD/SSD ..."
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${format} ${hddCandidate})
-  if [ ${#error} -gt 0 ]; then
-    echo "# FAIL blitz.datadrive.sh format --> ${error}"
-    echo "# Please report issue to the raspiblitz github."
+  if (whiptail --title "FORMAT HDD/SSD" --yesno "The connected hard drive needs to get formatted.\nIMPORTANT: This will delete all data on that drive." 8 56); then
+    clear
+    echo "# --> Formatting HDD/SSD ..."
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${format} ${hddCandidate})
+    if [ ${#error} -gt 0 ]; then
+      echo "# FAIL blitz.datadrive.sh format --> ${error}"
+      echo "# Please report issue to the raspiblitz github."
+      exit 1
+    fi
+   else
+    clear
+    echo "# Not formatting the HDD/SSD - Setup Process stopped."
+    echo "# Rearrange your hardware and retstart with a fresh sd card again."
     exit 1
   fi
 

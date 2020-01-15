@@ -833,3 +833,9 @@ There is an experimental script to connect the RaspiBlitz to a UPS over USB cabl
 To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on apcusb`
 
 If you have other UPS models or ways to connect ... feel free to extend this script.
+
+## How to recover a BTRFS partition?
+
+This articles goes thru the usual options:
+https://ownyourbits.com/2019/03/03/how-to-recover-a-btrfs-partition/
+https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks

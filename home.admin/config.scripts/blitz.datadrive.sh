@@ -138,10 +138,10 @@ if [ "$1" = "status" ]; then
         sudo mkdir -p /mnt/storage
         if [ "${hddFormat}" = "btrfs" ]; then
           # in btrfs setup the second partition is storage partition
-          sudo mount /dev/${hdd}2 /mnt/storage
+          sudo mount /dev/${hdd}2 /mnt/storage 2>/dev/null
         else
           # in ext4 setup the first partition is also the storage partition
-          sudo mount /dev/${hdd}1 /mnt/storage
+          sudo mount /dev/${hdd}1 /mnt/storage 2>/dev/null
         fi
         isTempMounted=$(df | grep /mnt/storage | grep -c ${hdd})
         if [ ${isTempMounted} -eq 0 ]; then
