@@ -774,7 +774,7 @@ fi
 if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
  
   # checking if BTRFS mode
-  isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
+  isBTRFS=$(sudo btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
   if [ ${isBTRFS} -eq 0 ]; then
     echo "error='raid only BTRFS'"
     exit 1
