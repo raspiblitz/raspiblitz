@@ -40,7 +40,15 @@ sleep 10
 echo "stop ${network}d (2) - please wait .."
 sudo systemctl stop ${network}d 2>/dev/null
 sleep 3
+
+# make sure drives are synced before shutdown
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${isBTRFS} -eq 1 ] && [ ${isMounted} -eq 1 ]; then
+  echo "STARTING BTRFS RAID DATA CHECK ..."
+  sudo btrfs scrub start /mnt/hdd/
+fi
 sync
+
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
 exit 0
