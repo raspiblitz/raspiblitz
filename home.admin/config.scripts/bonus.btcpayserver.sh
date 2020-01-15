@@ -121,7 +121,7 @@ After=bitcoind.service
 ExecStart=/usr/local/bin/dotnet \"/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp2.1/NBXplorer.dll\" -c /home/btcpay/.nbxplorer/Main/settings.config
 User=btcpay
 Group=btcpay
-pe=simple
+Type=simple
 PIDFile=/run/nbxplorer/nbxplorer.pid
 Restart=on-failure
 
