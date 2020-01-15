@@ -784,9 +784,15 @@ if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
     exit 1
   fi
 
+  deviceToBeRemoved="/dev/${raidUsbDev}"
+  # just in case be able to remove missing drive
+  if [ ${#raidUsbDev} -eq 0 ]; then
+    deviceToBeRemoved="missing"
+  fi
+
   >&2 echo "# removing USB DEV from RAID"
   sudo btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
-  sudo btrfs device remove /dev/${raidUsbDev} /mnt/hdd 1>/dev/null
+  sudo btrfs device remove ${deviceToBeRemoved} /mnt/hdd 1>/dev/null
   
   >&2 echo "# OK - RaspiBlitz data is not running in RAID1 anymore - you can remove ${raidUsbDev}"
   exit 0

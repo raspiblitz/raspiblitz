@@ -241,7 +241,7 @@ if [ ${isMounted} -eq 0 ]; then
     fi
     if [ ${configExists} -eq 0 ]; then
       echo "Moving invalid config to raspiblitz.invalid.conf" >> ${logFile}
-      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf
+      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf 2>/dev/null
     fi
   fi
   
