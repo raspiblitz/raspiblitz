@@ -119,18 +119,19 @@ if [ "$1" = "status" ]; then
 
         # temp mount data drive
         sudo mkdir -p /mnt/hdd
-        errorOutput=$(sudo mount /dev/${hdd}1 /mnt/hdd 2>&1 >/dev/null)
-        echo "errorOutput='${errorOutput}'"
-
+        sudo mount -o degraded /dev/${hdd}1 /mnt/hdd
+        
+        # check any other error
         isTempMounted=$(df | grep /mnt/hdd | grep -c ${hdd})
         if [ ${isTempMounted} -eq 0 ]; then
-          echo "hddError='data mount failed'"
+            echo "hddError='data mount failed'"
+
+        # check for recoverable RaspiBlitz data (if config file exists) and raid 
         else
-          # check for recoverable RaspiBlitz data (if config file exists)
-          hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
-          isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
-          echo "hddRaspiData=${hddRaspiData}"
-          sudo umount /mnt/hdd
+            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+            isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+            echo "hddRaspiData=${hddRaspiData}"
+            sudo umount /mnt/hdd
         fi
 
         # temp storage data drive
