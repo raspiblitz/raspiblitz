@@ -40,9 +40,9 @@ if [ ${lcdrotate} -gt 0 ]; then
 fi
 
 echo "map touchscreen to on/off"
-tochscreenMenu='off'
+touchscreenMenu='off'
 if [ ${touchscreen} -gt 0 ]; then 
-  tochscreenMenu='on'
+  touchscreenMenu='on'
 fi
 
 echo "check autopilot by lnd.conf"
@@ -66,7 +66,7 @@ l 'Lightning Loop' ${loop} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 6 'LND Auto-Unlock' ${autoUnlock} \
-9 'Touchscreen' ${tochscreenMenu} \
+9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
@@ -84,7 +84,7 @@ b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
-9 'Touchscreen' ${tochscreenMenu} \
+9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
