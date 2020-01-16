@@ -161,7 +161,7 @@ if [ ${isMounted} -eq 1 ]; then
   blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
-  if [ ${blockchainDataExists} -eq 1 ]; then
+  if [ ${blockchainDataExists} -gt 0 ]; then
     if [ ${configExists} -eq 1 ]; then
       /home/admin/XXdebugLogs.sh
       echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
