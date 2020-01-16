@@ -26,6 +26,7 @@ do
   sleep 2
 done
 sudo killall /usr/local/bin/lnd
+sudo chmod 664 /mnt/hdd/lnd/tls.cert
 echo "copy new cert to admin user"
 sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
 sudo chown admin:admin -R /home/admin/.lnd/*.cert

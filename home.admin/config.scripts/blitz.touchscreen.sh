@@ -98,15 +98,11 @@ EOF
   # remove minimize, maximize, close from titlebar
   sudo sed -i -E 's/titleLayout>LIMC/titleLayout>L/g' /etc/xdg/openbox/lxde-pi-rc.xml
 
-  # Copy over the macaroons
-  sudo mkdir -p /home/pi/.lnd/data/chain/bitcoin/mainnet/
-  sudo chmod 700 /home/pi/.lnd/
-  sudo ln -nsf /home/admin/.lnd/tls.cert /home/pi/.lnd/
-  sudo cp /home/admin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon /home/pi/.lnd/data/chain/bitcoin/mainnet/
-  sudo cp /home/admin/.lnd/data/chain/bitcoin/mainnet/invoice.macaroon /home/pi/.lnd/data/chain/bitcoin/mainnet/
-  sudo chmod 600 /home/pi/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon
-  sudo chmod 600 /home/pi/.lnd/data/chain/bitcoin/mainnet/invoice.macaroon
-  sudo chown -R pi:pi /home/pi/.lnd/
+  # link over the macaroons/tls to pi user
+  # invoice & read macarrons have permissions to be read by pi user
+  # and just linking the base directory it should be flexible to work also with testnet or litecoin
+  sudo rm -r /home/pi/.lnd 2>/dev/null
+  sudo ln -s /mnt/hdd/lnd /home/pi/.lnd
 
   # rotate touchscreen based on if LCD is rotated
   if [ "${lcdrotate}" = "1" ]; then
