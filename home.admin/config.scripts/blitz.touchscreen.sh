@@ -2,6 +2,7 @@
 # see issue: https://github.com/rootzoll/raspiblitz/issues/646
 # and issue: https://github.com/rootzoll/raspiblitz/issues/809
 # to work it needs to be based on Raspbian Desktop base image
+# to check debug logs: sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
 
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -98,10 +99,9 @@ EOF
   # remove minimize, maximize, close from titlebar
   sudo sed -i -E 's/titleLayout>LIMC/titleLayout>L/g' /etc/xdg/openbox/lxde-pi-rc.xml
 
-  # link over the macaroons/tls to pi user
-  # invoice & read macarrons have permissions to be read by pi user
-  # and just linking the base directory it should be flexible to work also with testnet or litecoin
-  sudo ln -s /mnt/hdd/lnd /home/pi/.lnd
+  # make sure that the directory for tls & macaroons exists
+  # fresh copy will be put there by bootstrap script on every start- restart needed
+  sudo mkdir -p /home/pi/.lnd 2>/dev/null
 
   # rotate touchscreen based on if LCD is rotated
   if [ "${lcdrotate}" = "1" ]; then
