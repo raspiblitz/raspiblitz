@@ -101,7 +101,6 @@ EOF
   # link over the macaroons/tls to pi user
   # invoice & read macarrons have permissions to be read by pi user
   # and just linking the base directory it should be flexible to work also with testnet or litecoin
-  sudo rm -r /home/pi/.lnd 2>/dev/null
   sudo ln -s /mnt/hdd/lnd /home/pi/.lnd
 
   # rotate touchscreen based on if LCD is rotated
@@ -155,9 +154,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # add again 00infoLCD.sh to .bashrc of pi user
   sudo sed -i s'/^#exec $SCRIPT/exec $SCRIPT/' /home/pi/.bashrc
-
-  # remove copy of macaroons
-  sudo rm -rf /home/pi/.lnd/
 
   # remove old pi autostart
   sudo rm -f /home/pi/autostart.sh
