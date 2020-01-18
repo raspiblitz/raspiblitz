@@ -679,12 +679,14 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${bas
 fi
 if [ "${baseImage}" = "raspbian" ]; then
   # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
-  cat > /home/admin/setup.sh <<EOF
+  cat > /tmp/setup.sh <<EOF
 
   # make LCD screen rotation correct
   sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
+  sudo cp /tmp/setup.sh /home/admin/setup.sh
+  sudo chown admin.admin /home/admin/setup.sh
   sudo chmod +x /home/admin/setup.sh
 fi
 
