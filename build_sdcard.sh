@@ -729,12 +729,12 @@ echo "*** LCD DRIVER ***"
 
 echo "--> Downloading LCD Driver from Github"
 cd /home/admin/
-git clone https://github.com/goodtft/LCD-show.git
-sudo chmod -R 755 LCD-show
-sudo chown -R admin:admin LCD-show
+sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+sudo -u admin chmod -R 755 LCD-show
+sudo -u admin chown -R admin:admin LCD-show
 cd LCD-show/
 # set comit hard to a8de38f (7 Nov 2019) for security
-sudo git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
+sudo -u admin git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
 
 # install xinput calibrator package
   echo "--> install xinput calibrator package"
