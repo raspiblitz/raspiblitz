@@ -700,7 +700,7 @@ fi
 
 echo ""
 echo "*** HARDENING ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
 
 # fail2ban (no config required)
 sudo apt-get install -y --no-install-recommends python3-systemd fail2ban
