@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd /home/admin/RTL
-    git reset --hard v0.6.1
+    git reset --hard v0.6.3
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/admin/RTL" ]; then
@@ -89,10 +89,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # prepare RTL.conf file
     echo "*** RTL.conf ***"
     cp ./RTL/sample-RTL.conf ./RTL/RTL.conf
+    chmod 600 ./RTL/RTL.conf || exit 1
     sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/${chain}net/g" ./RTL/RTL.conf
     sudo sed -i "s/^lndConfigPath=.*/lndConfigPath=\/mnt\/hdd\/lnd\/lnd.conf/g" ./RTL/RTL.conf
     sudo sed -i "s/^nodeAuthType=.*/nodeAuthType=DEFAULT/g" ./RTL/RTL.conf
-    sudo sed -i "s/^rtlPass=.*/rtlPass=/g" ./RTL/RTL.conf
+    # getting ready for the phasing out of the "DEFAULT" auth type
+    # will need to change blitz.setpassword.sh too
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    sudo sed -i "s/^rtlPass=.*/rtlPass=$PASSWORD_B/g" ./RTL/RTL.conf
     echo ""
 
     # open firewall

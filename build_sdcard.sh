@@ -679,12 +679,14 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${bas
 fi
 if [ "${baseImage}" = "raspbian" ]; then
   # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
-  cat > /home/admin/setup.sh <<EOF
+  cat > /tmp/setup.sh <<EOF
 
   # make LCD screen rotation correct
   sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
 
 EOF
+  sudo cp /tmp/setup.sh /home/admin/setup.sh
+  sudo chown admin.admin /home/admin/setup.sh
   sudo chmod +x /home/admin/setup.sh
 fi
 
@@ -698,7 +700,7 @@ fi
 
 echo ""
 echo "*** HARDENING ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#hardening-your-pi
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
 
 # fail2ban (no config required)
 sudo apt-get install -y --no-install-recommends python3-systemd fail2ban
@@ -729,12 +731,12 @@ echo "*** LCD DRIVER ***"
 
 echo "--> Downloading LCD Driver from Github"
 cd /home/admin/
-git clone https://github.com/goodtft/LCD-show.git
-sudo chmod -R 755 LCD-show
-sudo chown -R admin:admin LCD-show
+sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+sudo -u admin chmod -R 755 LCD-show
+sudo -u admin chown -R admin:admin LCD-show
 cd LCD-show/
 # set comit hard to a8de38f (7 Nov 2019) for security
-sudo git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
+sudo -u admin git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
 
 # install xinput calibrator package
   echo "--> install xinput calibrator package"

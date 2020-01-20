@@ -201,6 +201,15 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
+  # RTL - will change to RTL-Conf.json and deprecate "DEFAULT auth type"
+  sed -i "s/^rtlPass=.*/rtlPass=${newPassword}/g" ./RTL/RTL.conf 2>/dev/null
+  # electrs
+  RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+  sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
+  # BTC-RPC-Explorer
+  sed -i "s/^BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:.*@127.0.0.1:8332?timeout=10000/BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:${newPassword}@127.0.0.1:8332\?timeout=10000/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+  sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+  sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
 
   echo "OK -> RPC Password B changed"
   echo "if services are running - reboot is needed to activate new settings"
