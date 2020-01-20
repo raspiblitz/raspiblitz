@@ -92,7 +92,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     chmod 600 ./RTL/RTL.conf || exit 1
     sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/${chain}net/g" ./RTL/RTL.conf
     sudo sed -i "s/^lndConfigPath=.*/lndConfigPath=\/mnt\/hdd\/lnd\/lnd.conf/g" ./RTL/RTL.conf
-    sudo sed -i "s/^nodeAuthType=.*/nodeAuthType=DEFAULT/g" ./RTL/RTL.conf
+    sudo sed -i "s/^nodeAuthType=.*/nodeAuthType=CUSTOM/g" ./RTL/RTL.conf
     # getting ready for the phasing out of the "DEFAULT" auth type
     # will need to change blitz.setpassword.sh too
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
