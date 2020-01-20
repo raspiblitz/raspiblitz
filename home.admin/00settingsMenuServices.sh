@@ -507,7 +507,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
-      if [ ${externalurl} = "https://localhost" ]; then
+      if [ "${externalurl}" = "https://localhost" ]; then
         localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         externalurl="https://$localip\n
 Will need to accept the self-signed certificate in the \
@@ -546,7 +546,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed lndmanage " --msgbox "\
 Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n

@@ -24,6 +24,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   echo "*** INSTALL LNDMANAGE ***"
   mkdir /home/admin/lndmanage
+  sudo chown admin:admin /home/admin/lndmanage
   cd /home/admin/lndmanage
   # activate virtual environment
   python -m venv venv
