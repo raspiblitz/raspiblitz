@@ -705,6 +705,7 @@ if [ "${baseImage}" = "raspbian" ]; then
 
   # disable bluetooth module
   sudo sh -c "echo 'dtoverlay=pi3-disable-bt' >> /boot/config.txt"
+  sudo sh -c "echo 'dtoverlay=disable-bt' >> /boot/config.txt"
 
   # remove bluetooth services
   sudo systemctl disable bluetooth.service
