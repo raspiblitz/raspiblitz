@@ -5,6 +5,12 @@ _temp="./download/dialog.$$"
 source /home/admin/raspiblitz.info 2>/dev/null
 
 ###################
+# CHECK IF DNS NEEDS SETTING DURING SETUP
+# https://github.com/rootzoll/raspiblitz/issues/787
+###################
+sudo /home/admin/config.scripts/internet.dns.sh test
+
+###################
 # ENTER NAME
 ###################
 

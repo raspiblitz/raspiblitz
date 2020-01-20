@@ -11,7 +11,7 @@ fi
 DNSSERVER="$1"
 
 # 2. parameter
-NODIALOG="$1"
+NODIALOG="$2"
 
 # just in case a reboot is needed after test dialog
 autoreboot=0
@@ -28,15 +28,19 @@ if [ "${DNSSERVER}" = "test" ]; then
   fi
 
   # when dns not working ask in dialog to set a preset DNS
-  whiptail --title ' DNS Test Failed ' --yes-button='Set DNS 1.1.1.1' --no-button='Ignore' --yesno "It looks like your DNS within local network is not working.\n
+  if [ ${dnsworking} -eq 0 ]; then
+    whiptail --title ' DNS Test Failed ' --yes-button='Set DNS 1.1.1.1' --no-button='Ignore' --yesno "It looks like your DNS within local network is not working.\n
 Do you want to set the fixed DNS 1.1.1.1 by cloudfare (they claim they provide privacy) for your RaspiBlitz and reboot?\n
-  " 10 64
-  if [ $? -eq 0 ]; then
-    echo "SETTING 1.1.1.1"
-    DNSSERVER="1.1.1.1"
-    autoreboot=1
+" 10 64
+    if [ $? -eq 0 ]; then
+      echo "SETTING 1.1.1.1"
+      DNSSERVER="1.1.1.1"
+      autoreboot=1
+    else
+      echo "Ignoring DNS-Test fail"
+    fi
   else
-    echo "Ignoring DNS-Test fail"
+    echo "DNS TEST --> OK"
   fi
   exit 1
 
