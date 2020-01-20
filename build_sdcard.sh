@@ -578,9 +578,8 @@ sudo apt-get -y install cpulimit
 sudo apt-get -y install screen
 
 # for multiple (detachable/background) sessions when using SSH
+# https://github.com/rootzoll/raspiblitz/issues/990
 sudo apt-get -y install tmux
-cd /home/admin
-sudo -u admin wget https://github.com/gpakosz/.tmux/raw/01c91ba5231eb2e7b32cc2f47ac9022efae87962/.tmux.conf
 
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
@@ -710,7 +709,6 @@ if [ "${baseImage}" = "dietpi" ]; then
   sudo cp ./boot/config-35.txt /DietPi/config.txt
   # make LCD screen rotation correct
   sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-
 fi
 
 # *** RASPIBLITZ IMAGE READY ***
