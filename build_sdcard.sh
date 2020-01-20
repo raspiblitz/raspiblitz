@@ -93,9 +93,9 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sudo sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   sudo locale-gen
-  export LANGUAGE=en_GB.UTF-8
-  export LANG=en_GB.UTF-8
-  export LC_ALL=en_GB.UTF-8
+  export LANGUAGE=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
 
   # https://github.com/rootzoll/raspiblitz/issues/684
   sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
