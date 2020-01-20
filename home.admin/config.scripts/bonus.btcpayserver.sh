@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/btcpay/.btcpayserver 2>/dev/null
   
     sudo chown -R btcpay:btcpay /mnt/hdd/app-data/.btcpayserver
-    sudo -u btcpay ln -s /mnt/hdd/app-data/.btcpayserver /home/btcpay/ 2>/dev/null
+    sudo ln -s /mnt/hdd/app-data/.btcpayserver /home/btcpay/ 2>/dev/null
     sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
     echo ""
