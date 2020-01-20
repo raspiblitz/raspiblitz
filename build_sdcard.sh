@@ -82,20 +82,6 @@ else
   echo "OK running ${baseImage}"
 fi
 
-# setting static DNS server
-# comment this block out if you are sure that your DNS conf works reliable
-# see https://github.com/rootzoll/raspiblitz/issues/322#issuecomment-466733550
-dnsconfFile="/etc/dhcpcd.conf"
-if [ "${baseImage}" = "ubuntu" ]; then
-  dnsconfFile="/etc/dhcp/dhcpd.conf"
-fi
-# comment out any static dns entry if one is active
-sudo sed -i "s/^static domain_name_servers=.*/#static domain_name_servers=/g" "$dnsconfFile"
-# add new dns config to conf file
-echo "static domain_name_servers=1.1.1.1 8.8.8.8" | sudo tee -a "$dnsconfFile"
-# reload to activate for following network operations
-systemctl daemon-reload
-
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   # fixing locales for build
   # https://github.com/rootzoll/raspiblitz/issues/138

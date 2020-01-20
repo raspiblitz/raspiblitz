@@ -50,6 +50,13 @@ else
 fi
 echo ""
 
+dnsconfFile="/etc/dhcpcd.conf"
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isUbuntu} -gt 0 ]; then
+  echo "# adapting dhcpd.conf path for ubuntu"
+  dnsconfFile="/etc/dhcp/dhcpd.conf"
+fi
+
 # setting DNS address
 echo "# Setting DNS server in /etc/dhcpcd.conf ..."
 sudo sed -i "s/^static domain_name_servers=.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
