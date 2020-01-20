@@ -395,25 +395,21 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
     echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
   fi
 
-  echo "updating admin user LND data" >> $logFile
-  sudo rm -R /home/admin/.lnd
-  sudo mkdir -u admin -p /home/admin/.lnd/data/chain/${network}/${chain}net 2>/dev/null
+  echo "updating/cleaning admin user LND data" >> $logFile
+  sudo rm -R /home/admin/.lnd 2>/dev/null
+  sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net 2>/dev/null
   sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
-  sudo chown admin:admin /home/admin/.lnd/lnd.conf 2>> $logFile
   sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo chown admin:admin /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null
-  sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>> $logFile
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon > /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon" 2>> $logFile
+  sudo chown admin:admin -R /home/admin/.lnd 2>> $logFile
 
-  echo "updating pi user LND data (just read & invoice)" >> $logFile
-  sudo rm -R /home/pi/.lnd
-  sudo -u pi mkdir -p /home/pi/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
+  echo "updating/cleaning pi user LND data (just read & invoice)" >> $logFile
+  sudo rm -R /home/pi/.lnd 2>/dev/null
+  sudo mkdir -p /home/pi/.lnd/data/chain/${network}/${chain}net/ 2>> $logFile
   sudo cp /mnt/hdd/lnd/tls.cert /home/pi/.lnd/tls.cert 2>> $logFile
-  sudo chown pi:pi /home/pi/.lnd/tls.cert 2>> $logFile
-  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon 2>/dev/null
-  sudo chown pi:pi /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon 2>> $logFile
-  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon 2>/dev/null
-  sudo chown pi:pi /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon 2>> $logFile
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon" 2>> $logFile
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon" 2>> $logFile
+  sudo chown pi:pi -R /home/pi/.lnd 2>> $logFile
 
 else 
   echo "skipping admin user LND data update" >> $logFile
