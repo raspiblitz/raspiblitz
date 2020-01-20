@@ -6,13 +6,13 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
  echo "# blitz.rescue.sh [status|export|import]"
- echo "ERROR='missing parameters'"
+ echo "error='missing parameters'"
  exit 1
 fi
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
-  echo "ERROR='missing sudo'"
+  echo "error='missing sudo'"
   exit 1
 fi
 

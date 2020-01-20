@@ -59,7 +59,6 @@ else
   echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
 fi
 
-
 # import config values
 sudo chmod 777 ${configFile}
 source ${configFile}
@@ -70,6 +69,12 @@ source ${configFile}
 
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
+
+# install litecoin (just if needed)
+if [ "${network}" = "litecoin" ]; then
+  echo "Installing Litecoin ..." >> ${logFile}
+  /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
+fi
 
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
