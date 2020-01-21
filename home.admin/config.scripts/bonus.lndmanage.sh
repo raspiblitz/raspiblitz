@@ -39,6 +39,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
   echo "To start type: 'manage' in the command line."
+  echo "Needs at least one channel to start without error."
   echo "To exit the venv - type 'deactivate' and press ENTER"
 
   exit 0

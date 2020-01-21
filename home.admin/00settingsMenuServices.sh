@@ -549,7 +549,8 @@ if [ "${lndmanage}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed lndmanage " --msgbox "\
-Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md\n
+Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md
+Have at least one channel active to run it without error.
 To start type: 'manage' in the command line.
 " 9 75
   fi
