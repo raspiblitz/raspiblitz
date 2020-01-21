@@ -11,10 +11,9 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "STILL EXPERIMENTAL - NOT FINISHED"
  echo "the Blitz-Touch-User-Interface (BlitzTUI) feature"
- echo "blitz.touchscreen.sh [on|off]"
+ echo "blitz.touchscreen.sh [on|off|update]"
  exit 1
 fi
-
 
 ###################
 # SWITCH ON
@@ -37,7 +36,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "installing BlitzTUI (including python dependencies)"
-  /home/admin/python3-env-lnd/bin/pip install BlitzTUI >/dev/null
+  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
 
   # make sure lndlibs are patched for compatibility for both Python2 and Python3
   if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
@@ -127,6 +126,15 @@ EOF
 
   echo "OK - a restart is needed: sudo shutdown -r now"
 
+fi
+
+###################
+# UPDATE CODE
+###################
+
+if [ "$1" = "update" ]; then
+  echo "updating BlitzTUI (including python dependencies) ..."
+  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
 fi
 
 ###################

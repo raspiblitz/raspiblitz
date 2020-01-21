@@ -242,11 +242,11 @@ class AppWindow(QMainWindow):
         if IS_WIN32_ENV:
             return
 
-        if self.rb_info.status != "ready":
-            log.info("skipping updating status_lnd --> no ready signal in info file")
-            return
-        else:
-            log.info("doing updating status_lnd / self.rb_info.status --> {}".format(self.rb_info.status))
+        #if self.rb_info.status != "ready":
+        #    log.info("skipping updating status_lnd --> no ready signal in info file")
+        #    return
+        #else:
+        #    log.info("doing updating status_lnd / self.rb_info.status --> {}".format(self.rb_info.status))
 
         # log.debug("update_status_lnd due: {}".format(self.status_lnd_due))
         if self.status_lnd_due <= self.uptime:
@@ -267,11 +267,11 @@ class AppWindow(QMainWindow):
         if IS_WIN32_ENV:
             return
 
-        if self.rb_info.status != "ready":
-            log.info("skipping update_status_lnd_channels --> no ready signal in info file")
-            return
-        else:
-            log.info("doing update_status_lnd_channels / self.rb_info.status --> {}".format(self.rb_info.status))
+        #if self.rb_info.status != "ready":
+        #    log.info("skipping update_status_lnd_channels --> no ready signal in info file")
+        #    return
+        #else:
+        #    log.info("doing update_status_lnd_channels / self.rb_info.status --> {}".format(self.rb_info.status))
 
         # log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))
         if self.status_lnd_channel_due <= self.uptime:
