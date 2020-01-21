@@ -250,6 +250,8 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
     sed -i "s/^message=.*/message='Starting Recover'/g" ${infoFile}
+    sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+    sed -i "s/^network=.*/network=${network}/g" ${infoFile}
     echo "Calling Data Migration .." >> $logFile
     sudo /home/admin/_bootstrap.migration.sh
     echo "Calling Provisioning .." >> $logFile
