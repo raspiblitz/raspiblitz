@@ -7,6 +7,7 @@
 # https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-to-update-my-raspiblitz-after-version-098
 
 cd /home/admin/raspiblitz
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # change branch if set as parameter
 clean=0
@@ -60,6 +61,7 @@ else
   echo "use parameter '-clean' if you want that next time"
   echo "******************************************"
 fi
+
 echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
@@ -67,6 +69,11 @@ sudo -u admin chmod +x /home/admin/*.sh
 sudo -u admin chmod +x /home/admin/*.py
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
+echo "******************************************"
+if [ "${touchscreen}" = "1" ]; then
+  echo "UPDATING TOUCHSCREEN CODE ..."
+  sudo ./config.scripts/blitz.touchscreen.sh update
+fi
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
 echo "Reboot recommended"
