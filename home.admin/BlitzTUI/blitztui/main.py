@@ -243,10 +243,10 @@ class AppWindow(QMainWindow):
             return
 
         if self.rb_info.status != "ready":
-            log.debug("skipping updating status_lnd --> no ready signal in info file")
+            log.info("skipping updating status_lnd --> no ready signal in info file")
             return
         else:
-            log.debug("doing updating status_lnd / self.rb_info.status --> {}".format(self.rb_info.status))
+            log.info("doing updating status_lnd / self.rb_info.status --> {}".format(self.rb_info.status))
 
         # log.debug("update_status_lnd due: {}".format(self.status_lnd_due))
         if self.status_lnd_due <= self.uptime:
@@ -268,10 +268,10 @@ class AppWindow(QMainWindow):
             return
 
         if self.rb_info.status != "ready":
-            log.debug("skipping update_status_lnd_channels --> no ready signal in info file")
+            log.info("skipping update_status_lnd_channels --> no ready signal in info file")
             return
         else:
-            log.debug("doing update_status_lnd_channels / self.rb_info.status --> {}".format(self.rb_info.status))
+            log.info("doing update_status_lnd_channels / self.rb_info.status --> {}".format(self.rb_info.status))
 
         # log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))
         if self.status_lnd_channel_due <= self.uptime:
@@ -631,7 +631,7 @@ class BeatThread(QThread):
         self.signal.emit(0)
 
     def run(self):
-        log.info("starting beat")
+        log.info("starting beat ...")
         self.beat_timer.start(self.interval)
         loop = QEventLoop()
         loop.exec_()
