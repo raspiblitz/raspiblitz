@@ -118,8 +118,14 @@ if [ "$1" = "status" ]; then
         fi
 
         # temp mount data drive
+        mountError=""
         sudo mkdir -p /mnt/hdd
-        mountError=$(sudo mount -o degraded /dev/${hdd}1 /mnt/hdd 2>&1)
+        if [ "${hddFormat}" = "ext4" ]; then
+          mountError=$(sudo mount /dev/${hdd}1 /mnt/hdd 2>&1)
+        fi
+        if [ "${hddFormat}" = "btrfs" ]; then
+          mountError=$(sudo mount -o degraded /dev/${hdd}1 /mnt/hdd 2>&1)
+        fi
         isTempMounted=$(df | grep /mnt/hdd | grep -c ${hdd})
 
         # check for mount error
