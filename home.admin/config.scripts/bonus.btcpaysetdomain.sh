@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /mnt/hdd/raspiblitz.conf
+
 # script to set up nginx and the SSL certificate for BTCPay Server
 # calls the config.scripts/internet.hiddenservice.sh for the Tor connection
 
@@ -47,6 +49,14 @@ case $CHOICE in
             ;;
         TOR) 
             echo "setting up for Tor only"
+            if [ "${runBehindTor}" != "on" ]; then
+            whiptail --title " TOR needs be installed first " --msgbox "\
+Please activate TOR service first to use this option.
+Use 'Run behind TOR' in the SERVICES submenu.
+Once TOR is running, choose this option again. 
+" 9 58
+              exit 1
+            fi
             ownDomain=0
             ;;
 esac
