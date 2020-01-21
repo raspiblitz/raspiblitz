@@ -177,6 +177,7 @@ class AppWindow(QMainWindow):
         if not os.path.exists(rb_info_abs_path):
             log.warning("file does not exist: {}".format(rb_info_abs_path))
 
+        log.info("init lnd.conf")
         lnd_cfg_valid = False
         self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
         try:
@@ -185,6 +186,7 @@ class AppWindow(QMainWindow):
         except Exception as err:
             pass
 
+        log.info("init raspiblitz.conf")
         rb_cfg_valid = False
         self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
         try:
@@ -193,6 +195,7 @@ class AppWindow(QMainWindow):
         except Exception as err:
             pass
 
+        log.info("init raspiblitz.info")
         rb_info_valid = False
         self.rb_info = RaspiBlitzInfo(rb_info_abs_path)
         try:
