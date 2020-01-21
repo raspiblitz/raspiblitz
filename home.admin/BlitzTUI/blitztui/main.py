@@ -238,7 +238,12 @@ class AppWindow(QMainWindow):
             flag.set()
 
     def update_status_lnd(self):
+
         if IS_WIN32_ENV:
+            return
+
+        if self.rb_info.status != "ready":
+            log.debug("skipping updating status_lnd --> no ready signal in info file")
             return
 
         # log.debug("update_status_lnd due: {}".format(self.status_lnd_due))
@@ -256,7 +261,12 @@ class AppWindow(QMainWindow):
                 self.status_lnd_due = self.uptime + self.status_lnd_interval
 
     def update_status_lnd_channels(self):
+
         if IS_WIN32_ENV:
+            return
+
+        if self.rb_info.status != "ready":
+            log.debug("skipping updating status_lnd --> no ready signal in info file")
             return
 
         # log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))

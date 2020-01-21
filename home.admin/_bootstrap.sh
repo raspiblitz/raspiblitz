@@ -516,5 +516,9 @@ if [ "${baseImage}" = "raspbian" ] ; then
   fi
 fi
 
+# mark that node is ready now
+sed -i "s/^state=.*/state=ready/g" ${infoFile}
+sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
