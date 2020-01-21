@@ -245,46 +245,41 @@ class AppWindow(QMainWindow):
         if IS_WIN32_ENV:
             return
 
-        #if self.rb_info.status != "ready":
-        #    log.info("skipping updating status_lnd --> no ready signal in info file")
-        #    return
-        #else:
-        #    log.info("doing updating status_lnd / self.rb_info.status --> {}".format(self.rb_info.status))
-
-        # log.debug("update_status_lnd due: {}".format(self.status_lnd_due))
         if self.status_lnd_due <= self.uptime:
             log.debug("updating status_lnd")
 
-            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
-                pid_ok, listen_ok, unlocked, synced_to_chain, synced_to_graph = check_lnd(stub_readonly)
-                self.status_lnd_pid_ok = pid_ok
-                self.status_lnd_listen_ok = listen_ok
-                self.status_lnd_unlocked = unlocked
-                self.status_lnd_synced_to_chain = synced_to_chain
-                self.status_lnd_synced_to_graph = synced_to_graph
-                # set next due time
-                self.status_lnd_due = self.uptime + self.status_lnd_interval
+            try:
+                with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                    pid_ok, listen_ok, unlocked, synced_to_chain, synced_to_graph = check_lnd(stub_readonly)
+                    self.status_lnd_pid_ok = pid_ok
+                    self.status_lnd_listen_ok = listen_ok
+                    self.status_lnd_unlocked = unlocked
+                    self.status_lnd_synced_to_chain = synced_to_chain
+                    self.status_lnd_synced_to_graph = synced_to_graph
+                    # set next due time
+                    self.status_lnd_due = self.uptime + self.status_lnd_interval
+            except Exception as err:
+                log.info("Exception on update_status_lnd")
+                pass
 
     def update_status_lnd_channels(self):
 
         if IS_WIN32_ENV:
             return
 
-        #if self.rb_info.status != "ready":
-        #    log.info("skipping update_status_lnd_channels --> no ready signal in info file")
-        #    return
-        #else:
-        #    log.info("doing update_status_lnd_channels / self.rb_info.status --> {}".format(self.rb_info.status))
-
-        # log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))
+        log.debug("update_status_lnd_channel due: {}".format(self.status_lnd_channel_due))
         if self.status_lnd_channel_due <= self.uptime:
             log.debug("updating status_lnd_channels")
 
-            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
-                self.status_lnd_channel_total_active, self.status_lnd_channel_total_remote_balance = \
-                    check_lnd_channels(stub_readonly)
-                # set next due time
-                self.status_lnd_channel_due = self.uptime + self.status_lnd_channel_interval
+            try:
+                with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                    self.status_lnd_channel_total_active, self.status_lnd_channel_total_remote_balance = \
+                        check_lnd_channels(stub_readonly)
+                    # set next due time
+                    self.status_lnd_channel_due = self.uptime + self.status_lnd_channel_interval
+            except Exception as err:
+                log.info("Exception on update_status_lnd_channels")
+                pass
 
     def update_title_bar(self):
         log.debug("updating: Main Window Title Bar")
