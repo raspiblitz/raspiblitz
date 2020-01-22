@@ -38,6 +38,8 @@ fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
 
+checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
+
 echo ""
 echo "*** SYNCING SHELL SCRIPTS WITH GITHUB ***"
 echo "This is for developing on your RaspiBlitz."
@@ -71,6 +73,12 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "******************************************"
 if [ "${touchscreen}" = "1" ]; then
+
+  echo "Checking if the content of BlitzTUI changed .."
+  checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
+  echo "checkSumBlitzTUIBefore=${checkSumBlitzTUIBefore}"
+  echo "checkSumBlitzTUIAfter=${checkSumBlitzTUIAfter}"
+
   echo "UPDATING TOUCHSCREEN CODE ..."
   sudo ./config.scripts/blitz.touchscreen.sh update
 fi
