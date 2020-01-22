@@ -349,7 +349,7 @@ else
   if [ "${BTCRPCexplorer}" = "on" ]; then
     source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
     if [ ${#error} -gt 0 ]; then
-      appInfoLine="ERROR BTC-RPC-Explorer: ${error}"
+      appInfoLine="ERROR BTC-RPC-Explorer: ${error} (try restart)"
     elif [ "${isIndexed}" = "0" ]; then
       appInfoLine="BTC-RPC-Explorer: ${indexInfo}"
     fi
