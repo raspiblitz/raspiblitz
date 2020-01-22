@@ -94,13 +94,15 @@ service WalletUnlocker {
 message GenSeedRequest {
     /**
     aezeed_passphrase is an optional user provided passphrase that will be used
-    to encrypt the generated aezeed cipher seed.
+    to encrypt the generated aezeed cipher seed. When using REST, this field
+    must be encoded as base64.
     */
     bytes aezeed_passphrase = 1;
 
     /**
     seed_entropy is an optional 16-bytes generated via CSPRNG. If not
     specified, then a fresh set of randomness will be used to create the seed.
+    When using REST, this field must be encoded as base64.
     */
     bytes seed_entropy = 2;
 }
@@ -125,7 +127,8 @@ message InitWalletRequest {
     /**
     wallet_password is the passphrase that should be used to encrypt the
     wallet. This MUST be at least 8 chars in length. After creation, this
-    password is required to unlock the daemon.
+    password is required to unlock the daemon. When using REST, this field
+    must be encoded as base64.
     */
     bytes wallet_password = 1;
 
@@ -138,7 +141,8 @@ message InitWalletRequest {
 
     /**
     aezeed_passphrase is an optional user provided passphrase that will be used
-    to encrypt the generated aezeed cipher seed.
+    to encrypt the generated aezeed cipher seed. When using REST, this field
+    must be encoded as base64.
     */
     bytes aezeed_passphrase = 3;
 
@@ -168,7 +172,7 @@ message UnlockWalletRequest {
     /**
     wallet_password should be the current valid passphrase for the daemon. This
     will be required to decrypt on-disk material that the daemon requires to
-    function properly.
+    function properly. When using REST, this field must be encoded as base64.
     */
     bytes wallet_password = 1;
 
@@ -196,13 +200,13 @@ message UnlockWalletResponse {}
 message ChangePasswordRequest {
     /**
     current_password should be the current valid passphrase used to unlock the
-    daemon.
+    daemon. When using REST, this field must be encoded as base64.
     */
     bytes current_password = 1;
 
     /**
     new_password should be the new passphrase that will be needed to unlock the
-    daemon.
+    daemon. When using REST, this field must be encoded as base64.
     */
     bytes new_password = 2;
 }
@@ -355,6 +359,13 @@ service Lightning {
         };
     }
 
+    /**
+    SubscribePeerEvents creates a uni-directional stream from the server to
+    the client in which any events relevant to the state of peers are sent
+    over. Events include peers going online and offline.
+    */
+    rpc SubscribePeerEvents (PeerEventSubscription) returns (stream PeerEvent);
+
     /** lncli: `getinfo`
     GetInfo returns general information concerning the lightning node including
     it's identity pubkey, alias, the chains it is connected to, and information
@@ -426,9 +437,24 @@ service Lightning {
     request to a remote peer. Users are able to specify a target number of
     blocks that the funding transaction should be confirmed in, or a manual fee
     rate to us for the funding transaction. If neither are specified, then a
-    lax block confirmation target is used.
+    lax block confirmation target is used. Each OpenStatusUpdate will return
+    the pending channel ID of the in-progress channel. Depending on the
+    arguments specified in the OpenChannelRequest, this pending channel ID can
+    then be used to manually progress the channel funding flow.
     */
     rpc OpenChannel (OpenChannelRequest) returns (stream OpenStatusUpdate);
+
+    /**
+    FundingStateStep is an advanced funding related call that allows the caller
+    to either execute some preparatory steps for a funding workflow, or
+    manually progress a funding workflow. The primary way a funding flow is
+    identified is via its pending channel ID. As an example, this method can be
+    used to specify that we're expecting a funding flow for a particular
+    pending channel ID, for which we need to use specific parameters.
+    Alternatively, this can be used to interactively drive PSBT signing for
+    funding for partially complete funding transactions.
+    */
+    rpc FundingStateStep(FundingTransitionMsg) returns (FundingStateStepResp);
 
     /**
     ChannelAcceptor dispatches a bi-directional streaming RPC in which
@@ -550,9 +576,9 @@ service Lightning {
     notifying the client of newly added/settled invoices. The caller can
     optionally specify the add_index and/or the settle_index. If the add_index
     is specified, then we'll first start by sending add invoice events for all
-    invoices with an add_index greater than the specified value.  If the
+    invoices with an add_index greater than the specified value. If the
     settle_index is specified, the next, we'll send out all settle events for
-    invoices with a settle_index greater than the specified value.  One or both
+    invoices with a settle_index greater than the specified value. One or both
     of these fields can be set. If no fields are set, then we'll only send out
     the latest add/settle events.
     */
@@ -595,7 +621,7 @@ service Lightning {
     DescribeGraph returns a description of the latest graph state from the
     point of view of the node. The graph information is partitioned into two
     components: all the nodes/vertexes, and all the edges that connect the
-    vertexes themselves.  As this is a directed graph, the edges also contain
+    vertexes themselves. As this is a directed graph, the edges also contain
     the node directional specific routing policy which includes: the time lock
     delta, fee information, etc.
     */
@@ -703,7 +729,7 @@ service Lightning {
 
     A list of forwarding events are returned. The size of each forwarding event
     is 40 bytes, and the max message size able to be returned in gRPC is 4 MiB.
-    As a result each message can only contain 50k entries.  Each response has
+    As a result each message can only contain 50k entries. Each response has
     the index offset of the last entry. The index offset can be provided to the
     request to allow the caller to skip a series of records.
     */
@@ -848,8 +874,19 @@ message TransactionDetails {
 
 message FeeLimit {
     oneof limit {
-        /// The fee limit expressed as a fixed amount of satoshis.
+        /**
+        The fee limit expressed as a fixed amount of satoshis.
+
+        The fields fixed and fixed_msat are mutually exclusive.
+        */
         int64 fixed = 1;
+
+        /**
+        The fee limit expressed as a fixed amount of millisatoshis.
+
+        The fields fixed and fixed_msat are mutually exclusive.
+        */
+        int64 fixed_msat = 3;
 
         /// The fee limit expressed as a percentage of the payment amount.
         int64 percent = 2;
@@ -857,23 +894,46 @@ message FeeLimit {
 }
 
 message SendRequest {
-    /// The identity pubkey of the payment recipient
+    /**
+    The identity pubkey of the payment recipient. When using REST, this field
+    must be encoded as base64.
+    */
     bytes dest = 1;
 
-    /// The hex-encoded identity pubkey of the payment recipient
-    string dest_string = 2;
-
-    /// Number of satoshis to send.
-    int64 amt = 3;
-
-    /// The hash to use within the payment's HTLC
-    bytes payment_hash = 4;
-
-    /// The hex-encoded hash to use within the payment's HTLC
-    string payment_hash_string = 5;
+    /**
+    The hex-encoded identity pubkey of the payment recipient. Deprecated now
+    that the REST gateway supports base64 encoding of bytes fields.
+    */
+    string dest_string = 2 [deprecated = true];
 
     /**
-    A bare-bones invoice for a payment within the Lightning Network.  With the
+    The amount to send expressed in satoshis.
+
+    The fields amt and amt_msat are mutually exclusive.
+    */
+    int64 amt = 3;
+
+    /**
+    The amount to send expressed in millisatoshis.
+
+    The fields amt and amt_msat are mutually exclusive.
+    */
+    int64 amt_msat = 12;
+
+    /**
+    The hash to use within the payment's HTLC. When using REST, this field
+    must be encoded as base64.
+    */
+    bytes payment_hash = 4;
+
+    /**
+    The hex-encoded hash to use within the payment's HTLC. Deprecated now
+    that the REST gateway supports base64 encoding of bytes fields.
+    */
+    string payment_hash_string = 5 [deprecated = true];
+
+    /**
+    A bare-bones invoice for a payment within the Lightning Network. With the
     details of the invoice, the sender has all the data necessary to send a
     payment to the recipient.
     */
@@ -899,6 +959,11 @@ message SendRequest {
     */
     uint64 outgoing_chan_id = 9 [jstype = JS_STRING];
 
+    /**
+    The pubkey of the last hop of the route. If empty, any hop may be used.
+    */
+    bytes last_hop_pubkey = 13;
+
     /** 
     An optional maximum total time lock for the route. This should not exceed
     lnd's `--max-cltv-expiry` setting. If zero, then the value of
@@ -909,9 +974,23 @@ message SendRequest {
     /** 
     An optional field that can be used to pass an arbitrary set of TLV records
     to a peer which understands the new records. This can be used to pass
-    application specific data during the payment attempt.
+    application specific data during the payment attempt. Record types are
+    required to be in the custom range >= 65536. When using REST, the values
+    must be encoded as base64.
     */
-    map<uint64, bytes> dest_tlv = 11;
+    map<uint64, bytes> dest_custom_records = 11;
+
+    /// If set, circular payments to self are permitted.
+    bool allow_self_payment = 14;
+
+    /**
+    Features assumed to be supported by the final node. All transitive feature
+    depdencies must also be set properly. For a given feature bit pair, either
+    optional or remote may be set, but not both. If this field is nil or empty,
+    the router will try to load destination features from the graph as a
+    fallback.
+    */
+    repeated FeatureBit dest_features = 15;
 }
 
 message SendResponse {
@@ -922,11 +1001,17 @@ message SendResponse {
 }
 
 message SendToRouteRequest {
-    /// The payment hash to use for the HTLC.
+    /**
+    The payment hash to use for the HTLC. When using REST, this field must be
+    encoded as base64.
+    */
     bytes payment_hash = 1;
 
-    /// An optional hex-encoded payment hash to be used for the HTLC.
-    string payment_hash_string = 2;
+    /**
+    An optional hex-encoded payment hash to be used for the HTLC. Deprecated now
+    that the REST gateway supports base64 encoding of bytes fields.
+    */
+    string payment_hash_string = 2 [deprecated = true];
 
     reserved 3;
 
@@ -988,10 +1073,16 @@ message ChannelAcceptResponse {
 
 message ChannelPoint {
     oneof funding_txid {
-        /// Txid of the funding transaction
+        /**
+        Txid of the funding transaction. When using REST, this field must be
+        encoded as base64.
+        */
         bytes funding_txid_bytes = 1 [json_name = "funding_txid_bytes"];
 
-        /// Hex-encoded string representing the funding transaction
+        /**
+        Hex-encoded string representing the byte-reversed hash of the funding
+        transaction.
+        */
         string funding_txid_str = 2 [json_name = "funding_txid_str"];
     }
 
@@ -1109,7 +1200,10 @@ message NewAddressResponse {
 }
 
 message SignMessageRequest {
-    /// The message to be signed
+    /**
+    The message to be signed. When using REST, this field must be encoded as
+    base64.
+    */
     bytes msg = 1 [ json_name = "msg" ];
 }
 message SignMessageResponse {
@@ -1118,7 +1212,10 @@ message SignMessageResponse {
 }
 
 message VerifyMessageRequest {
-    /// The message over which the signature is to be verified
+    /**
+    The message over which the signature is to be verified. When using REST,
+    this field must be encoded as base64.
+    */
     bytes msg = 1 [ json_name = "msg" ];
 
     /// The signature to be verified over the given message
@@ -1137,7 +1234,7 @@ message ConnectPeerRequest {
     LightningAddress addr = 1;
 
     /** If set, the daemon will attempt to persistently connect to the target
-     * peer.  Otherwise, the call will be synchronous. */
+     * peer. Otherwise, the call will be synchronous. */
     bool perm = 2;
 }
 message ConnectPeerResponse {
@@ -1271,6 +1368,15 @@ message Channel {
     by the channel scoring system over the lifetime of the channel [EXPERIMENTAL].
     */
     int64 uptime = 24 [json_name = "uptime"];
+
+    /**
+    Close address is the address that we will enforce payout to on cooperative
+    close if the channel was opened utilizing option upfront shutdown. This
+    value can be set on channel open by setting close_address in an open channel
+    request. If this value is not set, you can still choose a payout address by
+    cooperatively closing with the delivery_address field set.
+    */
+    string close_address = 25 [json_name ="close_address"];
 }
 
 
@@ -1383,6 +1489,9 @@ message Peer {
 
     // The type of sync we are currently performing with this peer.
     SyncType sync_type = 10 [json_name = "sync_type"];
+
+    /// Features advertised by the remote peer in their init message.
+    map<uint32, Feature> features = 11 [json_name = "features"];
 }
 
 message ListPeersRequest {
@@ -1392,9 +1501,27 @@ message ListPeersResponse {
     repeated Peer peers = 1 [json_name = "peers"];
 }
 
+message PeerEventSubscription {
+}
+
+message PeerEvent {
+    /// The identity pubkey of the peer.
+    string pub_key = 1 [json_name = "pub_key"];
+
+    enum EventType {
+        PEER_ONLINE = 0;
+        PEER_OFFLINE = 1;
+    }
+
+    EventType type = 2 [ json_name = "type" ];
+}
+
 message GetInfoRequest {
 }
 message GetInfoResponse {
+
+    /// The version of the LND software that the node is running.
+    string version = 14 [ json_name = "version" ];
 
     /// The identity pubkey of the current node.
     string identity_pubkey = 1 [json_name = "identity_pubkey"];
@@ -1402,11 +1529,17 @@ message GetInfoResponse {
     /// If applicable, the alias of the current node, e.g. "bob"
     string alias = 2 [json_name = "alias"];
 
+    /// The color of the current node in hex code format
+    string color = 17 [json_name = "color"];
+
     /// Number of pending channels
     uint32 num_pending_channels = 3 [json_name = "num_pending_channels"];
 
     /// Number of active channels
     uint32 num_active_channels = 4 [json_name = "num_active_channels"];
+
+    /// Number of inactive channels
+    uint32 num_inactive_channels = 15 [json_name = "num_inactive_channels"];
 
     /// Number of peers
     uint32 num_peers = 5 [json_name = "num_peers"];
@@ -1417,8 +1550,14 @@ message GetInfoResponse {
     /// The node's current view of the hash of the best block
     string block_hash = 8 [json_name = "block_hash"];
 
+    /// Timestamp of the block best known to the wallet
+    int64 best_header_timestamp = 13 [ json_name = "best_header_timestamp" ];
+
     /// Whether the wallet's view is synced to the main chain
     bool synced_to_chain = 9 [json_name = "synced_to_chain"];
+
+    // Whether we consider ourselves synced with the public channel graph.
+    bool synced_to_graph = 18 [json_name = "synced_to_graph"];
 
     /** 
     Whether the current node is connected to testnet. This field is 
@@ -1428,26 +1567,17 @@ message GetInfoResponse {
 
     reserved 11;
 
-    /// The URIs of the current node.
-    repeated string uris = 12 [json_name = "uris"];
-
-    /// Timestamp of the block best known to the wallet
-    int64 best_header_timestamp = 13 [ json_name = "best_header_timestamp" ];
-
-    /// The version of the LND software that the node is running.
-    string version = 14 [ json_name = "version" ];
-
-    /// Number of inactive channels
-    uint32 num_inactive_channels = 15 [json_name = "num_inactive_channels"];
-
     /// A list of active chains the node is connected to
     repeated Chain chains = 16 [json_name = "chains"];
 
-    /// The color of the current node in hex code format
-    string color = 17 [json_name = "color"];
+    /// The URIs of the current node.
+    repeated string uris = 12 [json_name = "uris"];
 
-    // Whether we consider ourselves synced with the public channel graph.
-    bool synced_to_graph = 18 [json_name = "synced_to_graph"];
+    /*
+    Features that our node has advertised in our init message, node
+    announcements and invoices.
+    */
+    map<uint32, Feature> features = 19 [json_name = "features"];
 }
 
 message Chain {
@@ -1491,6 +1621,14 @@ message CloseChannelRequest {
 
     /// A manual fee rate set in sat/byte that should be used when crafting the closure transaction.
     int64 sat_per_byte = 4;
+
+    /*
+    An optional address to send funds to in the case of a cooperative close.
+    If the channel was opened with an upfront shutdown script and this field
+    is set, the request to close will fail because the channel must pay out
+    to the upfront shutdown addresss.
+    */
+    string delivery_address = 5 [json_name = "delivery_address"];
 }
 
 message CloseStatusUpdate {
@@ -1506,11 +1644,17 @@ message PendingUpdate {
 }
 
 message OpenChannelRequest {
-    /// The pubkey of the node to open a channel with
+    /**
+    The pubkey of the node to open a channel with. When using REST, this field
+    must be encoded as base64.
+    */
     bytes node_pubkey = 2 [json_name = "node_pubkey"];
 
-    /// The hex encoded pubkey of the node to open a channel with
-    string node_pubkey_string = 3 [json_name = "node_pubkey_string"];
+    /**
+    The hex encoded pubkey of the node to open a channel with. Deprecated now
+    that the REST gateway supports base64 encoding of bytes fields.
+    */
+    string node_pubkey_string = 3 [json_name = "node_pubkey_string", deprecated = true];
 
     /// The number of satoshis the wallet should commit to the channel
     int64 local_funding_amount = 4 [json_name = "local_funding_amount"];
@@ -1538,12 +1682,112 @@ message OpenChannelRequest {
 
     /// Whether unconfirmed outputs should be used as inputs for the funding transaction.
     bool spend_unconfirmed = 12 [json_name = "spend_unconfirmed"];
+
+    /*
+    Close address is an optional address which specifies the address to which
+    funds should be paid out to upon cooperative close. This field may only be
+    set if the peer supports the option upfront feature bit (call listpeers
+    to check). The remote peer will only accept cooperative closes to this
+    address if it is set.
+
+    Note: If this value is set on channel creation, you will *not* be able to
+    cooperatively close out to a different address.
+    */
+    string close_address = 13 [json_name = "close_address"];
+
+    /**
+    Funding shims are an optional argument that allow the caller to intercept
+    certain funding functionality. For example, a shim can be provided to use a
+    particular key for the commitment key (ideally cold) rather than use one
+    that is generated by the wallet as normal, or signal that signing will be
+    carried out in an interactive manner (PSBT based).
+    */
+    FundingShim funding_shim = 14 [json_name = "funding_shim"];
 }
 message OpenStatusUpdate {
     oneof update {
         PendingUpdate chan_pending = 1 [json_name = "chan_pending"];
         ChannelOpenUpdate chan_open = 3 [json_name = "chan_open"];
+   }
+
+    /**
+    The pending channel ID of the created channel. This value may be used to
+    further the funding flow manually via the FundingStateStep method.
+    */
+    bytes pending_chan_id = 4 [json_name = "pending_chan_id"];
+}
+
+message KeyLocator {
+    /// The family of key being identified.
+    int32 key_family = 1;
+
+    /// The precise index of the key being identified.
+    int32 key_index = 2;
+}
+
+message KeyDescriptor {
+     /**
+     The raw bytes of the key being identified. 
+     */
+     bytes raw_key_bytes = 1;
+
+     /** 
+     The key locator that identifies which key to use for signing. 
+     */
+     KeyLocator key_loc = 2;
+}
+
+message ChanPointShim {
+    /**
+    The size of the pre-crafted output to be used as the channel point for this
+    channel funding.
+    */
+    int64 amt = 1;
+
+    /// The target channel point to refrence in created commitment transactions.
+    ChannelPoint chan_point = 2;
+
+    /// Our local key to use when creating the multi-sig output.
+    KeyDescriptor local_key = 3;
+
+    /// The key of the remote party to use when creating the multi-sig output.
+    bytes remote_key = 4;
+
+    /**
+    If non-zero, then this will be used as the pending channel ID on the wire
+    protocol to initate the funding request. This is an optional field, and
+    should only be set if the responder is already expecting a specific pending
+    channel ID.
+    */
+    bytes pending_chan_id = 5;
+}
+
+message FundingShim {
+    oneof shim {
+        ChanPointShim chan_point_shim = 1;
     }
+}
+
+message FundingShimCancel {
+    /// The pending channel ID of the channel to cancel the funding shim for.
+    bytes pending_chan_id = 1;
+}
+
+message FundingTransitionMsg {
+    oneof trigger {
+        /**
+        The funding shim to regsiter. This should be used before any
+        channel funding has began by the remote party, as it is intended as a
+        prepatory step for the full channel funding.
+        */
+        FundingShim shim_register = 1;
+
+        /// Used to cancel an existing registered funding shim.
+        FundingShimCancel shim_cancel = 2;
+    }
+}
+
+message FundingStateStepResp {
 }
 
 message PendingHTLC {
@@ -1725,12 +1969,29 @@ message QueryRoutesRequest {
     /// The 33-byte hex-encoded public key for the payment destination
     string pub_key = 1;
 
-    /// The amount to send expressed in satoshis
+    /**
+    The amount to send expressed in satoshis.
+
+    The fields amt and amt_msat are mutually exclusive.
+    */
     int64 amt = 2;
+
+    /**
+    The amount to send expressed in millisatoshis.
+
+    The fields amt and amt_msat are mutually exclusive.
+    */
+    int64 amt_msat = 12;
 
     reserved 3;
 
-    /// An optional CLTV delta from the current height that should be used for the timelock of the final hop
+    /**
+    An optional CLTV delta from the current height that should be used for the
+    timelock of the final hop. Note that unlike SendPayment, QueryRoutes does
+    not add any additional block padding on top of final_ctlv_delta. This
+    padding of a few blocks needs to be added manually or otherwise failures may
+    happen when a block comes in while the payment is in flight.
+    */
     int32 final_cltv_delta = 4;
 
     /**
@@ -1742,7 +2003,8 @@ message QueryRoutesRequest {
     FeeLimit fee_limit = 5;
 
     /**
-    A list of nodes to ignore during path finding.
+    A list of nodes to ignore during path finding. When using REST, these fields
+    must be encoded as base64.
     */
     repeated bytes ignored_nodes = 6;
 
@@ -1774,13 +2036,54 @@ message QueryRoutesRequest {
     zero, then the value of `--max-cltv-expiry` is used as the limit.
     */
     uint32 cltv_limit = 11;
+
+    /** 
+    An optional field that can be used to pass an arbitrary set of TLV records
+    to a peer which understands the new records. This can be used to pass
+    application specific data during the payment attempt. If the destination
+    does not support the specified recrods, and error will be returned.
+    Record types are required to be in the custom range >= 65536. When using
+    REST, the values must be encoded as base64.
+    */
+    map<uint64, bytes> dest_custom_records = 13;
+
+    /**
+    The channel id of the channel that must be taken to the first hop. If zero,
+    any channel may be used.
+    */
+    uint64 outgoing_chan_id = 14 [jstype = JS_STRING];
+
+    /**
+    The pubkey of the last hop of the route. If empty, any hop may be used.
+    */
+    bytes last_hop_pubkey = 15;
+
+    /**
+    Optional route hints to reach the destination through private channels.
+    */
+    repeated lnrpc.RouteHint route_hints = 16;
+
+    /**
+    Features assumed to be supported by the final node. All transitive feature
+    depdencies must also be set properly. For a given feature bit pair, either
+    optional or remote may be set, but not both. If this field is nil or empty,
+    the router will try to load destination features from the graph as a
+    fallback.
+    */
+    repeated lnrpc.FeatureBit dest_features = 17;
 }
 
 message NodePair {
-    /// The sending node of the pair.
+    /**
+    The sending node of the pair. When using REST, this field must be encoded as
+    base64.
+    */
     bytes from = 1;
 
-    /// The receiving node of the pair.
+    /**
+    The receiving node of the pair. When using REST, this field must be encoded
+    as base64.
+    */
     bytes to = 2;
 }
 
@@ -1833,9 +2136,43 @@ message Hop {
 
     /** 
     If set to true, then this hop will be encoded using the new variable length
-    TLV format.
+    TLV format. Note that if any custom tlv_records below are specified, then
+    this field MUST be set to true for them to be encoded properly.
     */
     bool tlv_payload = 9 [json_name = "tlv_payload"];
+
+    /**
+    An optional TLV record tha singals the use of an MPP payment. If present,
+    the receiver will enforce that that the same mpp_record is included in the
+    final hop payload of all non-zero payments in the HTLC set. If empty, a
+    regular single-shot payment is or was attempted.
+    */
+    MPPRecord mpp_record = 10 [json_name = "mpp_record"];
+
+    /**
+    An optional set of key-value TLV records. This is useful within the context
+    of the SendToRoute call as it allows callers to specify arbitrary K-V pairs
+    to drop off at each hop within the onion.
+    */
+    map<uint64, bytes> custom_records = 11 [json_name = "custom_records"];
+}
+
+message MPPRecord {
+    /**
+    A unique, random identifier used to authenticate the sender as the intended
+    payer of a multi-path payment. The payment_addr must be the same for all
+    subpayments, and match the payment_addr provided in the receiver's invoice.
+    The same payment_addr must be used on all subpayments.
+    */
+    bytes payment_addr = 11 [json_name = "payment_addr"];
+
+    /**
+    The total amount in milli-satoshis being sent as part of a larger multi-path
+    payment. The caller is responsible for ensuring subpayments to the same node
+    and payment_hash sum exactly to total_amt_msat. The same
+    total_amt_msat must be used on all subpayments.
+    */
+    int64 total_amt_msat = 10 [json_name = "total_amt_msat"];
 }
 
 /**
@@ -1848,7 +2185,7 @@ carry the initial payment amount after fees are accounted for.
 message Route {
 
     /**
-    The cumulative (final) time lock across the entire route.  This is the CLTV
+    The cumulative (final) time lock across the entire route. This is the CLTV
     value that should be extended to the first hop in the route. All other hops
     will decrement the time-lock as advertised, leaving enough time for all
     hops to wait for or present the payment preimage to complete the payment.
@@ -1856,7 +2193,7 @@ message Route {
     uint32 total_time_lock = 1 [json_name = "total_time_lock"];
 
     /**
-    The sum of the fees paid at each hop within the final route.  In the case
+    The sum of the fees paid at each hop within the final route. In the case
     of a one-hop payment, this value will be zero as we don't need to pay a fee
     to ourselves.
     */
@@ -1927,6 +2264,7 @@ message LightningNode {
     string alias = 3 [ json_name = "alias" ];
     repeated NodeAddress addresses = 4 [ json_name = "addresses" ];
     string color = 5 [ json_name = "color" ];
+    map<uint32, Feature> features = 6 [ json_name = "features" ];
 }
 
 message NodeAddress {
@@ -2105,22 +2443,34 @@ message Invoice {
     */
     string memo = 1 [json_name = "memo"];
 
-    /** Deprecated. An optional cryptographic receipt of payment which is not
-    implemented.
-    */
-    bytes receipt = 2 [json_name = "receipt", deprecated = true];
+    reserved 2;
 
     /**
     The hex-encoded preimage (32 byte) which will allow settling an incoming
-    HTLC payable to this preimage
+    HTLC payable to this preimage. When using REST, this field must be encoded
+    as base64.
     */
     bytes r_preimage = 3 [json_name = "r_preimage"];
 
-    /// The hash of the preimage
+    /**
+    The hash of the preimage. When using REST, this field must be encoded as
+    base64.
+    */
     bytes r_hash = 4 [json_name = "r_hash"];
 
-    /// The value of this invoice in satoshis
+    /**
+    The value of this invoice in satoshis
+
+    The fields value and value_msat are mutually exclusive.
+    */
     int64 value = 5 [json_name = "value"];
+
+    /**
+    The value of this invoice in millisatoshis
+
+    The fields value and value_msat are mutually exclusive.
+    */
+    int64 value_msat = 23 [json_name = "value_msat"];
 
     /// Whether this invoice has been fulfilled
     bool settled = 6 [json_name = "settled", deprecated = true];
@@ -2132,7 +2482,7 @@ message Invoice {
     int64 settle_date = 8 [json_name = "settle_date"];
 
     /**
-    A bare-bones invoice for a payment within the Lightning Network.  With the
+    A bare-bones invoice for a payment within the Lightning Network. With the
     details of the invoice, the sender has all the data necessary to send a
     payment to the recipient.
     */
@@ -2141,7 +2491,8 @@ message Invoice {
     /**
     Hash (SHA-256) of a description of the payment. Used if the description of
     payment (memo) is too long to naturally fit within the description field
-    of an encoded payment request.
+    of an encoded payment request. When using REST, this field must be encoded
+    as base64.
     */
     bytes description_hash = 10 [json_name = "description_hash"];
 
@@ -2216,6 +2567,15 @@ message Invoice {
 
     /// List of HTLCs paying to this invoice [EXPERIMENTAL].
     repeated InvoiceHTLC htlcs = 22 [json_name = "htlcs"];
+
+    /// List of features advertised on the invoice.
+    map<uint32, Feature> features = 24 [json_name = "features"];
+    
+    /**
+    Indicates if this invoice was a spontaneous payment that arrived via keysend
+    [EXPERIMENTAL].
+    */
+    bool is_keysend = 25 [json_name = "is_keysend"];
 }
 
 enum InvoiceHTLCState {
@@ -2249,13 +2609,19 @@ message InvoiceHTLC {
 
     /// Current state the htlc is in.
     InvoiceHTLCState state = 8 [json_name = "state"];
+
+    /// Custom tlv records.
+    map<uint64, bytes> custom_records = 9 [json_name = "custom_records"];
+
+    /// The total amount of the mpp payment in msat.
+    uint64 mpp_total_amt_msat = 10 [json_name = "mpp_total_amt_msat"];
 }
 
 message AddInvoiceResponse {
     bytes r_hash = 1 [json_name = "r_hash"];
 
     /**
-    A bare-bones invoice for a payment within the Lightning Network.  With the
+    A bare-bones invoice for a payment within the Lightning Network. With the
     details of the invoice, the sender has all the data necessary to send a
     payment to the recipient.
     */
@@ -2273,15 +2639,23 @@ message PaymentHash {
     /**
     The hex-encoded payment hash of the invoice to be looked up. The passed
     payment hash must be exactly 32 bytes, otherwise an error is returned.
+    Deprecated now that the REST gateway supports base64 encoding of bytes
+    fields.
     */
-    string r_hash_str = 1 [json_name = "r_hash_str"];
+    string r_hash_str = 1 [json_name = "r_hash_str", deprecated = true];
 
-    /// The payment hash of the invoice to be looked up.
+    /**
+    The payment hash of the invoice to be looked up. When using REST, this field
+    must be encoded as base64.
+    */
     bytes r_hash = 2 [json_name = "r_hash"];
 }
 
 message ListInvoiceRequest {
-    /// If set, only unsettled invoices will be returned in the response.
+    /**
+    If set, only invoices that are not settled and not canceled will be returned
+    in the response.
+    */
     bool pending_only = 1 [json_name = "pending_only"];
 
     /**
@@ -2345,11 +2719,11 @@ message Payment {
     /// Deprecated, use value_sat or value_msat.
     int64 value = 2 [json_name = "value", deprecated = true];
 
-    /// The date of this payment
-    int64 creation_date = 3 [json_name = "creation_date"];
+    /// Deprecated, use creation_time_ns
+    int64 creation_date = 3 [json_name = "creation_date", deprecated = true];
 
-    /// The path this payment took
-    repeated string path = 4 [ json_name = "path" ];
+    /// The path this payment took.
+    repeated string path = 4 [json_name = "path", deprecated = true];
 
     /// Deprecated, use fee_sat or fee_msat.
     int64 fee = 5 [json_name = "fee", deprecated = true];
@@ -2381,6 +2755,35 @@ message Payment {
 
     ///  The fee paid for this payment in milli-satoshis
     int64 fee_msat = 12 [json_name = "fee_msat"];
+
+    /// The time in UNIX nanoseconds at which the payment was created.
+    int64 creation_time_ns = 13 [json_name = "creation_time_ns"];
+
+    /// The HTLCs made in attempt to settle the payment [EXPERIMENTAL].
+    repeated HTLCAttempt htlcs = 14 [json_name = "htlcs"];
+}
+
+message HTLCAttempt {
+        enum HTLCStatus {
+                IN_FLIGHT = 0;
+                SUCCEEDED = 1;
+                FAILED = 2;
+        }
+
+        /// The status of the HTLC.
+        HTLCStatus status = 1 [json_name = "status"];
+
+        /// The route taken by this HTLC.
+        Route route = 2 [json_name = "route"];
+
+        /// The time in UNIX nanoseconds at which this HTLC was sent.
+        int64 attempt_time_ns = 3 [json_name = "attempt_time_ns"];
+
+        /**
+        The time in UNIX nanoseconds at which this HTLC was settled or failed.
+        This value will not be set if the HTLC is still IN_FLIGHT.
+        */
+        int64 resolve_time_ns = 4 [json_name = "resolve_time_ns"];
 }
 
 message ListPaymentsRequest {
@@ -2434,6 +2837,35 @@ message PayReq {
     string fallback_addr = 8 [json_name = "fallback_addr"];
     int64 cltv_expiry = 9 [json_name = "cltv_expiry"];
     repeated RouteHint route_hints = 10 [json_name = "route_hints"];
+    bytes payment_addr = 11 [json_name = "payment_addr"];
+    int64 num_msat = 12 [json_name = "num_msat"];
+    map<uint32, Feature> features = 13 [json_name = "features"];
+}
+
+enum FeatureBit {
+        DATALOSS_PROTECT_REQ = 0;
+        DATALOSS_PROTECT_OPT = 1;
+        INITIAL_ROUING_SYNC = 3;
+        UPFRONT_SHUTDOWN_SCRIPT_REQ = 4;
+        UPFRONT_SHUTDOWN_SCRIPT_OPT = 5;
+        GOSSIP_QUERIES_REQ = 6;
+        GOSSIP_QUERIES_OPT = 7;
+        TLV_ONION_REQ = 8;
+        TLV_ONION_OPT = 9;
+        EXT_GOSSIP_QUERIES_REQ = 10;
+        EXT_GOSSIP_QUERIES_OPT = 11;
+        STATIC_REMOTE_KEY_REQ = 12;
+        STATIC_REMOTE_KEY_OPT = 13;
+        PAYMENT_ADDR_REQ = 14;
+        PAYMENT_ADDR_OPT = 15;
+        MPP_REQ = 16;
+        MPP_OPT = 17;
+}
+
+message Feature {
+        string name = 2 [json_name = "name"];
+        bool is_required = 3 [json_name = "is_required"];
+        bool is_known = 4 [json_name = "is_known"];
 }
 
 message FeeReportRequest {}
@@ -2484,6 +2916,12 @@ message PolicyUpdateRequest {
 
     /// If set, the maximum HTLC size in milli-satoshis. If unset, the maximum HTLC will be unchanged.
     uint64 max_htlc_msat = 6 [json_name = "max_htlc_msat"];
+
+    /// The minimum HTLC size in milli-satoshis. Only applied if min_htlc_msat_specified is true.
+    uint64 min_htlc_msat = 7 [json_name = "min_htlc_msat"];
+
+    /// If true, min_htlc_msat is applied.
+    bool min_htlc_msat_specified = 8 [json_name = "set_min_htlc_msat"];
 }
 message PolicyUpdateResponse {
 }
@@ -2556,7 +2994,8 @@ message ChannelBackup {
     /**
     Is an encrypted single-chan backup. this can be passed to
     RestoreChannelBackups, or the WalletUnlocker Init and Unlock methods in
-    order to trigger the recovery protocol.
+    order to trigger the recovery protocol. When using REST, this field must be
+    encoded as base64.
     */
     bytes chan_backup = 2 [ json_name = "chan_backup" ];
 }
@@ -2570,7 +3009,8 @@ message MultiChanBackup {
     /**
     A single encrypted blob containing all the static channel backups of the
     channel listed above. This can be stored as a single file or blob, and
-    safely be replaced with any prior/future versions.
+    safely be replaced with any prior/future versions. When using REST, this
+    field must be encoded as base64.
     */
     bytes multi_chan_backup = 2 [ json_name = "multi_chan_backup" ];
 }
@@ -2599,8 +3039,15 @@ message ChannelBackups {
 
 message RestoreChanBackupRequest {
     oneof backup {
+        /**
+        The channels to restore as a list of channel/backup pairs.
+        */
         ChannelBackups chan_backups = 1 [ json_name = "chan_backups" ];
 
+        /**
+        The channels to restore in the packed multi backup format. When using
+        REST, this field must be encoded as base64.
+        */
         bytes multi_chan_backup = 2 [ json_name = "multi_chan_backup" ];
     }
 }

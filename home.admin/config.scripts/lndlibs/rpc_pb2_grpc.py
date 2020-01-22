@@ -246,6 +246,11 @@ class LightningStub(object):
         request_serializer=rpc__pb2.ListPeersRequest.SerializeToString,
         response_deserializer=rpc__pb2.ListPeersResponse.FromString,
         )
+    self.SubscribePeerEvents = channel.unary_stream(
+        '/lnrpc.Lightning/SubscribePeerEvents',
+        request_serializer=rpc__pb2.PeerEventSubscription.SerializeToString,
+        response_deserializer=rpc__pb2.PeerEvent.FromString,
+        )
     self.GetInfo = channel.unary_unary(
         '/lnrpc.Lightning/GetInfo',
         request_serializer=rpc__pb2.GetInfoRequest.SerializeToString,
@@ -280,6 +285,11 @@ class LightningStub(object):
         '/lnrpc.Lightning/OpenChannel',
         request_serializer=rpc__pb2.OpenChannelRequest.SerializeToString,
         response_deserializer=rpc__pb2.OpenStatusUpdate.FromString,
+        )
+    self.FundingStateStep = channel.unary_unary(
+        '/lnrpc.Lightning/FundingStateStep',
+        request_serializer=rpc__pb2.FundingTransitionMsg.SerializeToString,
+        response_deserializer=rpc__pb2.FundingStateStepResp.FromString,
         )
     self.ChannelAcceptor = channel.stream_stream(
         '/lnrpc.Lightning/ChannelAcceptor',
@@ -578,6 +588,16 @@ class LightningServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def SubscribePeerEvents(self, request, context):
+    """*
+    SubscribePeerEvents creates a uni-directional stream from the server to
+    the client in which any events relevant to the state of peers are sent
+    over. Events include peers going online and offline.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def GetInfo(self, request, context):
     """* lncli: `getinfo`
     GetInfo returns general information concerning the lightning node including
@@ -647,7 +667,25 @@ class LightningServicer(object):
     request to a remote peer. Users are able to specify a target number of
     blocks that the funding transaction should be confirmed in, or a manual fee
     rate to us for the funding transaction. If neither are specified, then a
-    lax block confirmation target is used.
+    lax block confirmation target is used. Each OpenStatusUpdate will return
+    the pending channel ID of the in-progress channel. Depending on the
+    arguments specified in the OpenChannelRequest, this pending channel ID can
+    then be used to manually progress the channel funding flow.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def FundingStateStep(self, request, context):
+    """*
+    FundingStateStep is an advanced funding related call that allows the caller
+    to either execute some preparatory steps for a funding workflow, or
+    manually progress a funding workflow. The primary way a funding flow is
+    identified is via its pending channel ID. As an example, this method can be
+    used to specify that we're expecting a funding flow for a particular
+    pending channel ID, for which we need to use specific parameters.
+    Alternatively, this can be used to interactively drive PSBT signing for
+    funding for partially complete funding transactions.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -772,9 +810,9 @@ class LightningServicer(object):
     notifying the client of newly added/settled invoices. The caller can
     optionally specify the add_index and/or the settle_index. If the add_index
     is specified, then we'll first start by sending add invoice events for all
-    invoices with an add_index greater than the specified value.  If the
+    invoices with an add_index greater than the specified value. If the
     settle_index is specified, the next, we'll send out all settle events for
-    invoices with a settle_index greater than the specified value.  One or both
+    invoices with a settle_index greater than the specified value. One or both
     of these fields can be set. If no fields are set, then we'll only send out
     the latest add/settle events.
     """
@@ -813,7 +851,7 @@ class LightningServicer(object):
     DescribeGraph returns a description of the latest graph state from the
     point of view of the node. The graph information is partitioned into two
     components: all the nodes/vertexes, and all the edges that connect the
-    vertexes themselves.  As this is a directed graph, the edges also contain
+    vertexes themselves. As this is a directed graph, the edges also contain
     the node directional specific routing policy which includes: the time lock
     delta, fee information, etc.
     """
@@ -922,7 +960,7 @@ class LightningServicer(object):
 
     A list of forwarding events are returned. The size of each forwarding event
     is 40 bytes, and the max message size able to be returned in gRPC is 4 MiB.
-    As a result each message can only contain 50k entries.  Each response has
+    As a result each message can only contain 50k entries. Each response has
     the index offset of the last entry. The index offset can be provided to the
     request to allow the caller to skip a series of records.
     """
@@ -1073,6 +1111,11 @@ def add_LightningServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.ListPeersRequest.FromString,
           response_serializer=rpc__pb2.ListPeersResponse.SerializeToString,
       ),
+      'SubscribePeerEvents': grpc.unary_stream_rpc_method_handler(
+          servicer.SubscribePeerEvents,
+          request_deserializer=rpc__pb2.PeerEventSubscription.FromString,
+          response_serializer=rpc__pb2.PeerEvent.SerializeToString,
+      ),
       'GetInfo': grpc.unary_unary_rpc_method_handler(
           servicer.GetInfo,
           request_deserializer=rpc__pb2.GetInfoRequest.FromString,
@@ -1107,6 +1150,11 @@ def add_LightningServicer_to_server(servicer, server):
           servicer.OpenChannel,
           request_deserializer=rpc__pb2.OpenChannelRequest.FromString,
           response_serializer=rpc__pb2.OpenStatusUpdate.SerializeToString,
+      ),
+      'FundingStateStep': grpc.unary_unary_rpc_method_handler(
+          servicer.FundingStateStep,
+          request_deserializer=rpc__pb2.FundingTransitionMsg.FromString,
+          response_serializer=rpc__pb2.FundingStateStepResp.SerializeToString,
       ),
       'ChannelAcceptor': grpc.stream_stream_rpc_method_handler(
           servicer.ChannelAcceptor,
