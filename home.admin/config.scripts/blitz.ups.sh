@@ -20,12 +20,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "Turn ON: UPS"
 
-  # check if already activated
-  if [ ${#ups} -gt 0 ]; then
-    echo "FAIL: UPS is already on - switch off with: ./blitz.ups.sh off"
-    exit 1
-  fi
-
   if [ "$2" = "apcusb" ]; then
    
     # MODEL: APC with USB connection
@@ -57,7 +51,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # add default 'ups' raspiblitz.conf if needed
     if [ ${#ups} -eq 0 ]; then
-      echo "ups=" >> /mnt/hdd/raspiblitz.conf
+      echo "ups=on" >> /mnt/hdd/raspiblitz.conf
     fi
     # set ups config value (in case of update)
     sudo sed -i "s/^ups=.*/ups='apcusb'/g" /mnt/hdd/raspiblitz.conf
@@ -79,7 +73,7 @@ fi
 if [ "$1" = "status" ]; then
   
   # check if already activated
-  if [ ${#ups} -eq 0 ]; then
+  if [ ${#ups} -eq 0 ] || [ "${ups}" = "off" ]; then
     echo "upsStatus='OFF'"
     exit 0
   fi
@@ -113,7 +107,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "Turn OFF: UPS"
 
   # check if already activated
-  if [ ${#ups} -eq 0 ]; then
+  if [ ${#ups} -eq 0 ] || [ "${ups}" = "off" ]; then
     echo "FAIL: UPS is already off."
     exit 1
   fi
@@ -122,7 +116,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop apcupsd
     sudo systemctl disable apcupsd
     sudo apt-get remove -y apcupsd
-    sudo sed -i "s/^ups=.*/ups=/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^ups=.*/ups=off/g" /mnt/hdd/raspiblitz.conf
   else
     echo "FAIL: unknown UPSTYPE: ${ups}"
     exit 1
