@@ -73,14 +73,16 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "******************************************"
 if [ "${touchscreen}" = "1" ]; then
-
   echo "Checking if the content of BlitzTUI changed .."
   checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
-  echo "checkSumBlitzTUIBefore=${checkSumBlitzTUIBefore}"
-  echo "checkSumBlitzTUIAfter=${checkSumBlitzTUIAfter}"
-
-  echo "UPDATING TOUCHSCREEN CODE ..."
-  sudo ./config.scripts/blitz.touchscreen.sh update
+  echo "checkSumBlitzTUIBefore = ${checkSumBlitzTUIBefore}"
+  echo "checkSumBlitzTUIAfter  = ${checkSumBlitzTUIAfter}"
+  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ]; then
+    echo "BlitzTUI did not changed."
+  else
+    echo "BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."
+    sudo ./config.scripts/blitz.touchscreen.sh update
+  fi
 fi
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
