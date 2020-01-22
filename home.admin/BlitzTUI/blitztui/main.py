@@ -629,7 +629,7 @@ class BeatThread(QThread):
         self.signal.emit(0)
 
     def run(self):
-        log.info("starting beat ...")
+        log.info("starting beat ..")
         self.beat_timer.start(self.interval)
         loop = QEventLoop()
         loop.exec_()
