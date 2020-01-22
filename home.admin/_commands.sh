@@ -35,6 +35,7 @@ function manage() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
     cd /home/admin/lndmanage
     source venv/bin/activate
+    echo "NOTICE: Needs at least one active channel to run without error."
     echo "to exit (venv) enter ---> deactivate"
     lndmanage
   else
