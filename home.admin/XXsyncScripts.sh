@@ -66,12 +66,15 @@ fi
 
 echo "COPYING from GIT-Directory to /home/admin/"
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
+echo ".."
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
 echo ".."
 sudo -u admin chmod +x /home/admin/*.sh
+echo ".."
 sudo -u admin chmod +x /home/admin/*.py
 echo ".."
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
+echo ".."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "******************************************"
 if [ "${touchscreen}" = "1" ]; then
