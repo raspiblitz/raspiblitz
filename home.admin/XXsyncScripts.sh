@@ -40,7 +40,7 @@ origin=$(git remote -v | grep 'origin' | tail -n1)
 
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
-echo ""
+echo
 echo "*** SYNCING SHELL SCRIPTS WITH GITHUB ***"
 echo "This is for developing on your RaspiBlitz."
 echo "THIS IS NOT THE REGULAR UPDATE MECHANISM"
@@ -67,8 +67,10 @@ fi
 echo "COPYING from GIT-Directory to /home/admin/ .."
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
+echo ".."
 sudo -u admin chmod +x /home/admin/*.sh
 sudo -u admin chmod +x /home/admin/*.py
+echo ".."
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "******************************************"
@@ -87,4 +89,3 @@ fi
 echo "******************************************"
 echo "OK - shell scripts and assests are synced"
 echo "Reboot recommended"
-echo ""
