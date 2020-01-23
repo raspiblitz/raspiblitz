@@ -366,7 +366,7 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
       if [ "${runBehindTor}" = "on" ]; then
         TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
         whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex needs to be created before BTC-RPC-Explorer can be active.
+The txindex may need to be created before BTC-RPC-Explorer can be active.
 Takes ~7 hours on a RPi4 with SSD.
 Monitor the progress on the LCD or with 'INFO' in main menu.\n
 BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
@@ -376,13 +376,14 @@ ${TOR_ADDRESS}
 " 18 75 
       else
         whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex needs to be created before BTC-RPC-Explorer can be active.
+The txindex may need to be created before BTC-RPC-Explorer can be active.
 Takes ~7 hours on a RPi4 with SSD.
 Monitor the progress on the LCD or with 'INFO' in main menu.\n
 BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
 ---> http://${localip}:3002
 " 14 75 
       fi
+      needsReboot=1
     else
       l1="!!! FAIL on BTC-RPC-Explorer install !!!"
       l2="Try manual install on terminal after reboot with:"
