@@ -39,7 +39,7 @@ function manage() {
     echo "to exit (venv) enter ---> deactivate"
     lndmanage
   else
-    echo "lndmanage not install - to install run:"
+    echo "lndmanage not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
   fi
 }
