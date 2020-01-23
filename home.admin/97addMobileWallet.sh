@@ -43,7 +43,7 @@ when your are on the same LOCAL NETWORK?
   esac
 fi
 
-# Basic Options
+# Options (available without TOR)
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
         SHANGO_IOS "Shango Wallet (iOS)" \
@@ -51,6 +51,15 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
+
+if [ "${runBehindTor}" = "on" ]; then
+   # Options (available with TOR)
+  OPTIONS=(ZAP_IOS "Zap Wallet (iOS) TOR" \
+        ZAP_ANDROID "Zap Wallet (Android) TOR" \
+        ZEUS_IOS "Zeus Wallet (iOS) TOR" \
+        ZEUS_ANDROID "Zeus Wallet (Android) TOR"
+	)
+fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
