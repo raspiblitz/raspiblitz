@@ -121,6 +121,9 @@ if [ "${chain}" != "${choice}" ]; then
   elif [ "${ElectRS}" = "on" ]; then
      dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
      exit 1
+   elif [ "${loop}" = "on" ]; then
+     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
+     exit 1
   else
     echo "Testnet Setting changed .."
     anychange=1
