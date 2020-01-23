@@ -21,14 +21,18 @@ if [ ${isForwarded} -gt 0 ]; then
   justLocal=0
 fi
 
+# if TOR is activated then outside reach is possible (no notice)
+if [ "${runBehindTor}" = "on" ]; then
+  justLocal=0
+fi
+
 # check if dynamic domain is set
 if [ ${justLocal} -eq 1 ]; then
   whiptail --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
 also from outside your local network you need to 
 activate 'Services' -> 'DynamicDNS' FIRST.
-Or use SSH tunnel forwarding for port 10009.
-For more details see chapter in GitHub README 
-on the service 'DynamicDNS'.
+OR use SSH tunnel forwarding for port 10009
+OR have TOR activated.
 
 Do you JUST want to connect with your mobile
 when your are on the same LOCAL NETWORK?
