@@ -106,60 +106,15 @@ fi
 needsReboot=0
 anychange=0
 
-# AUTOPILOT process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoPilot}" != "${choice}" ]; then
-  echo "Autopilot Setting changed .."
-  anychange=1
-  sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
-  needsReboot=1
-else 
-  echo "Autopilot Setting unchanged."
-fi
-
-# LOOP process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${loop}" != "${choice}" ]; then
-  echo "Loop Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.loop.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start loopd
-      if [ ${#GOPATH} -eq 0 ]; then
-        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
-Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start from the command line after the reboot.
-Use the command 'loop' to see the options.
-" 11 56
-        needsReboot=1
-      else
-        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
-Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Use the command 'loop' to see the options.
-" 10 56
-        needsReboot=0
-      fi
-    else
-      l1="FAILED to install Lightning LOOP"
-      l2="Try manual install in the terminal with:"
-      l3="/home/admin/config.scripts/bonus.loop.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else 
-  echo "Loop Setting unchanged."
-fi
-
-# TESTNET process choice
+# TESTNET process choice - KEEP FIRST IN ORDER
 choice="main"; check=$(echo "${CHOICES}" | grep -c "2")
 if [ ${check} -eq 1 ]; then choice="test"; fi
 if [ "${chain}" != "${choice}" ]; then
   if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
      dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
+  elif [ "${BTCRPCexplorer}" = "on" ]; then
+     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer\nbefore changing testnet.' 6 37
+     exit 1
   else
     echo "Testnet Setting changed .."
     anychange=1
@@ -225,6 +180,54 @@ if [ "${chain}" != "${choice}" ]; then
   fi
 else 
   echo "Testnet Setting unchanged."
+fi
+
+# AUTOPILOT process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${autoPilot}" != "${choice}" ]; then
+  echo "Autopilot Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
+  needsReboot=1
+else 
+  echo "Autopilot Setting unchanged."
+fi
+
+# LOOP process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${loop}" != "${choice}" ]; then
+  echo "Loop Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.loop.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start loopd
+      if [ ${#GOPATH} -eq 0 ]; then
+        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
+Start from the command line after the reboot.
+Use the command 'loop' to see the options.
+" 11 56
+        needsReboot=1
+      else
+        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
+Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
+Use the command 'loop' to see the options.
+" 10 56
+        needsReboot=0
+      fi
+    else
+      l1="FAILED to install Lightning LOOP"
+      l2="Try manual install in the terminal with:"
+      l3="/home/admin/config.scripts/bonus.loop.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else 
+  echo "Loop Setting unchanged."
 fi
 
 # Dynamic Domain
