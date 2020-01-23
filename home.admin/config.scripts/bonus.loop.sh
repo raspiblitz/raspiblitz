@@ -32,7 +32,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/bitcoin
     sudo -u bitcoin git clone https://github.com/lightninglabs/loop.git
     cd /home/bitcoin/loop
-    sudo -u bitcoin git reset --hard v0.3.0-alpha
+    sudo -u bitcoin git reset --hard v0.3.1-alpha
     cd /home/bitcoin/loop/cmd
     go install ./...
     
@@ -45,7 +45,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/bitcoin/loop
-ExecStart=/usr/local/gocode/bin/loopd
+ExecStart=/usr/local/gocode/bin/loopd --network=${chain}net
 User=bitcoin
 Group=bitcoin
 Type=simple
