@@ -344,7 +344,6 @@ ${TOR_ADDRESS}
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else
   echo "RTL Webinterface Setting unchanged."
 fi
@@ -388,7 +387,6 @@ BTC-RPC-Explorer will be available on the following URL in your local web browse
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else
   echo "BTC-RPC-Explorer Setting unchanged."
 fi
@@ -491,7 +489,6 @@ https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else
   echo "ElectRS Setting unchanged."
 fi
@@ -535,7 +532,6 @@ ${TOR_ADDRESS}
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-  needsReboot=0
 else
   echo "BTCPayServer setting not changed."
 fi
@@ -554,7 +550,6 @@ Have at least one channel active to run it without error.
 To start type: 'manage' in the command line.
 " 9 75
   fi
-  needsReboot=0
 else 
   echo "lndmanage setting unchanged."
 fi
