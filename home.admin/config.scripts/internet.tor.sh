@@ -290,18 +290,21 @@ CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
 
-# Hidden Service v2 for WEB ADMIN INTERFACE
+# Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
 HiddenServicePort 80 127.0.0.1:80
 
-# Hidden Service v2 for LND RPC
+# Hidden Service for LND RPC
 HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
 HiddenServicePort 80 127.0.0.1:10009
 
-# Hidden Service v3 for LND incoming connections (just in case)
+# Hidden Service for LND REST
+HiddenServiceDir /mnt/hdd/tor/lndrest8080/
+HiddenServicePort 8080 127.0.0.1:8080
+
+# Hidden Service for LND incoming connections
 # https://trac.torproject.org/projects/tor/wiki/doc/NextGenOnions#Howtosetupyourownprop224service
 HiddenServiceDir /mnt/hdd/tor/lnd9735
-HiddenServiceVersion 3
 HiddenServicePort 9735 127.0.0.1:9735
 
 # NOTE: bitcoind get tor service automatically - see /mnt/hdd/bitcoin for onion key

@@ -115,7 +115,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 
-  	./97addMobileWalletLNDconnect.sh RPC
+  	/home/admin/config.scripts/bonus.lndconnect.sh RPC
     exit 1;
     ;;
   ZAP_ANDROID)
@@ -134,7 +134,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 
-  	./97addMobileWalletLNDconnect.sh RPC
+  	/home/admin/config.scripts/bonus.lndconnect.sh RPC
     exit 1;
     ;;
   ZEUS_IOS)
@@ -153,7 +153,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 	
-  	./97addMobileWalletLNDconnect.sh REST
+  	/home/admin/config.scripts/bonus.lndconnect.sh REST
   	exit 1;
   	;;
   ZEUS_ANDROID)
@@ -170,7 +170,7 @@ case $CHOICE in
 	  rm -f qr.txt
 	  /home/admin/XXdisplayQRlcd_hide.sh
 
-  	./97addMobileWalletLNDconnect.sh REST
+  	/home/admin/config.scripts/bonus.lndconnect.sh REST
   	exit 1;
   	;;
 esac
