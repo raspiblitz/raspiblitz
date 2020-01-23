@@ -81,8 +81,19 @@ else
   echo ""
 fi
 
+if [ "${loop}" = "on" ]; then
+  echo "*** LAST 20 LOOP LOGS ***"
+  echo "sudo journalctl -u loopd -b --no-pager -n20"
+  sudo journalctl -u loopd -b --no-pager -n20
+  echo ""
+else
+  echo "- RTL is OFF by config"
+  echo ""
+fi
+
 if [ "${rtlWebinterface}" = "on" ]; then
   echo "*** LAST 20 RTL LOGS ***"
+  echo "sudo journalctl -u RTL -b --no-pager -n20"
   sudo journalctl -u RTL -b --no-pager -n20
   echo ""
 else
