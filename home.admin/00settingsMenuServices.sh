@@ -115,6 +115,12 @@ if [ "${chain}" != "${choice}" ]; then
   elif [ "${BTCRPCexplorer}" = "on" ]; then
      dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
      exit 1
+  elif [ "${BTCPayServer}" = "on" ]; then
+     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
+     exit 1
+  elif [ "${ElectRS}" = "on" ]; then
+     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
+     exit 1
   else
     echo "Testnet Setting changed .."
     anychange=1
