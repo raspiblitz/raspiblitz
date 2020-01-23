@@ -113,7 +113,7 @@ if [ "${chain}" != "${choice}" ]; then
   if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
      dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
   elif [ "${BTCRPCexplorer}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer\nbefore changing testnet.' 6 37
+     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
      exit 1
   else
     echo "Testnet Setting changed .."

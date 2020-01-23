@@ -73,8 +73,8 @@ echo ""
 
 if [ "${touchscreen}" = "1" ]; then
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
-  echo "sudo tail -n 20 sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log"
-  sudo tail -n 20 sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
+  echo "sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log"
+  sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log
   echo ""
 else
   echo "- TOUCHSCREEN is OFF by config"
