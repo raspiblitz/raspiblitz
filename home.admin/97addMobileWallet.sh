@@ -89,7 +89,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-      ./97addMobileWalletShango.sh
+      /home/admin/config.scripts/bonus.lndconnect.sh RPC SHANGO
 	  exit 1;
 	  ;;
 	SHANGO_ANDROID)
@@ -103,7 +103,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-      ./97addMobileWalletShango.sh
+	  /home/admin/config.scripts/bonus.lndconnect.sh RPC SHANGO
       exit 1;
       ;;
   ZAP_IOS)
