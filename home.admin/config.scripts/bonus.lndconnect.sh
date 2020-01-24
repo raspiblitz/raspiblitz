@@ -103,8 +103,6 @@ if [ "${runBehindTor}" == "on" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     port="8080"
   fi
-  # TOR does not need the TLS cert
-  #extraparamter="--nocert"
   echo "# port ${port} on host ${host}"
 fi
 
