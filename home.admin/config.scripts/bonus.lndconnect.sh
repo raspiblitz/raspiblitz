@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [REST|RPC] [?NOCERT]"
+ echo "# bonus.lndconnect.sh [REST|RPC] [?NOCERT|SHANGO]"
  exit 1
 fi
 
@@ -15,9 +15,11 @@ source /mnt/hdd/raspiblitz.conf
 #### PARAMETER
 
 # defaults
+connector="lndconnect"
 servicePort="10009"
 useTOR=0
 extraparamter=""
+
 
 # 1. REST or RPC
 # determine service port from argument
@@ -34,6 +36,9 @@ fi
 if [ "$2" == "NOCERT" ]; then
   echo "# forcing NOCERT"
   extraparamter="--nocert"
+elif [ "$2" == "SHANGO" ]; then
+  echo "# connecting thru shango QR code"
+  connector="shango"
 fi
 
 #### MAKE SURE LNDCONNECT IS INSTALLED
@@ -105,14 +110,33 @@ fi
 
 #### RUN LNDCONNECT
 
-# get Go vars
-source /etc/profile
+imagePath=""
+datastring=""
 
-# write qr code data to an image
-lndconnect --host=${host} --port=${port} --image ${extraparamter}
+if [ "${connector}" == "lndconnect" ]; then
 
-# display qr code image on LCD
-./XXdisplayLCD.sh lndconnect-qr.png
+  # get Go vars
+  source /etc/profile
+
+  # write qr code data to an image
+  lndconnect --host=${host} --port=${port} --image ${extraparamter}
+  imagePath=$(readlink -f lndconnect-qr.png)
+
+  # display qr code image on LCD
+  /home/admin/config.scripts/blitz.lcd.sh image ${imagePath}
+
+elif [ "${connector}" == "shango" ]; then
+
+  # write qr code data to text file
+  datastring=$(echo -e "${host}:${port},\n$(xxd -p -c2000 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in /home/admin/.lnd/tls.cert -noout)")
+
+  # display qr code on LCD
+  /home/admin/config.scripts/blitz.lcd.sh qr ${datastring}
+
+else
+  echo "error='unkown connector'"
+  exit 1
+fi
 
 # show pairing info dialog
 msg=""
@@ -126,17 +150,19 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --no-button "show QR code" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
-  lndconnect --host=${host} --port=${port} ${extraparamter}
-  echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
-  read key
+  if [ "${connector}" == "lndconnect" ]; then
+    lndconnect --host=${host} --port=${port} ${extraparamter}
+    echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
+    read key
+  elif [ "${connector}" == "shango" ]; then
+    /home/admin/config.scripts/blitz.lcd.sh qr-console ${datastring}
+  fi
 fi
 
 # clean up
-./XXdisplayQRlcd_hide.sh
-shred lndconnect-qr.png 2> /dev/null
-rm -f lndconnect-qr.png 2> /dev/null
-shred qr.txt 2> /dev/null
-rm -f qr.txt 2> /dev/null
+/home/admin/config.scripts/blitz.lcd.sh hide
+shred ${imagePath} 2> /dev/null
+rm -f ${imagePath} 2> /dev/null
 
 echo "------------------------------"
 echo "If the connection was not working:"
