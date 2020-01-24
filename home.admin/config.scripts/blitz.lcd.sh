@@ -94,15 +94,15 @@ if [ "${command}" == "image" ]; then
     exit 1
   else
     # test the image path - if file exists
-    if [ -f "$imagepath" ]; then
-      echo "# OK - file exists: ${imagepath}"
+    if [ -f "$imagePath" ]; then
+      echo "# OK - file exists: ${imagePath}"
     else
       echo "error='file does not exist'"
       exit 1
     fi
   fi
 
-  sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagepath} 2> /dev/null
+  sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
   exit 0
 fi
 

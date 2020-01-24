@@ -119,11 +119,11 @@ if [ "${connector}" == "lndconnect" ]; then
   source /etc/profile
 
   # write qr code data to an image
+  cd /home/admin
   lndconnect --host=${host} --port=${port} --image ${extraparamter}
-  imagePath=$(readlink -f lndconnect-qr.png)
 
   # display qr code image on LCD
-  /home/admin/config.scripts/blitz.lcd.sh image ${imagePath}
+  /home/admin/config.scripts/blitz.lcd.sh image /home/admin/lndconnect-qr.png
 
 elif [ "${connector}" == "shango" ]; then
 
