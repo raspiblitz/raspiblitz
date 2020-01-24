@@ -31,10 +31,10 @@ if [ ${#sshtunnel} -gt 0 ]; then
 fi
 
 # write qr code data to text file
-echo -e "${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in ./.lnd/tls.cert -noout)" > qr.txt
+qrcodedata=$("${host}:${port},\n$(xxd -p -c2000 ./.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in ./.lnd/tls.cert -noout)")
 
 # display qr code on LCD
-./XXdisplayQRlcd.sh
+/home/admin/config.scripts/blitz.lcd.sh qr "${qrcodedata}"
 
 # show pairing info
 clear
@@ -49,11 +49,11 @@ whiptail --backtitle "Connecting Shango Mobile Wallet" \
 	 --no-button "show QR code" \
 	 --yesno "${msg}" 20 70
 if [ $? -eq 1 ]; then
-    /home/admin/XXdisplayQR.sh
+    /home/admin/config.scripts/blitz.lcd.sh qr-console "${qrcodedata}"
 fi
 
 # clean up
-./XXdisplayQRlcd_hide.sh
+/home/admin/config.scripts/blitz.lcd.sh hide
 shred qr.png 2> /dev/null
 rm -f qr.png 2> /dev/null
 shred qr.txt 2> /dev/null

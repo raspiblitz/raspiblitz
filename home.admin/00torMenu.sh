@@ -24,8 +24,14 @@ fi
 
 echo "Run dialog ..."
 echo "Installing the QR code generator (qrencode)"
-./XXaptInstall.sh qrencode
-./XXaptInstall.sh fbi
+
+# Make sure needed packages are installed
+if [ $(sudo dpkg-query -l | grep "ii  fbi" | wc -l) = 0 ]; then
+   sudo apt-get install fbi -y > /dev/null
+fi
+if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+   sudo apt-get install qrencode -y > /dev/null
+fi
 
 # BASIC MENU INFO
 HEIGHT=14

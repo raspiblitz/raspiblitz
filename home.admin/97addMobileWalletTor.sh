@@ -42,8 +42,9 @@ echo "Press ENTER to continue, CTRL+C to cancel."
 echo ""
 read key
 
-./XXdisplayQRlcd_hide.sh
+/home/admin/config.scripts/blitz.lcd.sh hide
 
+cd /home/admin
 # write QR code to image
 if [ $1 == zeus ]; then
   lndconnect --host=$(sudo cat /mnt/hdd/tor/lnd_REST/hostname) --port=8080 --image
@@ -51,7 +52,7 @@ elif [ $1 == zap ]; then
   lndconnect --host=$(sudo cat /mnt/hdd/tor/lnd_REST/hostname) --port=8080 --nocert --image
 fi
 # display qr code image on LCD
-./XXdisplayLCD.sh lndconnect-qr.png
+/home/admin/config.scripts/blitz.lcd.sh image /home/admin/lndconnect-qr.png
 # show pairing info dialog
 msg=""
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
@@ -71,7 +72,7 @@ if [ $? -eq 1 ]; then
 fi
 
 # clean up
-./XXdisplayQRlcd_hide.sh
+/home/admin/config.scripts/blitz.lcd.sh hide
 shred lndconnect-qr.png 2> /dev/null
 rm -f lndconnect-qr.png 2> /dev/null
 shred qr.txt 2> /dev/null

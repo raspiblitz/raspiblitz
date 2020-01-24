@@ -117,7 +117,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh REST
+  	  /home/admin/config.scripts/bonus.lndconnect.sh RPC
       exit 1;
     ;;
   ZAP_ANDROID)

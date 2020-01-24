@@ -61,23 +61,21 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-#  echo "******************************"
-#  echo "WIN"
-#  echo "******************************"
-#  echo "${result}"
 
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
   payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
-  echo -e "${payReq}" > qr.txt
-  ./XXdisplayQRlcd.sh
+  /home/admin/config.scripts/blitz.lcd.sh qr "${payReq}"
+
+  if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+   sudo apt-get install qrencode -y > /dev/null
+  fi
 
   echo
   echo "********************"
   echo "Here is your invoice"
   echo "********************"
   echo
-  ./XXaptInstall.sh qrencode
-  qrencode -t ANSI256 < /home/admin/qr.txt
+  qrencode -t ANSI256 "${payReq}"
   echo
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
   echo
@@ -97,8 +95,8 @@ else
       echo $result
       echo
       echo "Returning to menu - OK Invoice payed."
-      /home/admin/XXdisplayQRlcd_hide.sh
-      /home/admin/XXdisplayLCD.sh /home/admin/raspiblitz/pictures/ok.png
+      /home/admin/config.scripts/blitz.lcd.sh hide
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/ok.png
       sleep 2
       break
     fi
@@ -117,8 +115,6 @@ else
 
   done
 
-  /home/admin/XXdisplayQRlcd_hide.sh
-  shred qr.txt
-  rm -f qr.txt
+  /home/admin/config.scripts/blitz.lcd.sh hide
 
 fi
