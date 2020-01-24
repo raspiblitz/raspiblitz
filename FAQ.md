@@ -684,13 +684,14 @@ You can backup your channel and wallet data, make a complete fresh RaspiBlitz an
 
 ## Can I run the RaspiBlitz without a display/LCD?
 
-The display is one of the nice features of the RaspiBlitz but the raspberry can run without it. Maybe not all add-on feature could be used to the full extend, but you can get started without the LCD and even plug it on later. Enabling VNC provides a reasonable compromise.
+The display is one of the nice features of the RaspiBlitz but the raspberry can run without it. Maybe not all add-on feature could be used to the full extend, but you can get started without the LCD and even plug it on later.
 
-Normally with the LCD it's easy to see your local IP changes and you can get started quickly. Without it needs a bit more digging thru your network - you can find a good tutorial on that on the RaspiBolt tutorial (origin of RaspiBlitz):
+If you want to use the HDMI output you can place a file called `hdmi` on the `boot` section of the RaspiBlitz sd card ... just connect the sd card to your laptop, create that file and then boot it up in the RaspberryPi.
 
-https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#connecting-to-the-network
+If you are already logged in you can use on the console the commands:
 
-*Please Note: Without a LCD-Hat you cannot simply use the HDMI as alternative, because screen signal is routed to the GPIO pins. On how to switch that back manually - see [waveshare documentation](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)).*
+- `hdmi` --> to witch to HDMI
+- `lcd` --> to witch to LCD
 
 ## How do I set up VNC?
 
