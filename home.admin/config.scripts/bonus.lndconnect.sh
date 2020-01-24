@@ -20,7 +20,6 @@ servicePort="10009"
 useTOR=0
 extraparamter=""
 
-
 # 1. REST or RPC
 # determine service port from argument
 if [ "$1" == "RPC" ]; then
@@ -129,7 +128,7 @@ elif [ "${connector}" == "shango" ]; then
   datastring=$(echo -e "${host}:${port},\n$(xxd -p -c2000 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in /home/admin/.lnd/tls.cert -noout)")
 
   # display qr code on LCD
-  /home/admin/config.scripts/blitz.lcd.sh qr ${datastring}
+  /home/admin/config.scripts/blitz.lcd.sh qr "${datastring}"
 
 else
   echo "error='unkown connector'"
