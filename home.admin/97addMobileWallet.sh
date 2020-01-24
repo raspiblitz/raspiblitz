@@ -54,10 +54,10 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
 
 if [ "${runBehindTor}" = "on" ]; then
    # Options (available with TOR)
-  OPTIONS=(ZAP_IOS "Zap Wallet (iOS) TOR" \
-        ZAP_ANDROID "Zap Wallet (Android) TOR" \
-        ZEUS_IOS "Zeus Wallet (iOS) TOR" \
-        ZEUS_ANDROID "Zeus Wallet (Android) TOR"
+  OPTIONS=(ZAP_IOS "Zap Wallet (iOS) over TOR" \
+        ZAP_ANDROID "Zap Wallet (Android) over TOR" \
+        ZEUS_IOS "Zeus Wallet (iOS) over TOR" \
+        ZEUS_ANDROID "Zeus Wallet (Android) over TOR"
 	)
 fi
 
@@ -102,7 +102,7 @@ case $CHOICE in
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basc version\nOr join public beta test for latest features:\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 60
+		--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://testflight.apple.com/join/P32C380R"
 	  fi
