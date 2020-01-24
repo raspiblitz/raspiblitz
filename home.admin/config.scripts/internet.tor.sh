@@ -267,21 +267,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
     sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
     sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+    sudo chown -R debian-tor:debian-tor /mnt/hdd/tor 
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
 DataDirectory /mnt/hdd/tor/sys
 PidFile /mnt/hdd/tor/sys/tor.pid
 
-SafeLogging 0
+SafeLogging 1
 Log notice stdout
 Log notice file /mnt/hdd/tor/notice.log
 Log info file /mnt/hdd/tor/info.log
 
 RunAsDaemon 1
-User bitcoin
-PortForwarding 1
+User debian-tor
 ControlPort 9051
 SocksPort 9050
 ExitRelay 0
@@ -309,7 +308,6 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/
     echo ""
 
     # NYX - Tor monitor tool
