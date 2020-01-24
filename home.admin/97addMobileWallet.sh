@@ -98,13 +98,17 @@ case $CHOICE in
       exit 1;
       ;;
   ZAP_IOS)
-      /home/admin/config.scripts/blitz.lcd.sh qr "https://testflight.apple.com/join/P32C380R"
+      appstoreLink="https://testflight.apple.com/join/elC3EXAK"
+      if [ "${chain}" == "test" ]; then
+	    appstoreLink="https://testflight.apple.com/join/P32C380R"
+	  fi
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\nhttps://testflight.apple.com/join/P32C380R\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
+		--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://testflight.apple.com/join/P32C380R"
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh RPC
