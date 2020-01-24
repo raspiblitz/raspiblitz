@@ -2,13 +2,14 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "flip/rotate the LCD screen"
- echo "blitz.lcd.sh rotate [on|off]"
- echo "blitz.lcd.sh image [path]"
- echo "blitz.lcd.sh qr [datastring]"
- echo "blitz.lcd.sh qr-console [datastring]"
- echo "blitz.lcd.sh hide"
- exit 1
+  echo "flip/rotate the LCD screen"
+  echo "blitz.lcd.sh rotate [on|off]"
+  echo "blitz.lcd.sh image [path]"
+  echo "blitz.lcd.sh qr [datastring]"
+  echo "blitz.lcd.sh qr-console [datastring]"
+  echo "blitz.lcd.sh hide"
+  echo "blitz.lcd.sh hdmi [on|off]"
+  exit 1
 fi
 
 # load config
@@ -158,6 +159,36 @@ if [ "${command}" == "hide" ]; then
   shred /home/admin/qr.png 2> /dev/null
   rm -f /home/admin/qr.png 2> /dev/null
   exit 0
+fi
+
+###################
+# HDMI
+# see https://github.com/rootzoll/raspiblitz/issues/767
+# see https://www.waveshare.com/wiki/3.5inch_RPi_LCD_%28A%29
+###################
+
+if [ "${command}" == "hdmi" ]; then
+
+  # make sure that the config entry exists
+  if [ ${#lcd2hdmi} -eq 0 ]; then
+    echo "lcd2hdmi=off" >> /mnt/hdd/raspiblitz.conf
+  fi
+
+  secondParameter=$2
+  if [ "${secondParameter}" == "on" ]; then
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /mnt/hdd/raspiblitz.conf
+    cd /home/admin/LCD-show
+    ./LCD-hdmi
+  elif [ "${secondParameter}" == "off" ]; then
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /mnt/hdd/raspiblitz.conf
+    cd /home/admin/LCD-show
+    ./LCD35-show
+  else
+    echo "error='unkown second parameter'"
+    exit 1
+  fi
+  exit 0
+
 fi
 
 # unknown command
