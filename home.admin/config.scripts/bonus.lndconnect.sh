@@ -104,7 +104,7 @@ if [ "${runBehindTor}" == "on" ]; then
     port="8080"
   fi
   # TOR does not need the TLS cert
-  extraparamter="--nocert"
+  #extraparamter="--nocert"
   echo "# port ${port} on host ${host}"
 fi
 
