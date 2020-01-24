@@ -43,6 +43,13 @@ when your are on the same LOCAL NETWORK?
   esac
 fi
 
+if [ "${chain}" == "test" ]; then
+  whiptail --title " Testnet Notice " --msgbox "You are running your node in testnet.
+Not all mobile Apps may support running in testnet.
+For full support switch to mainnet.
+" 9 55
+fi
+
 # Options (available without TOR)
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
@@ -72,36 +79,35 @@ case $CHOICE in
   	exit 1;
     ;;
 	SHANGO_IOS)
-	  /home/admin/config.scripts/blitz.lcd.sh qr "https://testflight.apple.com/join/WwCjFnS8"
+	  appstoreLink="https://testflight.apple.com/join/WwCjFnS8"
+	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Shango on your iOS device" \
-			--yes-button "continue" \
-		  --no-button "link as QR code" \
-		  --yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/WwCjFnS8\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+	    --yes-button "continue" \
+		--no-button "link as QR code" \
+		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://testflight.apple.com/join/WwCjFnS8"
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
       ./97addMobileWalletShango.sh
 	  exit 1;
 	  ;;
 	SHANGO_ANDROID)
-	  /home/admin/config.scripts/blitz.lcd.sh qr "https://play.google.com/store/apps/details?id=com.shango"
+	  appstoreLink="https://play.google.com/store/apps/details?id=com.shango"
+	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Shango on your Android Phone" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\nhttps://play.google.com/apps/testing/com.shango\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue" 10 60
+		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue" 10 60
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://play.google.com/store/apps/details?id=com.shango"
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
       ./97addMobileWalletShango.sh
       exit 1;
       ;;
   ZAP_IOS)
-      appstoreLink="https://testflight.apple.com/join/elC3EXAK"
-      if [ "${chain}" == "test" ]; then
-	    appstoreLink="https://testflight.apple.com/join/P32C380R"
-	  fi
+      appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
 		--yes-button "continue" \
@@ -115,39 +121,42 @@ case $CHOICE in
       exit 1;
     ;;
   ZAP_ANDROID)
-      /home/admin/config.scripts/blitz.lcd.sh qr "https://play.google.com/store/apps/details?id=zapsolutions.zap"
+      appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=zapsolutions.zap\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://play.google.com/store/apps/details?id=zapsolutions.zap"
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh RPC
       exit 1;
     ;;
   ZEUS_IOS)
-      /home/admin/config.scripts/blitz.lcd.sh qr "https://testflight.apple.com/join/gpVFzEHN"
+      appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zeus on your iOS device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\nhttps://testflight.apple.com/join/gpVFzEHN\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.lcd.sh qr-console "https://testflight.apple.com/join/gpVFzEHN"
+		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh REST
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      /home/admin/config.scripts/blitz.lcd.sh qr "https://play.google.com/store/apps/details?id=com.zeusln.zeus"
+      appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Shango on your Android Phone" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\nhttps://play.google.com/store/apps/details?id=com.zeusln.zeus\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console "https://play.google.com/store/apps/details?id=com.zeusln.zeus"
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh REST
