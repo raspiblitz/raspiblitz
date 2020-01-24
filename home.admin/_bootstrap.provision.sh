@@ -63,6 +63,20 @@ fi
 sudo chmod 777 ${configFile}
 source ${configFile}
 
+# check if the system was configured for HDMI and needs switch 
+# keep as one of the first so that user can see video output
+if [ "${lcd2hdmi}" == "on" ]; then
+  echo "RaspiBlitz has config to run with HDMI video outout." >> ${logFile}
+  # check that raspiblitz.info shows that confing script was not run yet
+  switchScriptNotRunYet=$(sudo cat /home/admin/raspiblitz.info | grep -c "lcd2hdmi=off")
+  if [ ${switchScriptNotRunYet} -eq 1 ]; then
+    echo "--> Switching to HDMI video output & rebooting" >> ${logFile}
+    sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  else
+    echo "OK RaspiBlitz was already switched to HDMI output." >> ${logFile}
+  fi
+fi
+
 ##########################
 # BASIC SYSTEM SETTINGS
 ##########################
