@@ -33,13 +33,13 @@ function repair() {
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
 }
 
 # command: lcd
 function lcd() {
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  /home/admin/config.scripts/blitz.lcd.sh hdmi off
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi off
 }
 
 # command: manage
