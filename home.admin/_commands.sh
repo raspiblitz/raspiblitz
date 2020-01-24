@@ -30,6 +30,18 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: hdmi
+function hdmi() {
+  echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
+  /home/admin/config.scripts/blitz.lcd.sh hdmi on
+}
+
+# command: lcd
+function lcd() {
+  echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
+  /home/admin/config.scripts/blitz.lcd.sh hdmi off
+}
+
 # command: manage
 function manage() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then

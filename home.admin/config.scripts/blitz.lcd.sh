@@ -170,17 +170,20 @@ fi
 if [ "${command}" == "hdmi" ]; then
 
   # make sure that the config entry exists
-  if [ ${#lcd2hdmi} -eq 0 ]; then
-    echo "lcd2hdmi=off" >> /mnt/hdd/raspiblitz.conf
+  
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null| grep -c 'lcd2hdmi=') -eq 0 ]; then
+    echo "lcd2hdmi=off" >> /mnt/hdd/raspiblitz.conf 2>/dev/null
   fi
 
   secondParameter=$2
   if [ "${secondParameter}" == "on" ]; then
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /mnt/hdd/raspiblitz.conf
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /home/admin/raspiblitz.info 2>/dev/null
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /mnt/hdd/raspiblitz.conf 2>/dev/null
     cd /home/admin/LCD-show
     ./LCD-hdmi
   elif [ "${secondParameter}" == "off" ]; then
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /mnt/hdd/raspiblitz.conf
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /home/admin/raspiblitz.info 2>/dev/null
+    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /mnt/hdd/raspiblitz.conf 2>/dev/null
     cd /home/admin/LCD-show
     ./LCD35-show
   else

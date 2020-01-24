@@ -39,6 +39,7 @@ network=""
 chain=""
 setupStep=0
 fsexpanded=0
+lcd2hdmi="off"
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
@@ -50,6 +51,7 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
+echo "lcd2hdmi=${lcd2hdmi}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
@@ -136,6 +138,22 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "DONE wait 6 secs ... one more reboot needed ... "
   sudo shutdown -r now
   sleep 100
+fi
+
+################################
+# FORCED SWITCH TO HDMI
+# if a file called 'hdmi' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+forceHDMIoutput=$(sudo ls /boot/hdmi 2>/dev/null | grep -c hdmi)
+if [ ${forceHDMIoutput} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/hdmi
+  # switch to HDMI what will trigger reboot
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  exit 0
 fi
 
 ################################
