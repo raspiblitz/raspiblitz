@@ -80,7 +80,7 @@ case $CHOICE in
             exit 1;
             ;;
         NYX)
-            sudo -u bitcoin nyx
+            sudo -u debian-tor nyx
             ./00mainMenu.sh
             ;;
         ZEUS)
