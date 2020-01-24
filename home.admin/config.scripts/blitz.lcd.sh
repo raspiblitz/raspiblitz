@@ -89,7 +89,7 @@ fi
 if [ "${command}" == "image" ]; then
   
   imagePath=$2
-  if [${#imagePath} -eq 0 ]; then
+  if [ ${#imagePath} -eq 0 ]; then
     echo "error='missing second parameter - see help'"
     exit 1
   else
