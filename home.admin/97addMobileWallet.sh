@@ -90,7 +90,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-      /home/admin/config.scripts/bonus.lndconnect.sh RPC SHANGO
+      /home/admin/config.scripts/bonus.lndconnect.sh shango-ios
 	  exit 1;
 	  ;;
 	SHANGO_ANDROID)
@@ -104,7 +104,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  /home/admin/config.scripts/bonus.lndconnect.sh RPC SHANGO
+	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android
       exit 1;
       ;;
   ZAP_IOS)
@@ -118,7 +118,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh RPC
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios
       exit 1;
     ;;
   ZAP_ANDROID)
@@ -132,7 +132,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh RPC
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android
       exit 1;
     ;;
   ZEUS_IOS)
@@ -146,7 +146,7 @@ case $CHOICE in
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh REST
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios
   	  exit 1;
   	;;
   ZEUS_ANDROID)
@@ -160,7 +160,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh REST
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android
   	  exit 1;
   	;;
   FULLY_NODED)

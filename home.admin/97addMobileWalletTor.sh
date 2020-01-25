@@ -16,7 +16,7 @@ fi
 /home/admin/config.scripts/bonus.go.sh
 
 # make sure lndconnect is installed
-/home/admin/config.scripts/bonus.lndconnect.sh
+/home/admin/config.scripts/bonus.lndconnect.sh install
 
 # get Go vars
 source /etc/profile
