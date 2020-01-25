@@ -40,8 +40,8 @@ fi
 #### MAKE SURE LNDCONNECT IS INSTALLED
 
 # check if it is installed
-# https://github.com/LN-Zap/lndconnect/commits/master
-commit=82d7103bb8c8dd3c8ae8de89e3bc061eef82bb8f
+# https://github.com/rootzoll/lndconnect
+commit=0de9946db8cb9bb66c3f2259ea2f4fa01517217f
 isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ]; then
   echo "# Installing lndconnect.."
@@ -50,8 +50,8 @@ if [ $isInstalled -eq 0 ]; then
   # get Go vars
   source /etc/profile
   # Install latest lndconnect from source:
-  go get -d github.com/LN-Zap/lndconnect
-  cd $GOPATH/src/github.com/LN-Zap/lndconnect
+  go get -d github.com/rootzoll/lndconnect
+  cd $GOPATH/src/github.com/rootzoll/lndconnect
   git checkout $commit
   make
 else
