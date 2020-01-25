@@ -44,7 +44,7 @@ fi
 # using own fork of lndconnet because of this commit to fix for better QR code:
 commit=e3aef66c89001cd35b31a0750ab2bd798bc8fcb5
 isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
-if [ $isInstalled -eq 0 ]; then
+if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   echo "# Installing lndconnect.."
   # make sure Go is installed
   /home/admin/config.scripts/bonus.go.sh
