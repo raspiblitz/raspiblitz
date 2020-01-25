@@ -18,6 +18,8 @@ hiddenService=$(sudo cat /mnt/hdd/tor/bitcoinrpc/hostname)
 quickConnect="btcstandup://$RPC_USER:$PASSWORD_B@$hiddenService:8332/?label=$hostname"
 echo ""
 echo "scan the QR Code with Fully Noded to connect to your node:"
+/home/admin/config.scripts/blitz.lcd.sh qr "${quickConnect}"
 qrencode -t ANSI256 $quickConnect
 echo "Press ENTER to return to the menu"
 read key
+/home/admin/config.scripts/blitz.lcd.sh hide
