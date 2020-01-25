@@ -61,7 +61,7 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
 
 if [ "${runBehindTor}" = "on" ]; then
    # Options (available with TOR)
-  OPTIONS=(ZAP_IOS "Zap Wallet (iOS) over TOR" \
+  OPTIONS=( #ZAP_IOS "Zap Wallet (iOS) over TOR" \
         ZAP_ANDROID "Zap Wallet (Android) over TOR" \
         ZEUS_IOS "Zeus Wallet (iOS) over TOR" \
         ZEUS_ANDROID "Zeus Wallet (Android) over TOR" \
