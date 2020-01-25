@@ -111,7 +111,7 @@ class RaspiBlitzInfo(object):
         """load config from file"""
         parser = ConfigParser()
 
-        log.info("loading RaspiBlitzInfo config from file: {}".format(self.abs_path))
+        log.debug("loading RaspiBlitzInfo config from file: {}".format(self.abs_path))
         with open(self.abs_path) as f:
             parser.read_string("[{}]\n".format(DEFAULTSECT) + f.read())
 
@@ -125,7 +125,6 @@ class RaspiBlitzInfo(object):
         self.state = get_str_clean(default_s, "state", self.state)
         self.undervoltage_reports = get_int_safe(default_s, "undervoltageReports", self.undervoltage_reports)
 
-        log.info("status --> {}".format(self.state))
 
 def get_int_safe(cp_section, key, default_value):
     """take a ConfigParser section, get key that might be string encoded int and return int"""

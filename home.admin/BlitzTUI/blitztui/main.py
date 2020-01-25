@@ -17,6 +17,7 @@ import qrcode
 from PyQt5.QtCore import Qt, QProcess, QThread, pyqtSignal, QCoreApplication, QTimer, QEventLoop
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
+from blitztui.file_logger import setup_logging
 from blitztui.client import ReadOnlyStub, InvoiceStub
 from blitztui.client import check_lnd, check_lnd_channels
 from blitztui.client import check_invoice_paid, create_invoice, get_node_uri
@@ -142,8 +143,8 @@ class AppWindow(QMainWindow):
         self.show()
 
     def start_info_lcd(self, pause=12):
-        # if system has been running for more than 90 seconds then skip pause
-        if self.uptime > 90:
+        # if system has been running for more than 180 seconds then skip pause
+        if self.uptime > 180:
             pause = 0
 
         process = QProcess(self)
@@ -177,7 +178,7 @@ class AppWindow(QMainWindow):
         if not os.path.exists(rb_info_abs_path):
             log.warning("file does not exist: {}".format(rb_info_abs_path))
 
-        log.info("init lnd.conf")
+        log.debug("init lnd.conf")
         lnd_cfg_valid = False
         self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
         try:
@@ -186,7 +187,7 @@ class AppWindow(QMainWindow):
         except Exception as err:
             pass
 
-        log.info("init raspiblitz.conf")
+        log.debug("init raspiblitz.conf")
         rb_cfg_valid = False
         self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
         try:
@@ -195,7 +196,7 @@ class AppWindow(QMainWindow):
         except Exception as err:
             pass
 
-        log.info("init raspiblitz.info")
+        log.debug("init raspiblitz.info")
         rb_info_valid = False
         self.rb_info = RaspiBlitzInfo(rb_info_abs_path)
         try:
@@ -625,7 +626,7 @@ class BeatThread(QThread):
         self.beat_timer.timeout.connect(self.tick)
 
     def tick(self):
-        # log.debug("beat")
+        log.info("beat")
         self.signal.emit(0)
 
     def run(self):
@@ -661,8 +662,17 @@ Keep on stacking SATs..! :-D"""
                         help="print version", action="version",
                         version=__version__)
 
+    parser.add_argument('-d', '--debug', help="enable debug logging", action="store_true")
+
     # parse args
     args = parser.parse_args()
+
+    if args.debug:
+        setup_logging(log_level="DEBUG")
+    else:
+        setup_logging()
+
+    log.info("Starting BlitzTUI v{}".format(__version__))
 
     # initialize app
     app = QApplication(sys.argv)
