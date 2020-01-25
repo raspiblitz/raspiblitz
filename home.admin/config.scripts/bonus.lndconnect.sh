@@ -41,7 +41,8 @@ fi
 
 # check if it is installed
 # https://github.com/rootzoll/lndconnect
-commit=0de9946db8cb9bb66c3f2259ea2f4fa01517217f
+# using own fork of lndconnet because of this commit to fix for better QR code:
+commit=e3aef66c89001cd35b31a0750ab2bd798bc8fcb5
 isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ]; then
   echo "# Installing lndconnect.."
