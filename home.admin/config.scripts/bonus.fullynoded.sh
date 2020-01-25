@@ -22,4 +22,7 @@ echo "scan the QR Code with Fully Noded to connect to your node:"
 qrencode -t ANSI256 $quickConnect
 echo "Press ENTER to return to the menu"
 read key
+
+# clean up
 /home/admin/config.scripts/blitz.lcd.sh hide
+clear
