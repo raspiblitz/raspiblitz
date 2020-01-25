@@ -22,6 +22,9 @@ fi
 
 echo "_background.sh STARTED"
 
+# global vars
+blitzTUIHeartBeatLine=""
+
 counter=0
 while [ 1 ]
 do
@@ -152,7 +155,30 @@ do
 
   fi
 
+  ###############################
+  # BlitzTUI Monitoring
+  ###############################
 
+  # check every 30sec
+  recheckBlitzTUI=$(($counter % 30))
+  if [ ${recheckBlitzTUI} -eq 1 ]; then
+    echo "BlitzTUI Monitoring ..."
+    latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
+    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
+      echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
+      echo "latestHeartBeatLine(${latestHeartBeatLine})"
+      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
+        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+        sudo init 3 ; sleep 2 ; sudo init 5
+      else
+        echo "OK - Beat changes since last period - BlitzTUI is alive"
+      fi
+    else
+      echo "blitzTUIHeartBeatLine is empty - skipping check"
+    fi
+    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
+  fi
+  
   ###############################
   # SCB Monitoring
   ###############################
