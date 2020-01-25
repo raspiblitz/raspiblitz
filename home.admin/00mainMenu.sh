@@ -163,16 +163,8 @@ case $CHOICE in
             read key
             ./00mainMenu.sh
             ;;
-        SWITCH)
-            sudo ./95switchMainTest.sh
-            echo "Press ENTER to return to main menu."
-            read key
-            ./00mainMenu.sh
-            ;;
         MOBILE)
             ./97addMobileWallet.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ./00mainMenu.sh
             ;;
         EXPORT)
