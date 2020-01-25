@@ -81,7 +81,7 @@ EOF
 #!/bin/sh
 
 unset QT_QPA_PLATFORMTHEME
-/home/admin/python3-env-lnd/bin/blitz-tui
+/home/admin/python3-env-lnd/bin/blitz-tui --debug
 EOF
   sudo chmod a+x /home/pi/autostart.sh
   sudo chown pi:pi /home/pi/autostart.sh

@@ -7,7 +7,7 @@ import sys
 IS_WIN32_ENV = sys.platform == "win32"
 
 
-def setup_logging(default_path=os.path.abspath(os.path.expanduser('~/.blitz-tui.json'))):
+def setup_logging(default_path=os.path.abspath(os.path.expanduser('~/.blitz-tui.json')), log_level="INFO"):
     """Setup logging configuration"""
     path = default_path
     if os.path.exists(path):
@@ -33,7 +33,7 @@ def setup_logging(default_path=os.path.abspath(os.path.expanduser('~/.blitz-tui.
                                   'formatter': 'extended',
                                   'stream': 'ext://sys.stdout'},
                       'file_handler': {'class': 'logging.handlers.RotatingFileHandler',
-                                       'level': 'DEBUG',
+                                       'level': log_level,
                                        'formatter': 'extended',
                                        'filename': log_file,
                                        'maxBytes': 10485760,

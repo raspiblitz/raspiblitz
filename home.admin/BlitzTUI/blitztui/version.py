@@ -4,5 +4,5 @@
 # 3) we can import it into your module module
 """
 
-__version_info__ = ('0', '44', '0')
+__version_info__ = ('0', '45', '0')
 __version__ = '.'.join(__version_info__)
