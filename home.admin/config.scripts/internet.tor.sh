@@ -266,6 +266,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
     sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
     sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lndrest8080 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/bitcoinrpc 2>/dev/null
     sudo chmod -R 700 /mnt/hdd/tor
     sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
     cat > ./torrc <<EOF
@@ -294,9 +296,13 @@ CookieAuthFileGroupReadable 1
 HiddenServiceDir /mnt/hdd/tor/web80/
 HiddenServicePort 80 127.0.0.1:80
 
+# Hidden Service for WEB ADMIN INTERFACE
+HiddenServiceDir /mnt/hdd/tor/bitcoinrpc/
+HiddenServicePort 8332 127.0.0.1:8332
+ 
 # Hidden Service for LND RPC
 HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
-HiddenServicePort 80 127.0.0.1:10009
+HiddenServicePort 10009 127.0.0.1:10009
 
 # Hidden Service for LND REST
 HiddenServiceDir /mnt/hdd/tor/lndrest8080/

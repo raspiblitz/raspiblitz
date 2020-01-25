@@ -64,7 +64,8 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS=(ZAP_IOS "Zap Wallet (iOS) over TOR" \
         ZAP_ANDROID "Zap Wallet (Android) over TOR" \
         ZEUS_IOS "Zeus Wallet (iOS) over TOR" \
-        ZEUS_ANDROID "Zeus Wallet (Android) over TOR"
+        ZEUS_ANDROID "Zeus Wallet (Android) over TOR" \
+		FULLY_NODED "Fully Noded (IOS) over TOR"
 	)
 fi
 
@@ -160,6 +161,20 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh REST
+  	  exit 1;
+  	;;
+  FULLY_NODED)
+      appstoreLink="https://testflight.apple.com/join/PuFnSqgi"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+	  whiptail --title "Install Fully Noded on your iOS device" \
+		--yes-button "continue" \
+		--no-button "link as QR code" \
+		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+	  if [ $? -eq 1 ]; then
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
+  	  /home/admin/config.scripts/bonus.fullynoded.sh
   	  exit 1;
   	;;
 esac
