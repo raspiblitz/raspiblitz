@@ -170,8 +170,6 @@ do
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
         sudo init 3 ; sleep 2 ; sudo init 5
-      else
-        # echo "OK - Beat changes since last period - BlitzTUI is alive"
       fi
     else
       echo "blitzTUIHeartBeatLine is empty - skipping check"
