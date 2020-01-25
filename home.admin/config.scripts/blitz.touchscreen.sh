@@ -104,8 +104,6 @@ EOF
 
   # rotate touchscreen based on if LCD is rotated
   if [ "${lcdrotate}" = "1" ]; then
-    echo "LCD is rotated into default - no touchscreen rotate"
-  else
     echo "Activate Touchscreen Rotate"
     cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 Section "InputClass"
@@ -116,6 +114,8 @@ Section "InputClass"
         Driver "libinput"
 EndSection
 EOF
+  else
+    echo "LCD is rotated into default - no touchscreen rotate"
   fi
 
   # mark touchscreen as switched ON in config
