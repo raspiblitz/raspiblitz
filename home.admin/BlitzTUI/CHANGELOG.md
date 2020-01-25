@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.45.0] - 2020-01-25
+### Added
+- clean up log statements
+- add debug flag
+
 ## [0.44.0] - 2019-12-30
 ### Added
 - make sure to close LN RPC channels
