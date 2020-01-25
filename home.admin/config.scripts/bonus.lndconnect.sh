@@ -97,7 +97,7 @@ elif [ "${targetWallet}" = "zap-android" ]; then
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
   connector="lndconnect"
-  supportsTOR=1
+  supportsTOR=0
   port="8080"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
@@ -122,7 +122,6 @@ else
   echo "error='unknown target wallet'"
   exit 1
 fi
-
 
 #### ADAPT PARAMETERS BASED RASPIBLITZ CONFIG
 
