@@ -50,17 +50,29 @@ if [ "$1" = "status" ]; then
     localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "publicIP='${publicIP}'"
-    echo "port='50001'"
+    echo "portTCP='50001'"
     localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50001 (LISTEN)')
-    echo "localPortActive=${localPortRunning}"
+    echo "localTCPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that somethingis answering on that port
-      echo "publicPortAnswering=1"
+      echo "publicTCPPortAnswering=1"
     else
       # no answere on that port
-      echo "publicPortAnswering=0"
+      echo "publicTCPPortAnswering=0"
     fi
+    echo "portHTTPS='50002'"
+    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50002 (LISTEN)')
+    echo "localHTTPSPortActive=${localPortRunning}"
+    publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that somethingis answering on that port
+      echo "publicHTTPSPortAnswering=1"
+    else
+      # no answere on that port
+      echo "publicHTTPSPortAnswering=0"
+    fi
+
 
   else
     echo "isSynced=0"
