@@ -72,7 +72,14 @@ if [ "$1" = "status" ]; then
       # no answere on that port
       echo "publicHTTPSPortAnswering=0"
     fi
-
+    # add TOR info
+    if [ "${runBehindTor}" == "on" ]; then
+      echo "TORrunning=1"
+      TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+      echo "TORaddress='${TORaddress}'"
+    else
+      echo "TORrunning=0"
+    fi
 
   else
     echo "isSynced=0"
@@ -119,7 +126,7 @@ This can take multiple hours.
         STATUS "ElectRS Status Info"
 	)
 
-  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 8 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 8 50  "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
 
   case $CHOICE in
@@ -133,11 +140,23 @@ This can take multiple hours.
     echo "- deavtivate automatic server selection"
     echo "- as manual server set '${localIP}' & '${portHTTPS}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
+    echo 
+    echo "To start directly from laptop terminal use:"
+    echo "electrum --oneserver --server ${localIP}:${portHTTPS}:s"
+    if [ ${TORrunning} -eq 1 ]; then
+      echo ""
+      echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
+      echo "${TORaddress}"
+      echo "To connect through TOR open the Tor Browser and start with the options:" 
+      echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${TORaddress}
+    fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
     echo "https://github.com/rootzoll/raspiblitz"
     echo 
     echo "Press ENTER to get back to main menu."
+    /home/admin/config.scripts/blitz.lcd.sh hide
     read key
     ;;
     STATUS)
@@ -396,25 +415,6 @@ WantedBy=multi-user.target
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001    
-    
-    TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-    if [ -z "$TOR_ADDRESS" ]; then
-      echo "Waiting for the Hidden Service"
-      sleep 10
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-      if [ -z "$TOR_ADDRESS" ]; then
-        echo " FAIL - The Hidden Service address could not be found - Tor error?"
-        exit 1
-      fi
-    fi    
-    echo ""
-    echo "***"
-    echo "The Tor Hidden Service address for electrs is:"
-    echo "$TOR_ADDRESS"
-    echo "Electrum wallet: to connect through Tor open the Tor Browser and start with the options:" 
-    echo "\`electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150\`"
-    echo "***"
-    echo "" 
   fi
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
@@ -422,8 +422,7 @@ WantedBy=multi-user.target
   # run every 10 min by _background.sh
   
   echo ""
-  echo "To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
-  echo "Electrum wallet: start with the options \`electrum --oneserver --server RaspiBlitz_IP:50002:s\`"
+  echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo ""
   
   exit 0
@@ -438,7 +437,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 
-    echo "*** REMOVING ELECTRS ***"
+    echo "#*** REMOVING ELECTRS ***"
 
     sudo systemctl stop electrs
     sudo systemctl disable electrs
@@ -450,15 +449,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
 
-    # delete also db (because in case HDD is full, deactivating should free data)
-    sudo rm -rf /mnt/hdd/app-storage/electrs/
+    
+    if [ "$2" == "keepindex" ]; then
+      echo "# keeping index db"
+    else
+      # delete also db by default (because in case HDD is full, deactivating should free data)
+      sudo rm -rf /mnt/hdd/app-storage/electrs/
+    fi
 
-    echo "OK ElectRS removed."
+    echo "# OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
     /home/admin/config.scripts/bonus.electrsexplorer.sh
   else 
-    echo "ElectRS is not installed."
+    echo "# ElectRS is not installed."
   fi
   exit 0
 fi
