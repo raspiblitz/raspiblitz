@@ -42,8 +42,8 @@ if [ "$1" = "status" ]; then
       echo "isSynced=1"
     else
       echo "isSynced=0"
+      echo "infoSync='Syncing / Building Index (please wait)'"
     fi
-    echo "infoSync='Syncing / Building Index (please wait)'"
   else
     echo "isSynced=0"
   fi
