@@ -171,7 +171,7 @@ if [ "$1" = "calibrate" ]; then
   if [ "$2" == "norestart" ]; then
     echo "# skipping touchscreen restart"
   else
-    echo "# retstarting touchscreen"
+    echo "# restarting touchscreen"
     sudo init 3
     sleep 3
     sudo init 5
