@@ -144,9 +144,23 @@ fi
 ###################
 
 if [ "$1" = "calibrate" ]; then
+  
+  # run calibrate screen
   echo "# calibrating touchscreen ..."
+  sudo rm /tmp/99-calibration.conf 2>/dev/null
   sudo -u pi DISPLAY=:0.0 xinput_calibrator --output-filename /tmp/99-calibration.conf
-  sudo cp /tmp/99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+  
+  # check if calibration was done of user
+  calibrationDone=$(sudo ls /tmp/99-calibration.conf 2>/dev/null | grep -c "99-calibration.conf")
+  if [ ${calibrationDone} -eq 0 ]; then
+    echo "error='aborted'"
+    exit 1
+  fi
+
+  # copy the results over as configuration
+  sudo mv /tmp/99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+
+  # restart touchscreen with new calibration
   if [ "$2" == "norestart" ]; then
     echo "# skipping touchscreen restart"
   else
@@ -155,6 +169,7 @@ if [ "$1" = "calibrate" ]; then
     sleep 3
     sudo init 5
   fi
+  
   echo "# OK done"
   exit 0
 fi
