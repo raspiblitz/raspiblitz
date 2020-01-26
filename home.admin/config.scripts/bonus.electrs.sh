@@ -160,7 +160,6 @@ This can take multiple hours.
     /home/admin/config.scripts/blitz.lcd.sh hide
     ;;
     STATUS)
-    echo "######## Electrum Rust Server Status Info ########"
     sudo /home/admin/config.scripts/bonus.electrs.sh status
     echo 
     echo "Press ENTER to get back to main menu."

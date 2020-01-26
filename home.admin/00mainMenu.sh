@@ -40,7 +40,10 @@ if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
 if [ "${lndmanage}" == "on" ]; then
-  OPTIONS+=(lndmanage "Electrum Rust Server")  
+  OPTIONS+=(LNDMANAGE "LND Manage Info")  
+fi
+if [ "${lndmanage}" == "on" ]; then
+  OPTIONS+=(LOOP "Loop In/Out Info")  
 fi
 
 # Basic Options
@@ -133,8 +136,12 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.electrs.sh menu
             ./00mainMenu.sh
             ;;
-        lndmanage)
+        LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ./00mainMenu.sh
+            ;;
+        LOOP)
+            /home/admin/config.scripts/bonus.loop.sh menu
             ./00mainMenu.sh
             ;;
         lnchannels)
