@@ -431,6 +431,9 @@ if [ "${touchscreen}" != "${choice}" ]; then
   echo "Touchscreen Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/blitz.touchscreen.sh ${choice}
+  if [ "${choice}" == "1" ]; then
+    dialog --title 'Touchscreen Activated' --msgbox 'Touchscreen was activated - will reboot.\n\nAfter reboot use the SCREEN option in main menu to calibrate the touchscreen.' 9 48
+  fi
   needsReboot=1
 else
   echo "Touchscreen Setting unchanged."
