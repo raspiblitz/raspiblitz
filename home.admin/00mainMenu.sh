@@ -50,10 +50,6 @@ OPTIONS+=(INFO "RaspiBlitz Status Screen" \
   CASHOUT "Remove Funds from on-chain Wallet"
 )
 
-if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Tor Service options")  
-fi
-
 # dont offer lnbalance/lnchannels on testnet
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances" \
@@ -64,6 +60,14 @@ fi
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")  
+fi
+
+if [ "${runBehindTor}" == "on" ]; then
+  OPTIONS+=(TOR "Tor Service options")  
+fi
+
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
 
 if [ "${touchscreen}" == "1" ]; then
@@ -122,6 +126,11 @@ case $CHOICE in
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
+            ./00mainMenu.sh
+            ;;
+        ELECTRS)
+            /home/admin/config.scripts/bonus.electrs.sh menu
+            ./00mainMenu.sh
             ;;
         lnchannels)
             lnchannels ${network}
