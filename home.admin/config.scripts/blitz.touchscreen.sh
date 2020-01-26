@@ -11,7 +11,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "STILL EXPERIMENTAL - NOT FINISHED"
  echo "the Blitz-Touch-User-Interface (BlitzTUI) feature"
- echo "blitz.touchscreen.sh [on|off|update]"
+ echo "blitz.touchscreen.sh [on|off|calibrate|update]"
  exit 1
 fi
 
@@ -125,6 +125,7 @@ EOF
   sudo sed -i 's/^touchscreen=.*/touchscreen=1/g' /mnt/hdd/raspiblitz.conf
 
   echo "OK - a restart is needed: sudo shutdown -r now"
+  exit 0
 
 fi
 
@@ -134,7 +135,28 @@ fi
 
 if [ "$1" = "update" ]; then
   echo "updating BlitzTUI (including python dependencies) ..."
-  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
+  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/
+  exit 0
+fi
+
+###################
+# CALIBRATE
+###################
+
+if [ "$1" = "calibrate" ]; then
+  echo "# calibrating touchscreen ..."
+  sudo -u pi DISPLAY=:0.0 xinput_calibrator --output-filename /tmp/99-calibration.conf
+  sudo cp /tmp/99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+  if [ "$2" == "norestart" ]; then
+    echo "# skipping touchscreen restart"
+  else
+    echo "# retstarting touchscreen"
+    sudo init 3
+    sleep 3
+    sudo init 5
+  fi
+  echo "# OK done"
+  exit 0
 fi
 
 ###################
@@ -173,5 +195,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i 's/^touchscreen=.*/touchscreen=0/g' /mnt/hdd/raspiblitz.conf
 
   echo "OK - a restart is needed: sudo shutdown -r now"
+  exit 0
 
 fi
