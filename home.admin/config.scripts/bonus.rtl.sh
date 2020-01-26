@@ -22,13 +22,15 @@ if [ "$1" = "menu" ]; then
   torInfo="\nActivate TOR to access the web interface from outside your local network."
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname)
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    torInfo="\nThe Hidden Service address for TOR Browser:\n${toraddress}"
+    torInfo="\nHidden Service address for TOR Browser (QR see LCD):\n${toraddress}"
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
   fi
   whiptail --title " Ride The Lightning (RTL)" --msgbox "Open the following URL in your local web browser:
 http://${localip}:3000
 Use your Password B to login.
 ${torInfo}
-" 12 56
+" 12 58
+  /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
 fi
 
