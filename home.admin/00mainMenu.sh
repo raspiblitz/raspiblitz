@@ -54,10 +54,6 @@ if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Tor Service options")  
 fi
 
-if [ "${touchscreen}" == "1" ]; then
-  OPTIONS+=(SCREEN "Touchscreen Calibration")  
-fi
-
 # dont offer lnbalance/lnchannels on testnet
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances" \
@@ -68,6 +64,10 @@ fi
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")  
+fi
+
+if [ "${touchscreen}" == "1" ]; then
+  OPTIONS+=(SCREEN "Touchscreen Calibration")  
 fi
 
 # final Options
