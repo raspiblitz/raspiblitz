@@ -126,7 +126,7 @@ This can take multiple hours.
         STATUS "ElectRS Status Info"
 	)
 
-  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 8 50  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 10 50 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
 
   case $CHOICE in
