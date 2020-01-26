@@ -57,7 +57,8 @@ fi
 # dont offer lnbalance/lnchannels on testnet
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances" \
-  lnchannels "Lightning Channel List")  
+  lnchannels "Lightning Channel List" \
+  lnfwdreport "Lightning Forwarding Events Report")  
 fi
 
 # Depending Options
@@ -117,6 +118,12 @@ case $CHOICE in
             ;;
         lnchannels)
             lnchannels ${network}
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        lnfwdreport)
+            ./XXlnfwdreport.sh 
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
