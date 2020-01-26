@@ -29,7 +29,7 @@ if [ "$1" = "menu" ]; then
 http://${localip}:3000
 Use your Password B to login.
 ${torInfo}
-" 12 58
+" 12 64
   echo "please wait ..."
   /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
