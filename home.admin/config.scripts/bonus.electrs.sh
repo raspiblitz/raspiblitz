@@ -149,7 +149,7 @@ This can take multiple hours.
       echo "${TORaddress}"
       echo "To connect through TOR open the Tor Browser and start with the options:" 
       echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${TORaddress}
+      /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
     fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
