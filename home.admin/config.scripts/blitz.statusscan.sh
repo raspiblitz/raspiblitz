@@ -248,6 +248,20 @@ if [ ${lndRunning} -eq 1 ]; then
 
 fi
 
+# touchscreen statistics
+if [ "${touchscreen}" == "1" ]; then
+  echo "blitzTUIActive=1"
+  if [ ${#blitzTUIRestarts} -gt 0 ]; then
+    echo "blitzTUIRestarts=${blitzTUIRestarts}"
+  else
+    echo "blitzTUIRestarts=0"
+  fi
+else
+  echo "blitzTUIActive=0"
+  echo "blitzTUIRestarts=0"
+fi
+
+
 # check if online if problem with other stuff 
 
 # info on scan run time
