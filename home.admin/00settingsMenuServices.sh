@@ -322,6 +322,8 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
+      echo "waiting 10 secs .."
+      sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu
     else
       l1="!!! FAIL on RTL install !!!"

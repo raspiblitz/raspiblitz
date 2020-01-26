@@ -16,20 +16,18 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
-
 # show info menu
 if [ "$1" = "menu" ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  torInfo=""
+  torInfo="\nActivate TOR to access the web interface from outside your local network."
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname)
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    torInfo="The Hidden Service address for TOR Browser:\n${toraddress}"
+    torInfo="\nThe Hidden Service address for TOR Browser:\n${toraddress}"
   fi
-  whiptail --title " Ride The Lightning (RTL)" --msgbox "
-Open the following URL in your local web browser:
+  whiptail --title " Ride The Lightning (RTL)" --msgbox "Open the following URL in your local web browser:
 http://${localip}:3000
-Use your Password B to login.\n
-${toraddress}
+Use your Password B to login.
+${torInfo}
 " 12 56
   exit 0
 fi
@@ -139,23 +137,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # correct old Hidden Service with port
     sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
-
-    TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-    if [ -z "$TOR_ADDRESS" ]; then
-      echo "Waiting for the Hidden Service"
-      sleep 10
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-        if [ -z "$TOR_ADDRESS" ]; then
-          echo " FAIL - The Hidden Service address could not be found - Tor error?"
-          exit 1
-        fi
-    fi    
-    echo ""
-    echo "***"
-    echo "The Tor Hidden Service address for RTL is:"
-    echo "$TOR_ADDRESS"
-    echo "***"
-    echo "" 
   fi
   exit 0
 fi
