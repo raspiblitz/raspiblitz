@@ -20,7 +20,7 @@ fi
 if [ "$1" = "menu" ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   torInfo="\nActivate TOR to access the web interface from outside your local network."
-  toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname)
+  toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     torInfo="\nHidden Service address for TOR Browser (QR see LCD):\n${toraddress}"
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
@@ -30,6 +30,7 @@ http://${localip}:3000
 Use your Password B to login.
 ${torInfo}
 " 12 58
+  echo "please wait ..."
   /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
 fi

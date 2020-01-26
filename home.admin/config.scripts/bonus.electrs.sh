@@ -413,7 +413,7 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001    
+    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
