@@ -39,6 +39,9 @@ fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
+if [ "${lndmanage}" == "on" ]; then
+  OPTIONS+=(lndmanage "Electrum Rust Server")  
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -128,6 +131,10 @@ case $CHOICE in
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ./00mainMenu.sh
+            ;;
+        lndmanage)
+            /home/admin/config.scripts/bonus.lndmanage.sh menu
             ./00mainMenu.sh
             ;;
         lnchannels)
