@@ -35,26 +35,28 @@ if [ "${rtlWebinterface}" == "on" ]; then
   TITLE="Webinterface: http://${localip}:3000"
 fi
 
-# Basic Options
-OPTIONS+=(INFO "RaspiBlitz Status Screen" \
-  FUNDING "Fund your on-chain Wallet" \
-  CONNECT "Connect to a Peer" \
-  CHANNEL "Open a Channel with Peer" \
-  SEND "Pay an Invoice/PaymentRequest" \
-  RECEIVE "Create Invoice/PaymentRequest" \
-  SERVICES "Activate/Deactivate Services" \
-  MOBILE "Connect Mobile Wallet" \
-  EXPORT "Macaroons and TLS.cert" \
-  NAME "Change Name/Alias of Node" \
-  PASSWORD "Change Passwords" \
-  CASHOUT "Remove Funds from on-chain Wallet"
-)
-
-# dont offer lnbalance/lnchannels on testnet
-if [ "${chain}" = "main" ]; then
-  OPTIONS+=(lnbalance "Detailed Wallet Balances" \
-  lnchannels "Lightning Channel List")  
+# Put Activated Apps on top
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
+
+# Basic Options
+OPTIONS+=(INFO "RaspiBlitz Status Screen")
+OPTIONS+=(FUNDING "Fund your on-chain Wallet")
+OPTIONS+=(CONNECT "Connect to a Peer")
+OPTIONS+=(CHANNEL "Open a Channel with Peer")
+if [ "${chain}" = "main" ]; then
+  OPTIONS+=(lnbalance "Detailed Wallet Balances")
+  OPTIONS+=(lnchannels "Lightning Channel List")
+fi
+OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
+OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
+OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(MOBILE "Connect Mobile Wallet")
+OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+OPTIONS+=(NAME "Change Name/Alias of Node")
+OPTIONS+=(PASSWORD "Change Passwords")
+OPTIONS+=(CASHOUT "Remove Funds from LND")
 
 # Depending Options
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
@@ -64,10 +66,6 @@ fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Tor Service options")  
-fi
-
-if [ "${ElectRS}" == "on" ]; then
-  OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
 
 if [ "${touchscreen}" == "1" ]; then
