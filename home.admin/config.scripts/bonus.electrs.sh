@@ -91,7 +91,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get status
-  echo "# collecting status info ... (please wai)"
+  echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
   if [ ${serviceInstalled} -eq 0 ]; then
