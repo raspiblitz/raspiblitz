@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [status|on|off]"
+ echo "bonus.electrs.sh [on|off|status|menu]"
  exit 1
 fi
 
@@ -81,6 +81,33 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+if [ "$1" = "menu" ]; then
+
+  # get status
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+
+  # Options (available without TOR)
+  OPTIONS=( \
+        CONNECT "Connect" \
+        STATUS "Status"
+	)
+
+  CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  clear
+
+  case $CHOICE in
+    CONNECT)
+    echo "connect"
+    read key
+    ;;
+    STATUS)
+    echo "status"
+    read key
+    ;;
+  esac
+
+  exit 0
+fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
