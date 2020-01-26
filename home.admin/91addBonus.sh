@@ -5,6 +5,7 @@ cd
 cd /home/admin/assets
 chmod +x lnbalance.sh
 chmod +x lnchannels.sh
+chmod +x lnfwdreport.sh
 sudo cp lnbalance.sh /usr/local/bin/lnbalance
 sudo cp lnchannels.sh /usr/local/bin/lnchannels
 sudo cp lnfwdreport.sh /usr/local/bin/lnfwdreport
