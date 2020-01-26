@@ -54,6 +54,10 @@ if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Tor Service options")  
 fi
 
+if [ "${touchscreen}" == "1" ]; then
+  OPTIONS+=(SCREEN "Touchscreen Calibration")  
+fi
+
 # dont offer lnbalance/lnchannels on testnet
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances" \
@@ -114,6 +118,10 @@ case $CHOICE in
         TOR)
             ./00torMenu.sh
             ./00mainMenu.sh
+            ;;
+        SCREEN)
+            dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
+            /home/admin/config.scripts/blitz.touchscreen calibrate
             ;;
         lnchannels)
             lnchannels ${network}

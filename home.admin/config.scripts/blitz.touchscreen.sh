@@ -145,8 +145,15 @@ fi
 
 if [ "$1" = "calibrate" ]; then
   
+  # check that touchscreen is on
+  if [ "${touchscreen}" == "1" ]; then
+    echo "# calibrating touchscreen ..."
+    echo "error='not installed'"
+  else
+    exit 1
+  fi
+
   # run calibrate screen
-  echo "# calibrating touchscreen ..."
   sudo rm /tmp/99-calibration.conf 2>/dev/null
   sudo -u pi DISPLAY=:0.0 xinput_calibrator --output-filename /tmp/99-calibration.conf
   
@@ -169,7 +176,7 @@ if [ "$1" = "calibrate" ]; then
     sleep 3
     sudo init 5
   fi
-  
+
   echo "# OK done"
   exit 0
 fi
