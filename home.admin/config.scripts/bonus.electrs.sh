@@ -35,6 +35,7 @@ if [ "$1" = "status" ]; then
   fi
 
   if [ ${serviceRunning} -eq 1 ]; then
+
     # Experimental try to get sync Info
     syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
@@ -44,6 +45,23 @@ if [ "$1" = "status" ]; then
       echo "isSynced=0"
       echo "infoSync='Syncing / Building Index (please wait)'"
     fi
+
+    # check local IPv4 port
+    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    echo "localIP='${localIP}'"
+    echo "publicIP='${publicIP}'"
+    echo "port='50001'"
+    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50001 (LISTEN)')
+    echo "localPortActive=${localPortRunning}"
+    publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that somethingis answering on that port
+      echo "publicPortAnswering=1"
+    else
+      # no answere on that port
+      echo "publicPortAnswering=0"
+    fi
+
   else
     echo "isSynced=0"
   fi
