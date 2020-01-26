@@ -121,7 +121,7 @@ case $CHOICE in
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
-            /home/admin/config.scripts/blitz.touchscreen calibrate
+            /home/admin/config.scripts/blitz.touchscreen.sh calibrate
             ;;
         lnchannels)
             lnchannels ${network}
