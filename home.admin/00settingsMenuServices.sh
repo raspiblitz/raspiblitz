@@ -322,21 +322,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-        whiptail --title " Installed RTL " --msgbox "\
-Open the following URL in your local web browser and login with your PASSWORD B.\n
----> http://${localip}:3000 \n
-The Hidden Service address to be used in the Tor Browser is:\n
-${TOR_ADDRESS}
-" 14 66 
-      else
-        l1="Open the following URL in your local web browser"
-        l2="and login with your PASSWORD B."
-        l3="---> http://${localip}:3000"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
-      fi
+      /home/admin/config.scripts/bonus.rtl.sh menu
     else
       l1="!!! FAIL on RTL install !!!"
       l2="Try manual install on terminal after reboot with:"

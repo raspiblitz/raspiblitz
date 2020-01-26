@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch WebGUI RideTheLightning on or off"
- echo "bonus.rtl.sh [on|off]"
+ echo "bonus.rtl.sh [on|off|menu]"
  exit 1
 fi
 
@@ -16,6 +16,23 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+
+# show info menu
+if [ "$1" = "menu" ]; then
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  torInfo=""
+  toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname)
+  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+    torInfo="The Hidden Service address for TOR Browser:\n${toraddress}"
+  fi
+  whiptail --title " Ride The Lightning (RTL)" --msgbox "
+Open the following URL in your local web browser:
+http://${localip}:3000
+Use your Password B to login.\n
+${toraddress}
+" 12 56
+  exit 0
+fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then

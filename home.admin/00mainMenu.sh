@@ -36,14 +36,17 @@ if [ "${rtlWebinterface}" == "on" ]; then
 fi
 
 # Put Activated Apps on top
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(RTL "RTL Web Node Manager")  
+fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
 if [ "${lndmanage}" == "on" ]; then
-  OPTIONS+=(LNDMANAGE "LND Manage Info")  
+  OPTIONS+=(LNDMANAGE "LND Manage Script")  
 fi
 if [ "${lndmanage}" == "on" ]; then
-  OPTIONS+=(LOOP "Loop In/Out Info")  
+  OPTIONS+=(LOOP "Loop In/Out Service")  
 fi
 
 # Basic Options
@@ -130,6 +133,10 @@ case $CHOICE in
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
+            ./00mainMenu.sh
+            ;;
+        RTL)
+            /home/admin/config.scripts/bonus.rtl.sh menu
             ./00mainMenu.sh
             ;;
         ELECTRS)
