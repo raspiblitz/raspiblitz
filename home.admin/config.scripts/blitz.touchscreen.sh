@@ -103,7 +103,7 @@ EOF
   sudo mkdir -p /home/pi/.lnd 2>/dev/null
 
   # rotate touchscreen based on if LCD is rotated
-  if [ "${lcdrotate}" = "1" ]; then
+  if [ "${lcdrotate}" = "0" ]; then
     echo "Activate Touchscreen Rotate"
     cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 Section "InputClass"

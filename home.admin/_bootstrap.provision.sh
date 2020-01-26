@@ -323,7 +323,7 @@ else
     echo "Provisioning LCD rotate - not active" >> ${logFile}
 fi
 
-# TOCHSCREEN
+# TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then
     echo "Provisioning Touchscreen - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Touchscreen'/g" ${infoFile}
