@@ -86,22 +86,67 @@ if [ "$1" = "menu" ]; then
   # get status
   source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "# FAIL not installed"
+    exit 1
+  fi
+
+  if [ ${serviceRunning} -eq 0 ]; then
+    dialog --title "Electrum Service Not Running" --msgbox "
+The electrum system service is not running.
+Please check the following debug info.
+      " 8 48
+    /home/admin/XXdebugInfo.sh
+    echo "Press ENTER to get back to main menu."
+    read key
+    exit 0
+  fi
+
+  if [ ${isSynced} -eq 0 ]; then
+    dialog --title "Electrum Index Not Ready" --msgbox "
+Electrum server is still building its index.
+Please wait and try again later.
+This can take multiple hours.
+      " 9 48
+    exit 0
+  fi
+
   # Options (available without TOR)
   OPTIONS=( \
-        CONNECT "Connect" \
-        STATUS "Status"
+        CONNECT "How to Connect" \
+        INDEX "Delete/Rebuild Index" \
+        STATUS "Debug Status Info"
 	)
 
-  CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 8 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
 
   case $CHOICE in
     CONNECT)
-    echo "connect"
+    echo "######## How to Connect to Electrum Rust Server #######"
+
+    echo 
+    echo "Press ENTER to get back to main menu."
     read key
     ;;
     STATUS)
-    echo "status"
+    echo "######## Electrum Rust Server Debug Info ########"
+    sudo /home/admin/config.scripts/bonus.electrs.sh status
+    echo 
+    echo "Press ENTER to get back to main menu."
+    read key
+    ;;
+    INDEX)
+    echo "######## Delete/Rebuild Index ########"
+    echo "# stopping service"
+    sudo systemctl stop electrs
+    echo "# deleting index"
+    sudo rm -r /mnt/hdd/app-storage/electrs/db
+    echo "# starting service"
+    sudo systemctl start electrs
+    echo "# ok"
+    echo 
+    echo "Press ENTER to get back to main menu."
     read key
     ;;
   esac
