@@ -156,8 +156,8 @@ This can take multiple hours.
     echo "https://github.com/rootzoll/raspiblitz"
     echo 
     echo "Press ENTER to get back to main menu."
-    /home/admin/config.scripts/blitz.lcd.sh hide
     read key
+    /home/admin/config.scripts/blitz.lcd.sh hide
     ;;
     STATUS)
     echo "######## Electrum Rust Server Status Info ########"
