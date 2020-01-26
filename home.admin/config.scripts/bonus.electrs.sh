@@ -84,6 +84,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get status
+  echo "# collecting status info ... (please wai)"
   source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
   if [ ${serviceInstalled} -eq 0 ]; then
@@ -115,7 +116,7 @@ This can take multiple hours.
   OPTIONS=( \
         CONNECT "How to Connect" \
         INDEX "Delete/Rebuild Index" \
-        STATUS "Debug Status Info"
+        STATUS "ElectRS Status Info"
 	)
 
   CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 8 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -124,13 +125,23 @@ This can take multiple hours.
   case $CHOICE in
     CONNECT)
     echo "######## How to Connect to Electrum Rust Server #######"
-
+    echo
+    echo "Install the Electrum Wallet App on your laptop from:"
+    echo "https://electrum.org"
+    echo
+    echo "On Network Settings > Server menu:"
+    echo "- deavtivate automatic server selection"
+    echo "- as manual server set '${localIP}' & '${portHTTPS}'"
+    echo "- laptop and RaspiBlitz need to be within same local network"
+    echo
+    echo "For more details check the RaspiBlitz README on ElectRS:"
+    echo "https://github.com/rootzoll/raspiblitz"
     echo 
     echo "Press ENTER to get back to main menu."
     read key
     ;;
     STATUS)
-    echo "######## Electrum Rust Server Debug Info ########"
+    echo "######## Electrum Rust Server Status Info ########"
     sudo /home/admin/config.scripts/bonus.electrs.sh status
     echo 
     echo "Press ENTER to get back to main menu."

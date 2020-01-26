@@ -42,7 +42,7 @@ fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
-OPTIONS+=(FUNDING "Fund your on-chain Wallet")
+OPTIONS+=(FUNDING "Fund your LND Wallet")
 OPTIONS+=(CONNECT "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
 if [ "${chain}" = "main" ]; then
