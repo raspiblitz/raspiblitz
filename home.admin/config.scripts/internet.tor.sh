@@ -350,6 +350,21 @@ EOF
   # ACTIVATE LND OVER TOR (function call)
   activateLndOverTOR
 
+  # ACTIVATE APPS OVER TOR
+  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  if [ "${BTCRPCexplorer}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3002
+  fi
+  if [ "${rtlWebinterface}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
+  fi
+  if [ "${BTCPayServer}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
+  fi
+  if [ "${ElectRS}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
+  fi
+
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
   exit 0

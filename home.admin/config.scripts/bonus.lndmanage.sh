@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install or uninstall lndmanage"
- echo "bonus.lndmanage.sh [on|off]"
+ echo "bonus.lndmanage.sh [on|off|menu]"
  exit 1
 fi
 
@@ -12,6 +12,16 @@ source /mnt/hdd/raspiblitz.conf
 # add default value to raspi config if needed
 if ! grep -Eq "^lndmanage=" /mnt/hdd/raspiblitz.conf; then
   echo "lndmanage=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+# show info menu
+if [ "$1" = "menu" ]; then
+  dialog --title " Info lndmanage " --msgbox "\n\
+Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md
+Have at least one channel active to run it without error.\n
+To start type: 'manage' in the command line.
+" 9 75
+  exit 0
 fi
 
 # install

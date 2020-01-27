@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch WebGUI RideTheLightning on or off"
- echo "bonus.rtl.sh [on|off]"
+ echo "bonus.rtl.sh [on|off|menu]"
  exit 1
 fi
 
@@ -16,6 +16,33 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+# show info menu
+if [ "$1" = "menu" ]; then
+
+  # get network info
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
+
+  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+    # Info with TOR
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
+http://${localip}:3000
+Use your Password B to login.\n
+Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
+" 12 67
+    /home/admin/config.scripts/blitz.lcd.sh hide
+  else
+    # Info without TOR
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
+http://${localip}:3000
+Use your Password B to login.\n
+Activate TOR to access the web interface from outside your local network.
+" 12 57
+  fi
+  echo "please wait ..."
+  exit 0
+fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
@@ -122,23 +149,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # correct old Hidden Service with port
     sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
-
-    TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-    if [ -z "$TOR_ADDRESS" ]; then
-      echo "Waiting for the Hidden Service"
-      sleep 10
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-        if [ -z "$TOR_ADDRESS" ]; then
-          echo " FAIL - The Hidden Service address could not be found - Tor error?"
-          exit 1
-        fi
-    fi    
-    echo ""
-    echo "***"
-    echo "The Tor Hidden Service address for RTL is:"
-    echo "$TOR_ADDRESS"
-    echo "***"
-    echo "" 
   fi
   exit 0
 fi

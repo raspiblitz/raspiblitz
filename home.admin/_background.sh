@@ -24,6 +24,7 @@ echo "_background.sh STARTED"
 
 # global vars
 blitzTUIHeartBeatLine=""
+blitzTUIRestarts=0
 
 counter=0
 while [ 1 ]
@@ -169,6 +170,11 @@ do
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+        blitzTUIRestarts=$(($blitzTUIRestarts +1))
+        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
+          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
+        fi
+        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
         sudo init 3 ; sleep 2 ; sudo init 5
       fi
     else

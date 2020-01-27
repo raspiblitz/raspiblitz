@@ -35,36 +35,54 @@ if [ "${rtlWebinterface}" == "on" ]; then
   TITLE="Webinterface: http://${localip}:3000"
 fi
 
+# Put Activated Apps on top
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(RTL "RTL Web Node Manager")  
+fi
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "BTCPay Server Info")  
+fi
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Electrum Rust Server")  
+fi
+if [ "${lndmanage}" == "on" ]; then
+  OPTIONS+=(LNDMANAGE "LND Manage Script")  
+fi
+if [ "${lndmanage}" == "on" ]; then
+  OPTIONS+=(LOOP "Loop In/Out Service")  
+fi
+
 # Basic Options
-OPTIONS+=(INFO "RaspiBlitz Status Screen" \
-  FUNDING "Fund your on-chain Wallet" \
-  CONNECT "Connect to a Peer" \
-  CHANNEL "Open a Channel with Peer" \
-  SEND "Pay an Invoice/PaymentRequest" \
-  RECEIVE "Create Invoice/PaymentRequest" \
-  SERVICES "Activate/Deactivate Services" \
-  MOBILE "Connect Mobile Wallet" \
-  EXPORT "Macaroons and TLS.cert" \
-  NAME "Change Name/Alias of Node" \
-  PASSWORD "Change Passwords" \
-  CASHOUT "Remove Funds from on-chain Wallet"
-)
-
-if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Tor Service options")  
-fi
-
-# dont offer lnbalance/lnchannels on testnet
+OPTIONS+=(INFO "RaspiBlitz Status Screen")
+OPTIONS+=(FUNDING "Fund your LND Wallet")
+OPTIONS+=(CONNECT "Connect to a Peer")
+OPTIONS+=(CHANNEL "Open a Channel with Peer")
 if [ "${chain}" = "main" ]; then
-  OPTIONS+=(lnbalance "Detailed Wallet Balances" \
-  lnchannels "Lightning Channel List" \
-  lnfwdreport "Lightning Forwarding Events Report")  
+  OPTIONS+=(lnbalance "Detailed Wallet Balances")
+  OPTIONS+=(lnchannels "Lightning Channel List")
+  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")  
 fi
+OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
+OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
+OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(MOBILE "Connect Mobile Wallet")
+OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+OPTIONS+=(NAME "Change Name/Alias of Node")
+OPTIONS+=(PASSWORD "Change Passwords")
+OPTIONS+=(CASHOUT "Remove Funds from LND")
 
 # Depending Options
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")  
+fi
+
+if [ "${runBehindTor}" == "on" ]; then
+  OPTIONS+=(TOR "Monitor TOR Service")  
+fi
+
+if [ "${touchscreen}" == "1" ]; then
+  OPTIONS+=(SCREEN "Touchscreen Calibration")  
 fi
 
 # final Options
@@ -113,7 +131,32 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         TOR)
-            ./00torMenu.sh
+            sudo -u bitcoin nyx
+            ./00mainMenu.sh
+            ;;
+        SCREEN)
+            dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
+            /home/admin/config.scripts/blitz.touchscreen.sh calibrate
+            ./00mainMenu.sh
+            ;;
+        RTL)
+            /home/admin/config.scripts/bonus.rtl.sh menu
+            ./00mainMenu.sh
+            ;;
+        BTCPAY)
+            /home/admin/config.scripts/bonus.btcpayserver.sh menu
+            ./00mainMenu.sh
+            ;;
+        ELECTRS)
+            /home/admin/config.scripts/bonus.electrs.sh menu
+            ./00mainMenu.sh
+            ;;
+        LNDMANAGE)
+            /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ./00mainMenu.sh
+            ;;
+        LOOP)
+            /home/admin/config.scripts/bonus.loop.sh menu
             ./00mainMenu.sh
             ;;
         lnchannels)

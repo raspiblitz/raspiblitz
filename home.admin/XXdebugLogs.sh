@@ -87,7 +87,7 @@ if [ "${loop}" = "on" ]; then
   sudo journalctl -u loopd -b --no-pager -n20
   echo ""
 else
-  echo "- RTL is OFF by config"
+  echo "- Loop is OFF by config"
   echo ""
 fi
 
@@ -98,6 +98,19 @@ if [ "${rtlWebinterface}" = "on" ]; then
   echo ""
 else
   echo "- RTL is OFF by config"
+  echo ""
+fi
+
+if [ "${ElectRS}" = "on" ]; then
+  echo "*** LAST 20 ElectRS LOGS ***"
+  echo "sudo journalctl -u electrs -b --no-pager -n20"
+  sudo journalctl -u electrs -b --no-pager -n20
+  echo ""
+  echo "*** ElectRS Status ***"
+  sudo /home/admin/config.scripts/bonus.electrs.sh status
+  echo ""
+else
+  echo "- Electrum Rust Server is OFF by config"
   echo ""
 fi
 

@@ -11,6 +11,38 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+# show info menu
+if [ "$1" = "menu" ]; then
+
+  # get network info
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+
+  if [ ${#toraddress} -gt 0 ]; then
+
+    # TOR
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    whiptail --title " BTCPay Server (TOR) " --msgbox "Open the following URL in your local web browser:
+https://${localip}:23000
+You need to accept the selfsigned certificate in browser.\n
+Hidden Service address for TOR Browser (QR see LCD):
+${toraddress}
+" 12 67
+    /home/admin/config.scripts/blitz.lcd.sh hide
+  else
+
+    # IP + Domain
+    whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
+https://${localip}:23000\n
+To make BTCPay reachable from the outside see 'BTCPay'
+in README of https://github.com/rootzoll/raspiblitz
+" 11 67
+  fi
+
+  echo "please wait ..."
+  exit 0
+fi
+
 # add default value to raspi config if needed
 if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf

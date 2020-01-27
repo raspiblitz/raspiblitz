@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Lightning Loop Service on or off"
- echo "bonus.loop.sh [on|off]"
+ echo "bonus.loop.sh [on|off|menu]"
  exit 1
 fi
 
@@ -12,6 +12,15 @@ source /mnt/hdd/raspiblitz.conf
 # add default value to raspi config if needed
 if ! grep -Eq "^loop=" /mnt/hdd/raspiblitz.conf; then
   echo "loop=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+# show info menu
+if [ "$1" = "menu" ]; then
+  dialog --title " Info Loop Service " --msgbox "\n\
+Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
+Use the command 'loop' on the terminal to see the options.
+" 10 56
+  exit 0
 fi
 
 # stop services
@@ -32,7 +41,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/bitcoin
     sudo -u bitcoin git clone https://github.com/lightninglabs/loop.git
     cd /home/bitcoin/loop
-    sudo -u bitcoin git reset --hard v0.3.1-alpha
+    sudo -u bitcoin git reset --hard v0.4.0-rc1.beta
     cd /home/bitcoin/loop/cmd
     go install ./...
     

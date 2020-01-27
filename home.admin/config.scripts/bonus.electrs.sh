@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [status|on|off]"
+ echo "bonus.electrs.sh [on|off|status|menu]"
  exit 1
 fi
 
@@ -35,6 +35,7 @@ if [ "$1" = "status" ]; then
   fi
 
   if [ ${serviceRunning} -eq 1 ]; then
+
     # Experimental try to get sync Info
     syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
@@ -42,8 +43,44 @@ if [ "$1" = "status" ]; then
       echo "isSynced=1"
     else
       echo "isSynced=0"
+      echo "infoSync='Syncing / Building Index (please wait)'"
     fi
-    echo "infoSync='Syncing / Building Index (please wait)'"
+
+    # check local IPv4 port
+    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    echo "localIP='${localIP}'"
+    echo "publicIP='${publicIP}'"
+    echo "portTCP='50001'"
+    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50001 (LISTEN)')
+    echo "localTCPPortActive=${localPortRunning}"
+    publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that somethingis answering on that port
+      echo "publicTCPPortAnswering=1"
+    else
+      # no answere on that port
+      echo "publicTCPPortAnswering=0"
+    fi
+    echo "portHTTPS='50002'"
+    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50002 (LISTEN)')
+    echo "localHTTPSPortActive=${localPortRunning}"
+    publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that somethingis answering on that port
+      echo "publicHTTPSPortAnswering=1"
+    else
+      # no answere on that port
+      echo "publicHTTPSPortAnswering=0"
+    fi
+    # add TOR info
+    if [ "${runBehindTor}" == "on" ]; then
+      echo "TORrunning=1"
+      TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+      echo "TORaddress='${TORaddress}'"
+    else
+      echo "TORrunning=0"
+    fi
+
   else
     echo "isSynced=0"
   fi
@@ -51,6 +88,100 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+if [ "$1" = "menu" ]; then
+
+  # get status
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "# FAIL not installed"
+    exit 1
+  fi
+
+  if [ ${serviceRunning} -eq 0 ]; then
+    dialog --title "Electrum Service Not Running" --msgbox "
+The electrum system service is not running.
+Please check the following debug info.
+      " 8 48
+    /home/admin/XXdebugInfo.sh
+    echo "Press ENTER to get back to main menu."
+    read key
+    exit 0
+  fi
+
+  if [ ${isSynced} -eq 0 ]; then
+    dialog --title "Electrum Index Not Ready" --msgbox "
+Electrum server is still building its index.
+Please wait and try again later.
+This can take multiple hours.
+      " 9 48
+    exit 0
+  fi
+
+  # Options (available without TOR)
+  OPTIONS=( \
+        CONNECT "How to Connect" \
+        INDEX "Delete/Rebuild Index" \
+        STATUS "ElectRS Status Info"
+	)
+
+  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 10 50 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  clear
+
+  case $CHOICE in
+    CONNECT)
+    echo "######## How to Connect to Electrum Rust Server #######"
+    echo
+    echo "Install the Electrum Wallet App on your laptop from:"
+    echo "https://electrum.org"
+    echo
+    echo "On Network Settings > Server menu:"
+    echo "- deavtivate automatic server selection"
+    echo "- as manual server set '${localIP}' & '${portHTTPS}'"
+    echo "- laptop and RaspiBlitz need to be within same local network"
+    echo 
+    echo "To start directly from laptop terminal use:"
+    echo "electrum --oneserver --server ${localIP}:${portHTTPS}:s"
+    if [ ${TORrunning} -eq 1 ]; then
+      echo ""
+      echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
+      echo "${TORaddress}"
+      echo "To connect through TOR open the Tor Browser and start with the options:" 
+      echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
+      /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
+    fi
+    echo
+    echo "For more details check the RaspiBlitz README on ElectRS:"
+    echo "https://github.com/rootzoll/raspiblitz"
+    echo 
+    echo "Press ENTER to get back to main menu."
+    read key
+    /home/admin/config.scripts/blitz.lcd.sh hide
+    ;;
+    STATUS)
+    sudo /home/admin/config.scripts/bonus.electrs.sh status
+    echo 
+    echo "Press ENTER to get back to main menu."
+    read key
+    ;;
+    INDEX)
+    echo "######## Delete/Rebuild Index ########"
+    echo "# stopping service"
+    sudo systemctl stop electrs
+    echo "# deleting index"
+    sudo rm -r /mnt/hdd/app-storage/electrs/db
+    echo "# starting service"
+    sudo systemctl start electrs
+    echo "# ok"
+    echo 
+    echo "Press ENTER to get back to main menu."
+    read key
+    ;;
+  esac
+
+  exit 0
+fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
@@ -282,26 +413,7 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001    
-    
-    TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-    if [ -z "$TOR_ADDRESS" ]; then
-      echo "Waiting for the Hidden Service"
-      sleep 10
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-      if [ -z "$TOR_ADDRESS" ]; then
-        echo " FAIL - The Hidden Service address could not be found - Tor error?"
-        exit 1
-      fi
-    fi    
-    echo ""
-    echo "***"
-    echo "The Tor Hidden Service address for electrs is:"
-    echo "$TOR_ADDRESS"
-    echo "Electrum wallet: to connect through Tor open the Tor Browser and start with the options:" 
-    echo "\`electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150\`"
-    echo "***"
-    echo "" 
+    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
@@ -309,8 +421,7 @@ WantedBy=multi-user.target
   # run every 10 min by _background.sh
   
   echo ""
-  echo "To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
-  echo "Electrum wallet: start with the options \`electrum --oneserver --server RaspiBlitz_IP:50002:s\`"
+  echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo ""
   
   exit 0
@@ -325,7 +436,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 
-    echo "*** REMOVING ELECTRS ***"
+    echo "#*** REMOVING ELECTRS ***"
 
     sudo systemctl stop electrs
     sudo systemctl disable electrs
@@ -337,15 +448,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
 
-    # delete also db (because in case HDD is full, deactivating should free data)
-    sudo rm -rf /mnt/hdd/app-storage/electrs/
+    
+    if [ "$2" == "keepindex" ]; then
+      echo "# keeping index db"
+    else
+      # delete also db by default (because in case HDD is full, deactivating should free data)
+      sudo rm -rf /mnt/hdd/app-storage/electrs/
+    fi
 
-    echo "OK ElectRS removed."
+    echo "# OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
     /home/admin/config.scripts/bonus.electrsexplorer.sh
   else 
-    echo "ElectRS is not installed."
+    echo "# ElectRS is not installed."
   fi
   exit 0
 fi

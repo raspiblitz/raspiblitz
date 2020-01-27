@@ -214,20 +214,8 @@ if [ "${loop}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start loopd
-      if [ ${#GOPATH} -eq 0 ]; then
-        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
-Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Start from the command line after the reboot.
-Use the command 'loop' to see the options.
-" 11 56
-        needsReboot=1
-      else
-        whiptail --title " Installed the Lightning Loop Service (loopd) " --msgbox "\
-Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Use the command 'loop' to see the options.
-" 10 56
-        needsReboot=0
-      fi
+      /home/admin/config.scripts/bonus.loop.sh menu
+      needsReboot=1
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
@@ -334,21 +322,9 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/RTL/hostname)
-        whiptail --title " Installed RTL " --msgbox "\
-Open the following URL in your local web browser and login with your PASSWORD B.\n
----> http://${localip}:3000 \n
-The Hidden Service address to be used in the Tor Browser is:\n
-${TOR_ADDRESS}
-" 14 66 
-      else
-        l1="Open the following URL in your local web browser"
-        l2="and login with your PASSWORD B."
-        l3="---> http://${localip}:3000"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
-      fi
+      echo "waiting 10 secs .."
+      sleep 10
+      /home/admin/config.scripts/bonus.rtl.sh menu
     else
       l1="!!! FAIL on RTL install !!!"
       l2="Try manual install on terminal after reboot with:"
@@ -431,6 +407,9 @@ if [ "${touchscreen}" != "${choice}" ]; then
   echo "Touchscreen Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/blitz.touchscreen.sh ${choice}
+  if [ "${choice}" == "1" ]; then
+    dialog --title 'Touchscreen Activated' --msgbox 'Touchscreen was activated - will reboot.\n\nAfter reboot use the SCREEN option in main menu to calibrate the touchscreen.' 9 48
+  fi
   needsReboot=1
 else
   echo "Touchscreen Setting unchanged."
@@ -557,11 +536,7 @@ if [ "${lndmanage}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
   if [ "${choice}" =  "on" ]; then
-    whiptail --title " Installed lndmanage " --msgbox "\
-Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md
-Have at least one channel active to run it without error.
-To start type: 'manage' in the command line.
-" 9 75
+    sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
   fi
 else 
   echo "lndmanage setting unchanged."
