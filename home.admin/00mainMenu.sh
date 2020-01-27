@@ -45,6 +45,9 @@ fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
+if [ "${BTCRPCexplorer}" == "on" ]; then
+  OPTIONS+=(EXPLORE "BTC RPC Explorer")  
+fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")  
 fi
@@ -144,6 +147,10 @@ case $CHOICE in
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
+            ./00mainMenu.sh
+            ;;
+        EXPLORE)
+            /home/admin/config.scripts/bonus.btc-rpc-explorer.sh menu
             ./00mainMenu.sh
             ;;
         ELECTRS)
