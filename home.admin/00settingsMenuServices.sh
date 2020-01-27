@@ -347,27 +347,11 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo sytemctl start btc-rpc-explorer
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
-        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex may need to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD.
-Monitor the progress on the LCD or with 'INFO' in main menu.\n
-BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
----> http://${localip}:3002\n
-The Hidden Service address to be used in the Tor Browser is:\n
-${TOR_ADDRESS}
-" 18 75 
-      else
-        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex may need to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD.
-Monitor the progress on the LCD or with 'INFO' in main menu.\n
-BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
----> http://${localip}:3002
-" 14 75 
-      fi
+      whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
+The txindex may need to be created before BTC-RPC-Explorer can be active.\n
+This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
+When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
+" 14 50
       needsReboot=1
     else
       l1="!!! FAIL on BTC-RPC-Explorer install !!!"
