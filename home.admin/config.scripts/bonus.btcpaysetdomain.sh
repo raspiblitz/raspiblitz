@@ -356,36 +356,9 @@ fi
 # setting value in raspi blitz config
 sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain=$YOUR_DOMAIN/g" /mnt/hdd/raspiblitz.conf
 
-if [ $ownDomain -eq 1 ]; then
-  echo ""
-  echo "Visit your BTCpayServer instance on https://$YOUR_DOMAIN"
-  echo ""
-elif [ $ownDomain -eq 0 ]; then
+if [ $ownDomain -eq 0 ]; then
   # Hidden Service for BTCPay if Tor active
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
-  
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-      if [ -z "$TOR_ADDRESS" ]; then
-        echo "Waiting for the Hidden Service"
-        sleep 10
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-        if [ -z "$TOR_ADDRESS" ]; then
-          echo " FAIL - The Hidden Service address could not be found - Tor error?"
-          exit 1
-        fi
-      fi   
-      echo ""
-      echo "***"
-      echo "Open the Hidden Service address in the Tor Browser to connect to your BTCPayServer instance."
-      echo "$TOR_ADDRESS"
-      echo "***"
-      echo "" 
-  fi
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  echo ""
-  echo "Open https://$localip in a browser to visit your BTCPayServer on your Local Network." 
-  echo "Will need to accept the self-signed certificate in the browser to be able to connect outside of the Tor Browser"
-  echo ""
+  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
 fi
+
+echo "OK done - check the new option 'BTCPAY' on main menu for more info." 
