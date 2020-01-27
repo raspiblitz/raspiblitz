@@ -422,42 +422,11 @@ if [ "${ElectRS}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start electrs
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-        echo "Electrs now starts indexing the transaction data in the background. 
-This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
-See more more info about how to monitor the process:
-https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"        
-        echo ""
-        echo "The Tor Hidden Service address for electrs is:"
-        echo "$TOR_ADDRESS"
-        echo ""
-        echo "To connect the Electrum wallet through Tor open the Tor Browser and start Electrum with the options:" 
-        echo "\`electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150\`"
-        echo ""
-        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
-        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
-        echo "" 
-        echo "scan the QR to use the Tor address in Electrum on mobile:"
-        qrencode -t ANSI256 $TOR_ADDRESS
-        echo "Press ENTER to return to the menu"
-        read key
-      else
-        echo "Electrs now starts indexing the transaction data in the background. 
-This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
-See more more info about how to monitor the process:
-https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"  
-        echo ""
-        echo "To connect through the Electrum wallet to your own Electrum Rust Server:"
-        echo "Start the wallet with the options \`electrum --oneserver --server $localip:50002:s\`"
-        echo ""
-        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
-        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
-        echo "" 
-        echo "Press ENTER to return to the menu"
-        read key
-      fi
+      whiptail --title " Installed ElectRS Server " --msgbox "\
+The index database needs to be created before Electrum Server can be used.\n
+This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
+When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
+" 14 50
     else
       l1="!!! FAIL on ElectRS install !!!"
       l2="Try manual install on terminal after reboot with:"
@@ -480,27 +449,10 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
-      if [ "${externalurl}" = "https://localhost" ]; then
-        localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-        externalurl="https://$localip\n
-Will need to accept the self-signed certificate in the \
-browser to be able to connect from the outside of the Tor Network."
-      fi
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-        whiptail --title " Installed BTCPAY Server " --msgbox "\
-Open the following URL in your local web browser
-and register your admin account:\n 
----> ${externalurl}\n
-The Hidden Service address to be used in the Tor Browser:\n
-${TOR_ADDRESS}
-" 17 75 
-      else
-        l1="Open the following URL in your local web browser"
-        l2="and register your admin account: "
-        l3="---> ${externalurl}"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
-      fi
+      whiptail --title " Installed BTCPay Server " --msgbox "\
+BTCPay server was installed.\n
+Use the new 'BTCPay' entry in Main Menu for more info.\n
+" 10 35
     else
       l1="BTCPayServer installation is cancelled"
       l2="Try again from the menu or install from the terminal with:"

@@ -147,6 +147,7 @@ This can take multiple hours.
       echo ""
       echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
+      echo
       echo "To connect through TOR open the Tor Browser and start with the options:" 
       echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
