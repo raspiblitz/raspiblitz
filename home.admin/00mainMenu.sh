@@ -39,6 +39,9 @@ fi
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "RTL Web Node Manager")  
 fi
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "BTCPay Server Info")  
+fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")  
 fi
@@ -137,6 +140,10 @@ case $CHOICE in
             ;;
         RTL)
             /home/admin/config.scripts/bonus.rtl.sh menu
+            ./00mainMenu.sh
+            ;;
+        ELECTRS)
+            /home/admin/config.scripts/bonus.btcpayserver.sh menu
             ./00mainMenu.sh
             ;;
         ELECTRS)

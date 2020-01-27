@@ -18,20 +18,29 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
+
+  # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  torInfo="\nActivate TOR to access the web interface from outside your local network."
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
+
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    torInfo="\nHidden Service address for TOR Browser (QR see LCD):\n${toraddress}"
+    # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-  fi
-  whiptail --title " Ride The Lightning (RTL)" --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
 http://${localip}:3000
-Use your Password B to login.
-${torInfo}
+Use your Password B to login.\n
+Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
 " 12 67
+    /home/admin/config.scripts/blitz.lcd.sh hide
+  else
+    # Info without TOR
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
+http://${localip}:3000
+Use your Password B to login.\n
+Activate TOR to access the web interface from outside your local network.
+" 12 57
+  fi
   echo "please wait ..."
-  /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
 fi
 
