@@ -28,7 +28,7 @@ fi
 # check if it is installed
 # https://github.com/rootzoll/lndconnect
 # using own fork of lndconnet because of this commit to fix for better QR code:
-commit=e76226f2dd3cce3c169a7161f66612c2662407fa
+commit=82d7103bb8c8dd3c8ae8de89e3bc061eef82bb8f
 isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   echo "# Installing lndconnect.."
@@ -39,7 +39,7 @@ if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   # Install latest lndconnect from source:
   go get -d github.com/rootzoll/lndconnect
   cd $GOPATH/src/github.com/rootzoll/lndconnect
-  //git checkout $commit
+  git checkout $commit
   make
 else
   echo "# lndconnect is already installed" 

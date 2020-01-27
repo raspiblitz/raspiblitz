@@ -417,7 +417,17 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${ElectRS}" != "${choice}" ]; then
   echo "ElectRS Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.electrs.sh ${choice}
+  extraparameter=""
+  if [ "${choice}" =  "off" ]; then
+	  whiptail --title "Delete Electrum Index?" \
+    --yes-button "Keep Index" \
+    --no-button "Delete Index" \
+    --yesno "ElectRS is getting uninstalled. Do you also want to delete the Electrum Index? It contains no important data, but can take multiple hours to rebuild if needed again." 10 60
+	  if [ $? -eq 1 ]; then
+      extraparameter="deleteindex"
+	  fi
+  fi
+  /home/admin/config.scripts/bonus.electrs.sh ${choice} ${extraparameter}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then

@@ -449,11 +449,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
 
-    
-    if [ "$2" == "keepindex" ]; then
-      echo "# keeping index db"
-    else
-      # delete also db by default (because in case HDD is full, deactivating should free data)
+    if [ "$2" == "deleteindex" ]; then
       sudo rm -rf /mnt/hdd/app-storage/electrs/
     fi
 

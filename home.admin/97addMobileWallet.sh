@@ -78,7 +78,7 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
 
 # Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLY_NODED "Fully Noded (IOS) over TOR") 
+  OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -141,7 +141,7 @@ case $CHOICE in
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
@@ -168,10 +168,10 @@ case $CHOICE in
       choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install Shango on your Android Phone" \
+	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 60
+		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
