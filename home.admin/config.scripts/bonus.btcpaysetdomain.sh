@@ -9,7 +9,7 @@ HEIGHT=20
 WIDTH=73
 CHOICE_HEIGHT=2
 BACKTITLE="RaspiBlitz"
-TITLE=""
+TITLE="BTCPay Server Install"
 MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
 pointing to your public IP. You will need to forward ports from your
 router to your RaspiBlitz and an email address to be used for
