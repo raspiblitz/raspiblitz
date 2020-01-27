@@ -57,7 +57,7 @@ choose_IP_or_TOR()
   whiptail --title " How to Connect? " \
 	--yes-button "TOR" \
 	--no-button "IP/Domain" \
-	--yesno "The wallet you selected supports connection thru TOR. On An" 10 60
+	--yesno "The mobile wallet you selected supports TOR.\nDo you want to connect over TOR to your RaspiBlitz or fallback to Domain/IP?" 9 60
 	if [ $? -eq 0 ]; then
 	  echo "# yes-button -> TOR"
 	  connect="tor" 
@@ -137,6 +137,7 @@ case $CHOICE in
       # choose IP or TOR --> function call
       choose_IP_or_TOR
 	  echo "connect(${connect})"
+	  read key
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
