@@ -10,16 +10,16 @@ WIDTH=73
 CHOICE_HEIGHT=2
 BACKTITLE="RaspiBlitz"
 TITLE="BTCPay Server Install"
-MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
+MENU="Choose 'TOR' if you want to set up BTCPayServer
+as a Tor Hidden service and use a self signed SSL certificate.\n\n
+Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
 pointing to your public IP. You will need to forward ports from your
 router to your RaspiBlitz and an email address to be used for
-communication about the SSL certificate.\n\n
-Choose 'TOR' if you want to set up BTCPayServer
-as a Tor Hidden service and use a self signed SSL certificate.\n\n
+communication about the SSL certificate (very experimental).\n\n
 For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz"
-OPTIONS=(DOMAIN "use a Domain Name or dynamicDNS" \
-          TOR "Tor access and a self-signed certificate")
+OPTIONS=(TOR "Tor access and a self-signed certificate"\
+         DOMAIN "(Dynamic) Domain Name (experimental)")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
@@ -317,7 +317,7 @@ proxy_set_header Proxy \"\";
 
 
 server {
-    listen 80 default_server;
+    listen 23001 default_server;
     server_name _;
     return 301 https://\$host\$request_uri;
 }
