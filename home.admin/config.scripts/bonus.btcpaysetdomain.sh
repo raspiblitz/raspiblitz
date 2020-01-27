@@ -10,14 +10,14 @@ WIDTH=73
 CHOICE_HEIGHT=2
 BACKTITLE="RaspiBlitz"
 TITLE=""
-MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS 
-pointing to your public IP.\n
-You will need the ports 80, 443 and 9735 forwarded to your RaspiBlitz
-and an email address to be used for communication about the SSL certificate.\n\n
+MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
+pointing to your public IP. You will need to forward ports from your
+router to your RaspiBlitz and an email address to be used for
+communication about the SSL certificate.\n\n
 Choose 'TOR' if you want to set up BTCPayServer
 as a Tor Hidden service and use a self signed SSL certificate.\n\n
-Find more information about using the BTCPayServer on the RaspiBlitz here:
-https://github.com/openoms/bitcoin-tutorials/tree/master/BTCPayServer"
+For details or troubleshoot check for 'BTCPay'
+in README of https://github.com/rootzoll/raspiblitz
 OPTIONS=(DOMAIN "use a Domain Name or dynamicDNS" \
           TOR "Tor access and a self-signed certificate")
 
