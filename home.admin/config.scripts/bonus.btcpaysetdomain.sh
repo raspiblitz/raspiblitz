@@ -17,7 +17,7 @@ communication about the SSL certificate.\n\n
 Choose 'TOR' if you want to set up BTCPayServer
 as a Tor Hidden service and use a self signed SSL certificate.\n\n
 For details or troubleshoot check for 'BTCPay'
-in README of https://github.com/rootzoll/raspiblitz
+in README of https://github.com/rootzoll/raspiblitz"
 OPTIONS=(DOMAIN "use a Domain Name or dynamicDNS" \
           TOR "Tor access and a self-signed certificate")
 
