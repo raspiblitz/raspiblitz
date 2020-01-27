@@ -142,7 +142,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.rtl.sh menu
             ./00mainMenu.sh
             ;;
-        ELECTRS)
+        BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
             ./00mainMenu.sh
             ;;
