@@ -81,7 +81,7 @@ echo ""
 if [ $ownDomain -eq 1 ]; then
   echo ""
   echo "***"
-  echo "Confirm that the ports 80, 443 and 9735 are forwarded to the IP of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
+  echo "Confirm that the ports 443 and 9735 are forwarded to the IP of your RaspiBlitz AND the port 80 on your router forwards to port 23001 of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
   read key
   
   echo ""
@@ -107,7 +107,7 @@ if [ $ownDomain -eq 1 ]; then
   # install nginx and certbot
   sudo apt-get install nginx-full certbot -y
   
-  sudo ufw allow 80 comment 'btcpayserver TCP'
+  sudo ufw allow 23001 comment 'btcpayserver TCP'
   sudo ufw allow 443 comment 'btcpayserver SSL'
   
   # get SSL cert
@@ -170,7 +170,7 @@ proxy_set_header Proxy \"\";
 
 
 server {
-    listen 80 default_server;
+    listen 23001 default_server;
     server_name _;
     return 301 https://\$host\$request_uri;
 }

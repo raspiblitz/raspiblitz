@@ -33,8 +33,8 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23000\n
-To make BTCPay reachable from the outside see 'BTCPay'
+https://${localip}:23001\n
+For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz
 " 11 67
   fi
@@ -323,7 +323,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     
     sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
     sudo rm -f /etc/systemd/system/btcpayserver.service
-    sudo rm -f /etc/nginx/sites-available/btcpayserver    
+    sudo rm -f /etc/nginx/sites-available/btcpayserver
+    sudo rm -rf /mnt/hdd/tor/btcpay 2>/dev/null
     echo "OK BTCPayServer removed."
   else 
     echo "BTCPayServer is not installed."
