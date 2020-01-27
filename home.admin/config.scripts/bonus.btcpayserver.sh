@@ -18,7 +18,7 @@ if [ "$1" = "menu" ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
 
-  if [ ${#toraddress} -gt 0 ]; then
+  if [ "${BTCPayDomain}" == "localhost" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
@@ -326,7 +326,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
     sudo rm -f /etc/systemd/system/btcpayserver.service
     sudo rm -f /etc/nginx/sites-available/btcpayserver
-    sudo rm -rf /mnt/hdd/tor/btcpay 2>/dev/null
     echo "OK BTCPayServer removed."
   else 
     echo "BTCPayServer is not installed."
