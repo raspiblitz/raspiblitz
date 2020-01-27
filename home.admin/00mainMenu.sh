@@ -77,7 +77,7 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
 
 if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Tor Service options")  
+  OPTIONS+=(TOR "Monitor TOR Service")  
 fi
 
 if [ "${touchscreen}" == "1" ]; then
@@ -130,7 +130,7 @@ case $CHOICE in
             ./00mainMenu.sh
             ;;
         TOR)
-            ./00torMenu.sh
+            sudo -u bitcoin nyx
             ./00mainMenu.sh
             ;;
         SCREEN)
