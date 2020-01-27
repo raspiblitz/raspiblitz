@@ -16,6 +16,20 @@ source /mnt/hdd/raspiblitz.conf
 # show info menu
 if [ "$1" = "menu" ]; then
 
+  # get status
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
+
+  # check if index is ready
+  if [ ${isIndexed} -eq 0 ]; then
+    dialog --title " Blockchain Index Not Ready " --msgbox "
+The Blockchain Index is still getting build.
+Please wait and try again later.
+This can take multiple hours.
+      " 9 48
+    exit 0
+  fi
+
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
