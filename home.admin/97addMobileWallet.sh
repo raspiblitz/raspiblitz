@@ -134,7 +134,8 @@ case $CHOICE in
       exit 1;
     ;;
   ZAP_ANDROID)
-      choose_IP_or_TOR()
+      # choose IP or TOR --> function call
+      choose_IP_or_TOR
 	  echo "connect(${connect})"
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
@@ -164,7 +165,7 @@ case $CHOICE in
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      choose_IP_or_TOR()
+      choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Shango on your Android Phone" \
