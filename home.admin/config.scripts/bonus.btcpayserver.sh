@@ -93,9 +93,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     sudo apt-get -y install libunwind8 gettext libssl1.0
-    sudo -u btcpay wget https://download.visualstudio.microsoft.com/download/pr/d52fa156-1555-41d5-a5eb-234305fbd470/173cddb039d613c8f007c9f74371f8bb/dotnet-sdk-3.1.101-linux-arm.tar.gz
-    # check binary is was not manipulated (checksum test)
     dotnetName="dotnet-sdk-3.1.101-linux-arm.tar.gz"
+    sudo rm /home/btcpay/${dotnetName} 2>/dev/null
+    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/d52fa156-1555-41d5-a5eb-234305fbd470/173cddb039d613c8f007c9f74371f8bb/${dotnetName}"
+    # check binary is was not manipulated (checksum test)
     binaryChecksum="bd68786e16d59b18096658ccab2a662f35cd047065a6c87a9c6790a893a580a6aa81b1338360087e58d5b5e5fdca08269936281e41a7a7e7051667efb738a613"
     actualChecksum=$(sha512sum /home/btcpay/${dotnetName} | cut -d " " -f1)
     if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
@@ -104,9 +105,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   
     # download aspnetcore-runtime
-    sudo -u btcpay wget https://download.visualstudio.microsoft.com/download/pr/da60c9fc-c329-42d6-afaf-b8ef2bbadcf3/14655b5928319349e78da3327874592a/aspnetcore-runtime-3.1.1-linux-arm.tar.gz
-    # check binary is was not manipulated (checksum test)
     aspnetcoreName="aspnetcore-runtime-3.1.1-linux-arm.tar.gz"
+    sudo rm /home/btcpay/${aspnetcoreName} 2>/dev/null
+    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/da60c9fc-c329-42d6-afaf-b8ef2bbadcf3/14655b5928319349e78da3327874592a/${aspnetcoreName}"
+    # check binary is was not manipulated (checksum test)
     binaryChecksum="5171cdd232f02fbd41abee893ebe3722fe442436bef9792fec9c687a746357d22b4499aa6f0a9e35285bc04783c54e400810acb365c5a1c3401f23a65e6b062f"
     actualChecksum=$(sha512sum /home/btcpay/${aspnetcoreName} | cut -d " " -f1)
     if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
