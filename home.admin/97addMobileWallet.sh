@@ -50,7 +50,24 @@ For full support switch to mainnet.
 " 9 55
 fi
 
-# Options (available without TOR)
+# fuction to call for wallets that support TOR
+connect="ip"
+choose_IP_or_TOR()
+{
+  whiptail --title " How to Connect? " \
+	--yes-button "TOR" \
+	--no-button "IP/Domain" \
+	--yesno "The wallet you selected supports connection thru TOR. On An" 10 60
+	if [ $? -eq 0 ]; then
+	  echo "# yes-button -> TOR"
+	  connect="tor" 
+	else
+	  echo "# no-button -> IP"
+	  connect="ip"
+	fi
+}
+
+# Options
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
         SHANGO_IOS "Shango Wallet (iOS)" \
@@ -59,13 +76,9 @@ OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
 
+# Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
-   # Options (available with TOR)
-  OPTIONS=( #ZAP_IOS "Zap Wallet (iOS) over TOR" \
-        ZAP_ANDROID "Zap Wallet (Android) over TOR" \
-        ZEUS_ANDROID "Zeus Wallet (Android) over TOR" \
-		FULLY_NODED "Fully Noded (IOS) over TOR"
-	)
+  OPTIONS+=(FULLY_NODED "Fully Noded (IOS) over TOR") 
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -89,7 +102,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-      /home/admin/config.scripts/bonus.lndconnect.sh shango-ios
+      /home/admin/config.scripts/bonus.lndconnect.sh shango-ios ${connect}
 	  exit 1;
 	  ;;
 	SHANGO_ANDROID)
@@ -103,7 +116,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android
+	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android ${connect}
       exit 1;
       ;;
   ZAP_IOS)
@@ -117,10 +130,12 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
     ;;
   ZAP_ANDROID)
+      choose_IP_or_TOR()
+	  echo "connect(${connect})"
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
@@ -131,7 +146,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
     ;;
   ZEUS_IOS)
@@ -145,10 +160,11 @@ case $CHOICE in
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios ${connect}
   	  exit 1;
   	;;
   ZEUS_ANDROID)
+      choose_IP_or_TOR()
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Shango on your Android Phone" \
@@ -159,7 +175,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android ${connect}
   	  exit 1;
   	;;
   FULLY_NODED)

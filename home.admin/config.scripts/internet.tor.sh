@@ -267,7 +267,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
     sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
     sudo mkdir /mnt/hdd/tor/lndrest8080 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/bitcoinrpc 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lndrpc9735fallback 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/lndrest8080fallback 2>/dev/null
+    sudo mkdir /mnt/hdd/tor/bitcoin8332 2>/dev/null
     sudo chmod -R 700 /mnt/hdd/tor
     sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
     cat > ./torrc <<EOF
@@ -294,24 +296,38 @@ CookieAuthFileGroupReadable 1
 
 # Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
+HiddenServiceVersion 3
 HiddenServicePort 80 127.0.0.1:80
 
-# Hidden Service for WEB ADMIN INTERFACE
-HiddenServiceDir /mnt/hdd/tor/bitcoinrpc/
+# Hidden Service for BITCOIN
+HiddenServiceDir /mnt/hdd/tor/bitcoin8332/
+HiddenServiceVersion 3
 HiddenServicePort 8332 127.0.0.1:8332
  
+# Hidden Service for LND (incoming connections)
+HiddenServiceDir /mnt/hdd/tor/lnd9735
+HiddenServiceVersion 3
+HiddenServicePort 9735 127.0.0.1:9735
+
 # Hidden Service for LND RPC
 HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
+HiddenServiceVersion 3
+HiddenServicePort 10009 127.0.0.1:10009
+
+# Hidden Service for LND RPC (v2Fallback)
+HiddenServiceDir /mnt/hdd/tor/lndrpc10009fallback/
+HiddenServiceVersion 2
 HiddenServicePort 10009 127.0.0.1:10009
 
 # Hidden Service for LND REST
 HiddenServiceDir /mnt/hdd/tor/lndrest8080/
+HiddenServiceVersion 3
 HiddenServicePort 8080 127.0.0.1:8080
 
-# Hidden Service for LND incoming connections
-# https://trac.torproject.org/projects/tor/wiki/doc/NextGenOnions#Howtosetupyourownprop224service
-HiddenServiceDir /mnt/hdd/tor/lnd9735
-HiddenServicePort 9735 127.0.0.1:9735
+# Hidden Service for LND REST (v2Fallback)
+HiddenServiceDir /mnt/hdd/tor/lndrest8080fallback/
+HiddenServiceVersion 2
+HiddenServicePort 8080 127.0.0.1:8080
 
 # NOTE: bitcoind get tor service automatically - see /mnt/hdd/bitcoin for onion key
 EOF
