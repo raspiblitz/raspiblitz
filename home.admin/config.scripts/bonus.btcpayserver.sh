@@ -306,25 +306,28 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
+    # removing services
+    # btcpay
     sudo systemctl stop btcpayserver
     sudo systemctl disable btcpayserver
     sudo rm /etc/systemd/system/btcpayserver.service
-   
+    # nbxplorer
+    sudo systemctl stop nbxplorer
+    sudo systemctl disable nbxplorer
+    sudo rm /etc/systemd/system/nbxplorer.service
+    # clear dotnet cache
     sudo -u btcpay dotnet nuget locals all --clear
     sudo rm -rf /tmp/NuGetScratch
-
+    # remove dotnet
     sudo rm -f /home/btcpay/dotnet-sdk*
     sudo rm -f /home/btcpay/aspnetcore*
     sudo rm -rf /home/btcpay/dotnet
     sudo rm -rf /usr/share/dotnet
-    
-    sudo systemctl stop nbxplorer 2>/dev/null
-    sudo systemctl disable nbxplorer 2>/dev/null
+    # clear app config (not user data)
     sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
-    sudo rm -f /etc/systemd/system/nbxplorer.service
-    
     sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
-    sudo rm -f /etc/systemd/system/btcpayserver.service
+    # clear nginx config
+    sudo rm -f /etc/nginx/sites-enabled/btcpayserver
     sudo rm -f /etc/nginx/sites-available/btcpayserver
     echo "OK BTCPayServer removed."
   else 
