@@ -23,7 +23,7 @@ if [ "$1" = "menu" ]; then
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTCPay Server (TOR) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23000
+https://${localip}:23001
 You need to accept the selfsigned certificate in browser.\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
@@ -33,7 +33,7 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23001\n
+https://${BTCPayDomain}\n
 For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz
 " 11 67
