@@ -136,8 +136,6 @@ case $CHOICE in
   ZAP_ANDROID)
       # choose IP or TOR --> function call
       choose_IP_or_TOR
-	  echo "connect(${connect})"
-	  read key
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
@@ -166,6 +164,7 @@ case $CHOICE in
   	  exit 1;
   	;;
   ZEUS_ANDROID)
+      # choose IP or TOR --> function call
       choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
