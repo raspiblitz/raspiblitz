@@ -257,6 +257,7 @@ fi
 if [ "${BTCPayServer}" = "on" ]; then
   if [ "${runBehindTor}" = "on" ] && [ "${BTCPayDomain}" = "localhost" ]; then
     echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on tor >> ${logFile} 2>&1
   else
     # provisioning non-TOR BTCPayServer is not supported yet - needs manual reinstall
