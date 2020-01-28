@@ -5,42 +5,40 @@ source /mnt/hdd/raspiblitz.conf
 # script to set up nginx and the SSL certificate for BTCPay Server
 # calls the config.scripts/internet.hiddenservice.sh for the Tor connection
 
-########## Deactivated IP/DOMAIN for now - using TOR as default ###########
-#HEIGHT=20
-#WIDTH=73
-#CHOICE_HEIGHT=2
-#BACKTITLE="RaspiBlitz"
-#TITLE="BTCPay Server Install"
-#MENU="Choose 'TOR' if you want to set up BTCPayServer
-#as a Tor Hidden service and use a self signed SSL certificate.\n\n
-#Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
-#pointing to your public IP. You will need to forward ports from your
-#router to your RaspiBlitz and an email address to be used for
-#communication about the SSL certificate (very experimental).\n\n
-#For details or troubleshoot check for 'BTCPay'
-#in README of https://github.com/rootzoll/raspiblitz"
-#OPTIONS=(TOR "Tor access and a self-signed certificate"\
-#         DOMAIN "(Dynamic) Domain Name (experimental)")
-#
-#CHOICE=$(dialog --clear \
-#                --backtitle "$BACKTITLE" \
-#                --title "$TITLE" \
-#                --menu "$MENU" \
-#                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-#                "${OPTIONS[@]}" \
-#                2>&1 >/dev/tty)
-#
-#dialogcancel=$?
-#echo "done dialog"
-#clear
-#
-## check if user canceled dialog
-#echo "dialogcancel(${dialogcancel})"
-#if [ ${dialogcancel} -eq 1 ]; then
-#  echo "user cancelled"
-#  exit 1
-#fi
-CHOICE="TOR"
+HEIGHT=20
+WIDTH=73
+CHOICE_HEIGHT=2
+BACKTITLE="RaspiBlitz"
+TITLE="BTCPay Server Install"
+MENU="Choose 'TOR' if you want to set up BTCPayServer
+as a Tor Hidden service and use a self signed SSL certificate.\n\n
+Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
+pointing to your public IP. You will need to forward ports from your
+router to your RaspiBlitz and an email address to be used for
+communication about the SSL certificate (very experimental).\n\n
+For details or troubleshoot check for 'BTCPay'
+in README of https://github.com/rootzoll/raspiblitz"
+OPTIONS=(TOR "Tor access and a self-signed certificate"\
+         DOMAIN "(Dynamic) Domain Name (experimental)")
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+dialogcancel=$?
+echo "done dialog"
+clear
+
+# check if user canceled dialog
+echo "dialogcancel(${dialogcancel})"
+if [ ${dialogcancel} -eq 1 ]; then
+  echo "user cancelled"
+  exit 1
+fi
 
 clear
 case $CHOICE in

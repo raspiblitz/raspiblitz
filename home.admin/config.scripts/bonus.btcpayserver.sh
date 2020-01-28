@@ -22,11 +22,9 @@ if [ "$1" = "menu" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTCPay Server (TOR) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23001
-You need to accept the selfsigned certificate in browser.\n
-Hidden Service address for TOR Browser (QR see LCD):
-${toraddress}
+    whiptail --title " BTCPay Server (TOR) " --msgbox "Have TOR Browser installed on your laptop and open:\n
+${toraddress}\n
+See LCD of RaspiBlitz for QR code of this address if you want to open on mobile devices with TOR browser.
 " 12 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
@@ -43,9 +41,12 @@ in README of https://github.com/rootzoll/raspiblitz
   exit 0
 fi
 
-# add default value to raspi config if needed
+# add default values to raspi config if needed
 if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
+fi
+if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
+  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
@@ -57,13 +58,17 @@ sudo systemctl stop btcpayserver 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
 
+  # --> just serving directly thru TOR for now
   # setting up nginx and the SSL certificate    
-  /home/admin/config.scripts/bonus.btcpaysetdomain.sh
-  errorOnInstall=$?
-  if [ ${errorOnInstall} -eq 1 ]; then
-   echo "exiting as user cancelled BTCPayServer installation"  
-   exit 1
-  fi 
+  #/home/admin/config.scripts/bonus.btcpaysetdomain.sh
+  #errorOnInstall=$?
+  #if [ ${errorOnInstall} -eq 1 ]; then
+  # echo "exiting as user cancelled BTCPayServer installation"  
+  # exit 1
+  #fi
+  sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
+
   # check for $BTCPayDomain
   source /mnt/hdd/raspiblitz.conf
 
