@@ -62,16 +62,16 @@ if [ "$1" = "status" ]; then
       # no answere on that port
       echo "publicTCPPortAnswering=0"
     fi
-    echo "portHTTPS='50002'"
+    echo "portHTTP='50002'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
-    echo "localHTTPSPortActive=${localPortRunning}"
+    echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that somethingis answering on that port
-      echo "publicHTTPSPortAnswering=1"
+      echo "publicHTTPPortAnswering=1"
     else
       # no answere on that port
-      echo "publicHTTPSPortAnswering=0"
+      echo "publicHTTPPortAnswering=0"
     fi
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
@@ -139,11 +139,11 @@ This can take multiple hours.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deavtivate automatic server selection"
-    echo "- as manual server set '${localIP}' & '${portHTTPS}'"
+    echo "- as manual server set '${localIP}' & '${portHTTP}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo 
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localIP}:${portHTTPS}:s"
+    echo "electrum --oneserver --server ${localIP}:${portHTTP}:s"
     if [ ${TORrunning} -eq 1 ]; then
       echo ""
       echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
