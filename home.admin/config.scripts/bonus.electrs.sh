@@ -51,7 +51,7 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "publicIP='${publicIP}'"
     echo "portTCP='50001'"
-    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50001 (LISTEN)')
+    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
@@ -62,7 +62,7 @@ if [ "$1" = "status" ]; then
       echo "publicTCPPortAnswering=0"
     fi
     echo "portHTTPS='50002'"
-    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50002 (LISTEN)')
+    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
     echo "localHTTPSPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
