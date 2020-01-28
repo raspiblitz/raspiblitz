@@ -255,8 +255,7 @@ fi
 
 # BTCPAYSERVER - not restored due to need for domain name and port forwarding
 if [ "${BTCPayServer}" = "on" ]; then
-    
-  if [ "${runBehindTor}" = "on" ]; && [ "${BTCPayDomain}" = "localhost" ] then
+  if [ "${runBehindTor}" = "on" ] && [ "${BTCPayDomain}" = "localhost" ]; then
     echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
     sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on tor >> ${logFile} 2>&1
   else
