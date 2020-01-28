@@ -269,6 +269,9 @@ WantedBy=multi-user.target
     sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
     sudo chown btcpay:btcpay /home/btcpay/admin.macaroon
     sudo chmod 600 /home/btcpay/admin.macaroon
+    
+    doesNetworkEntryAlreadyExists=$(sudo cat /home/btcpay/.btcpayserver/Main/settings.config | grep -c '^network=')
+    if [ ${doesNetworkEntryAlreadyExists} -eq 0 ]; then
     echo "
 ### Global settings ###
 network=mainnet
@@ -282,6 +285,7 @@ externalurl=https://$BTCPayDomain
 BTC.explorer.url=http://127.0.0.1:24444/
 BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
 " | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
+    fi
 
     sudo systemctl restart btcpayserver
   else 
