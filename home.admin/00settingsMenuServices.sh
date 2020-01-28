@@ -454,7 +454,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice}
+  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then

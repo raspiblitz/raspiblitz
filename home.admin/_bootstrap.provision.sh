@@ -255,8 +255,15 @@ fi
 
 # BTCPAYSERVER - not restored due to need for domain name and port forwarding
 if [ "${BTCPayServer}" = "on" ]; then
-  echo "Setting BTCPayServer to be off - will need to be reinstalled from the menu again" >> ${logFile}
-  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
+    
+  if [ "${runBehindTor}" = "on" ]; && [ "${BTCPayDomain}" = "localhost" ] then
+    echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
+    sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on tor >> ${logFile} 2>&1
+  else
+    # provisioning non-TOR BTCPayServer is not supported yet - needs manual reinstall
+    echo "Setting BTCPayServer to be off - will need to be reinstalled from the menu again" >> ${logFile}
+    sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
+  fi
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
@@ -340,8 +347,6 @@ if [ "${#ups}" -gt 0 ]; then
 else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
-
-
 
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
