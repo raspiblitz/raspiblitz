@@ -79,22 +79,33 @@ echo "***"
 echo ""
 
 if [ $ownDomain -eq 1 ]; then
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   echo ""
   echo "***"
-  echo "Confirm that the ports 443 and 9735 are forwarded to the IP of your RaspiBlitz AND the port 80 on your router forwards to port 23001 of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
+  echo "Confirm that the ports 443 and 9735 are open on your router" 
+  echo "AND the port 80 points to the port 23001 of your RaspiBlitz."
+  echo ""
+  echo "Press [ENTER] to continue or use [CTRL + C] to exit"
+  echo ""
+  echo "Example settings for your router:"
+  echo "forward the port 443 to port 443 on ${localip}"
+  echo "forward the port 9735 to port 9735 on ${localip}"
+  echo "forward the port 80 to port 23001 on ${localip}"
   read key
   
   echo ""
   echo "***"
   echo "Type your domain or dynamicDNS pointing to your public IP and press [ENTER] or use [CTRL + C] to exit"
-  echo "example:"
+  echo ""
+  echo "Example:"
   echo "btcpay.example.com"
   read YOUR_DOMAIN
 
   echo ""
   echo "***"
-  echo "Type an email address that will be used to message about the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
-  echo "example:"
+  echo "Type an email address that will be used to message about the expiration of the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
+  echo ""
+  echo "Example:"
   echo "name@email.com"
   read YOUR_EMAIL
   

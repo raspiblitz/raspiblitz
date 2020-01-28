@@ -23,11 +23,11 @@ if [ "$1" = "menu" ]; then
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTCPay Server (TOR) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23001
-You need to accept the selfsigned certificate in browser.\n
-Hidden Service address for TOR Browser (QR see LCD):
+https://${localip}
+You will need to accept the selfsigned certificate in the browser.\n
+Hidden Service address for Tor Browser (see the LCD for a QRcode):
 ${toraddress}
-" 12 67
+" 12 70
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
