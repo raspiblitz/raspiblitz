@@ -39,7 +39,8 @@ if [ "$1" = "status" ]; then
     # Experimental try to get sync Info
     syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
-    if [ "${syncedToBlock}" = "${blockchainHeight}" ]; then
+    lastBlockchainHeight=$(($blockchainHeight -1))
+    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "isSynced=1"
     else
       echo "isSynced=0"
