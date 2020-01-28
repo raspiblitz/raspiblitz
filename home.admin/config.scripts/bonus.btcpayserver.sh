@@ -66,7 +66,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # echo "exiting as user cancelled BTCPayServer installation"  
   # exit 1
   #fi
-  
+
   if [ "$2" == "tor" ]; then
     sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
     /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
