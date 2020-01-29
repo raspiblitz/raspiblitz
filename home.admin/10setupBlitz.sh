@@ -216,8 +216,7 @@ if [ ${isMounted} -eq 1 ]; then
     echo "Litecoin Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
     --menu "You need a copy of the Litecoin Blockchain - you have 2 options:" 13 75 4 \
-    T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
-    S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    S "SYNC     --> MAINNET thru Litecoin Network" 2>&1 >/dev/tty)
 
   # error
   else
