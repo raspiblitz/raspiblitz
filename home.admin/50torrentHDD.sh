@@ -10,7 +10,7 @@ source /home/admin/raspiblitz.info
 # using https://getbitcoinblockchain.com/ as abase
 # and make my own upt-to-date update file becuase they dont do that anymore
 bitcoinBase="raspiblitz-bitcoin2-2019-05-01-base"
-bitcoinUpdate="raspiblitz-bitcoin2-2019-06-29-update"
+bitcoinUpdate="raspiblitz-bitcoin2-2020-01-28-update"
 
 litecoinBase="raspiblitz-litecoin2-2019-06-29-base"
 litecoinUpdate="raspiblitz-litecoin2-2019-06-29-update"
