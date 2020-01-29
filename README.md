@@ -91,9 +91,9 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
-HTTP: (offline)
+HTTP: [https://raspiblitz.com/raspiblitz-v1.4RC3-2020-01-29.img.gz](https://raspiblitz.com/raspiblitz-v1.4RC3-2020-01-29.img.gz)
 
-SHA-256: b4a0daefc9352711200093afa08998d649569e0cb4de90cb39db1f150b4130af
+SHA-256: b0366ca977f9ed53db1eebcc3d9d07b0dcb92437a2699700b72cf0bb3729388f
 
 To see what new features to test and the place to give feedback - see [Milestone v1.4 issues list](https://github.com/rootzoll/raspiblitz/issues?utf8=%E2%9C%93&q=is%3Aissue+milestone%3A%221.4+Release%22+).
 
