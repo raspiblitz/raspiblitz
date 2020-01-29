@@ -22,7 +22,6 @@ if [ "$1" = "menu" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-
     whiptail --title " BTCPay Server (TOR) " --msgbox "Have TOR Browser installed on your laptop and open:\n
 ${toraddress}\n
 See LCD of RaspiBlitz for QR code of this address if you want to open on mobile devices with TOR browser.
