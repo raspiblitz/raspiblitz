@@ -71,7 +71,6 @@ if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
-
 echo ""
 echo "***"
 echo "Setting up Nginx and Certbot"
@@ -82,15 +81,14 @@ if [ $ownDomain -eq 1 ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   echo ""
   echo "***"
-  echo "Confirm that the ports 443 and 9735 are open on your router" 
-  echo "AND the port 80 points to the port 23001 of your RaspiBlitz."
+  echo "Confirm that the ports 80, 443 and 9735 are forwarded to your RaspiBlitz" 
   echo ""
   echo "Press [ENTER] to continue or use [CTRL + C] to exit"
   echo ""
   echo "Example settings for your router:"
   echo "forward the port 443 to port 443 on ${localip}"
   echo "forward the port 9735 to port 9735 on ${localip}"
-  echo "forward the port 80 to port 23001 on ${localip}"
+  echo "forward the port 80 to port 80 on ${localip}"
   read key
   
   echo ""
@@ -118,7 +116,7 @@ if [ $ownDomain -eq 1 ]; then
   # install nginx and certbot
   sudo apt-get install nginx-full certbot -y
   
-  sudo ufw allow 23001 comment 'btcpayserver TCP'
+  sudo ufw allow 80 comment 'HTTP web server'
   sudo ufw allow 443 comment 'btcpayserver SSL'
   
   # get SSL cert
@@ -181,7 +179,7 @@ proxy_set_header Proxy \"\";
 
 
 server {
-    listen 23001 default_server;
+    listen 80 default_server;
     server_name _;
     return 301 https://\$host\$request_uri;
 }

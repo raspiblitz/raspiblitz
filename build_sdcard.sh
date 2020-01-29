@@ -661,6 +661,22 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt-get install -y --no-install-recommends python3-systemd fail2ban
 
+if [ "${baseImage}" = "raspbian" ]; then
+  echo ""
+  echo "*** DISABLE BLUETOOTH ***"
+
+  # disable bluetooth module
+  sudo sh -c "echo 'dtoverlay=pi3-disable-bt' >> /boot/config.txt"
+  sudo sh -c "echo 'dtoverlay=disable-bt' >> /boot/config.txt"
+
+  # remove bluetooth services
+  sudo systemctl disable bluetooth.service
+  sudo systemctl disable hciuart.service
+
+  # remove bluetooth packages
+  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
+fi
+
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""
