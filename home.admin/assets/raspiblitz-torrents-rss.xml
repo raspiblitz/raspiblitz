@@ -57,6 +57,15 @@
       />
     </item>
 
+    <item>
+      <guid>http://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-bitcoin2-2020-01-28-update.torrent</guid>
+      <title>raspiblitz-bitcoin2-2020-01-28-update.torrent</title>
+      <enclosure 
+        url="http://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-bitcoin2-2020-01-28-update.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
   </channel>
 
 </rss>
