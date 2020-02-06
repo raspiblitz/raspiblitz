@@ -12,24 +12,24 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 * ShimFan Cooling: [pimoroni.com](https://shop.pimoroni.com/products/fan-shim) (order later if sold out)
 * Power USBC: [pimoroni.com](https://shop.pimoroni.com/products/universal-usb-c-power-supply-5-1v-3a)
 * RaspberryPi-Case: [pimoroni.com](https://shop.pimoroni.com/products/pibow-coupe-4?variant=29210100105299)
-* 500GB SSD: [amazon.fr](https://www.amazon.fr/Crucial-CT500MX500SSD1-interne-MX500-pouces/dp/B0786QNS9B)
-* SSD-Case: [amazon.fr](https://www.amazon.fr/UGREEN-Boîtier-Externe-Pouces-Compatible/dp/B07D2BHVBD)
-* Micro SD-Card 32GB: [amazon.fr](https://www.amazon.fr/dp/B07CY3QSST)
-* LCD-Display: [amazon.fr](https://www.amazon.fr/dp/B01N2N86HB) or [amazon.fr](https://www.amazon.fr/dp/B07L42Z79L)
+* 500GB SSD: [amazon.fr](https://amzn.to/39afgCq)
+* SSD-Case: [amazon.fr](https://amzn.to/2UsPB3F)
+* Micro SD-Card 32GB: [amazon.fr](https://amzn.to/2vPyChH)
+* LCD-Display: [amazon.fr](https://amzn.to/2UAJyud) or [amazon.fr](https://amzn.to/2OyGJ8S)
 
 ## Package: Minimal (around 150 EUR)
 
 *The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
 Basic Parts for all minimal variants:
-* 1TB Hard Drive: [amazon.fr](https://www.amazon.fr/dp/B07997KKSK)
-* Micro SD-Card 16GB: [amazon.fr](https://www.amazon.fr/SanDisk-SDSQUAR-016G-GZFMA-Mémoire-MicroSDHC-Nouvelle/dp/B073S9SFK2)
-* LCD-Display: [amazon.fr](https://www.amazon.fr/dp/B01N2N86HB) or [amazon.fr](https://www.amazon.fr/dp/B07L42Z79L)
+* 1TB Hard Drive: [amazon.fr](https://amzn.to/2S0wFYz)
+* Micro SD-Card 16GB: [amazon.fr](https://amzn.to/3999e55)
+* LCD-Display: [amazon.fr](https://amzn.to/381Q296) or [amazon.fr](https://amzn.to/374ABvD)
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
-* RaspBerry Pi 3: [amazon.fr](https://www.amazon.fr/dp/B07BDR5PDW)
-* Power >=3A: [amazon.fr](https://www.amazon.fr/dp/B01566WOAG)
-* Heatsink-Case: [amazon.fr](https://www.amazon.fr/dp/B07MXZ8JHL)
+* RaspBerry Pi 3: [amazon.fr](https://amzn.to/2UuiTil)
+* Power >=3A: [amazon.fr](https://amzn.to/39dhRLM)
+* Heatsink-Case: [amazon.fr](https://amzn.to/2v5x1nQ)
 
 Or if you order new go with the RaspberryPi 4 1GB and the following parts:
 * RaspBerry Pi 4 1GB: [pimoroni.com](https://shop.pimoroni.com/products/raspberry-pi-4?variant=29157087379539)
@@ -40,4 +40,6 @@ Or if you order new go with the RaspberryPi 4 1GB and the following parts:
 ## Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
+
+* 500GB SSD: [amazon.fr](https://amzn.to/39afgCq)
 
