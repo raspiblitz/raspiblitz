@@ -40,3 +40,9 @@ Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
 * 1000GB SSD: [amazon.com](https://amzn.to/3856aXl)
+* RaspBerry Pi 4 4GB: [amazon.com] (https://amzn.to/374GF7q)
+* SSD-Case: [amazon.com] (https://amzn.to/2GHoSs1)
+* Micro SD-Card 32GB: [amazon.com] (https://amzn.to/2OcRQ7k)
+* LCD-Display: [amazon.com] (https://amzn.to/37IrXUB)
+* ShimFan Cooling: [amazon.com] (https://amzn.to/2S8MlJc) (order later if sold out)
+* RaspberryPi-Case: [thecryptocloak.com] (https://thecryptocloak.com/product/lightningshell/)
