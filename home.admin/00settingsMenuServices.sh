@@ -502,6 +502,7 @@ if [ "${LNBits}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
   if [ "${choice}" =  "on" ]; then
+    sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
   fi
 else 

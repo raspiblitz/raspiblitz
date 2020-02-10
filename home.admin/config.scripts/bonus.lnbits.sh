@@ -174,8 +174,7 @@ EOF
 
     sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service 
     sudo systemctl enable lnbits
-    sudo systemctl start lnbits
-    echo "# OK"
+    echo "# OK - service needs starting: sudo systemctl start lnbits"
 
   else 
     echo "LNBits already installed."
