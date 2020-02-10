@@ -108,7 +108,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # prepare .env file
     echo "# get the github code"
-    sudo rm -r /home/admin/lnbits
+    sudo rm -r /home/admin/lnbits 2>/dev/null
     cd /home/admin
     sudo -u admin git clone https://github.com/arcbtc/lnbits.git
     #sudo -u admin git reset --hard e3fd6b4ff1f19b750b852a0bb0814cd259db948c
@@ -130,6 +130,12 @@ DEFAULT_USER_WALLET_NAME = os.getenv("DEFAULT_USER_WALLET_NAME", "Bitcoin LN Wal
 FEE_RESERVE = float(os.getenv("FEE_RESERVE", 0))
 EOF
 
+    # to the install
+    cd /home/admin/lnbits
+    sudo -u admin pipenv shell
+    sudo -u admin pipenv install --dev
+    sudo -u admin pip install python-dotenv
+
     # open firewall
     echo
     echo "*** Updating Firewall ***"
@@ -138,7 +144,7 @@ EOF
     echo ""
 
     # install service
-    echo "*** Install btc-rpc-explorer systemd ***"
+    echo "*** Install systemd ***"
     cat > /home/admin/lnd.service <<EOF
 # systemd unit for BTC RPC Explorer
 
@@ -170,7 +176,7 @@ EOF
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
   
-  # Hidden Service for BTC-RPC-explorer if Tor is active
+  # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5000
