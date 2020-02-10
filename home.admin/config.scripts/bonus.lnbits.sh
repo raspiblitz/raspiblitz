@@ -162,6 +162,9 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
     sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service 
