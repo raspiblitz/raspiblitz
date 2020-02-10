@@ -83,7 +83,7 @@ if [ "$1" = "write-macaroons" ]; then
   macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   macaroonReadHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_API_ENDPOINT=.*/LND_API_ENDPOINT=http:\/\/127.0.0.1:10009\/rest\//g" /home/admin/lnbits/.env
+  sudo sed -i "s/^LND_API_ENDPOINT=.*/LND_API_ENDPOINT=https:\/\/127.0.0.1:8080\/rest\//g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=${macaroonReadHex}/g" /home/admin/lnbits/.env
