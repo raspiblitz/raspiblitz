@@ -132,9 +132,8 @@ EOF
 
     # to the install
     cd /home/admin/lnbits
-    sudo -u admin pipenv shell
     sudo -u admin pipenv install --dev
-    sudo -u admin pip install python-dotenv
+    #sudo -u admin pip install python-dotenv
 
     # open firewall
     echo
