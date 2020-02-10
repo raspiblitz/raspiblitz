@@ -87,6 +87,7 @@ if [ "$1" = "write-macaroons" ]; then
   sudo sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=${macaroonReadHex}/g" /home/admin/lnbits/.env
+  echo "# OK - macaroons written to /home/admin/lnbits/.env"
   exit 0
 fi
 
