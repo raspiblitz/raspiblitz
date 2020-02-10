@@ -145,7 +145,7 @@ EOF
     # install service
     echo "*** Install systemd ***"
     cat > /home/admin/lnd.service <<EOF
-# systemd unit for BTC RPC Explorer
+# systemd unit for lnbits
 
 [Unit]
 Description=lnbits
@@ -154,8 +154,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/admin/lnbits
-ExecStartPre="cd /home/admin/lnbits && pipenv shell"
-ExecStart="flask run --host=0.0.0.0"
+ExecStart="/usr/bin/pipenv run gunicorn -b :5000 lnbits:app"
 User=admin
 Restart=always
 TimeoutSec=120
