@@ -115,7 +115,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # write macarroons to .env file
     echo "# preparing env file"
     sudo rm /home/admin/lnbits/.env 2>/dev/null 
-    sudo -u admin mv /home/admin/lnbits/.example.env /home/admin/lnbits/.env 
+    sudo -u admin mv /home/admin/lnbits/.env.example /home/admin/lnbits/.env 
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
  
     # make sure in settings file LND is set as funding source
