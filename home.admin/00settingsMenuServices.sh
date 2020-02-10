@@ -495,7 +495,7 @@ else
 fi
 
 # LNBits process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LNBits}" != "${choice}" ]; then
   echo "LNBits Setting changed .."
