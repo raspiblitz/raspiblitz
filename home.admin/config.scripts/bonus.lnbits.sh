@@ -133,7 +133,8 @@ EOF
     # to the install
     cd /home/admin/lnbits
     sudo -u admin pipenv install --dev
-    #sudo -u admin pip install python-dotenv
+    sudo -u admin /usr/bin/pipenv run pip install python-dotenv
+    sudo -u admin /usr/bin/pipenv run pip install gunicorn
 
     # open firewall
     echo
@@ -144,7 +145,7 @@ EOF
 
     # install service
     echo "*** Install systemd ***"
-    cat > /home/admin/lnd.service <<EOF
+    cat > /home/admin/lnbits.service <<EOF
 # systemd unit for lnbits
 
 [Unit]
