@@ -431,6 +431,11 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
   sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon" 2>> $logFile
   sudo chown pi:pi -R /home/pi/.lnd 2>> $logFile
 
+  if [ "${LNBits}" = "on" ]; then
+    echo "updating macaroons for LNBits fresh on start" >> $logFile
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons >> $logFile
+  fi
+
 else 
   echo "skipping admin user LND data update" >> $logFile
 fi

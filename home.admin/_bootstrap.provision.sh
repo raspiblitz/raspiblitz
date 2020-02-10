@@ -350,6 +350,15 @@ else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
 
+# LNBits
+if [ "${LNBits}" = "on" ]; then
+  echo "Provisioning LNBits - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup LNBits '/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LNBits - keep default" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}

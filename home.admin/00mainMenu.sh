@@ -48,10 +48,13 @@ fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")  
 fi
+if [ "${LNBits}" == "on" ]; then
+  OPTIONS+=(LNBITS "LNBits Server")  
+fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")  
 fi
-if [ "${lndmanage}" == "on" ]; then
+if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")  
 fi
 
@@ -155,6 +158,10 @@ case $CHOICE in
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ./00mainMenu.sh
+            ;;
+        LNBITS)
+            /home/admin/config.scripts/bonus.lnbits.sh menu
             ./00mainMenu.sh
             ;;
         LNDMANAGE)
