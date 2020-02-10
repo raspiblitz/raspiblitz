@@ -155,7 +155,9 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/admin/lnbits
-ExecStart="/usr/bin/pipenv run gunicorn -b :5000 lnbits:app"
+ExecStart="/bin/sh -c 'cd /home/admin/lnbits && pipenv run gunicorn -b :5000 lnbits:app"
+
+
 User=admin
 Restart=always
 TimeoutSec=120
@@ -169,7 +171,8 @@ EOF
 
     sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service 
     sudo systemctl enable lnbits
-    echo "OK"
+    sudo systemctl start lnbits
+    echo "# OK"
 
   else 
     echo "LNBits already installed."
