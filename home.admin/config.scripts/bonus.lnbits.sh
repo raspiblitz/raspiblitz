@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch LNBits on or off"
- echo "bonus.lnbits.sh [on|off|status|menu]"
+ echo "bonus.lnbits.sh [on|off|status|menu|write-macaroons]"
  exit 1
 fi
 
@@ -74,7 +74,7 @@ if [ "$1" = "write-macaroons" ]; then
     
   # make sure its run as user admin
   adminUserId=$(id -u admin)
-  if [ "${$EUID}" != "${adminUserId}" ]; then
+  if [ "${EUID}" != "${adminUserId}" ]; then
     echo "error='please run as admin user'"
     exit 1
   fi
