@@ -118,6 +118,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm /home/admin/lnbits/.env 2>/dev/null 
     sudo -u admin mv /home/admin/lnbits/.env.example /home/admin/lnbits/.env 
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+
+    # set database path to HDD data so that its survives updates and migrations
+    sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
+    sudo chown admin:admin /mnt/hdd/app-data/LNBits
+    echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits" >> /home/admin/lnbits/.env
  
     # make sure in settings file LND is set as funding source
     cat > /home/admin/lnbits/lnbits/settings.py <<EOF
@@ -125,7 +130,7 @@ import os
 from .wallets import LndWallet
 WALLET = LndWallet(endpoint=os.getenv("LND_API_ENDPOINT"),admin_macaroon=os.getenv("LND_ADMIN_MACAROON"),invoice_macaroon=os.getenv("LND_INVOICE_MACAROON"),read_macaroon=os.getenv("LND_READ_MACAROON"))
 LNBITS_PATH = os.path.dirname(os.path.realpath(__file__))
-DATABASE_PATH = os.getenv("DATABASE_PATH", os.path.join(LNBITS_PATH, "data", "database.sqlite3"))
+LNBITS_DATA_FOLDER = os.getenv("LNBITS_DATA_FOLDER", os.path.join(LNBITS_PATH, "data"))
 DEFAULT_USER_WALLET_NAME = os.getenv("DEFAULT_USER_WALLET_NAME", "Bitcoin LN Wallet")
 FEE_RESERVE = float(os.getenv("FEE_RESERVE", 0))
 EOF
