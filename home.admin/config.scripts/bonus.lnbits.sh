@@ -108,6 +108,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # prepare .env file
     echo "# get the github code"
+    sudo rm -r /home/admin/lnbits
     cd /home/admin
     sudo -u admin git clone https://github.com/arcbtc/lnbits.git
     #sudo -u admin git reset --hard e3fd6b4ff1f19b750b852a0bb0814cd259db948c
@@ -130,6 +131,7 @@ FEE_RESERVE = float(os.getenv("FEE_RESERVE", 0))
 EOF
 
     # open firewall
+    echo
     echo "*** Updating Firewall ***"
     sudo ufw allow 5000 comment 'lnbits'
     sudo ufw --force enable
@@ -183,7 +185,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ]; then
+  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
     echo "*** REMOVING LNBits ***"
     sudo systemctl stop lnbits
     sudo systemctl disable lnbits
