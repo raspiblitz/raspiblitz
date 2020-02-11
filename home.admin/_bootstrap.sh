@@ -434,6 +434,7 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "updating macaroons for LNBits fresh on start" >> $logFile
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons >> $logFile
+    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
   fi
 
 else 

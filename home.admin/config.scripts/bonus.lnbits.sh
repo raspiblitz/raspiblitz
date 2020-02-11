@@ -121,7 +121,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
-    sudo chown admin:admin /mnt/hdd/app-data/LNBits
+    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
     echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits" >> /home/admin/lnbits/.env
  
     # make sure in settings file LND is set as funding source
