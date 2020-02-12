@@ -1,13 +1,5 @@
 # script to create a self-signed SSL certificate
 
-echo ""
-echo "***"
-echo "installing Nginx"
-echo "***"
-echo ""
-sudo apt-get install -y nginx
-sudo /etc/init.d/nginx start 2>/dev/null
-
 # Only generate if there is none. Or Electrum will not connect if the cert changed.
 if [ -f /etc/ssl/certs/localhost.crt ] ; then
   echo "A self-signed certificate is already present" 

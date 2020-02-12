@@ -307,6 +307,7 @@ EOF
     fi
 
     # create a self-signed ssl certificate
+    /home/admin/config.scripts/internet.nginx.sh
     /home/admin/config.scripts/internet.selfsignedcert.sh
 
     echo ""

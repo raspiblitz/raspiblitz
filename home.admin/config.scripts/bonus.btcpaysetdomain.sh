@@ -265,6 +265,7 @@ elif [ $ownDomain -eq 0 ]; then
   sudo systemctl disable certbot 2>/dev/null
   
   # create a self-signed ssl certificate
+  /home/admin/config.scripts/internet.nginx.sh
   /home/admin/config.scripts/internet.selfsignedcert.sh
   
   # allow the HTTPS connection through the firewall
