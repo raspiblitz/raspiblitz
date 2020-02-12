@@ -8,12 +8,12 @@ The new shopping list comes in three different packages: Minimal, Standard & Max
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB: [pimoroni.de](https://shop.pimoroni.de/products/raspberry-pi-4?variant=29212362801254)
-* ShimFan Cooling: [pimoroni.de](https://shop.pimoroni.de/products/fan-shim) (order later if sold out)
-* Power USBC: [pimoroni.de](https://shop.pimoroni.de/products/universal-usb-c-power-supply-5-1v-3a)
-* RaspberryPi-Case: [pimoroni.de](https://shop.pimoroni.de/products/pibow-coupe-4?variant=29212366405734)
+* RaspBerry Pi 4 2GB: [amazon.de](https://geni.us/raspiblitz-4-2gb)
+* ShimFan Cooling: [amazon.de](https://geni.us/raspiblitz-fanshim) (order later if sold out)
+* Power USBC: [amazon.de](https://geni.us/raspiblitz-ps)
+* RaspberryPi-Case: [amazon.de](https://geni.us/raspiblitz-case)
 * 500GB SSD: [amazon.de](https://amzn.to/37KjG2C)
-* SSD-Case: [amazon.de](https://amzn.to/2GHoSs1)
+* SSD-Case: [amazon.de](https://geni.us/raspiblitz-ssd-case)
 * Micro SD-Card 32GB: [amazon.de](https://amzn.to/2OcRQ7k)
 * LCD-Display: [amazon.de](https://amzn.to/37IrXUB)
 
@@ -32,13 +32,20 @@ If you have already a used RaspberryPi 3 B+ you can reuse with the following par
 * Heatsink-Case: [amazon.de](https://www.amazon.de/gp/product/B07MXZ8JHL) or [amazon.de](https://www.amazon.de/dp/B07KPFPFCK/)
 
 Or if you order new go with the RaspberryPi 4 1GB and the following parts:
-* RaspBerry Pi 4 1GB: [pimoroni.de](https://shop.pimoroni.de/products/raspberry-pi-4?variant=29212362768486)
-* ShimFan Cooling: [pimoroni.de](https://shop.pimoroni.de/products/fan-shim) (order later if sold out)
-* Power USBC: [pimoroni.de](https://shop.pimoroni.de/products/raspberry-pi-official-usb-c-power-supply-eu?variant=29392393371750) or [pimoroni.de](https://shop.pimoroni.de/products/universal-usb-c-power-supply-5-1v-3a)
-* RaspberryPi-Case: [pimoroni.de](https://shop.pimoroni.de/products/pibow-coupe-4?variant=29212366405734)
+* RaspBerry Pi 4 1GB: [amazon.de](https://geni.us/raspiblitz-2GB)
+* ShimFan Cooling: [amazon.de](https://geni.us/raspiblitz-fanshim) (order later if sold out)
+* Power USBC: [amazon.de](https://geni.us/raspiblitz-ps)
+* RaspberryPi-Case: [amazon.de](https://geni.us/raspiblitz-case) 
 
 ## Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
-* 1000GB SSD: [amazon.de](https://amzn.to/3aY4e4O)
+* 1000GB SSD: [amazon.de](https://geni.us/raspiblitz-1000gb-san)
+* RaspBerry Pi 4 4GB: [amazon.de](https://geni.us/raspiblitz-4-4gb)
+* SSD-Case: [amazon.de](https://geni.us/raspiblitz-ssd-case)
+* Micro SD-Card 32GB: [amazon.de](https://geni.us/raspiblitz-sc-card)
+* LCD-Display: [amazon.de](https://geni.us/raspiblitz-touchscreen)
+* ShimFan Cooling: [amazon.de](https://geni.us/raspiblitz-fanshim)
+* RaspberryPi-Case: [amazon.de](https://geni.us/raspiblitz-case) 
+* Power USBC: [amazon.de](https://geni.us/raspiblitz-ps)
