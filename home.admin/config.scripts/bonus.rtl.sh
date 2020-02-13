@@ -80,9 +80,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd /home/admin/RTL
-    git reset --hard v0.6.3
+    git reset --hard v0.6.5
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
+    # git fetch origin
+    # git checkout feature/0.6.5
     if [ -d "/home/admin/RTL" ]; then
      echo "OK - RTL code copy looks good"
     else
@@ -92,7 +94,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     echo ""
     
-
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
@@ -113,17 +114,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get purge -y python2
     sudo apt-get autoremove -y
 
-    # prepare RTL.conf file
+    # prepare RTL-Config.json file
     echo "*** RTL.conf ***"
-    cp ./RTL/sample-RTL.conf ./RTL/RTL.conf
-    chmod 600 ./RTL/RTL.conf || exit 1
-    sudo sed -i "s/^macroonPath=.*/macroonPath=\/mnt\/hdd\/lnd\/data\/chain\/${network}\/${chain}net/g" ./RTL/RTL.conf
-    sudo sed -i "s/^lndConfigPath=.*/lndConfigPath=\/mnt\/hdd\/lnd\/lnd.conf/g" ./RTL/RTL.conf
-    sudo sed -i "s/^nodeAuthType=.*/nodeAuthType=CUSTOM/g" ./RTL/RTL.conf
-    # getting ready for the phasing out of the "DEFAULT" auth type
-    # will need to change blitz.setpassword.sh too
+    # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
+    cp /home/admin/RTL/sample-RTL-Config.json /home/admin/RTL/RTL-Config.json
+    chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    sudo sed -i "s/^rtlPass=.*/rtlPass=$PASSWORD_B/g" ./RTL/RTL.conf
+     # modify sample-RTL-Config.json and save in RTL-Config.json
+    node > /home/admin/RTL/RTL-Config.json <<EOF
+//Read data
+var data = require('/home/admin/RTL/sample-RTL-Config.json');
+//Manipulate data
+data.nodes[0].lnNode = '$hostname'
+data.nodes[0].Authentication.macaroonPath = '/mnt/hdd/lnd/data/chain/${network}/${chain}net/';
+data.nodes[0].Authentication.configPath = '/mnt/hdd/lnd/lnd.conf';
+data.multiPass = '$PASSWORD_B';
+data.nodes[0].Settings.userPersona = 'OPERATOR'
+data.nodes[0].Settings.channelBackupPath = 'RTL-SCB-backup-$hostname'
+//Output data
+console.log(JSON.stringify(data, null, 2));
+EOF
     echo ""
 
     # open firewall

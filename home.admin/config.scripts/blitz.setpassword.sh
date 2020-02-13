@@ -201,8 +201,18 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
-  # RTL - will change to RTL-Conf.json and deprecate "DEFAULT auth type"
-  sed -i "s/^rtlPass=.*/rtlPass=${newPassword}/g" ./RTL/RTL.conf 2>/dev/null
+  # RTL - keep settings from current RTL-Config.json
+  cp /home/admin/RTL/RTL-Config.json /home/admin/RTL/backup-RTL-Config.json
+  chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
+  node > /home/admin/RTL/RTL-Config.json <<EOF
+//Read data
+var data = require('/home/admin/RTL/backup-RTL-Config.json');
+//Manipulate data
+data.multiPass = '$newPassword';
+//Output data
+console.log(JSON.stringify(data, null, 2));
+EOF
+  rm -f /home/admin/RTL/backup-RTL-Config.json
   # electrs
   RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
   sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
