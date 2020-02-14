@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # TODO: check if services/apps are running and stop all ... or let thet to outside?
-# TODO: check if old data ... or let this to outside?
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
@@ -255,11 +254,6 @@ if [ "$1" = "import-gui" ]; then
   # get info about HDD
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # make sure a HDD/SSD is connected
-  if [ ${isMounted} -eq 1 ]; then
-
-  fi
-
   # make sure HDD/SSD is not mounted
   # because importing migration just works during early setup
   if [ ${isMounted} -eq 1 ]; then
@@ -267,11 +261,17 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
+  # make sure a HDD/SSD is connected
+  if [ ${#hddCandidate} -eq 0 ]; then
+    echo "FAIL --> there is no HDD/SSD connected to migrate data to"
+    exit 1
+  fi
+
   # ask format for new HDD/SSD
   OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
            BTRFS "BTRFS & 3 Partinions (experimental)"
 	)
-  CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
     EXT4)
@@ -284,12 +284,16 @@ if [ "$1" = "import-gui" ]; then
 
   exit 0
 
-  # cleaning old migration files from blitz
-  sudo rm ${defaultZipPath}/*.tar.gz
+  # now temp mount the HDD/SSD
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
+  if [ ${#error} -gt 0 ]; then
+    echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
+    exit 1
+  fi
 
   # make sure that temp directory exists and can be written by admin
   sudo mkdir -p ${defaultZipPath}
-  chmod 777 -R ${defaultZipPath}
+  sudo chmod 777 -R ${defaultZipPath}
 
   echo "**************************"
   echo "* UPLOAD THE RESCUE FILE *"
@@ -326,14 +330,15 @@ if [ "$1" = "import-gui" ]; then
   echo
   echo "OK: Upload found in ${defaultZipPath} - restoring data ... (please wait)"
   source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
-
-  # check result
-  echo
   if [ ${#error} -gt 0 ]; then
+    echo
     echo "FAIL: Was not able to restore data --> ${error}"
+    exit 1
   else
+    echo
     echo "OK: Migration data was imported"
-    echo "You may need to redownload/validate/build blockchain data & indexes."
+    echo "--> Now rebooting and kicking your node in to recovery/update mode ..."
+    sudo shutdown -r now
   fi
 
   exit 0
