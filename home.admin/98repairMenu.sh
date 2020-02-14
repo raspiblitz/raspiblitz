@@ -50,7 +50,7 @@ RaspiBlitz image to your SD card.
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
          BACKUP-LND "Backup your LND data (Rescue-File)" \
-         BACKUP-HDD "Backup HDD data (Migration-File)" \
+         MIGRATION "Migrate Blitz Data to new Hardware" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
@@ -77,7 +77,7 @@ case $CHOICE in
     read key
     /home/admin/00mainMenu.sh
     ;;
-  BACKUP-HDD)
+  MIGRATION)
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
     echo "Press ENTER to return to main menu."
     read key
