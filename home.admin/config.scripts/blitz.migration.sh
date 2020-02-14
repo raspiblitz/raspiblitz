@@ -136,6 +136,7 @@ if [ "$1" = "export-gui" ]; then
   fi
 
   # show info for migration
+  clear
   echo
   echo "*******************************"
   echo "* DOWNLOAD THE MIGRATION FILE *"
