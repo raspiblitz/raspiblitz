@@ -421,6 +421,7 @@ case $CHOICE in
             echo "PRESS ENTER to continue/reboot"
             sudo shutdown -r now
             exit 0
+            ;;
         X)
             lncli -h
             echo "OK you now on the command line."
