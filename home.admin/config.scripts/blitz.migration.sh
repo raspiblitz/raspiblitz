@@ -309,6 +309,8 @@ if [ "$1" = "import-gui" ]; then
   sudo mkdir -p ${defaultZipPath}
   sudo chmod 777 -R ${defaultZipPath}
 
+  clear
+  echo
   echo "**************************"
   echo "* UPLOAD THE RESCUE FILE *"
   echo "**************************"
@@ -318,7 +320,7 @@ if [ "$1" = "import-gui" ]; then
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
   echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
+  echo "scp -r './raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}'"
   echo ""
   echo "Use password A to authenticate file transfere."
   echo "PRESS ENTER when upload is done."
