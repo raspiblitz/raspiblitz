@@ -20,6 +20,7 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
+if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -71,6 +72,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 22 45 14 \
@@ -89,6 +91,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 fi
 
@@ -100,6 +103,9 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
+  exit 1
+elif [ ${dialogcancel} -eq 255 ]; then
+  echo "ESC pressed"
   exit 1
 fi
 
@@ -483,6 +489,21 @@ if [ "${lndmanage}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
+  fi
+else 
+  echo "lndmanage setting unchanged."
+fi
+
+# LNBits process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${LNBits}" != "${choice}" ]; then
+  echo "LNBits Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start lnbits
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
   fi
 else 
   echo "lndmanage setting unchanged."
