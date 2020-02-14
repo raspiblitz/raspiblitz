@@ -78,7 +78,7 @@ case $CHOICE in
     /home/admin/00mainMenu.sh
     ;;
   BACKUP-HDD)
-    sudo /home/admin/config.scripts/blitz.migration.sh "export"
+    sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
     echo "Press ENTER to return to main menu."
     read key
     /home/admin/00mainMenu.sh

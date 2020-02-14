@@ -5,7 +5,7 @@
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
- echo "# blitz.migration.sh [status|export|import]"
+ echo "# blitz.migration.sh [status|export|import|export-gui|import-gui]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -110,8 +110,7 @@ if [ "$1" = "export" ]; then
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
   echo "exportpath='${defaultZipPath}'"
   echo "filename='${name}'"
-  sudo ${defaultZipPath}/raspiblitz-export-temp.tar.gz
-  mv ${defaultZipPath}/raspiblitz-export-temp.tar.gz ${defaultZipPath}/${name}
+  sudo mv ${defaultZipPath}/raspiblitz-export-temp.tar.gz ${defaultZipPath}/${name}
   sudo chown bitcoin:bitcoin ${defaultZipPath}/${name}
 
   # delete temp files
@@ -120,6 +119,39 @@ if [ "$1" = "export" ]; then
   
   echo "scpDownload='${scpDownload}'"
   echo "# OK - Export done"
+  exit 0
+fi
+
+if [ "$1" = "export-gui" ]; then
+
+  # cleaning old migration files from blitz
+  sudo rm ${defaultZipPath}/*.tar.gz
+
+  # create new migration file
+  clear
+  echo "--> creating blitz migration file ... (please wait)"
+  source <(sudo /home/admin/config.scripts/blitz.migration.sh "export")
+  if [ ${#filename} -eq 0 ]; then
+    echo "# FAIL: was not able to create migration file"
+    exit 0
+  fi
+
+  # show info for migration
+  echo
+  echo "*******************************"
+  echo "* DOWNLOAD THE MIGRATION FILE *"
+  echo "*******************************"
+  echo 
+  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
+  echo "${scpDownload}"
+  echo ""
+  echo "Use password A to authenticate file transfere."
+  echo
+  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
+  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
+  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
+
   exit 0
 fi
 
@@ -209,6 +241,63 @@ if [ "$1" = "import" ]; then
   echo "# OK done - you may now want to:"
   echo "# make sure that HDD is not registered in /etc/fstab & reboot"
   echo "# to kickstart recovering system based in imported data"
+
+  exit 0
+fi
+
+if [ "$1" = "import-gui" ]; then
+
+  # cleaning old migration files from blitz
+  sudo rm ${defaultZipPath}/*.tar.gz
+
+  # make sure that temp directory exists and can be written by admin
+  sudo mkdir -p ${defaultZipPath}
+  chmod 777 -R ${defaultZipPath}
+
+  echo "**************************"
+  echo "* UPLOAD THE RESCUE FILE *"
+  echo "**************************"
+  echo "If you have a lnd-rescue backup file on your laptop you can now"
+  echo "upload it and restore the your latest LND state."
+  echo
+  echo "ON YOUR LAPTOP open a new terminal and change into"
+  echo "the directory where your migration file is and"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
+  echo ""
+  echo "Use password A to authenticate file transfere."
+  echo "PRESS ENTER when upload is done."
+  read key
+
+  countZips=$(sudo ls ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
+
+  # in case no upload found
+  if [ ${countZips} -eq 0 ]; then
+    echo
+    echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
+    exit 0
+  fi
+
+  # in case of multiple files
+  if [ ${countZips} -gt 1 ]; then
+    echo
+    echo "FAIL: Multiple possible files detected in ${defaultZipPath}"
+    exit 0
+  fi
+
+  # restore upload
+  echo
+  echo "OK: Upload found in ${defaultZipPath} - restoring data ... (please wait)"
+  source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
+
+  # check result
+  echo
+  if [ ${#error} -gt 0 ]; then
+    echo "FAIL: Was not able to restore data --> ${error}"
+  else
+    echo "OK: Migration data was imported"
+    echo "You may need to redownload/validate/build blockchain data & indexes."
+  fi
 
   exit 0
 fi

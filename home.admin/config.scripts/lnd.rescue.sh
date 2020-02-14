@@ -54,11 +54,11 @@ if [ ${mode} = "backup" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************"
-  echo "* DOWNLOAD THE BACKUP FILE *"
-  echo "****************************"
+  echo "*****************************"
+  echo "* DOWNLOAD THE REASCUE FILE *"
+  echo "*****************************"
   echo 
-  echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
+  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo ""
   echo "Use password A to authenticate file transfere."
@@ -86,7 +86,7 @@ elif [ ${mode} = "restore" ]; then
       countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz 2>/dev/null | grep -c 'lnd-rescue')
       if [ ${countZips} -lt 1 ]; then
         echo "**************************"
-        echo "* UPLOAD THE BACKUP FILE *"
+        echo "* UPLOAD THE RESCUE FILE *"
         echo "**************************"
         echo "If you have a lnd-rescue backup file on your laptop you can now"
         echo "upload it and restore the your latest LND state."
@@ -99,7 +99,7 @@ elif [ ${mode} = "restore" ]; then
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
         echo "Use password A to authenticate file transfere."
-        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
+        echo "PRESS ENTER when upload is done."
       fi
       if [ ${countZips} -gt 1 ]; then
         echo "!! WARNING !!"
