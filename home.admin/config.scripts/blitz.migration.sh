@@ -262,6 +262,12 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
+  # check if HDD/SSD is big enough
+  if [ ${hddGigaBytes} -lt 120 ]; then
+    echo "FAIL --> connected HDD/SSD is too small"
+    exit 1
+  fi
+
   # ask format for new HDD/SSD
   OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
            BTRFS "BTRFS & 3 Partinions (experimental)"
