@@ -418,8 +418,6 @@ case $CHOICE in
             ;;   
         MIGRATION)
             sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
-            echo "PRESS ENTER to continue/reboot"
-            sudo shutdown -r now
             exit 0
             ;;
         X)

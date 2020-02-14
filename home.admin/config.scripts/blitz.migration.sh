@@ -15,17 +15,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# check if data drive is mounted - other wise cannot operate
-isMounted=$(sudo df | grep -c /mnt/hdd)
-if [ ${isMounted} -eq 0 ]; then
-  echo "# FAIL check why /mnt/hdd is not available/mounted"
-  echo "error='datadrive not found'"
-  exit 1
-fi
-
 ###################
 # STATUS
 ###################
+
+# check if data drive is mounted - other wise cannot operate
+isMounted=$(sudo df | grep -c /mnt/hdd)
 
 # gathering system info
 isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
