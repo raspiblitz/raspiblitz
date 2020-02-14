@@ -37,14 +37,14 @@ defaultZipPath="/mnt/hdd/temp"
 # SCP download and upload links
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 scpDownload="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpUpload="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
+scpUpload="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
-  echo "isBTRFS=${isBTRFS}"  
-  echo "scpDownload='${scpDownload}'" 
-  echo "scpUpload='${scpUpload}'" 
+  echo "isBTRFS=${isBTRFS}"
+  echo "scpDownload=\"${scpDownload}\""
+  echo "scpUpload=\"${scpUpload}\""
   exit 1
 fi
 
@@ -99,7 +99,7 @@ if [ "$1" = "export" ]; then
 
   # zip it
   echo "# Building the Export File (this can take some time) .."
-  sudo tar -zcvf ${defaultZipPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp
+  sudo tar -zcvf ${defaultZipPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
   echo "# Building checksum (can take also a while) ..." 
@@ -117,7 +117,7 @@ if [ "$1" = "export" ]; then
   rm ~/.exclude.temp
   rm ~/.include.temp
   
-  echo "scpDownload='${scpDownload}'"
+  echo "scpDownload=\"${scpDownload}\""
   echo "# OK - Export done"
   exit 0
 fi
@@ -203,7 +203,7 @@ if [ "$1" = "import" ]; then
   countZips=$(sudo ls ${importFile} 2>/dev/null | grep -c '.tar.gz')
   if [ ${countZips} -eq 0 ]; then
     echo "# can just find file when ends on .tar.gz and exists"
-    echo "scpUpload='${scpUpload}'" 
+    echo "scpUpload=\"${scpUpload}\"" 
     echo "error='file not found'"
     exit 1
   elif [ ${countZips} -eq 1 ]; then
@@ -251,6 +251,38 @@ if [ "$1" = "import" ]; then
 fi
 
 if [ "$1" = "import-gui" ]; then
+
+  # get info about HDD
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  # make sure a HDD/SSD is connected
+  if [ ${isMounted} -eq 1 ]; then
+
+  fi
+
+  # make sure HDD/SSD is not mounted
+  # because importing migration just works during early setup
+  if [ ${isMounted} -eq 1 ]; then
+    echo "FAIL --> cannot import migration data when HDD(SDD is mounted"
+    exit 1
+  fi
+
+  # ask format for new HDD/SSD
+  OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
+           BTRFS "BTRFS & 3 Partinions (experimental)"
+	)
+  CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  clear
+  case $CHOICE in
+    EXT4)
+      echo "EXT4 FORMAT"
+      ;;
+    BTRFS)
+      echo "BTRFS FORMAT"
+      ;;
+  esac
+
+  exit 0
 
   # cleaning old migration files from blitz
   sudo rm ${defaultZipPath}/*.tar.gz
