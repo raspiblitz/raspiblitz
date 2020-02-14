@@ -276,18 +276,26 @@ if [ "$1" = "import-gui" ]; then
   clear
   case $CHOICE in
     EXT4)
-      echo "EXT4 FORMAT"
+      echo "EXT4 FORMAT -->"
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddCandidate})
+      if [ ${#error} -gt 0 ]; then
+        echo "FAIL --> ${error}"
+        exit 1
+      fi
       ;;
     BTRFS)
       echo "BTRFS FORMAT"
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format btrfs ${hddCandidate})
+      if [ ${#error} -gt 0 ]; then
+        echo "FAIL --> ${error}"
+        exit 1
+      fi
       ;;
     *)
       echo "CANCEL"
       exit 0
       ;;
   esac
-
-  exit 0
 
   # now temp mount the HDD/SSD
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
