@@ -925,7 +925,7 @@ if [ "$1" = "tempmount" ]; then
   # get device to temp mount
   hdd=$2
   if [ ${#hdd} -eq 0 ]; then
-    >&2 echo "# FAIL which device shozld be temp mounted (e.g. sda)"
+    >&2 echo "# FAIL which device should be temp mounted (e.g. sda)"
     >&2 echo "# run 'status' to see device candidates"
     echo "error='missing second parameter'"
     exit 1
