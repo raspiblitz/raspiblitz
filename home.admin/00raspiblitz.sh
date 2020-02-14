@@ -262,15 +262,17 @@ if [ ${setupStep} -eq 0 ]; then
       TITLE="⚡ Welcome to your RaspiBlitz ⚡"
       MENU="\nChoose how you want to setup your RaspiBlitz: \n "
       OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-      HEIGHT=11
+                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" \
+                MIGRATION "Upload a Migration File from old RaspiBlitz" )
+      HEIGHT=12
     else
       # start setup
       BACKTITLE="RaspiBlitz - Setup"
       TITLE="⚡ Welcome to your RaspiBlitz ⚡"
       MENU="\nStart to setup your RaspiBlitz: \n "
-      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning")
-      HEIGHT=10
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning" \
+                MIGRATION "Upload a Migration File from old RaspiBlitz")
+      HEIGHT=11
     fi
   fi
 
@@ -414,6 +416,11 @@ case $CHOICE in
             sudo /home/admin/XXshutdown.sh reboot
             exit 0
             ;;   
+        MIGRATION)
+            sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
+            echo "PRESS ENTER to continue/reboot"
+            sudo shutdown -r now
+            exit 0
         X)
             lncli -h
             echo "OK you now on the command line."

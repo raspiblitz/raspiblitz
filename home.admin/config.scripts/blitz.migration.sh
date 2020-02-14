@@ -127,6 +127,11 @@ if [ "$1" = "export-gui" ]; then
   # cleaning old migration files from blitz
   sudo rm ${defaultZipPath}/*.tar.gz
 
+  # stopping lnd / bitcoin
+  echo "--> stopping services ..."
+  sudo systemctl stop lnd
+  sudo systemctl stop bitcoind
+
   # create new migration file
   clear
   echo "--> creating blitz migration file ... (please wait)"
@@ -147,11 +152,11 @@ if [ "$1" = "export-gui" ]; then
   echo ""
   echo "Use password A to authenticate file transfere."
   echo
-  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
-  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
-  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
-
+  echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
+  echo "To complete the data migration follow then instructions on the github FAQ."
+  echo
+  read key
+  /home/admin/XXshutdown.sh
   exit 0
 fi
 
