@@ -322,7 +322,7 @@ if [ "$1" = "import-gui" ]; then
   echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
   echo "scp -r './raspiblitz-*.tar.gz' admin@${localip}:${defaultZipPath}"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password 'raspiblitz' to authenticate file transfere."
   echo "PRESS ENTER when upload is done."
   read key
 
