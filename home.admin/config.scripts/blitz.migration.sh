@@ -270,7 +270,7 @@ if [ "$1" = "import-gui" ]; then
 
   # ask format for new HDD/SSD
   OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
-           BTRFS "BTRFS & 3 Partinions (experimental)"
+           BTRFS "BTRFS & 3 Partitions (experimental)"
 	)
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
@@ -280,6 +280,10 @@ if [ "$1" = "import-gui" ]; then
       ;;
     BTRFS)
       echo "BTRFS FORMAT"
+      ;;
+    *)
+      echo "CANCEL"
+      exit 0
       ;;
   esac
 
