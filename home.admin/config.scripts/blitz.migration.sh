@@ -229,13 +229,17 @@ if [ "$1" = "import" ]; then
   # copy bitcoin/litecoin data backups back to orgplaces (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
+    sudo mkdir /mnt/hdd/bitcoin
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
   fi
   if [ -d "/mnt/hdd/backup_litecoin" ]; then
     echo "# Copying back litecoin backup data .."
+    sudo mkdir /mnt/hdd/litecoin
     sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
     sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/litecoin
   fi
 
   echo "# OK done - you may now want to:"
@@ -311,11 +315,11 @@ if [ "$1" = "import-gui" ]; then
 
   clear
   echo
-  echo "**************************"
-  echo "* UPLOAD THE RESCUE FILE *"
-  echo "**************************"
-  echo "If you have a lnd-rescue backup file on your laptop you can now"
-  echo "upload it and restore the your latest LND state."
+  echo "*****************************"
+  echo "* UPLOAD THE MIGRATION FILE *"
+  echo "*****************************"
+  echo "If you have a migration file on your laptop you can now"
+  echo "upload it and restore on the new HDD/SSD."
   echo
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
@@ -381,10 +385,9 @@ if [ "$1" = "import-gui" ]; then
   # if there is no blockchain yet - fallback to syncing
   if [ $(sudo ls /mnt/hdd/bitcoin/ 2>/dev/null | grep -c blocks) -eq 0 ]; then
     echo "Setting Blockchain Data to resync ..."
-    sudo mkdir /mnt/hdd/${network} 2>/dev/null
     sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks 2>/dev/null
     sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
-    sudo touch /mnt/hdd/${network}/blocks/.selfsync
+    sudo -u bitcoin touch /mnt/hdd/${network}/blocks/.selfsync
   fi
 
   echo "--> Now rebooting and kicking your node in to recovery/update mode ..."
