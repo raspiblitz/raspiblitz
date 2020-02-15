@@ -350,13 +350,45 @@ if [ "$1" = "import-gui" ]; then
     echo
     echo "FAIL: Was not able to restore data --> ${error}"
     exit 1
-  else
+  fi
+  
+  # check & load config
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${#network} -eq 0 ]; then
     echo
-    echo "OK: Migration data was imported"
-    echo "--> Now rebooting and kicking your node in to recovery/update mode ..."
-    sudo shutdown -r now
+    echo "FAIL: No raspiblitz.conf found afer migration restore"
+    exit 1
   fi
 
+  echo
+  echo "OK: Migration data was imported"
+
+  # Copy from other computer is only option for Bitcoin
+  if [ "${network}" == "bitcoin" ]; then
+    OPTIONS=(SYNC "Re-Sync & Validate Blockchain" \
+             COPY "Copy over LAN from other Computer"
+	  )
+    CHOICE=$(whiptail --clear --title "How to get Blockchain?" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+    clear
+    case $CHOICE in
+      COPY)
+        echo "Copy Blockchain Data -->"
+        /home/admin/50copyHDD.sh stop-after-script
+        ;;
+    esac
+  fi
+
+  # if there is no blockchain yet - fallback to syncing
+  if [ $(sudo ls /mnt/hdd/bitcoin/ | grep -c blocks) -eq 0 ]; then
+    echo "Sync Blockchain Data -->"
+    sudo mkdir /mnt/hdd/${network} 2>/dev/null
+    sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks 2>/dev/null
+    sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
+    sudo touch /mnt/hdd/${network}/blocks/.selfsync
+  fi
+
+  echo "--> Now rebooting and kicking your node in to recovery/update mode ..."
+  sudo shutdown -r now
   exit 0
 fi
 
