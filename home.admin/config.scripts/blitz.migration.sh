@@ -379,8 +379,8 @@ if [ "$1" = "import-gui" ]; then
   fi
 
   # if there is no blockchain yet - fallback to syncing
-  if [ $(sudo ls /mnt/hdd/bitcoin/ | grep -c blocks) -eq 0 ]; then
-    echo "Sync Blockchain Data -->"
+  if [ $(sudo ls /mnt/hdd/bitcoin/ 2>/dev/null | grep -c blocks) -eq 0 ]; then
+    echo "Setting Blockchain Data to resync ..."
     sudo mkdir /mnt/hdd/${network} 2>/dev/null
     sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks 2>/dev/null
     sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
