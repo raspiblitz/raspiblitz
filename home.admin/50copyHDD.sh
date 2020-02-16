@@ -29,7 +29,7 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
-if [ -d "/mnt/hdd/bitcoin" ]; then
+if [ -d "/mnt/hdd/bitcoin" ] && [ "$1" != "stop-after-script" ]; then
   dialog --title "Fresh or Repair" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
   response=$?
   echo "response(${response})"
