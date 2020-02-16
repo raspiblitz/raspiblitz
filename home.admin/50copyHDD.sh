@@ -78,7 +78,11 @@ else
 fi
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."
-echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
+if [ "$1" == "stop-after-script" ]; then
+  echo "Then it will ask for the default RaspiBlitz SSH password --> raspiblitz."
+else
+  echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
+fi
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another option."
