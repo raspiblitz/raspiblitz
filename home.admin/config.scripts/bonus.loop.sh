@@ -41,7 +41,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/bitcoin
     sudo -u bitcoin git clone https://github.com/lightninglabs/loop.git
     cd /home/bitcoin/loop
-    sudo -u bitcoin git reset --hard v0.4.0-beta
+    sudo -u bitcoin git reset --hard v0.4.1-beta
     cd /home/bitcoin/loop/cmd
     go install ./...
     
