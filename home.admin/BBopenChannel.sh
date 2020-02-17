@@ -62,8 +62,8 @@ pubKey=$(dialog --clear \
 
 clear
 if [ ${#pubKey} -eq 0 ]; then
- echo "Selected CANCEL"
- echo ""
+ echo "no channel selected - returning to menu ..."
+ sleep 3
  exit 1
 fi
 
@@ -140,3 +140,5 @@ else
   fi
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key

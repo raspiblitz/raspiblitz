@@ -167,8 +167,6 @@ case $CHOICE in
             ;;
         CHANNEL)
             /home/admin/BBopenChannel.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         SEND)
             /home/admin/BBpayInvoice.sh
