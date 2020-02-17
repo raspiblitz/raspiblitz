@@ -235,9 +235,9 @@ EOF
     sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
   fi
 
-  echo "OK -> RPC Password B changed"
-  echo "if services are running - reboot is needed to activate new settings"
-  exit 0
+  echo "# OK -> RPC Password B changed"
+  echo "# Reboot is needed"
+  exit 1
 
 ############################
 # PASSWORD C
