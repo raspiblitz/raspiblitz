@@ -126,3 +126,5 @@ else
 fi
 
 echo ""
+echo "Press ENTER to return to main menu."
+read key

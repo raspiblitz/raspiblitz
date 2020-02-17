@@ -158,8 +158,6 @@ case $CHOICE in
             ;;
         CONNECT)
             /home/admin/BBconnectPeer.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         FUNDING)
             /home/admin/BBfundWallet.sh
