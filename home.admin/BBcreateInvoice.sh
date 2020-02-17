@@ -56,8 +56,8 @@ sleep 2
 result=$($command 2>$_error)
 error=`cat ${_error} 2>/dev/null`
 
-#echo "result(${result})"
-#echo "error(${error})"
+echo "result(${result})"
+echo "error(${error})"
 
 if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -67,7 +67,7 @@ if [ ${#error} -gt 0 ]; then
 else
 
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
-  payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
+  payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
   /home/admin/config.scripts/blitz.lcd.sh qr "${payReq}"
 
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
