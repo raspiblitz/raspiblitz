@@ -56,8 +56,8 @@ sleep 2
 result=$($command 2>$_error)
 error=`cat ${_error} 2>/dev/null`
 
-echo "result(${result})"
-echo "error(${error})"
+#echo "result(${result})"
+#echo "error(${error})"
 
 if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
