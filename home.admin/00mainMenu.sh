@@ -104,7 +104,6 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-#clear
 case $CHOICE in
         INFO)
             echo "Gathering Information (please wait) ..."
@@ -117,11 +116,6 @@ case $CHOICE in
               /home/admin/00raspiblitz.sh
               exit 0
             fi
-            ;;
-        lnbalance)
-            lnbalance ${network}
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         TOR)
             sudo -u bitcoin nyx
@@ -151,7 +145,16 @@ case $CHOICE in
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
             ;;
+        lnbalance)
+            clear
+            echo "*** YOUR SATOSHI BALANCES ***"
+            lnbalance ${network}
+            echo "Press ENTER to return to main menu."
+            read key
+            ;;
         lnchannels)
+            clear
+            echo "*** YOUR LIGHTNING CHANNELS ***"
             lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
