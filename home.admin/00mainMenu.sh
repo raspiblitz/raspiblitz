@@ -63,17 +63,8 @@ OPTIONS+=(INFO "RaspiBlitz Status Screen")
 OPTIONS+=(FUNDING "Fund your LND Wallet")
 OPTIONS+=(CONNECT "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
-if [ "${chain}" = "main" ]; then
-  OPTIONS+=(lnbalance "Detailed Wallet Balances")
-  OPTIONS+=(lnchannels "Lightning Channel List")
-fi
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-OPTIONS+=(SERVICES "Activate/Deactivate Services")
-OPTIONS+=(MOBILE "Connect Mobile Wallet")
-OPTIONS+=(EXPORT "Macaroons and TLS.cert")
-OPTIONS+=(NAME "Change Name/Alias of Node")
-OPTIONS+=(PASSWORD "Change Passwords")
 
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
@@ -81,6 +72,17 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
 
 OPTIONS+=(CASHOUT "Remove Funds from LND")
+
+if [ "${chain}" = "main" ]; then
+  OPTIONS+=(lnbalance "Detailed Wallet Balances")
+  OPTIONS+=(lnchannels "Lightning Channel List")
+fi
+
+OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(MOBILE "Connect Mobile Wallet")
+OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+OPTIONS+=(NAME "Change Name/Alias of Node")
+OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Monitor TOR Service")  
