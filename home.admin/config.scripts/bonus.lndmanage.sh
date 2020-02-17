@@ -44,6 +44,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   python3 -m pip install wheel
   python3 -m pip install lndmanage==0.8.0.1
 
+  # check if install was successfull
+  if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
+    echo
+    echo "!! FAIL --> Was not able to install LNDMANAGE"
+    echo "!! Maybe because of internet network issues - try again later."
+    sleep 9
+    exit 1
+  fi
+
   # setting value in raspi blitz config
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
 
