@@ -99,7 +99,7 @@ if [ ${#amount} -eq 0 ]; then
 fi
 
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel ${pubKey} ${amount} 0"
+command="lncli --chain=${network} --network=${chain}net --conf_target=1 openchannel ${pubKey} ${amount} 0"
 
 # info output
 clear
@@ -130,7 +130,7 @@ else
   echo "******************************"
   echo "${result}"
   echo ""
-  echo "Whats next? --> You need to wait 6 confirmations, for the channel to be ready."
+  echo "Whats next? --> You need to wait 3 confirmations, for the channel to be ready."
   fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
   if [ "${network}" = "bitcoin" ]; then
     if [ "${chain}" = "main" ]; then
