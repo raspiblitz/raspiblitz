@@ -240,7 +240,7 @@ EOF
 
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
-  exit 1
+  exit 0
 
 ############################
 # PASSWORD C
