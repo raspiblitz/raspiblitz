@@ -49,7 +49,7 @@ if [ "$chain" = "test" ]; then
   coininfo="TESTNET Bitcoin"
 fi
 
-msg="Send ${coininfo} to address --> ${address}\n\nScan the QR code on the LCD with your mobile wallet or copy paste the address.\nThe wallet you sending from needs to support Segwit addresses."
+msg="Send ${coininfo} to address --> ${address}\n\nScan the QR code on the LCD with your mobile wallet or copy paste the address.\nThe wallet you sending from needs to support bech32 addresses.\nThis screen will not update - press DONE when send."
 if [ "$chain" = "test" ]; then
   msg="${msg} \n\n Get some testnet coins from https://testnet-faucet.mempool.co"
 fi
