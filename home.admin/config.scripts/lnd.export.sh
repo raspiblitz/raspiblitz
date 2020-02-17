@@ -163,3 +163,8 @@ elif [ "${exportType}" = "reset" ]; then
 else
   echo "FAIL: unknown '${exportType}' -run-> ./lnd.export.sh -h"
 fi
+
+if [ "$1" = "" ] || [ $# -eq 0 ]; then
+  echo "Press ENTER to return to main menu."
+  read key
+fi

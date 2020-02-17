@@ -194,8 +194,6 @@ case $CHOICE in
             ;;
         EXPORT)
             sudo /home/admin/config.scripts/lnd.export.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh
