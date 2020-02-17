@@ -74,13 +74,13 @@ OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(EXPORT "Macaroons and TLS.cert")
 OPTIONS+=(NAME "Change Name/Alias of Node")
 OPTIONS+=(PASSWORD "Change Passwords")
-OPTIONS+=(CASHOUT "Remove Funds from LND")
 
-# Depending Options
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")  
 fi
+
+OPTIONS+=(CASHOUT "Remove Funds from LND")
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Monitor TOR Service")  
