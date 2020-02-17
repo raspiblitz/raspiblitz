@@ -50,7 +50,7 @@ sleep 2
 
 # execute command
 result=$($command 2>$_error)
-error=`cat ${_error}`
+error=`cat ${_error} 2>/dev/null`
 
 #echo "result(${result})"
 #echo "error(${error})"
