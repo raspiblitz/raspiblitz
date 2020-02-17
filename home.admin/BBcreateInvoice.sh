@@ -122,3 +122,5 @@ else
   /home/admin/config.scripts/blitz.lcd.sh hide
 
 fi
+echo "Press ENTER to return to main menu."
+read key

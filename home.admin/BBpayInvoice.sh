@@ -102,3 +102,5 @@ else
   echo "It worked :) - check out the service you were paying."
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key

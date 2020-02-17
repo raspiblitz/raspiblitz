@@ -173,13 +173,9 @@ case $CHOICE in
             ;;
         SEND)
             /home/admin/BBpayInvoice.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         RECEIVE)
             /home/admin/BBcreateInvoice.sh
-            echo "Press ENTER to return to main menu."
-            read key
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
