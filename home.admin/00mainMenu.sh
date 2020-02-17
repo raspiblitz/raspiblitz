@@ -109,112 +109,93 @@ case $CHOICE in
         INFO)
             walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
             if [ ${walletLocked} -eq 0 ]; then
-              ./00infoBlitz.sh
+              /home/admin/00infoBlitz.sh
               echo "Screen is not refreshing itself ... press ENTER to continue."
               read key
+            else
+              /home/admin/00raspiblitz.sh
+              exit 0
             fi
-            ./00raspiblitz.sh
             ;;
         lnbalance)
             lnbalance ${network}
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         TOR)
             sudo -u bitcoin nyx
-            ./00mainMenu.sh
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
-            ./00mainMenu.sh
             ;;
         RTL)
             /home/admin/config.scripts/bonus.rtl.sh menu
-            ./00mainMenu.sh
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
-            ./00mainMenu.sh
             ;;
         EXPLORE)
             /home/admin/config.scripts/bonus.btc-rpc-explorer.sh menu
-            ./00mainMenu.sh
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
-            ./00mainMenu.sh
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu
-            ./00mainMenu.sh
             ;;
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
-            ./00mainMenu.sh
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
-            ./00mainMenu.sh
             ;;
         lnchannels)
             lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         CONNECT)
-            ./BBconnectPeer.sh
+            /home/admin/BBconnectPeer.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         FUNDING)
-            ./BBfundWallet.sh
-            ./00mainMenu.sh
+            /home/admin/BBfundWallet.sh
             ;;
         CASHOUT)
-            ./BBcashoutWallet.sh
-            ./00mainMenu.sh
+            /home/admin/BBcashoutWallet.sh
             ;;
         CHANNEL)
-            ./BBopenChannel.sh
+            /home/admin/BBopenChannel.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         SEND)
-            ./BBpayInvoice.sh
+            /home/admin/BBpayInvoice.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         RECEIVE)
-            ./BBcreateInvoice.sh
+            /home/admin/BBcreateInvoice.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         SERVICES)
-            ./00settingsMenuServices.sh
-            ./00mainMenu.sh
+            /home/admin/00settingsMenuServices.sh
             ;;
         CLOSEALL)
-            ./BBcloseAllChannels.sh
+            /home/admin/BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         MOBILE)
-            ./97addMobileWallet.sh
-            ./00mainMenu.sh
+            /home/admin/97addMobileWallet.sh
             ;;
         EXPORT)
             sudo /home/admin/config.scripts/lnd.export.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh
@@ -224,13 +205,11 @@ case $CHOICE in
               echo "Press ENTER to Reboot."
               read key
               sudo /home/admin/XXshutdown.sh reboot
-            else
-              ./00mainMenu.sh
+              exit 0
             fi
             ;;
         REPAIR)
-            ./98repairMenu.sh
-            ./00mainMenu.sh
+            /home/admin/98repairMenu.sh
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
@@ -239,15 +218,14 @@ case $CHOICE in
               echo "Press ENTER to Reboot .."
               read key
               sudo /home/admin/XXshutdown.sh reboot
+              exit 0
             else
               echo "Press ENTER to return to main menu .."
               read key
-              ./00mainMenu.sh
             fi
             ;;
         UPDATE)
             /home/admin/99checkUpdate.sh
-            ./00mainMenu.sh
             ;; 
         OFF)
             echo ""
@@ -268,7 +246,7 @@ case $CHOICE in
             exit 0
             ;;
         DELETE)
-            sudo ./XXcleanHDD.sh
+            sudo /home/admin/XXcleanHDD.sh
             sudo /home/admin/XXshutdown.sh reboot
             exit 0
             ;;
@@ -288,4 +266,6 @@ case $CHOICE in
             echo "To return to main menu use command: raspiblitz"
             exit 0
 esac
-clear
+
+# go into loop - start script from beginning to load config/sate fresh
+/home/admin/00mainMenu.sh
