@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 _temp="./download/dialog.$$"
 _error="./.error.out"
 sudo chmod 7777 ${_error} 2>/dev/null
