@@ -210,13 +210,14 @@ elif [ "${abcd}" = "b" ]; then
     echo "# changing RTL password"
     cp /home/admin/RTL/RTL-Config.json /home/admin/RTL/backup-RTL-Config.json
     # remove hashed old password
-    sed -i "/\b\(multiPassHashed\)\b/d" ./RTL-Config.json
+    #sed -i "/\b\(multiPassHashed\)\b/d" ./RTL-Config.json
     # set new password
     chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
     node > /home/admin/RTL/RTL-Config.json <<EOF
 //Read data
 var data = require('/home/admin/RTL/backup-RTL-Config.json');
 //Manipulate data
+data.multiPassHashed = null;
 data.multiPass = '$newPassword';
 //Output data
 console.log(JSON.stringify(data, null, 2));
