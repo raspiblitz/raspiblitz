@@ -63,6 +63,9 @@ if [ ${#abcd} -eq 0 ]; then
         D)
           abcd='d';
           ;;
+        *)
+          exit 1
+          ;;
     esac
 fi
 
