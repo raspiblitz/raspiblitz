@@ -24,7 +24,7 @@ fi
 # let user enter a <pubkey>@host
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
-l3="network map -> ${networkMap}"
+l3="node directory -> 1ml.com"
 dialog --title "Open a Connection to a Peer" \
 --backtitle "Lightning ( ${network} | ${chain} )" \
 --inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
