@@ -107,6 +107,7 @@ CHOICE=$(dialog --clear \
 #clear
 case $CHOICE in
         INFO)
+            echo "Gathering Information (please wait) ..."
             walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
             if [ ${walletLocked} -eq 0 ]; then
               /home/admin/00infoBlitz.sh
