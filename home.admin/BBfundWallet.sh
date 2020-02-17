@@ -23,7 +23,7 @@ fi
 
 # execute command
 echo "calling lncli ... please wait"
-command="lncli --chain=${network} --network=${chain}net newaddress np2wkh"
+command="lncli --chain=${network} --network=${chain}net newaddress p2wkh"
 echo "${command}"
 result=$($command)
 echo "$result"
