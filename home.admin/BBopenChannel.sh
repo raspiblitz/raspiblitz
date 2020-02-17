@@ -92,7 +92,9 @@ dialog --title "Funding of Channel" \
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  echo
+  echo "no valid amount entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
