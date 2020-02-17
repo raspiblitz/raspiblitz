@@ -32,7 +32,7 @@ _input=$(cat $_temp | xargs )
 shred $_temp
 if [ ${#_input} -eq 0 ]; then
   echo "no peer entered - returning to menu ..."
-  sleep 3
+  sleep 2
   exit 1
 fi
 

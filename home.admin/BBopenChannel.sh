@@ -63,7 +63,7 @@ pubKey=$(dialog --clear \
 clear
 if [ ${#pubKey} -eq 0 ]; then
  echo "no channel selected - returning to menu ..."
- sleep 3
+ sleep 2
  exit 1
 fi
 
