@@ -106,20 +106,6 @@ CHOICE=$(dialog --clear \
 
 #clear
 case $CHOICE in
-        CLOSE)
-            exit 1;
-            ;;
-        X)
-            clear
-            echo "***********************************"
-            echo "* RaspiBlitz Commandline"
-            echo "* Here be dragons .. have fun :)"
-            echo "***********************************"
-            echo "LND commandline options: lncli -h"
-            echo "Back to main menu use command: raspiblitz"
-            echo
-            exit 1;
-            ;;
         INFO)
             walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
             if [ ${walletLocked} -eq 0 ]; then
@@ -259,6 +245,10 @@ case $CHOICE in
               ./00mainMenu.sh
             fi
             ;;
+        UPDATE)
+            /home/admin/99checkUpdate.sh
+            ./00mainMenu.sh
+            ;; 
         OFF)
             echo ""
             echo "LCD turns white when shutdown complete."
@@ -281,10 +271,21 @@ case $CHOICE in
             sudo ./XXcleanHDD.sh
             sudo /home/admin/XXshutdown.sh reboot
             exit 0
-            ;;   
-        UPDATE)
-            /home/admin/99checkUpdate.sh
-            ./00mainMenu.sh
+            ;;
+        X)
+            clear
+            echo "***********************************"
+            echo "* RaspiBlitz Commandline"
+            echo "* Here be dragons .. have fun :)"
+            echo "***********************************"
+            echo "LND command line options: lncli -h"
+            echo "Back to main menu use command: raspiblitz"
+            echo
             exit 0
-            ;;   
+            ;;
+        *)
+            clear
+            echo "To return to main menu use command: raspiblitz"
+            exit 0
 esac
+clear
