@@ -201,10 +201,12 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
+  
   # RTL - keep settings from current RTL-Config.json
-  cp /home/admin/RTL/RTL-Config.json /home/admin/RTL/backup-RTL-Config.json
-  chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
-  node > /home/admin/RTL/RTL-Config.json <<EOF
+  if [ "${rtlWebinterface}" = "on" ]; then
+    cp /home/admin/RTL/RTL-Config.json /home/admin/RTL/backup-RTL-Config.json
+    chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
+    node > /home/admin/RTL/RTL-Config.json <<EOF
 //Read data
 var data = require('/home/admin/RTL/backup-RTL-Config.json');
 //Manipulate data
@@ -212,16 +214,26 @@ data.multiPass = '$newPassword';
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-  rm -f /home/admin/RTL/backup-RTL-Config.json
+    rm -f /home/admin/RTL/backup-RTL-Config.json
+  fi
+  
   # electrs
-  RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-  sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
+  if [ "${ElectRS}" = "on" ]; then
+    RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+    sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
+  fi
+
   # BTC-RPC-Explorer
-  sed -i "s/^BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:.*@127.0.0.1:8332?timeout=10000/BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:${newPassword}@127.0.0.1:8332\?timeout=10000/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
-  sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
-  sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+  if [ "${BTCRPCexplorer}" = "on" ]; then
+    sed -i "s/^BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:.*@127.0.0.1:8332?timeout=10000/BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:${newPassword}@127.0.0.1:8332\?timeout=10000/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+    sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+    sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+  fi
+
   # BTCPayServer
-  sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
+  if [ "${BTCPayServer}" = "on" ]; then
+    sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
+  fi
 
   echo "OK -> RPC Password B changed"
   echo "if services are running - reboot is needed to activate new settings"
