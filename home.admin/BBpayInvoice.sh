@@ -51,7 +51,10 @@ dialog --title "Pay thru Lightning Network" \
 invoice=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#invoice} -eq 0 ]; then
-  echo "FAIL - not a valid input (${invoice})"
+  clear
+  echo
+  echo "no invoice entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 

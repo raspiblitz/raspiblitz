@@ -28,7 +28,10 @@ dialog --title "Pay thru Lightning Network" \
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  clear
+  echo
+  echo "no amount entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
