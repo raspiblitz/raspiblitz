@@ -6,9 +6,9 @@
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice display for easy setup & monitoring. Not your Node, not your Rules.**
+**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice display for easy setup & monitoring.**
 
-It's mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
+RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not you Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
 ## Feature Overview
 
@@ -20,11 +20,11 @@ There are additional services that can be switched on:
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
-As an parallel alternative to the SSH menu there is also the "Ride the Lightning" (RTL) WebUI available:
+As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is available:
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
-You can now activate the following Lightning & Bitcoin Apps on the RaspiBlitz:
+There are further Services that can be switched on:
 
 * ElectRS (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
 * BTCPayServer (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
@@ -32,6 +32,7 @@ You can now activate the following Lightning & Bitcoin Apps on the RaspiBlitz:
 * LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 * LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+* Touchscreen, TOR, Autopilot, DynDNS, SSHTunneling, UPS Support, ...
 
 ## Time Estimate to Setup a RaspiBlitz
 
