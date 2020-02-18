@@ -16,10 +16,6 @@ This is a quick look at the SSH main menu (once RaspiBlitz is SetUp):
 
 ![MainMenu-A](pictures/mainmenu.png)
 
-There are additional services that can be switched on:
-
-![MainMenu-Services](pictures/mainmenu-services.png)
-
 As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is available:
 
 ![RTL-preview](pictures/RTL-dashboard.png)
