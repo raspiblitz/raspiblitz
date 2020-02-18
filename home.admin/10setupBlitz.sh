@@ -202,9 +202,9 @@ if [ ${isMounted} -eq 1 ]; then
     echo "Bitcoin-RP3 Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
-    T "TORRENT --> Download thru Torrent (trusted DEFAULT ±1day)" \
-    C "COPY    --> Copy from laptop/node (over LAN ±6hours)" \
-    N "CLONE   --> Clone from 2nd HDD (extra Power needed ±6hours)"\
+    T "TORRENT --> Download thru Torrent (TRUSTED DEFAULT ±1day)" \
+    C "COPY    --> Copy from laptop/node (OVER LAN ±6hours)" \
+    N "CLONE   --> Clone from 2nd HDD (EXTRA POWER NEEDED ±6hours)"\
     S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
 
   # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
@@ -213,8 +213,8 @@ if [ ${isMounted} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
     S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
-    C "COPY    --> Copy from laptop/node (over LAN ±4hours)" \
-    T "TORRENT --> Download thru Torrent (trusted FALLBACK ±1day)" 2>&1 >/dev/tty)
+    C "COPY    --> Copy from laptop/node (OVER LAN ±4hours)" \
+    T "TORRENT --> Download thru Torrent (TRUSTED FALLBACK ±1day)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
