@@ -30,7 +30,14 @@ There are further Services that can be switched on:
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 
-And much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
+You can connect the following Wallet-Apps to your RaspiBlitz:
+
+* **Zap** (Android, iOS & Desktop) [details](https://zap.jackmallers.com/)
+* **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
+* **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
+* **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
+
+Also much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## Time Estimate to Setup a RaspiBlitz
 
@@ -127,7 +134,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
-Browser-Download: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz]()
+Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz]()
 
 Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/raspiblitz-v1.4-2020-02-18.torrent
 
