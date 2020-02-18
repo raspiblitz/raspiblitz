@@ -22,13 +22,15 @@ As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is availa
 
 There are further Services that can be switched on:
 
+* **TOR** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
 * **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 * **LNBits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
-* **Touchscreen, TOR, Autopilot, DynDNS, SSHTunneling, UPS Support, ...**
+
+And much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## Time Estimate to Setup a RaspiBlitz
 
@@ -125,19 +127,19 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
 
-HTTP: [https://raspiblitz.com/raspiblitz-v1.4RC3-2020-01-29.img.gz](https://raspiblitz.com/raspiblitz-v1.4RC3-2020-01-29.img.gz)
+Browser-Download: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz]()
 
-SHA-256: b0366ca977f9ed53db1eebcc3d9d07b0dcb92437a2699700b72cf0bb3729388f
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/raspiblitz-v1.4-2020-02-18.torrent
 
-To see what new features to test and the place to give feedback - see [Milestone v1.4 issues list](https://github.com/rootzoll/raspiblitz/issues?utf8=%E2%9C%93&q=is%3Aissue+milestone%3A%221.4+Release%22+).
+SHA-256: ab35ca7e8c05a02e26b90bcabe82f3e7c0f0bdf104df2bda3fde574e2ff5a72a or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz.sig)
 
 **Write the SD-Card image to your SD Card**
 
-You need to write the downloaded sd card image (the img.gz-file) to your sd card - you can use the very easy tool Balena Etcher for this:
+You need to write the downloaded sd card image (the img.gz-file) to your sd card (16GB minimum) - you can use the very easy tool Balena Etcher for this:
 https://www.balena.io/etcher/ .. it's available for Win, Mac & Linux.
 
 * [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
-* [Whats new in Version 1.3 of RaspiBlitz?](FAQ.md#whats-new-in-version-13-of-raspiblitz)
+* [Whats new in Version 1.4 of RaspiBlitz?](FAQ.md#whats-new-in-version-14-of-raspiblitz)
 * [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Boot your RaspiBlitz
@@ -168,19 +170,17 @@ Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win1
 
 ## Support
 
-Get get help on RaspiBlitz setup and to exchange on how to best manage/run your node - try the community managed telegram group: https://t.me/raspiblitz
-
 If you run into a problem or you have still a question, follow the steps below to get support. Also check the [setup documentation](#setup-process-detailed-documentation) for details.
 
 1. Lookup the [FAQ](FAQ.md) if you can find an answer to this question/problem.
 
-2. Please determine if your problem/question is about RaspiBlitz or for example with LND. For example if you cant route a payment or get an error when opening a channel that is an LND question/problem an is best answered by the LND dev community: https://dev.lightning.community
+2. If you have a hardware problem, please check that your hardware parts are exactly the parts recommended in the shopping list above. Different screens or even SSD-casings can cause problems.
 
-3. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
+3. There is a Telegram Group of RaspiBlitz users helping each other: https://t.me/raspiblitz
 
-4. Check the RaspiBlot Troubleshoot guide: https://stadicus.github.io/RaspiBolt/raspibolt_70_troubleshooting.html (RaspiBolt is very similar to the RaspiBlitz)
+4. Please determine if your problem/question is about RaspiBlitz or for example with LND. For example if you cant route a payment or get an error when opening a channel that is an LND question/problem an is best answered by the LND dev community: https://dev.lightning.community
 
-5. There is a Telegram Group of RaspiBlitz users helping each other: https://t.me/raspiblitz
+5. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
 
 6. If you haven't found an answer yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If it's a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
 
@@ -198,7 +198,7 @@ Automatically after login per SSH as admin to the RaspiBlitz, it will run a hard
 
 If you see a warning there, please read carefully, because a lot of things that go wrong later (errors and even loss of funds) relate of problems with the hardware. If you get an OK here ... you are good to go :)
 
-In the beginning you can choose to run on Bitcoin or Litecoin with Lightning:
+In the beginning you can choose how to setup your RaspiBlitz, by running on Bitcoin or Litecoin with Lightning. This is also the point where you can import a Migration file from an older RaspiBlitz.
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
