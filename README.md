@@ -2,11 +2,11 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.4RC2 with lnd 0.9.0-beta and bitcoin 0.19.1 or litecoin 0.16.3.`
+`Version 1.4 with lnd 0.9.0-beta and bitcoin 0.19.1 or litecoin 0.16.3.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice Display for easy setup & monitoring.**
+**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice display for easy setup & monitoring. Not your Node, not your Rules.**
 
 It's mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
@@ -20,11 +20,18 @@ There are additional services that can be switched on:
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
-As an parallel alternative to the SSH menu there is also the RTL WebUI available (LND API Coverage at 57%):
+As an parallel alternative to the SSH menu there is also the "Ride the Lightning" (RTL) WebUI available:
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
-See more details in the [Feature Documentation](#feature-documentation) & of course you have all the [Fullnode APIs](#interface--apis).
+You can now activate the following Lightning & Bitcoin Apps on the RaspiBlitz:
+
+* ElectRS (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
+* BTCPayServer (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+* BTC-RPC-Explorer (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
+* LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
+* Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 
 ## Time Estimate to Setup a RaspiBlitz
 
@@ -46,9 +53,7 @@ The RaspiBlitz is build from the following minimal parts:
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardware set for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) *(pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)*
-
-*To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org*
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardware set for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com)
 
 ### Amazon Shopping List (buy parts & build it yourself)
 

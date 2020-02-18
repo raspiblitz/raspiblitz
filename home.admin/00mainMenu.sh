@@ -15,9 +15,9 @@ source ${configFile}
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # BASIC MENU INFO
-HEIGHT=14
+HEIGHT=15
 WIDTH=64
-CHOICE_HEIGHT=6
+CHOICE_HEIGHT=7
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
