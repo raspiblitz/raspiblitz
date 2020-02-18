@@ -73,7 +73,8 @@ case $CHOICE in
     ;;
   BACKUP-LND)
     sudo /home/admin/config.scripts/lnd.rescue.sh backup
-    echo "Press ENTER to return to main menu."
+    echo
+    echo "Press ENTER when your backup download is done."
     read key
     /home/admin/00mainMenu.sh
     ;;
