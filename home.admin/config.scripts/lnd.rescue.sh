@@ -63,10 +63,10 @@ if [ ${mode} = "backup" ]; then
   echo ""
   echo "Use password A to authenticate file transfere."
   echo
-  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
-  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
-  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
+  echo "BEWARE: Your Lightning node is now stopped. Its safe to backup the data and"
+  echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again or rebooted its not adviced to restore the backup file anymore because"
+  echo "it cointains then outdated channel data & can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 
