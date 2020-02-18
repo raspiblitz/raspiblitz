@@ -22,13 +22,13 @@ As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is availa
 
 There are further Services that can be switched on:
 
-* ElectRS (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
-* BTCPayServer (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
-* BTC-RPC-Explorer (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
-* LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
-* LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
-* Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
-* Touchscreen, TOR, Autopilot, DynDNS, SSHTunneling, UPS Support, ...
+* **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
+* **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+* **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
+* **LNBits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
+* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+* **Touchscreen, TOR, Autopilot, DynDNS, SSHTunneling, UPS Support, ...**
 
 ## Time Estimate to Setup a RaspiBlitz
 
