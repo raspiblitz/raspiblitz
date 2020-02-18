@@ -74,9 +74,9 @@ case $CHOICE in
   BACKUP-LND)
     sudo /home/admin/config.scripts/lnd.rescue.sh backup
     echo
-    echo "Press ENTER when your backup download is done."
+    echo "Press ENTER when your backup download is done to shutdown."
     read key
-    /home/admin/00mainMenu.sh
+    /home/admin/XXshutdown.sh
     ;;
   MIGRATION)
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
