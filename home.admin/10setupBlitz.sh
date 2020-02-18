@@ -197,8 +197,8 @@ if [ ${isMounted} -eq 1 ]; then
     raspberryPi=0
   fi
 
-  # Bitcoin on older/weak RaspberryPi3
-  if [ ${network} = "bitcoin" ] && [ ${raspberryPi} -gt 3 ]; then
+  # Bitcoin on older/weak RaspberryPi3 (LEGACY)
+  if [ ${network} = "bitcoin" ] && [ ${raspberryPi} -eq 3 ]; then
     echo "Bitcoin-RP3 Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
@@ -207,7 +207,7 @@ if [ ${isMounted} -eq 1 ]; then
     N "CLONE   --> Clone from 2nd HDD (extra Power needed ±6hours)"\
     S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
 
-  # Bitcoin on stronger RaspberryPi4
+  # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
   elif [ ${network} = "bitcoin" ]; then
     echo "Bitcoin-RP4 Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
