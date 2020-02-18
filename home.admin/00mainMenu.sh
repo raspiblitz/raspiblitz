@@ -17,7 +17,7 @@ localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 
 # BASIC MENU INFO
 HEIGHT=17
 WIDTH=64
-CHOICE_HEIGHT=9
+CHOICE_HEIGHT=10
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
