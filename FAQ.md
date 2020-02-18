@@ -628,7 +628,7 @@ Work notes for the process of producing a new sd card image release:
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Power on the Build Laptop (press F12 for boot menu)
-* Connect USB stick with GPG signing keys
+* Connect USB stick with GPG signing keys - decrypt drive if needed
 * Open Terminal and cd into directory of USB Stick under `/media/amnesia`
 * Run `gpg --import ./sub.key`, check and `exit`
 * Disconnect USB stick with GPG keys
