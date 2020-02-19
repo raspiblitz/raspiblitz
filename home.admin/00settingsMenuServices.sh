@@ -75,7 +75,7 @@ m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 22 45 14 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
