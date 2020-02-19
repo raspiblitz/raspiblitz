@@ -27,7 +27,7 @@ fi
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ -d "/home/admin/lndmanage" ]; then
+  if [ "${lndmanage}" == "on" ]; then
     echo "LNDMANAGE already installed"
     exit 1
   fi
@@ -36,9 +36,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   mkdir /home/admin/lndmanage
   sudo chown admin:admin /home/admin/lndmanage
   cd /home/admin/lndmanage
+
   # activate virtual environment
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
+  
   # get dependencies
   sudo apt install -y python3-dev libatlas-base-dev
   python3 -m pip install wheel
