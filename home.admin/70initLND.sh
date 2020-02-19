@@ -393,33 +393,6 @@ ${errMore}
       fi
     fi
 
-##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
-#    echo "****************************************************************************"
-#    echo "* RECOVER LND WALLET BY SEED WORDS"
-#    echo "****************************************************************************"
-#    echo "A) For 'Wallet Password' use your old PASSWORD C"
-#    echo "B) For 'cipher seed mnemonic' answere 'y' and then enter your seed words" 
-#    echo "C) On 'cipher seed passphrase' ONLY enter PASSWORD D if u used it on create"
-#    echo "D) On 'address look-ahead' only enter more than 2500 had lots of channels"
-#    echo "****************************************************************************"
-#    echo ""
-#    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>/home/admin/.error.tmp
-#    error=`cat /home/admin/.error.tmp`
-#    rm /home/admin/.error.tmp 2>/dev/null
-#
-#    if [ ${#error} -gt 0 ]; then
-#      echo ""
-#      echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-#      echo "${error}"
-#      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-#      echo ""
-#      echo "Press ENTER to retry ..."
-#      read key
-#      echo "Starting RETRY ..."
-#      /home/admin/70initLND.sh
-#      exit 1
-#    fi
-
     /home/admin/70initLND.sh
 
   fi # END OLD WALLET
