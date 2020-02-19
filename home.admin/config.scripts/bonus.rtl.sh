@@ -40,7 +40,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     rm -r /home/admin/RTL 2>/dev/null
     git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
     cd /home/admin/RTL
-    git reset --hard v0.5.4
+    git reset --hard v0.6.7
     # check if node_modles exists now
     if [ -d "/home/admin/RTL" ]; then
      echo "OK - RTL code copy looks good"
