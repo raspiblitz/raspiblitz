@@ -56,7 +56,7 @@ def new(stub, wallet_password="", seed_entropy=None):
         print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError GenSeedRequest'")
-        print("errMore='" + details + "'")
+        print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
@@ -75,7 +75,7 @@ def new(stub, wallet_password="", seed_entropy=None):
         print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
-        print("errMore='" + details + "'")
+        print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
@@ -99,7 +99,7 @@ def seed(stub, wallet_password="", seed_words="", seed_password=""):
         print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
-        print("errMore='" + details + "'")
+        print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
@@ -129,7 +129,7 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
         print >> sys.stderr, code
         details = rpc_error_call.details()
         print("err='RPCError InitWallet'")
-        print("errMore='" + details + "'")
+        print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]

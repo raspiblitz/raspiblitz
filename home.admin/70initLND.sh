@@ -359,7 +359,7 @@ to protect the seed words. Most users did not set this.
 
       # trigger wallet recovery
       source /home/admin/python3-env-lnd/bin/activate
-      source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD})
+      source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD} 2>/dev/null)
 
       # check if wallet was created for real
       if [ ${#err} -eq 0 ]; then
