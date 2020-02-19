@@ -236,7 +236,9 @@ elif [ ${mode} = "scb-up" ]; then
   done
 
   # EXIT with CODE 1 --> FILE UPLOADED
+  echo
   echo "# OK channel.backup uploaded"
+  sleep 2
   exit 0
 
 else
