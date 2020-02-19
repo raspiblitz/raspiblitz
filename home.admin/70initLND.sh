@@ -284,7 +284,10 @@ or having a complete LND rescue-backup from your old node.
         exit 1
       else
         clear
-        echo "FILE UPLOADED --> will get checked/activated after blockchain/lightning is synced"
+        echo "channel.backup will get checked/activated after blockchain/lightning is synced"
+        sleep 2
+        echo "NEXT --> Set password for new LND wallet"
+        sleep 3
       fi
     fi
 
