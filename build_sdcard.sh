@@ -496,7 +496,7 @@ lndVersion="0.9.0-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
+PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
 # bitconner
 #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
