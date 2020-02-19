@@ -85,6 +85,16 @@ while :
     # get the local network IP to be displayed on the lCD
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+    # waiting for IP in general
+    if [ ${#localip} -eq 0 ]; then
+      l1="Waiting for Network ...\n"
+      l2="Not able to get local IP.\n"
+      l3="Is LAN cable connected?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
+      sleep 3
+      continue
+    fi
+
     # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
