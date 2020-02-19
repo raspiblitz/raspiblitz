@@ -376,7 +376,12 @@ to protect the seed words. Most users did not set this.
       if [ ${#err} -eq 0 ]; then
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
-      " 7 53
+
+IMPORTANT: After full sync wait an hour - if you
+see still a on-chain balance of 0 satoshis try to
+recover your wallet with the ZAP desktop app and
+then send funds back to your RaspiBlitz.
+      " 12 53
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
