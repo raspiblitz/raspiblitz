@@ -34,7 +34,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   
   echo "*** INSTALL LNDMANAGE ***"
-  mkdir /home/admin/lndmanage
+  mkdir /home/admin/lndmanage 2>/dev/null
   sudo chown admin:admin /home/admin/lndmanage
   cd /home/admin/lndmanage
 
