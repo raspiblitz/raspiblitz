@@ -25,7 +25,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   # On Bitcoin Error
   ####################
 
-  height=5
+  height=6
   width=43
   title="Blockchain Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "blockchain-error" ]; then
@@ -71,7 +71,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
   # On LND Error
   ####################
 
-  height=5
+  height=6
   width=43
   title="Lightning Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
