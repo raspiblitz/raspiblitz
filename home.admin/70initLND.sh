@@ -384,7 +384,10 @@ Something went wrong - see info below:
 ${err}
 ${errMore}
       " 13 72
-          sleep 3
+          clear
+          echo "Restarting LND Wallet Setup .." 
+          sleep 2
+          echo
           /home/admin/70initLND.sh
           exit 1
       fi
