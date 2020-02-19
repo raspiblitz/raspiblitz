@@ -1,5 +1,30 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.4 of RaspiBlitz?
+
+Beside many small improvements and changes, these are most important changes:
+
+- Update: LND version 0.9.0-beta
+- Update: bitcoin-core version 19.0.1-beta
+- Update: litecoin version 0.17.1-beta
+- Update: RTL (Ride the Lightning) Web UI version 0.6.7-beta (redesign)
+- Update: Touchscreen UI (Node Info & Donate)
+- Update: Fee Report on LCD
+- Update: TORv2 -> TORv3
+- Update: New Torrent files
+- New: ElectRS (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
+- New: BTCPayServer (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+- New: LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
+- New: BTC-RPC-Explorer (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
+- New: Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+- New: LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+- New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
+- New: TOR Support to connect mobile Apps
+- New: Migration Export/Import (e.g. HDD -> SSD)
+- New: Start without LCD (switch to HDMI)
+- New: Recovery Sheet (PDF)
+- Experimental: BTRFS [details](https://de.wikipedia.org/wiki/Btrfs)
+
 ## Whats new in Version 1.3 of RaspiBlitz?
 
 Version 1.3 is using the new Raspbian Buster that is ready to use with the RaspberryPi 4 (also still works with RaspberryPi 3).
@@ -25,7 +50,7 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 
 For full details see issue list of [Release 1.3 Milestone](https://github.com/rootzoll/raspiblitz/milestone/6?closed=1).
 
-## How to update my RaspiBlitz from v1.2?
+## How to update my RaspiBlitz from v1.3?
 
 The update should be quite simple - you don't need to close any channels:
 
