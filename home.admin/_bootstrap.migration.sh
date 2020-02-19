@@ -160,6 +160,8 @@ echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
 if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
   echo "detected version change ... starting migration script" >> ${logFile}
   echo "TODO: Update Migration check ... only needed after version 1.0" >> ${logFile}
+  echo "OK Done - Updating version in config ..."
+  sudo sed -i "s/^raspiBlitzVersion=.*/raspiBlitzVersion='${codeVersion}'/g" ${configFile}
 else
   echo "OK - version of config data is up to date" >> ${logFile}
 fi
