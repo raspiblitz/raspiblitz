@@ -393,6 +393,7 @@ ${errMore}
       fi
     fi
 
+    clear
     /home/admin/70initLND.sh
 
   fi # END OLD WALLET
