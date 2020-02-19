@@ -487,7 +487,8 @@ if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${lndmanage}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
   fi
 else 
