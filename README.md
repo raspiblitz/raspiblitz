@@ -136,7 +136,7 @@ Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz](https://rasp
 
 Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-20.img.gz.torrent
 
-SHA-256: TODO or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
+SHA-256: 55b1989a45e99ecc56b74febddfa98f52271799105cc80900b09cc67e73df078 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
 
 **Write the SD-Card image to your SD Card**
 
