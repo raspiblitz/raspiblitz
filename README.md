@@ -132,11 +132,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.4:**
 
-Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz](https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz)
+Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz)
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-18.img.gz.torrent
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-20.img.gz.torrent
 
-SHA-256: 051af0f8923c179e9e74ee17597ff1d7733d5737b94b4e2e0319f1bdc7cf0ffa or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-18.img.gz.sig)
+SHA-256: TODO or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
 
 **Write the SD-Card image to your SD Card**
 
