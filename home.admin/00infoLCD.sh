@@ -305,8 +305,8 @@ while :
       # echo "Config Not Valid!"
       l1="POTENTIAL CONFIG ERROR FOUND\n"
       l2="ssh admin@${localip}\n"
-      l3="use PasswordA and then run:\n"
-      l4="/home/admin/config.scripts/blitz.configcheck.py"
+      l3="use Password A\n"
+      l4="Run on Terminal command: check"
       dialog --backtitle "RaspiBlitz ${codeVersion} cfg-err ${localip}" --infobox "$l1$l2$l3$l4" 6 50
       sleep 20
       continue

@@ -30,6 +30,11 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: check
+function check() {
+  /home/admin/config.scripts/blitz.configcheck.py
+}
+
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"

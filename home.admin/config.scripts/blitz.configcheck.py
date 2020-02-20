@@ -190,6 +190,8 @@ def main():
             if not args.quiet:
                 print("LND Config: \t\tERROR")
                 log.warning(err)
+                print("# Use command to fix: sudo nano /mnt/hdd/lnd/lnd.conf")
+                print("# CTRL+o to save / CRTL+x to exit / then reboot")
 
     else:
         if not args.quiet:
@@ -211,6 +213,8 @@ def main():
             if not args.quiet:
                 print("RaspiBlitz Config: \tERROR")
                 log.warning(err)
+                print("# Use command to fix: nano /mnt/hdd/raspiblitz.conf")
+                print("# CTRL+o to save / CRTL+x to exit / then reboot")
 
     else:
         if not args.quiet:
