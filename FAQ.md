@@ -889,3 +889,18 @@ Once the Blitz is running on BTRFS you can use the '/home/admin/config.scripts/b
 This articles goes thru the usual options:
 https://ownyourbits.com/2019/03/03/how-to-recover-a-btrfs-partition/
 https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
+
+## How do I fix a displayed Error in my Config?
+
+When the LCD display is telling you to do config check:
+- go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
+- start reboot with command: './XXshutdown.sh reboot' 
+- go to the RaspiBlitz terminal run the command: 'check'
+- now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
+- save config with: CTRL+o
+- exit nano editor with: CTRL+x
+- start reboot with command: './XXshutdown.sh reboot' 
+
+## How to fix my upside down LCD after update?
+
+Some displays have a different orientation. To fix this activate/deactivate the LCD-ROTATION option in the MAINMENU > SERVICES and let it reboot. YOu might need to do this up to 3 times until your display got it right.
