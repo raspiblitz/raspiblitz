@@ -23,7 +23,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: Migration Export/Import (e.g. HDD -> SSD)
 - New: Start without LCD (switch to HDMI)
 - New: Recovery Sheet (PDF)
-- Experimental: BTRFS [details](https://de.wikipedia.org/wiki/Btrfs)
+- Experimental: BTRFS [details](FAQ.md#why-use-btrfs-on-raspiblitz)
 
 For full details see issue list of [Release 1.4 Milestone](https://github.com/rootzoll/raspiblitz/milestone/7?closed=1).
 

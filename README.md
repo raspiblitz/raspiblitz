@@ -257,7 +257,7 @@ If you connected a fresh Hard Drive or SSD to the RaspiBlitz it might now ask yo
 
 <img src="pictures/ssh4-formatHDD.png" alt="format-HDD" width="366">
 
-*Your HDD/SSD will get formatted with the linux standard file system EXT4. If you want to try out the experimental new BTRFS that RaspiBlitz supports since v1.4 - you need to start the setup with an additional 32GB USB thumb drive connected to the second USB3 port of the RaspberryPi. Then you will unlock this new secret feature.*
+*Your HDD/SSD will get formatted with the linux standard file system EXT4. If you want to try out the experimental new [BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz) that RaspiBlitz supports since v1.4 - you need to start the setup with an additional 32GB USB thumb drive connected to the second USB3 port of the RaspberryPi. Then you will unlock this new secret feature.*
 
 After formatting you need to get a copy of the blockchain, the RaspiBlitz offers the following options:
 
@@ -815,7 +815,7 @@ If you start MIGRATION you will need in the next step to format your HDD/SSD.
 
 ![MIGRATION1](pictures/migration1.png)
 
-Normally you choose here the EXT4 format. But you have also have the option to choose the BTRFS format which is an expiremental feature under RaspiBlitz - see FAQ for details on BTRFS.
+Normally you choose here the EXT4 format. But you have also have the option to choose the BTRFS format which is an expiremental feature under RaspiBlitz - see [FAQ for details on BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz).
 
 Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you. 
 
