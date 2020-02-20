@@ -203,7 +203,7 @@ Automatically after login per SSH as admin to the RaspiBlitz, it will run a hard
 
 If you see a warning there, please read carefully, because a lot of things that go wrong later (errors and even loss of funds) relate of problems with the hardware. If you get an OK here ... you are good to go :)
 
-In the beginning you can choose how to setup your RaspiBlitz, by running on Bitcoin or Litecoin with Lightning. This is also the point where you can import a Migration file from an older RaspiBlitz - read about Migration further down. The default is here to choose Bitcoin.
+In the beginning you can choose how to setup your RaspiBlitz, by running on Bitcoin or Litecoin with Lightning. This is also the point where you can import a Migration file from an older RaspiBlitz - read about Migration [further down](README.md#import-a-migration-file). The default is here to choose Bitcoin.
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
@@ -758,7 +758,7 @@ This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download pe
 
 ##### MIGRATION: Migrate Bitz Date to new Hardware
 
-This stops your RaspiBlitz and creates a Migration ZIP file you can download/export per SCP to your laptop. This contains all important data of your RaspiBlitz including LND, your Blitz configuration and also data from your installed apps. Can be used to migrate your RaspiBlitz to a new hardware - for example if your want to replace the HDD with a SSD.
+This stops your RaspiBlitz and creates a Migration ZIP file you can download/export per SCP to your laptop. This contains all important data of your RaspiBlitz including LND, your Blitz configuration and also data from your installed apps. Can be used to migrate your RaspiBlitz to a new hardware - for example if your want to replace the HDD with a SSD. How to import a Migration File [see here](README.md#import-a-migration-file).
 
 *NOTICE: If you start your RaspiBlitz after exporting the migration file again it is outdated and using it can risk loosing your channel funds.*
 
@@ -805,6 +805,8 @@ With the command `raspiblitz` it's possible to return to the main menu.
 
 As mentioned above you can export a Migration File from your Raspiblitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
 
+A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, TOR/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
+
 If you want to it to import it again to a new RaspiBlitz (for example with an updated HDD/SSD) you can choose the MIGRATION option on the first setup dialog after the Hardwaretest (where you normally choose between Bitcoin & Litecoin).
 
 ![SSH0](pictures/ssh0-welcome2.png)
@@ -821,7 +823,7 @@ Finally you need to decide how to get a copy of the blockchain data again for yo
 
 ![MIGRATION2](pictures/migration2.png)
 
-Here you have the two options [SYNC](README.md#) and [COPY](README.md#) as mentioned in the normal setup.
+Here you have the two options [SYNC](README.md#1-sync---selfvalidate-all-blocks) and [COPY](README.md#2-copy---copy-from-laptop-or-another-raspiblitz-over-local-network) as mentioned in the normal setup.
 
 Then RaspiBlitz will reboot and start the normal recovery process to install all the services that are defined by the raspiblitz.config from your Migration File.
 
@@ -843,6 +845,8 @@ To develop your own scripts/apps and to connect other services/apps to your Rasp
 * `lnd` running on port 9735 (public)
 * `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
 * `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
+
+If you activate TOR then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
 
 ### Backup for On-Chain- & Channel-Funds
 

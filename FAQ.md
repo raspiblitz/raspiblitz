@@ -860,6 +860,30 @@ To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on apc
 
 If you have other UPS models or ways to connect ... feel free to extend this script.
 
+## Why use BTRFS on RaspiBlitz?
+
+The file system [BTRFS](https://de.wikipedia.org/wiki/Btrfs) for your HDD/SSD provides two new features to make the datastorage more resilient:
+
+### Storing your important Data in RAID1 with a USB Thumb Drive
+
+BTRFS comes with build in RAID features - that means that data can be stored on two physical drives at the same time and if one is failing the other one can be used to heal the other one or its replacement.
+
+For the Raspiblitz this means that you can connect an additional 32GB USB3 Thumb Drive (under 10 USD) and have it running in a RAID with your HDD/SSD - having your LND channel data and all other important data of your RaspiBlitz double safe.
+
+### Snapshotting the Blockchain
+
+BTRFS comes with a build in snapshot feature - that means that your RaspiBlitz can make every day a backup of the blockchain data and if a blockchain corruption occurs (exmaple thru a power outage) there is no need to sync the complete chain again. Just switch back to the last backup state and quickly sync up from there. On BTRFS such backups can be done as snapshots that dont need much more space on the drive and are quicly done - no need to buy a bigger SSD or wait for copying over 200GB.
+
+## How to use BTRFS on RaspiBlitz?
+
+Because the BTRFS is still experimental its a bit hidden to activate. There are two ways:
+
+- When you start a fresh setup just connect a 32GB Thumb Drive on the second USB3 port from the beginning and you should be asked during HDD setup if you want to try out BTRFS and gave the Thumb Drive as RAID1.
+
+- If you have a existing RaspiBlitz you want to switch to BTRFS then you need to export a Migration File (MAINMENU > REPAIR > MIGRATION) an then format your HDD/SSD clean. When you import a Migration File during a fresh Setup (see above) you will get the option to format the HDD/SSD with BTRFS. 
+
+Once the Blitz is running on BTRFS you can use the '/home/admin/config.scripts/blitz.datadrive.sh' script to add a RAID drive or make a snapshot.
+
 ## How to recover a BTRFS partition?
 
 This articles goes thru the usual options:
