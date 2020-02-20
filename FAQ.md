@@ -20,9 +20,9 @@ Beside many small improvements and changes, these are most important changes:
 - New: LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 - New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 - New: TOR Support to connect mobile Apps
-- New: Migration Export/Import (e.g. HDD -> SSD)
-- New: Start without LCD (switch to HDMI)
-- New: Recovery Sheet (PDF)
+- New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
+- New: Start without LCD (switch to HDMI) [details](FAQ.md#can-i-run-the-raspiblitz-without-a-displaylcd)
+- New: Recovery Sheet (PDF) [details](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
 - Experimental: BTRFS [details](FAQ.md#why-use-btrfs-on-raspiblitz)
 
 For full details see issue list of [Release 1.4 Milestone](https://github.com/rootzoll/raspiblitz/milestone/7?closed=1).
