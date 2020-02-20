@@ -143,7 +143,7 @@ SHA-256: 55b1989a45e99ecc56b74febddfa98f52271799105cc80900b09cc67e73df078 or [SI
 You need to write the downloaded sd card image (the img.gz-file) to your sd card (16GB minimum) - you can use the very easy tool Balena Etcher for this:
 https://www.balena.io/etcher/ .. it's available for Win, Mac & Linux.
 
-* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-since-12)
+* [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [Whats new in Version 1.4 of RaspiBlitz?](FAQ.md#whats-new-in-version-14-of-raspiblitz)
 * [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 

@@ -27,6 +27,8 @@ Beside many small improvements and changes, these are most important changes:
 
 For full details see issue list of [Release 1.4 Milestone](https://github.com/rootzoll/raspiblitz/milestone/7?closed=1).
 
+Find the full Tutorial how to build a RaspiBlitz in the [README](README.md) or follow the [instructions to update to the latest version](README.md#updating-raspiblitz-to-new-version).
+
 ## Whats new in Version 1.3 of RaspiBlitz?
 
 Version 1.3 is using the new Raspbian Buster that is ready to use with the RaspberryPi 4 (also still works with RaspberryPi 3).
