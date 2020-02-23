@@ -665,7 +665,7 @@ It can be used as:
 
 You can also develop extensions on it.
 
-[Details on Service](https://github.com/bitromortac/lndmanage/blob/master/README.md)
+[Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
 
 #### MOBILE: Connect Mobile Wallet
 
