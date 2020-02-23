@@ -218,7 +218,7 @@ if [ "$1" = "import" ]; then
     echo "# OK -> checksum looks good: ${md5checksum}"
   else
     echo "# FAIL -> Checksum not correct: ${md5checksum}"
-    echo "# Maybe transfere/upload failed?"
+    echo "# Maybe transfer/upload failed?"
     echo "error='bad checksum'"
     exit 1
   fi

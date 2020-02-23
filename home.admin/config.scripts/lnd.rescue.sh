@@ -128,7 +128,7 @@ elif [ ${mode} = "restore" ]; then
           echo "OK -> checksum looks good: ${md5checksum}"
         else
           echo "!!! FAIL -> Checksum not correct."
-          echo "Maybe transfere failed? Continue on your own risk!"
+          echo "Maybe transfer failed? Continue on your own risk!"
           echo "Recommend to abort and upload again!"
         fi
 
