@@ -41,6 +41,22 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# get HDD info
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+# check if HDD is mounted
+if [ ${isMounted} -eq 0 ]; then
+  echo "FAIL - HDD is not mounted"
+  exit 1
+fi
+
+# check if HDD is big enough
+if [ ${hddGigaBytes} -lt 800 ]; then
+  echo "FAIL - HDD is too small to run copy station (+/- 1TB needed)"
+  exit 1
+fi
+
+
 # make sure that its running in screen
 # call with '-foreground' to prevent running in screen
 if [ "$1" != "-foreground" ]; then 
@@ -71,21 +87,6 @@ if [ -d "$pathBitcoinBlockchain" ]; then
   echo "OK found $pathBitcoinBlockchain"
 else
   echo "FAIL path of 'pathBitcoinBlockchain' does not exists: ${pathBitcoinBlockchain}"
-  exit 1
-fi
-
-# get HDD info
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
-# check if HDD is mounted
-if [ ${isMounted} -eq 0 ]; then
-  echo "FAIL - HDD is not mounted"
-  exit 1
-fi
-
-# check if HDD is big enough
-if [ ${hddGigaBytes} -lt 800 ]; then
-  echo "FAIL - HDD is too small to run copy station (+/- 1TB needed)"
   exit 1
 fi
 
