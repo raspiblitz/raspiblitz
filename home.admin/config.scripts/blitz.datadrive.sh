@@ -196,6 +196,12 @@ if [ "$1" = "status" ]; then
       echo "hddGotBlockchain=0"
     fi
 
+    # check size in bytes and GBs
+    size=$(lsblk -o NAME,SIZE -b | grep "^${hdd}" | awk '$1=$1' | cut -d " " -f 2)
+    echo "hddBytes=${size}"
+    hddGigaBytes=$(echo "scale=0; ${size}/1024/1024/1024" | bc -l)
+    echo "hddGigaBytes=${hddGigaBytes}"
+
     # used space - at the moment just string info to display
     if [ ${isBTRFS} -eq 0 ]; then
       # EXT4 calculations
