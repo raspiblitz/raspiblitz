@@ -17,7 +17,7 @@ pathBitcoinBlockchain="/mnt/hdd/bitcoin"
 pathLitecoinBlockchain="/mnt/hdd/litecoin"
 
 # where to find the RaspiBlitz HDD template directory (no trailing /)
-pathTemplateHDD="/mnt/hdd/templateHDD"
+pathTemplateHDD="/mnt/hdd/app-storage/templateHDD"
 
 # 0 = ask before formatting/init new HDD
 # 1 = auto-formatting every new HDD that needs init
@@ -74,6 +74,21 @@ else
   exit 1
 fi
 
+# get HDD info
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+# check if HDD is mounted
+if [ ${isMounted} -eq 0 ]; then
+  echo "FAIL - HDD is not mounted"
+  exit 1
+fi
+
+# check if HDD is big enough
+if [ ${hddGigaBytes} -lt 800 ]; then
+  echo "FAIL - HDD is too small to run copy station (+/- 1TB needed)"
+  exit 1
+fi
+
 # check that path information is valid
 if [ -d "$pathTemplateHDD" ]; then
   echo "OK found $pathTemplateHDD"
@@ -92,7 +107,7 @@ if [ "${nointeraction}" == "1" ]; then
   echo "setting RaspiBlitz LCD info"
   sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
   sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
-  echo "Disconnect target HDDs! .. 30ses until continue."
+  echo "Disconnect target HDDs! .. 30sec until continue."
   sleep 30
 else
   echo
