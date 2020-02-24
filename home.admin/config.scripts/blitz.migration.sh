@@ -145,7 +145,7 @@ if [ "$1" = "export-gui" ]; then
   echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
   echo "${scpDownload}"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
   echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
   echo "To complete the data migration follow then instructions on the github FAQ."
@@ -218,7 +218,7 @@ if [ "$1" = "import" ]; then
     echo "# OK -> checksum looks good: ${md5checksum}"
   else
     echo "# FAIL -> Checksum not correct: ${md5checksum}"
-    echo "# Maybe transfere/upload failed?"
+    echo "# Maybe transfer/upload failed?"
     echo "error='bad checksum'"
     exit 1
   fi
@@ -326,7 +326,7 @@ if [ "$1" = "import-gui" ]; then
   echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
   echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
   echo ""
-  echo "Use password 'raspiblitz' to authenticate file transfere."
+  echo "Use password 'raspiblitz' to authenticate file transfer."
   echo "PRESS ENTER when upload is done."
   read key
 
