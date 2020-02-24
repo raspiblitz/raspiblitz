@@ -72,30 +72,30 @@ if [ "$1" != "-foreground" ]; then
   screenPID=$(screen -ls | grep "copystation" | cut -d "." -f1 | xargs)
   if [ ${#screenPID} -eq 0 ]; then
     # start copystation in sreen 
-    echo "starting copystation screen session"
+    echo "# starting copystation screen session"
     screen -S copystation -dm /home/admin/XXcopyStation.sh -foreground
     screen -d -r
     exit 0
   else
-    echo "changing into running copystation screen session"
+    echo "# changing into running copystation screen session"
     screen -d -r
     exit 0
   fi
 fi
 
 clear
-echo "******************************"
-echo "RASPIBLITZ COPYSTATION SCRIPT"
-echo "******************************"
+echo "# ******************************"
+echo "# RASPIBLITZ COPYSTATION SCRIPT"
+echo "# ******************************"
 echo
 
 echo "*** CHECKING CONFIG"
 
 # check that path information is valid
 if [ -d "$pathTemplateHDD" ]; then
-  echo "OK found $pathTemplateHDD"
+  echo "# OK found $pathTemplateHDD"
 else
-  echo "Creating: ${pathTemplateHDD}"
+  echo "# Creating: ${pathTemplateHDD}"
   mkdir ${pathTemplateHDD}
   chmod 777 ${pathTemplateHDD}
 fi
@@ -104,29 +104,26 @@ fi
 systemctl stop lnd 2>/dev/null
 systemctl stop background 2>/dev/null
 
-
-if [ "${nointeraction}" == "1" ]; then
-  echo "setting RaspiBlitz LCD info"
-  sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
-  sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
-  echo "Disconnect target HDDs! .. 30sec until continue."
-  sleep 30
-else
-  echo
-  echo "*** INIT HDD SCAN"
-  echo "Please make sure that no HDDs that you want to sync later to are not connected now."
-  echo "PRESS ENTER when ready."
-  read key
-fi
+#if [ "${nointeraction}" == "1" ]; then
+#  echo "setting RaspiBlitz LCD info"
+#  sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
+#  sudo sed -i "s/^message=.*/message='Disconnect target HDDs!'/g" /home/admin/raspiblitz.info 2>/dev/null
+#  echo "Disconnect target HDDs! .. 30sec until continue."
+#  sleep 30
+#else
+#  echo
+#  echo "*** INIT HDD SCAN"
+#  echo "Please make sure that no HDDs that you want to sync later to are not connected now."
+#  echo "PRESS ENTER when ready."
+#  read key
+#fi
 
 # finding system drives (the drives that should not be synced to)
-systemDrives=$(lsblk -o NAME | grep "^sd")
-echo "OK - the following drives detected as system drives:"
-echo "$systemDrives"
+echo "# OK - the following drives detected as the system drive: $datadisk"
 echo
 
 if [ "${nointeraction}" == "1" ]; then
-  sudo sed -i "s/^message=.*/message='Connect now target HDDs ..'/g" /home/admin/raspiblitz.info 2>/dev/null
+  sudo sed -i "s/^message=.*/message='Connect target HDDs ..'/g" /home/admin/raspiblitz.info 2>/dev/null
   sleep 5
 fi
 
@@ -149,7 +146,7 @@ do
   # only execute every 30min
   nowTimestamp=$(date +%s)
   secondsDiff=$(echo "${nowTimestamp}-${lastBlockchainUpdateTimestamp}" | bc)
-  echo "seconds since last update from bitcoind: ${secondsDiff}"
+  echo "# seconds since last update from bitcoind: ${secondsDiff}"
   echo
 
   if [ ${secondsDiff} -gt 3000 ]; then
@@ -159,42 +156,44 @@ do
     echo "******************************"
 
     # stop blockchains
-    echo "Stopping Blockchain ..."
+    echo "# Stopping Blockchain ..."
     systemctl stop bitcoind 2>/dev/null
     systemctl stop litecoind 2>/dev/null
     sleep 10
 
     # sync bitcoin
-    echo "Syncing Bitcoin ..."
+    echo "# Syncing Bitcoin to template folder ..."
 
     sudo sed -i "s/^message=.*/message='Updating Template: Bitcoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
     # make sure the bitcoin directory in template folder exists
     if [ ! -d "$pathTemplateHDD/bitcoin" ]; then
-      echo "creating the bitcoin subfolder in the template folder"
+      echo "# creating the bitcoin subfolder in the template folder"
       mkdir ${pathTemplateHDD}/bitcoin
       chmod 777 ${pathTemplateHDD}/bitcoin
     fi
 
-    rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathBitcoinBlockchain}/testnet3 ${pathTemplateHDD}/bitcoin
+    # do the sync to the template folder for BITCOIN
+    rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathTemplateHDD}/bitcoin
 
     if [ -d "${pathLitecoinBlockchain}" ]; then
 
       # sync litecoin
-      echo "Syncing Litecoin ..."
+      echo "# Syncing Litecoin ..."
 
-      echo "creating the litecoin subfolder in the template folder"
+      echo "# creating the litecoin subfolder in the template folder"
       mkdir ${pathTemplateHDD}/litecoin 2>/dev/null
       chmod 777 ${pathTemplateHDD}/litecoin 2>/dev/null
 
       sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
+      # do the sync to the template folder for LITECOIN
       rsync -a --info=progress2 ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
 
     fi
 
     # restart bitcoind (to let further setup while syncing HDDs)
-    echo "Restarting Blockchain ..."
+    echo "# Restarting Blockchain ..."
     systemctl start bitcoind 2>/dev/null
     systemctl start litecoind 2>/dev/null
 
@@ -208,7 +207,7 @@ do
   sleep 4
   echo "" > ./.syncinfo.tmp
   lsblk -o NAME | grep "^sd" | while read -r detectedDrive ; do
-    isSystemDrive=$(echo "${systemDrives}" | grep -c "${detectedDrive}")
+    isSystemDrive=$(echo "${datadisk}" | grep -c "${detectedDrive}")
     if [ ${isSystemDrive} -eq 0 ]; then
 
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
@@ -227,68 +226,42 @@ do
         size=$(lsblk -o NAME,SIZE -b | grep "^${detectedDrive}" | awk '$1=$1' | cut -d " " -f 2)
         echo "size: ${size}"
         if [ ${size} -lt 250000000000 ]; then
-          read key
             whiptail --title "FAIL" --msgbox "
 THE DEVICE IS TOO SMALL <250GB
 Please remove device and PRESS ENTER
             " 9 46
         else
 
-          # find biggest partition
-          biggestSize=0
-          lsblk -o NAME,SIZE -b | grep "─${detectedDrive}" | while read -r partitionLine ; do
-            partition=$(echo "${partitionLine}" | cut -d ' ' -f 1 | tr -cd "[:alnum:]")
-            size=$(echo "${partitionLine}" | tr -cd "[0-9]")
-            if [ ${size} -gt ${biggestSize} ]; then
-              formatPartition="${partition}"
-              biggestSize=$size
-            fi
-            echo "${formatPartition}" > .formatPartition.tmp    
-          done
-
-          formatPartition=$(cat .formatPartition.tmp)
-          rm .formatPartition.tmp
-          
-          if [ ${#formatPartition} -eq 0 ]; then
-            whiptail --title "FAIL" --msgbox "
-NO PARTITIONS FOUND ON THAT DEVICE
-Format on external computer with FAT32 first.
-Please remove device now.
-            " 10 46
-          else
-
-            # if config value "nointeraction=1" default to format
-            if [ "${nointeraction}" != "1" ]; then
-              whiptail --title "Format HDD" --yes-button "Format" --no-button "Cancel" --yesno "
+          # if config value "nointeraction=1" default to format
+          if [ "${nointeraction}" != "1" ]; then
+            whiptail --title "Format HDD" --yes-button "Format" --no-button "Cancel" --yesno "
 Found new HDD. Do you want to FORMAT now?
-Please temp lable device with: ${formatPartition}
-              " 10 54
-              choice=$?
-            else
-              choice=0
-              sudo sed -i "s/^message=.*/message='Formatting new HDD: ${formatPartition}'/g" /home/admin/raspiblitz.info 2>/dev/null
-            fi
-
-            # on cancel
-            if [ "${choice}" != "0" ]; then
-              whiptail --title "Format HDD" --msgbox "
-OK NO FORMAT - Please remove decive now.
-              " 8 46
-              exit 1
-            fi
-
-            # format the HDD
-            echo "Starting Formatting of device ..."
-            sudo mkfs.ext4 /dev/${formatPartition} -F -L BLOCKCHAIN
-
+Lable of device with: ${detectedDrive}
+            " 10 54
+            choice=$?
+          else
+            choice=0
+            sudo sed -i "s/^message=.*/message='Formatting new HDD: ${formatPartition}'/g" /home/admin/raspiblitz.info 2>/dev/null
           fi
+
+          # on cancel
+          if [ "${choice}" != "0" ]; then
+            whiptail --title "Format HDD" --msgbox "
+OK NO FORMAT - Please remove decive now.
+            " 8 46
+            exit 1
+          fi
+
+          # format the HDD
+          echo "Starting Formatting of device ${detectedDrive} ..."
+          sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${detectedDrive}
 
         fi
 
       fi # end init new HDD
 
       ################################################
-      # 3. sync HDD with template data      
+      # 3. sync HDD with template data
 
       partition=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep "BLOCKCHAIN" | cut -d ' ' -f 1 | tr -cd "[:alnum:]")
       if [ ${#partition} -gt 0 ]; then
@@ -301,15 +274,13 @@ OK NO FORMAT - Please remove decive now.
         # rsync device
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
-          if [ "${nointeraction}" == "1" ]; then
-            sudo sed -i "s/^message=.*/message='Syncing from Template: ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
-          fi
+          sudo sed -i "s/^message=.*/message='Syncing Template -> ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
           rsync -a --info=progress2 ${pathTemplateHDD}/* /mnt/hdd2
           chmod -r 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
           echo "${partition} " >> ./.syncinfo.tmp
         else
-          echo "FAIL: was not able to mount --> ${partition}"
+          echo "# FAIL: was not able to mount --> ${partition}"
         fi
         
         # unmount device
