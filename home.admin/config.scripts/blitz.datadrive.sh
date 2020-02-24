@@ -303,14 +303,16 @@ if [ "$1" = "format" ]; then
     exit 1
   fi
 
-  >&2 echo "# Checking on SWAP"
-  if [ ${isSwapExternal} -eq 1 ]; then
-    >&2 echo "# Switching off external SWAP"
+  # get basic info on data drives 
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  if [ ${isSwapExternal} -eq 1 ] && [ "${hdd}" == "${datadisk}" ]; then
+    >&2 echo "# Switching off external SWAP of system drive"
     sudo dphys-swapfile swapoff 1>/dev/null
     sudo dphys-swapfile uninstall 1>/dev/null
   fi
 
-  >&2 echo "# Unmounting all data drives"
+  >&2 echo "# Unmounting all partitions of this device"
   # remove device from all system mounts (also fstab)
   lsblk -o NAME,UUID | grep "${hdd}" | awk '$1=$1' | cut -d " " -f 2 | grep "-" | while read -r uuid ; do
     >&2 echo "# Cleaning /etc/fstab from ${uuid}"
@@ -319,24 +321,26 @@ if [ "$1" = "format" ]; then
   done
   sudo mount -a
 
-  # unmount drives
-  sudo umount /mnt/hdd 2>/dev/null
-  sudo umount /mnt/temp 2>/dev/null
-  sudo umount /mnt/storage 2>/dev/null
-  unmounted1=$(df | grep -c "/mnt/hdd")
-  if [ ${unmounted1} -gt 0 ]; then
-    echo "error='failed to unmount /mnt/hdd'"
-    exit 1
-  fi
-  unmounted2=$(df | grep -c "/mnt/temp")
-  if [ ${unmounted2} -gt 0 ]; then
-    echo "error='failed to unmount /mnt/temp'"
-    exit 1
-  fi
-  unmounted3=$(df | grep -c "/mnt/storage")
-  if [ ${unmounted3} -gt 0 ]; then
-    echo "error='failed to unmount /mnt/storage'"
-    exit 1
+  if [ "${hdd}" == "${datadisk}" ]; then
+    >&2 echo "# Make sure system drives are unmounted .."
+    sudo umount /mnt/hdd 2>/dev/null
+    sudo umount /mnt/temp 2>/dev/null
+    sudo umount /mnt/storage 2>/dev/null
+    unmounted1=$(df | grep -c "/mnt/hdd")
+    if [ ${unmounted1} -gt 0 ]; then
+      echo "error='failed to unmount /mnt/hdd'"
+      exit 1
+    fi
+    unmounted2=$(df | grep -c "/mnt/temp")
+    if [ ${unmounted2} -gt 0 ]; then
+      echo "error='failed to unmount /mnt/temp'"
+      exit 1
+    fi
+    unmounted3=$(df | grep -c "/mnt/storage")
+    if [ ${unmounted3} -gt 0 ]; then
+      echo "error='failed to unmount /mnt/storage'"
+      exit 1
+    fi
   fi
 
   # wipe all partitions and write fresh GPT
@@ -360,6 +364,9 @@ fi
 # formatting old: EXT4
 if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
+  # prepare temo mount point
+  sudo mkdir -p /tmp/ext4 1>/dev/null
+
   # write new EXT4 partition
   >&2 echo "# Creating the one big partition"
   sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>/dev/null 2>/dev/null
@@ -382,10 +389,10 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
   done
 
   # make sure /mnt/hdd is unmounted before formatting
-  sudo umount -f /mnt/hdd 2>/dev/null
-  unmounted=$(df | grep -c "/mnt/hdd")
+  sudo umount -f /tmp/ext4 2>/dev/null
+  unmounted=$(df | grep -c "/tmp/ext4")
   if [ ${unmounted} -gt 0 ]; then
-    echo "error='failed to unmount /mnt/hdd'"
+    echo "error='failed to unmount /tmp/ext4'"
     exit 1
   fi
 
@@ -408,7 +415,7 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
   # setting fsk check intervall to 1
   # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
-  sudo tune2fs -c 1 /dev/sda1
+  sudo tune2fs -c 1 /dev/${hdd}1
 
   >&2 echo "# OK EXT 4 format done"
   exit 0
