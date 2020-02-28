@@ -207,7 +207,7 @@ do
 
   echo
   echo "**************************************"
-  echo "SYNCING TEMPLATE -> CONNECTED HDS/SSD"
+  echo "SYNCING TEMPLATE -> CONNECTED HDD/SSDs"
   echo "**************************************"
 
   sleep 4
