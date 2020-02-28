@@ -282,6 +282,7 @@ OK NO FORMAT - Please remove decive now.
           targetSize=$(sudo du -s -b /mnt/hdd2 | awk '$1=$1' | cut -d " " -f1)
           echo "templateSize(${templateSize})"
           echo "targetSize(${targetSize})"
+          sleep 3
           if [ ${targetSize} -lt ${templateSize} ] || [ ${targetSize} -gt ${templateSize} ]; then
             echo "!! NOT THE SAME AFTER RSYNC"
             sleep 10
