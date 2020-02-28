@@ -205,6 +205,11 @@ do
   ################################################
   # 2. detect connected HDDs and loop thru them
 
+  echo
+  echo "**************************************"
+  echo "SYNCING TEMPLATE -> CONNECTED HDS/SSD"
+  echo "**************************************"
+
   sleep 4
   echo "" > ./.syncinfo.tmp
   lsblk -o NAME | grep "^sd" | while read -r detectedDrive ; do
@@ -277,17 +282,6 @@ OK NO FORMAT - Please remove decive now.
         if [ ${mountOK} -eq 1 ]; then
           sudo sed -i "s/^message=.*/message='Syncing Template -> ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
-          # check rsync
-          templateSize=$(sudo du -s -b ${pathTemplateHDD} | awk '$1=$1' | cut -d " " -f1)
-          targetSize=$(sudo du -s -b /mnt/hdd2 | awk '$1=$1' | cut -d " " -f1)
-          echo "templateSize(${templateSize})"
-          echo "targetSize(${targetSize})"
-          sleep 3
-          if [ ${targetSize} -lt ${templateSize} ] || [ ${targetSize} -gt ${templateSize} ]; then
-            echo "!! NOT THE SAME AFTER RSYNC"
-            sleep 10
-            echo "!NOTSAME!->" >> ./.syncinfo.tmp
-          fi
           sudo chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
           echo "${partition} " >> ./.syncinfo.tmp
