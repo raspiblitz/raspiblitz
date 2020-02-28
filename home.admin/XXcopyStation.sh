@@ -174,9 +174,10 @@ do
     fi
 
     # do the sync to the template folder for BITCOIN
-    rsync -a --info=progress2 ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathTemplateHDD}/bitcoin
+    rsync -a --info=progress2 --delete ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathTemplateHDD}/bitcoin
 
-    if [ -d "${pathLitecoinBlockchain}" ]; then
+    litecoindirsize=$(sudo du -s -b /mnt/hdd/bitcoin | awk '$1=$1' | cut -d " " -f1)
+    if [ -d "${pathLitecoinBlockchain}" ] && [ ${litecoindirsize} -gt 1000000000 ]; then
 
       # sync litecoin
       echo "# Syncing Litecoin ..."
@@ -188,7 +189,7 @@ do
       sudo sed -i "s/^message=.*/message='Updating Template: Litecoin'/g" /home/admin/raspiblitz.info 2>/dev/null
 
       # do the sync to the template folder for LITECOIN
-      rsync -a --info=progress2 ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
+      rsync -a --info=progress2 --delete ${pathLitecoinBlockchain}/chainstate ${pathLitecoinBlockchain}/blocks ${pathTemplateHDD}/litecoin
 
     fi
 
@@ -275,7 +276,7 @@ OK NO FORMAT - Please remove decive now.
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
           sudo sed -i "s/^message=.*/message='Syncing Template -> ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
-          rsync -a --info=progress2 ${pathTemplateHDD}/* /mnt/hdd2
+          rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           sudo chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
           echo "${partition} " >> ./.syncinfo.tmp
