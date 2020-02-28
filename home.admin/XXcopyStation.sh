@@ -176,7 +176,7 @@ do
     # do the sync to the template folder for BITCOIN
     rsync -a --info=progress2 --delete ${pathBitcoinBlockchain}/chainstate ${pathBitcoinBlockchain}/blocks ${pathTemplateHDD}/bitcoin
 
-    litecoindirsize=$(sudo du -s -b /mnt/hdd/bitcoin | awk '$1=$1' | cut -d " " -f1)
+    litecoindirsize=$(sudo du -s -b /mnt/hdd/litecoin | awk '$1=$1' | cut -d " " -f1)
     if [ -d "${pathLitecoinBlockchain}" ] && [ ${litecoindirsize} -gt 1000000000 ]; then
 
       # sync litecoin
@@ -277,6 +277,16 @@ OK NO FORMAT - Please remove decive now.
         if [ ${mountOK} -eq 1 ]; then
           sudo sed -i "s/^message=.*/message='Syncing Template -> ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
+          # check rsync
+          templateSize=$(sudo du -s -b ${pathTemplateHDD} | awk '$1=$1' | cut -d " " -f1)
+          targetSize=$(sudo du -s -b /mnt/hdd2 | awk '$1=$1' | cut -d " " -f1)
+          echo "templateSize(${templateSize})"
+          echo "targetSize(${targetSize})"
+          if [ ${targetSize} -lt ${templateSize} ] || [ ${targetSize} -gt ${templateSize} ]; then
+            echo "!! NOT THE SAME AFTER RSYNC"
+            sleep 10
+            echo "!NOTSAME!->" >> ./.syncinfo.tmp
+          fi
           sudo chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
           echo "${partition} " >> ./.syncinfo.tmp
