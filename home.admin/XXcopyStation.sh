@@ -303,6 +303,7 @@ OK NO FORMAT - Please remove decive now.
   echo "HDDs ready synced: ${synced}"
   echo "*************************"
   echo "Its safe to disconnect/remove HDDs now."
+  echo "Or connect a new HDD/SSD for syncing."
   echo "To stop copystation script: CTRL+c"
   echo ""
 
