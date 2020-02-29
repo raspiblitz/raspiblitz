@@ -160,7 +160,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/admin/lnbits
-ExecStart=/bin/sh -c 'cd /home/admin/lnbits && pipenv run gunicorn -b :5000 lnbits:app'
+ExecStart=/bin/sh -c 'cd /home/admin/lnbits && pipenv run gunicorn -b :5000 lnbits:app -k gevent'
 User=admin
 Restart=always
 TimeoutSec=120
