@@ -221,7 +221,7 @@ if [ ${lndRunning} -eq 1 ]; then
     # lnd scan progress
     scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
     nowTimestamp=$(date +%s)
-    if [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
+    if [ ${#scanTimestamp} -gt 0 ] && [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
       scanTimestamp=${nowTimestamp}
     fi
     if [ ${#scanTimestamp} -gt 0 ]; then
