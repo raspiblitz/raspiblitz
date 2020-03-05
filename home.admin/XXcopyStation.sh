@@ -209,6 +209,7 @@ do
   echo "**************************************"
   echo "SYNCING TEMPLATE -> CONNECTED HDD/SSDs"
   echo "**************************************"
+  echo "NOTE: Only use to prepare fresh HDDs"
 
   sleep 4
   echo "" > ./.syncinfo.tmp
