@@ -12,6 +12,7 @@ if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
+if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -20,7 +21,6 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
-if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -58,7 +58,7 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -66,16 +66,16 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cyryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 22 45 14 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -83,6 +83,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
@@ -91,7 +92,6 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 fi
 
@@ -103,9 +103,6 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
-  exit 1
-elif [ ${dialogcancel} -eq 255 ]; then
-  echo "ESC pressed"
   exit 1
 fi
 
@@ -370,6 +367,32 @@ else
   echo "BTC-RPC-Explorer Setting unchanged."
 fi
 
+# cryptoadvance Specter process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${specter}" != "${choice}" ]; then
+  echo "Cryptoadvance Specter Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      #sudo sytemctl start cryptoadvance-specter
+      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+      #whiptail --title " Installed Cryptoadvance Specter " --msgbox "\
+      #You should be able to reach specter on port 25441. The Login is Password B.\n
+      #" 14 50
+    else
+      l1="!!! FAIL on Cryptoadvance Specter install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Cryptoadvance Specter Setting unchanged."
+fi
+
 # LND Auto-Unlock
 choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -487,24 +510,8 @@ if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${lndmanage}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
-  fi
-else 
-  echo "lndmanage setting unchanged."
-fi
-
-# LNBits process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${LNBits}" != "${choice}" ]; then
-  echo "LNBits Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
   if [ "${choice}" =  "on" ]; then
-    sudo systemctl start lnbits
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
+    sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
   fi
 else 
   echo "lndmanage setting unchanged."

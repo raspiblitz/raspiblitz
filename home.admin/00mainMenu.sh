@@ -15,9 +15,9 @@ source ${configFile}
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # BASIC MENU INFO
-HEIGHT=17
+HEIGHT=13
 WIDTH=64
-CHOICE_HEIGHT=10
+CHOICE_HEIGHT=6
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
@@ -48,13 +48,13 @@ fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")  
 fi
-if [ "${LNBits}" == "on" ]; then
-  OPTIONS+=(LNBITS "LNBits Server")  
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")  
 fi
-if [ "${loop}" == "on" ]; then
+if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")  
 fi
 
@@ -63,26 +63,24 @@ OPTIONS+=(INFO "RaspiBlitz Status Screen")
 OPTIONS+=(FUNDING "Fund your LND Wallet")
 OPTIONS+=(CONNECT "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
-OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
-OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
-if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-  OPTIONS+=(CLOSEALL "Close all open Channels")  
-fi
-
-OPTIONS+=(CASHOUT "Remove Funds from LND")
-
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
   OPTIONS+=(lnchannels "Lightning Channel List")
 fi
-
+OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
+OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
 OPTIONS+=(SERVICES "Activate/Deactivate Services")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(EXPORT "Macaroons and TLS.cert")
 OPTIONS+=(NAME "Change Name/Alias of Node")
 OPTIONS+=(PASSWORD "Change Passwords")
+OPTIONS+=(CASHOUT "Remove Funds from LND")
+
+# Depending Options
+openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
+if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
+  OPTIONS+=(CLOSEALL "Close all open Channels")  
+fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Monitor TOR Service")  
@@ -106,92 +104,131 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
+#clear
 case $CHOICE in
+        CLOSE)
+            exit 1;
+            ;;
+        X)
+            clear
+            echo "***********************************"
+            echo "* RaspiBlitz Commandline"
+            echo "* Here be dragons .. have fun :)"
+            echo "***********************************"
+            echo "LND commandline options: lncli -h"
+            echo "Back to main menu use command: raspiblitz"
+            echo
+            exit 1;
+            ;;
         INFO)
-            echo "Gathering Information (please wait) ..."
             walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
             if [ ${walletLocked} -eq 0 ]; then
-              /home/admin/00infoBlitz.sh
+              ./00infoBlitz.sh
               echo "Screen is not refreshing itself ... press ENTER to continue."
               read key
-            else
-              /home/admin/00raspiblitz.sh
-              exit 0
             fi
+            ./00raspiblitz.sh
+            ;;
+        lnbalance)
+            lnbalance ${network}
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
             ;;
         TOR)
             sudo -u bitcoin nyx
+            ./00mainMenu.sh
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
+            ./00mainMenu.sh
             ;;
         RTL)
             /home/admin/config.scripts/bonus.rtl.sh menu
+            ./00mainMenu.sh
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
+            ./00mainMenu.sh
             ;;
         EXPLORE)
             /home/admin/config.scripts/bonus.btc-rpc-explorer.sh menu
+            ./00mainMenu.sh
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ./00mainMenu.sh
             ;;
-        LNBITS)
-            /home/admin/config.scripts/bonus.lnbits.sh menu
+	SPECTER)
+            /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+            ./00mainMenu.sh
             ;;
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ./00mainMenu.sh
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
-            ;;
-        lnbalance)
-            clear
-            echo "*** YOUR SATOSHI BALANCES ***"
-            lnbalance ${network}
-            echo "Press ENTER to return to main menu."
-            read key
+            ./00mainMenu.sh
             ;;
         lnchannels)
-            clear
-            echo "*** YOUR LIGHTNING CHANNELS ***"
             lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
+            ./00mainMenu.sh
             ;;
         CONNECT)
-            /home/admin/BBconnectPeer.sh
-            ;;
-        FUNDING)
-            /home/admin/BBfundWallet.sh
-            ;;
-        CASHOUT)
-            /home/admin/BBcashoutWallet.sh
-            ;;
-        CHANNEL)
-            /home/admin/BBopenChannel.sh
-            ;;
-        SEND)
-            /home/admin/BBpayInvoice.sh
-            ;;
-        RECEIVE)
-            /home/admin/BBcreateInvoice.sh
-            ;;
-        SERVICES)
-            /home/admin/00settingsMenuServices.sh
-            ;;
-        CLOSEALL)
-            /home/admin/BBcloseAllChannels.sh
+            ./BBconnectPeer.sh
             echo "Press ENTER to return to main menu."
             read key
+            ./00mainMenu.sh
+            ;;
+        FUNDING)
+            ./BBfundWallet.sh
+            ./00mainMenu.sh
+            ;;
+        CASHOUT)
+            ./BBcashoutWallet.sh
+            ./00mainMenu.sh
+            ;;
+        CHANNEL)
+            ./BBopenChannel.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        SEND)
+            ./BBpayInvoice.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        RECEIVE)
+            ./BBcreateInvoice.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
+            ;;
+        SERVICES)
+            ./00settingsMenuServices.sh
+            ./00mainMenu.sh
+            ;;
+        CLOSEALL)
+            ./BBcloseAllChannels.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
             ;;
         MOBILE)
-            /home/admin/97addMobileWallet.sh
+            ./97addMobileWallet.sh
+            ./00mainMenu.sh
             ;;
         EXPORT)
             sudo /home/admin/config.scripts/lnd.export.sh
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh
@@ -201,11 +238,13 @@ case $CHOICE in
               echo "Press ENTER to Reboot."
               read key
               sudo /home/admin/XXshutdown.sh reboot
-              exit 0
+            else
+              ./00mainMenu.sh
             fi
             ;;
         REPAIR)
-            /home/admin/98repairMenu.sh
+            ./98repairMenu.sh
+            ./00mainMenu.sh
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
@@ -214,15 +253,12 @@ case $CHOICE in
               echo "Press ENTER to Reboot .."
               read key
               sudo /home/admin/XXshutdown.sh reboot
-              exit 0
             else
               echo "Press ENTER to return to main menu .."
               read key
+              ./00mainMenu.sh
             fi
             ;;
-        UPDATE)
-            /home/admin/99checkUpdate.sh
-            ;; 
         OFF)
             echo ""
             echo "LCD turns white when shutdown complete."
@@ -242,26 +278,13 @@ case $CHOICE in
             exit 0
             ;;
         DELETE)
-            sudo /home/admin/XXcleanHDD.sh
+            sudo ./XXcleanHDD.sh
             sudo /home/admin/XXshutdown.sh reboot
             exit 0
-            ;;
-        X)
-            clear
-            echo "***********************************"
-            echo "* RaspiBlitz Commandline"
-            echo "* Here be dragons .. have fun :)"
-            echo "***********************************"
-            echo "LND command line options: lncli -h"
-            echo "Back to main menu use command: raspiblitz"
-            echo
+            ;;   
+        UPDATE)
+            /home/admin/99checkUpdate.sh
+            ./00mainMenu.sh
             exit 0
-            ;;
-        *)
-            clear
-            echo "To return to main menu use command: raspiblitz"
-            exit 0
+            ;;   
 esac
-
-# go into loop - start script from beginning to load config/sate fresh
-/home/admin/00mainMenu.sh
