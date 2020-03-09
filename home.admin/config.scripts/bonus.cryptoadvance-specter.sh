@@ -94,7 +94,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "*** Installing prerequisites ***"
     sudo apt install libusb-1.0.0-dev libudev-dev virtualenv
-    sudo -u bitcoin pip3 install --upgrade cryptoadvance.specter
 
     # activating Authentication here ...
     echo "*** creating App-config ***"
@@ -264,17 +263,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
 
-    echo "*** Removing wallets in core ***"
-    bitcoin-cli listwallets | jq -r .[] | tail -n +2
-    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2) 
-    do  
+    if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
+      echo "*** Removing wallets in core ***"
+      bitcoin-cli listwallets | jq -r .[] | tail -n +2
+      for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2) 
+      do  
 	name=$(echo $i | cut -d"/" -f2)
        	bitcoin-cli unloadwallet specter/$name 
-    done
-    sudo rm -rf /home/bitcoin/.bitcoin/specter
+      done
+      sudo rm -rf /home/bitcoin/.bitcoin/specter
 
-    echo "*** Removing /home/bitcoin/.specter ***"
-    sudo rm -rf /home/bitcoin/.specter
+      echo "*** Removing /home/bitcoin/.specter ***"
+      sudo rm -rf /home/bitcoin/.specter
+    fi
 
     echo "OK Cryptoadvance Specter removed."
   else 
