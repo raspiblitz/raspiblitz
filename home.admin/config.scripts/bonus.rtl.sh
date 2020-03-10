@@ -131,7 +131,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 var data = require('/home/rtl/RTL/sample-RTL-Config.json');
 //Manipulate data
 data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/mnt/hdd/lnd/data/chain/${network}/${chain}net/';
+data.nodes[0].Authentication.macaroonPath = '/home/admin/.lnd/data/chain/${network}/${chain}net/';
 data.nodes[0].Authentication.configPath = '/mnt/hdd/lnd/lnd.conf';
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
