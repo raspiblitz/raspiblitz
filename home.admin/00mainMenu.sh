@@ -79,6 +79,7 @@ OPTIONS+=(CASHOUT "Remove Funds from LND")
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
   OPTIONS+=(lnchannels "Lightning Channel List")
+  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")  
 fi
 
 OPTIONS+=(SERVICES "Activate/Deactivate Services")
@@ -166,6 +167,12 @@ case $CHOICE in
             lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
+            ;;
+        lnfwdreport)
+            ./XXlnfwdreport.sh 
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
             ;;
         CONNECT)
             /home/admin/BBconnectPeer.sh
