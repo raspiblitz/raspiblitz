@@ -88,6 +88,30 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+# determine nodeJS DISTRO
+isARM=$(uname -m | grep -c 'arm')   
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
+# get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
+if [ ${isARM} -eq 1 ] ; then
+DISTRO="linux-armv7l"
+fi
+if [ ${isAARCH64} -eq 1 ] ; then
+DISTRO="linux-arm64"
+fi
+if [ ${isX86_64} -eq 1 ] ; then
+DISTRO="linux-x64"
+fi
+if [ ${isX86_32} -eq 1 ] ; then
+echo "FAIL: No X86 32bit build available - will abort setup"
+exit 1
+fi
+if [ ${#DISTRO} -eq 0 ]; then
+echo "FAIL: Was not able to determine architecture"
+exit 1
+fi
+
 # stop service
 echo "making sure services are not running"
 sudo systemctl stop btc-rpc-explorer 2>/dev/null
@@ -104,16 +128,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
-    
-    # add btcrpcexplorer user
-    sudo adduser --disabled-password --gecos "" btcrpcexplorer
 
-    # install btc-rpc-explorer
-    cd /home/btcrpcexplorer
-    sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
-    cd btc-rpc-explorer
-    sudo -u btcrpcexplorer git reset --hard v1.1.9
-    sudo -u btcrpcexplorer npm install
+    npm install -g btc-rpc-explorer@1.1.8
 
     # prepare .env file
     echo "getting RPC credentials from the ${network}.conf"
@@ -121,25 +137,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
+    sudo -u bitcoin mkdir /home/bitcoin/.config/ 2>/dev/null
     touch /home/admin/btc-rpc-explorer.env
-    sudo chmod 600 /home/admin/btc-rpc-explorer.env || exit 1 
+    chmod 600 /home/admin/btc-rpc-explorer.env || exit 1 
     cat > /home/admin/btc-rpc-explorer.env <<EOF
 # Host/Port to bind to
 # Defaults: shown
 BTCEXP_HOST=0.0.0.0
-BTCEXP_PORT=3002
+#BTCEXP_PORT=3002
 # Bitcoin RPC Credentials (URI -OR- HOST/PORT/USER/PASS)
 # Defaults:
 #   - [host/port]: 127.0.0.1:8332
 #   - [username/password]: none
 #   - cookie: '~/.bitcoin/.cookie'
 #   - timeout: 5000 (ms)
-BTCEXP_BITCOIND_HOST=127.0.0.1
-BTCEXP_BITCOIND_PORT=8332
+BTCEXP_BITCOIND_URI=$network://$RPC_USER:$PASSWORD_B@127.0.0.1:8332?timeout=10000
+#BTCEXP_BITCOIND_HOST=127.0.0.1
+#BTCEXP_BITCOIND_PORT=8332
 BTCEXP_BITCOIND_USER=$RPC_USER
 BTCEXP_BITCOIND_PASS=$PASSWORD_B
 #BTCEXP_BITCOIND_COOKIE=/path/to/bitcoind/.cookie
-BTCEXP_BITCOIND_RPC_TIMEOUT=10000
+BTCEXP_BITCOIND_RPC_TIMEOUT=5000
 # Password protection for site via basic auth (enter any username, only the password is checked)
 # Default: none
 BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
@@ -151,8 +169,8 @@ BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
 BTCEXP_ADDRESS_API=none
 BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
 EOF
-    sudo mv /home/admin/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-    sudo chown btcrpcexplorer:btcrpcexplorer /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sudo mv /home/admin/btc-rpc-explorer.env /home/bitcoin/.config/btc-rpc-explorer.env
+    sudo chown bitcoin:bitcoin /home/bitcoin/.config/btc-rpc-explorer.env
 
     # open firewall
     echo "*** Updating Firewall ***"
@@ -171,13 +189,13 @@ Wants=${network}d.service
 After=${network}d.service
 
 [Service]
-WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
-ExecStart=/usr/bin/npm start
-User=btcrpcexplorer
-# Restart on failure but no more than 2 time every 10 minutes (600 seconds). Otherwise stop
-Restart=on-failure
-StartLimitIntervalSec=600
-StartLimitBurst=2
+ExecStart=/usr/local/lib/nodejs/node-$(node -v)-$DISTRO/bin/btc-rpc-explorer
+User=bitcoin
+Restart=always
+TimeoutSec=120
+RestartSec=30
+StandardOutput=null
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
@@ -223,8 +241,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop btc-rpc-explorer
     sudo systemctl disable btc-rpc-explorer
     sudo rm /etc/systemd/system/btc-rpc-explorer.service
-    sudo rm -rf /home/btcrpcexplorer/btc-rpc-explorer
-    sudo rm -f /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sudo rm -r /usr/local/lib/nodejs/node-$(node -v)-$DISTRO/bin/btc-rpc-explorer
     echo "OK BTC-RPC-explorer removed."
   else 
     echo "BTC-RPC-explorer is not installed."

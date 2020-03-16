@@ -75,21 +75,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo apt-get install -y python2
     fi
 
-    # create rtl user
-    sudo adduser --disabled-password --gecos "" rtl
-
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
-    rm -rf /home/admin/RTL 2>/dev/null
-    sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
-    cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.6.7
+    rm -r /home/admin/RTL 2>/dev/null
+    git clone https://github.com/ShahanaFarooqui/RTL.git /home/admin/RTL
+    cd /home/admin/RTL
+    git reset --hard v0.6.7
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     # git fetch origin
     # git checkout feature/0.6.5
-    if [ -d "/home/rtl/RTL" ]; then
+    if [ -d "/home/admin/RTL" ]; then
      echo "OK - RTL code copy looks good"
     else
       echo "FAIL - code copy did not run correctly"
@@ -101,10 +97,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=production
+    npm install --only=production
     cd ..
     # check if node_modules exist now
-    if [ -d "/home/rtl/RTL/node_modules" ]; then
+    if [ -d "/home/admin/RTL/node_modules" ]; then
      echo "OK - RTL install looks good"
     else
       echo "FAIL - npm install did not run correctly"
@@ -121,26 +117,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"
     # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
-    sudo cp /home/rtl/RTL/sample-RTL-Config.json /home/admin/RTL-Config.json
-    sudo chown admin:admin /home/admin/RTL-Config.json
-    sudo chmod 600 /home/admin/RTL-Config.json || exit 1
+    cp /home/admin/RTL/sample-RTL-Config.json /home/admin/RTL/RTL-Config.json
+    chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    # modify sample-RTL-Config.json and save in RTL-Config.json
-    sudo node > /home/admin/RTL-Config.json <<EOF
+     # modify sample-RTL-Config.json and save in RTL-Config.json
+    node > /home/admin/RTL/RTL-Config.json <<EOF
 //Read data
-var data = require('/home/rtl/RTL/sample-RTL-Config.json');
+var data = require('/home/admin/RTL/sample-RTL-Config.json');
 //Manipulate data
 data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/home/admin/.lnd/data/chain/${network}/${chain}net/';
+data.nodes[0].Authentication.macaroonPath = '/mnt/hdd/lnd/data/chain/${network}/${chain}net/';
 data.nodes[0].Authentication.configPath = '/mnt/hdd/lnd/lnd.conf';
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
-data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.channelBackupPath = 'RTL-SCB-backup-$hostname'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-    sudo mv /home/admin/RTL-Config.json /home/rtl/RTL/
-    sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
     echo ""
 
     # open firewall
@@ -151,32 +144,11 @@ EOF
 
     # install service
     echo "*** Install RTL systemd for ${network} on ${chain} ***"
-    cat > /home/admin/RTL.service <<EOF
-# Systemd unit for RTL
-# /etc/systemd/system/RTL.service
-
-[Unit]
-Description=RTL daemon
-Wants=lnd.service
-After=lnd.service
-
-[Service]
-ExecStart=/usr/bin/node /home/rtl/RTL/rtl --lndir /home/admin/.lnd/data/chain/bitcoin/mainnet
-User=rtl
-Restart=always
-TimeoutSec=120
-RestartSec=30
-StandardOutput=null
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
+    sudo cp /home/admin/assets/RTL.service /etc/systemd/system/RTL.service
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
+
   fi
   
   # setting value in raspi blitz config
@@ -203,7 +175,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop RTL
     sudo systemctl disable RTL
     sudo rm /etc/systemd/system/RTL.service
-    sudo rm -rf /home/rtl/RTL
+    sudo rm -r /home/admin/RTL
     echo "OK RTL removed."
   else 
     echo "RTL is not installed."
