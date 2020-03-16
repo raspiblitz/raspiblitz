@@ -9,17 +9,17 @@ HEIGHT=20
 WIDTH=73
 CHOICE_HEIGHT=2
 BACKTITLE="RaspiBlitz"
-TITLE=""
-MENU="Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS 
-pointing to your public IP.\n
-You will need the ports 80, 443 and 9735 forwarded to your RaspiBlitz
-and an email address to be used for communication about the SSL certificate.\n\n
-Choose 'TOR' if you want to set up BTCPayServer
+TITLE="BTCPay Server Install"
+MENU="Choose 'TOR' if you want to set up BTCPayServer
 as a Tor Hidden service and use a self signed SSL certificate.\n\n
-Find more information about using the BTCPayServer on the RaspiBlitz here:
-https://github.com/openoms/bitcoin-tutorials/tree/master/BTCPayServer"
-OPTIONS=(DOMAIN "use a Domain Name or dynamicDNS" \
-          TOR "Tor access and a self-signed certificate")
+Choose 'DOMAIN' if you want to use a Domain Name or dynamicDNS
+pointing to your public IP. You will need to forward ports from your
+router to your RaspiBlitz and an email address to be used for
+communication about the SSL certificate (very experimental).\n\n
+For details or troubleshoot check for 'BTCPay'
+in README of https://github.com/rootzoll/raspiblitz"
+OPTIONS=(TOR "Tor access and a self-signed certificate"\
+         DOMAIN "(Dynamic) Domain Name (experimental)")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
@@ -71,7 +71,6 @@ if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
-
 echo ""
 echo "***"
 echo "Setting up Nginx and Certbot"
@@ -79,22 +78,32 @@ echo "***"
 echo ""
 
 if [ $ownDomain -eq 1 ]; then
+  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   echo ""
   echo "***"
-  echo "Confirm that the ports 80, 443 and 9735 are forwarded to the IP of your RaspiBlitz by pressing [ENTER] or use [CTRL + C] to exit"
+  echo "Confirm that the ports 80, 443 and 9735 are forwarded to your RaspiBlitz" 
+  echo ""
+  echo "Press [ENTER] to continue or use [CTRL + C] to exit"
+  echo ""
+  echo "Example settings for your router:"
+  echo "forward the port 443 to port 443 on ${localip}"
+  echo "forward the port 9735 to port 9735 on ${localip}"
+  echo "forward the port 80 to port 80 on ${localip}"
   read key
   
   echo ""
   echo "***"
   echo "Type your domain or dynamicDNS pointing to your public IP and press [ENTER] or use [CTRL + C] to exit"
-  echo "example:"
+  echo ""
+  echo "Example:"
   echo "btcpay.example.com"
   read YOUR_DOMAIN
 
   echo ""
   echo "***"
-  echo "Type an email address that will be used to message about the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
-  echo "example:"
+  echo "Type an email address that will be used to message about the expiration of the SSL certificate and press [ENTER] or use [CTRL + C] to exit"
+  echo ""
+  echo "Example:"
   echo "name@email.com"
   read YOUR_EMAIL
   
@@ -107,7 +116,7 @@ if [ $ownDomain -eq 1 ]; then
   # install nginx and certbot
   sudo apt-get install nginx-full certbot -y
   
-  sudo ufw allow 80 comment 'btcpayserver TCP'
+  sudo ufw allow 80 comment 'HTTP web server'
   sudo ufw allow 443 comment 'btcpayserver SSL'
   
   # get SSL cert
@@ -317,7 +326,7 @@ proxy_set_header Proxy \"\";
 
 
 server {
-    listen 80 default_server;
+    listen 23001 default_server;
     server_name _;
     return 301 https://\$host\$request_uri;
 }
@@ -356,36 +365,9 @@ fi
 # setting value in raspi blitz config
 sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain=$YOUR_DOMAIN/g" /mnt/hdd/raspiblitz.conf
 
-if [ $ownDomain -eq 1 ]; then
-  echo ""
-  echo "Visit your BTCpayServer instance on https://$YOUR_DOMAIN"
-  echo ""
-elif [ $ownDomain -eq 0 ]; then
+if [ $ownDomain -eq 0 ]; then
   # Hidden Service for BTCPay if Tor active
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
-  
-      TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-      if [ -z "$TOR_ADDRESS" ]; then
-        echo "Waiting for the Hidden Service"
-        sleep 10
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-        if [ -z "$TOR_ADDRESS" ]; then
-          echo " FAIL - The Hidden Service address could not be found - Tor error?"
-          exit 1
-        fi
-      fi   
-      echo ""
-      echo "***"
-      echo "Open the Hidden Service address in the Tor Browser to connect to your BTCPayServer instance."
-      echo "$TOR_ADDRESS"
-      echo "***"
-      echo "" 
-  fi
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  echo ""
-  echo "Open https://$localip in a browser to visit your BTCPayServer on your Local Network." 
-  echo "Will need to accept the self-signed certificate in the browser to be able to connect outside of the Tor Browser"
-  echo ""
+  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
 fi
+
+echo "OK done - check the new option 'BTCPAY' on main menu for more info." 

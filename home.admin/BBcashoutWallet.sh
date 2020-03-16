@@ -28,7 +28,7 @@ if [ ${#openChannels} -eq 0 ]; then
 fi
 
 if [ ${openChannels} -gt 0 ]; then
-   whiptail --title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved' 10 56
+   whiptail --title 'Info' --yes-button='Cashout Anyway' --no-button='Go Back' --yesno 'You still have funds in open Lightning Channels.\nUse CLOSEALL first if you want to cashout all funds.\nNOTICE: Just confirmed on-chain funds can be moved.' 10 56
    if [ $? -eq 1 ]; then
      exit 1
    fi

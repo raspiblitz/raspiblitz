@@ -2,13 +2,13 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.4RC2 with lnd 0.9.0-beta and bitcoin 0.19.1 or litecoin 0.16.3.`
+`Version 1.4 with lnd 0.9.0-beta and bitcoin 0.19.0.1 or litecoin 0.17.1.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a all-switches-on Lightning Node based on LND running together with a Bitcoin- or Litecoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice Display for easy setup & monitoring.**
+**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice display for easy setup & monitoring.**
 
-It's mainly targeted for learning how to run your own node decentralized from home. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
+RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not you Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
 ## Feature Overview
 
@@ -16,15 +16,28 @@ This is a quick look at the SSH main menu (once RaspiBlitz is SetUp):
 
 ![MainMenu-A](pictures/mainmenu.png)
 
-There are additional services that can be switched on:
-
-![MainMenu-Services](pictures/mainmenu-services.png)
-
-As an parallel alternative to the SSH menu there is also the RTL WebUI available (LND API Coverage at 57%):
+As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is available:
 
 ![RTL-preview](pictures/RTL-dashboard.png)
 
-See more details in the [Feature Documentation](#feature-documentation) & of course you have all the [Fullnode APIs](#interface--apis).
+There are further Services that can be switched on:
+
+* **TOR** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
+* **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
+* **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+* **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
+* **LNBits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
+* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+
+You can connect the following Wallet-Apps to your RaspiBlitz:
+
+* **Zap** (Android, iOS & Desktop) [details](https://zap.jackmallers.com/)
+* **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
+* **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
+* **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
+
+Also much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## Time Estimate to Setup a RaspiBlitz
 
@@ -46,24 +59,54 @@ The RaspiBlitz is build from the following minimal parts:
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
-If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardware set for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com) *(pay with Bitcoin/Lightning or with deprecated PayPal/CreditCard)*
+If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBlitz or a all-you-need-hardware set for yourself or for your RaspiBlitz workshop from [raspiblitz.com](https://raspiblitz.com)
 
-*To list your local/national RaspiBlitz shop here or on raspiblitz.com, get in contact: christian@fulmo.org*
+### Amazon Shopping List (buy parts & build it yourself)
 
-### International Shopping Lists (buy parts & build it yourself)
+The cheapest way is to buy and assemble the single parts yourself. The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
-The cheapest way is to buy and assemble the single parts yourself. These are the community curated shopping lists based on country:
+#### Package: Standard (around 250 USD)
 
-* [Germany](shoppinglist_de.md) *(reference shopping list)*
-* [USA](shoppinglist_usa.md)
-* [Canada](shoppinglist_ca.md)
-* [UK](shoppinglist_uk.md)
-* [Switzerland](shoppinglist_ch.md)
-* [France](shoppinglist_fr.md)
-* [China](shoppinglist_cn.md)
-* [Australia](shoppinglist_au.md)
-* [Czech](shoppinglist_cz.md)
-* [Italy](shoppinglist_it.md)
+*The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
+
+* RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
+* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
+* 500GB SSD: [amazon](https://geni.us/raspiblitz-500gb-ssd)
+* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
+* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
+* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
+* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+
+#### Package: Minimal (around 180 USD)
+
+*The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
+
+Basic Parts for all minimal variants:
+* 1TB Hard Drive: [amazon](https://geni.us/raspiblitz-hdd)
+* Micro SD-Card 16GB: [amazon](https://geni.us/raspiblitz-sd-card16gb)
+* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
+
+If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
+* RaspBerry Pi 3: [amazon](https://geni.us/raspiblitz-rpi3)
+* Power >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
+* Heatsink-Case: [amazon](https://geni.us/raspiblitz-heatsink)
+
+Or if you order new go with the RaspberryPi 4 2GB and the following parts:
+* RaspBerry Pi 4 1GB + Power: [amazon](https://geni.us/raspiblitz-1gb-power)
+* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
+* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+
+#### Package: Maximal
+
+*The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
+
+* 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
+* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb-power)
+* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
+* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
+* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
+* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
+* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -89,21 +132,19 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.4:**
 
-*This is still an early Release Candidate image - only use if you have time to invest for testing and giving feedback. Everyone else is advised to wait for final version release before doing updates.*
+Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz)
 
-HTTP: (offline)
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-20.img.gz.torrent
 
-SHA-256: b4a0daefc9352711200093afa08998d649569e0cb4de90cb39db1f150b4130af
-
-To see what new features to test and the place to give feedback - see [Milestone v1.4 issues list](https://github.com/rootzoll/raspiblitz/issues?utf8=%E2%9C%93&q=is%3Aissue+milestone%3A%221.4+Release%22+).
+SHA-256: 55b1989a45e99ecc56b74febddfa98f52271799105cc80900b09cc67e73df078 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
 
 **Write the SD-Card image to your SD Card**
 
-You need to write the downloaded sd card image (the img.gz-file) to your sd card - you can use the very easy tool Balena Etcher for this:
+You need to write the downloaded sd card image (the img.gz-file) to your sd card (16GB minimum) - you can use the very easy tool Balena Etcher for this:
 https://www.balena.io/etcher/ .. it's available for Win, Mac & Linux.
 
-* [How to update my RaspiBlitz?](FAQ.md#how-to-update-my-raspiblitz-from-v12)
-* [Whats new in Version 1.3 of RaspiBlitz?](FAQ.md#whats-new-in-version-13-of-raspiblitz)
+* [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
+* [Whats new in Version 1.4 of RaspiBlitz?](FAQ.md#whats-new-in-version-14-of-raspiblitz)
 * [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Boot your RaspiBlitz
@@ -134,19 +175,17 @@ Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win1
 
 ## Support
 
-Get get help on RaspiBlitz setup and to exchange on how to best manage/run your node - try the community managed telegram group: https://t.me/raspiblitz
-
 If you run into a problem or you have still a question, follow the steps below to get support. Also check the [setup documentation](#setup-process-detailed-documentation) for details.
 
 1. Lookup the [FAQ](FAQ.md) if you can find an answer to this question/problem.
 
-2. Please determine if your problem/question is about RaspiBlitz or for example with LND. For example if you cant route a payment or get an error when opening a channel that is an LND question/problem an is best answered by the LND dev community: https://dev.lightning.community
+2. If you have a hardware problem, please check that your hardware parts are exactly the parts recommended in the shopping list above. Different screens or even SSD-casings can cause problems.
 
-3. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
+3. There is a Telegram Group of RaspiBlitz users helping each other: https://t.me/raspiblitz
 
-4. Check the RaspiBlot Troubleshoot guide: https://stadicus.github.io/RaspiBolt/raspibolt_70_troubleshooting.html (RaspiBolt is very similar to the RaspiBlitz)
+4. Please determine if your problem/question is about RaspiBlitz or for example with LND. For example if you cant route a payment or get an error when opening a channel that is an LND question/problem an is best answered by the LND dev community: https://dev.lightning.community
 
-5. There is a Telegram Group of RaspiBlitz users helping each other: https://t.me/raspiblitz
+5. Go to the GitHub issues of the RaspiBlitz: https://github.com/rootzoll/raspiblitz/issues Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
 
 6. If you haven't found an answer yet, open a new issue on the RaspiBlitz GitHub. You may have to register an account with GitHub for this. If it's a bug with the RaspiBlitz, please add (copy+paste) a Debug Report to your issue (see [FAQ](FAQ.md) how to generate) and/or add some screenshots/photos so the community gets more insight into your problem.
 
@@ -164,31 +203,33 @@ Automatically after login per SSH as admin to the RaspiBlitz, it will run a hard
 
 If you see a warning there, please read carefully, because a lot of things that go wrong later (errors and even loss of funds) relate of problems with the hardware. If you get an OK here ... you are good to go :)
 
-In the beginning you can choose to run on Bitcoin or Litecoin with Lightning:
+In the beginning you can choose how to setup your RaspiBlitz, by running on Bitcoin or Litecoin with Lightning. This is also the point where you can import a Migration file from an older RaspiBlitz - read about Migration [further down](README.md#import-a-migration-file). The default is here to choose Bitcoin.
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
 First thing to setup is giving your RaspiBlitz a name:
 
-![SSH2](pictures/ssh2-passwords.png)
+![SSH1](pictures/ssh1-name.png)
 
-This name is given to the RaspiBlitz as hostname in the local network and later on also for the alias of the lightning node.
+This name is given to the RaspiBlitz as an public alias of the lightning node for everybody to see.
 
 Then the user gets requested to think of and write down 4 passwords:
 
-![SSH1](pictures/ssh1-name.png)
+![SSH2](pictures/ssh2-passwords.png)
 
-*The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#write-down-your-passwords) - check out for more background.*
+You can use this [RaspiBlitz Password Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for save storage. And also use it later on for your Seed Words.
+
+*The password A,B,C & D idea is directly based in the [RaspiBolt Guide Preperations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
 Then the user is asked to enter the Password A:
 
 ![SSH3a](pictures/ssh3a-password.png)
 
-This is the new password has to be used for every SSH login after this screen. It's also set for the user existing user: root, bitcoin & pi.
+This is the new password has to be used for every SSH login after this screen with the user admin. It's also set for the other user existing user: root, bitcoin & pi.
 
 *The bitcoin and lightning services will later run in the background (as daemon) and use the separate user “bitcoin” for security reasons. This user does not have admin rights and cannot change the system configuration.*
 
-Then the user is asked to enter the Password B:
+Then the user is asked to enter the Password B - this is internally used for the bitcoin RPC interface. But also as login for additional Apps like the RTL-WebGUI or the Blockexplorer:
 
 ![SSH3b](pictures/ssh3b-password.png)
 
@@ -204,27 +245,44 @@ Your IP can reveal your location (at least to a certain radius) to everyone and 
 
 You can switch TOR off later on. Also you can switch TOR on also after the setup, but keep in mind that once running your node with your public IP leaves records on the internet connecting your lightning node id to your public IP.
 
-After this the setup process will need some time and the user will see a lot of console outputs:
+After this the setup process will need some time and the user will see a lot of console outputs - just wait until its finished:
 
 ![SSH4](pictures/ssh4-scripts.png)
 
 ### Getting the Blockchain
 
-*If you have a HDD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you have the option to trust that data and skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screen:*
+*If you have a HDD/SSD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you have the option to trust that data and skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screens:*
 
-If you connected a fresh Hard Drive Disc to the RaspiBlitz it might now ask you if it's OK to format the HDD.
+If you connected a fresh Hard Drive or SSD to the RaspiBlitz it might now ask you if it's OK to format it.
 
 <img src="pictures/ssh4-formatHDD.png" alt="format-HDD" width="366">
 
-To get a copy of the blockchain, the RaspiBlitz offers the following options:
+*Your HDD/SSD will get formatted with the linux standard file system EXT4. If you want to try out the experimental new [BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz) that RaspiBlitz supports since v1.4 - you need to start the setup with an additional 32GB USB thumb drive connected to the second USB3 port of the RaspberryPi. Then you will unlock this new secret feature.*
+
+After formatting you need to get a copy of the blockchain, the RaspiBlitz offers the following options:
 
 <img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="551">
 
 The options - and when to choose which - will be explained here shortly:
 
-#### 1. Torrent
+#### 1. SYNC - Selfvalidate all Blocks
 
-*This is the default way to download the blockchain data on old RaspberryPi 3s - for the newer RaspberryPi 4 you might consider the `SYNC` option.*
+With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. It will take around 2-3 days to sync & validate directly with the bitcoin network and then you have done it completely the original `don't trust, verify` way.
+
+*For the old RaspberryPi 3 this is not recommended. A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - that's why the other options above where invented.*
+
+
+#### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
+
+If you have another computer available (laptop, desktop or another RaspiBlitz) that already runs a working blockchain you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfer). Choose this option and follow the given instructions.
+
+This is also the best option if you don't like to run your RaspberryPi 3 with a prepared blockchain by a third party. Then install bitcoin-core (0.18.1 or higher) on a more powerful computer, sync+validate the blockchain there by yourself and copy it over after that through the local network.
+
+More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
+
+#### 3. Torrent Fallback
+
+*This is recommended for old RaspberryPi 3s - for the newer RaspberryPi 4 you might consider the `SYNC` option.*
 
 If you choose `TORRENT` it will show you the following screen:
 
@@ -239,24 +297,11 @@ You can cancel the torrent download by keeping the key `x` pressed. Then the dow
 * [I don't trust a torrent blockchain, how can I validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
 * [Why is taking my torrent download of the blockchain so long?](FAQ.md#why-is-taking-my-torrent-download-of-the-blockchain-so-long)
 
+#### 4. Cloning from a 2nd HDD (just offered on old RaspberryPi3)
 
-#### 2. Copying from another Computer
+*This feature is deprecated because its hard to setup and handle. It will just be offered on old RaspberryPi 3. And de removed in future version.*
 
-If you have another computer available (laptop, desktop or another raspiblitz) that already runs a working blockchain you can use this option to copy it over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfer). Choose this option and follow the given instructions.
-
-This is also the best option if you don't like to run your RaspberryPi 3 with a prepared blockchain by a third party. Then install bitcoin-core (0.18.1 or higher) on a more powerful computer, sync+validate the blockchain there by yourself and copy it over after that through the local network.
-
-More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
-
-#### 3. Cloning from a 2nd HDD
-
-This is a backup way to transfer a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd).
-
-#### 4. Sync from Bitcoin-Network
-
-With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. It will take around 3 days to sync & validate directly with the bitcoin network and then you have done it completely the original `don't trust, verify` way.
-
-*For the old RaspberryPi 3 (Minimal Package) this is not recommended. A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - that's why the other options above where invented.*
+This is a backup way to transfer a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd). 
 
 ### Setup Lightning
 
@@ -278,7 +323,7 @@ LND will now generate a fresh cipher seed (word list) for you.
 
 ![SSH8](pictures/ssh8-walletb.png)
 
-WRITE YOUR PERSONAL WORDS DOWN before you continue - without you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running after trying it out store this word list offline or in a password safe.
+WRITE YOUR PERSONAL WORDS DOWN before you continue - without it you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz at least take a photo with your smartphone just in case. If you might plan to keep your RaspiBlitz running store this word list offline or in a password safe. You can use the [RaspiBlitz Password Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf) for this.
 
 #### Recover a OLD Wallet
 
@@ -290,7 +335,9 @@ The RaspiBlitz calling the LND wallet creation command for you:
 
 ##### LNDRESCUE LND tar.gz-Backupfile (BEST)
 
-Choose this option if you have made a complete backup of the LND data and have a tar.gz file available. It will recover all your on-chain funds and open channels you had. But you have to be sure, that the LND backup you have is really the latest version - otherwise you might loose channel funds.
+Choose this option if you have made a complete backup of the LND data and have a tar.gz file starting withthe word 'lnd-rescue' available. It will recover all your on-chain funds and open channels you had. But you have to be sure, that the LND backup you have is really the latest version - otherwise you might loose channel funds.
+
+*If you have tar.gz file that starts with 'raspiblitz' than thats a migration file. That also includes your old LND wallet, but you import it earlier in the setup process .. see further below for details.*
 
 ##### SEED+SCB Words Seed & channel.backup file (OK)
 
@@ -322,11 +369,13 @@ After terminal login LND will ask you (like on every start/reboot) to unlock the
 
 ![SSH9c](pictures/ssh9c-unlock.png)
 
-Now on first start you will have a longer waiting time (between 1 hour and 2-3 days, depending on your initial setup) ... but that's OK, just leave the RaspiBlitz running until it's done. You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready, when the blue background screen is gone and you see the status screen like further below.
-
-To understand what is taking so long .. it's two things:
+Now on first start you will have a longer waiting time (between 10 minutes and 2-3 days, depending on your initial setup) ... but that's OK, just leave the RaspiBlitz running until it's done.
 
 ![SSH9d1](pictures/ssh9d-sync.png)
+
+*You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready, when the blue background screen is gone and you see a status screen.*
+
+To understand what is taking so long .. it's two things:
 
 1. Blockchain Sync
 
@@ -346,7 +395,7 @@ Once all is done you should see this status screen on the RaspiBlitz LCD/display
 
 If you now login by SSH in your RaspiBlitz (or you are still logged in) you will the the Main Menu:
 
-![SSH9e1](pictures/mainmenu1.png)
+![SSH9e1](pictures/mainmenu.png)
 
 And if you scroll down .. you see even more options. All options of the main menu will be explained below in the feature documentation.
 
@@ -362,15 +411,15 @@ If you like to do this all from a web browser with a dashboard UI instead from a
 
 Have fun riding the lightning :D
 
-*BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll*
+*BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll - also there is a [RaspiBlitz Donation Page](https://tallyco.in/s/r5lx23/), why not try to send some satoshis there with your new RaspiBlitz :D *
 
 * [How can I get further help/support?](#support)
 
 ### Feature Documentation
 
-These are the features available through the RaspiBlitz SSH main menu and services. They have the goal to offer some basic/fallback functionality & configurations. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
+These are the features available through the RaspiBlitz SSH menus. They have the goal to offer some basic/fallback functionality & configurations. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
-So lets take a look at the SSH main menu (3 pages to scroll down):
+So lets take a look at the SSH main menu (from top to bottom):
 
 ![MainMenu-A](pictures/mainmenu1.png)
 
@@ -390,7 +439,7 @@ This is the screen that gets displayed on the LCD/display. It's useful to call i
 
 Before you can open channels with other nodes you need to put some coins onto your LND on-chain wallet. Use this option to generate an address to send funds to.
 
-*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences.*
+*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/#privacy) before sending them to any Lightning Network wallet.*
 
 You can make multiple fundings - so you can start with small amounts first to test. LND will generate always a different address, but all funds you send will get into the same LND on-chain wallet.
 
@@ -406,6 +455,8 @@ To open a payment channel with another node you can use this option.
 
 Find interesting nodes to open channels with on online directories like [1ML.com](https://1ml.com/) or join the RaspiBlitz NodeManager telegram group to meet people to open channels with: https://t.me/raspiblitz
 
+Bear in mind that this option will open a public channel that can be seen by everyone in the network. This is good if you want to route payments. If your intention is to use it privately only, you will need to go to the command line and open the channel with the -private option.
+
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
 #### SEND: Pay an Invoice/PaymentRequest
@@ -420,19 +471,42 @@ Create an invoice to send to someone or a service to be payed through lightnig.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
-![MainMenu-B](pictures/mainmenu2.png)
+#### CHASHOUT: Remove Funds fro, on-chain Wallet
+
+Use if the want to remove all funds from the RaspiBlitz.
+
+#### lnbalance: Detailed Wallet Balances
+
+<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
+
+#### lnchannels: Lightning Channel List
+
+<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
+#### CLOSE ALL: Closing all open Channels
+
+*This option is just available if you have channels open.*
+
+With this feature you can close down all open channels and get funds locked up in those channels back to your on-chain wallet.
+
+It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
 
 #### SERVICES: Activate/Deactivate Services
 
-The RaspiBlitz offers further services and configuration:
+The RaspiBlitz offers further Services, Apps and configuration (scroll down in the to see all in the RaspiBlitz):
 
 ![MainMenu-Services](pictures/mainmenu-services.png)
 
-When you scroll down you find even more. Here you find more details about those options:
+Activate/Deactivate service selection with the space bar and then select OK to trigger Install/Uninstall. Here you find more details about those options (top to down):
 
 ##### Channel Autopilot
 
 The autopilot is a feature of LND that you can switch on. It automatically uses around half of your your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
+
+##### Loop
+
+A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop'. You can use it for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again. 
+
+[Details on Service](https://github.com/lightninglabs/loop)
 
 ##### Testnet
 
@@ -459,7 +533,7 @@ You will be asked for your dynamic domain name such like "mynode.crabdance.org" 
 
 ##### Run behind TOR
 
-You can run your Bitcoin- and Lightning-Node as a TOR hidden service - replacing your IP with an .onion-address
+You can run your Bitcoin- & Lightning-Node and also additional Apps as a TOR hidden service - replacing your IP with an .onion-address
 
 ![tor1](pictures/tor1.png)
 
@@ -471,7 +545,7 @@ This has some benefits:
 
 But this also comes with the following side effects:
 
-* Mobile wallets don't support connecting over TOR yet
+* Some Mobile wallets don't support connecting to RaspiBlitz over TOR yet
 * Lightning nodes that don't run TOR cannot reach you (like behind NAT)
 
 To try it out just switch on the service - you can deactivate later on if it's not working for you.
@@ -485,6 +559,14 @@ The RTL Webinterface is a LND Control Dashboard you can run in your browser with
 Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
 
 Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RTL
+
+##### BTC-RPC-Explorer
+
+BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own RaspiBlitz. See an example running on: https://btc-explorer.com 
+
+![EXPLORER](pictures/blockexplorer.png)
+
+[Details on Service](https://github.com/janoside/btc-rpc-explorer)
 
 ##### LND Auto-Unlock
 
@@ -510,17 +592,80 @@ Some routers support a feature called UPnP where devices can automatically reque
 
 ##### Touchscreen (experimental)
 
-Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this new experimental feature.
+Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this new feature that is still in development.
 
 ![RTL](pictures/touchscreen.png)
 
-It will give you 4 buttons on the right side. The function of the upper three are still to be determined (maybe for navigating a more complex menu) but the last one will give you a `POWER OFF` button you can use to safely power off your raspiBlitz without any SSH login needed.
+It will give you 4 buttons on the right side. 
 
-*If this feature works for everybody in the v1.3 release, touchscreen will be default and further developed for future releases.*
+- Info - to defined later
+- Node - shows the nodeid/uri as QR code (use to open channels from mobile wallets)
+- Invoice - creates an Invoice-QRcode that can be used for donations
+- Off - Shutdown or Restart the RaspiBlitz 
+
+*If this feature works for everybody in the v1.4 release, touchscreen will be default and further developed for future releases.*
 
 ##### LCD Rotate
 
 If you switch this on you can rotate the LCD of your RaspiBlitz 180 degrees. This can make sense if you want to use it in a special case or wall mount.
+
+##### Electrum Rust Server
+
+Enable a user to run his own Electrum server on the RaspiBlitz. The server indexes the entire Bitcoin blockchain, and the resulting index enables fast queries for any given user wallet, allowing the user to keep real-time track of his balances and his transaction history using the [Electrum wallet](https://electrum.org).
+
+Since Electrum Rust Server runs on the user's own machine, there is no need for the wallet to communicate with external Electrum servers, thus preserving the privacy of the user's addresses and balances.
+
+For example if you use your Trezor Hardware Wallet with the trezor.io wallet it will tell a third party your public keys - connecting it with your IP. Now you can use your Trezor with the Electrum Wallet just talking to your own Electrum Server preserving your privacy.
+
+[Details on Service](https://github.com/romanz/electrs)
+
+##### BTCPayServer
+
+BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free. 
+
+![BTCPAY](pictures/btcpay.png)
+
+*At the moment the RaspiBlitz can just make the BTCPayServer publicly available to the outside over the TOR network (Hidden Service).*
+
+[Details on Service](https://btcpayserver.org/)
+
+##### LNDmanage
+
+lndmanage is a command line tool for advanced channel management of an node.
+
+*You need at least one open channel to use this tool.*
+
+To run it change to the RaspiBlitz terminal and type 'manage'. This starts the LNDManage interactive mode and you can use the following commands:
+
+* __Activity reports ```report```__
+* __Display the node summary ```status```__
+* __Advanced channel listings ```listchannels```__
+  * ```listchannels rebalance```: list channels for rebalancing
+  * ```listchannels forwardings```: list forwarding statistics for each channel 
+  * ```listchannels hygiene```: information for closing of active channels
+  * ```listchannels inactive```: information on inactive channels
+* __Rebalancing command ```rebalance```__
+  * different rebalancing strategies can be chosen
+  * a target 'balancedness' can be specified (e.g. to empty the channel)
+* __Circular self-payments ```circle```__
+* __Recommendation of good nodes ```recommend-nodes```__
+
+[Details on Service](https://github.com/bitromortac/lndmanage/blob/master/README.md)
+
+##### LNBits
+
+LNbits is a very simple server that sits on top of your Lightning Wallet
+
+![LNBITS](pictures/lnbits.png)
+
+It can be used as:
+- Accounts system to mitigate the risk of exposing applications to your full balance, via unique API keys for each wallet
+- Fallback wallet for the LNURL scheme
+- Instant wallet for LN demonstrations
+
+You can also develop extensions on it.
+
+[Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
 
 #### MOBILE: Connect Mobile Wallet
 
@@ -533,10 +678,13 @@ At the moment the following mobile wallets are supported:
 * [ZAP (iOS/Android)](https://github.com/LN-Zap/zap-iOS)
 * [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet)
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
+* [Fully Noded (iOS over TOR)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changing IP of our Home-DSL.
 
 This youtube video explains the "port forwarding" on your router in more detail: https://www.youtube.com/watch?v=KESo7hHXQtg
+
+When you have TOR activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over TOR. 
 
 Basically those mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. And then you need to `pair` them with your RaspiBlitz - also with a QR code displayed on the LCD. If you run your RaspiBlitz without a LCD there is the fallback option to display that QR code on the terminal as ASCII code (might involve lowering your terminal font size).
 
@@ -582,28 +730,6 @@ Change the name of your node.
 
 Change you passwords for security.
 
-#### CHASHOUT: Remove Funds fro, on-chain Wallet
-
-Use if the want to remove all funds from the RaspiBlitz.
-
-![MainMenu-C](pictures/mainmenu3.png)
-
-#### lnbalance: Detailed Wallet Balances
-
-<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
-
-#### lnchannels: Lightning Channel List
-
-<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
-
-#### CLOSE ALL: Closing all open Channels
-
-*This option is just available if you have channels open.*
-
-With this feature you can close down all open channels and get funds locked up in those channels back to your on-chain wallet.
-
-It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
-
 #### REPAIR: Options to test, repair and reset your RaspiBlitz
 
 The `REPAIR` menu gives you options to check and reset your RaspiBlitz
@@ -623,6 +749,18 @@ Use this option is you see under-voltage reports on your LCD display or you thin
 This will print out a lot of information that can be used to find software problems.
 
 Use this if you want to report a software problem with your RaspiBlitz so that others can have a look at the details and help you better.
+
+##### BACKUP-LND: Backup your LND data (Rescue-File)
+
+This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download per SCP to your laptop. This can be used to move your LND id, wallet & channels to another RaspiBlitz. 
+
+*NOTICE: If you start your RaspiBlitz after this backup again the backup is outdated and using it can risk loosing your channel funds.*
+
+##### MIGRATION: Migrate Bitz Date to new Hardware
+
+This stops your RaspiBlitz and creates a Migration ZIP file you can download/export per SCP to your laptop. This contains all important data of your RaspiBlitz including LND, your Blitz configuration and also data from your installed apps. Can be used to migrate your RaspiBlitz to a new hardware - for example if your want to replace the HDD with a SSD. How to import a Migration File [see here](README.md#import-a-migration-file).
+
+*NOTICE: If you start your RaspiBlitz after exporting the migration file again it is outdated and using it can risk loosing your channel funds.*
 
 ##### RESET-CHAIN: Delete Blockchain and Re-Download
 
@@ -663,6 +801,34 @@ Closes the SSH main menu and exits to the terminal - where the user can make use
 
 With the command `raspiblitz` it's possible to return to the main menu.
 
+## Import a Migration File
+
+As mentioned above you can export a Migration File from your Raspiblitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
+
+A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, TOR/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
+
+If you want to it to import it again to a new RaspiBlitz (for example with an updated HDD/SSD) you can choose the MIGRATION option on the first setup dialog after the Hardwaretest (where you normally choose between Bitcoin & Litecoin).
+
+![SSH0](pictures/ssh0-welcome2.png)
+
+If you start MIGRATION you will need in the next step to format your HDD/SSD.
+
+![MIGRATION1](pictures/migration1.png)
+
+Normally you choose here the EXT4 format. But you have also have the option to choose the BTRFS format which is an expiremental feature under RaspiBlitz - see [FAQ for details on BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz).
+
+Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you. 
+
+Finally you need to decide how to get a copy of the blockchain data again for your RaspiBlitz.
+
+![MIGRATION2](pictures/migration2.png)
+
+Here you have the two options [SYNC](README.md#1-sync---selfvalidate-all-blocks) and [COPY](README.md#2-copy---copy-from-laptop-or-another-raspiblitz-over-local-network) as mentioned in the normal setup.
+
+Then RaspiBlitz will reboot and start the normal recovery process to install all the services that are defined by the raspiblitz.config from your Migration File.
+
+Then the blockhain needs to sync up and you should be back to normal.
+
 ## Interface / APIs
 
 To develop your own scripts/apps and to connect other services/apps to your RaspiBlitz you have multiple interfaces/APIs available:
@@ -679,6 +845,8 @@ To develop your own scripts/apps and to connect other services/apps to your Rasp
 * `lnd` running on port 9735 (public)
 * `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
 * `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
+
+If you activate TOR then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
 
 ### Backup for On-Chain- & Channel-Funds
 

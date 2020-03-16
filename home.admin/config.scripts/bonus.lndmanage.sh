@@ -27,30 +27,42 @@ fi
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ -d "/home/admin/lndmanage" ]; then
-    echo "LNDMANAGE already installed"
+  if [ "${lndmanage}" == "on" ]; then
+    echo "# FAIL - LNDMANAGE already installed"
+    sleep 3
     exit 1
   fi
   
   echo "*** INSTALL LNDMANAGE ***"
-  mkdir /home/admin/lndmanage
+  mkdir /home/admin/lndmanage 2>/dev/null
   sudo chown admin:admin /home/admin/lndmanage
   cd /home/admin/lndmanage
+
   # activate virtual environment
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
+
   # get dependencies
   sudo apt install -y python3-dev libatlas-base-dev
   python3 -m pip install wheel
   python3 -m pip install lndmanage==0.8.0.1
 
+  # check if install was successfull
+  if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
+    echo
+    echo "#!! FAIL --> Was not able to install LNDMANAGE"
+    echo "#!! Maybe because of internet network issues - try again later."
+    sleep 9
+    exit 1
+  fi
+
   # setting value in raspi blitz config
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
 
-  echo "usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
-  echo "To start type: 'manage' in the command line."
-  echo "Needs at least one channel to start without error."
-  echo "To exit the venv - type 'deactivate' and press ENTER"
+  echo "# usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
+  echo "# To start type: 'manage' in the command line."
+  echo "# Needs at least one channel to start without error."
+  echo "# To exit the venv - type 'deactivate' and press ENTER"
 
   exit 0
 fi
@@ -63,7 +75,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   
   echo "*** REMOVING LNDMANAGE ***"
   sudo rm -rf /home/admin/lndmanage
-  echo "OK, lndmanage is removed."
+  echo "# OK, lndmanage is removed."
   exit 0
 
 fi

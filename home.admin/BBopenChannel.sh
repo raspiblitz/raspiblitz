@@ -62,8 +62,10 @@ pubKey=$(dialog --clear \
 
 clear
 if [ ${#pubKey} -eq 0 ]; then
- echo "Selected CANCEL"
- echo ""
+ clear
+ echo 
+ echo "no channel selected - returning to menu ..."
+ sleep 2
  exit 1
 fi
 
@@ -90,12 +92,14 @@ dialog --title "Funding of Channel" \
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  echo
+  echo "no valid amount entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel ${pubKey} ${amount} 0"
+command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=1 ${pubKey} ${amount} 0"
 
 # info output
 clear
@@ -126,7 +130,7 @@ else
   echo "******************************"
   echo "${result}"
   echo ""
-  echo "Whats next? --> You need to wait 6 confirmations, for the channel to be ready."
+  echo "Whats next? --> You need to wait 3 confirmations, for the channel to be ready."
   fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
   if [ "${network}" = "bitcoin" ]; then
     if [ "${chain}" = "main" ]; then
@@ -140,3 +144,5 @@ else
   fi
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key

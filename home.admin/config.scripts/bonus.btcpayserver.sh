@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch BTCPay Server on or off"
-  echo "bonus.btcpayserver.sh [on|off]"
+  echo "bonus.btcpayserver.sh [on|off|menu] [ip|tor]"
   exit 1
 fi
 
@@ -18,23 +18,21 @@ if [ "$1" = "menu" ]; then
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
 
-  if [ ${#toraddress} -gt 0 ]; then
+  if [ "${BTCPayDomain}" == "localhost" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTCPay Server (TOR) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23000
-You need to accept the selfsigned certificate in browser.\n
-Hidden Service address for TOR Browser (QR see LCD):
-${toraddress}
+    whiptail --title " BTCPay Server (TOR) " --msgbox "Have TOR Browser installed on your laptop and open:\n
+${toraddress}\n
+See LCD of RaspiBlitz for QR code of this address if you want to open on mobile devices with TOR browser.
 " 12 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:23000\n
-To make BTCPay reachable from the outside see 'BTCPay'
+https://${BTCPayDomain}\n
+For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz
 " 11 67
   fi
@@ -43,9 +41,12 @@ in README of https://github.com/rootzoll/raspiblitz
   exit 0
 fi
 
-# add default value to raspi config if needed
+# add default values to raspi config if needed
 if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
+fi
+if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
+  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
@@ -57,13 +58,23 @@ sudo systemctl stop btcpayserver 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
 
+  # --> just serving directly thru TOR for now
   # setting up nginx and the SSL certificate    
-  /home/admin/config.scripts/bonus.btcpaysetdomain.sh
-  errorOnInstall=$?
-  if [ ${errorOnInstall} -eq 1 ]; then
-   echo "exiting as user cancelled BTCPayServer installation"  
-   exit 1
-  fi 
+  #/home/admin/config.scripts/bonus.btcpaysetdomain.sh
+  #errorOnInstall=$?
+  #if [ ${errorOnInstall} -eq 1 ]; then
+  # echo "exiting as user cancelled BTCPayServer installation"  
+  # exit 1
+  #fi
+
+  if [ "$2" == "tor" ]; then
+    sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
+  else
+    echo "# FAIL - at the moment only BTCPay Server over TOR is supported"
+    exit 1
+  fi
+
   # check for $BTCPayDomain
   source /mnt/hdd/raspiblitz.conf
 
@@ -93,9 +104,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     sudo apt-get -y install libunwind8 gettext libssl1.0
-    sudo -u btcpay wget https://download.visualstudio.microsoft.com/download/pr/d52fa156-1555-41d5-a5eb-234305fbd470/173cddb039d613c8f007c9f74371f8bb/dotnet-sdk-3.1.101-linux-arm.tar.gz
-    # check binary is was not manipulated (checksum test)
     dotnetName="dotnet-sdk-3.1.101-linux-arm.tar.gz"
+    sudo rm /home/btcpay/${dotnetName} 2>/dev/null
+    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/d52fa156-1555-41d5-a5eb-234305fbd470/173cddb039d613c8f007c9f74371f8bb/${dotnetName}"
+    # check binary is was not manipulated (checksum test)
     binaryChecksum="bd68786e16d59b18096658ccab2a662f35cd047065a6c87a9c6790a893a580a6aa81b1338360087e58d5b5e5fdca08269936281e41a7a7e7051667efb738a613"
     actualChecksum=$(sha512sum /home/btcpay/${dotnetName} | cut -d " " -f1)
     if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
@@ -104,9 +116,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   
     # download aspnetcore-runtime
-    sudo -u btcpay wget https://download.visualstudio.microsoft.com/download/pr/da60c9fc-c329-42d6-afaf-b8ef2bbadcf3/14655b5928319349e78da3327874592a/aspnetcore-runtime-3.1.1-linux-arm.tar.gz
-    # check binary is was not manipulated (checksum test)
     aspnetcoreName="aspnetcore-runtime-3.1.1-linux-arm.tar.gz"
+    sudo rm /home/btcpay/${aspnetcoreName} 2>/dev/null
+    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/da60c9fc-c329-42d6-afaf-b8ef2bbadcf3/14655b5928319349e78da3327874592a/${aspnetcoreName}"
+    # check binary is was not manipulated (checksum test)
     binaryChecksum="5171cdd232f02fbd41abee893ebe3722fe442436bef9792fec9c687a746357d22b4499aa6f0a9e35285bc04783c54e400810acb365c5a1c3401f23a65e6b062f"
     actualChecksum=$(sha512sum /home/btcpay/${aspnetcoreName} | cut -d " " -f1)
     if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
@@ -223,7 +236,7 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases 
-    sudo -u btcpay git reset --hard v1.0.3.153 
+    sudo -u btcpay git reset --hard v1.0.3.156 
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj   
     
@@ -267,6 +280,9 @@ WantedBy=multi-user.target
     sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
     sudo chown btcpay:btcpay /home/btcpay/admin.macaroon
     sudo chmod 600 /home/btcpay/admin.macaroon
+    
+    doesNetworkEntryAlreadyExists=$(sudo cat /home/btcpay/.btcpayserver/Main/settings.config | grep -c '^network=')
+    if [ ${doesNetworkEntryAlreadyExists} -eq 0 ]; then
     echo "
 ### Global settings ###
 network=mainnet
@@ -280,6 +296,7 @@ externalurl=https://$BTCPayDomain
 BTC.explorer.url=http://127.0.0.1:24444/
 BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
 " | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
+    fi
 
     sudo systemctl restart btcpayserver
   else 
@@ -304,26 +321,29 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
+    # removing services
+    # btcpay
     sudo systemctl stop btcpayserver
     sudo systemctl disable btcpayserver
     sudo rm /etc/systemd/system/btcpayserver.service
-   
+    # nbxplorer
+    sudo systemctl stop nbxplorer
+    sudo systemctl disable nbxplorer
+    sudo rm /etc/systemd/system/nbxplorer.service
+    # clear dotnet cache
     sudo -u btcpay dotnet nuget locals all --clear
     sudo rm -rf /tmp/NuGetScratch
-
+    # remove dotnet
     sudo rm -f /home/btcpay/dotnet-sdk*
     sudo rm -f /home/btcpay/aspnetcore*
     sudo rm -rf /home/btcpay/dotnet
     sudo rm -rf /usr/share/dotnet
-    
-    sudo systemctl stop nbxplorer 2>/dev/null
-    sudo systemctl disable nbxplorer 2>/dev/null
+    # clear app config (not user data)
     sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
-    sudo rm -f /etc/systemd/system/nbxplorer.service
-    
     sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
-    sudo rm -f /etc/systemd/system/btcpayserver.service
-    sudo rm -f /etc/nginx/sites-available/btcpayserver    
+    # clear nginx config
+    sudo rm -f /etc/nginx/sites-enabled/btcpayserver
+    sudo rm -f /etc/nginx/sites-available/btcpayserver
     echo "OK BTCPayServer removed."
   else 
     echo "BTCPayServer is not installed."

@@ -106,6 +106,8 @@ else
     sudo rm -f -r /mnt/hdd/tor
     sudo rm -f -r /mnt/hdd/temp
     sudo rm -f -r /mnt/hdd/ssh
+    sudo rm -f -r /mnt/hdd/app-storage
+    sudo rm -f -r /mnt/hdd/app-data
     sudo rm -f /mnt/hdd/swapfile
     sudo rm -f /mnt/hdd/*.*
 

@@ -125,7 +125,7 @@ elif [ "${exportType}" = "http" ]; then
   sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
   cd ${randomFolderName}
   sudo chmod 444 *.*
-  python -m SimpleHTTPServer ${randomPortNumber} 2>/dev/null
+  python3 -m http.server ${randomPortNumber} 2>/dev/null
   sudo ufw delete allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   cd ..
   sudo rm -r ${randomFolderName}
@@ -162,4 +162,9 @@ elif [ "${exportType}" = "reset" ]; then
 
 else
   echo "FAIL: unknown '${exportType}' -run-> ./lnd.export.sh -h"
+fi
+
+if [ "$1" = "" ] || [ $# -eq 0 ]; then
+  echo "Press ENTER to return to main menu."
+  read key
 fi

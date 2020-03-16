@@ -1,6 +1,8 @@
 #!/bin/bash
+clear
 _temp="./download/dialog.$$"
 _error="./.error.out"
+sudo chmod 7777 ${_error} 2>/dev/null
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
@@ -49,7 +51,10 @@ dialog --title "Pay thru Lightning Network" \
 invoice=$(cat $_temp | xargs)
 shred $_temp
 if [ ${#invoice} -eq 0 ]; then
-  echo "FAIL - not a valid input (${invoice})"
+  clear
+  echo
+  echo "no invoice entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
@@ -97,3 +102,5 @@ else
   echo "It worked :) - check out the service you were paying."
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key

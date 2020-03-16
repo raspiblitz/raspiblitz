@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # requests missing in dietpi
-sudo pip install requests
+sudo pip install requests 2>/dev/null
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

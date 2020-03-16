@@ -1,7 +1,8 @@
 #!/bin/bash
+clear
 _temp="./download/dialog.$$"
 _error="./.error.out"
-sudo chmod 7777 ${_error}
+sudo chmod 7777 ${_error} 2>/dev/null
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
@@ -27,7 +28,10 @@ dialog --title "Pay thru Lightning Network" \
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  clear
+  echo
+  echo "no amount entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
@@ -50,7 +54,7 @@ sleep 2
 
 # execute command
 result=$($command 2>$_error)
-error=`cat ${_error}`
+error=`cat ${_error} 2>/dev/null`
 
 #echo "result(${result})"
 #echo "error(${error})"
@@ -63,7 +67,7 @@ if [ ${#error} -gt 0 ]; then
 else
 
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
-  payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
+  payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
   /home/admin/config.scripts/blitz.lcd.sh qr "${payReq}"
 
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
@@ -118,3 +122,5 @@ else
   /home/admin/config.scripts/blitz.lcd.sh hide
 
 fi
+echo "Press ENTER to return to main menu."
+read key

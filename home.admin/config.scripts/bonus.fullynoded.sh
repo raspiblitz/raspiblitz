@@ -12,7 +12,7 @@ source /mnt/hdd/raspiblitz.conf
 # extract RPC credentials from bitcoin.conf - store only in var
 RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
 PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-hiddenService=$(sudo cat /mnt/hdd/tor/bitcoinrpc/hostname)
+hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin8332/hostname)
 
 # btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label> 
 quickConnect="btcstandup://$RPC_USER:$PASSWORD_B@$hiddenService:8332/?label=$hostname"

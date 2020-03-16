@@ -284,7 +284,10 @@ or having a complete LND rescue-backup from your old node.
         exit 1
       else
         clear
-        echo "FILE UPLOADED --> will get checked/activated after blockchain/lightning is synced"
+        echo "channel.backup will get checked/activated after blockchain/lightning is synced"
+        sleep 2
+        echo "NEXT --> Set password for new LND wallet"
+        sleep 3
       fi
     fi
 
@@ -359,7 +362,7 @@ to protect the seed words. Most users did not set this.
 
       # trigger wallet recovery
       source /home/admin/python3-env-lnd/bin/activate
-      source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD})
+      source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD} 2>/dev/null)
 
       # check if wallet was created for real
       if [ ${#err} -eq 0 ]; then
@@ -373,7 +376,12 @@ to protect the seed words. Most users did not set this.
       if [ ${#err} -eq 0 ]; then
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
-      " 7 53
+
+IMPORTANT: After full sync wait an hour - if you
+see still a on-chain balance of 0 satoshis try to
+recover your wallet with the ZAP desktop app and
+then send funds back to your RaspiBlitz.
+      " 12 53
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
@@ -381,39 +389,16 @@ Something went wrong - see info below:
 ${err}
 ${errMore}
       " 13 72
-          sleep 3
+          clear
+          echo "Restarting LND Wallet Setup .." 
+          sleep 2
+          echo
           /home/admin/70initLND.sh
           exit 1
       fi
     fi
 
-##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
-#    echo "****************************************************************************"
-#    echo "* RECOVER LND WALLET BY SEED WORDS"
-#    echo "****************************************************************************"
-#    echo "A) For 'Wallet Password' use your old PASSWORD C"
-#    echo "B) For 'cipher seed mnemonic' answere 'y' and then enter your seed words" 
-#    echo "C) On 'cipher seed passphrase' ONLY enter PASSWORD D if u used it on create"
-#    echo "D) On 'address look-ahead' only enter more than 2500 had lots of channels"
-#    echo "****************************************************************************"
-#    echo ""
-#    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>/home/admin/.error.tmp
-#    error=`cat /home/admin/.error.tmp`
-#    rm /home/admin/.error.tmp 2>/dev/null
-#
-#    if [ ${#error} -gt 0 ]; then
-#      echo ""
-#      echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-#      echo "${error}"
-#      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-#      echo ""
-#      echo "Press ENTER to retry ..."
-#      read key
-#      echo "Starting RETRY ..."
-#      /home/admin/70initLND.sh
-#      exit 1
-#    fi
-
+    clear
     /home/admin/70initLND.sh
 
   fi # END OLD WALLET

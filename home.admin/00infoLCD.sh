@@ -85,6 +85,16 @@ while :
     # get the local network IP to be displayed on the lCD
     localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
+    # waiting for IP in general
+    if [ ${#localip} -eq 0 ]; then
+      l1="Waiting for Network ...\n"
+      l2="Not able to get local IP.\n"
+      l3="Is LAN cable connected?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
+      sleep 3
+      continue
+    fi
+
     # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
@@ -295,8 +305,8 @@ while :
       # echo "Config Not Valid!"
       l1="POTENTIAL CONFIG ERROR FOUND\n"
       l2="ssh admin@${localip}\n"
-      l3="use PasswordA and then run:\n"
-      l4="/home/admin/config.scripts/blitz.configcheck.py"
+      l3="use Password A\n"
+      l4="Run on Terminal command: check"
       dialog --backtitle "RaspiBlitz ${codeVersion} cfg-err ${localip}" --infobox "$l1$l2$l3$l4" 6 50
       sleep 20
       continue
@@ -304,10 +314,6 @@ while :
 
     # no special case - show status display
     /home/admin/00infoBlitz.sh
-    if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
-      echo ""
-      echo ""
-    fi
     sleep 5
 
 done

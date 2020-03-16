@@ -54,19 +54,19 @@ if [ ${mode} = "backup" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************"
-  echo "* DOWNLOAD THE BACKUP FILE *"
-  echo "****************************"
+  echo "*****************************"
+  echo "* DOWNLOAD THE REASCUE FILE *"
+  echo "*****************************"
   echo 
-  echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
+  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
-  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
-  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
-  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
+  echo "BEWARE: Your Lightning node is now stopped. Its safe to backup the data and"
+  echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again or rebooted its not adviced to restore the backup file anymore because"
+  echo "it cointains then outdated channel data & can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 
@@ -86,7 +86,7 @@ elif [ ${mode} = "restore" ]; then
       countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz 2>/dev/null | grep -c 'lnd-rescue')
       if [ ${countZips} -lt 1 ]; then
         echo "**************************"
-        echo "* UPLOAD THE BACKUP FILE *"
+        echo "* UPLOAD THE RESCUE FILE *"
         echo "**************************"
         echo "If you have a lnd-rescue backup file on your laptop you can now"
         echo "upload it and restore the your latest LND state."
@@ -98,8 +98,8 @@ elif [ ${mode} = "restore" ]; then
         echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
-        echo "Use password A to authenticate file transfere."
-        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
+        echo "Use password A to authenticate file transfer."
+        echo "PRESS ENTER when upload is done."
       fi
       if [ ${countZips} -gt 1 ]; then
         echo "!! WARNING !!"
@@ -128,7 +128,7 @@ elif [ ${mode} = "restore" ]; then
           echo "OK -> checksum looks good: ${md5checksum}"
         else
           echo "!!! FAIL -> Checksum not correct."
-          echo "Maybe transfere failed? Continue on your own risk!"
+          echo "Maybe transfer failed? Continue on your own risk!"
           echo "Recommend to abort and upload again!"
         fi
 
@@ -186,7 +186,7 @@ elif [ ${mode} = "scb-down" ]; then
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
   echo "scp -r admin@${localip}:/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
   echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing" 
   echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file" 
@@ -218,7 +218,7 @@ elif [ ${mode} = "scb-up" ]; then
     echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
     echo "scp ./channel.backup admin@${localip}:/home/admin/"
     echo ""
-    echo "Use password A to authenticate file transfere."
+    echo "Use password A to authenticate file transfer."
     echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
 
     # wait user interaction
@@ -236,7 +236,9 @@ elif [ ${mode} = "scb-up" ]; then
   done
 
   # EXIT with CODE 1 --> FILE UPLOADED
+  echo
   echo "# OK channel.backup uploaded"
+  sleep 2
   exit 0
 
 else

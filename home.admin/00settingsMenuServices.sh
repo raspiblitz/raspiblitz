@@ -12,6 +12,7 @@ if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
+if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -20,6 +21,7 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
+if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -57,7 +59,7 @@ fi
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 21 45 13 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -65,15 +67,17 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cyryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 else
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 22 45 14 \
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
@@ -81,6 +85,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cyryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
@@ -89,6 +94,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+i 'LNBits' ${LNBits} \
 2>&1 >/dev/tty)
 fi
 
@@ -100,6 +106,9 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
+  exit 1
+elif [ ${dialogcancel} -eq 255 ]; then
+  echo "ESC pressed"
   exit 1
 fi
 
@@ -347,27 +356,11 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo sytemctl start btc-rpc-explorer
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname)
-        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex may need to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD.
-Monitor the progress on the LCD or with 'INFO' in main menu.\n
-BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
----> http://${localip}:3002\n
-The Hidden Service address to be used in the Tor Browser is:\n
-${TOR_ADDRESS}
-" 18 75 
-      else
-        whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex may need to be created before BTC-RPC-Explorer can be active.
-Takes ~7 hours on a RPi4 with SSD.
-Monitor the progress on the LCD or with 'INFO' in main menu.\n
-BTC-RPC-Explorer will be available on the following URL in your local web browser:\n
----> http://${localip}:3002
-" 14 75 
-      fi
+      whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
+The txindex may need to be created before BTC-RPC-Explorer can be active.\n
+This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
+When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
+" 14 50
       needsReboot=1
     else
       l1="!!! FAIL on BTC-RPC-Explorer install !!!"
@@ -378,6 +371,32 @@ BTC-RPC-Explorer will be available on the following URL in your local web browse
   fi
 else
   echo "BTC-RPC-Explorer Setting unchanged."
+fi
+
+# cryptoadvance Specter process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${specter}" != "${choice}" ]; then
+  echo "Cryptoadvance Specter Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      #sudo sytemctl start cryptoadvance-specter
+      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+      #whiptail --title " Installed Cryptoadvance Specter " --msgbox "\
+      #You should be able to reach specter on port 25441. The Login is Password B.\n
+      #" 14 50
+    else
+      l1="!!! FAIL on Cryptoadvance Specter install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Cryptoadvance Specter Setting unchanged."
 fi
 
 # LND Auto-Unlock
@@ -433,47 +452,26 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${ElectRS}" != "${choice}" ]; then
   echo "ElectRS Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.electrs.sh ${choice}
+  extraparameter=""
+  if [ "${choice}" =  "off" ]; then
+	  whiptail --title "Delete Electrum Index?" \
+    --yes-button "Keep Index" \
+    --no-button "Delete Index" \
+    --yesno "ElectRS is getting uninstalled. Do you also want to delete the Electrum Index? It contains no important data, but can take multiple hours to rebuild if needed again." 10 60
+	  if [ $? -eq 1 ]; then
+      extraparameter="deleteindex"
+	  fi
+  fi
+  /home/admin/config.scripts/bonus.electrs.sh ${choice} ${extraparameter}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start electrs
-      localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-        echo "Electrs now starts indexing the transaction data in the background. 
-This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
-See more more info about how to monitor the process:
-https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"        
-        echo ""
-        echo "The Tor Hidden Service address for electrs is:"
-        echo "$TOR_ADDRESS"
-        echo ""
-        echo "To connect the Electrum wallet through Tor open the Tor Browser and start Electrum with the options:" 
-        echo "\`electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150\`"
-        echo ""
-        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
-        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
-        echo "" 
-        echo "scan the QR to use the Tor address in Electrum on mobile:"
-        qrencode -t ANSI256 $TOR_ADDRESS
-        echo "Press ENTER to return to the menu"
-        read key
-      else
-        echo "Electrs now starts indexing the transaction data in the background. 
-This process takes days on an RPi3 and still many hours on a RPi4 with SSD.
-See more more info about how to monitor the process:
-https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#monitor-electrs"  
-        echo ""
-        echo "To connect through the Electrum wallet to your own Electrum Rust Server:"
-        echo "Start the wallet with the options \`electrum --oneserver --server $localip:50002:s\`"
-        echo ""
-        echo "See the docs for more detailed instructions to connect Electrum on Windows/Mac/Linux:"
-        echo "https://github.com/openoms/bitcoin-tutorials/tree/master/electrs#connect-the-electrum-wallet-to-electrs"
-        echo "" 
-        echo "Press ENTER to return to the menu"
-        read key
-      fi
+      whiptail --title " Installed ElectRS Server " --msgbox "\
+The index database needs to be created before Electrum Server can be used.\n
+This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
+When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
+" 14 50
     else
       l1="!!! FAIL on ElectRS install !!!"
       l2="Try manual install on terminal after reboot with:"
@@ -491,32 +489,15 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice}
+  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       source /home/btcpay/.btcpayserver/Main/settings.config
-      if [ "${externalurl}" = "https://localhost" ]; then
-        localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-        externalurl="https://$localip\n
-Will need to accept the self-signed certificate in the \
-browser to be able to connect from the outside of the Tor Network."
-      fi
-      if [ "${runBehindTor}" = "on" ]; then
-        TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/btcpay/hostname)
-        whiptail --title " Installed BTCPAY Server " --msgbox "\
-Open the following URL in your local web browser
-and register your admin account:\n 
----> ${externalurl}\n
-The Hidden Service address to be used in the Tor Browser:\n
-${TOR_ADDRESS}
-" 17 75 
-      else
-        l1="Open the following URL in your local web browser"
-        l2="and register your admin account: "
-        l3="---> ${externalurl}"
-        dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 7 65
-      fi
+      whiptail --title " Installed BTCPay Server " --msgbox "\
+BTCPay server was installed.\n
+Use the new 'BTCPay' entry in Main Menu for more info.\n
+" 10 35
     else
       l1="BTCPayServer installation is cancelled"
       l2="Try again from the menu or install from the terminal with:"
@@ -535,8 +516,24 @@ if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${lndmanage}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
+  fi
+else 
+  echo "lndmanage setting unchanged."
+fi
+
+# LNBits process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${LNBits}" != "${choice}" ]; then
+  echo "LNBits Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start lnbits
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
   fi
 else 
   echo "lndmanage setting unchanged."

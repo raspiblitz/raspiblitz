@@ -29,7 +29,7 @@ if [ "${setupStep}" = "100" ]; then
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
-if [ -d "/mnt/hdd/bitcoin" ]; then
+if [ -d "/mnt/hdd/bitcoin" ] && [ "$1" != "stop-after-script" ]; then
   dialog --title "Fresh or Repair" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
   response=$?
   echo "response(${response})"
@@ -78,7 +78,11 @@ else
 fi
 echo "" 
 echo "This command may ask you first about the admin password of the other computer (because sudo)."
-echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
+if [ "$1" == "stop-after-script" ]; then
+  echo "Then it will ask for the default RaspiBlitz SSH password --> raspiblitz."
+else
+  echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
+fi
 echo "It can take multiple hours until transfer is complete - be patient."
 echo "************************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another option."
@@ -133,6 +137,17 @@ else
 
 fi
 echo "*********************************************"
+
+# if started with parameter "stop-after-script" - quit here
+if [ "$1" == "stop-after-script" ]; then
+  if [ ${quickCheckOK} -eq 0 ]; then
+    echo "cleaning up .."
+    sudo rm -rf /mnt/hdd/bitcoin/blocks
+    sudo rm -rf /mnt/hdd/bitcoin/chainstate
+  fi
+  echo "DONE Copy"
+  exit 0
+fi
 
 # if started after intial setup - quit here
 if [ "${setupStep}" = "100" ]; then

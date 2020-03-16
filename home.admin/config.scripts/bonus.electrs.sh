@@ -39,7 +39,8 @@ if [ "$1" = "status" ]; then
     # Experimental try to get sync Info
     syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
-    if [ "${syncedToBlock}" = "${blockchainHeight}" ]; then
+    lastBlockchainHeight=$(($blockchainHeight -1))
+    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "isSynced=1"
     else
       echo "isSynced=0"
@@ -51,7 +52,7 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "publicIP='${publicIP}'"
     echo "portTCP='50001'"
-    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50001 (LISTEN)')
+    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
@@ -61,16 +62,16 @@ if [ "$1" = "status" ]; then
       # no answere on that port
       echo "publicTCPPortAnswering=0"
     fi
-    echo "portHTTPS='50002'"
-    localPortRunning=$(sudo -u electrs lsof -i | grep 'IPv4' | grep -c '50002 (LISTEN)')
-    echo "localHTTPSPortActive=${localPortRunning}"
+    echo "portHTTP='50002'"
+    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
+    echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that somethingis answering on that port
-      echo "publicHTTPSPortAnswering=1"
+      echo "publicHTTPPortAnswering=1"
     else
       # no answere on that port
-      echo "publicHTTPSPortAnswering=0"
+      echo "publicHTTPPortAnswering=0"
     fi
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
@@ -138,15 +139,16 @@ This can take multiple hours.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deavtivate automatic server selection"
-    echo "- as manual server set '${localIP}' & '${portHTTPS}'"
+    echo "- as manual server set '${localIP}' & '${portHTTP}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo 
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localIP}:${portHTTPS}:s"
+    echo "electrum --oneserver --server ${localIP}:${portHTTP}:s"
     if [ ${TORrunning} -eq 1 ]; then
       echo ""
       echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
+      echo
       echo "To connect through TOR open the Tor Browser and start with the options:" 
       echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
@@ -448,11 +450,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
 
-    
-    if [ "$2" == "keepindex" ]; then
-      echo "# keeping index db"
-    else
-      # delete also db by default (because in case HDD is full, deactivating should free data)
+    if [ "$2" == "deleteindex" ]; then
       sudo rm -rf /mnt/hdd/app-storage/electrs/
     fi
 

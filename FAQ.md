@@ -1,5 +1,34 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.4 of RaspiBlitz?
+
+Beside many small improvements and changes, these are most important changes:
+
+- Update: LND version 0.9.0-beta
+- Update: bitcoin-core version 19.0.1-beta
+- Update: litecoin version 0.17.1-beta
+- Update: RTL (Ride the Lightning) Web UI version 0.6.7-beta (redesign)
+- Update: Touchscreen UI (Node Info & Donate)
+- Update: Fee Report on LCD
+- Update: TORv2 -> TORv3
+- Update: New Torrent files
+- New: ElectRS (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
+- New: BTCPayServer (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+- New: LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
+- New: BTC-RPC-Explorer (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
+- New: Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+- New: LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+- New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
+- New: TOR Support to connect mobile Apps
+- New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
+- New: Start without LCD (switch to HDMI) [details](FAQ.md#can-i-run-the-raspiblitz-without-a-displaylcd)
+- New: Recovery Sheet (PDF) [details](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
+- Experimental: BTRFS [details](FAQ.md#why-use-btrfs-on-raspiblitz)
+
+For full details see issue list of [Release 1.4 Milestone](https://github.com/rootzoll/raspiblitz/milestone/7?closed=1).
+
+Find the full Tutorial how to build a RaspiBlitz in the [README](README.md) or follow the [instructions to update to the latest version](README.md#updating-raspiblitz-to-new-version).
+
 ## Whats new in Version 1.3 of RaspiBlitz?
 
 Version 1.3 is using the new Raspbian Buster that is ready to use with the RaspberryPi 4 (also still works with RaspberryPi 3).
@@ -24,62 +53,6 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 - Experimental: UPS support (APC) [details](FAQ.md#how-to-connect-a-ups-to-the-raspiblitz)
 
 For full details see issue list of [Release 1.3 Milestone](https://github.com/rootzoll/raspiblitz/milestone/6?closed=1).
-
-## How to update my RaspiBlitz from v1.2?
-
-The update should be quite simple - you don't need to close any channels:
-
-- Best is to get a second 16GB or 32GB sd card - but you can also reuse your old one
-- In SSH main menu of you RaspiBlitz choose `UPDATE` & follow the dialogs until shutdown
-- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/master/README.md#installing-the-software)
-- Write the new image to the (new) sd card with a tool like [balena etcher](https://www.balena.io/etcher/)
-- RaspiBlitz with new sd card image - it now goes through a recover/update phase - this may take some time.
-- Once that's done, login once per SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
-
-After the final reboot your RaspiBlitz should be ready running the new RaspiBlitz version.
-
-## How to update my RaspiBlitz from v1.0 or v1.1?
-
-For update you DON'T NEED to close any channels, remove funding or download the blockchain again.
-
-Here is a YouTube video tutorial on how to update: https://www.youtube.com/watch?v=Xvn0WQfHUdI
-
-Simply [Download the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an sd card writer ready. Then login into your RaspiBlitz with SSH and:
-
-- main menu > OFF
-- remove power
-- remove SD card
-
-Write the new image it to your SD card .. yes you simply overwrite the old one, it's OK, all your personal data is on the HDD. If you want to be extra safe you can make a image backup of your old sd card first - but that is optional. If you made manual changes to your RaspiBlitz with scripts on the sd card you might wanna check on this FAQ question first: [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).
-
-- insert new sd card image
-- power on the RaspiBlitz again
-
-You should see that it switched into recover/backup mode. It's now provisioning the fresh OS on the sd card your old settings and data. This process can take some while especially if you had RTL Web UI activated. Follow the instructions on the display ... if it takes longer then an hour .. [get support](https://github.com/rootzoll/raspiblitz#support).
-
-When update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED` message on the display. Login per SSH by using the password `raspiblitz` and set your Password A again. It can be the same as the old one, but maybe use the occasion to make password change for security reasons. If you had auto-unlock activated you might also be asked to enter your old Password C again. Then it wil make a final reboot.
-
-After your RaspiBlitz is done with catching up the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
-
-## How to verify the sd card image after download?
-
-You can do a quick check if the sha256 hash of the file you downloaded is the same as the sha256 hash mentioned below the download link or use the torrent download which will also check the file for checksum after download. But this does not prove to you that the sd card image was actually build by the lead developer of the RaspiBlitz project.
-
-To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
-
-```
-curl https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
-```
-
-After this download the "signature file" for the sd card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also find the download link for the signature file always in the README right below the image download link following the `SIGNATURE` link.
-
-If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
-
-```
-gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
-```
-
-As a result you should see a "correct signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the sd card image you downloaded is a original release RaspiBlitz.
 
 ## Whats new in Version 1.2 of RaspiBlitz?
 
@@ -129,7 +102,61 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 
 For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
 
-Instructions on how to update see FAQ info below.
+## How to update my RaspiBlitz (since 1.2)?
+
+The update should be quite simple - you don't need to close any channels:
+
+- Best is to get a second 16GB or 32GB sd card - but you can also reuse your old one
+- In SSH main menu of you RaspiBlitz choose `UPDATE` & follow the dialogs until shutdown
+- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/master/README.md#installing-the-software)
+- Write the new image to the (new) sd card with a tool like [balena etcher](https://www.balena.io/etcher/)
+- RaspiBlitz with new sd card image - it now goes through a recover/update phase - this may take some time.
+- Once that's done, login once per SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
+
+After the final reboot your RaspiBlitz should be ready running the new RaspiBlitz version.
+
+## How to update my RaspiBlitz from older versions like v1.0 or v1.1?
+
+For update you DON'T NEED to close any channels, remove funding or download the blockchain again.
+
+Here is a YouTube video tutorial on how to update: https://www.youtube.com/watch?v=Xvn0WQfHUdI
+
+Simply [Download the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an sd card writer ready. Then login into your RaspiBlitz with SSH and:
+
+- main menu > OFF
+- remove power
+- remove SD card
+
+Write the new image it to your SD card .. yes you simply overwrite the old one, it's OK, all your personal data is on the HDD. If you want to be extra safe you can make a image backup of your old sd card first - but that is optional. If you made manual changes to your RaspiBlitz with scripts on the sd card you might wanna check on this FAQ question first: [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).
+
+- insert new sd card image
+- power on the RaspiBlitz again
+
+You should see that it switched into recover/backup mode. It's now provisioning the fresh OS on the sd card your old settings and data. This process can take some while especially if you had RTL Web UI activated. Follow the instructions on the display ... if it takes longer then an hour .. [get support](https://github.com/rootzoll/raspiblitz#support).
+
+When update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED` message on the display. Login per SSH by using the password `raspiblitz` and set your Password A again. It can be the same as the old one, but maybe use the occasion to make password change for security reasons. If you had auto-unlock activated you might also be asked to enter your old Password C again. Then it wil make a final reboot.
+
+After your RaspiBlitz is done with catching up the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
+
+## How to verify the sd card image after download?
+
+You can do a quick check if the sha256 hash of the file you downloaded is the same as the sha256 hash mentioned below the download link or use the torrent download which will also check the file for checksum after download. But this does not prove to you that the sd card image was actually build by the lead developer of the RaspiBlitz project.
+
+To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
+
+```
+curl https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
+```
+
+After this download the "signature file" for the sd card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also find the download link for the signature file always in the README right below the image download link following the `SIGNATURE` link.
+
+If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
+
+```
+gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
+```
+
+As a result you should see a "correct signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the sd card image you downloaded is a original release RaspiBlitz.
 
 ## Can I still get version 1.2 of RaspiBlitz?
 
@@ -367,6 +394,8 @@ The node address is red, when the RaspiBlitz detects that it cannot reach the po
 Some routers support a feature called UPnP where devices can automatically request a forwarding to be publicly reachable. By turning on `LND UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
 
 On details how to set port forwarding manually on your router model see: https://portforward.com
+
+Also the selftesting of the RaspiBlitz if the port is forwarded or not might not work if your router is not supporting [Hairpinning](https://en.wikipedia.org/wiki/Hairpinning).
 
 ## Why is my node address on the display yellow (not green)?
 
@@ -628,7 +657,7 @@ Work notes for the process of producing a new sd card image release:
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Power on the Build Laptop (press F12 for boot menu)
-* Connect USB stick with GPG signing keys
+* Connect USB stick with GPG signing keys - decrypt drive if needed
 * Open Terminal and cd into directory of USB Stick under `/media/amnesia`
 * Run `gpg --import ./sub.key`, check and `exit`
 * Disconnect USB stick with GPG keys
@@ -835,8 +864,47 @@ To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on apc
 
 If you have other UPS models or ways to connect ... feel free to extend this script.
 
+## Why use BTRFS on RaspiBlitz?
+
+The file system [BTRFS](https://de.wikipedia.org/wiki/Btrfs) for your HDD/SSD provides two new features to make the datastorage more resilient:
+
+### Storing your important Data in RAID1 with a USB Thumb Drive
+
+BTRFS comes with build in RAID features - that means that data can be stored on two physical drives at the same time and if one is failing the other one can be used to heal the other one or its replacement.
+
+For the Raspiblitz this means that you can connect an additional 32GB USB3 Thumb Drive (under 10 USD) and have it running in a RAID with your HDD/SSD - having your LND channel data and all other important data of your RaspiBlitz double safe.
+
+### Snapshotting the Blockchain
+
+BTRFS comes with a build in snapshot feature - that means that your RaspiBlitz can make every day a backup of the blockchain data and if a blockchain corruption occurs (exmaple thru a power outage) there is no need to sync the complete chain again. Just switch back to the last backup state and quickly sync up from there. On BTRFS such backups can be done as snapshots that dont need much more space on the drive and are quicly done - no need to buy a bigger SSD or wait for copying over 200GB.
+
+## How to use BTRFS on RaspiBlitz?
+
+Because the BTRFS is still experimental its a bit hidden to activate. There are two ways:
+
+- When you start a fresh setup just connect a 32GB Thumb Drive on the second USB3 port from the beginning and you should be asked during HDD setup if you want to try out BTRFS and gave the Thumb Drive as RAID1.
+
+- If you have a existing RaspiBlitz you want to switch to BTRFS then you need to export a Migration File (MAINMENU > REPAIR > MIGRATION) an then format your HDD/SSD clean. When you import a Migration File during a fresh Setup (see above) you will get the option to format the HDD/SSD with BTRFS. 
+
+Once the Blitz is running on BTRFS you can use the '/home/admin/config.scripts/blitz.datadrive.sh' script to add a RAID drive or make a snapshot.
+
 ## How to recover a BTRFS partition?
 
 This articles goes thru the usual options:
 https://ownyourbits.com/2019/03/03/how-to-recover-a-btrfs-partition/
 https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
+
+## How do I fix a displayed Error in my Config?
+
+When the LCD display is telling you to do config check:
+- go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
+- start reboot with command: './XXshutdown.sh reboot' 
+- go to the RaspiBlitz terminal run the command: 'check'
+- now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
+- save config with: CTRL+o
+- exit nano editor with: CTRL+x
+- start reboot with command: './XXshutdown.sh reboot' 
+
+## How to fix my upside down LCD after update?
+
+Some displays have a different orientation. To fix this activate/deactivate the LCD-ROTATION option in the MAINMENU > SERVICES and let it reboot. YOu might need to do this up to 3 times until your display got it right.

@@ -119,7 +119,7 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
    else
     clear
     echo "# Not formatting the HDD/SSD - Setup Process stopped."
-    echo "# Rearrange your hardware and retstart with a fresh sd card again."
+    echo "# Rearrange your hardware and restart with a fresh sd card again."
     exit 1
   fi
 

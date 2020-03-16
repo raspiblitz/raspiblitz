@@ -196,28 +196,32 @@ if [ ${isMounted} -eq 1 ]; then
   if [ ${#raspberryPi} -eq 0 ]; then
     raspberryPi=0
   fi
-  syncComment="ULTRA SLOW"
-  if [ ${raspberryPi} -gt 3 ]; then
-    syncComment="BEST+SLOW"
-  fi
 
-  #Bitcoin
-  if [ ${network} = "bitcoin" ]; then
-    echo "Bitcoin Options"
-    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 4 options:" 13 75 5 \
-    T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
-    C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
-    N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
-    S "SYNC     --> MAINNET thru Bitcoin Network (${syncComment})" 2>&1 >/dev/tty)
+  # Bitcoin on older/weak RaspberryPi3 (LEGACY)
+  if [ ${network} = "bitcoin" ] && [ ${raspberryPi} -eq 3 ]; then
+    echo "Bitcoin-RP3 Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
+    T "TORRENT --> Download thru Torrent (TRUSTED DEFAULT ±1day)" \
+    C "COPY    --> Copy from laptop/node (OVER LAN ±6hours)" \
+    N "CLONE   --> Clone from 2nd HDD (EXTRA POWER NEEDED ±6hours)"\
+    S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
+
+  # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
+  elif [ ${network} = "bitcoin" ]; then
+    echo "Bitcoin-RP4 Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
+    S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
+    C "COPY    --> Copy from laptop/node (OVER LAN ±4hours)" \
+    T "TORRENT --> Download thru Torrent (TRUSTED FALLBACK ±1day)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
     echo "Litecoin Options"
-    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Litecoin Blockchain - you have 2 options:" 13 75 4 \
-    T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
-    S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Litecoin Blockchain:" 13 75 4 \
+    S "SYNC    --> Selfvalidate all Blocks (±1day)" 2>&1 >/dev/tty)
 
   # error
   else
@@ -242,6 +246,9 @@ if [ ${isMounted} -eq 1 ]; then
           S)
               /home/admin/50syncHDD.sh
               /home/admin/10setupBlitz.sh
+              ;;
+          *)
+              echo "Use 'raspiblitz' command to return to setup ..."
               ;;
   esac
   exit 1

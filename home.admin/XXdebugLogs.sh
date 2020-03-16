@@ -114,6 +114,26 @@ else
   echo ""
 fi
 
+if [ "${BTCPayServer}" = "on" ]; then
+  echo "*** LAST 20 BTCPayServer LOGS ***"
+  echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
+  sudo journalctl -u btcpayserver -b --no-pager -n20
+  echo ""
+else
+  echo "- BTCPayServer is OFF by config"
+  echo ""
+fi
+
+if [ "${LNBits}" = "on" ]; then
+  echo "*** LAST 20 LNBits LOGS ***"
+  echo "sudo journalctl -u lnbits -b --no-pager -n20"
+  sudo journalctl -u lnbits -b --no-pager -n20
+  echo ""
+else
+  echo "- LNBits is OFF by config"
+  echo ""
+fi
+
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
 if [ ${#undervoltageReports} -gt 0 ]; then

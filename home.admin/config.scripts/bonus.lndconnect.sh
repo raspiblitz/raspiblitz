@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android] [?ip|tor]"
  exit 1
 fi
 
@@ -15,26 +15,12 @@ source /mnt/hdd/raspiblitz.conf
 #### PARAMETER
 
 # 1. TARGET WALLET
-targetWallet=$1 
+targetWallet=$1
 
-# 1. REST or RPC
-# determine service port from argument
-if [ "$1" == "RPC" ]; then
-  echo "# RPC mode"
-  servicePort="10009"
-fi
-if [ "$1" == "REST" ]; then
-  echo "# REST mode"
-  servicePort="8080"
-fi
-
-# 2. FORCE NOCERT (optional)
-if [ "$2" == "NOCERT" ]; then
-  echo "# forcing NOCERT"
-  extraparamter="--nocert"
-elif [ "$2" == "SHANGO" ]; then
-  echo "# connecting thru shango QR code"
-  connector="shango"
+# 1. TOR or IP (optional - default IP)
+forceTOR=0
+if [ "$2" == "tor" ]; then
+  forceTOR=1
 fi
 
 #### MAKE SURE LNDCONNECT IS INSTALLED
@@ -42,7 +28,7 @@ fi
 # check if it is installed
 # https://github.com/rootzoll/lndconnect
 # using own fork of lndconnet because of this commit to fix for better QR code:
-commit=e76226f2dd3cce3c169a7161f66612c2662407fa
+commit=82d7103bb8c8dd3c8ae8de89e3bc061eef82bb8f
 isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   echo "# Installing lndconnect.."
@@ -53,7 +39,7 @@ if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   # Install latest lndconnect from source:
   go get -d github.com/rootzoll/lndconnect
   cd $GOPATH/src/github.com/rootzoll/lndconnect
-  //git checkout $commit
+  git checkout $commit
   make
 else
   echo "# lndconnect is already installed" 
@@ -69,11 +55,11 @@ extraparamter=""
 supportsTOR=0
 
 if [ "${targetWallet}" = "zap-ios" ]; then
-
   connector="lndconnect"
-  supportsTOR=0 # deactivated until fix: https://github.com/rootzoll/raspiblitz/issues/1001
-  
-  if [ "${runBehindTor}" == "on" ] && [ ${supportsTOR} -eq 1 ]; then
+  if [ ${forceTOR} -eq 1 ]; then
+    # deactivated until fix: https://github.com/rootzoll/raspiblitz/issues/1001
+    echo "error='no tor support'"
+    exit 1
     # when ZAP runs on TOR it uses REST
     port="8080"
     extraparamter="--nocert"
@@ -83,10 +69,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi
   
 elif [ "${targetWallet}" = "zap-android" ]; then
-
   connector="lndconnect"
-  supportsTOR=1
-  if [ "${runBehindTor}" == "on" ] && [ ${supportsTOR} -eq 1 ]; then
+  if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses REST
     port="8080"
     extraparamter="--nocert"
@@ -98,25 +82,33 @@ elif [ "${targetWallet}" = "zap-android" ]; then
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
   connector="lndconnect"
-  supportsTOR=0
+  if [ ${forceTOR} -eq 1 ]; then
+    echo "error='no tor support'"
+    exit 1
+  fi
   port="8080"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
   connector="lndconnect"
-  supportsTOR=1
   port="8080"
 
 elif [ "${targetWallet}" = "shango-ios" ]; then
 
   connector="shango"
-  supportsTOR=0
+  if [ ${forceTOR} -eq 1 ]; then
+    echo "error='no tor support'"
+    exit 1
+  fi
   port="10009"
 
 elif [ "${targetWallet}" = "shango-android" ]; then
 
   connector="shango"
-  supportsTOR=0
+  if [ ${forceTOR} -eq 1 ]; then
+    echo "error='no tor support'"
+    exit 1
+  fi
   port="10009"
 
 else
@@ -135,7 +127,7 @@ if [ ${#dynDomain} -gt 0 ]; then
 fi
 
 # tunnel thru TOR if running and supported by the wallet
-if [ "${runBehindTor}" == "on" ] && [ ${supportsTOR} -eq 1 ]; then
+if [ ${forceTOR} -eq 1 ]; then
   # depending on RPC or REST use different TOR address
   if [ "${port}" == "10009" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
@@ -162,6 +154,15 @@ if [ ${#sshtunnel} -gt 0 ]; then
       echo "# using ssh-tunnel --> host ${host} port ${port}"
     fi
   fi
+fi
+
+# special case: for Zeus android over TOR
+hostscreen="${host}"
+if [ "${targetWallet}" = "zeus-android" ] && [ ${forceTOR} -eq 1 ]; then
+  # show TORv2 address on LCD (to make QR code smaller and scannable by Zeus)
+  host=$(sudo cat /mnt/hdd/tor/lndrest8080fallback/hostname)
+  # show TORv3 address on Screen
+  hostscreen=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 fi
 
 #### RUN LNDCONNECT
@@ -206,8 +207,9 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --no-button "show QR code" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
+  # backup - show QR code on screen (not LCD)
   if [ "${connector}" == "lndconnect" ]; then
-    lndconnect --host=${host} --port=${port} ${extraparamter}
+    lndconnect --host=${hostscreen} --port=${port} ${extraparamter}
     echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
     read key
   elif [ "${connector}" == "shango" ]; then
