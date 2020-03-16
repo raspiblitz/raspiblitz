@@ -12,6 +12,7 @@ if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
+if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -66,6 +67,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cyryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
@@ -83,6 +85,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+s 'Cyryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
@@ -368,6 +371,32 @@ When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
   fi
 else
   echo "BTC-RPC-Explorer Setting unchanged."
+fi
+
+# cryptoadvance Specter process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${specter}" != "${choice}" ]; then
+  echo "Cryptoadvance Specter Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      #sudo sytemctl start cryptoadvance-specter
+      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+      #whiptail --title " Installed Cryptoadvance Specter " --msgbox "\
+      #You should be able to reach specter on port 25441. The Login is Password B.\n
+      #" 14 50
+    else
+      l1="!!! FAIL on Cryptoadvance Specter install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Cryptoadvance Specter Setting unchanged."
 fi
 
 # LND Auto-Unlock
