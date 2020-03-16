@@ -208,21 +208,25 @@ elif [ "${abcd}" = "b" ]; then
   # RTL - keep settings from current RTL-Config.json
   if [ "${rtlWebinterface}" == "on" ]; then
     echo "# changing RTL password"
-    cp /home/admin/RTL/RTL-Config.json /home/admin/RTL/backup-RTL-Config.json
+    cp /home/rtl/RTL/RTL-Config.json /home/rtl/RTL/backup-RTL-Config.json
     # remove hashed old password
     #sed -i "/\b\(multiPassHashed\)\b/d" ./RTL-Config.json
     # set new password
-    chmod 600 /home/admin/RTL/RTL-Config.json || exit 1
-    node > /home/admin/RTL/RTL-Config.json <<EOF
+    cp /home/rtl/RTL/RTL-Config.json /home/admin/RTL-Config.json
+    chown admin:admin /home/admin/RTL-Config.json
+    chmod 600 /home/admin/RTL-Config.json || exit 1
+    node > /home/admin/RTL-Config.json <<EOF
 //Read data
-var data = require('/home/admin/RTL/backup-RTL-Config.json');
+var data = require('/home/rtl/RTL/backup-RTL-Config.json');
 //Manipulate data
 data.multiPassHashed = null;
 data.multiPass = '$newPassword';
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-    rm -f /home/admin/RTL/backup-RTL-Config.json
+    rm -f /home/rtl/RTL/backup-RTL-Config.json
+    mv /home/admin/RTL-Config.json /home/rtl/RTL/
+    chown rtl:rtl /home/rtl/RTL/RTL-Config.json
   fi
   
   # electrs
@@ -235,9 +239,8 @@ EOF
   # BTC-RPC-Explorer
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "# changing BTCRPCEXPLORER password"
-    sed -i "s/^BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:.*@127.0.0.1:8332?timeout=10000/BTCEXP_BITCOIND_URI=$network:\/\/$RPC_USER:${newPassword}@127.0.0.1:8332\?timeout=10000/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
-    sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
-    sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/bitcoin/.config/btc-rpc-explorer.env 2>/dev/null
+    sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
+    sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
   fi
 
   # BTCPayServer
