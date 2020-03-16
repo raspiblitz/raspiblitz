@@ -395,6 +395,8 @@ Some routers support a feature called UPnP where devices can automatically reque
 
 On details how to set port forwarding manually on your router model see: https://portforward.com
 
+Also the selftesting of the RaspiBlitz if the port is forwarded or not might not work if your router is not supporting [Hairpinning](https://en.wikipedia.org/wiki/Hairpinning).
+
 ## Why is my node address on the display yellow (not green)?
 
 Yellow is OK. The RaspiBlitz can detect, that it can reach a service on the port 9735 of your public IP - this is in most cases the LND of your RaspiBlitz. But the RaspiBlitz cannot 100% for sure detect that this is its own LND service on that port - that's why it's just yellow, not green.
