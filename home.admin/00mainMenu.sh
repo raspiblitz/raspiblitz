@@ -57,6 +57,9 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")  
 fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Cryptoadvance Specter")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -146,6 +149,9 @@ case $CHOICE in
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
+            ;;
+        SPECTER)
+            /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
             ;;
         lnbalance)
             clear
