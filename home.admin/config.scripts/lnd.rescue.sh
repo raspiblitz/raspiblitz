@@ -61,7 +61,7 @@ if [ ${mode} = "backup" ]; then
   echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
   echo "BEWARE: Your Lightning node is now stopped. Its safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
@@ -98,7 +98,7 @@ elif [ ${mode} = "restore" ]; then
         echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
-        echo "Use password A to authenticate file transfere."
+        echo "Use password A to authenticate file transfer."
         echo "PRESS ENTER when upload is done."
       fi
       if [ ${countZips} -gt 1 ]; then
@@ -128,7 +128,7 @@ elif [ ${mode} = "restore" ]; then
           echo "OK -> checksum looks good: ${md5checksum}"
         else
           echo "!!! FAIL -> Checksum not correct."
-          echo "Maybe transfere failed? Continue on your own risk!"
+          echo "Maybe transfer failed? Continue on your own risk!"
           echo "Recommend to abort and upload again!"
         fi
 
@@ -186,7 +186,7 @@ elif [ ${mode} = "scb-down" ]; then
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
   echo "scp -r admin@${localip}:/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
   echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing" 
   echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file" 
@@ -218,7 +218,7 @@ elif [ ${mode} = "scb-up" ]; then
     echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
     echo "scp ./channel.backup admin@${localip}:/home/admin/"
     echo ""
-    echo "Use password A to authenticate file transfere."
+    echo "Use password A to authenticate file transfer."
     echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
 
     # wait user interaction
