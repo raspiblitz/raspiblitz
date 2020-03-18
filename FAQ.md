@@ -919,7 +919,7 @@ Some displays have a different orientation. To fix this activate/deactivate the 
 
 ## How can I repair my SSH login?
 
-If you cannot login per SSH into your RaspiBlitz your SSH RaspiBlitz certs might be corrupted. To renew and reset those do the following:
+If you cannot login per SSH into your RaspiBlitz your SSH RaspiBlitz certs might be corrupted. To renew and reset those do the following (since version 1.5):
 
 - shutdown the RaspiBlitz - if you dont have touchscreen activated, disconnect LAN cable, wait until HDD/SSD activity slows down (no constant blinking) and then cut the power
 - take out the sd card and connect it to your laptop - it should appear as a `boot` drive
