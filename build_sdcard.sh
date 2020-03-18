@@ -349,7 +349,7 @@ echo "*** PREPARING BITCOIN & Co ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.19.0.1"
+bitcoinVersion="0.19.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
