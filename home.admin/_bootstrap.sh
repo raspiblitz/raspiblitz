@@ -150,7 +150,7 @@ fi
 forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/hdmi
+  sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
   exit 0
@@ -166,7 +166,7 @@ fi
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/ssh.reset
+  sudo rm /boot/ssh.reset*
   # show info ssh reset
   sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
   sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
