@@ -147,7 +147,7 @@ fi
 # the sd card - switch to hdmi
 ################################
 
-forceHDMIoutput=$(sudo ls /boot/hdmi 2>/dev/null | grep -c hdmi)
+forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi
@@ -163,7 +163,7 @@ fi
 # the sd card - switch to hdmi
 ################################
 
-sshReset=$(sudo ls /boot/ssh.reset 2>/dev/null | grep -c reset)
+sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/ssh.reset
