@@ -450,7 +450,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.9.0-beta"
+lndVersion="0.9.2-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
