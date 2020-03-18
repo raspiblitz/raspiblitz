@@ -1,5 +1,12 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.5 of RaspiBlitz?
+
+Beside many small improvements and changes, these are most important changes:
+
+- Update: LND version 0.9.2-beta
+- Update: bitcoin-core version 19.1-beta
+
 ## Whats new in Version 1.4 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:

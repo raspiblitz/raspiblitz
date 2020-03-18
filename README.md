@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.4 with lnd 0.9.0-beta and bitcoin 0.19.0.1 or litecoin 0.17.1.`
+`Version 1.5 with lnd 0.9.2-beta and bitcoin 0.19.1 or litecoin 0.17.1.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -130,13 +130,13 @@ Add the display on top with the pins like in picture below. PlugIn the network c
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.4:**
+**Download SD-Card image - Version 1.5:**
 
-Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz)
+Browser: TODO
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-20.img.gz.torrent
+Torrent: TODO
 
-SHA-256: 55b1989a45e99ecc56b74febddfa98f52271799105cc80900b09cc67e73df078 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
+SHA-256: TODO or [SIGNATURE](TODO)
 
 **Write the SD-Card image to your SD Card**
 
