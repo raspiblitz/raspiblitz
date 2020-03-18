@@ -157,6 +157,28 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
 fi
 
 ################################
+# SSH SERVER CERTS RESET
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+sshReset=$(sudo ls /boot/ssh.reset 2>/dev/null | grep -c reset)
+if [ ${sshReset} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/ssh.reset
+  # show info ssh reset
+  sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
+  sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
+  # delete ssh certs
+  sudo systemctl stop sshd
+  sudo rm /mnt/hdd/ssh/ssh_host*
+  sudo ssh-keygen -A
+  sudo /home/admin/XXshutdown.sh reboot
+  exit 0
+fi
+
+################################
 # WAIT FOR LOCAL NETWORK
 ################################
 
