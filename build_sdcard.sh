@@ -707,8 +707,9 @@ sudo -u admin git clone https://github.com/goodtft/LCD-show.git
 sudo -u admin chmod -R 755 LCD-show
 sudo -u admin chown -R admin:admin LCD-show
 cd LCD-show/
-# set comit hard to a8de38f (7 Nov 2019) for security
-sudo -u admin git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
+# set comit hard to old version - that seemed to run better
+# 
+sudo -u admin git reset --hard ce52014
 
 # install xinput calibrator package
   echo "--> install xinput calibrator package"
