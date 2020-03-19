@@ -139,6 +139,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
   sudo tune2fs -c 1 /dev/mmcblk0p2
+  # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
+  sudo sed -i 's/^/fsck.mode=force fsck.repair=yes /g' /boot/cmdline.txt
 fi
 
 # special prepare when Ubuntu or Armbian
