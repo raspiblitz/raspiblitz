@@ -754,6 +754,7 @@ echo ""
 # activate LCD and trigger reboot
 # dont do this on dietpi to allow for automatic build
 if [ "${baseImage}" != "dietpi" ]; then
+  sudo chmod +x -R /home/admin/LCD-show
   cd /home/admin/LCD-show/
   sudo apt-mark hold raspberrypi-bootloader
   sudo ./LCD35-show
