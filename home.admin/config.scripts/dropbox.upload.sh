@@ -24,12 +24,20 @@ if [ "${MODE}" == "on" ]; then
 
   # get auth token from user if not given as second parameter
   if [ ${#authtoken} -eq 0 ]; then
+    sudo touch /home/admin/.tmp
+    sudo chmod 777 /home/admin/.tmp
     whiptail --title " Static Channel Backup on Dropbox " --inputbox "
 Follow the steps described at the following link
 to get the DropBox-Authtoken from your account:
-https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>./.tmp
-    authtoken=$( cat ./.tmp )
-    shred ./.tmp
+https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>/home/admin/.tmp
+    authtoken=$(cat /home/admin/.tmp)
+    shred /home/admin/.tmp
+  fi
+
+  # quick check on authtoken
+  if [ ${#authtoken} -gt 80 ]; then
+     echo "err='authtoken unvalid'"
+     exit
   fi
 
   # set in config - that acivates the dropbox back in background process
