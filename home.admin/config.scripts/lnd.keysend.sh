@@ -21,16 +21,16 @@ if [ "${parameter}" == "on" ]; then
   sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
   echo "lndExtraParameter='--accept-keysend'" >> /mnt/hdd/raspiblitz.conf
 
-  sudo systemctl restart lnd
   echo "# OK - keysend feature is switched ON"
+  echo "# LND or RaspiBlitz needs restart"
 
 elif [ "${parameter}" == "off" ]; then
 
  # just remove the parameter from the config file
  sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
 
- sudo systemctl restart lnd
  echo "# OK - keysend feature is switched OFF"
+ echo "# LND or RaspiBlitz needs restart"
 
 elif [ "${parameter}" == "status" ]; then
 

@@ -576,10 +576,11 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${keysend}" != "${choice}" ]; then
   echo "keysend setting changed .."
   anychange=1
+  needsReboot=1
   sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
-  dialog --msgbox "Accept Keysend is now ${choice} - LND restarted.\nYou might need to unlock wallet again." 6 46
+  dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
 else 
-  echo "kesend setting unchanged."
+  echo "keysend setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
