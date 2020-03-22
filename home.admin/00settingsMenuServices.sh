@@ -78,7 +78,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
-d 'Static Channel Backup on DropBox' ${DropboxBackup} \
+d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
@@ -99,7 +99,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
-d 'Static Channel Backup on DropBox' ${DropboxBackup} \
+d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 2>&1 >/dev/tty)
 fi
 
