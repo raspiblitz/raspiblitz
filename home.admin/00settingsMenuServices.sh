@@ -62,7 +62,7 @@ fi
 echo "map keysend to on/off"
 keysend="on"
 source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
-if [ ${keysendON} -eq 0 ]; then
+if [ ${keysendOn} -eq 0 ]; then
   keysend="off"
 fi
 
