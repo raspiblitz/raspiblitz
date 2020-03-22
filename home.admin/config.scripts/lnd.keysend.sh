@@ -30,8 +30,8 @@ elif [ "${parameter}" == "off" ]; then
 
 elif [ "${parameter}" == "status" ]; then
 
-  keysendOn=$(echo "${lndExtraParameter}" | grep -c '--accept-keysend')
-  keysendRunning=$(sudo systemctl status lnd | grep -c "accept-keysend")
+  keysendOn=$(echo "${lndExtraParameter}" | grep -c 'accept-keysend')
+  keysendRunning=$(sudo systemctl status lnd | grep -c 'accept-keysend')
   echo "keysendOn=${keysendOn}"
   echo "keysendRunning=${keysendRunning}"
 
