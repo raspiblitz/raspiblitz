@@ -43,7 +43,7 @@ https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>./.tmp
 elif [ "${MODE}" == "off" ]; then
 
   # to turn backup off - delete the parameter from the config file
-  sed -i '/dropboxBackupTarget=.*/d' /mnt/hdd/raspiblitz.conf
+  sudo sed -i '/dropboxBackupTarget=.*/d' /mnt/hdd/raspiblitz.conf
 
 elif [ "${MODE}" == "check" ]; then
 
