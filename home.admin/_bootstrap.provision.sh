@@ -324,7 +324,7 @@ else
 fi
 
 # LCD ROTATE
-if [ "${#lcdrotate}" -gt 0 ]; then
+if [ "${#lcdrotate}" -eq 0 ]; then
   # when upgrading from an old raspiblitz - enforce lcdrotate = 0
   lcdrotate=0
 fi
