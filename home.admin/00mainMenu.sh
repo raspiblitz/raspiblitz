@@ -194,6 +194,8 @@ case $CHOICE in
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
+            /home/admin/00raspiblitz.sh
+            exit 0
             ;;
         CLOSEALL)
             /home/admin/BBcloseAllChannels.sh

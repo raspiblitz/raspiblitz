@@ -577,6 +577,7 @@ if [ "${keysend}" != "${choice}" ]; then
   echo "keysend setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
+  dialog --msgbox "Accept Keysend is now ${choice} - LND restarted.\nYou might need to unlock wallet again." 6 46
 else 
   echo "kesend setting unchanged."
 fi
