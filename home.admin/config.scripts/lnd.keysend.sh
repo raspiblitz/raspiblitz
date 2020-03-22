@@ -8,6 +8,10 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
+# note: this script is not run during provision/recovery 
+# because if the lnd extra parameter is set in raspiblitz.conf,
+# it will automatically be used by the service 
+
 source /mnt/hdd/raspiblitz.conf
 
 parameter=$1
@@ -17,16 +21,16 @@ if [ "${parameter}" == "on" ]; then
   sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
   echo "lndExtraParameter='--accept-keysend'" >> /mnt/hdd/raspiblitz.conf
 
+  sudo systemctl restart lnd
   echo "# OK - keysend feature is switched ON"
-  echo "# LND reload needed: sudo systemctl restart lnd"
 
 elif [ "${parameter}" == "off" ]; then
 
  # just remove the parameter from the config file
  sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
 
+ sudo systemctl restart lnd
  echo "# OK - keysend feature is switched OFF"
- echo "# LND reload needed: sudo systemctl restart lnd"
 
 elif [ "${parameter}" == "status" ]; then
 
