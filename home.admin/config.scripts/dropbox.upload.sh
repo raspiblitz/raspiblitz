@@ -3,6 +3,8 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# script to upload a file to DropBox (without third party libs)"
+ echo "# dropbox.upload.sh on [AUTHTOKEN]"
+ echo "# dropbox.upload.sh off"
  echo "# dropbox.upload.sh upload [AUTHTOKEN] [FILEPATH]"
  echo "# dropbox.upload.sh check [AUTHTOKEN]"
  echo "# for Dropbox Setup with Authtoken, see:"
@@ -11,9 +13,39 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+source /mnt/hdd/raspiblitz.conf
+
 # get first parameter
 MODE="$1"
-if [ "${MODE}" == "check" ]; then
+if [ "${MODE}" == "on" ]; then
+  
+  # second parameter: dropbox auth token
+  authtoken="$2"
+
+  # get auth token from user if not given as second parameter
+  if [ ${#authtoken} -eq 0 ]; then
+    whiptail --title " Static Channel Backup on Dropbox " --inputbox "
+Follow the steps described at the following link
+to get the DropBox-Authtoken from your account:
+https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>./.tmp
+    authtoken=$( cat ./.tmp )
+    shred ./.tmp
+  fi
+
+  # set in config - that acivates the dropbox back in background process
+  if [ ${#authtoken} -gt 0 ]; then
+    if [ ${#dropboxBackupTarget} -eq 0 ]; then
+      echo "dropboxBackupTarget='${authtoken}'" >> /mnt/hdd/raspiblitz.conf
+    fi
+    sudo sed -i "s/^dropboxBackupTarget=.*/dropboxBackupTarget='${authtoken}'/g" /mnt/hdd/raspiblitz.conf
+  fi
+
+elif [ "${MODE}" == "off" ]; then
+
+  # to turn backup off - delete the parameter from the config file
+  sed -i '/dropboxBackupTarget=.*/d' /mnt/hdd/raspiblitz.conf
+
+elif [ "${MODE}" == "check" ]; then
 
   # get needed second parameter
   DROPBOX_APITOKEN="$2"
