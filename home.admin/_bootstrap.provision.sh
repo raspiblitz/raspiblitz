@@ -325,12 +325,12 @@ fi
 
 # LCD ROTATE
 if [ "${#lcdrotate}" -gt 0 ]; then
-    echo "Provisioning LCD rotate - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-    sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
-else
-    echo "Provisioning LCD rotate - not active" >> ${logFile}
+  # when upgrading from an old raspiblitz - enforce lcdrotate = 0
+  lcdrotate=0
 fi
+echo "Provisioning LCD rotate - run config script" >> ${logFile}
+sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
+sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then
