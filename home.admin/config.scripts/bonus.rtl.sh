@@ -87,8 +87,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl git reset --hard v0.7.0
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
-    # git fetch origin
-    # git checkout feature/0.6.5
     if [ -d "/home/rtl/RTL" ]; then
      echo "OK - RTL code copy looks good"
     else
@@ -101,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=production
+    sudo -u rtl npm install --only=prod
     cd ..
     # check if node_modules exist now
     if [ -d "/home/rtl/RTL/node_modules" ]; then
@@ -139,6 +137,7 @@ data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
+    sudo rm -f /home/rtl/RTL/RTL-Config.json
     sudo mv /home/admin/RTL-Config.json /home/rtl/RTL/
     sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
     echo ""
