@@ -40,9 +40,6 @@ https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>./.tmp
     sudo sed -i "s/^dropboxBackupTarget=.*/dropboxBackupTarget='${authtoken}'/g" /mnt/hdd/raspiblitz.conf
   fi
 
-  # do one initial upload (so user can see it worked)
-  /home/admin/config.scripts/dropbox.upload.sh upload ${authtoken} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
-
 elif [ "${MODE}" == "off" ]; then
 
   # to turn backup off - delete the parameter from the config file
