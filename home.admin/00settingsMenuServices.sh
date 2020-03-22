@@ -23,6 +23,9 @@ if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 
+DropboxBackup="off";
+if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
+
 echo "map chain to on/off"
 chainValue="off"
 if [ "${chain}" = "test" ]; then chainValue="on"; fi
@@ -75,6 +78,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
+d 'Static Channel Backup on DropBox' ${DropboxBackup} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
@@ -95,6 +99,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
+d 'Static Channel Backup on DropBox' ${DropboxBackup} \
 2>&1 >/dev/tty)
 fi
 
@@ -534,6 +539,22 @@ if [ "${LNBits}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
+  fi
+else 
+  echo "lndmanage setting unchanged."
+fi
+
+# DropBox process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${DropboxBackup}" != "${choice}" ]; then
+  echo "DropBox Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/dropbox.upload.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    # doing initial upload so that user can see result
+    source /mnt/hdd/raspiblitz.conf
+    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else 
   echo "lndmanage setting unchanged."
