@@ -23,6 +23,7 @@ if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 
+echo "map dropboxbackup to on/off"
 DropboxBackup="off";
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
@@ -58,12 +59,20 @@ else
   autoPilot="off"
 fi
 
+echo "map keysend to on/off"
+keysend="on"
+source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
+if [ ${keysendON} -eq 0 ]; then
+  keysend="off"
+fi
+
 # show select dialog
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
+k 'Accept Keysend' ${keysend} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -83,6 +92,7 @@ d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
+k 'Accept Keysend' ${keysend} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -558,6 +568,17 @@ if [ "${DropboxBackup}" != "${choice}" ]; then
   fi
 else 
   echo "lndmanage setting unchanged."
+fi
+
+# Kexysend process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${keysend}" != "${choice}" ]; then
+  echo "keysend setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
+else 
+  echo "kesend setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
