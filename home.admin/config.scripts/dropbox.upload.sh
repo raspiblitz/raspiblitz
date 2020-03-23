@@ -32,6 +32,12 @@ https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>./.tmp
     shred ./.tmp
   fi
 
+  # quick check on authtoken
+  if [ ${#authtoken} -gt 80 ]; then
+     echo "err='authtoken unvalid'"
+     exit
+  fi
+
   # set in config - that acivates the dropbox back in background process
   if [ ${#authtoken} -gt 0 ]; then
     if [ ${#dropboxBackupTarget} -eq 0 ]; then
