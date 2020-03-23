@@ -233,13 +233,13 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${loop}" != "${choice}" ]; then
   echo "Loop Setting changed .."
   anychange=1
+  needsReboot=1 # always reboot so that RTL gets restarted to show/hide support loop
   /home/admin/config.scripts/bonus.loop.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start loopd
       /home/admin/config.scripts/bonus.loop.sh menu
-      needsReboot=1
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
