@@ -204,7 +204,6 @@ if [ ${isMounted} -eq 1 ]; then
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
     T "TORRENT --> Download thru Torrent (TRUSTED DEFAULT ±1day)" \
     C "COPY    --> Copy from laptop/node (OVER LAN ±6hours)" \
-    N "CLONE   --> Clone from 2nd HDD (EXTRA POWER NEEDED ±6hours)"\
     S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
 
   # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
@@ -239,10 +238,7 @@ if [ ${isMounted} -eq 1 ]; then
               ;;
           C)
               /home/admin/50copyHDD.sh
-              ;;
-          N)
-              /home/admin/50cloneHDD.sh
-              ;;              
+              ;;      
           S)
               /home/admin/50syncHDD.sh
               /home/admin/10setupBlitz.sh
