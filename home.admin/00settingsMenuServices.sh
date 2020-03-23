@@ -503,21 +503,30 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      source /home/btcpay/.btcpayserver/Main/settings.config
-      whiptail --title " Installed BTCPay Server " --msgbox "\
-BTCPay server was installed.\n
-Use the new 'BTCPay' entry in Main Menu for more info.\n
+  # check if TOR is installed
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" != "on" ]; then
+    whiptail --title " BTCPayServer needs TOR " --msgbox "\
+At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
+Please activate TOR in SERVICES first and then try again..\n
 " 10 35
-    else
-      l1="BTCPayServer installation is cancelled"
-      l2="Try again from the menu or install from the terminal with:"
-      l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+  else
+    anychange=1
+    /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
+    errorOnInstall=$?
+    if [ "${choice}" =  "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+        source /home/btcpay/.btcpayserver/Main/settings.config
+        whiptail --title " BTCPayServer needs TOR " --msgbox "\
+At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
+Please activate TOR in SERVICES first and then try again.\n
+" 11 38
+      else
+        l1="BTCPayServer installation is cancelled"
+        l2="Try again from the menu or install from the terminal with:"
+        l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
+        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      fi
     fi
   fi
 else
