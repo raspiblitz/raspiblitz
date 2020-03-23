@@ -505,7 +505,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
   # check if TOR is installed
   source /mnt/hdd/raspiblitz.conf
-  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" != "on" ]; then
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " BTCPayServer needs TOR " --msgbox "\
 At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
 Please activate TOR in SERVICES first and & let it reboot.\n
@@ -518,10 +518,10 @@ Then try activating BTCPayServer again in SERVICES.\n
     if [ "${choice}" =  "on" ]; then
       if [ ${errorOnInstall} -eq 0 ]; then
         source /home/btcpay/.btcpayserver/Main/settings.config
-        whiptail --title " BTCPayServer needs TOR " --msgbox "\
-At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
-Please activate TOR in SERVICES first and then try again.\n
-" 11 38
+        whiptail --title " Installed BTCPay Server " --msgbox "\
+BTCPay server was installed.\n
+Use the new 'BTCPay' entry in Main Menu for more info.\n
+" 10 35
       else
         l1="BTCPayServer installation is cancelled"
         l2="Try again from the menu or install from the terminal with:"
