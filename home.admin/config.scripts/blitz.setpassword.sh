@@ -225,6 +225,7 @@ data.multiPass = '$newPassword';
 console.log(JSON.stringify(data, null, 2));
 EOF
     rm -f /home/rtl/RTL/backup-RTL-Config.json
+    rm -f /home/rtl/RTL/RTL-Config.json
     mv /home/admin/RTL-Config.json /home/rtl/RTL/
     chown rtl:rtl /home/rtl/RTL/RTL-Config.json
   fi
