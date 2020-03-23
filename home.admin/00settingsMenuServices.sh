@@ -508,9 +508,9 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " BTCPayServer needs TOR " --msgbox "\
 At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
-Please activate TOR in SERVICES first and & let it reboot.\n
+Please activate TOR in SERVICES first.\n
 Then try activating BTCPayServer again in SERVICES.\n
-" 14 35
+" 13 42
   else
     anychange=1
     /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
