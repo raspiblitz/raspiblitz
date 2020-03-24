@@ -25,18 +25,34 @@ if ! grep -Eq "^joinmarket=" /mnt/hdd/raspiblitz.conf; then
   echo "joinmarket=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
+# show info menu
+if [ "$1" = "menu" ]; then
+  dialog --title " JoinMarket info " --msgbox "\n\
+Usage:\n
+https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md\n\n
+Start to use by logging in to the 'joinmarket' user with:\n
+'sudo su - joinmarket' \n\n
+Can log in directly with the 'joinmarket' user via ssh. \n
+The user password is the PASSWORD_B.
+" 13 87
+  exit 0
+fi
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL JOINMARKET ***"
 
-  #check if running Tor
+  # check if running Tor
   if [ ${runBehindTor} = on ]; then
     echo "OK, running behind Tor."
   else
     echo "Not running Tor"
-    echo "Activate Tor from the SERVICE menu before installing JoinMarket."
+    echo "Activate Tor from the SERVICES menu before installing JoinMarket."
     exit 1
   fi
+
+  # make sure the Bitcoin Core wallet is on
+  /home/admin/config.scripts/network.wallet.sh on
 
   if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     echo "*** Add the 'joinmarket' user ***"
