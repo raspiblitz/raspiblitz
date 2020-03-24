@@ -359,6 +359,15 @@ else
   echo "Provisioning LNBits - keep default" >> ${logFile}
 fi
 
+# JoinMarket
+if [ "${joinmarket}" = "on" ]; then
+  echo "Provisioning JoinMarket - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup JoinMarket'/g" ${infoFile}
+  sudo /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning JoinMarket - keep default" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
