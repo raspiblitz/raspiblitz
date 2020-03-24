@@ -22,6 +22,7 @@ if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
+if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -88,6 +89,7 @@ p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
+j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
@@ -110,6 +112,7 @@ p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
+j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
 fi
 
@@ -580,7 +583,7 @@ else
   echo "lndmanage setting unchanged."
 fi
 
-# Kexysend process choice
+# Keysend process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${keysend}" != "${choice}" ]; then
@@ -591,6 +594,38 @@ if [ "${keysend}" != "${choice}" ]; then
   dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
 else 
   echo "keysend setting unchanged."
+fi
+
+# JoinMarket process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "j")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${joinmarket}" != "${choice}" ]; then
+  echo "JoinMarket setting changed .."
+  # check if TOR is installed
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
+    whiptail --title " Use Tor with JoinMarket" --msgbox "\
+It is highly recommended to use Tor with JoinMarket.\n
+Please activate TOR in SERVICES first.\n
+Then try activating JoinMarket again in SERVICES.\n
+" 13 42
+  else
+    anychange=1
+    sudo /home/admin/config.scripts/bonus.joinmarket.sh ${choice}
+    errorOnInstall=$?
+    if [ "${choice}" =  "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+         sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+      else
+        l1="JoinMarket installation is cancelled"
+        l2="Try again from the menu or install from the terminal with:"
+        l3="sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      fi
+    fi
+  fi
+else
+  echo "JoinMarket not changed."
 fi
 
 if [ ${anychange} -eq 0 ]; then
