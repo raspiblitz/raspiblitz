@@ -27,14 +27,13 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " JoinMarket info " --msgbox "\n\
-Usage:\n
-https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md\n\n
-Start to use by logging in to the 'joinmarket' user with:\n
-'sudo su - joinmarket' \n\n
-Can log in directly with the 'joinmarket' user via ssh. \n
+  whiptail --title " JoinMarket info " --msgbox "Usage:
+https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md\n
+Start to use by logging in to the 'joinmarket' user with:
+'sudo su - joinmarket' \n
+Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
-" 13 87
+" 14 87
   exit 0
 fi
 
@@ -90,12 +89,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # latest release: https://github.com/JoinMarket-Orgjoinmarket-clientserver/releases
     # commits: https://github.com/JoinMarket-Org/joinmarket-clientserver/commits/master
     sudo -u joinmarket git checkout 35034b4c3b6fa38a0c4d94c0e884be0749ec9799
+
+    # make apt-get install work without user interaction
+    sudo apt-get -y install rpl
+    sudo rpl "sudo apt-get install" "sudo apt-get -y install" /home/joinmarket/joinmarket-clientserver/install.sh
+
+    # install joinmarket server
     sudo -u joinmarket ./install.sh --without-qt
     
     # autostart for joinmarket
-    sudo bash -c "echo 'bash startup.sh' >> /home/joinmarket/.bashrc"
-    sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
-    sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
+    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "bash startup.sh") -eq 0 ]; then
+      sudo bash -c "echo 'bash startup.sh' >> /home/joinmarket/.bashrc"
+    fi
+    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c ". /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate") -eq 0 ]; then
+      sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
+    fi
+    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "cd /home/joinmarket/joinmarket-clientserver/scripts/") -eq 0 ]; then
+      sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
+    fi
 
     cat > /home/admin/startup.sh <<EOF
 # check for joinmarket.cfg
@@ -106,8 +117,7 @@ if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   echo "Notes on usage:"
   echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md"
   echo ""
-  echo "To return to the RaspiBlitz menu open a new a terminal window or use:"
-  echo "'sudo su - admin'"
+  echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
   echo ""
 else
   echo "Generating the joinmarket.cfg"
@@ -139,8 +149,7 @@ else
   echo "Notes on usage:"
   echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md"
   echo ""
-  echo "To return to the RaspiBlitz menu open a new a terminal window or use:"
-  echo "'sudo su - admin'"
+  echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
   echo ""
 fi
 EOF
@@ -152,11 +161,11 @@ EOF
       echo "JoinMarket is already installed"
       echo ""
   fi    
-
-  # setting value in raspi blitz config
-  sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
   
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
+    # setting value in raspi blitz config
+    sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
+    # starting info
     echo ""
     echo "Start to use by logging in to the 'joinmarket' user with:"
     echo "'sudo su - joinmarket'"
