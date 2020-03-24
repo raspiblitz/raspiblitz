@@ -94,6 +94,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     
     # autostart for joinmarket
     sudo bash -c "echo 'bash startup.sh' >> /home/joinmarket/.bashrc"
+    sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
+    sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
 
     cat > /home/admin/startup.sh <<EOF
 # check for joinmarket.cfg
@@ -127,7 +129,6 @@ else
   sudo sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^socks5 = false/#socks5 = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^port = 6697/#port = 6697/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^usessl = true/#usessl = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
