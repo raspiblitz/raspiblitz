@@ -60,6 +60,9 @@ fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
+if [ "${joinmarket}" == "on" ]; then
+  OPTIONS+=(JMARKET "JoinMarket Server")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -153,6 +156,9 @@ case $CHOICE in
             ;;
         SPECTER)
             /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+            ;;
+        JMARKET)
+            sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
         lnbalance)
             clear
