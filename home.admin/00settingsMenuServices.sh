@@ -617,10 +617,7 @@ Then try activating JoinMarket again in SERVICES.\n
       if [ ${errorOnInstall} -eq 0 ]; then
          sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
       else
-        l1="JoinMarket installation is cancelled"
-        l2="Try again from the menu or install from the terminal with:"
-        l3="sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
-        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+        whiptail --title 'FAIL' --msgbox "JoinMarket installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.joinmarket.sh on" 9 65
       fi
     fi
   fi

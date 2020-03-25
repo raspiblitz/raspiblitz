@@ -90,6 +90,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # latest release: https://github.com/JoinMarket-Orgjoinmarket-clientserver/releases
     # commits: https://github.com/JoinMarket-Org/joinmarket-clientserver/commits/master
     sudo -u joinmarket git checkout 35034b4c3b6fa38a0c4d94c0e884be0749ec9799
+
+    # make apt-get install work without user interaction
+    sudo apt-get -y install rpl
+    sudo rpl "sudo apt-get install" "sudo apt-get -y install" /home/joinmarket/joinmarket-clientserver/install.sh
+
+    # install joinmarket server
     sudo -u joinmarket ./install.sh --without-qt
     
     # autostart for joinmarket
