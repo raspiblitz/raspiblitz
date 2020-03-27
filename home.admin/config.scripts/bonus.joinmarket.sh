@@ -76,7 +76,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
 
     # copy old JoinMarket data to app-data
-    cp -rf /mnt/admin/joinmarket-clientserver/scripst/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
+    cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
 
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
