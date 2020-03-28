@@ -54,6 +54,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/network.wallet.sh on
 
   if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
+
+    echo "*** Cleaning before install ***"
+    sudo userdel -rf joinmarket 2>/dev/null
+
     echo "*** Add the 'joinmarket' user ***"
     adduser --disabled-password --gecos "" joinmarket
 
@@ -76,7 +80,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
 
     # copy old JoinMarket data to app-data
-    cp -rf /mnt/admin/joinmarket-clientserver/scripst/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
+    cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
 
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
@@ -84,25 +88,35 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install joinmarket
     cd /home/joinmarket
-    sudo -u joinmarket git clone https://github.com/JoinMarket-Org/joinmarket-clientserver.git
+    # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
+    sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev
+    # from https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/INSTALL.md 
+    sudo apt install -y python3-dev python3-pip git build-essential automake pkg-config libtool libffi-dev libssl-dev libgmp-dev libsodium-dev
+
+    sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    # latest release: https://github.com/JoinMarket-Orgjoinmarket-clientserver/releases
-    # commits: https://github.com/JoinMarket-Org/joinmarket-clientserver/commits/master
-    sudo -u joinmarket git checkout 35034b4c3b6fa38a0c4d94c0e884be0749ec9799
+    git reset --hard v0.6.2
 
-    # make apt-get install work without user interaction
-    sudo apt-get -y install rpl
-    sudo rpl "sudo apt-get install" "sudo apt-get -y install" /home/joinmarket/joinmarket-clientserver/install.sh
-
-    # install joinmarket server
-    sudo -u joinmarket ./install.sh --without-qt
-    
+    # set up jmvenv 
+    sudo apt install -y virtualenv
+    # use the PySide2 armf package from the system
+    sudo -u joinmarket virtualenv --system-site-packages -p /usr/bin/python3.7 jmvenv
+    source jmvenv/bin/activate || exit 1
+    pip install -r requirements/base.txt
+    # https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/requirements/gui.txt
+    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'
+    pip install qrcode[pil]
+    pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
+        
     # autostart for joinmarket
     if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "bash startup.sh") -eq 0 ]; then
       sudo bash -c "echo 'bash startup.sh' >> /home/joinmarket/.bashrc"
     fi
     if [ $(sudo cat /home/joinmarket/.bashrc | grep -c ". /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate") -eq 0 ]; then
       sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
+    fi
+    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"") -eq 0 ]; then
+      sudo bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"' >> /home/joinmarket/.bashrc"
     fi
     if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "cd /home/joinmarket/joinmarket-clientserver/scripts/") -eq 0 ]; then
       sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
