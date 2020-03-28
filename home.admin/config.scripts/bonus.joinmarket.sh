@@ -98,7 +98,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     git reset --hard v0.6.2
 
     # set up jmvenv 
-    sudo pip3 install virtualenv
+    sudo apt install -y virtualenv
     # use the PySide2 armf package from the system
     sudo -u joinmarket virtualenv --system-site-packages -p /usr/bin/python3.7 jmvenv
     source jmvenv/bin/activate || exit 1
