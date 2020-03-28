@@ -111,8 +111,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ $(sudo cat /home/joinmarket/.bashrc | grep -c ". /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate") -eq 0 ]; then
       sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
     fi
-    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'") -eq 0 ]; then
-      sudo bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'' >> /home/joinmarket/.bashrc"
+    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"") -eq 0 ]; then
+      sudo bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"' >> /home/joinmarket/.bashrc"
     fi
     if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "cd /home/joinmarket/joinmarket-clientserver/scripts/") -eq 0 ]; then
       sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
