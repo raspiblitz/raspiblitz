@@ -54,6 +54,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/network.wallet.sh on
 
   if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
+
+    echo "*** Cleaning before install ***"
+    sudo userdel -rf joinmarket 2>/dev/null
+
     echo "*** Add the 'joinmarket' user ***"
     adduser --disabled-password --gecos "" joinmarket
 
