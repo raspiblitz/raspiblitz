@@ -55,9 +55,10 @@ copyHost()
   cd /mnt/hdd/${network}
   echo
   echo "*** Copy Blockchain Source Modus ***"
-  echo "- Your RaspiBlitz has now stopped LND and ${network}"
-  echo "- Run now the script given by the other RaspiBlitz in Terminal"
-  echo "- When you are done - Restart RaspiBlitz: sudo shutdown -r now"
+  echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
+  echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
+  echo "2. Then run the script given by the other RaspiBlitz in Terminal"
+  echo "3. When you are done - Restart RaspiBlitz: sudo shutdown -r now"
   echo
   exit 99
 }

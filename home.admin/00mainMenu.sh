@@ -226,7 +226,6 @@ case $CHOICE in
         REPAIR)
             /home/admin/98repairMenu.sh
             if [ $? -eq 99 ]; then
-              cd /mnt/hdd/${network}
               exit 1
             fi
             ;;
