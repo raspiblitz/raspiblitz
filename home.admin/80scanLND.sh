@@ -30,7 +30,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
     l1="Copy Blockchain Source Modus\n"
     l2="Please restart RaspiBlitz when done.\n"
     l3="Restart from Terminal: sudo shutdown -r now"
-    dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localip}" --infobox "$l1$l2$l3" 5 45
+    dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localIP}" --infobox "$l1$l2$l3" 5 45
     sleep 3
     exit 1
   fi
