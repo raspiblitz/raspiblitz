@@ -49,14 +49,16 @@ RaspiBlitz image to your SD card.
 copyHost()
 {
   clear
+  sed -i "s/^state=.*/state=copysource/g" ${infoFile}
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   cd /mnt/hdd/${network}
-  echo ""
+  echo
   echo "*** Copy Blockchain Source Modus ***"
   echo "- Your RaspiBlitz has now stopped LND and ${network}"
   echo "- Run now the script given by the other RaspiBlitz in Terminal"
   echo "- When you are done - Restart RaspiBlitz: sudo shutdown -r now"
+  echo
   exit 99
 }
 
