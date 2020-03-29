@@ -46,11 +46,26 @@ RaspiBlitz image to your SD card.
 " 12 40
 }
 
+copyHost()
+{
+  clear
+  sudo systemctl stop lnd
+  sudo systemctl stop ${network}d
+  cd /mnt/hdd/${network}
+  echo ""
+  echo "*** Copy Blockchain Source Modus ***"
+  echo "- Your RaspiBlitz has now stopped LND and ${network}"
+  echo "- Run now the script given by the other RaspiBlitz in Terminal"
+  echo "- When you are done - Restart RaspiBlitz: sudo shutdown -r now"
+  exit 1
+}
+
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
          BACKUP-LND "Backup your LND data (Rescue-File)" \
          MIGRATION "Migrate Blitz Data to new Hardware" \
+         COPY-SOURCE "Copy Blockchain Source Modus" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
@@ -129,5 +144,8 @@ case $CHOICE in
     infoResetSDCard
     sudo shutdown now
     exit 1;
+    ;;
+  COPY-SOURCE)
+    copyHost
     ;;
 esac
