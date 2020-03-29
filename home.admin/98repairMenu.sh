@@ -49,7 +49,7 @@ RaspiBlitz image to your SD card.
 copyHost()
 {
   clear
-  sed -i "s/^state=.*/state=copysource/g" ${infoFile}
+  sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   cd /mnt/hdd/${network}
