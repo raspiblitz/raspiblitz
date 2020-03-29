@@ -186,18 +186,6 @@ while :
       continue
     fi
 
-
-    # check if in Copy Blockchain Source Mode
-    if [ "${state}" = "copysource" ]; then
-      l1="Copy Blockchain Source Modus\n"
-      l2="Please restart RaspiBlitz when done.\n"
-      l3="Restart from Terminal: sudo shutdown -r now"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
     # check if recovering/upgrade is running
     if [ "${state}" = "recovering" ]; then
       if [ ${#message} -eq 0 ]; then
