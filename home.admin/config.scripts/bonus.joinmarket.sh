@@ -28,12 +28,12 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "Usage:
-https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md\n
+https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md\n
 Start to use by logging in to the 'joinmarket' user with:
 'sudo su - joinmarket' \n
 Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
-" 14 87
+" 14 81
   exit 0
 fi
 
@@ -129,7 +129,7 @@ if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   echo "Welcome to the JoinMarket command line!"
   echo ""  
   echo "Notes on usage:"
-  echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md"
+  echo "https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md"
   echo ""
   echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
   echo ""
@@ -161,7 +161,7 @@ else
   echo "Welcome to the JoinMarket command line!"
   echo ""  
   echo "Notes on usage:"
-  echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/USAGE.md"
+  echo "https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md"
   echo ""
   echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
   echo ""
