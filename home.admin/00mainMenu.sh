@@ -225,6 +225,9 @@ case $CHOICE in
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
+            if [ $? -eq 99 ]; then
+              exit 1
+            fi
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh

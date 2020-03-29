@@ -57,7 +57,7 @@ copyHost()
   echo "- Your RaspiBlitz has now stopped LND and ${network}"
   echo "- Run now the script given by the other RaspiBlitz in Terminal"
   echo "- When you are done - Restart RaspiBlitz: sudo shutdown -r now"
-  exit 1
+  exit 99
 }
 
 # Basic Options
