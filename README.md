@@ -135,7 +135,7 @@ Browser: https://raspiblitz.com/raspiblitz-v1.5RC1-2020-03-31.img.gz
 
 Torrent: TODO just for final release
 
-SHA-256: 20a1c94afb3beb62b9fd6ee4589ca18e7aa0c33085d4ef65cbab0543ba41d689 or [SIGNATURE](TODO just for final release)
+SHA-256: 0463dbad63b25ec3f2565fe555fd97e64cbe1c981a16dab07f1c9074c4dae5c2 or [SIGNATURE](TODO just for final release)
 
 **Write the SD-Card image to your SD Card**
 
