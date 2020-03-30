@@ -131,7 +131,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 *IMPORTANT: This is just a Release Candidate - not the final release. Please just use if you feel reckless and like to help on testing. If you have serious funds on your node please wait for the final release before updating.*
 
-Browser: https://raspiblitz.com/raspiblitz-v1.5RC1-2020-03-30.img.gz
+Browser: https://raspiblitz.com/raspiblitz-v1.5RC1-2020-03-31.img.gz
 
 Torrent: TODO just for final release
 
