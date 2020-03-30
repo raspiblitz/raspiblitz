@@ -176,7 +176,7 @@ while :
       l3="Use password: raspiblitz\n"
 
       if [ "${state}" = "recovering" ]; then
-        l1="Recovering please wait - for debug:\n"
+        l1="Recovering please wait ..\n"
       fi
 
       boxwidth=$((${#localip} + 24))
