@@ -154,7 +154,6 @@ else
   sudo sed -i "s/^socks5 = false/#socks5 = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^usessl = true/#usessl = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sudo sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Edited the joinmarket.cfg to communicate over Tor only."
   echo ""
