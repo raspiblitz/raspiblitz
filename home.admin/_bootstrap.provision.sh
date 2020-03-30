@@ -368,6 +368,15 @@ else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
 
+# JoinMarket
+if [ "${specter}" = "on" ]; then
+  echo "Provisioning Specter - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Specter'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.cryptoadvance-specter.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Specter - keep default" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
