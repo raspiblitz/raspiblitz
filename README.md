@@ -27,6 +27,7 @@ There are further Services that can be switched on:
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 * **LNBits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 
@@ -70,12 +71,11 @@ The cheapest way is to buy and assemble the single parts yourself. The new shopp
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
 * RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
+* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
 * 500GB SSD: [amazon](https://geni.us/raspiblitz-500gb-ssd)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
 * Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
 
 #### Package: Minimal (around 180 USD)
 
@@ -88,25 +88,23 @@ Basic Parts for all minimal variants:
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
 * RaspBerry Pi 3: [amazon](https://geni.us/raspiblitz-rpi3)
+* Heatsink-Case RP3: [amazon](https://geni.us/raspiblitz-heatsink)
 * Power >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
-* Heatsink-Case: [amazon](https://geni.us/raspiblitz-heatsink)
 
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
-* RaspBerry Pi 4 1GB + Power: [amazon](https://geni.us/raspiblitz-1gb-power)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+* RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
+* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
 
 #### Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
-* 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
 * RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb-power)
-* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
-* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
+* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
+* 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
+* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -114,17 +112,16 @@ Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 
 ## Assemble your RaspiBlitz
 
-If you are going with the Standard/Maximal-RaspberryPi4 Setup you need to:
+When you have all parts you need to:
 
-- Assemble the Shim-Fan and connect it to the GPIO pins: [detail instructions](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-fan-shim)
-- Fit the RaspberryPi to the PiBow case: [detail instructions](https://www.youtube.com/watch?v=utk3cjzCLog)
-- Put the SSD into the HDD USB & may get some rubber bands
+- Assemble the Heatsink-Case on the RaspberryPi (follow the intructions in package).
+- Put the SSD/Hdd into the Case and connect it per USB to the RaspberryPi
+- Add the display on top with the pins like in picture below.
+- PlugIn the network cable.
 
-Add the display on top with the pins like in picture below. PlugIn the network cable. In the end your RaspiBlitz should look like this:
+In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
-
-*If you are going with the Minimal-RaspberryPi3 Setup just apply the Geekworm Heatsink-Case and connect everything- [detail instructions](https://www.youtube.com/watch?v=2QDlbAorJKw).*
 
 ## Installing the Software
 
