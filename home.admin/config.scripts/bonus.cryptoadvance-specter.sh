@@ -93,7 +93,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo service bitcoind start
 
     echo "*** Installing prerequisites ***"
-    sudo apt install libusb-1.0.0-dev libudev-dev virtualenv
+    sudo apt install libusb-1.0.0-dev libudev-dev virtualenv libssl-dev
 
     # activating Authentication here ...
     echo "*** creating App-config ***"
