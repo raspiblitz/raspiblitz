@@ -57,9 +57,6 @@ supportsTOR=0
 if [ "${targetWallet}" = "zap-ios" ]; then
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    # deactivated until fix: https://github.com/rootzoll/raspiblitz/issues/1001
-    echo "error='no tor support'"
-    exit 1
     # when ZAP runs on TOR it uses REST
     port="8080"
     extraparamter="--nocert"

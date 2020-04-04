@@ -120,6 +120,7 @@ case $CHOICE in
       exit 1;
       ;;
   ZAP_IOS)
+      choose_IP_or_TOR
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \

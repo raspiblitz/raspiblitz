@@ -1,5 +1,23 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.5 of RaspiBlitz?
+
+Beside many small improvements and changes, these are most important changes:
+
+- Update: LND version 0.9.2-beta
+- Update: bitcoin-core version 19.1-beta
+- Update: Loop 0.5.1
+- Update: RTL 0.7.0 (Loop In and Out integration)
+- Shoppinglist: Replace Shimfan with passive RP4-Heatcase
+- Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
+- Fix: Screen Rotate on update from v1.3
+- New: Specter Desktop (connect DIY Specter-Wallet or ColdCard) [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- New: JoinMarket [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
+- New: Activate 'Keysend' on LND by Service Menu [details](https://github.com/rootzoll/raspiblitz/issues/1000)
+- New: Reset SSH cert if SSH login not working [details](FAQ.md#how-can-i-repair-my-ssh-login)
+- New: Make it easier to Copy The Blockchain over Network from running Blitz[details](https://github.com/rootzoll/raspiblitz/issues/1081)
+- Removed: Clone Blockchain from second HDD (use CopyStation script)
+
 ## Whats new in Version 1.4 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
@@ -394,6 +412,8 @@ The node address is red, when the RaspiBlitz detects that it cannot reach the po
 Some routers support a feature called UPnP where devices can automatically request a forwarding to be publicly reachable. By turning on `LND UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
 
 On details how to set port forwarding manually on your router model see: https://portforward.com
+
+Also the selftesting of the RaspiBlitz if the port is forwarded or not might not work if your router is not supporting [Hairpinning](https://en.wikipedia.org/wiki/Hairpinning).
 
 ## Why is my node address on the display yellow (not green)?
 
@@ -906,3 +926,18 @@ When the LCD display is telling you to do config check:
 ## How to fix my upside down LCD after update?
 
 Some displays have a different orientation. To fix this activate/deactivate the LCD-ROTATION option in the MAINMENU > SERVICES and let it reboot. YOu might need to do this up to 3 times until your display got it right.
+
+## How can I repair my SSH login?
+
+If you cannot login per SSH into your RaspiBlitz your SSH RaspiBlitz certs might be corrupted. To renew and reset those do the following (since version 1.5):
+
+- shutdown the RaspiBlitz - if you dont have touchscreen activated, disconnect LAN cable, wait until HDD/SSD activity slows down (no constant blinking) and then cut the power
+- take out the sd card and connect it to your laptop - it should appear as a `boot` drive
+- in the root directory of that `boot` drive create a file called `ssh.reset`
+- that file can be empty or just copy another file on that drive and rename it ()
+- eject the drive from your laptop safely
+- put sd card back into the RaspiBlitz (also make sure LAN cable is connected again)
+- power up - the RaspiBlitz should boot up & reboot again
+- then try again to SSH login
+
+If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login thats what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor. 

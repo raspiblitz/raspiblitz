@@ -22,6 +22,11 @@ if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
+if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
+
+echo "map dropboxbackup to on/off"
+DropboxBackup="off";
+if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -55,12 +60,20 @@ else
   autoPilot="off"
 fi
 
+echo "map keysend to on/off"
+keysend="on"
+source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
+if [ ${keysendOn} -eq 0 ]; then
+  keysend="off"
+fi
+
 # show select dialog
 echo "run dialog ..."
 
 if [ "${runBehindTor}" = "on" ]; then
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
+k 'Accept Keysend' ${keysend} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -75,10 +88,13 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
+d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
+j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
 1 'Channel Autopilot' ${autoPilot} \
+k 'Accept Keysend' ${keysend} \
 l 'Lightning Loop' ${loop} \
 2 'Testnet' ${chainValue} \
 3 ${dynDomainMenu} ${domainValue} \
@@ -95,6 +111,8 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 i 'LNBits' ${LNBits} \
+d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
+j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
 fi
 
@@ -218,13 +236,13 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${loop}" != "${choice}" ]; then
   echo "Loop Setting changed .."
   anychange=1
+  needsReboot=1 # always reboot so that RTL gets restarted to show/hide support loop
   /home/admin/config.scripts/bonus.loop.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start loopd
       /home/admin/config.scripts/bonus.loop.sh menu
-      needsReboot=1
     else
       l1="FAILED to install Lightning LOOP"
       l2="Try manual install in the terminal with:"
@@ -488,21 +506,31 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      source /home/btcpay/.btcpayserver/Main/settings.config
-      whiptail --title " Installed BTCPay Server " --msgbox "\
+  # check if TOR is installed
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
+    whiptail --title " BTCPayServer needs TOR " --msgbox "\
+At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
+Please activate TOR in SERVICES first.\n
+Then try activating BTCPayServer again in SERVICES.\n
+" 13 42
+  else
+    anychange=1
+    /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
+    errorOnInstall=$?
+    if [ "${choice}" =  "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+        source /home/btcpay/.btcpayserver/Main/settings.config
+        whiptail --title " Installed BTCPay Server " --msgbox "\
 BTCPay server was installed.\n
 Use the new 'BTCPay' entry in Main Menu for more info.\n
 " 10 35
-    else
-      l1="BTCPayServer installation is cancelled"
-      l2="Try again from the menu or install from the terminal with:"
-      l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      else
+        l1="BTCPayServer installation is cancelled"
+        l2="Try again from the menu or install from the terminal with:"
+        l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
+        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      fi
     fi
   fi
 else
@@ -537,6 +565,64 @@ if [ "${LNBits}" != "${choice}" ]; then
   fi
 else 
   echo "lndmanage setting unchanged."
+fi
+
+# DropBox process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${DropboxBackup}" != "${choice}" ]; then
+  echo "DropBox Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/dropbox.upload.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    # doing initial upload so that user can see result
+    source /mnt/hdd/raspiblitz.conf
+    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
+  fi
+else 
+  echo "lndmanage setting unchanged."
+fi
+
+# Keysend process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${keysend}" != "${choice}" ]; then
+  echo "keysend setting changed .."
+  anychange=1
+  needsReboot=1
+  sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
+  dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
+else 
+  echo "keysend setting unchanged."
+fi
+
+# JoinMarket process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "j")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${joinmarket}" != "${choice}" ]; then
+  echo "JoinMarket setting changed .."
+  # check if TOR is installed
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
+    whiptail --title " Use Tor with JoinMarket" --msgbox "\
+It is highly recommended to use Tor with JoinMarket.\n
+Please activate TOR in SERVICES first.\n
+Then try activating JoinMarket again in SERVICES.\n
+" 13 42
+  else
+    anychange=1
+    sudo /home/admin/config.scripts/bonus.joinmarket.sh ${choice}
+    errorOnInstall=$?
+    if [ "${choice}" =  "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+         sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+      else
+        whiptail --title 'FAIL' --msgbox "JoinMarket installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.joinmarket.sh on" 9 65
+      fi
+    fi
+  fi
+else
+  echo "JoinMarket not changed."
 fi
 
 if [ ${anychange} -eq 0 ]; then
