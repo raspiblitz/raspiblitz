@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
  exit 1
 fi
 
@@ -88,6 +88,14 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
   connector="lndconnect"
+  port="8080"
+
+elif [ "${targetWallet}" = "sendmany-android" ]; then
+
+  connector="lndconnect"
+  if [ ${forceTOR} -eq 1 ]; then
+    #extraparamter="--nocert"
+  fi
   port="8080"
 
 elif [ "${targetWallet}" = "shango-ios" ]; then
