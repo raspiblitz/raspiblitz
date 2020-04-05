@@ -81,6 +81,11 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
 
+# Additinal Options with no TOR
+if [ "${runBehindTor}" != "on" ]; then
+  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
+fi
+
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.lcd.sh hide
@@ -148,6 +153,20 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
+      exit 1;
+    ;;
+  SENDMANY_ANDROID)
+      appstoreLink="https://github.com/fusion44/sendmany/releases"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+	  whiptail --title "Install SendMany APK from GithubReleases on your device" \
+	    --yes-button "continue" \
+		--no-button "link as QR code" \
+		--yesno "Download & install the SendMany APK from GitHub:\n\n${appstoreLink}\n\nEasiest way to scan QR code on LCD and download/install.\n\nWhen installed and started -> continue." 10 65
+	  if [ $? -eq 1 ]; then
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
+  	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 1;
     ;;
   ZEUS_IOS)

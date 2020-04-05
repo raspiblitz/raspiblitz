@@ -94,8 +94,10 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
 
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    port="8080"
-    extraparamter="--nocert"
+    echo "error='no tor support'"
+    exit 1
+    #port="8080"
+    #extraparamter="--nocert"
   fi
   port="10009"
 
