@@ -209,7 +209,7 @@ msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "continue" \
-	 --no-button "show QR code" \
+	 --no-button "console QRcode" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
