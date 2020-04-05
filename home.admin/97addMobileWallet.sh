@@ -156,6 +156,19 @@ case $CHOICE in
       exit 1;
     ;;
   SENDMANY_ANDROID)
+
+      # check if keysend is activated first
+
+	  source <(/home/admin/config.scripts/lnd.keysend.sh status)
+	  if [ "${keysendOn}" == "0" ]; then
+	    whiptail --title " KEYSEND NEEDED " --msgbox "
+To use the chat feature of the SendMany app, you need to activate the Keysend feature first.
+
+Please go to MAINMENU > SERVICES and activate KEYSEND first.
+" 12 65
+	    exit 1
+	  fi
+
       appstoreLink="https://github.com/fusion44/sendmany/releases"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install SendMany APK from GithubReleases on your device" \
