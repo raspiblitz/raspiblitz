@@ -170,7 +170,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 
       appstoreLink="https://github.com/fusion44/sendmany/releases"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install SendMany APK from GithubReleases on your device" \
+	  whiptail --title "Install SendMany APK from GithubReleases- (open assets) on your device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
 		--yesno "Download & install the SendMany APK from GitHub:\n\n${appstoreLink}\n\nEasiest way to scan QR code on LCD and download/install.\n\nWhen installed and started -> continue." 10 65
