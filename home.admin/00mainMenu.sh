@@ -61,7 +61,7 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
 if [ "${joinmarket}" == "on" ]; then
-  OPTIONS+=(JMARKET "JoinMarket Server")
+  OPTIONS+=(JMARKET "JoinMarket")
 fi
 
 # Basic Options

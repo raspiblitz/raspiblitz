@@ -12,7 +12,7 @@ Beside many small improvements and changes, these are most important changes:
 - Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
 - Fix: Screen Rotate on update from v1.3
 - New: Specter Desktop (connect DIY Specter-Wallet or ColdCard) [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- New: JoinMarket Server [details](https://github.com/romanz/electrs)
+- New: JoinMarket [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 - New: Activate 'Keysend' on LND by Service Menu [details](https://github.com/rootzoll/raspiblitz/issues/1000)
 - New: Reset SSH cert if SSH login not working [details](FAQ.md#how-can-i-repair-my-ssh-login)
 - New: Make it easier to Copy The Blockchain over Network from running Blitz[details](https://github.com/rootzoll/raspiblitz/issues/1081)
