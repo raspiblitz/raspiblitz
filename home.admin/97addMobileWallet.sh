@@ -158,7 +158,6 @@ case $CHOICE in
   SENDMANY_ANDROID)
 
       # check if keysend is activated first
-
 	  source <(/home/admin/config.scripts/lnd.keysend.sh status)
 	  if [ "${keysendOn}" == "0" ]; then
 	    whiptail --title " KEYSEND NEEDED " --msgbox "
