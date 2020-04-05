@@ -94,6 +94,7 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
 
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
+    port="8080"
     #extraparamter="--nocert"
   fi
   port="8080"
