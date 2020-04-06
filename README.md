@@ -69,13 +69,13 @@ The cheapest way is to buy and assemble the single parts yourself. The new shopp
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
+* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * 500GB SSD: [amazon](https://geni.us/raspiblitz-500gb-ssd)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
 * Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
 #### Package: Minimal (around 180 USD)
 
@@ -92,21 +92,21 @@ If you have already a used RaspberryPi 3 B+ you can reuse with the following par
 * Heatsink-Case: [amazon](https://geni.us/raspiblitz-heatsink)
 
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
-* RaspBerry Pi 4 1GB + Power: [amazon](https://geni.us/raspiblitz-1gb-power)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
 #### Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
 * 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
-* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb-power)
+* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
 * Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
-* ShimFan Cooling: [amazon](https://geni.us/raspiblitz-fanshim)
-* RaspberryPi-Case: [amazon](https://geni.us/raspiblitz-case) 
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
