@@ -98,18 +98,6 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
-  if [ ${nginxTest} -eq 0 ]; then
-      dialog --title "Testing nginx.conf has failed" --msgbox "
-Will try to fix by generating a self-signed certificate.
-Try connecting via port 50002 or Tor again once finished.
-Check 'sudo nginx -t' for a detailed error message.
-      " 9 61
-    /home/admin/config.scripts/internet.selfsignedcert.sh
-    echo "Press ENTER to get back to main menu."
-    read key
-    exit 0
-  fi
-
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
     exit 1
@@ -132,6 +120,19 @@ Electrum server is still building its index.
 Please wait and try again later.
 This can take multiple hours.
       " 9 48
+    exit 0
+  fi
+
+  if [ ${nginxTest} -eq 0 ]; then
+      dialog --title "Testing nginx.conf has failed" --msgbox "
+Will try to fix by generating a self-signed certificate.
+Try connecting via port 50002 or Tor again once finished.
+Open this menu again for more information.
+Check 'sudo nginx -t' for a detailed error message.
+      " 10 61
+    /home/admin/config.scripts/internet.selfsignedcert.sh
+    echo "Press ENTER to get back to main menu."
+    read key
     exit 0
   fi
 
