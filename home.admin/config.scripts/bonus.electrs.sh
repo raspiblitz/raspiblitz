@@ -122,14 +122,18 @@ This can take multiple hours.
       " 9 48
     exit 0
   fi
-
+  
   if [ ${nginxTest} -eq 0 ]; then
-      dialog --title "Testing nginx.conf has failed" --msgbox "
-Will try to fix by generating a self-signed certificate.
+     dialog --title "Testing nginx.conf has failed" --msgbox "
+Nginx is in a failed state. Will attempt to fix.
 Try connecting via port 50002 or Tor again once finished.
-Open this menu again for more information.
 Check 'sudo nginx -t' for a detailed error message.
-      " 10 61
+      " 9 61
+    logFileMissing=$(sudo nginx -t 2>&1 | grep -c "/var/log/nginx/access.log")
+    if [ ${logFileMissing} -eq 1 ]; then
+      sudo mkdir /var/log/nginx
+      sudo systemctl restart nginx
+    fi
     /home/admin/config.scripts/internet.selfsignedcert.sh
     echo "Press ENTER to get back to main menu."
     read key
