@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "Usage:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md\n
 Start to use by logging in to the 'joinmarket' user with:
-'sudo su - joinmarket' \n
+sudo su joinmarket\n
 Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
 " 14 81
@@ -109,18 +109,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
         
     # autostart for joinmarket
-    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "bash startup.sh") -eq 0 ]; then
-      sudo bash -c "echo 'bash startup.sh' >> /home/joinmarket/.bashrc"
-    fi
-    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c ". /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate") -eq 0 ]; then
-      sudo bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
-    fi
-    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"") -eq 0 ]; then
-      sudo bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"' >> /home/joinmarket/.bashrc"
-    fi
-    if [ $(sudo cat /home/joinmarket/.bashrc | grep -c "cd /home/joinmarket/joinmarket-clientserver/scripts/") -eq 0 ]; then
-      sudo bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
-    fi
+    bash -c "echo '# automatically start startup.sh for joinmarket unless' >> /home/joinmarket/.bashrc"
+    bash -c "echo '# when running in a tmux session' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/joinmarket/.bashrc"
+    bash -c "echo '  /home/joinmarket/startup.sh' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'fi' >> /home/joinmarket/.bashrc"
+    bash -c "echo '# always activate jmvenv with PySide2 and cd to scripts' >> /home/joinmarket/.bashrc"    
+    bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
+    bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
 
     cat > /home/admin/startup.sh <<EOF
 # check for joinmarket.cfg
@@ -142,19 +139,19 @@ else
   sudo chmod 600 /home/joinmarket/.joinmarket/joinmarket.cfg || exit 1
   echo ""
   echo "Editing the joinmarket.cfg"
-  sudo sed -i "s/^rpc_user =.*/rpc_user = raspibolt/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^rpc_user =.*/rpc_user = raspibolt/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   PASSWORD_B=\$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  sudo sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Filled the bitcoin RPC password (PASSWORD_B)"
   #communicate with IRC servers via Tor
-  sudo sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^#host = darksci3bfoka7tw.onion/host = darksci3bfoka7tw.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^socks5 = false/#socks5 = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sudo sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^#host = darksci3bfoka7tw.onion/host = darksci3bfoka7tw.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^socks5 = false/#socks5 = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Edited the joinmarket.cfg to communicate over Tor only."
   echo ""
   echo "Welcome to the JoinMarket command line!"
@@ -167,12 +164,13 @@ else
 fi
 EOF
 
-    sudo mv /home/admin/startup.sh /home/joinmarket/startup.sh
-    sudo chown joinmarket:joinmarket /home/joinmarket/startup.sh
+    mv /home/admin/startup.sh /home/joinmarket/startup.sh
+    chown joinmarket:joinmarket /home/joinmarket/startup.sh
+    chmod +x /home/joinmarket/startup.sh
     
   else
-      echo "JoinMarket is already installed"
-      echo ""
+    echo "JoinMarket is already installed"
+    echo ""
   fi    
   
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
@@ -181,7 +179,7 @@ EOF
     # starting info
     echo ""
     echo "Start to use by logging in to the 'joinmarket' user with:"
-    echo "'sudo su - joinmarket'"
+    echo "sudo su joinmarket"
     echo ""
     echo "If logging in directly via ssh the password is the PASSWORD_B"
     echo ""   
