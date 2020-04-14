@@ -80,7 +80,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
-s 'Cyryptoadvance Specter' ${specter} \
+s 'Cryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${touchscreenMenu} \
 r 'LCD Rotate' ${lcdrotateMenu} \
@@ -101,7 +101,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
-s 'Cyryptoadvance Specter' ${specter} \
+s 'Cryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
 8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
