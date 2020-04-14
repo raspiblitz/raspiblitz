@@ -213,7 +213,7 @@ After=${network}d.service
 [Service]
 ExecStart=/home/bitcoin/.specter/.env/bin/python3 -m cryptoadvance.specter server --host 0.0.0.0 --cert=/home/bitcoin/.specter/cert.pem --key=/home/bitcoin/.specter/key.pem
 User=bitcoin
-Environment=PATH=/home/bitcoin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
+Environment=PATH=/home/bitcoin/.specter/.env/bin:/home/bitcoin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
 Restart=always
 TimeoutSec=120
 RestartSec=30
