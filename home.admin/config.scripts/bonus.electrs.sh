@@ -56,10 +56,10 @@ if [ "$1" = "status" ]; then
     echo "localTCPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
-      # OK looks good - but just means that somethingis answering on that port
+      # OK looks good - but just means that something is answering on that port
       echo "publicTCPPortAnswering=1"
     else
-      # no answere on that port
+      # no answer on that port
       echo "publicTCPPortAnswering=0"
     fi
     echo "portHTTP='50002'"
@@ -67,10 +67,10 @@ if [ "$1" = "status" ]; then
     echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
-      # OK looks good - but just means that somethingis answering on that port
+      # OK looks good - but just means that something is answering on that port
       echo "publicHTTPPortAnswering=1"
     else
-      # no answere on that port
+      # no answer on that port
       echo "publicHTTPPortAnswering=0"
     fi
     # add TOR info
@@ -81,6 +81,9 @@ if [ "$1" = "status" ]; then
     else
       echo "TORrunning=0"
     fi
+    # check Nginx
+    nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+    echo "nginxTest=$nginxTest"
 
   else
     echo "isSynced=0"
@@ -119,6 +122,23 @@ This can take multiple hours.
       " 9 48
     exit 0
   fi
+  
+  if [ ${nginxTest} -eq 0 ]; then
+     dialog --title "Testing nginx.conf has failed" --msgbox "
+Nginx is in a failed state. Will attempt to fix.
+Try connecting via port 50002 or Tor again once finished.
+Check 'sudo nginx -t' for a detailed error message.
+      " 9 61
+    logFileMissing=$(sudo nginx -t 2>&1 | grep -c "/var/log/nginx/access.log")
+    if [ ${logFileMissing} -eq 1 ]; then
+      sudo mkdir /var/log/nginx
+      sudo systemctl restart nginx
+    fi
+    /home/admin/config.scripts/internet.selfsignedcert.sh
+    echo "Press ENTER to get back to main menu."
+    read key
+    exit 0
+  fi
 
   # Options (available without TOR)
   OPTIONS=( \
@@ -138,7 +158,7 @@ This can take multiple hours.
     echo "https://electrum.org"
     echo
     echo "On Network Settings > Server menu:"
-    echo "- deavtivate automatic server selection"
+    echo "- deactivate automatic server selection"
     echo "- as manual server set '${localIP}' & '${portHTTP}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo 
@@ -146,11 +166,11 @@ This can take multiple hours.
     echo "electrum --oneserver --server ${localIP}:${portHTTP}:s"
     if [ ${TORrunning} -eq 1 ]; then
       echo ""
-      echo "The TOR Hidden Service address for electrs is (see LCD for QR code):"
+      echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
       echo "To connect through TOR open the Tor Browser and start with the options:" 
-      echo "electrum --oneserver --server=$TOR_ADDRESS:50002:s --proxy socks5:127.0.0.1:9150"
+      echo "electrum --oneserver --server${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
     fi
     echo
