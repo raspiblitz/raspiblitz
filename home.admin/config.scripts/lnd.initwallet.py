@@ -89,7 +89,6 @@ def seed(stub, wallet_password="", seed_words="", seed_password=""):
     request = ln.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
         aezeed_passphrase=seed_password.encode()
     )
 
