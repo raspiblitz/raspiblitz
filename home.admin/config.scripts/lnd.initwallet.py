@@ -87,6 +87,7 @@ def new(stub, wallet_password="", seed_entropy=None):
 
 def seed(stub, wallet_password="", seed_words="", seed_password=""):
     request = ln.InitWalletRequest(
+        recovery_window=5000,
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
         aezeed_passphrase=seed_password.encode()
@@ -115,6 +116,7 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
     print(scb_hex_str)
 
     request = ln.InitWalletRequest(
+        recovery_window=5000,
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
         aezeed_passphrase=seed_password.encode(),
