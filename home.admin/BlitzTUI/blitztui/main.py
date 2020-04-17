@@ -196,7 +196,7 @@ class AppWindow(QMainWindow):
         except Exception as err:
             pass
 
-        self.cfg_valid = lnd_cfg_valid and rb_cfg_valid and rb_info_valid
+        self.cfg_valid = rb_cfg_valid and rb_info_valid
         log.debug("checked cfg_valid with result: {}".format(self.cfg_valid))
 
     def check_invoice(self, flag, tick=0):
