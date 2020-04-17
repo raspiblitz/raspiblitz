@@ -234,6 +234,9 @@ if [ ${walletExists} -eq 0 ]; then
       sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
     fi
 
+    echo "waiting ."
+    sleep 10
+
   else
 
 ############################
@@ -380,6 +383,7 @@ Looks good :) LND was able to recover the wallet.
 IMPORTANT: Please dont reboot the RaspiBlitz until
 the LND was able to rescan the Blockchain again.
       " 10 60
+      clear
 
       else
         whiptail --title " FAIL " --msgbox "
@@ -403,8 +407,9 @@ else
   echo "OK - LND wallet already exists."
 fi
 
-echo "waiting ."
-sleep 15
+
+echo "waiting .."
+sleep 10
 dialog --pause "  Waiting for LND - please wait .." 8 58 45
 
 ############################
@@ -414,11 +419,15 @@ dialog --pause "  Waiting for LND - please wait .." 8 58 45
 clear
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
+
+# check if macaroon exists and if not try to unlock LND wallet first
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   /home/admin/AAunlockLND.sh
   sleep 3
 fi
+
+# check if macatoon exists now - if not fail
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
@@ -430,15 +439,10 @@ if [ ${macaroonExists} -eq 0 ]; then
   exit 1
 fi
 
-  # copy macaroons to all needed users
-  sudo /home/admin/config.scripts/lnd.check.sh update-credentials
-
-  echo "OK - LND Macaroons created and copied"
-  echo ""
-else
-  echo "OK - Macaroons are already copied"
-  echo ""
-fi
+# copy macaroons to all needed users
+sudo /home/admin/config.scripts/lnd.check.sh update-credentials
+echo "OK - LND Macaroons created and copied"
+echo ""
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
