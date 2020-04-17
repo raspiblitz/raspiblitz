@@ -71,7 +71,15 @@ logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
   echo "WARN !! Logs /var/log in are bigger then 1GB"
   echo "ACTION --> DELETED ALL LOGS"
+  if [ -d "/var/log/nginx" ]; then
+    nginxLog=1
+    echo "/var/log/nginx is present"
+  fi
   sudo rm -r /var/log/*
+  if [ $nginxLog == 1 ]; then
+    sudo mkdir /var/log/nginx
+    echo "Recreated /var/log/nginx"
+  fi
   sleep 3
   echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
