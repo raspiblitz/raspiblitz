@@ -479,13 +479,14 @@ else
 
   whiptail --title "RESET DONE" --msgbox "
 OK LND Reset is done.
-System will restart now.
-" 10 35
+You may now give it
+time to rescan.
+" 10 25
 
   # make sure host is named like in the raspiblitz config
   echo "Setting the Name/Alias/Hostname .."
   sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
-  sudo /home/admin/XXshutdown.sh reboot
-
+  # call raspiblitz menu and show if needed scanning info
+  /home/admin/00raspiblitz.sh
 fi
