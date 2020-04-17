@@ -124,10 +124,12 @@ case $CHOICE in
         echo "processing ..."
         sleep 3
     done
-    # prepare new name
-    sudo sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
-    sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
 
+    # make sure host is named like in the raspiblitz config
+    echo "Setting the Name/Alias/Hostname .."
+    sudo /home/admin/config.scripts/lnd.setname.sh ${result}
+
+    echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
     /home/admin/70initLND.sh

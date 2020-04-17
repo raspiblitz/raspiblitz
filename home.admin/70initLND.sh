@@ -102,6 +102,7 @@ echo "*** Init LND Service & Start ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
 
+  echo "stopping lnd .."
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
@@ -495,10 +496,5 @@ OK LND Reset is done.
 You may now give it
 extra time to rescan.
 " 10 25
-
-  # make sure host is named like in the raspiblitz config
-  echo "Setting the Name/Alias/Hostname .."
-  sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
-  clear
 
 fi
