@@ -178,15 +178,6 @@ class AppWindow(QMainWindow):
         if not os.path.exists(rb_info_abs_path):
             log.warning("file does not exist: {}".format(rb_info_abs_path))
 
-        log.debug("init lnd.conf")
-        lnd_cfg_valid = False
-        self.lnd_cfg = LndConfig(lnd_cfg_abs_path)
-        try:
-            self.lnd_cfg.reload()
-            lnd_cfg_valid = True
-        except Exception as err:
-            pass
-
         log.debug("init raspiblitz.conf")
         rb_cfg_valid = False
         self.rb_cfg = RaspiBlitzConfig(rb_cfg_abs_path)
@@ -305,7 +296,6 @@ class AppWindow(QMainWindow):
 
     def update_watched_attr(self):
         log.debug("updating: watched attributes")
-        self.lnd_cfg.reload()
         self.rb_cfg.reload()
         self.rb_info.reload()
 
