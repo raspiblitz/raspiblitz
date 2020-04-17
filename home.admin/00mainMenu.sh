@@ -246,9 +246,8 @@ case $CHOICE in
             /home/admin/99checkUpdate.sh
             ;; 
         OFF)
+            clear
             echo ""
-            echo "LCD turns white when shutdown complete."
-            echo "Then wait 5 seconds and disconnect power."
             sudo /home/admin/XXshutdown.sh
             exit 0
             ;;
