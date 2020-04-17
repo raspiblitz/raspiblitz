@@ -3,10 +3,12 @@
 if [ $# -eq 0 ]; then
  echo "# script to check LND states"
  echo "# lnd.check.sh basic-setup"
+ echo "# lnd.check.sh update-credentials"
  exit 1
 fi
 
 # load raspiblitz conf
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # check basic LND setup
@@ -172,6 +174,46 @@ if [ "$1" == "basic-setup" ]; then
     rpcpasscorrect=1
   fi
   echo "rpcpasscorrect=${rpcpasscorrect}"
+
+# enforce basic LND credentials for users
+elif [ "$1" == "update-credentials" ]; then
+
+  echo "# making sure LND blockchain RPC password is set correct in lnd.conf"
+  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
+  if [ ${#rpcpassword} -gt 0 ]; then
+    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+  else
+    echo "# WARN: could not get value 'rpcuser' from blockchain conf"
+  fi
+
+  echo "# make sure admin user LND data dirs exist"
+  sudo mkdir -p /home/admin/.lnd
+  sudo mkdir -p /home/admin/.lnd/data
+  sudo mkdir -p /home/admin/.lnd/data/chain
+  sudo mkdir -p /home/admin/.lnd/data/chain/${network}
+  sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net
+
+  echo "# updating/cleaning admin user LND data"
+  sudo rm -R /home/admin/.lnd 2>/dev/null
+  sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net 2>/dev/null
+  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf
+  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon > /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
+  sudo chown admin:admin -R /home/admin/.lnd
+
+  echo "# updating/cleaning pi user LND data (just read & invoice)"
+  sudo rm -R /home/pi/.lnd 2>/dev/null
+  sudo mkdir -p /home/pi/.lnd/data/chain/${network}/${chain}net/
+  sudo cp /mnt/hdd/lnd/tls.cert /home/pi/.lnd/tls.cert
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon"
+  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon"
+  sudo chown pi:pi -R /home/pi/.lnd
+
+  if [ "${LNBits}" = "on" ]; then
+    echo "# updating macaroons for LNBits fresh on start"
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
+  fi
 
 else
   echo "# FAIL: parameter not known"

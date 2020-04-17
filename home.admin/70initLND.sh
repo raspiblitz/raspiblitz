@@ -379,7 +379,8 @@ Looks good :) LND was able to recover the wallet.
 
 IMPORTANT: Please dont reboot the RaspiBlitz until
 the LND was able to rescan the Blockchain again.
-      " 10 53
+      " 10 60
+
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
@@ -396,9 +397,6 @@ ${errMore}
       fi
     fi
 
-    clear
-    /home/admin/70initLND.sh
-
   fi # END OLD WALLET
 
 else
@@ -406,12 +404,8 @@ else
 fi
 
 echo "waiting ."
-sleep 10
-echo "waiting .."
-sleep 10
-echo "waiting ..."
-sleep 10
-dialog --pause "  Waiting for LND - please wait .." 8 58 30
+sleep 15
+dialog --pause "  Waiting for LND - please wait .." 8 58 45
 
 ############################
 # Copy LND macaroons to admin
@@ -435,18 +429,11 @@ if [ ${macaroonExists} -eq 0 ]; then
   echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
-macaroonExists=$(sudo ls -la /home/admin/.lnd/data/chain/${network}/${chain}net/ | grep -c admin.macaroon)
-if [ ${macaroonExists} -eq 0 ]; then
-  sudo mkdir /home/admin/.lnd
-  sudo mkdir /home/admin/.lnd/data
-  sudo mkdir /home/admin/.lnd/data/chain
-  sudo mkdir /home/admin/.lnd/data/chain/${network}
-  sudo mkdir /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/lnd.conf /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo chown -R admin:admin /home/admin/.lnd/
-  echo "OK - LND Macaroons created"
+
+  # copy macaroons to all needed users
+  sudo /home/admin/config.scripts/lnd.check.sh update-credentials
+
+  echo "OK - LND Macaroons created and copied"
   echo ""
 else
   echo "OK - Macaroons are already copied"
@@ -474,8 +461,6 @@ if [ ${setupStep} -lt 100 ]; then
   sudo /home/admin/95finalSetup.sh
 
 else
-
-  dialog --pause "  Starting LND - please wait .." 8 58 300
 
   # its important that RaspiBlitz dont get rebooted
   # before LND rescan is finished

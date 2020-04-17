@@ -437,35 +437,8 @@ sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 source ${configFile}
 if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
-  echo "making sure LND blockchain RPC password is set correct in lnd.conf" >> $logFile
-  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#rpcpassword} -gt 0 ]; then
-    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
-  else
-    echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
-  fi
-
-  echo "updating/cleaning admin user LND data" >> $logFile
-  sudo rm -R /home/admin/.lnd 2>/dev/null
-  sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net 2>/dev/null
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
-  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon > /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon" 2>> $logFile
-  sudo chown admin:admin -R /home/admin/.lnd 2>> $logFile
-
-  echo "updating/cleaning pi user LND data (just read & invoice)" >> $logFile
-  sudo rm -R /home/pi/.lnd 2>/dev/null
-  sudo mkdir -p /home/pi/.lnd/data/chain/${network}/${chain}net/ 2>> $logFile
-  sudo cp /mnt/hdd/lnd/tls.cert /home/pi/.lnd/tls.cert 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon" 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon" 2>> $logFile
-  sudo chown pi:pi -R /home/pi/.lnd 2>> $logFile
-
-  if [ "${LNBits}" = "on" ]; then
-    echo "updating macaroons for LNBits fresh on start" >> $logFile
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons >> $logFile
-    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
-  fi
+  echo "running LND user credentials update" >> $logFile
+  sudo /home/admin/config.scripts/lnd.check.sh update-credentials >> $logFile
 
 else 
   echo "skipping admin user LND data update" >> $logFile
