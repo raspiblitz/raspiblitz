@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.46.0] - 2020-04-17
+### Added
+- remove LND config check
+
 ## [0.45.0] - 2020-01-25
 ### Added
 - clean up log statements
