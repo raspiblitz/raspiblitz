@@ -364,7 +364,7 @@ fi
 # formatting old: EXT4
 if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
-  # prepare temo mount point
+  # prepare temp mount point
   sudo mkdir -p /tmp/ext4 1>/dev/null
 
   # write new EXT4 partition
