@@ -132,6 +132,8 @@ case $CHOICE in
     sudo rm -r /mnt/hdd/lnd
     /home/admin/70initLND.sh
 
+    # go back to main menu (and show)
+    /home/admin/00raspiblitz.sh
     exit 1;
     ;;
   RESET-HDD)

@@ -339,11 +339,9 @@ LND accepted the channel.backup file you uploaded.
 It will now take around a hour until you can see,
 if LND was able to recover funds from your channels.
 
-IMPORTANT: If you then still missing satoshis from
-your on-chain balance try to recover your wallet 
-with your seed words with the ZAP desktop app and
-then send funds back to your RaspiBlitz.
-     " 14 56
+IMPORTANT: Please dont reboot the RaspiBlitz until
+the LND was able to rescan the Blockchain again.
+     " 12 56
     fi
   
   fi

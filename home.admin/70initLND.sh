@@ -377,11 +377,9 @@ to protect the seed words. Most users did not set this.
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
 
-IMPORTANT: After full sync wait an hour - if you
-see still a on-chain balance of 0 satoshis try to
-recover your wallet with the ZAP desktop app and
-then send funds back to your RaspiBlitz.
-      " 12 53
+IMPORTANT: Please dont reboot the RaspiBlitz until
+the LND was able to rescan the Blockchain again.
+      " 10 53
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
@@ -477,16 +475,19 @@ if [ ${setupStep} -lt 100 ]; then
 
 else
 
+  dialog --pause "  Starting LND - please wait .." 8 58 300
+
+  # its important that RaspiBlitz dont get rebooted
+  # before LND rescan is finished
   whiptail --title "RESET DONE" --msgbox "
 OK LND Reset is done.
 You may now give it
-time to rescan.
+extra time to rescan.
 " 10 25
 
   # make sure host is named like in the raspiblitz config
   echo "Setting the Name/Alias/Hostname .."
   sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
+  clear
 
-  # call raspiblitz menu and show if needed scanning info
-  /home/admin/00raspiblitz.sh
 fi
