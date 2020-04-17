@@ -247,8 +247,7 @@ if [ ${setupStep} -eq 0 ]; then
     BACKTITLE="RaspiBlitz - Manual Update"
     TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
     MENU="\n         ATTENTION: OLD DATA COULD CONTAIN FUNDS\n"
-    OPTIONS+=(MANUAL "read how to recover your old funds" \
-              DELETE "erase old data, keep blockchain, reboot" )
+    OPTIONS+=(MANUAL "read how to recover your old funds")
     HEIGHT=11
 
   else
@@ -384,28 +383,6 @@ case $CHOICE in
             /home/admin/10setupBlitz.sh
             exit 1;
             ;;
-        CONTINUE)
-            /home/admin/10setupBlitz.sh
-            exit 1;
-            ;;
-        OFF)
-            echo ""
-            echo "LCD turns white when shutdown complete."
-            echo "Then wait 5 seconds and disconnect power."
-            echo "-----------------------------------------------"
-            echo "stop lnd - please wait .."
-            sudo systemctl stop lnd
-            echo "stop ${network}d (1) - please wait .."
-            sudo -u bitcoin ${network}-cli stop
-            sleep 10
-            echo "stop ${network}d (2) - please wait .."
-            sudo systemctl stop ${network}d
-            sleep 3
-            sync
-            echo "starting shutdown ..."
-            sudo shutdown now
-            exit 0
-            ;;
         MANUAL)
             echo "************************************************************************************"
             echo "PLEASE go to RaspiBlitz FAQ:"
@@ -413,27 +390,13 @@ case $CHOICE in
             echo "And check: How can I recover my coins from a failing RaspiBlitz?"
             echo "************************************************************************************"
             exit 0
-            ;;
-        DELETE)
-            sudo /home/admin/XXcleanHDD.sh
-            sudo /home/admin/XXshutdown.sh reboot
-            exit 0
-            ;;   
+            ;; 
         MIGRATION)
             sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
             exit 0
             ;;
-        X)
-            lncli -h
-            echo "OK you now on the command line."
-            echo "You can return to the main menu with the command:"
-            echo "raspiblitz"
-            ;;
-        R)
-            /home/admin/00raspiblitz.sh
-            ;;
-        U) # unlock
-            /home/admin/AAunlockLND.sh
-            /home/admin/00raspiblitz.sh
+        CONTINUE)
+            /home/admin/10setupBlitz.sh
+            exit 1;
             ;;
 esac
