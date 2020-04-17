@@ -266,7 +266,7 @@ if [ ${walletExists} -eq 0 ]; then
         whiptail --title "UNDER CONSTRUCTION" --msgbox "
 To recover an old wallet from SEED or SEED+SCB please
 create an empty NEW WALLET first and setup everything
-else until you get to he main menu.
+else until you get to the main menu.
 
 Then once your in the MAIN MENU go to REPAIR > RESET-LND
 skip all the backups and recover your old wallet.
