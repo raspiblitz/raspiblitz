@@ -18,6 +18,8 @@ Beside many small improvements and changes, these are most important changes:
 - New: SendMany App (wallet & chat over keysend)
 - New: Reset SSH cert if SSH login not working [details](FAQ.md#how-can-i-repair-my-ssh-login)
 - New: Make it easier to Copy The Blockchain over Network from running Blitz
+- New: Forwarding Fee Report on Main Menu
+- New: Easy Setup of Auto-Backup of SCB to Dropbox
 - Removed: Clone Blockchain from second HDD (use CopyStation script)
 
 ## Whats new in Version 1.4 of RaspiBlitz?
