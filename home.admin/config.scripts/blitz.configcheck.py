@@ -174,30 +174,6 @@ def main():
     # parse args
     args = parser.parse_args()
 
-
-    # LND Config
-    lnd_cfg_valid = False
-
-    lnd_cfg = LndConfig()
-    if os.path.exists(lnd_cfg.abs_path):
-        try:
-            lnd_cfg.reload()
-
-            lnd_cfg_valid = True
-            if not args.quiet:
-                print("LND Config: \t\tOK")
-        except Exception as err:
-            if not args.quiet:
-                print("LND Config: \t\tERROR")
-                log.warning(err)
-                print("# Use command to fix: sudo nano /mnt/hdd/lnd/lnd.conf")
-                print("# CTRL+o to save / CRTL+x to exit / then reboot")
-
-    else:
-        if not args.quiet:
-            print("LND Config: \t\tMISSING")
-
-
     # Raspi Config
     rb_cfg_valid = False
 
@@ -244,17 +220,6 @@ def main():
 
 
     if args.print:
-        print("=======\n= LND =\n=======")
-        if lnd_cfg_valid:
-            print("rpc_list: \t\t{}".format(lnd_cfg.rpc_listen))
-            print("rpc_list_host: \t\t{}".format(lnd_cfg.rpc_listen_host))
-            print("rpc_list_port: \t\t{}".format(lnd_cfg.rpc_listen_port))
-            print("")
-        else:
-            print("invalid or missing")
-            print("")
-
-
         print("====================\n= RaspiBlitzConfig =\n====================")
         if rb_cfg_valid:
             print("auto_nat_discovery: \t\t{}".format(rb_cfg.auto_nat_discovery))
