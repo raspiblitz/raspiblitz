@@ -100,6 +100,8 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   # https://github.com/rootzoll/raspiblitz/issues/684
   sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
 
+  # remove unneccesary files
+  sudo rm -rf /home/pi/MagPi 
 fi
 
 # remove some (big) packages that are not needed
