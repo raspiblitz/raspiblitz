@@ -257,6 +257,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     echo "*** Install Tor ***"
+    echo "*** Installing NYX - TOR monitoring Tool ***"
+    # NYX - Tor monitor tool
+    #  https://nyx.torproject.org/#home
     sudo apt install tor tor-arm -y
 
     echo ""
@@ -335,18 +338,7 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/
-    echo ""
-
-    # NYX - Tor monitor tool
-    #  https://nyx.torproject.org/#home
-    echo "*** Installing NYX - TOR monitoring Tool ***"
-    nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
-    if [ ${nyxInstalled} -eq 0 ]; then
-      sudo pip install nyx
-    else
-      echo "NYX already installed"
-    fi
+    sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
     echo ""
 
     echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
