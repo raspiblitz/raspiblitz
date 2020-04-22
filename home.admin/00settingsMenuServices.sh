@@ -20,7 +20,7 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
-if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
+if [ ${#LNbits} -eq 0 ]; then LNbits="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -72,7 +72,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNBits' ${LNBits} \
+i 'LNbits' ${LNbits} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
@@ -91,7 +91,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNBits' ${LNBits} \
+i 'LNbits' ${LNbits} \
 2>&1 >/dev/tty)
 fi
 
@@ -495,11 +495,11 @@ else
   echo "lndmanage setting unchanged."
 fi
 
-# LNBits process choice
+# LNbits process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${LNBits}" != "${choice}" ]; then
-  echo "LNBits Setting changed .."
+if [ "${LNbits}" != "${choice}" ]; then
+  echo "LNbits Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
   if [ "${choice}" =  "on" ]; then

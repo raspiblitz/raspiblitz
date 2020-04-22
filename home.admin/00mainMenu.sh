@@ -48,8 +48,8 @@ fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")  
 fi
-if [ "${LNBits}" == "on" ]; then
-  OPTIONS+=(LNBITS "LNBits Server")  
+if [ "${LNbits}" == "on" ]; then
+  OPTIONS+=(LNBITS "LNbits Server")
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")  

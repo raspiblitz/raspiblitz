@@ -17,7 +17,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: LNDmanage (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 - New: BTC-RPC-Explorer (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 - New: Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
-- New: LNBits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+- New: LNbits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 - New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 - New: TOR Support to connect mobile Apps
 - New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
