@@ -14,7 +14,7 @@ source /home/admin/_version.info
 
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
-# and delivers basic config info for scripts
+# and delivers basic config info for scripts 
 # make raspiblitz.conf if not there
 sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -118,7 +118,7 @@ fi
 
 ################################
 # AFTER BOOT SCRIPT
-# when a process needs to
+# when a process needs to 
 # execute stuff after a reboot
 # it should in file
 # /home/admin/setup.sh
@@ -182,7 +182,7 @@ done
 ################################
 # HDD CHECK & PRE-INIT
 ################################
-
+ 
 # wait loop until HDD is connected
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
@@ -262,8 +262,8 @@ if [ ${isMounted} -eq 0 ]; then
       sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf 2>/dev/null
     fi
   fi
-
-  # UPDATE MIGRATION & CONFIG PROVISIONING
+  
+  # UPDATE MIGRATION & CONFIG PROVISIONING 
   if [ ${configExists} -eq 1 ]; then
     echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
@@ -285,7 +285,7 @@ if [ ${isMounted} -eq 0 ]; then
     sync
     sudo shutdown -r -F +1
     exit 0
-  else
+  else 
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
@@ -335,11 +335,11 @@ if [ ${configExists} -eq 1 ]; then
   echo "load and update publicIP" >> $logFile
   source ${configFile}
   freshPublicIP=""
-
+  
   # determine the publicIP/domain that LND should announce
   if [ ${#lndAddress} -gt 3 ]; then
 
-    # use domain as PUBLICIP
+    # use domain as PUBLICIP 
     freshPublicIP="${lndAddress}"
 
   else
@@ -379,7 +379,7 @@ if [ ${configExists} -eq 1 ]; then
   else
     publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
     if [ ${publicIPValueExists} -gt 1 ]; then
-      # remove one
+      # remove one 
       echo "more then one publiIp entry - removing one" >> $logFile
       sed -i "s/^publicIP=.*//g" ${configFile}
       publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
@@ -437,7 +437,7 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
     sudo chown admin:admin -R /mnt/hdd/app-data/lnbits
   fi
 
-else
+else 
   echo "skipping admin user LND data update" >> $logFile
 fi
 
@@ -517,7 +517,7 @@ if [ ${isRaspbian} -gt 0 ]; then
 fi
 if [ ${isArmbian} -gt 0 ]; then
   baseImage="armbian"
-fi
+fi 
 if [ ${isUbuntu} -gt 0 ]; then
 baseImage="ubuntu"
 fi
