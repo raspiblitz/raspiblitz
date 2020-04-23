@@ -350,13 +350,13 @@ else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
 
-# LNBits
-if [ "${LNBits}" = "on" ]; then
-  echo "Provisioning LNBits - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup LNBits '/g" ${infoFile}
+# LNbits
+if [ "${LNbits}" = "on" ]; then
+  echo "Provisioning LNbits - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup LNbits '/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
 else
-  echo "Provisioning LNBits - keep default" >> ${logFile}
+  echo "Provisioning LNbits - keep default" >> ${logFile}
 fi
 
 # JoinMarket

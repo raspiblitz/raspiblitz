@@ -124,13 +124,13 @@ else
   echo ""
 fi
 
-if [ "${LNBits}" = "on" ]; then
-  echo "*** LAST 20 LNBits LOGS ***"
+if [ "${LNbits}" = "on" ]; then
+  echo "*** LAST 20 LNbits LOGS ***"
   echo "sudo journalctl -u lnbits -b --no-pager -n20"
   sudo journalctl -u lnbits -b --no-pager -n20
   echo ""
 else
-  echo "- LNBits is OFF by config"
+  echo "- LNbits is OFF by config"
   echo ""
 fi
 

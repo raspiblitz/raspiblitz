@@ -8,7 +8,7 @@
 
 **The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and an nice display for easy setup & monitoring.**
 
-RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not you Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
+RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
 ## Feature Overview
 
@@ -26,7 +26,7 @@ There are further Services that can be switched on:
 * **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
-* **LNBits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* **LNbits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
@@ -70,12 +70,13 @@ The cheapest way is to buy and assemble the single parts yourself. The new shopp
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
-* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
+* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * 500GB SSD: [amazon](https://geni.us/raspiblitz-500gb-ssd)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
 * Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
 #### Package: Minimal (around 180 USD)
 
@@ -92,19 +93,21 @@ If you have already a used RaspberryPi 3 B+ you can reuse with the following par
 * Power >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
 
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
-* RaspBerry Pi 4 2GB + Power: [amazon](https://geni.us/raspiblitz-2gb-power)
-* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
+* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4)
 
 #### Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
-* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb-power)
-* Heatsink-Case RP4: [amazon](https://geni.us/heatsink-raspi4)
-* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
-* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
-* 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
+* 1TB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
+* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb)
+* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
+* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
+* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -651,7 +654,7 @@ To run it change to the RaspiBlitz terminal and type 'manage'. This starts the L
 
 [Details on Service](https://github.com/bitromortac/lndmanage/blob/master/README.md)
 
-##### LNBits
+##### LNbits
 
 LNbits is a very simple server that sits on top of your Lightning Wallet
 
