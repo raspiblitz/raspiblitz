@@ -125,9 +125,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
-    sudo mkdir /mnt/hdd/app-data/lnbits 2>/dev/null
-    sudo chown admin:admin -R /mnt/hdd/app-data/lnbits
-    echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/lnbits" >> /home/admin/lnbits/.env
+    sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
+    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
+    echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits" >> /home/admin/lnbits/.env
 
     # to the install
     cd /home/admin/lnbits
