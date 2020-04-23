@@ -351,7 +351,7 @@ else
 fi
 
 # LNbits
-if [ "${LNbits}" = "on" ]; then
+if [ "${LNbits}" = "on" ] || [ "${LNBits}" = "on" ]; then
   echo "Provisioning LNbits - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup LNbits '/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
