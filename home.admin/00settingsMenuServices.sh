@@ -22,6 +22,7 @@ if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
+if [ ${#LNbits} -eq 0 ]; then LNbits="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
