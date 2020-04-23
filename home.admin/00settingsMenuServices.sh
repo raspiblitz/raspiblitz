@@ -87,7 +87,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNbits' ${LNbits} \
+i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
@@ -555,7 +555,7 @@ fi
 # LNbits process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${LNbits}" != "${choice}" ]; then
+if [ "${LNBits}" != "${choice}" ]; then
   echo "LNbits Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}

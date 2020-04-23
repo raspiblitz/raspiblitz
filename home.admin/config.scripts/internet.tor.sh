@@ -373,7 +373,7 @@ EOF
   if [ "${ElectRS}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
-  if [ "${LNbits}" = "on" ]; then
+  if [ "${LNBits}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5000
   fi
 
