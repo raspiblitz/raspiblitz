@@ -46,8 +46,8 @@ Activate TOR to access from outside your local network.
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^LNbits=" /mnt/hdd/raspiblitz.conf; then
-  echo "LNbits=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^LNBits=" /mnt/hdd/raspiblitz.conf; then
+  echo "LNBits=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # status
