@@ -9,6 +9,12 @@ echo "they will get recreated on fresh bootup, by _bootstrap.sh service"
 sudo rm /etc/ssh/ssh_host_*
 echo "OK"
 
+# https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
+echo ""
+echo "deleting local DNS confs ..."
+sudo rm /etc/resolv.conf
+echo "OK"
+
 echo " "
 echo "Will shutdown now."
 echo "Wait until Raspberry LEDs show no activity anymore."

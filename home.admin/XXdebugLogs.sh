@@ -134,6 +134,16 @@ else
   echo ""
 fi
 
+if [ "${specter}" = "on" ]; then
+  echo "*** LAST 20 SPECTER LOGS ***"
+  echo "sudo journalctl -u cryptoadvance-specter -b --no-pager -n20"
+  sudo journalctl -u cryptoadvance-specter -b --no-pager -n20
+  echo ""
+else
+  echo "- SPECTER is OFF by config"
+  echo ""
+fi
+
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
 if [ ${#undervoltageReports} -gt 0 ]; then

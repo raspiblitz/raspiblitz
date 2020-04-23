@@ -154,7 +154,7 @@ activateLndOverTOR()
     sudo systemctl disable lnd 2>/dev/null
 
     echo "editing /etc/systemd/system/lnd.service"
-    sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735/g" /etc/systemd/system/lnd.service
+    sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735 \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
   
     echo "Enable LND again"
     sudo systemctl enable lnd
@@ -257,6 +257,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     echo "*** Install Tor ***"
+    echo "*** Installing NYX - TOR monitoring Tool ***"
+    # NYX - Tor monitor tool
+    #  https://nyx.torproject.org/#home
     sudo apt install tor tor-arm -y
 
     echo ""
@@ -335,18 +338,7 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/
-    echo ""
-
-    # NYX - Tor monitor tool
-    #  https://nyx.torproject.org/#home
-    echo "*** Installing NYX - TOR monitoring Tool ***"
-    nyxInstalled=$(sudo pip list 2>/dev/null | grep 'nyx' -c)
-    if [ ${nyxInstalled} -eq 0 ]; then
-      sudo pip install nyx
-    else
-      echo "NYX already installed"
-    fi
+    sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
     echo ""
 
     echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
@@ -409,7 +401,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** Removing TOR from LND ***"
   sudo systemctl disable lnd
   echo "editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
+  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
 
   sudo systemctl enable lnd
   echo "OK"

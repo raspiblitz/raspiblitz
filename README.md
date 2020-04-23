@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.4 with lnd 0.9.0-beta and bitcoin 0.19.0.1 or litecoin 0.17.1.`
+`Version 1.5 with lnd 0.9.2-beta and bitcoin 0.19.1 or litecoin 0.17.1.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -27,6 +27,7 @@ There are further Services that can be switched on:
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 * **LNbits** (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
+* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 
@@ -88,19 +89,19 @@ Basic Parts for all minimal variants:
 
 If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
 * RaspBerry Pi 3: [amazon](https://geni.us/raspiblitz-rpi3)
+* Heatsink-Case RP3: [amazon](https://geni.us/raspiblitz-heatsink)
 * Power >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
-* Heatsink-Case: [amazon](https://geni.us/raspiblitz-heatsink)
 
 Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 * RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
 * RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
-* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
+* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4)
 
 #### Package: Maximal
 
 *The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
 
-* 1000GB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
+* 1TB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
 * RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb)
 * RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
@@ -114,29 +115,30 @@ Or if you order new go with the RaspberryPi 4 2GB and the following parts:
 
 ## Assemble your RaspiBlitz
 
-If you are going with the Standard/Maximal-RaspberryPi4 Setup you need to:
+When you have all parts you need to:
 
-- Assemble the Shim-Fan and connect it to the GPIO pins: [detail instructions](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-fan-shim)
-- Fit the RaspberryPi to the PiBow case: [detail instructions](https://www.youtube.com/watch?v=utk3cjzCLog)
-- Put the SSD into the HDD USB & may get some rubber bands
+- Assemble the Heatsink-Case on the RaspberryPi (follow the intructions in package).
+- Put the SSD/Hdd into the Case and connect it per USB to the RaspberryPi
+- Add the display on top with the pins like in picture below.
+- PlugIn the network cable.
 
-Add the display on top with the pins like in picture below. PlugIn the network cable. In the end your RaspiBlitz should look like this:
+In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
-
-*If you are going with the Minimal-RaspberryPi3 Setup just apply the Geekworm Heatsink-Case and connect everything- [detail instructions](https://www.youtube.com/watch?v=2QDlbAorJKw).*
 
 ## Installing the Software
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.4:**
+**Download SD-Card image - Version 1.5:**
 
-Browser: [https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz)
+*IMPORTANT: This is just a Release Candidate - not the final release. Please just use if you feel reckless and like to help on testing. If you have serious funds on your node please wait for the final release before updating.*
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/raspiblitz-v1.4-2020-02-20.img.gz.torrent
+Browser: https://raspiblitz.com/raspiblitz-v1.5RC1-2020-03-31.img.gz
 
-SHA-256: 55b1989a45e99ecc56b74febddfa98f52271799105cc80900b09cc67e73df078 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.4-2020-02-20.img.gz.sig)
+Torrent: TODO just for final release
+
+SHA-256: 0463dbad63b25ec3f2565fe555fd97e64cbe1c981a16dab07f1c9074c4dae5c2 or [SIGNATURE](TODO just for final release)
 
 **Write the SD-Card image to your SD Card**
 
@@ -165,7 +167,7 @@ When everything boots up correctly, you should see the local IP address of your 
 
 ![LCD0](pictures/lcd0-welcome.png)
 
-Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win10](https://www.youtube.com/watch?v=xIfzZXHaCzQ)) and connect through SSH with the command displayed by the RaspiBlitz:
+Now open up a terminal ([OSX](https://www.youtube.com/watch?v=5XgBd6rjuDQ)/[Win10](https://www.howtogeek.com/336775/how-to-enable-and-use-windows-10s-built-in-ssh-commands/)) and connect through SSH with the command displayed by the RaspiBlitz:
 
 `ssh admin@[YOURIP]` → use password: `raspiblitz`
 

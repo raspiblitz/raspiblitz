@@ -46,11 +46,29 @@ RaspiBlitz image to your SD card.
 " 12 40
 }
 
+copyHost()
+{
+  clear
+  sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
+  sudo systemctl stop lnd
+  sudo systemctl stop ${network}d
+  cd /mnt/hdd/${network}
+  echo
+  echo "*** Copy Blockchain Source Modus ***"
+  echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
+  echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
+  echo "2. Then run the script given by the other RaspiBlitz in Terminal"
+  echo "3. When you are done - Restart RaspiBlitz: sudo shutdown -r now"
+  echo
+  exit 99
+}
+
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
          BACKUP-LND "Backup your LND data (Rescue-File)" \
          MIGRATION "Migrate Blitz Data to new Hardware" \
+         COPY-SOURCE "Copy Blockchain Source Modus" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
@@ -106,14 +124,19 @@ case $CHOICE in
         echo "processing ..."
         sleep 3
     done
-    # prepare new name
-    sudo sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
+
+    # make sure host is named like in the raspiblitz config
+    echo "Setting the Name/Alias/Hostname .."
+    sudo /home/admin/config.scripts/lnd.setname.sh ${result}
     sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
 
+    echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
     /home/admin/70initLND.sh
 
+    # go back to main menu (and show)
+    /home/admin/00raspiblitz.sh
     exit 1;
     ;;
   RESET-HDD)
@@ -129,5 +152,8 @@ case $CHOICE in
     infoResetSDCard
     sudo shutdown now
     exit 1;
+    ;;
+  COPY-SOURCE)
+    copyHost
     ;;
 esac

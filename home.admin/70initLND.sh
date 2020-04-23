@@ -102,6 +102,7 @@ echo "*** Init LND Service & Start ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
 
+  echo "stopping lnd .."
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
@@ -234,6 +235,9 @@ if [ ${walletExists} -eq 0 ]; then
       sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
     fi
 
+    echo "waiting ."
+    sleep 10
+
   else
 
 ############################
@@ -255,8 +259,30 @@ if [ ${walletExists} -eq 0 ]; then
       exit 1
     fi
 
+    # recovering from an old wallet while node is not synced is not possible at the moment
+    # because LND will forget the recovery window on restart and not be able to recover funds
+    # TODO: https://github.com/rootzoll/raspiblitz/issues/1126 
+    if [ ${setupStep} -lt 100 ]; then
+      if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
+        whiptail --title "UNDER CONSTRUCTION" --msgbox "
+To recover an old wallet from SEED or SEED+SCB please
+create an empty NEW WALLET first and setup everything
+else until you get to the main menu.
+
+Then once your in the MAIN MENU go to REPAIR > RESET-LND
+skip all the backups and recover your old wallet.
+
+Sorry, this process will be optimized soon.
+      " 15 63
+        /home/admin/70initLND.sh
+        exit 1
+      fi
+    fi
+
     # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
+
+      # ket people know about the difference between SEED & SEED+SCB
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
 To also try to recover the open channel funds you need the
@@ -377,11 +403,11 @@ to protect the seed words. Most users did not set this.
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
 
-IMPORTANT: After full sync wait an hour - if you
-see still a on-chain balance of 0 satoshis try to
-recover your wallet with the ZAP desktop app and
-then send funds back to your RaspiBlitz.
-      " 12 53
+IMPORTANT: Please dont reboot the RaspiBlitz until
+the LND was able to rescan the Blockchain again.
+      " 10 60
+      clear
+
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
@@ -398,22 +424,16 @@ ${errMore}
       fi
     fi
 
-    clear
-    /home/admin/70initLND.sh
-
   fi # END OLD WALLET
 
 else
   echo "OK - LND wallet already exists."
 fi
 
-echo "waiting ."
-sleep 10
+
 echo "waiting .."
 sleep 10
-echo "waiting ..."
-sleep 10
-dialog --pause "  Waiting for LND - please wait .." 8 58 30
+dialog --pause "  Waiting for LND - please wait .." 8 58 45
 
 ############################
 # Copy LND macaroons to admin
@@ -422,11 +442,15 @@ dialog --pause "  Waiting for LND - please wait .." 8 58 30
 clear
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
+
+# check if macaroon exists and if not try to unlock LND wallet first
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   /home/admin/AAunlockLND.sh
   sleep 3
 fi
+
+# check if macatoon exists now - if not fail
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
@@ -437,23 +461,11 @@ if [ ${macaroonExists} -eq 0 ]; then
   echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
-macaroonExists=$(sudo ls -la /home/admin/.lnd/data/chain/${network}/${chain}net/ | grep -c admin.macaroon)
-if [ ${macaroonExists} -eq 0 ]; then
-  sudo mkdir /home/admin/.lnd
-  sudo mkdir /home/admin/.lnd/data
-  sudo mkdir /home/admin/.lnd/data/chain
-  sudo mkdir /home/admin/.lnd/data/chain/${network}
-  sudo mkdir /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/lnd.conf /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo chown -R admin:admin /home/admin/.lnd/
-  echo "OK - LND Macaroons created"
-  echo ""
-else
-  echo "OK - Macaroons are already copied"
-  echo ""
-fi
+
+# copy macaroons to all needed users
+sudo /home/admin/config.scripts/lnd.check.sh update-credentials
+echo "OK - LND Macaroons created and copied"
+echo ""
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
@@ -477,15 +489,12 @@ if [ ${setupStep} -lt 100 ]; then
 
 else
 
+  # its important that RaspiBlitz dont get rebooted
+  # before LND rescan is finished
   whiptail --title "RESET DONE" --msgbox "
 OK LND Reset is done.
-System will restart now.
-" 10 35
-
-  # make sure host is named like in the raspiblitz config
-  echo "Setting the Name/Alias/Hostname .."
-  sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
-
-  sudo /home/admin/XXshutdown.sh reboot
+You may now give it
+extra time to rescan.
+" 10 25
 
 fi

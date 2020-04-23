@@ -1,16 +1,16 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspbian Buster Desktop (2019-09-26)
+# Raspbian Buster Desktop (2020-02-13)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: 2c4067d59acf891b7aa1683cb1918da78d76d2552c02749148d175fa7f766842
+# SHA256: a82ed4139dfad31c3167e60e943bcbe28c404d1858f4713efe5530c08a419f50
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.4   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.5   *"
 echo "*****************************************"
 echo ""
 
@@ -100,6 +100,8 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   # https://github.com/rootzoll/raspiblitz/issues/684
   sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
 
+  # remove unneccesary files
+  sudo rm -rf /home/pi/MagPi 
 fi
 
 # remove some (big) packages that are not needed
@@ -139,6 +141,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
   sudo tune2fs -c 1 /dev/mmcblk0p2
+  # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
+  sudo sed -i 's/^/fsck.mode=force fsck.repair=yes /g' /boot/cmdline.txt
 fi
 
 # special prepare when Ubuntu or Armbian
@@ -258,7 +262,7 @@ echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile
+sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
 
 # installs bandwidth monitoring for future statistics
 sudo apt-get install -y vnstat
@@ -349,7 +353,7 @@ echo "*** PREPARING BITCOIN & Co ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.19.0.1"
+bitcoinVersion="0.19.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -450,7 +454,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.9.0-beta"
+lndVersion="0.9.2-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -633,18 +637,6 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${bas
   sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
   sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
 fi
-if [ "${baseImage}" = "raspbian" ]; then
-  # create /home/admin/setup.sh - which will get executed after reboot by autologin pi user
-  cat > /tmp/setup.sh <<EOF
-
-  # make LCD screen rotation correct
-  sudo sed --in-place -i "57s/.*/dtoverlay=tft35a:rotate=270/" /boot/config.txt
-
-EOF
-  sudo cp /tmp/setup.sh /home/admin/setup.sh
-  sudo chown admin.admin /home/admin/setup.sh
-  sudo chmod +x /home/admin/setup.sh
-fi
 
 if [ "${baseImage}" = "dietpi" ]; then
   # bash autostart for dietpi
@@ -707,8 +699,9 @@ sudo -u admin git clone https://github.com/goodtft/LCD-show.git
 sudo -u admin chmod -R 755 LCD-show
 sudo -u admin chown -R admin:admin LCD-show
 cd LCD-show/
-# set comit hard to a8de38f (7 Nov 2019) for security
-sudo -u admin git reset --hard a8de38f41586e153a8e03adcf7708c8b5974ffc8
+# set comit hard to old version - that seemed to run better
+# 
+sudo -u admin git reset --hard ce52014
 
 # install xinput calibrator package
   echo "--> install xinput calibrator package"
@@ -751,6 +744,7 @@ echo ""
 # activate LCD and trigger reboot
 # dont do this on dietpi to allow for automatic build
 if [ "${baseImage}" != "dietpi" ]; then
+  sudo chmod +x -R /home/admin/LCD-show
   cd /home/admin/LCD-show/
   sudo apt-mark hold raspberrypi-bootloader
   sudo ./LCD35-show

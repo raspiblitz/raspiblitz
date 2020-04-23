@@ -71,7 +71,15 @@ logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
   echo "WARN !! Logs /var/log in are bigger then 1GB"
   echo "ACTION --> DELETED ALL LOGS"
+  if [ -d "/var/log/nginx" ]; then
+    nginxLog=1
+    echo "/var/log/nginx is present"
+  fi
   sudo rm -r /var/log/*
+  if [ $nginxLog == 1 ]; then
+    sudo mkdir /var/log/nginx
+    echo "Recreated /var/log/nginx"
+  fi
   sleep 3
   echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
@@ -147,12 +155,34 @@ fi
 # the sd card - switch to hdmi
 ################################
 
-forceHDMIoutput=$(sudo ls /boot/hdmi 2>/dev/null | grep -c hdmi)
+forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/hdmi
+  sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  exit 0
+fi
+
+################################
+# SSH SERVER CERTS RESET
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
+if [ ${sshReset} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/ssh.reset*
+  # show info ssh reset
+  sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
+  sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
+  # delete ssh certs
+  sudo systemctl stop sshd
+  sudo rm /mnt/hdd/ssh/ssh_host*
+  sudo ssh-keygen -A
+  sudo /home/admin/XXshutdown.sh reboot
   exit 0
 fi
 
@@ -407,35 +437,8 @@ sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 source ${configFile}
 if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
-  echo "making sure LND blockchain RPC password is set correct in lnd.conf" >> $logFile
-  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#rpcpassword} -gt 0 ]; then
-    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
-  else
-    echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
-  fi
-
-  echo "updating/cleaning admin user LND data" >> $logFile
-  sudo rm -R /home/admin/.lnd 2>/dev/null
-  sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net 2>/dev/null
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
-  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon > /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon" 2>> $logFile
-  sudo chown admin:admin -R /home/admin/.lnd 2>> $logFile
-
-  echo "updating/cleaning pi user LND data (just read & invoice)" >> $logFile
-  sudo rm -R /home/pi/.lnd 2>/dev/null
-  sudo mkdir -p /home/pi/.lnd/data/chain/${network}/${chain}net/ 2>> $logFile
-  sudo cp /mnt/hdd/lnd/tls.cert /home/pi/.lnd/tls.cert 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/readonly.macaroon" 2>> $logFile
-  sudo sh -c "cat /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon > /home/pi/.lnd/data/chain/${network}/${chain}net/invoice.macaroon" 2>> $logFile
-  sudo chown pi:pi -R /home/pi/.lnd 2>> $logFile
-
-  if [ "${LNbits}" = "on" ]; then
-    echo "updating macaroons for LNbits fresh on start" >> $logFile
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons >> $logFile
-    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
-  fi
+  echo "running LND user credentials update" >> $logFile
+  sudo /home/admin/config.scripts/lnd.check.sh update-credentials >> $logFile
 
 else 
   echo "skipping admin user LND data update" >> $logFile

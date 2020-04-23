@@ -61,7 +61,7 @@ echo "generating QR code ... please wait"
 whiptail --backtitle "Fund your on chain wallet" \
 	 --title "Send ${coininfo}" \
 	 --yes-button "DONE" \
-	 --no-button "Show QR Code" \
+	 --no-button "Console QRcode" \
 	 --yesno "${msg}" 0 0
 
 # display QR code

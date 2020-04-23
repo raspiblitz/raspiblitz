@@ -47,7 +47,7 @@ if [ "${runBehindTor}" = "on" ]; then
   isHiddenService=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c $service)
   if [ ${isHiddenService} -eq 0 ]; then
     #check if the port is already forwarded
-    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 127.0.0.1:$fromPort)
+    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort\b")
     if [ ${alreadyThere} -gt 0 ]; then
       echo "The port $fromPort is already forwarded. Check /etc/tor/torrc for the details."
       exit 1
@@ -60,7 +60,7 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
 
     # check and insert second port pair
     if [ ${#toPort2} -gt 0 ]; then
-      alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 127.0.0.1:$fromPort2)
+      alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
       if [ ${alreadyThere} -gt 0 ]; then
         echo "The port $fromPort2 is already forwarded. Check the /etc/tor/torrc for the details."
       else
@@ -91,7 +91,7 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   echo "$TOR_ADDRESS"
   echo "use with the port: $toPort"
   echo ""
-  alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c 127.0.0.1:$fromPort2)
+  alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
   if [ ${#toPort2} -gt 0 ]; then
     if [ ${alreadyThere} -eq 0 ]; then
       echo "or the port: $toPort2"

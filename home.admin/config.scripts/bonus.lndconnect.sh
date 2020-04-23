@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
  exit 1
 fi
 
@@ -57,9 +57,6 @@ supportsTOR=0
 if [ "${targetWallet}" = "zap-ios" ]; then
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    # deactivated until fix: https://github.com/rootzoll/raspiblitz/issues/1001
-    echo "error='no tor support'"
-    exit 1
     # when ZAP runs on TOR it uses REST
     port="8080"
     extraparamter="--nocert"
@@ -92,6 +89,17 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
 
   connector="lndconnect"
   port="8080"
+
+elif [ "${targetWallet}" = "sendmany-android" ]; then
+
+  connector="lndconnect"
+  if [ ${forceTOR} -eq 1 ]; then
+    echo "error='no tor support'"
+    exit 1
+    #port="8080"
+    #extraparamter="--nocert"
+  fi
+  port="10009"
 
 elif [ "${targetWallet}" = "shango-ios" ]; then
 
@@ -200,11 +208,11 @@ msg=""
 if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
-msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <show QR code> to see it in this window."
+msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <console QRcode> to see it in this window."
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "continue" \
-	 --no-button "show QR code" \
+	 --no-button "console QRcode" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)

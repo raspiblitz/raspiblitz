@@ -66,8 +66,9 @@ echo ""
 echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
 echo "to be connected to the same local network."
 echo ""
-echo "Open a terminal on the source computer and change into the directory that contains the"
-echo "blockchain data. You should see directories 'blocks', 'chainstate'".
+echo "If you use a RaspiBlitz (>=v1.5) as Blockchain source go: MENU > REPAIR > COPY-SOURCE"
+echo "Otherwiese open a terminal on the source computer and change into the directory that"
+echo "contains the blockchain data. You should see directories 'blocks' & 'chainstate'".
 echo "Make sure the bitcoin client on that computer is stopped."
 echo ""
 echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"

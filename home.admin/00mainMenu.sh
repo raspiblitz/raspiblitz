@@ -57,6 +57,12 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")  
 fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Cryptoadvance Specter")
+fi
+if [ "${joinmarket}" == "on" ]; then
+  OPTIONS+=(JMARKET "JoinMarket")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -76,6 +82,7 @@ OPTIONS+=(CASHOUT "Remove Funds from LND")
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
   OPTIONS+=(lnchannels "Lightning Channel List")
+  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")  
 fi
 
 OPTIONS+=(SERVICES "Activate/Deactivate Services")
@@ -147,6 +154,12 @@ case $CHOICE in
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
             ;;
+        SPECTER)
+            /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+            ;;
+        JMARKET)
+            sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+            ;;
         lnbalance)
             clear
             echo "*** YOUR SATOSHI BALANCES ***"
@@ -160,6 +173,12 @@ case $CHOICE in
             lnchannels ${network}
             echo "Press ENTER to return to main menu."
             read key
+            ;;
+        lnfwdreport)
+            ./XXlnfwdreport.sh 
+            echo "Press ENTER to return to main menu."
+            read key
+            ./00mainMenu.sh
             ;;
         CONNECT)
             /home/admin/BBconnectPeer.sh
@@ -206,6 +225,9 @@ case $CHOICE in
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
+            if [ $? -eq 99 ]; then
+              exit 1
+            fi
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
@@ -224,21 +246,9 @@ case $CHOICE in
             /home/admin/99checkUpdate.sh
             ;; 
         OFF)
+            clear
             echo ""
-            echo "LCD turns white when shutdown complete."
-            echo "Then wait 5 seconds and disconnect power."
-            echo "-----------------------------------------------"
-            echo "stop lnd - please wait .."
-            sudo systemctl stop lnd
-            echo "stop ${network}d (1) - please wait .."
-            sudo -u bitcoin ${network}-cli stop
-            sleep 10
-            echo "stop ${network}d (2) - please wait .."
-            sudo systemctl stop ${network}d
-            sleep 3
-            sync
-            echo "starting shutdown ..."
-            sudo shutdown now
+            sudo /home/admin/XXshutdown.sh
             exit 0
             ;;
         DELETE)

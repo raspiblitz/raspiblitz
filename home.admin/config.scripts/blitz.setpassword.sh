@@ -225,30 +225,38 @@ data.multiPass = '$newPassword';
 console.log(JSON.stringify(data, null, 2));
 EOF
     rm -f /home/rtl/RTL/backup-RTL-Config.json
+    rm -f /home/rtl/RTL/RTL-Config.json
     mv /home/admin/RTL-Config.json /home/rtl/RTL/
     chown rtl:rtl /home/rtl/RTL/RTL-Config.json
   fi
   
   # electrs
   if [ "${ElectRS}" == "on" ]; then
-    echo "# changing ELECTRS password"
+    echo "# changing the RPC password for ELECTRS"
     RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
   fi
 
   # BTC-RPC-Explorer
   if [ "${BTCRPCexplorer}" = "on" ]; then
-    echo "# changing BTCRPCEXPLORER password"
+    echo "# changing the RPC password for BTCRPCEXPLORER"
     sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
     sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
   fi
 
   # BTCPayServer
   if [ "${BTCPayServer}" == "on" ]; then
-    echo "# changing BTCPAYSERVER password"
+    echo "# changing the RPC password for BTCPAYSERVER"
     sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
   fi
 
+  # JoinMarket
+  if [ "${joinmarket}" == "on" ]; then
+    echo "# changing the RPC password for JOINMARKET"
+    sed -i "s/^rpc_password =.*/rpc_password = ${newPassword}/g" /home/joinmarket/.joinmarket/joinmarket.cfg 2>/dev/null
+    echo "# changing the password for the 'joinmarket' user"
+    echo "joinmarket:${newPassword}" | sudo chpasswd
+  fi
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
   exit 0

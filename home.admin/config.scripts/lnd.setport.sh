@@ -73,10 +73,6 @@ else
   sudo sed -i "s/^lndPort=.*/lndPort=${portnumber}/g" /mnt/hdd/raspiblitz.conf
 fi
 
-# editing service file
-echo "editing /etc/systemd/system/lnd.service"
-sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
-
 # enable service again
 echo "enable service again"
 sudo systemctl enable lnd

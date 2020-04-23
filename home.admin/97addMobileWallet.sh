@@ -81,6 +81,11 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
 
+# Additinal Options with no TOR
+if [ "${runBehindTor}" != "on" ]; then
+  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
+fi
+
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.lcd.sh hide
@@ -120,6 +125,7 @@ case $CHOICE in
       exit 1;
       ;;
   ZAP_IOS)
+      choose_IP_or_TOR
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
@@ -147,6 +153,32 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
+      exit 1;
+    ;;
+  SENDMANY_ANDROID)
+
+      # check if keysend is activated first
+	  source <(/home/admin/config.scripts/lnd.keysend.sh status)
+	  if [ "${keysendOn}" == "0" ]; then
+	    whiptail --title " KEYSEND NEEDED " --msgbox "
+To use the chat feature of the SendMany app, you need to activate the Keysend feature first.
+
+Please go to MAINMENU > SERVICES and activate KEYSEND first.
+" 12 65
+	    exit 1
+	  fi
+
+      appstoreLink="https://github.com/fusion44/sendmany/releases"
+      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+	  whiptail --title "Install SendMany APK from GithubReleases- (open assets) on your device" \
+	    --yes-button "continue" \
+		--no-button "link as QR code" \
+		--yesno "Download & install the SendMany APK from GitHub:\n\n${appstoreLink}\n\nEasiest way to scan QR code on LCD and download/install.\n\nWhen installed and started -> continue." 10 65
+	  if [ $? -eq 1 ]; then
+	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
+  	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 1;
     ;;
   ZEUS_IOS)

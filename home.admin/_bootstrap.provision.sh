@@ -324,13 +324,13 @@ else
 fi
 
 # LCD ROTATE
-if [ "${#lcdrotate}" -gt 0 ]; then
-    echo "Provisioning LCD rotate - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-    sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
-else
-    echo "Provisioning LCD rotate - not active" >> ${logFile}
+if [ "${#lcdrotate}" -eq 0 ]; then
+  # when upgrading from an old raspiblitz - enforce lcdrotate = 0
+  lcdrotate=0
 fi
+echo "Provisioning LCD rotate - run config script" >> ${logFile}
+sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
+sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then
@@ -357,6 +357,24 @@ if [ "${LNbits}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LNbits - keep default" >> ${logFile}
+fi
+
+# JoinMarket
+if [ "${joinmarket}" = "on" ]; then
+  echo "Provisioning JoinMarket - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup JoinMarket'/g" ${infoFile}
+  sudo /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning JoinMarket - keep default" >> ${logFile}
+fi
+
+# JoinMarket
+if [ "${specter}" = "on" ]; then
+  echo "Provisioning Specter - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Specter'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.cryptoadvance-specter.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
 # replay backup LND conf & tlscerts
