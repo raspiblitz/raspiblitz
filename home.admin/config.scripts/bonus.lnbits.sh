@@ -53,7 +53,7 @@ fi
 # status
 if [ "$1" = "status" ]; then
 
-  if [ "${LNbits}" = "on" ]; then
+  if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 
     # check for error
@@ -122,6 +122,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "LNBITS_BACKEND_WALLET_CLASS=LndWallet" >> /home/admin/lnbits/.env
     echo "LND_GRPC_ENDPOINT=127.0.0.1" >> /home/admin/lnbits/.env
     echo "LND_GRPC_PORT=10009" >> /home/admin/lnbits/.env
+    echo "LNBITS_FORCE_HTTPS=0" >> /home/admin/lnbits/.env
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
@@ -174,7 +175,7 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^LNbits=.*/LNbits=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
@@ -188,10 +189,10 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^LNbits=.*/LNbits=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ] || [ "${LNbits}" == "on" ]; then
+  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
     echo "*** REMOVING LNbits ***"
     sudo systemctl stop lnbits
     sudo systemctl disable lnbits
