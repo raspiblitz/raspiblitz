@@ -83,7 +83,7 @@ if [ "$1" = "write-macaroons" ]; then
   macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   macaroonReadHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_CERT=.*/LND_CERT=_____TO-DO_____/g" /home/admin/lnbits/.env
+  sudo sed -i "s/^LND_CERT=.*/LND_CERT=/mnt/hdd/lnd/data/chain/${network}/${chain}net/tls.cert/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/admin/lnbits/.env
   sudo sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=${macaroonReadHex}/g" /home/admin/lnbits/.env
@@ -131,9 +131,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits" >> /home/admin/lnbits/.env
 
     # to the install
+    echo "# installing application dependencies"
     cd /home/admin/lnbits
     sudo -u admin pipenv install
     sudo -u admin /usr/bin/pipenv run pip install python-dotenv
+
+    # to the install
+    echo "# updating databases"
+    sudo -u admin /usr/bin/pipenv run flask migrate
 
     # open firewall
     echo
