@@ -9,6 +9,7 @@ Beside many small improvements and changes, these are most important changes:
 - Update: Loop 0.5.1
 - Update: RTL 0.7.0 (Loop In and Out integration)
 - Update: BTCPayServer v1.0.4.1
+- Update: LNbits v0.1 [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - Shoppinglist: Replace Shimfan with passive RP4-Heatcase
 - Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
 - Fix: Screen Rotate on update from v1.3
