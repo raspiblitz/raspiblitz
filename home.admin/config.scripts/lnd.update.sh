@@ -59,7 +59,7 @@ if [ $(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786') -eq 1 ] ; then
 fi
 
 # installed LND version
-lndInstalledVersion=$(sudo -u bitcoin lncli --network=mainnet --chain=bitcoin  getinfo | jq -r ".version" | cut -d " " -f1)
+lndInstalledVersion=$(sudo -u bitcoin lncli --version | cut -d " " -f3)
 lndInstalledVersionMajor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f1)
 lndInstalledVersionMain=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
 lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
@@ -226,12 +226,9 @@ if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
   else
     sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi
-  echo "# restarting LND"
-  sudo systemctl start lnd
-  sleep 5
-  echo ""
 
   echo "# OK LND Installed"
+  echo "# NOTE: RaspiBlitz may need to reboot now"
   exit 1
 
 else
