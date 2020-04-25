@@ -112,7 +112,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcrpcexplorer
     sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
     cd btc-rpc-explorer
-    sudo -u btcrpcexplorer git reset --hard v1.1.9
+    sudo -u btcrpcexplorer git reset --hard v2.0.0
     sudo -u btcrpcexplorer npm install
 
     # prepare .env file
