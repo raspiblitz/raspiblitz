@@ -159,6 +159,24 @@ sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
 
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
+# LND INTERIMS UPDATE
+if [ ${#lndInterimsUpdate} -gt 0 ]; then
+  sudo sed -i "s/^message=.*/message='Provisioning LND update'/g" ${infoFile}
+  if [ "${lndInterimsUpdate}" == "reckless"]; then
+    # recklessly update LND to latest release on GitHub (just for test & dev nodes)
+    echo "Provisioning LND reckless interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.update.sh reckless >> ${logFile}
+  else
+    # when installing the same sd image - this will re-trigger the secure interims update
+    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
+    # because standard LND version is most more up to date
+    echo "Provisioning LND secure interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.update.sh secure ${lndInterimsUpdate} >> ${logFile}
+  fi
+else
+  echo "Provisioning LND interims update - keep default" >> ${logFile}
+fi
+
 # TESTNET
 if [ "${chain}" = "test" ]; then
     echo "Provisioning TESTNET - run config script" >> ${logFile}
@@ -368,7 +386,7 @@ else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
 
-# JoinMarket
+# Specter
 if [ "${specter}" = "on" ]; then
   echo "Provisioning Specter - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Specter'/g" ${infoFile}
