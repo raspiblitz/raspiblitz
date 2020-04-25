@@ -162,8 +162,10 @@ if [ "${mode}" = "secure" ]; then
     echo "error='PGP verify fail'"
     exit 1
   fi
+
   # note: install will be done the same as reckless further down
-  
+  lndInterimsUpdateNew="${$lndUpdateVersion}"
+
 fi
 
 # RECKLESS
@@ -194,7 +196,7 @@ if [ "${mode}" = "reckless" ]; then
   fi
 
   # prepare install
-  lndUpdateVersion="reckless"
+  lndInterimsUpdateNew="reckless"
 fi
 
 # JOINED INSTALL (SECURE & RECKLESS)
@@ -203,9 +205,12 @@ if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
   # install
   echo "# stopping LND"
   sudo systemctl stop lnd
-  echo "# installing new LND binary"
+  echo "# unzip LND binary"
   sudo -u admin tar -xzf ${binaryName}
-  sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${cpuArchitecture}-v${lndUpdateVersion}/*
+  # removing the tar.gz ending from the binary
+  directoryName="${binaryName%.*.*}"
+  echo "# install binary directory '${directoryName}'"
+  sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-*/*
   sleep 3
   installed=$(sudo -u admin lnd --version)
   if [ ${#installed} -eq 0 ]; then
@@ -215,9 +220,9 @@ if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
   echo "# flag update in raspiblitz config"
   source /mnt/hdd/raspiblitz.conf
   if [ ${#lndInterimsUpdate} -eq 0 ]; then
-    echo "lndInterimsUpdate='${lndUpdateVersion}'" >> /mnt/hdd/raspiblitz.conf
+    echo "lndInterimsUpdate='${lndInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
   else
-    sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndUpdateVersion}'/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi
   echo "# restarting LND"
   sudo systemctl start lnd
