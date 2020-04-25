@@ -48,7 +48,7 @@ lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut 
 lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "lndUpdateVersion")
 
 # get latest release from LND GitHub releases
-gitHubLatestReleaseJSON="curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq '.[0]'"
+gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq '.[0]')"
 lndLatestVersion=$(echo "${gitHubLatestReleaseJSON}" | jq -r '.tag_name')
 lndLatestDownload=$(echo "${gitHubLatestReleaseJSON}" | grep "browser_download_url" | grep "linux-${cpuArchitecture}" | cut -d '"' -f4)
 
@@ -95,6 +95,9 @@ elif [ "${mode}" = "secure" ]; then
   echo "# TODO install secure"
 
 # RECKLESS
+# this mode is just for people running test and development nodes - its not recommended
+# for production nodes. In a update/recovery scenario it will not install a fixed version
+# it will always pick the latest release from the github
 elif [ "${mode}" = "reckless" ]; then
 
   echo "# TODO install reckless"
