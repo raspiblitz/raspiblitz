@@ -21,7 +21,27 @@ mode="$1"
 lndUpdateVersion="0.10.0-beta"
 lndUpdateComment="Some optional apps might not work with this update. You will not be able to downgrade after LND database migration."
 
+# check who signed the release in https://github.com/lightningnetwork/lnd/releases
+# olaoluwa
+lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+lndUpdatePGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+
+#joostjager
+# lndUpdatePGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
+# lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
+
+# bitconner 
+# lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+# lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+
+# wpaulino
+# lndUpdatePGPpkeys="https://keybase.io/wpaulino/pgp_keys.asc"
+# lndUpdatePGPcheck="729E9D9D92C75A5FBFEEE057B5DD717BEF7CA5B1"
+
 # GATHER DATA
+
+# setting download directory
+downloadDir="/home/admin/download"
 
 # detect CPU architecture & fitting download link
 cpuArchitecture=""
@@ -92,7 +112,71 @@ elif [ "${mode}" = "secure" ]; then
     fi
   fi
 
-  echo "# TODO install secure"
+  # change into download directory
+  cd "${downloadDir}"
+
+  # extract the SHA256 hash from the manifest file for the corresponding platform
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt
+  lndSHA256=$(grep -i "linux-${cpuArchitecture}" manifest-v$lndUpdateVersion.txt | cut -d " " -f1)
+  echo "# SHA256 hash: $lndSHA256"
+
+  # get LND binary
+  binaryName="lnd-linux-${cpuArchitecture}-v${lndUpdateVersion}.tar.gz"
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/${binaryName}
+
+  # check binary was not manipulated (checksum test)
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt.sig
+  sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
+  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+    echo "error='checksum not matching'"
+    exit 1
+  fi
+
+  # check gpg finger print
+  gpg ./pgp_keys.asc
+  fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${lndUpdatePGPcheck}" -c)
+  if [ ${fingerprint} -lt 1 ]; then
+    echo "error='PGP author check failed'"
+  fi
+  gpg --import ./pgp_keys.asc
+  sleep 3
+  verifyResult=$(gpg --verify manifest-v${lndUpdateVersion}.txt.sig 2>&1)
+  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+  echo "# goodSignature(${goodSignature})"
+  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${lndUpdatePGPcheck}" -c)
+  echo "# correctKey(${correctKey})"
+  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+    echo "error='PGP verify fail'"
+    exit 1
+  fi
+
+  # install
+  echo "# stopping LND"
+  sudo systemctl stop lnd
+  echo "# installing new LND binary"
+  sudo -u admin tar -xzf ${binaryName}
+  sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${cpuArchitecture}-v${lndUpdateVersion}/*
+  sleep 3
+  installed=$(sudo -u admin lnd --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo "error='install failed'"
+    exit 1
+  fi
+  echo "# flag update in raspiblitz config"
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${#lndInterimsUpdate} -eq 0 ]; then
+    echo "lndInterimsUpdate='${lndUpdateVersion}'" >> /mnt/hdd/raspiblitz.conf
+  else
+    sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndUpdateVersion}'/g" /mnt/hdd/raspiblitz.conf
+  fi
+  echo "# restarting LND"
+  sudo systemctl start lnd
+  sleep 5
+  echo ""
+
+  echo "# OK LND Installed"
+  exit 1
 
 # RECKLESS
 # this mode is just for people running test and development nodes - its not recommended
@@ -100,7 +184,7 @@ elif [ "${mode}" = "secure" ]; then
 # it will always pick the latest release from the github
 elif [ "${mode}" = "reckless" ]; then
 
-  echo "# TODO install reckless"
+  echo "# lnd.update.sh reckless"
 
 # NOT KNOWN PARAMETER
 else
