@@ -117,12 +117,22 @@ elif [ "${mode}" = "secure" ]; then
 
   # extract the SHA256 hash from the manifest file for the corresponding platform
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt
+  checkDownload=$(ls manifest-v${lndUpdateVersion}.txt 2>/dev/null | grep -c manifest-v${lndUpdateVersion}.txt)
+  if [ ${checkDownload} -eq 0 ]; then
+    echo "error='download manifest failed'"
+    exit 1
+  fi
   lndSHA256=$(grep -i "linux-${cpuArchitecture}" manifest-v$lndUpdateVersion.txt | cut -d " " -f1)
   echo "# SHA256 hash: $lndSHA256"
 
   # get LND binary
   binaryName="lnd-linux-${cpuArchitecture}-v${lndUpdateVersion}.tar.gz"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/${binaryName}
+  checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+  if [ ${checkDownload} -eq 0 ]; then
+    echo "error='download binary failed'"
+    exit 1
+  fi
 
   # check binary was not manipulated (checksum test)
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt.sig
