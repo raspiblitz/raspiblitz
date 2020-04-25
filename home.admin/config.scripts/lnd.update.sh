@@ -212,7 +212,7 @@ if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
   # removing the tar.gz ending from the binary
   directoryName="${binaryName%.*.*}"
   echo "# install binary directory '${directoryName}'"
-  sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-*/*
+  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
   sleep 3
   installed=$(sudo -u admin lnd --version)
   if [ ${#installed} -eq 0 ]; then
