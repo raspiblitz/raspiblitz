@@ -114,7 +114,8 @@ if [ "${mode}" = "secure" ]; then
     fi
   fi
 
-  # change into download directory
+  # clean & change into download directory
+  sudo rm -r ${downloadDir}/*
   cd "${downloadDir}"
 
   # extract the SHA256 hash from the manifest file for the corresponding platform
@@ -182,7 +183,8 @@ if [ "${mode}" = "reckless" ]; then
     exit 1
   fi
 
-  # change into download directory
+  # clean & change into download directory
+  sudo rm -r ${downloadDir}/*
   cd "${downloadDir}"
 
   # download binary
