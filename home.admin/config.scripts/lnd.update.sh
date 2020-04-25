@@ -2,7 +2,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "See if there is an optional LND update available."
+ echo "Interim optional LND updates between RaspiBlitz releases."
  echo "lnd.update.sh [info|secure|reckless]"
  echo "info -> get actual state and possible actions"
  echo "secure -> only do recommended updates by RaspiBlitz team"
@@ -82,13 +82,22 @@ elif [ "${mode}" = "secure" ]; then
   # this is needed for recovery/update. 
   fixedUpdateVersion="$2"
   if [ ${#fixedUpdateVersion} -gt 0 ]; then
-    echo "# checking for fixed version update to '${fixedUpdateVersion}'"
+    echo "# checking for fixed version update: askedFor(${fixedUpdateVersion}) available(${lndUpdateVersion})"
+    if [ "${fixedUpdateVersion}" != "${lndUpdateVersion}" ]; then
+      echo "warn='required update version does not match'"
+      echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
+      exit 1
+    else
+      echo "# OK - update version is matching"
+    fi
   fi
 
+  echo "# TODO install secure"
 
 # RECKLESS
 elif [ "${mode}" = "reckless" ]; then
 
+  echo "# TODO install reckless"
 
 # NOT KNOWN PARAMETER
 else
