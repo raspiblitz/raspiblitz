@@ -91,9 +91,11 @@ if [ "${mode}" = "info" ]; then
   echo "lndLatestVersion='${lndLatestVersion}'"
   echo "lndLatestDownload='${lndLatestDownload}'"
 
+  exit 1
+fi
 
 # SECURE
-elif [ "${mode}" = "secure" ]; then
+if [ "${mode}" = "secure" ]; then
 
   echo "# lnd.update.sh secure"
 
@@ -160,6 +162,43 @@ elif [ "${mode}" = "secure" ]; then
     echo "error='PGP verify fail'"
     exit 1
   fi
+  # note: install will be done the same as reckless further down
+  
+fi
+
+# RECKLESS
+# this mode is just for people running test and development nodes - its not recommended
+# for production nodes. In a update/recovery scenario it will not install a fixed version
+# it will always pick the latest release from the github
+if [ "${mode}" = "reckless" ]; then
+
+  echo "# lnd.update.sh reckless"
+
+  # check that download link has a value
+  if [ ${#lndLatestDownload} -eq 0 ]; then
+    echo "error='no download link'"
+    exit 1
+  fi
+
+  # change into download directory
+  cd "${downloadDir}"
+
+  # download binary
+  echo "# downloading binary"
+  binaryName=$(basename "${lndLatestDownload}")
+  sudo -u admin wget -N ${lndLatestDownload}
+  checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+  if [ ${checkDownload} -eq 0 ]; then
+    echo "error='download binary failed'"
+    exit 1
+  fi
+
+  # prepare install
+  lndUpdateVersion="reckless"
+fi
+
+# JOINED INSTALL (SECURE & RECKLESS)
+if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
 
   # install
   echo "# stopping LND"
@@ -188,15 +227,9 @@ elif [ "${mode}" = "secure" ]; then
   echo "# OK LND Installed"
   exit 1
 
-# RECKLESS
-# this mode is just for people running test and development nodes - its not recommended
-# for production nodes. In a update/recovery scenario it will not install a fixed version
-# it will always pick the latest release from the github
-elif [ "${mode}" = "reckless" ]; then
-
-  echo "# lnd.update.sh reckless"
-
-# NOT KNOWN PARAMETER
 else
+
   echo "error='parameter not known'"
+  exit 1
+
 fi
