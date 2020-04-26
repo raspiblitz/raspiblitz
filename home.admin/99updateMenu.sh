@@ -130,8 +130,8 @@ patch()
   Only skip reboot if you know
   it will work without restart.
       " 11 40
-      clear
       if [ $? -eq 0 ]; then
+        clear
         echo "REBOOT .."
         /home/admin/XXshutdown.sh reboot
         sleep 8
