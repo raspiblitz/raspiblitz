@@ -86,7 +86,7 @@ OK. RaspiBlitz will NOT update now.
 
 patchNotice()
 {
-  whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Start Patch" --yesno "This is the possibility to patch your RaspiBlitz:
+  whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Patch Menu" --yesno "This is the possibility to patch your RaspiBlitz:
 It means it will sync the program code with the
 the GitHub repo for your version branch v${codeVersion}.
 

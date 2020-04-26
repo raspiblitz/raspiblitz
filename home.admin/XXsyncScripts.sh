@@ -27,7 +27,7 @@ wantedGitHubUser="$2"
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
   wantedBranch="$2"
-  wantedRepo="$3"
+  wantedGitHubUser="$3"
 fi
 
 # set to another GutHub repo as origin
