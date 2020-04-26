@@ -13,7 +13,7 @@ OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
          LND "Update LND Release Options"
 	)
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 15 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 15 55 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
@@ -99,7 +99,7 @@ BUT BEWARE: This means RaspiBlitz will contact GitHub,
 hotfix the code and might compromise your security.
 
 Do you want to Patch your RaspiBlitz now?
-      " 18 60
+      " 18 58
   if [ $? -eq 0 ]; then
     exit 1
   fi
@@ -113,7 +113,7 @@ Do you want to Patch your RaspiBlitz now?
            BRANCH "Change GitHub branch to sync with"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
