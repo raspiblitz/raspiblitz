@@ -162,7 +162,7 @@ echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   sudo sed -i "s/^message=.*/message='Provisioning LND update'/g" ${infoFile}
-  if [ "${lndInterimsUpdate}" == "reckless"]; then
+  if [ "${lndInterimsUpdate}" == "reckless" ]; then
     # recklessly update LND to latest release on GitHub (just for test & dev nodes)
     echo "Provisioning LND reckless interims update" >> ${logFile}
     sudo /home/admin/config.scripts/lnd.update.sh reckless >> ${logFile}
