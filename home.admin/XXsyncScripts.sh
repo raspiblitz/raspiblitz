@@ -14,7 +14,7 @@ activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
 
 # if parameter is "info" just give back basic info about sync 
-if [ "$1" == "info"]; then
+if [ "$1" == "info" ]; then
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
   exit 1
