@@ -208,12 +208,17 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 1
       fi
-      sudo -u admin /home/admin/config.scripts/lnd.update.sh secure
-      /home/admin/XXshutdown.sh reboot
-      sleep 8
+      error=""
+      source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh secure)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        /home/admin/XXshutdown.sh reboot
+        sleep 8
+      fi
       ;;
     RECKLESS)
-      whiptail --title "RECKLESS LND UPDATE to ${lndLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' update will simply
+      whiptail --title "RECKLESS LND UPDATE to ${lndLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' LND update will simply
 grab the latest LND release published on the LND GitHub page (also release candidates).
 
 There will be no security checks on signature, etc.
@@ -227,9 +232,14 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 1
       fi
-      sudo -u admin /home/admin/config.scripts/lnd.update.sh reckless
-      /home/admin/XXshutdown.sh reboot
-      sleep 8
+      error=""
+      source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh reckless)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        /home/admin/XXshutdown.sh reboot
+        sleep 8
+      fi
       ;;
   esac
 }
