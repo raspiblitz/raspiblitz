@@ -13,7 +13,7 @@ OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
          LND "Update LND Release Options"
 	)
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 15 55 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
@@ -84,7 +84,7 @@ OK. RaspiBlitz will NOT update now.
   sudo shutdown now
 }
 
-patch()
+patchNotice()
 {
   whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Start Patch" --yesno "This is the possibility to patch your RaspiBlitz:
 It means it will sync the program code with the
@@ -103,6 +103,10 @@ Do you want to Patch your RaspiBlitz now?
   if [ $? -eq 0 ]; then
     exit 1
   fi
+}
+
+patch()
+{
 
   # get sync info
   source <(sudo /home/admin/XXsyncScripts.sh info)
@@ -110,7 +114,7 @@ Do you want to Patch your RaspiBlitz now?
   # Patch Options
   OPTIONS=(PATCH "Patch/Sync RaspiBlitz with GitHub Repo" \
            REPO "Change GitHub Repo to sync with" \
-           BRANCH "Change GitHub branch to sync with"
+           BRANCH "Change GitHub Branch to sync with"
 	)
 
   CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -154,6 +158,7 @@ case $CHOICE in
     release
     ;;
   PATCH)
+    patchNotice
     patch
     ;;
   LND)
