@@ -47,7 +47,6 @@ else
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
-
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
 echo
@@ -58,7 +57,7 @@ echo "# and can lead to dirty state of your scripts."
 echo "# REPO ----> ${origin}"
 echo "# BRANCH --> ${activeBranch}"
 echo "# ******************************************"
-git pull
+git pull 1>&2
 cd ..
 if [ ${clean} -eq 1 ]; then
   echo "# Cleaning scripts & assets/config.scripts"
