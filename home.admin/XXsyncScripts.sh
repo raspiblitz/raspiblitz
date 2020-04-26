@@ -72,7 +72,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
       git checkout -b ${wantedBranch} origin/${wantedBranch}
     else
       echo "# changing branch .."
-      git checkout origin/${wantedBranch}
+      git checkout ${wantedBranch}
     fi
 
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
