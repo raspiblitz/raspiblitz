@@ -243,7 +243,7 @@ case $CHOICE in
             fi
             ;;
         UPDATE)
-            /home/admin/99checkUpdate.sh
+            /home/admin/99updateMenu.sh
             ;; 
         OFF)
             clear
