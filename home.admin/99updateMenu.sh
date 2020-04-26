@@ -189,7 +189,7 @@ lnd()
            RECKLESS "Experimental LND update to ${lndLatestVersion}"
 	)
 
-  CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -208,7 +208,7 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 1
       fi
-      sudo -u admin /home/admin/config.scripts/lnd.update secure
+      sudo -u admin /home/admin/config.scripts/lnd.update.sh secure
       /home/admin/XXshutdown.sh reboot
       sleep 8
       ;;
@@ -227,7 +227,7 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 1
       fi
-      sudo -u admin /home/admin/config.scripts/lnd.update reckless
+      sudo -u admin /home/admin/config.scripts/lnd.update.sh reckless
       /home/admin/XXshutdown.sh reboot
       sleep 8
       ;;
