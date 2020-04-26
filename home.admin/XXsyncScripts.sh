@@ -65,8 +65,16 @@ if [ ${#wantedBranch} -gt 0 ]; then
       exit 1
     fi
 
-    echo "# try changing branch .."
-    git checkout ${wantedBranch}
+    echo "# checking if branch is locally available"
+    localBranch=$(git branch | grep -c "${wantedBranch}")
+    if [ ${localBranch} -eq 0 ]; then
+      echo "# checkout/changing branch .."
+      git checkout -b ${wantedBranch} origin/${wantedBranch}
+    else
+      echo "# changing branch .."
+      git checkout origin/${wantedBranch}
+    fi
+
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
   fi
 else
