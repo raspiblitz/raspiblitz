@@ -124,7 +124,7 @@ patch()
     PATCH)
       sudo -u admin /home/admin/XXsyncScripts.sh
       sleep 4
-      whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Rebbot" --yesno "  OK patching/syncing done.
+      whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
   By default a reboot is advised.
   Only skip reboot if you know
