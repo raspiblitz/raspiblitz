@@ -141,14 +141,26 @@ patch()
       exit 1
       ;;
     REPO)
-      echo "TODO"
+      clear
+      newGitHubUser=$(whiptail --inputbox "\nPlease enter the GitHub USERNAME of the forked RaspiBlitz Repo?" 10 38 ${activeGitHubUser} --title "Change Sync Repo" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus = 0 ]; then
+        newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
+        echo "--> " $newGitHubUser
+      fi
       echo "PRESS ENTER to return to PATCH MENU."
       read key
       patch
       exit 1
       ;;
     BRANCH)
-      echo "TODO"
+      clear
+      newGitHubBranch=$(whiptail --inputbox "\nPlease enter the GitHub BRANCH of the RaspiBlitz Repo '${activeGitHubUser}'?" 10 38 ${activeBranch} --title "Change Sync Branch" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus = 0 ]; then
+        newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
+        echo "--> " $newGitHubBranch
+      fi
       echo "PRESS ENTER to return to PATCH MENU."
       read key
       patch
