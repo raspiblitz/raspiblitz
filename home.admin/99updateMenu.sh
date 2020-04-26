@@ -146,7 +146,11 @@ patch()
       exitstatus=$?
       if [ $exitstatus = 0 ]; then
         newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
-        echo "--> " $newGitHubUser
+        echo "--> " ${newGitHubUser}
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${activeBranch} ${newGitHubUser})
+        if [ ${#error} -gt 0 ]; then
+          whiptail --title "ERROR" --msgbox "${error}" 8 30
+        fi
       fi
       echo "PRESS ENTER to return to PATCH MENU."
       read key
@@ -160,6 +164,10 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${$newGitHubBranch})
+        if [ ${#error} -gt 0 ]; then
+          whiptail --title "ERROR" --msgbox "${error}" 8 30
+        fi
       fi
       echo "PRESS ENTER to return to PATCH MENU."
       read key
@@ -191,19 +199,3 @@ case $CHOICE in
     lnd
     ;;
 esac
-
-
-# get latest release version from GitHub
-sudo curl -s -X GET https://raw.githubusercontent.com/rootzoll/raspiblitz/master/home.admin/_version.info > /home/admin/.version.tmp
-gitHubVersionMain=$(cut -d"=" -f2 /home/admin/.version.tmp | cut -d'"' -f2 | cut -d"." -f1 | egrep "^[0-9]")
-gitHubVersionSub=$(cut -d"=" -f2 /home/admin/.version.tmp | cut -d'"' -f2 | cut -d"." -f2 | egrep "^[0-9]")
-sudo shred /home/admin/.version.tmp
-sudo rm /home/admin/.version.tmp 2>/dev/null
-
-# check valid version info
-if [ ${#gitHubVersionMain} -eq 0 ] || [ ${#gitHubVersionSub} -eq 0 ]; then
-  echo "FAIL: Was not able to get latest release Version from GitHub."
-  echo "PRESS ENTER to continue."
-  read key
-  exit 1
-fi
