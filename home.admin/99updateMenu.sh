@@ -154,8 +154,6 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      echo "PRESS ENTER to return to PATCH MENU."
-      read key
       patch
       exit 1
       ;;
@@ -173,8 +171,6 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      echo "PRESS ENTER to return to PATCH MENU."
-      read key
       patch
       exit 1
       ;;
