@@ -37,6 +37,14 @@ if [ ${#wantedGitHubUser} -gt 0 ]; then
   if [ "${activeGitHubUser}" = "${wantedGitHubUser}" ]; then
     echo "# OK"
   else
+
+    echo "# checking repo exists .."
+    repoExists=$(curl -s https://api.github.com/repos/${wantedGitHubUser}/raspiblitz | jq -r '.name' | grep -c 'raspiblitz')
+    if [ ${repoExists} -eq 0 ]; then
+      echo "error='repo not found'"
+      exit 1
+    fi
+
     echo "# try changing github origin .."
     git remote set-url origin https://github.com/${wantedGitHubUser}/raspiblitz.git
     activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
@@ -49,6 +57,14 @@ if [ ${#wantedBranch} -gt 0 ]; then
   if [ "${wantedBranch}" = "${activeBranch}" ]; then
     echo "# OK"
   else
+
+    echo "# checking branch exists .."
+    branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c '${wantedBranch}')
+    if [ ${repoExists} -eq 0 ]; then
+      echo "error='branch not found'"
+      exit 1
+    fi
+
     echo "# try changing branch .."
     git checkout ${wantedBranch}
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
@@ -61,7 +77,6 @@ fi
 origin=$(git remote -v | grep 'origin' | tail -n1)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
-echo
 echo "# *** SYNCING SHELL SCRIPTS WITH GITHUB ***"
 echo "# This is for developing on your RaspiBlitz."
 echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"
