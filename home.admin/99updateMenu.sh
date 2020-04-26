@@ -99,7 +99,7 @@ BUT BEWARE: This means RaspiBlitz will contact GitHub,
 hotfix the code and might compromise your security.
 
 Do you want to Patch your RaspiBlitz now?
-      " 18 62
+      " 18 60
   if [ $? -eq 0 ]; then
     exit 1
   fi
@@ -108,12 +108,12 @@ Do you want to Patch your RaspiBlitz now?
   source <(sudo /home/admin/XXsyncScripts.sh info)
 
   # Patch Options
-  OPTIONS=(PATCH "Patch/Sync from GitHub Repo: ${activeGitHubUser}" \
+  OPTIONS=(PATCH "Patch/Sync RaspiBlitz with GitHub Repo" \
            REPO "Change GitHub Repo to sync with" \
            BRANCH "Change GitHub branch to sync with"
 	)
 
-  CHOICE=$(whiptail --clear --title "Patch Options" --menu "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" 15 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
