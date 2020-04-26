@@ -132,9 +132,11 @@ patch()
       " 11 40
       clear
       if [ $? -eq 0 ]; then
-        echo "REBOOT"
+        echo "REBOOT .."
+        /home/admin/XXshutdown.sh reboot
+        sleep 8
       else
-        echo "SKIP REBOOT"
+        echo "SKIP REBOOT .."
       fi
       exit 1
       ;;
