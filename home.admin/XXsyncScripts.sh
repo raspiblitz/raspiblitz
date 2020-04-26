@@ -59,7 +59,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
   else
 
     echo "# checking branch exists .."
-    branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c '${wantedBranch}')
+    branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c ${wantedBranch})
     if [ ${branchExists} -eq 0 ]; then
       echo "error='branch not found'"
       exit 1
