@@ -602,6 +602,7 @@ sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /ho
 cd /home/admin/
 sudo -u admin git clone -b ${wantedBranch} https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
