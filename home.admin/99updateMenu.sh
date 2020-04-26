@@ -123,8 +123,20 @@ patch()
   case $CHOICE in
     PATCH)
       sudo -u admin /home/admin/XXsyncScripts.sh
-      echo "PRESS ENTER to return to PATCH MENU."
-      read key
+      sleep 4
+      whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Rebbot" --yesno "  OK patching/syncing done.
+
+  By default a reboot is advised.
+  Only skip reboot if you know
+  it will work without restart.
+      " 11 40
+      clear
+      if [ $? -eq 0 ]; then
+        echo "REBOOT"
+      else
+        echo "SKIP REBOOT"
+      fi
+      exit 1
       ;;
     REPO)
       echo "TODO"

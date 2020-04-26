@@ -102,6 +102,7 @@ fi
 # final Options
 OPTIONS+=(REPAIR "Repair Options")
 OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
+OPTIONS+=(REBOOT "Reboot RaspiBlitz")
 OPTIONS+=(OFF "PowerOff RaspiBlitz")
 OPTIONS+=(X "Console / Terminal")
 
@@ -245,6 +246,12 @@ case $CHOICE in
         UPDATE)
             /home/admin/99updateMenu.sh
             ;; 
+        REBOOT)
+            clear
+            echo ""
+            sudo /home/admin/XXshutdown.sh reboot
+            exit 0
+            ;;
         OFF)
             clear
             echo ""
