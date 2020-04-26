@@ -180,10 +180,58 @@ patch()
 
 lnd()
 {
-  echo "TODO"
-  echo "PRESS ENTER to return to MAIN MENU."
-  read key
-  exit 1
+
+  # get lnd info
+  source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
+
+  # LND Update Options
+  OPTIONS=(SECURE "Optional LND update to ${lndUpdateVersion}" \
+           RECKLESS "Experimental LND update to ${lndLatestVersion}"
+	)
+
+  CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+  clear
+  case $CHOICE in
+    SECURE)
+      if [ ${lndUpdateInstalled} -eq 1 ]; then
+        whiptail --title "ALREADY INSTALLED" --msgbox "The LND version ${lndUpdateVersion} is already installed." 8 30
+        exit 1
+      fi
+      whiptail --title "OPTIONAL LND UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to LND v${lndUpdateVersion}:
+
+${lndUpdateComment}
+
+Do you really want to update LND now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 1
+      fi
+      sudo -u admin /home/admin/config.scripts/lnd.update secure
+      /home/admin/XXshutdown.sh reboot
+      sleep 8
+      ;;
+    RECKLESS)
+      whiptail --title "RECKLESS LND UPDATE to ${lndLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' update will simply
+grab the latest LND release published on the LND GitHub page (also release candidates).
+
+There will be no security checks on signature, etc.
+
+This update mode is only recommended for testing and
+development nodes with no serious funding. 
+
+Do you really want to update LND now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 1
+      fi
+      sudo -u admin /home/admin/config.scripts/lnd.update reckless
+      /home/admin/XXshutdown.sh reboot
+      sleep 8
+      ;;
+  esac
 }
 
 clear
