@@ -23,17 +23,29 @@ fi
 # change branch if set as parameter
 clean=0
 wantedBranch="$1"
+wantedGitHubUser="$2"
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
   wantedBranch="$2"
+  wantedRepo="$3"
 fi
-if [ "$2" = "-clean" ]; then
-  clean=1
+
+# set to another GutHub repo as origin
+if [ ${#wantedGitHubUser} -gt 0 ]; then
+  echo "# your active GitHubUser is: ${activeGitHubUser}"
+  echo "# your wanted GitHubUser is: ${wantedGitHubUser}"
+  if [ "${activeGitHubUser}" = "${wantedGitHubUser}" ]; then
+    echo "# OK"
+  else
+    echo "# try changing github origin .."
+    git remote set-url origin https://github.com/${wantedGitHubUser}/raspiblitz.git
+    activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
+  fi
 fi
 
 if [ ${#wantedBranch} -gt 0 ]; then
-  echo "# your wanted branch is: ${wantedBranch}"
   echo "# your active branch is: ${activeBranch}"
+  echo "# your wanted branch is: ${wantedBranch}"
   if [ "${wantedBranch}" = "${activeBranch}" ]; then
     echo "# OK"
   else
