@@ -281,7 +281,15 @@ sudo apt-get install -y fbi
 sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
-sudo apt-get install -y build-essential
+sudo apt install -y build-essential 
+if [ "${baseImage}" = "armbian" ]; then
+  # add armbian config
+  sudo apt --fix-broken install -y
+  sudo apt install armbian-config -y
+  # dependencies for Armbian Buster minimal kernel 5.4
+  sudo apt install -y python3-venv python3-dev python3-wheel
+fi
+
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
