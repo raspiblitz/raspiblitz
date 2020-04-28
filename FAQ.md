@@ -8,7 +8,7 @@ Beside many small improvements and changes, these are most important changes:
 - Update: bitcoin-core version 19.1-beta
 - Update: Loop 0.5.1
 - Update: RTL 0.7.0 (Loop In and Out integration)
-- Update: BTCPayServer v1.0.4.1
+- Update: BTCPayServer v1.0.4.2
 - Update: LNbits v0.1 [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v200)
 - Shoppinglist: Replace Shimfan with passive RP4-Heatcase
