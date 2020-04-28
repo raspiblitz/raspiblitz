@@ -564,7 +564,7 @@ if [ "${LNBits}" != "${choice}" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
   fi
 else 
-  echo "lndmanage setting unchanged."
+  echo "LNbits setting unchanged."
 fi
 
 # DropBox process choice
