@@ -158,6 +158,10 @@ elif [ "${exportType}" = "reset" ]; then
   echo "- copy new macaroons to admin user"
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
   sudo chown admin:admin -R /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  # BTCPayServer  
+  if [ "${BTCPayServer}" == "on" ]; then
+    /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
+  fi
   echo "OK DONE"
 
 else
