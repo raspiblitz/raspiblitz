@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch BTCPay Server on or off"
-  echo "bonus.btcpayserver.sh [on|off|menu] [ip|tor]"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon] [ip|tor]"
   exit 1
 fi
 
@@ -49,11 +49,42 @@ if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
   echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
-# stop services
-echo "making sure services are not running"
-sudo systemctl stop nbxplorer 2>/dev/null
-sudo systemctl stop btcpayserver 2>/dev/null
-  
+# write-tls-macaroon
+if [ "$1" = "write-tls-macaroon" ] then
+  # copy admin macaroon
+  echo "copyin admin.macaroon for btcpay"
+  sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
+  sudo chown btcpay:btcpay /home/btcpay/admin.macaroon
+  sudo chmod 600 /home/btcpay/admin.macaroon
+  # set thumbprint
+  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/admin/.lnd/tls.cert | cut -c 20-)
+  doesNetworkEntryAlreadyExists=$(sudo cat /home/btcpay/.btcpayserver/Main/settings.config | grep -c '^network=')
+  if [ ${doesNetworkEntryAlreadyExists} -eq 0 ]; then
+    echo "setting the LND TLS thumbprint for BTCPay"
+    echo "
+### Global settings ###
+network=mainnet
+
+### Server settings ###
+port=23000
+bind=127.0.0.1
+externalurl=https://$BTCPayDomain
+
+### NBXplorer settings ###
+BTC.explorer.url=http://127.0.0.1:24444/
+BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
+" | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
+  else
+    echo "setting new LND TLS thumbprint for BTCPay"
+    sudo -u btcpay sed -i \
+    "s/^BTC.lightning=type=lnd-rest\;server=https\:\/\/127.0.0.1:8080\/\;macaroonfilepath=\/home\/btcpay\/admin.macaroon\;certthumbprint=.*\
+/BTC.lightning=type=lnd-rest\;server=https\:\/\/127.0.0.1:8080\/\;macaroonfilepath=\/home\/btcpay\/admin.macaroon\;certthumbprint=$FINGERPRINT/g" \
+/home/btcpay/.btcpayserver/Main/settings.config
+  fi
+  sudo systemctl restart btcpayserver
+  exit 0
+fi
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
@@ -77,6 +108,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check for $BTCPayDomain
   source /mnt/hdd/raspiblitz.conf
+
+  # stop services
+  echo "making sure services are not running"
+  sudo systemctl stop nbxplorer 2>/dev/null
+  sudo systemctl stop btcpayserver 2>/dev/null
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -275,30 +311,8 @@ WantedBy=multi-user.target
         fi
     done
 
-    # set thumbprint
-    FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/admin/.lnd/tls.cert | cut -c 20-)
-    sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
-    sudo chown btcpay:btcpay /home/btcpay/admin.macaroon
-    sudo chmod 600 /home/btcpay/admin.macaroon
-    
-    doesNetworkEntryAlreadyExists=$(sudo cat /home/btcpay/.btcpayserver/Main/settings.config | grep -c '^network=')
-    if [ ${doesNetworkEntryAlreadyExists} -eq 0 ]; then
-    echo "
-### Global settings ###
-network=mainnet
+    /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 
-### Server settings ###
-port=23000
-bind=127.0.0.1
-externalurl=https://$BTCPayDomain
-
-### NBXplorer settings ###
-BTC.explorer.url=http://127.0.0.1:24444/
-BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
-" | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
-    fi
-
-    sudo systemctl restart btcpayserver
   else 
     echo "BTCPay Server is already installed."
     # start service
