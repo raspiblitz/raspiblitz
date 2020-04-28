@@ -50,7 +50,7 @@ if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # write-tls-macaroon
-if [ "$1" = "write-tls-macaroon" ] then
+if [ "$1" = "write-tls-macaroon" ]; then
   # copy admin macaroon
   echo "copyin admin.macaroon for btcpay"
   sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
@@ -272,7 +272,9 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases
-    sudo -u btcpay git reset --hard v1.0.4.1 
+    #sudo -u btcpay git reset --hard v1.0.4.1 
+    # https://github.com/btcpayserver/btcpayserver/commits/master
+    sudo -u btcpay git checkout 3a2970a495316d42c9cce0be1ddb185fcdc15352
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj   
     
@@ -345,12 +347,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable nbxplorer
     sudo rm /etc/systemd/system/nbxplorer.service
     # clear dotnet cache
-    sudo -u btcpay dotnet nuget locals all --clear
+    dotnet nuget locals all --clear
     sudo rm -rf /tmp/NuGetScratch
     # remove dotnet
-    sudo rm -f /home/btcpay/dotnet-sdk*
-    sudo rm -f /home/btcpay/aspnetcore*
-    sudo rm -rf /home/btcpay/dotnet
     sudo rm -rf /usr/share/dotnet
     # clear app config (not user data)
     sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
@@ -358,6 +357,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # clear nginx config
     sudo rm -f /etc/nginx/sites-enabled/btcpayserver
     sudo rm -f /etc/nginx/sites-available/btcpayserver
+    # nuke user
+    sudo userdel -rf btcpay 2>/dev/null
     echo "OK BTCPayServer removed."
   else 
     echo "BTCPayServer is not installed."
