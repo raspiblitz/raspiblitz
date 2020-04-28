@@ -20,9 +20,9 @@ function copy_mac_set_perms() {
   local n=${3:-bitcoin} # the network (e.g. bitcoin or litecoin) defaults to bitcoin
   local c=${4:-main} # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
 
-  sudo /bin/cp /mnt/hdd/lnd/data/chain/${n}/${c}net/${file_name} /mnt/hdd/app-data/lnd/${n}/${c}net/${file_name}
-  sudo /bin/chown --silent admin:${group_name} /mnt/hdd/app-data/lnd/${n}/${c}net/${file_name}
-  sudo /bin/chmod --silent 640 /mnt/hdd/app-data/lnd/${n}/${c}net/${file_name}
+  sudo /bin/cp /mnt/hdd/lnd/data/chain/${n}/${c}net/${file_name} /mnt/hdd/app-data/lnd/chain/${n}/${c}net/${file_name}
+  sudo /bin/chown --silent admin:${group_name} /mnt/hdd/app-data/lnd/chain/${n}/${c}net/${file_name}
+  sudo /bin/chmod --silent 640 /mnt/hdd/app-data/lnd/chain/${n}/${c}net/${file_name}
 }
 
 ########################
@@ -42,10 +42,11 @@ fi
 if [ "$1" = "update" ]; then
   echo "UPDATE"
 
-  sudo /bin/mkdir --mode 0755 --parents /mnt/hdd/app-data/lnd/${network}/${chain}net/
+  sudo /bin/mkdir --mode 0755 --parents /mnt/hdd/app-data/lnd/chain/${network}/${chain}net/
 
   copy_mac_set_perms admin.macaroon lndadmin ${network} ${chain}
   copy_mac_set_perms invoice.macaroon lndinvoice ${network} ${chain}
   copy_mac_set_perms readonly.macaroon lndreadonly ${network} ${chain}
 
 fi
+
