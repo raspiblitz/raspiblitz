@@ -64,6 +64,8 @@ If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBl
 
 ### Amazon Shopping List (buy parts & build it yourself)
 
+*Please try to use the exact hardware models that are recommended in the shopping lists, because we have multiple reports were for example other SSD or SSD cases/controllers lead to problems. The idea of the shopping lists is to provide you the best tested hardware components that work together - improvement recommendations are always welcome.*
+
 The cheapest way is to buy and assemble the single parts yourself. The new shopping list comes in three different packages: Minimal, Standard & Maximal:
 
 #### Package: Standard (around 250 USD)
