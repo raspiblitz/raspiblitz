@@ -35,6 +35,24 @@ function check() {
   /home/admin/config.scripts/blitz.configcheck.py
 }
 
+# command: debug
+function debug() {
+  cd /home/admin
+  ./XXdebugLogs.sh
+}
+
+# command: restart
+function restart() {
+  cd /home/admin
+  ./XXshutdown.sh reboot
+}
+
+# command: restart
+function off() {
+  cd /home/admin
+  ./XXshutdown.sh
+}
+
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"

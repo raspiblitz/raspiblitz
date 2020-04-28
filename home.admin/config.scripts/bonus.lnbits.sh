@@ -79,15 +79,23 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  # rewrite macaroons for lnbits environment
-  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_CERT=.*/LND_CERT=_____TO-DO_____/g" /home/admin/lnbits/.env
-  sudo sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/admin/lnbits/.env
-  sudo sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/admin/lnbits/.env
-  sudo sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=${macaroonReadHex}/g" /home/admin/lnbits/.env
-  echo "# OK - macaroons written to /home/admin/lnbits/.env"
+  # copy macaroons and for lnbits environment
+  # set tls.cert path
+  sudo -u lnbits sed -i "s/^LND_CERT=.*/LND_CERT=\/home\/admin\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
+  # copy macaroons
+  echo "copy macaroons to lnbits user"
+  sudo -u lnbits mkdir -p /home/lnbits/.lnd/data/chain/${network}/${chain}net/
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/    
+  sudo chown lnbits:lnbits -R /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  sudo chmod 600 /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  echo "OK DONE"
+  #set macaroons paths in .env
+  sudo -u lnbits sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/admin.macaroon/g" /home/lnbits/lnbits/.env
+  sudo -u lnbits sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/invoice.macaroon/g" /home/lnbits/lnbits/.env
+  sudo -u lnbits sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/read.macaroon/g" /home/lnbits/lnbits/.env
+  echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
   exit 0
 fi
 
@@ -102,38 +110,50 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
   if [ ${isInstalled} -eq 0 ]; then
 
+    echo "*** Add the 'lnbits' user ***"
+    sudo adduser --disabled-password --gecos "" lnbits
+
     # make sure needed debian packages are installed
     echo "# installing needed packages"
     sudo apt-get install -y pipenv  2>/dev/null
 
     # install from GitHub
     echo "# get the github code"
-    sudo rm -r /home/admin/lnbits 2>/dev/null
-    cd /home/admin
-    sudo -u admin git clone https://github.com/arcbtc/lnbits.git
-    cd /home/admin/lnbits
-    sudo -u admin git checkout tags/0.1.0
+    sudo rm -r /home/lnbits/lnbits 2>/dev/null
+    cd /home/lnbits
+    sudo -u lnbits git clone https://github.com/arcbtc/lnbits.git
+    cd /home/lnbits/lnbits
+    sudo -u lnbits git checkout tags/0.1.0
 
     # prepare .env file
     echo "# preparing env file"
-    sudo rm /home/admin/lnbits/.env 2>/dev/null
-    echo "FLASK_APP=lnbits" >> /home/admin/lnbits/.env
-    echo "FLASK_ENV=production" >> /home/admin/lnbits/.env
-    echo "LNBITS_BACKEND_WALLET_CLASS=LndWallet" >> /home/admin/lnbits/.env
-    echo "LND_GRPC_ENDPOINT=127.0.0.1" >> /home/admin/lnbits/.env
-    echo "LND_GRPC_PORT=10009" >> /home/admin/lnbits/.env
-    echo "LNBITS_FORCE_HTTPS=0" >> /home/admin/lnbits/.env
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+    sudo rm /home/lnbits/lnbits/.env 2>/dev/null
+    sudo -u lnbits touch /home/lnbits/lnbits/.env
+    sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndWallet' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_GRPC_ENDPOINT=127.0.0.1' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_GRPC_PORT=10009' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_CERT=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+    /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
-    sudo chown admin:admin -R /mnt/hdd/app-data/LNBits
-    echo "LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits" >> /home/admin/lnbits/.env
+    sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> sudo /home/lnbits/lnbits/.env"
 
     # to the install
-    cd /home/admin/lnbits
-    sudo -u admin pipenv install
-    sudo -u admin /usr/bin/pipenv run pip install python-dotenv
+    echo "# installing application dependencies"
+    cd /home/lnbits/lnbits
+    sudo -u lnbits pipenv install
+    sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
+    # to the install
+    echo "# updating databases"
+    sudo -u lnbits /usr/bin/pipenv run flask migrate
 
     # open firewall
     echo
@@ -153,9 +173,9 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-WorkingDirectory=/home/admin/lnbits
-ExecStart=/bin/sh -c 'cd /home/admin/lnbits && pipenv run gunicorn -b :5000 lnbits:app -k gevent'
-User=admin
+WorkingDirectory=/home/lnbits/lnbits
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b :5000 lnbits:app -k gevent'
+User=lnbits
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -197,7 +217,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop lnbits
     sudo systemctl disable lnbits
     sudo rm /etc/systemd/system/lnbits.service
-    sudo rm -r /home/admin/lnbits
+    sudo userdel -rf lnbits
     echo "OK LNbits removed."
   else
     echo "LNbits is not installed."

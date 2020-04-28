@@ -4,7 +4,7 @@
 
 Beside many small improvements and changes, these are most important changes:
 
-- Update: LND version 0.9.2-beta
+- Update: LND version 0.9.2-beta (optional update to 0.10.0-beta)
 - Update: bitcoin-core version 19.1-beta
 - Update: Loop 0.5.1
 - Update: RTL 0.7.0 (Loop In and Out integration)
@@ -22,7 +22,8 @@ Beside many small improvements and changes, these are most important changes:
 - New: Make it easier to Copy The Blockchain over Network from running Blitz
 - New: Forwarding Fee Report on Main Menu
 - New: Easy Setup of Auto-Backup of SCB to Dropbox
-- New: Updating LND & easy patching of RaspiBlitz
+- New: LND Interims Updates (secure & reckless) [details](https://github.com/rootzoll/raspiblitz/issues/1116#issuecomment-619467148) 
+- New: Sync RaspiBlitz with your forked GitHub repo thru menu [details](FAQ.md#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - Removed: Clone Blockchain from second HDD (use CopyStation script)
 
 ## Whats new in Version 1.4 of RaspiBlitz?
@@ -499,9 +500,17 @@ Now push the new branch to your forked GitHub repo with `git push -u origin BRAN
 
 Once the branch is available and synced between the RaspiBlitz GitHub repo, your forked GitHub repo and your local computer git repo, you can start developing.
 
-## How can I sync a branch of my forked with my local RaspiBlitz?
+## How can I sync a branch of my forked GitHub with my local RaspiBlitz?
 
-You need to know that there is a git copy of the original RaspiBlitz GitHub repo on your physical RaspiBlitz in the folder `/home/admin/raspiblitz`. If you change into that folder and run `git remote -v` you can see the set origin repo.
+Since v1.5 of RaspiBlitz there is an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub Reposity and and Branch to sync with. You change the GitHub Reposity by setting the GutHub username where you forked the Repo.
+
+So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then justchange the Repo to sync/patch with to your username `raumi75`. 
+
+Now you can use the `Patch/Sync RaspiBlitz with GitHub Repo` to easily keep your RaspiBlitz in sync with your forked repository and develop your own customizations and features.
+
+Background info and doing it manually:
+
+There is a git copy of the original RaspiBlitz GitHub repo on your physical RaspiBlitz in the folder `/home/admin/raspiblitz`. If you change into that folder and run `git remote -v` you can see the set origin repo.
 
 You need to change that origin repo to your forked repo. You do that with:
 ```
