@@ -87,6 +87,7 @@ if [ "$1" = "write-macaroons" ]; then
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/    
   sudo chown lnbits:lnbits -R /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  sudo chmod 600 /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
   echo "OK DONE"
   #set macaroons paths in .env
   sudo -u lnbits sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/admin.macaroon/g" /home/lnbits/lnbits/.env
