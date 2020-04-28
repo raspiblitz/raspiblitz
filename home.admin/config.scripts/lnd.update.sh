@@ -3,9 +3,9 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Interim optional LND updates between RaspiBlitz releases."
- echo "lnd.update.sh [info|secure|reckless]"
+ echo "lnd.update.sh [info|verified|reckless]"
  echo "info -> get actual state and possible actions"
- echo "secure -> only do recommended updates by RaspiBlitz team"
+ echo "verified -> only do recommended updates by RaspiBlitz team"
  echo "  binary will be checked by signature and checksum"
  echo "reckless -> if you just want to update to the latest release"
  echo "  published on LND GitHub releases (RC or final) without any"
@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# 1. parameter [info|secure|reckless]
+# 1. parameter [info|verified|reckless]
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
@@ -64,7 +64,7 @@ lndInstalledVersionMajor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut 
 lndInstalledVersionMain=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
 lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
 
-# test if the installed version already the secure/recommended update version
+# test if the installed version already the verified/recommended update version
 lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "lndUpdateVersion")
 
 # get latest release from LND GitHub releases
@@ -82,7 +82,7 @@ if [ "${mode}" = "info" ]; then
   echo "lndInstalledVersionMain='${lndInstalledVersionMain}'"
   echo "lndInstalledVersionMinor='${lndInstalledVersionMinor}'"
 
-  echo "# the secure/recommended update option"
+  echo "# the verified/recommended update option"
   echo "lndUpdateInstalled='${lndUpdateInstalled}'"
   echo "lndUpdateVersion='${lndUpdateVersion}'"
   echo "lndUpdateComment='${lndUpdateComment}'"
@@ -94,13 +94,13 @@ if [ "${mode}" = "info" ]; then
   exit 1
 fi
 
-# SECURE
-if [ "${mode}" = "secure" ]; then
+# verified
+if [ "${mode}" = "verified" ]; then
 
-  echo "# lnd.update.sh secure"
+  echo "# lnd.update.sh verified"
 
   # check for optional second parameter: forced update version
-  # --> only does the secure update if its the given version
+  # --> only does the verified update if its the given version
   # this is needed for recovery/update. 
   fixedUpdateVersion="$2"
   if [ ${#fixedUpdateVersion} -gt 0 ]; then
@@ -201,8 +201,8 @@ if [ "${mode}" = "reckless" ]; then
   lndInterimsUpdateNew="reckless"
 fi
 
-# JOINED INSTALL (SECURE & RECKLESS)
-if [ "${mode}" = "secure" ] || [ "${mode}" = "reckless" ]; then
+# JOINED INSTALL (verified & RECKLESS)
+if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
 
   # install
   echo "# stopping LND"

@@ -22,7 +22,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: Make it easier to Copy The Blockchain over Network from running Blitz
 - New: Forwarding Fee Report on Main Menu
 - New: Easy Setup of Auto-Backup of SCB to Dropbox
-- New: LND Interims Updates (secure & reckless) [details](https://github.com/rootzoll/raspiblitz/issues/1116#issuecomment-619467148) 
+- New: LND Interims Updates (verified & reckless) [details](https://github.com/rootzoll/raspiblitz/issues/1116#issuecomment-619467148) 
 - New: Sync RaspiBlitz with your forked GitHub repo thru menu [details](FAQ.md#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - Removed: Clone Blockchain from second HDD (use CopyStation script)
 
