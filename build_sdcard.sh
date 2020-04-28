@@ -101,7 +101,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
 
   # remove unneccesary files
-  sudo rm -rf /home/pi/MagPi 
+  sudo rm -rf /home/pi/MagPi
 fi
 
 # remove some (big) packages that are not needed
@@ -281,7 +281,7 @@ sudo apt-get install -y fbi
 sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
-sudo apt install -y build-essential 
+sudo apt install -y build-essential
 if [ "${baseImage}" = "armbian" ]; then
   # add armbian config
   sudo apt --fix-broken install -y
@@ -329,6 +329,13 @@ echo "*** ADDING SERVICE USER bitcoin"
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
+
+echo ""
+echo "*** ADDING GROUPS FOR CREDENTIALS STORE ***"
+# access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
+sudo /usr/sbin/groupadd --force --gid 9700 lndadmin
+sudo /usr/sbin/groupadd --force --gid 9701 lndinvoice
+sudo /usr/sbin/groupadd --force --gid 9702 lndreadonly
 
 echo ""
 echo "*** SWAP FILE ***"
@@ -709,7 +716,7 @@ sudo -u admin chmod -R 755 LCD-show
 sudo -u admin chown -R admin:admin LCD-show
 cd LCD-show/
 # set comit hard to old version - that seemed to run better
-# 
+#
 sudo -u admin git reset --hard ce52014
 
 # install xinput calibrator package
