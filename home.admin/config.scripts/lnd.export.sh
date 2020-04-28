@@ -158,6 +158,10 @@ elif [ "${exportType}" = "reset" ]; then
   echo "- copy new macaroons to admin user"
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
   sudo chown admin:admin -R /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
+  # LNBits
+  if [ "${LNBits}" = "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+  fi
   echo "OK DONE"
 
 else
