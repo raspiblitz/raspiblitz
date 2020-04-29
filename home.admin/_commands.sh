@@ -2,9 +2,9 @@
 
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
-# command: raspiblitz 
+# command: raspiblitz
 # calls the the raspiblitz mainmenu (legacy)
-function raspiblitz() { 
+function raspiblitz() {
   cd /home/admin
   ./00raspiblitz.sh
 }
@@ -79,4 +79,13 @@ function manage() {
   fi
 }
 
-
+# command: torthistx
+function torthistx() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
+    echo "Broadcasting transaction through Tor to Blockstreams API and into the network."
+    curl --socks5-hostname localhost:9050 -d $1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx
+  else
+    echo "Not running behind Tor - to install run:"
+    echo "sudo /home/admin/config.scripts/internet.tor.sh on"
+  fi
+}
