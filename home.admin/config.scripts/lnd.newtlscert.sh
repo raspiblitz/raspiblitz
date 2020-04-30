@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # stop services
@@ -31,3 +30,7 @@ echo "copy new cert to admin user"
 sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
 sudo chown admin:admin -R /home/admin/.lnd/*.cert
 echo "OK TLS certs are fresh"
+
+# ToDo(frennkie) why doesn't this start lnd again?
+# ToDo(frennkie) the way LND generates the x509 certificate is not ideal -
+#   it may be better to simply run openssl and create a cert with ou settings...
