@@ -185,7 +185,7 @@ lnd()
   source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
 
   # LND Update Options
-  OPTIONS=(SECURE "Optional LND update to ${lndUpdateVersion}" \
+  OPTIONS=(VERIFIED "Optional LND update to ${lndUpdateVersion}" \
            RECKLESS "Experimental LND update to ${lndLatestVersion}"
 	)
 
@@ -193,7 +193,7 @@ lnd()
 
   clear
   case $CHOICE in
-    SECURE)
+    VERIFIED)
       if [ ${lndUpdateInstalled} -eq 1 ]; then
         whiptail --title "ALREADY INSTALLED" --msgbox "The LND version ${lndUpdateVersion} is already installed." 8 30
         exit 1
@@ -209,7 +209,7 @@ Do you really want to update LND now?
         exit 1
       fi
       error=""
-      source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh secure)
+      source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh verified)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else

@@ -272,9 +272,7 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases
-    #sudo -u btcpay git reset --hard v1.0.4.1 
-    # https://github.com/btcpayserver/btcpayserver/commits/master
-    sudo -u btcpay git checkout 3a2970a495316d42c9cce0be1ddb185fcdc15352
+    sudo -u btcpay git reset --hard v1.0.4.2
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj   
     

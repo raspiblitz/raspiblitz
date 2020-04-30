@@ -123,7 +123,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits
     sudo -u lnbits git clone https://github.com/arcbtc/lnbits.git
     cd /home/lnbits/lnbits
-    sudo -u lnbits git checkout tags/0.1.0
+    sudo -u lnbits git checkout tags/raspiblitz
 
     # prepare .env file
     echo "# preparing env file"
