@@ -97,7 +97,7 @@ if [ "$1" = "sync" ]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert # and create symlink
   fi
-  sudo chmod 664 "/mnt/hdd/app-data/lnd/tls.cert"
-  sudo chown bitcoin:bitcoin "/mnt/hdd/app-data/lnd/tls.cert"
+  sudo chmod 664 "/mnt/hdd/lnd/tls.cert"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
 
 fi
