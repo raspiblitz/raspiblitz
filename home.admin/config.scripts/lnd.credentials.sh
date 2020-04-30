@@ -45,8 +45,8 @@ if [ "$1" = "reset" ]; then
   echo ""
   cd || exit
   echo "- deleting old macaroons"
-  sudo rm /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/*.macaroon
-  sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/*.macaroon
+  sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
+  sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
   sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
   echo "- resetting TLS cert"
   sudo /home/admin/config.scripts/lnd.newtlscert.sh
