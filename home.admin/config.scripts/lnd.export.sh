@@ -161,6 +161,7 @@ elif [ "${exportType}" = "reset" ]; then
   # BTCPayServer  
   if [ "${BTCPayServer}" == "on" ]; then
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
+   fi
   # LNBits
   if [ "${LNBits}" = "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
