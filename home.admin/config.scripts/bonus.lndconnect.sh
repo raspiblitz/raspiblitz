@@ -51,7 +51,7 @@ fi
 connector=""
 host=""
 port=""
-extraparamter=""
+extraparameter=""
 supportsTOR=0
 
 if [ "${targetWallet}" = "zap-ios" ]; then
@@ -59,7 +59,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses REST
     port="8080"
-    extraparamter="--nocert"
+    extraparameter="--nocert"
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -70,7 +70,7 @@ elif [ "${targetWallet}" = "zap-android" ]; then
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses REST
     port="8080"
-    extraparamter="--nocert"
+    extraparameter="--nocert"
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -97,7 +97,7 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     echo "error='no tor support'"
     exit 1
     #port="8080"
-    #extraparamter="--nocert"
+    #extraparameter="--nocert"
   fi
   port="10009"
 
@@ -185,7 +185,7 @@ if [ "${connector}" == "lndconnect" ]; then
 
   # write qr code data to an image
   cd /home/admin
-  lndconnect --host=${host} --port=${port} --image ${extraparamter}
+  lndconnect --host=${host} --port=${port} --image ${extraparameter}
 
   # display qr code image on LCD
   /home/admin/config.scripts/blitz.lcd.sh image /home/admin/lndconnect-qr.png
@@ -199,7 +199,7 @@ elif [ "${connector}" == "shango" ]; then
   /home/admin/config.scripts/blitz.lcd.sh qr "${datastring}"
 
 else
-  echo "error='unkown connector'"
+  echo "error='unknown connector'"
   exit 1
 fi
 
@@ -217,7 +217,7 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
   if [ "${connector}" == "lndconnect" ]; then
-    lndconnect --host=${hostscreen} --port=${port} ${extraparamter}
+    lndconnect --host=${hostscreen} --port=${port} ${extraparameter}
     echo "(To shrink QR code: OSX->CMD- / LINUX-> CTRL-) Press ENTER when finished."
     read key
   elif [ "${connector}" == "shango" ]; then

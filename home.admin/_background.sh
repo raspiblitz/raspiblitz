@@ -202,19 +202,20 @@ do
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
+        # ToDo(frennkie) /home/admin/.lnd/ no longer is on the SD card
         sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
         sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
         echo "OK channel.backup copied to '/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup'"
       
         # check if a SCP backup target is set
-        # paramter in raspiblitz.conf:
+        # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
-          # but its more likely that whithout ignoriing known host, script might not run thru and that way: no offsite channel backup
+          # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
           sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
           result=$?
           if [ ${result} -eq 0 ]; then
@@ -225,7 +226,7 @@ do
         fi
 
         # check if a DropBox backup target is set
-        # paramter in raspiblitz.conf:
+        # parameter in raspiblitz.conf:
         # dropboxBackupTarget='[DROPBOX-APP-OAUTH2-TOKEN]'
         # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
         if [ ${#dropboxBackupTarget} -gt 0 ]; then
