@@ -82,8 +82,16 @@ elif [ "$1" = "sync" ]; then
     echo "# WARN: could not get value 'rpcpass' from network config (e.g. bitcoin.conf)"
   fi
 
+  echo "# make sure LND conf is readable and symlinked"
+  sudo chmod 644 "/mnt/hdd/lnd/lnd.conf"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/lnd.conf"
+  if ! [[ -L "/mnt/hdd/app-data/lnd/lnd.conf" ]]; then
+    sudo rm -rf "/mnt/hdd/app-data/lnd/lnd.conf"                # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/lnd/lnd.conf" "/mnt/hdd/lnd/lnd.conf"  # and create symlink
+  fi
+
   echo "# make sure TLS certificate is readable and symlinked"
-  sudo chmod 664 "/mnt/hdd/lnd/tls.cert"
+  sudo chmod 644 "/mnt/hdd/lnd/tls.cert"
   sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
   if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
