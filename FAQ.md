@@ -6,7 +6,7 @@ Beside many small improvements and changes, these are most important changes:
 
 - Update: LND version 0.9.2-beta (optional update to 0.10.0-beta)
 - Update: bitcoin-core version 19.1-beta
-- Update: Loop 0.5.1
+- Update: Loop 0.5.1 or 0.6.0 (based in LND version)
 - Update: RTL 0.7.0 (Loop In and Out integration)
 - Update: BTCPayServer v1.0.4.2
 - Update: LNbits v0.1 [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)

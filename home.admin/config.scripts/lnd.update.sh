@@ -165,7 +165,7 @@ if [ "${mode}" = "verified" ]; then
   fi
 
   # note: install will be done the same as reckless further down
-  lndInterimsUpdateNew="${$lndUpdateVersion}"
+  lndInterimsUpdateNew="${lndUpdateVersion}"
 
 fi
 
