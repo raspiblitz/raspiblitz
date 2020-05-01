@@ -128,7 +128,7 @@ elif [ "${exportType}" = "http" ]; then
   echo "OK - temp HTTP server is stopped."
 
 else
-  echo "FAIL: unknown '${exportType}' -run-> ./lnd.export.sh -h"
+  echo "FAIL: unknown '${exportType}' - run with -h for help"
 fi
 
 if [ "$1" = "" ] || [ $# -eq 0 ]; then
