@@ -79,7 +79,7 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  echo "make sure lnbits is member of readonly and invoice"
+  echo "make sure lnbits is member of lndreadonly and lndinvoice"
   sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
   sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
 

@@ -52,7 +52,7 @@ fi
 # write-tls-macaroon
 if [ "$1" = "write-tls-macaroon" ]; then
 
-  echo "make sure btcpay is member of admin"
+  echo "make sure btcpay is member of lndadmin"
   sudo /usr/sbin/usermod --append --groups lndadmin btcpay
 
   echo "make sure symlink to central app-data directory exists"
