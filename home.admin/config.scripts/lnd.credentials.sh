@@ -87,7 +87,7 @@ elif [ "$1" = "sync" ]; then
   sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/lnd.conf"
   if ! [[ -L "/mnt/hdd/app-data/lnd/lnd.conf" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/lnd.conf"                # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/lnd/lnd.conf" "/mnt/hdd/lnd/lnd.conf"  # and create symlink
+    sudo ln -s "/mnt/hdd/lnd/lnd.conf" "/mnt/hdd/app-data/lnd/lnd.conf"  # and create symlink
   fi
 
   echo "# make sure TLS certificate is readable and symlinked"
@@ -95,7 +95,7 @@ elif [ "$1" = "sync" ]; then
   sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
   if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/lnd/tls.cert" "/home/admin/.lnd/tls.cert"  # and create symlink
+    sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
   fi
 
 ###########################
