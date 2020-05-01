@@ -79,6 +79,10 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
+  echo "make sure lnbits is member of readonly and invoice"
+  sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
+  sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+
   echo "make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/lnbits/.lnd" ]]; then
     sudo rm -rf "/home/lnbits/.lnd"                          # not a symlink.. delete it silently

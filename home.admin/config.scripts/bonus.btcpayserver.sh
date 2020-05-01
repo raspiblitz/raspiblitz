@@ -52,6 +52,9 @@ fi
 # write-tls-macaroon
 if [ "$1" = "write-tls-macaroon" ]; then
 
+  echo "make sure btcpay is member of admin"
+  sudo /usr/sbin/usermod --append --groups lndadmin btcpay
+
   echo "make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/btcpay/.lnd" ]]; then
     sudo rm -rf "/home/btcpay/.lnd"                          # not a symlink.. delete it silently
