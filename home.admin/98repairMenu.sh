@@ -72,7 +72,9 @@ OPTIONS=(HARDWARE "Run Hardwaretest" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
-         RESET-ALL "Delete HDD completly to start fresh"
+         RESET-ALL "Delete HDD completly to start fresh" \
+         DELETE-ELEC "Delete Electrum Index" \
+         DELETE-INDEX "Delete Bitcoin Transaction-Index"
 	)
 
 CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 15 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -151,6 +153,14 @@ case $CHOICE in
     /home/admin/XXcleanHDD.sh -all
     infoResetSDCard
     sudo shutdown now
+    exit 1;
+    ;;
+  DELETE-ELEC)
+    /home/admin/bonus.scripts/bonus.electrs.sh off deleteindex
+    exit 1;
+    ;;
+  DELETE-INDEX)
+    /home/admin/bonus.scripts/network.txindex.sh delete
     exit 1;
     ;;
   COPY-SOURCE)
