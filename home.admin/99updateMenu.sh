@@ -9,8 +9,8 @@ clear
 
 # Basic Options
 OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
-         PATCH "Patch RaspiBlitz v${codeVersion}" \
-         LND "Update LND Release Options"
+         LND "Interim LND Update Options" \
+         PATCH "Patch RaspiBlitz v${codeVersion}"
 	)
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
