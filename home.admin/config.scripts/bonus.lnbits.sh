@@ -188,6 +188,7 @@ WantedBy=multi-user.target
 EOF
 
     sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service
+    sudo chown root:root /etc/systemd/system/lnbits.service
     sudo systemctl enable lnbits
     echo "# OK - service needs starting: sudo systemctl start lnbits"
 

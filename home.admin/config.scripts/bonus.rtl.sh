@@ -183,6 +183,7 @@ EOF
 
     sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
+    sudo chown root:root /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi
