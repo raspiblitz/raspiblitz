@@ -79,23 +79,20 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  # copy macaroons and for lnbits environment
-  # set tls.cert path
-  sudo -u lnbits sed -i "s/^LND_CERT=.*/LND_CERT=\/home\/admin\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
-  # copy macaroons
-  echo "copy macaroons to lnbits user"
-  sudo -u lnbits mkdir -p /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/    
-  sudo chown lnbits:lnbits -R /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  sudo chmod 600 /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  echo "OK DONE"
-  #set macaroons paths in .env
-  sudo -u lnbits sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/admin.macaroon/g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/invoice.macaroon/g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/read.macaroon/g" /home/lnbits/lnbits/.env
-  echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
+  echo "make sure symlink to central app-data directory exists"
+  if ! [[ -L "/home/lnbits/.lnd" ]]; then
+    sudo rm -rf "/home/lnbits/.lnd"                          # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lnbits/.lnd"  # and create symlink
+  fi
+
+  # set tls.cert path (use | as separator to avoid escaping file path slashes)
+  sudo -u lnbits sed -i "s|^LND_CERT=.*|LND_CERT=/home/lnbits/.lnd/tls.cert|g" /home/lnbits/lnbits/.env
+
+  # set macaroon  path info in .env
+  sudo -u lnbits sed -i "s|^LND_ADMIN_MACAROON=.*|LND_ADMIN_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/lnbits/lnbits/.env
+  sudo -u lnbits sed -i "s|^LND_INVOICE_MACAROON=.*|LND_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
+  sudo -u lnbits sed -i "s|^LND_READ_MACAROON=.*|LND_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
+  echo "# OK - macaroon path info written to /home/lnbits/lnbits/.env"
   exit 0
 fi
 

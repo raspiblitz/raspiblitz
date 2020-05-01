@@ -3,16 +3,9 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "tool to reset or sync credentials (e.g. macaroons)"
-  echo "lnd.credentials [reset|sync]"
-
+  echo "lnd.credentials.sh [reset|sync]"
   exit 1
 fi
-
-# some vars will be sourced (e.g. from config) - make them known here for
-# cleaner linting/shellchecking.
-network=
-chain=
-rpcpassword=
 
 # load data from config
 source /mnt/hdd/raspiblitz.conf
@@ -35,7 +28,6 @@ function copy_mac_set_perms() {
 ###########################
 # RESET Macaroons and TLS
 ###########################
-
 if [ "$1" = "reset" ]; then
   clear
   echo "###### RESET MACAROONS AND TLS.cert ######"
@@ -62,12 +54,10 @@ if [ "$1" = "reset" ]; then
   copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
   echo "OK DONE"
 
-fi
-
 ###########################
 # SYNC
 ###########################
-if [ "$1" = "sync" ]; then
+elif [ "$1" = "sync" ]; then
   echo "###### SYNCING MACAROONS, RPC Password AND TLS Certificate ######"
 
   echo "# make sure LND app-data directories exist"
@@ -92,12 +82,18 @@ if [ "$1" = "sync" ]; then
     echo "# WARN: could not get value 'rpcpass' from network config (e.g. bitcoin.conf)"
   fi
 
-  echo "# make sure TLS certificate is symlinked and readable"
-  if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
-    sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert # and create symlink
-  fi
+  echo "# make sure TLS certificate is readable and symlinked"
   sudo chmod 664 "/mnt/hdd/lnd/tls.cert"
   sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
+  if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
+    sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/lnd/tls.cert" "/home/admin/.lnd/tls.cert"  # and create symlink
+  fi
 
+###########################
+# UNKNOWN
+###########################
+else
+  echo "# FAIL: parameter not known - run with -h for help"
+  exit 1
 fi

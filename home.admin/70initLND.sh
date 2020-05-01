@@ -463,7 +463,7 @@ if [ ${macaroonExists} -eq 0 ]; then
 fi
 
 # copy macaroons to all needed users
-sudo /home/admin/config.scripts/lnd.check.sh update-credentials
+sudo /home/admin/config.scripts/lnd.credentials.sh sync
 echo "OK - LND Macaroons created and copied"
 echo ""
 

@@ -1,17 +1,17 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "# script to check LND states"
   echo "# lnd.check.sh basic-setup"
   exit 1
 fi
 
 # load raspiblitz conf
-source /home/admin/raspiblitz.info # ToDo(frennkie) I don't think this is needed
 source /mnt/hdd/raspiblitz.conf
 
 # check basic LND setup
-if [ "$1" == "basic-setup" ]; then # ToDo(frennkie) If there is only one option.. just run it by default?!
+if [ "$1" == "basic-setup" ]; then
 
   # check TLS exits
   tlsExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
@@ -175,16 +175,6 @@ if [ "$1" == "basic-setup" ]; then # ToDo(frennkie) If there is only one option.
   echo "rpcpasscorrect=${rpcpasscorrect}"
 
 else
-  echo "# FAIL: parameter not known"
+  echo "# FAIL: parameter not known - run with -h for help"
+  exit 1
 fi
-
-# ToDo(frennkie)
-#$: grep lnd.check.sh *
-#00raspiblitz.sh:  source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
-#10setupBlitz.sh:  source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
-#80scanLND.sh:  lndErrorFull=$(sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep "err=" | tail -1)
-#80scanLND.sh:      sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep "err="
-#80scanLND.sh:      source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
-#80scanLND.sh:      lndSetupErrorCount=$(sudo /home/admin/config.scripts/lnd.check.sh basic-setup | grep -c "err=")
-
-#70initLND.sh:sudo /home/admin/config.scripts/lnd.check.sh update-credentials
