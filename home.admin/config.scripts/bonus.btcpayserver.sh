@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0 
+# Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -51,13 +51,21 @@ fi
 
 # write-tls-macaroon
 if [ "$1" = "write-tls-macaroon" ]; then
+
+  echo "make sure symlink to central app-data directory exists"
+  if ! [[ -L "/home/btcpay/.lnd" ]]; then
+    sudo rm -rf "/home/btcpay/.lnd"                          # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/btcpay/.lnd"  # and create symlink
+  fi
+
   # copy admin macaroon
-  echo "copyin admin.macaroon for btcpay"
-  sudo cp /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon /home/btcpay/admin.macaroon
-  sudo chown btcpay:btcpay /home/btcpay/admin.macaroon
-  sudo chmod 600 /home/btcpay/admin.macaroon
+  echo "extra symlink to admin.macaroon for btcpay"
+  if ! [[ -L "/home/btcpay/admin.macaroon" ]]; then
+    sudo ln -s "/home/btcpay/.lnd/data/chain/${network}/${chain}net/admin.macaroon" "/home/btcpay/admin.macaroon"
+  fi
+
   # set thumbprint
-  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/admin/.lnd/tls.cert | cut -c 20-)
+  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
   doesNetworkEntryAlreadyExists=$(sudo cat /home/btcpay/.btcpayserver/Main/settings.config | grep -c '^network=')
   if [ ${doesNetworkEntryAlreadyExists} -eq 0 ]; then
     echo "setting the LND TLS thumbprint for BTCPay"
@@ -76,10 +84,8 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
 " | sudo -u btcpay tee -a /home/btcpay/.btcpayserver/Main/settings.config
   else
     echo "setting new LND TLS thumbprint for BTCPay"
-    sudo -u btcpay sed -i \
-    "s/^BTC.lightning=type=lnd-rest\;server=https\:\/\/127.0.0.1:8080\/\;macaroonfilepath=\/home\/btcpay\/admin.macaroon\;certthumbprint=.*\
-/BTC.lightning=type=lnd-rest\;server=https\:\/\/127.0.0.1:8080\/\;macaroonfilepath=\/home\/btcpay\/admin.macaroon\;certthumbprint=$FINGERPRINT/g" \
-/home/btcpay/.btcpayserver/Main/settings.config
+    s="BTC.lightning=type=lnd-rest\;server=https\://127.0.0.1:8080/\;macaroonfilepath=/home/btcpay/admin.macaroon\;"
+    sudo -u btcpay sed -i "s|^${s}certthumbprint=.*|${s}certthumbprint=$FINGERPRINT|g" /home/btcpay/.btcpayserver/Main/settings.config
   fi
   sudo systemctl restart btcpayserver
   exit 0
@@ -90,11 +96,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
 
   # --> just serving directly thru TOR for now
-  # setting up nginx and the SSL certificate    
+  # setting up nginx and the SSL certificate
   #/home/admin/config.scripts/bonus.btcpaysetdomain.sh
   #errorOnInstall=$?
   #if [ ${errorOnInstall} -eq 1 ]; then
-  # echo "exiting as user cancelled BTCPayServer installation"  
+  # echo "exiting as user cancelled BTCPayServer installation"
   # exit 1
   #fi
 
@@ -136,7 +142,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Installing .NET"
     echo "***"
     echo ""
-    
+
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     sudo apt-get -y install libunwind8 gettext libssl1.0
@@ -150,7 +156,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "!!! FAIL !!! Downloaded ${dotnetName} not matching SHA512 checksum: ${binaryChecksum}"
       exit 1
     fi
-  
+
     # download aspnetcore-runtime
     aspnetcoreName="aspnetcore-runtime-3.1.1-linux-arm.tar.gz"
     sudo rm /home/btcpay/${aspnetcoreName} 2>/dev/null
@@ -162,15 +168,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "!!! FAIL !!! Downloaded ${aspnetcoreName} not matching SHA512 checksum: ${binaryChecksum}"
       exit 1
     fi
-  
+
     sudo -u btcpay mkdir /home/btcpay/dotnet
     sudo -u btcpay tar -xvf ${dotnetName} -C /home/btcpay/dotnet
     sudo -u btcpay tar -xvf ${aspnetcoreName} -C /home/btcpay/dotnet
     sudo rm -f *.tar.gz*
-    
+
     # opt out of telemetry
     echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" | sudo tee -a /etc/environment
-    
+
     # make .NET accessible and add to PATH
     sudo ln -s /home/btcpay/dotnet /usr/share
     export PATH=$PATH:/usr/share
@@ -184,14 +190,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo bash -c "echo 'PATH=\$PATH:/home/btcpay/dotnet' >> /etc/profile"
     fi
     sudo -u btcpay /home/btcpay/dotnet/dotnet --info
-    
+
     # NBXplorer
     echo ""
     echo "***"
     echo "Install NBXplorer"
     echo "***"
     echo ""
-        
+
     cd /home/btcpay
     echo "Downloading NBXplorer source code.."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
@@ -201,7 +207,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
 
-    
+
     # create nbxplorer service
     echo "
 [Unit]
@@ -225,12 +231,12 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/nbxplorer.service
-  
+
     sudo systemctl daemon-reload
     # start to create settings.config
     sudo systemctl enable nbxplorer
     sudo systemctl start nbxplorer
-    
+
     echo "Checking for nbxplorer config"
     while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
       do
@@ -242,7 +248,7 @@ WantedBy=multi-user.target
           echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
         fi
     done
-    
+
     echo ""
     echo "***"
     echo "getting RPC credentials from the bitcoin.conf"
@@ -259,14 +265,14 @@ EOF
     sudo mv /home/admin/settings.config /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
     sudo systemctl restart nbxplorer
-    
+
     # BTCPayServer
     echo ""
     echo "***"
     echo "Install BTCPayServer"
     echo "***"
     echo ""
-    
+
     cd /home/btcpay
     echo "Downloading BTCPayServer source code.."
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
@@ -274,8 +280,8 @@ EOF
     # check https://github.com/btcpayserver/btcpayserver/releases
     sudo -u btcpay git reset --hard v1.0.4.2
     # from the build.sh with path
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj   
-    
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
+
     # create btcpayserver service
     echo "
 [Unit]
@@ -294,11 +300,11 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
-  
+
     sudo systemctl daemon-reload
     sudo systemctl enable btcpayserver
     sudo systemctl start btcpayserver
-    
+
     echo "Checking for btcpayserver config"
     while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
       do
@@ -313,13 +319,13 @@ WantedBy=multi-user.target
 
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 
-  else 
+  else
     echo "BTCPay Server is already installed."
     # start service
     echo "start service"
     sudo systemctl start nbxplorer 2>/dev/null
     sudo systemctl start btcpayserver 2>/dev/null
-  fi 
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=on/g" /mnt/hdd/raspiblitz.conf
@@ -358,7 +364,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # nuke user
     sudo userdel -rf btcpay 2>/dev/null
     echo "OK BTCPayServer removed."
-  else 
+  else
     echo "BTCPayServer is not installed."
   fi
   exit 0
