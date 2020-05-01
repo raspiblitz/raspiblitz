@@ -450,7 +450,7 @@ if [ ${macaroonExists} -eq 0 ]; then
   sleep 3
 fi
 
-# check if macatoon exists now - if not fail
+# check if macaroon exists now - if not fail
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
