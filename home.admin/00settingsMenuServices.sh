@@ -110,7 +110,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
-i 'LNbits' ${LNbits} \
+i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
 2>&1 >/dev/tty)
