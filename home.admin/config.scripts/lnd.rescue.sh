@@ -122,6 +122,7 @@ elif [ ${mode} = "restore" ]; then
         filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
         echo "OK -> found file to restore: ${filename}"
 
+        # checksum test
         md5checksum=$(md5sum ${filename} | head -n1 | cut -d " " -f1)
         isCorrect=$(echo ${filename} | grep -c ${md5checksum})
         if [ ${isCorrect} -eq 1 ]; then
@@ -132,6 +133,7 @@ elif [ ${mode} = "restore" ]; then
           echo "Recommend to abort and upload again!"
         fi
 
+        # overrride test
         oldWalletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c "wallet.db")
         if [ ${oldWalletExists} -gt 0 ]; then
           echo
@@ -164,6 +166,19 @@ elif [ ${mode} = "restore" ]; then
   sudo tar -xf ${filename} -C /
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   echo "OK"
+  echo
+
+  # check if LND needs update
+  # (if RaspiBlitz has an optional LND version update, then install it
+  # the newer LND version can always handle older data)
+  echo "Checking LND version ..."
+  source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
+  if [ ${lndUpdateInstalled} -eq 0 ]; then
+    echo "Installing available LND update ... (newer version can handle more wallet formats)"
+    sudo -u admin /home/admin/config.scripts/lnd.update.sh verified
+  else
+    echo "OK"
+  fi
   echo
 
   # start LND
