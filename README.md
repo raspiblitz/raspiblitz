@@ -48,15 +48,7 @@ If you start at home ordering the parts from Amazon (see shopping list below) th
 
 ## Hardware Needed
 
-The RaspiBlitz is build from the following minimal parts:
-
-* RaspBerryPi 3B/4B
-* 500GB USB HDD or SSD
-* LCD-Display HAT
-* 16GB Micro SD-Card
-* Power supply >=3A (stable output is important)
-
-**All parts together are at around 150-200 USD - based on shops and location.**
+All parts together are at around 150-250 USD - based on shops and location.
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
@@ -64,7 +56,7 @@ If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBl
 
 ### Amazon Shopping List (buy parts & build it yourself)
 
-The cheapest way is to buy and assemble the single parts yourself.
+The cheapest way is to buy and assemble the single parts yourself. There are two packages.
 
 *Please try to use the exact hardware models that are recommended in the shopping lists, because we have multiple reports were for example other SSD or SSD cases/controllers lead to problems. The idea of the shopping lists is to provide you the best tested hardware components that work together - improvement recommendations are always welcome.*
 
@@ -101,7 +93,7 @@ When RaspberryPi 4 2GB --> add following parts:
 * RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4)
 
-* [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
+[What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
 
 ## Assemble your RaspiBlitz
 
