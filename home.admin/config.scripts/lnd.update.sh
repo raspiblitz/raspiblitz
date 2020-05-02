@@ -65,7 +65,7 @@ lndInstalledVersionMain=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -
 lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
 
 # test if the installed version already the verified/recommended update version
-lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "lndUpdateVersion")
+lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "${lndUpdateVersion}")
 
 # get latest release from LND GitHub releases
 gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq '.[0]')"
