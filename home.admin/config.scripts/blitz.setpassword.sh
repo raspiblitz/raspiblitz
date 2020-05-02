@@ -298,31 +298,21 @@ elif [ "${abcd}" = "x" ]; then
     shred -u $3 2>/dev/null
 
     # ask user for new password (first time)
-    dialog --backtitle "RaspiBlitz"\
-       --insecure --passwordbox "${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
-
-    # get user input
-    password1=$( cat $_temp )
-    shred -u $_temp
+    password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter the Password:\n(to test if typed in correctly)" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred -u $_temp
+    password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
     fi
@@ -330,14 +320,14 @@ elif [ "${abcd}" = "x" ]; then
     # check that password does not contain bad characters
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
     fi
