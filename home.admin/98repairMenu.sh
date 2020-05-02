@@ -77,7 +77,7 @@ OPTIONS=(HARDWARE "Run Hardwaretest" \
          DELETE-INDEX "Delete Bitcoin Transaction-Index"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 16 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
