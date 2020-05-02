@@ -31,7 +31,7 @@ Follow the steps described at the following link
 to get the DropBox-Authtoken from your account:
 https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>/home/admin/.tmp
     authtoken=$(cat /home/admin/.tmp)
-    shred /home/admin/.tmp
+    shred -u /home/admin/.tmp
   fi
 
   # quick check on authtoken
@@ -104,8 +104,7 @@ elif [ "${MODE}" == "upload" ]; then
     --header "Content-Type: application/octet-stream" \
     --data-binary @$SOURCEFILE > /home/admin/.dropbox.tmp
   safeResponse=$(sed 's/[^a-zA-Z0-9 ]//g' /home/admin/.dropbox.tmp)
-  sudo shred /home/admin/.dropbox.tmp
-  sudo rm /home/admin/.dropbox.tmp 2>/dev/null
+  sudo shred -u /home/admin/.dropbox.tmp
 
   success=$(echo "${safeResponse}" | grep -c 'servermodified')
   sizeZero=$(echo "${safeResponse}" | grep -c 'size 0')

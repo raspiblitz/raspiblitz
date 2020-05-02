@@ -42,7 +42,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u bitcoin git clone https://github.com/lightninglabs/loop.git
     cd /home/bitcoin/loop
     # https://github.com/lightninglabs/loop/releases
-    sudo -u bitcoin git reset --hard v0.5.1-beta
+    source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
+    if [ ${lndInstalledVersionMain} -lt 10 ]; then
+      sudo -u bitcoin git reset --hard v0.5.1-beta
+    else
+      sudo -u bitcoin git reset --hard v0.6.0-beta
+    fi
     cd /home/bitcoin/loop/cmd
     go install ./...
     

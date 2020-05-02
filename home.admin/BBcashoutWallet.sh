@@ -56,7 +56,7 @@ else
    exit 1
 fi
 address=$(cat $_temp | xargs)
-shred $_temp
+shred -u $_temp
 if [ ${#address} -eq 0 ]; then
   echo "FAIL - not a valid address (${address})"
   echo "Press ENTER to return to main menu."

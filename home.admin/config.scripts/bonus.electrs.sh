@@ -143,7 +143,7 @@ Check 'sudo nginx -t' for a detailed error message.
   # Options (available without TOR)
   OPTIONS=( \
         CONNECT "How to Connect" \
-        INDEX "Delete/Rebuild Index" \
+        INDEX "Delete&Rebuild Index" \
         STATUS "ElectRS Status Info"
 	)
 
@@ -455,6 +455,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
   sudo sed -i "s/^ElectRS=.*/ElectRS=off/g" /mnt/hdd/raspiblitz.conf
 
+  # if second parameter is "deleteindex"
+  if [ "$2" == "deleteindex" ]; then
+    echo "# deleting electrum index"
+    sudo rm -rf /mnt/hdd/app-storage/electrs/
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 
@@ -469,10 +475,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /home/electrs/.cargo
     sudo rm -rf /home/electrs/.rustup
     sudo rm -rf /home/electrs/.profile
-
-    if [ "$2" == "deleteindex" ]; then
-      sudo rm -rf /mnt/hdd/app-storage/electrs/
-    fi
 
     echo "# OK ElectRS removed."
     

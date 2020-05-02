@@ -227,8 +227,7 @@ fi
 
 # clean up
 /home/admin/config.scripts/blitz.lcd.sh hide
-shred ${imagePath} 2> /dev/null
-rm -f ${imagePath} 2> /dev/null
+shred -u ${imagePath} 2> /dev/null
 
 echo "------------------------------"
 echo "If the connection was not working:"

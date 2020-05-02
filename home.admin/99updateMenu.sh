@@ -9,8 +9,8 @@ clear
 
 # Basic Options
 OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
-         PATCH "Patch RaspiBlitz v${codeVersion}" \
-         LND "Update LND Release Options"
+         LND "Interim LND Update Options" \
+         PATCH "Patch RaspiBlitz v${codeVersion}"
 	)
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -208,11 +208,20 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 1
       fi
+      # if loop is installed remove
+      if [ "${loop}" == "on" ]; then
+        sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
+      fi
       error=""
+      warn=""
       source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh verified)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
+        # if loop was installed before reinstall
+        if [ "${loop}" == "on" ]; then
+          sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
+        fi
         /home/admin/XXshutdown.sh reboot
         sleep 8
       fi

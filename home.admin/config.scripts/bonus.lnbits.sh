@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# https://github.com/arcbtc/lnbits
+# https://github.com/lnbits/lnbits
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -89,14 +89,15 @@ if [ "$1" = "write-macaroons" ]; then
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lnbits/.lnd"  # and create symlink
   fi
 
-  # set tls.cert path (use | as separator to avoid escaping file path slashes)
-  sudo -u lnbits sed -i "s|^LND_CERT=.*|LND_CERT=/home/lnbits/.lnd/tls.cert|g" /home/lnbits/lnbits/.env
-
-  # set macaroon  path info in .env
-  sudo -u lnbits sed -i "s|^LND_ADMIN_MACAROON=.*|LND_ADMIN_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s|^LND_INVOICE_MACAROON=.*|LND_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s|^LND_READ_MACAROON=.*|LND_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
-  echo "# OK - macaroon path info written to /home/lnbits/lnbits/.env"
+  # copy cert and macaroons cert for lnbits environment
+  sudo -u lnbits sed -i "s/^LND_REST_CERT=.*/LND_REST_CERT=\/home\/lnbits\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
+  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
+  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
+  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+  echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
   exit 0
 fi
 
@@ -132,20 +133,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_GRPC_ENDPOINT=127.0.0.1' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_GRPC_PORT=10009' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_CERT=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
     /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
     sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> sudo /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
     # to the install
     echo "# installing application dependencies"
