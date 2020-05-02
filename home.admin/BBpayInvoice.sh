@@ -49,7 +49,7 @@ l3="To try it out go to: ${testSite}"
 dialog --title "Pay thru Lightning Network" \
 --inputbox "$l1\n$l2\n$l3" 10 70 2>$_temp
 invoice=$(cat $_temp | xargs)
-shred $_temp
+shred -u $_temp
 if [ ${#invoice} -eq 0 ]; then
   clear
   echo

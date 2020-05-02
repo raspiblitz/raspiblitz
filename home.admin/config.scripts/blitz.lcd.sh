@@ -156,8 +156,7 @@ fi
 
 if [ "${command}" == "hide" ]; then
   sudo killall -3 fbi
-  shred /home/admin/qr.png 2> /dev/null
-  rm -f /home/admin/qr.png 2> /dev/null
+  shred -u /home/admin/qr.png 2> /dev/null
   exit 0
 fi
 

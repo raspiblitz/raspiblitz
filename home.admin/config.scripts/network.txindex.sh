@@ -88,5 +88,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
+
+###################
+# delete (and make sure all using apps are deinstalled)
+# on version update check all bonus scripts that this network.txindex.sh on
+###################
+if [ "$1" = "delete" ]; then
+  echo "# deinstalling apps needing txindex ..."
+  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
+  echo "# changing config ..."
+  sudo systemctl stop ${network}d
+  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
+  echo "# deleting tx index ..."
+  sudo rm -r /mnt/hdd/${network}/indexes/txindex
+  sudo systemctl restart ${network}d
+  exit 0
+fi
+
 echo "FAIL - Unknown Parameter $1"
 exit 1

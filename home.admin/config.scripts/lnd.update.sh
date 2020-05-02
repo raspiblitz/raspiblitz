@@ -114,11 +114,13 @@ if [ "${mode}" = "verified" ]; then
     fi
   fi
 
-  # clean & change into download directory
+  echo 
+  echo "# clean & change into download directory"
   sudo rm -r ${downloadDir}/*
   cd "${downloadDir}"
 
-  # extract the SHA256 hash from the manifest file for the corresponding platform
+  echo
+  echo "# extract the SHA256 hash from the manifest file for the corresponding platform"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt
   checkDownload=$(ls manifest-v${lndUpdateVersion}.txt 2>/dev/null | grep -c manifest-v${lndUpdateVersion}.txt)
   if [ ${checkDownload} -eq 0 ]; then
@@ -128,7 +130,8 @@ if [ "${mode}" = "verified" ]; then
   lndSHA256=$(grep -i "linux-${cpuArchitecture}" manifest-v$lndUpdateVersion.txt | cut -d " " -f1)
   echo "# SHA256 hash: $lndSHA256"
 
-  # get LND binary
+  echo
+  echo "# get LND binary"
   binaryName="lnd-linux-${cpuArchitecture}-v${lndUpdateVersion}.tar.gz"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/${binaryName}
   checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
@@ -137,7 +140,8 @@ if [ "${mode}" = "verified" ]; then
     exit 1
   fi
 
-  # check binary was not manipulated (checksum test)
+  echo
+  echo "# check binary was not manipulated (checksum test)"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt.sig
   sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
@@ -146,26 +150,32 @@ if [ "${mode}" = "verified" ]; then
     exit 1
   fi
 
-  # check gpg finger print
+  echo 
+  echo "# getting gpg finger print"
   gpg ./pgp_keys.asc
   fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${lndUpdatePGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo "error='PGP author check failed'"
+    exit 1
   fi
+  echo "fingerprint='${fingerprint}'"
+
+  echo 
+  echo "# chacking gpg finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-v${lndUpdateVersion}.txt.sig 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "# goodSignature(${goodSignature})"
+  echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${lndUpdatePGPcheck}" -c)
-  echo "# correctKey(${correctKey})"
+  echo "correctKey='${correctKey}'"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo "error='PGP verify fail'"
     exit 1
   fi
 
   # note: install will be done the same as reckless further down
-  lndInterimsUpdateNew="${$lndUpdateVersion}"
+  lndInterimsUpdateNew="${lndUpdateVersion}"
 
 fi
 

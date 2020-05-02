@@ -183,10 +183,10 @@ if [ ${walletExists} -eq 0 ]; then
 ############################
 
     # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
     passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # make sure passwordC is set
     if [ ${#passwordC} -eq 0 ]; then
@@ -200,7 +200,7 @@ if [ ${walletExists} -eq 0 ]; then
     source /home/admin/python3-env-lnd/bin/activate
     python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # in case of error - retry
     if [ ${#err} -gt 0 ]; then
@@ -320,10 +320,10 @@ or having a complete LND rescue-backup from your old node.
     clear
 
     # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
     passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
@@ -334,7 +334,7 @@ or having a complete LND rescue-backup from your old node.
         # dialog to enter
         dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
         wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
-        shred /home/admin/.seed.tmp
+        shred -u /home/admin/.seed.tmp
         echo "processing ... ${wordstring}"
 
         # check correct number of words
@@ -374,10 +374,10 @@ During wallet creation LND offers to set an extra password
 to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
+        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
         sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
         passwordD=`sudo cat /home/admin/.pass.tmp`
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
+        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
       fi
 
     fi

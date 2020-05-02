@@ -72,10 +72,12 @@ OPTIONS=(HARDWARE "Run Hardwaretest" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
-         RESET-ALL "Delete HDD completly to start fresh"
+         RESET-ALL "Delete HDD completly to start fresh" \
+         DELETE-ELEC "Delete Electrum Index" \
+         DELETE-INDEX "Delete Bitcoin Transaction-Index"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 15 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
@@ -120,7 +122,7 @@ case $CHOICE in
         l3="one word, keep characters basic & not too long"
         dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2$l3" 13 52 2>$_temp
         result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-        shred $_temp
+        shred -u $_temp
         echo "processing ..."
         sleep 3
     done
@@ -151,6 +153,14 @@ case $CHOICE in
     /home/admin/XXcleanHDD.sh -all
     infoResetSDCard
     sudo shutdown now
+    exit 1;
+    ;;
+  DELETE-ELEC)
+    /home/admin/config.scripts/bonus.electrs.sh off deleteindex
+    exit 1;
+    ;;
+  DELETE-INDEX)
+    /home/admin/config.scripts/network.txindex.sh delete
     exit 1;
     ;;
   COPY-SOURCE)

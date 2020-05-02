@@ -471,6 +471,33 @@ if [ "${ElectRS}" != "${choice}" ]; then
   echo "ElectRS Setting changed .."
   anychange=1
   extraparameter=""
+  if [ "${choice}" =  "on" ]; then
+    # check on HDD size
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+    if [ ${hddGigaBytes} -lt 800 ]; then
+      whiptail --title " HDD/SSD TOO SMALL " --msgbox "\
+Since v1.5 we recommend at least a 1TB HDD/SSD if you want to run ElectRS.\n
+This is due to the eletcrum index that will grow over time and needs space.\n
+To migrate to a bigger HDD/SSD check RaspiBlitz README on 'migration'.\n
+" 14 50
+    else
+      /home/admin/config.scripts/bonus.electrs.sh on ${extraparameter}
+      errorOnInstall=$?
+      if [ ${errorOnInstall} -eq 0 ]; then
+        sudo systemctl start electrs
+        whiptail --title " Installed ElectRS Server " --msgbox "\
+The index database needs to be created before Electrum Server can be used.\n
+This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
+When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
+" 14 50
+      else
+        l1="!!! FAIL on ElectRS install !!!"
+        l2="Try manual install on terminal after reboot with:"
+        l3="/home/admin/config.scripts/bonus.electrs.sh on"
+        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      fi
+    fi
+  fi
   if [ "${choice}" =  "off" ]; then
 	  whiptail --title "Delete Electrum Index?" \
     --yes-button "Keep Index" \
@@ -479,24 +506,9 @@ if [ "${ElectRS}" != "${choice}" ]; then
 	  if [ $? -eq 1 ]; then
       extraparameter="deleteindex"
 	  fi
-  fi
-  /home/admin/config.scripts/bonus.electrs.sh ${choice} ${extraparameter}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start electrs
-      whiptail --title " Installed ElectRS Server " --msgbox "\
-The index database needs to be created before Electrum Server can be used.\n
-This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
-When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
-" 14 50
-    else
-      l1="!!! FAIL on ElectRS install !!!"
-      l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.electrs.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
+    /home/admin/config.scripts/bonus.electrs.sh off ${extraparameter}
+  fi  
+
 else
   echo "ElectRS Setting unchanged."
 fi

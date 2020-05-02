@@ -5,8 +5,8 @@
 Beside many small improvements and changes, these are most important changes:
 
 - Update: LND version 0.9.2-beta (optional update to 0.10.0-beta)
-- Update: bitcoin-core version 19.1-beta
-- Update: Loop 0.5.1
+- Update: bitcoin-core version 0.19.1-beta
+- Update: Loop 0.5.1 or 0.6.0 (based in LND version)
 - Update: RTL 0.7.0 (Loop In and Out integration)
 - Update: BTCPayServer v1.0.4.2
 - Update: LNbits v0.1 [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
@@ -17,7 +17,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: Specter Desktop (connect DIY Specter-Wallet or ColdCard) [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - New: JoinMarket [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 - New: Activate 'Keysend' on LND by Service Menu [details](https://github.com/rootzoll/raspiblitz/issues/1000)
-- New: SendMany App (wallet & chat over keysend)
+- New: SendMany App (wallet & chat over keysend) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 - New: Reset SSH cert if SSH login not working [details](FAQ.md#how-can-i-repair-my-ssh-login)
 - New: Make it easier to Copy The Blockchain over Network from running Blitz
 - New: Forwarding Fee Report on Main Menu
