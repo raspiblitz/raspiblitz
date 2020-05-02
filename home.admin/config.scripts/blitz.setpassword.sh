@@ -78,6 +78,7 @@ if [ "${abcd}" = "a" ]; then
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
+    clear
 
     # ask user for new password A (first time)
     password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
@@ -136,21 +137,13 @@ elif [ "${abcd}" = "b" ]; then
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
-    # ask user for new password A (first time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+    clear
 
-    # get user input
-    password1=$( cat $_temp )
-    shred -u $_temp
+    # ask user for new password A (first time)
+    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter Password B:\n" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred -u $_temp
+    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
