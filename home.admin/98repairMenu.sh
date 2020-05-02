@@ -156,11 +156,11 @@ case $CHOICE in
     exit 1;
     ;;
   DELETE-ELEC)
-    /home/admin/bonus.scripts/bonus.electrs.sh off deleteindex
+    /home/admin/config.scripts/bonus.electrs.sh off deleteindex
     exit 1;
     ;;
   DELETE-INDEX)
-    /home/admin/bonus.scripts/network.txindex.sh delete
+    /home/admin/config.scripts/network.txindex.sh delete
     exit 1;
     ;;
   COPY-SOURCE)
