@@ -26,7 +26,7 @@ l2="1 ${network} = 100 000 000 SAT"
 dialog --title "Pay thru Lightning Network" \
 --inputbox "$l1\n$l2" 9 50 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
-shred $_temp
+shred -u $_temp
 if [ ${#amount} -eq 0 ]; then
   clear
   echo
