@@ -22,7 +22,7 @@ while [ ${#result} -eq 0 ]
     l2="one word, keep characters basic & not too long"
     dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-    shred $_temp
+    shred -u $_temp
     echo "processing ..."
     sleep 3
   done

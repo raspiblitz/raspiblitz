@@ -57,7 +57,7 @@ Password C will be stored on the device.
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
     exit 1
   fi
-  shred ./.tmp
+  shred -u ./.tmp
 fi
 
 # config file

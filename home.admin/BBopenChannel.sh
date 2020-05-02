@@ -96,7 +96,7 @@ l3="max available : ${confirmedBalance}"
 dialog --title "Funding of Channel" \
 --inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
-shred $_temp
+shred -u $_temp
 if [ ${#amount} -eq 0 ]; then
   echo
   echo "no valid amount entered - returning to menu ..."
