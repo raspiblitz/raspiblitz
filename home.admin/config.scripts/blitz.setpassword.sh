@@ -80,20 +80,10 @@ if [ "${abcd}" = "a" ]; then
   if [ ${#newPassword} -eq 0 ]; then
 
     # ask user for new password A (first time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Set new Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
-
-    # get user input
-    password1=$( cat $_temp )
-    shred $_temp
+    password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter Password A:\n(This is new password to login per SSH)" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred $_temp
+    password2=$(whiptail --passwordbox "\nRe-Enter Password A:\n(This is new password to login per SSH)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
