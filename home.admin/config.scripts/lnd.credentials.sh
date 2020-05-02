@@ -7,6 +7,40 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+# interactive choose type of action
+if [ "$1" = "" ] || [ $# -eq 0 ]; then
+    OPTIONS=()
+    OPTIONS+=(RESET "Recreate Macaroons + TLS")
+    OPTIONS+=(SYNC "Sync central store with LND")
+    OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+    CHOICE=$(dialog --clear \
+                --backtitle "RaspiBlitz" \
+                --title "Manage LND credentials" \
+                --menu "Choose action" \
+                11 50 7 \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+    clear
+    case $CHOICE in
+        RESET)
+          sudo /home/admin/config.scripts/lnd.credentials.sh reset
+          echo "Press ENTER to return to main menu."
+          read key
+          exit 0
+          ;;
+        SYNC)
+          sudo /home/admin/config.scripts/lnd.credentials.sh sync
+          echo "Press ENTER to return to main menu."
+          read key
+          exit 0
+          ;;
+        EXPORT)
+          sudo /home/admin/config.scripts/lnd.export.sh
+          exit 0
+          ;;
+    esac
+fi
+
 # load data from config
 source /mnt/hdd/raspiblitz.conf
 
