@@ -145,7 +145,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
     sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> sudo /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
     # to the install
     echo "# installing application dependencies"
