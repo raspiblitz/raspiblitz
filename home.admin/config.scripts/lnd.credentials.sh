@@ -11,8 +11,8 @@ fi
 if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
     OPTIONS+=(RESET "Recreate Macaroons + TLS")
-    OPTIONS+=(SYNC "Sync central store with LND")
-    OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+    OPTIONS+=(SYNC "Sync with RaspiBlitz Apps/Users")
+    OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Manage LND credentials" \
