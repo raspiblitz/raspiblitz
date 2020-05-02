@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.5 with lnd 0.9.2-beta and bitcoin 0.19.1 or litecoin 0.17.1.`
+`Version 1.5 with lnd 0.9.2-beta (0.10.0-beta optional) and bitcoin 0.19.1 or litecoin 0.17.1.`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -37,6 +37,7 @@ You can connect the following Wallet-Apps to your RaspiBlitz:
 * **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
 * **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
+* **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 
 Also much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
