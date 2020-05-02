@@ -64,54 +64,42 @@ If you like to support the RaspiBlitz project you can order a ready-2-go RaspiBl
 
 ### Amazon Shopping List (buy parts & build it yourself)
 
-*Please try to use the exact hardware models that are recommended in the shopping lists, because we have multiple reports were for example other SSD or SSD cases/controllers lead to problems. The idea of the shopping lists is to provide you the best tested hardware components that work together - improvement recommendations are always welcome.*
+The cheapest way is to buy and assemble the single parts yourself.
 
-The cheapest way is to buy and assemble the single parts yourself. The new shopping list comes in three different packages: Minimal, Standard & Maximal:
+*Please try to use the exact hardware models that are recommended in the shopping lists, because we have multiple reports were for example other SSD or SSD cases/controllers lead to problems. The idea of the shopping lists is to provide you the best tested hardware components that work together - improvement recommendations are always welcome.*
 
 #### Package: Standard (around 250 USD)
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
+* RaspBerry Pi 4 2GB (or 4GB) [amazon](https://geni.us/raspiblitz-4-2gb)
 * RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
-* 500GB SSD: [amazon](https://geni.us/raspiblitz-500gb-ssd)
+* 1TB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
 * SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
 * Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
 * RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
 
+*You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
+
 #### Package: Minimal (around 180 USD)
 
 *The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
-Basic Parts for all minimal variants:
+Basic Parts:
 * 1TB Hard Drive: [amazon](https://geni.us/raspiblitz-hdd)
 * Micro SD-Card 16GB: [amazon](https://geni.us/raspiblitz-sd-card16gb)
 * LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
 
-If you have already a used RaspberryPi 3 B+ you can reuse with the following parts:
+When RaspberryPi 3 --> add following parts:
 * RaspBerry Pi 3: [amazon](https://geni.us/raspiblitz-rpi3)
 * Heatsink-Case RP3: [amazon](https://geni.us/raspiblitz-heatsink)
-* Power >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
+* Powersupply >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
 
-Or if you order new go with the RaspberryPi 4 2GB and the following parts:
+When RaspberryPi 4 2GB --> add following parts:
 * RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
 * RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
 * RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4)
-
-#### Package: Maximal
-
-*The maximal package is still in the works ... if you want to prepare for it, take the standard package as a base and choose the RaspberryPi4 with 4GB and a high quality 1TB SSD instead of 500GB.*
-
-* 1TB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
-* RaspBerry Pi 4 4GB: [amazon](https://geni.us/raspiblitz-4-4gb)
-* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
-* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case)
-* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
-* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen)
-* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
-
-*You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
 * [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
 
