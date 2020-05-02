@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# https://github.com/arcbtc/lnbits
+# https://github.com/lnbits/lnbits
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -79,23 +79,25 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  # copy macaroons and for lnbits environment
+  # copy cert and macaroons cert for lnbits environment
   # set tls.cert path
-  sudo -u lnbits sed -i "s/^LND_CERT=.*/LND_CERT=\/home\/admin\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
+  sudo -u lnbits sed -i "s/^LND_REST_CERT=.*/LND_REST_CERT=\/home\/admin\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
   # copy macaroons
   echo "copy macaroons to lnbits user"
   sudo -u lnbits mkdir -p /home/lnbits/.lnd/data/chain/${network}/${chain}net/
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/    
+  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
   sudo chown lnbits:lnbits -R /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
   sudo chmod 600 /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
   echo "OK DONE"
-  #set macaroons paths in .env
-  sudo -u lnbits sed -i "s/^LND_ADMIN_MACAROON=.*/LND_ADMIN_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/admin.macaroon/g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s/^LND_INVOICE_MACAROON=.*/LND_INVOICE_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/invoice.macaroon/g" /home/lnbits/lnbits/.env
-  sudo -u lnbits sed -i "s/^LND_READ_MACAROON=.*/LND_READ_MACAROON=\/home\/lnbits\/.lnd\/data\/chain\/${network}\/${chain}net\/read.macaroon/g" /home/lnbits/lnbits/.env
-  echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
+  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/admin/lnbits/.env
+  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/admin/lnbits/.env
+  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/admin/lnbits/.env
+  echo "# OK - macaroons written to /home/admin/lnbits/.env"
   exit 0
 fi
 
@@ -131,14 +133,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_GRPC_ENDPOINT=127.0.0.1' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_GRPC_PORT=10009' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_CERT=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ENDPOINT=127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
     /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
