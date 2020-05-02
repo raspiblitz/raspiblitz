@@ -85,7 +85,7 @@ if [ "${abcd}" = "a" ]; then
 
     # get user input
     password1=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
@@ -93,7 +93,7 @@ if [ "${abcd}" = "a" ]; then
 
     # get user input
     password2=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -152,7 +152,7 @@ elif [ "${abcd}" = "b" ]; then
 
     # get user input
     password1=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
@@ -160,7 +160,7 @@ elif [ "${abcd}" = "b" ]; then
 
     # get user input
     password2=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -312,7 +312,7 @@ elif [ "${abcd}" = "x" ]; then
     # second parameter is the flexible text
     text=$2
     resultFile=$3
-    shred $3 2>/dev/null
+    shred -u $3 2>/dev/null
 
     # ask user for new password (first time)
     dialog --backtitle "RaspiBlitz"\
@@ -320,7 +320,7 @@ elif [ "${abcd}" = "x" ]; then
 
     # get user input
     password1=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # ask user for new password A (second time)
     dialog --backtitle "RaspiBlitz - Setup"\
@@ -328,7 +328,7 @@ elif [ "${abcd}" = "x" ]; then
 
     # get user input
     password2=$( cat $_temp )
-    shred $_temp
+    shred -u $_temp
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then

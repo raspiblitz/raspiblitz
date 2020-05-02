@@ -50,7 +50,7 @@ The RaspiBlitz will call this URL regularly.
 4 service freedns.afraid.org use 'DirectURL' 
 " 10 52 2>./.tmp
   dynUpdateUrl=$( cat ./.tmp )
-  shred ./.tmp
+  shred -u ./.tmp
 
 fi
 
