@@ -202,10 +202,9 @@ do
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
-        # ToDo(frennkie) /home/admin/.lnd/ no longer is on the SD card
-        sudo mkdir -p /home/admin/.lnd/data/chain/${network}/${chain}net/ 2>/dev/null
-        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
-        echo "OK channel.backup copied to '/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup'"
+        sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
+        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/backups/scb/channel.backup
+        echo "OK channel.backup copied to '/home/admin/backups/scb/channel.backup'"
       
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
