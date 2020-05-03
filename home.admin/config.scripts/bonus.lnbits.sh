@@ -79,9 +79,10 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  echo "make sure lnbits is member of lndreadonly and lndinvoice"
+  echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
   sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
   sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+  sudo /usr/sbin/usermod --append --groups lndadmin lnbits
 
   echo "make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/lnbits/.lnd" ]]; then
