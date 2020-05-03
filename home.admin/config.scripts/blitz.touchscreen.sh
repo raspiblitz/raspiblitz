@@ -98,9 +98,15 @@ EOF
   # remove minimize, maximize, close from titlebar
   sudo sed -i -E 's/titleLayout>LIMC/titleLayout>L/g' /etc/xdg/openbox/lxde-pi-rc.xml
 
-  # make sure that the directory for tls & macaroons exists
-  # fresh copy will be put there by bootstrap script on every start- restart needed
-  sudo mkdir -p /home/pi/.lnd 2>/dev/null
+  echo "make sure pi is member of lndreadonly and lndinvoice"
+  sudo /usr/sbin/usermod --append --groups lndinvoice pi
+  sudo /usr/sbin/usermod --append --groups lndreadonly pi
+
+  echo "make sure symlink to central app-data directory exists"
+  if ! [[ -L "/home/pi/.lnd" ]]; then
+    sudo rm -rf "/home/pi/.lnd"                          # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/pi/.lnd"  # and create symlink
+  fi
 
   # rotate touchscreen based on if LCD is rotated
   if [ "${lcdrotate}" = "0" ]; then

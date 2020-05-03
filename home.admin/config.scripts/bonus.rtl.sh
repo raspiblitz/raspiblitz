@@ -78,6 +78,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create rtl user
     sudo adduser --disabled-password --gecos "" rtl
 
+    echo "*** make sure rtl is member of lndadmin ***"
+    sudo /usr/sbin/usermod --append --groups lndadmin rtl
+
+    echo "*** make sure symlink to central app-data directory exists ***"
+    if ! [[ -L "/home/rtl/.lnd" ]]; then
+      sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
+      sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
+    fi
+
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     rm -rf /home/admin/RTL 2>/dev/null
@@ -129,8 +138,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 var data = require('/home/rtl/RTL/sample-RTL-Config.json');
 //Manipulate data
 data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/home/admin/.lnd/data/chain/${network}/${chain}net/';
-data.nodes[0].Authentication.configPath = '/mnt/hdd/lnd/lnd.conf';
+data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/';
+data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/lnd.conf';
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
 data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
@@ -160,7 +169,7 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/bin/node /home/rtl/RTL/rtl --lndir /home/admin/.lnd/data/chain/bitcoin/mainnet
+ExecStart=/usr/bin/node /home/rtl/RTL/rtl --lndir /home/rtl/.lnd/data/chain/bitcoin/mainnet
 User=rtl
 Restart=always
 TimeoutSec=120
@@ -174,6 +183,7 @@ EOF
 
     sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
+    sudo chown root:root /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi

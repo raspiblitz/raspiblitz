@@ -87,7 +87,7 @@ fi
 
 OPTIONS+=(SERVICES "Activate/Deactivate Services")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
-OPTIONS+=(EXPORT "Macaroons and TLS.cert")
+OPTIONS+=(LNDCREDS "Manage LND Credentials")
 OPTIONS+=(NAME "Change Name/Alias of Node")
 OPTIONS+=(PASSWORD "Change Passwords")
 
@@ -210,8 +210,8 @@ case $CHOICE in
         MOBILE)
             /home/admin/97addMobileWallet.sh
             ;;
-        EXPORT)
-            sudo /home/admin/config.scripts/lnd.export.sh
+        LNDCREDS)
+            sudo /home/admin/config.scripts/lnd.credentials.sh
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh

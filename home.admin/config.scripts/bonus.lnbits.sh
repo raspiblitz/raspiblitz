@@ -79,24 +79,23 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  # copy cert and macaroons cert for lnbits environment
-  # set tls.cert path
-  sudo -u lnbits sed -i "s/^LND_REST_CERT=.*/LND_REST_CERT=\/home\/admin\/.lnd\/tls.cert/g" /home/lnbits/lnbits/.env
-  # copy macaroons
-  echo "copy macaroons to lnbits user"
-  sudo -u lnbits mkdir -p /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon /home/lnbits/.lnd/data/chain/${network}/${chain}net/
-  sudo chown lnbits:lnbits -R /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  sudo chmod 600 /home/lnbits/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  echo "OK DONE"
-  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+  echo "make sure lnbits is member of lndreadonly and lndinvoice"
+  sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
+  sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+
+  echo "make sure symlink to central app-data directory exists"
+  if ! [[ -L "/home/lnbits/.lnd" ]]; then
+    sudo rm -rf "/home/lnbits/.lnd"                          # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lnbits/.lnd"  # and create symlink
+  fi
+
+  # set tls.cert path (use | as separator to avoid escaping file path slashes)
+  sudo -u lnbits sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/home/lnbits/.lnd/tls.cert|g" /home/lnbits/lnbits/.env
+
+  # set macaroon  path info in .env
+  sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/lnbits/lnbits/.env
+  sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
+  sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
   echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
   exit 0
 fi
@@ -188,6 +187,7 @@ WantedBy=multi-user.target
 EOF
 
     sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service
+    sudo chown root:root /etc/systemd/system/lnbits.service
     sudo systemctl enable lnbits
     echo "# OK - service needs starting: sudo systemctl start lnbits"
 

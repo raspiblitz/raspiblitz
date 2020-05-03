@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # stop services
@@ -27,7 +26,14 @@ do
 done
 sudo killall /usr/local/bin/lnd
 sudo chmod 664 /mnt/hdd/lnd/tls.cert
-echo "copy new cert to admin user"
-sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd
-sudo chown admin:admin -R /home/admin/.lnd/*.cert
+sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
+echo "symlink new cert to lnd app-data directory"
+if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
+  sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
+  sudo ln -s /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert # and create symlink
+fi
 echo "OK TLS certs are fresh"
+
+# ToDo(frennkie) why doesn't this start lnd again? - I assume as _background will start it anyway?!
+# ToDo(frennkie) the way LND generates the x509 certificate is not ideal -
+#   it may be better to simply run openssl and create a cert with our settings...
