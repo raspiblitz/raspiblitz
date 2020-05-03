@@ -432,16 +432,16 @@ fi
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
 #################################
-# MAKE SURE ADMIN USER HAS LATEST LND DATA
+# MAKE SURE USERS HAVE LATEST LND CREDENTIALS
 #################################
 source ${configFile}
 if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
-  echo "running LND user credentials update" >> $logFile
-  sudo /home/admin/config.scripts/lnd.check.sh update-credentials >> $logFile
+  echo "running LND users credentials update" >> $logFile
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
 
 else 
-  echo "skipping admin user LND data update" >> $logFile
+  echo "skipping LND credientials sync" >> $logFile
 fi
 
 ################################
