@@ -79,11 +79,6 @@ if [ "$1" = "write-macaroons" ]; then
     exit 1
   fi
 
-  echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
-  sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
-  sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
-  sudo /usr/sbin/usermod --append --groups lndadmin lnbits
-
   echo "make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/lnbits/.lnd" ]]; then
     sudo rm -rf "/home/lnbits/.lnd"                          # not a symlink.. delete it silently
@@ -93,13 +88,19 @@ if [ "$1" = "write-macaroons" ]; then
   # set tls.cert path (use | as separator to avoid escaping file path slashes)
   sudo -u lnbits sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/home/lnbits/.lnd/tls.cert|g" /home/lnbits/lnbits/.env
 
-# set macaroon  path info in .env - USING HEX IMNPORT
+  # set macaroon  path info in .env - USING HEX IMPORT
+  sudo chmod 600 /home/lnbits/lnbits/.env
   macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
   macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
   sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
   sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
   sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+
+  #echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
+  #sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
+  #sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+  #sudo /usr/sbin/usermod --append --groups lndadmin lnbits
 
   # set macaroon  path info in .env - USING PATH
   #sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/lnbits/lnbits/.env

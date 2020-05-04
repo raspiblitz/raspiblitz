@@ -131,16 +131,13 @@ elif [ "$1" = "sync" ]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
     sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
   fi
-
-  echo "# fix the macaroon for LNbits" 
-  # https://github.com/rootzoll/raspiblitz/pull/1156#issuecomment-623293240
-  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
-
+  
+  if [ "${LNBits}" = "on" ]; then
+    echo "# fix the macaroon for LNbits" 
+    # https://github.com/rootzoll/raspiblitz/pull/1156#issuecomment-623293240
+    /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+  fi
+  
 ###########################
 # UNKNOWN
 ###########################
