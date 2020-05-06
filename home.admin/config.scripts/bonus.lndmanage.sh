@@ -45,7 +45,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # get dependencies
   sudo apt install -y python3-dev libatlas-base-dev
   python3 -m pip install wheel
-  python3 -m pip install lndmanage==0.8.0.1
+  python3 -m pip install lndmanage==0.10.0
 
   # check if install was successfull
   if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
