@@ -451,6 +451,14 @@ Create an invoice to send to someone or a service to be payed through lightnig.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
+#### CLOSE ALL: Closing all open Channels
+
+*This option is just available if you have channels open.*
+
+With this feature you can close down all open channels and get funds locked up in those channels back to your on-chain wallet.
+
+It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
+
 #### CHASHOUT: Remove Funds fro, on-chain Wallet
 
 Use if the want to remove all funds from the RaspiBlitz.
@@ -462,13 +470,7 @@ Use if the want to remove all funds from the RaspiBlitz.
 #### lnchannels: Lightning Channel List
 
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
-#### CLOSE ALL: Closing all open Channels
 
-*This option is just available if you have channels open.*
-
-With this feature you can close down all open channels and get funds locked up in those channels back to your on-chain wallet.
-
-It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
 
 #### lnfwdreport: Report on your earned fees for Forwarding Payments 
 
