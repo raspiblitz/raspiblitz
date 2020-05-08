@@ -82,9 +82,9 @@ if [ "${runBehindTor}" = "on" ]; then
 fi
 
 # Additinal Options with no TOR
-if [ "${runBehindTor}" != "on" ]; then
+#if [ "${runBehindTor}" != "on" ]; then
   OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
-fi
+#fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 13 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
