@@ -110,7 +110,7 @@ In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.jpg)
 
-## Installing the Software
+## Downloading the Software
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
@@ -124,14 +124,15 @@ Torrent: TODO just for final release
 
 SHA-256: 344e67c72cadcc3ec9c75d96a05b68b20e90729d33683f0e91dc7937c00565d8 or [SIGNATURE](TODO just for final release)
 
-**Write the SD-Card image to your SD Card**
+* [Whats new in Version 1.5 of RaspiBlitz?](FAQ.md#whats-new-in-version-15-of-raspiblitz)
+* [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
+* [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
+
+## Write the SD-Card image to your SD Card
 
 You need to write the downloaded sd card image (the img.gz-file) to your sd card (16GB minimum) - you can use the very easy tool Balena Etcher for this:
 https://www.balena.io/etcher/ .. it's available for Win, Mac & Linux.
 
-* [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
-* [Whats new in Version 1.4 of RaspiBlitz?](FAQ.md#whats-new-in-version-14-of-raspiblitz)
-* [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Boot your RaspiBlitz
 

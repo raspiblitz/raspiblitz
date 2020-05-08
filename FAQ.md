@@ -549,7 +549,7 @@ Also there is the ZKDS metal case available that also needs some extra hardware 
 
 https://diynodes.com (delivery from UK)
 
-![ZKDSMetalCase](pictures/metalcase.jpeg)
+![ZKDSMetalCase](pictures/metalcase.png)
 
 ## Are those "Under-Voltage detected" warnings a problem?
 
