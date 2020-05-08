@@ -537,17 +537,19 @@ Try some rubber band.
 
 ## What other case options do I have?
 
-You can replace the generic case in the shopping lists with a customized 3D printed for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
+You can put the heasink-case (top-part mentioned in the shopping lists) into a customized 3D printed case for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
 
-![LightningShell](pictures/lightningshell.png)
+https://www.cryptocloaks.com/product/lightningshell/ (Delivery from USA)
 
-https://www.cryptocloaks.com/product/lightningshell/
+![LightningShell](pictures/lightningshell.jpeg)
 
-Also there is a free & open source case you can 3D print:
+![LightningShell](pictures/lightningshell2.jpeg)
 
-![OpenCase](pictures/opencase.png)
+Also there is the ZKDS metal case available that also needs some extra hardware (SATA-USB expansion board and USB bridge).
 
-https://www.cryptocloaks.com/file-factory/
+https://diynodes.com (delivery from UK)
+
+![ZKDSMetalCase](pictures/metalcase.jpeg)
 
 ## Are those "Under-Voltage detected" warnings a problem?
 
