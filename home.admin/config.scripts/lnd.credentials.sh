@@ -135,7 +135,7 @@ elif [ "$1" = "sync" ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "# fix the macaroon for LNbits" 
     # https://github.com/rootzoll/raspiblitz/pull/1156#issuecomment-623293240
-    /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
+    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
   fi
   
 ###########################
