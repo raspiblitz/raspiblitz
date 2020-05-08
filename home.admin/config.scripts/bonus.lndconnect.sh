@@ -94,10 +94,13 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
 
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    echo "error='no tor support'"
-    exit 1
+    # echo "error='no tor support'"
+    # exit 1
     #port="8080"
     #extraparameter="--nocert"
+    # deactivate TOR for now, because address is too long QR code is too big to be scanned by
+    # app and so just make it possible to use local.
+    forceTOR=0
   fi
   port="10009"
 
