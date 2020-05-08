@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.5 with lnd 0.9.2-beta (0.10.0-beta optional) and bitcoin 0.19.1 or litecoin 0.17.1.`
+`Version 1.5 with lnd 0.9.2-beta (0.10.0-beta optional) and bitcoin 0.19.1 (or litecoin 0.17.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -30,6 +30,7 @@ There are further Services that can be switched on:
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
 * **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+* **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -282,12 +283,6 @@ You can cancel the torrent download by keeping the key `x` pressed. Then the dow
 * [I don't trust a torrent blockchain, how can I validate myself?](FAQ.md#how-can-i-avoid-using-a-prepared-blockchain-and-validate-myself)
 * [Why is taking my torrent download of the blockchain so long?](FAQ.md#why-is-taking-my-torrent-download-of-the-blockchain-so-long)
 
-#### 4. Cloning from a 2nd HDD (just offered on old RaspberryPi3)
-
-*This feature is deprecated because its hard to setup and handle. It will just be offered on old RaspberryPi 3. And de removed in future version.*
-
-This is a backup way to transfer a blockchain from another computer if copying over the network is not working. More details on the setup can be found [here](FAQ.md#how-do-i-clone-the-blockchain-from-a-2nd-hdd). 
-
 ### Setup Lightning
 
 Lightning is installed and waiting for your setup if you see this screen.
@@ -404,9 +399,7 @@ Have fun riding the lightning :D
 
 These are the features available through the RaspiBlitz SSH menus. They have the goal to offer some basic/fallback functionality & configurations. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
-So lets take a look at the SSH main menu (from top to bottom):
-
-![MainMenu-A](pictures/mainmenu1.png)
+So lets take a look at the SSH main in detail:
 
 #### INFO: Raspiblitz Status Screen
 
@@ -450,6 +443,8 @@ Pay an invoice through lightning.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
+If you are looking for something to test pay with Lightning ... why not [donate some satoshis to the RaspiBlitz development[(https://tallyco.in/s/r5lx23/)? Thanks :) 
+
 #### RECEIVE: Create Invoice/PaymentRequest
 
 Create an invoice to send to someone or a service to be payed through lightnig.
@@ -475,6 +470,12 @@ With this feature you can close down all open channels and get funds locked up i
 
 It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
 
+#### lnfwdreport: Report on your earned fees for Forwarding Payments 
+
+If you connected your node well within the Lightning Network you can become a "Routing Node" other users select your Node as part of a Lightnig Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
+
+Beware - earning fees as a routing node does not come automatic. Its a bit of hard work of building the right channels to be attractive for other people to route thru. Check the interet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
+  
 #### SERVICES: Activate/Deactivate Services
 
 The RaspiBlitz offers further Services, Apps and configuration (scroll down in the to see all in the RaspiBlitz):
@@ -487,9 +488,13 @@ Activate/Deactivate service selection with the space bar and then select OK to t
 
 The autopilot is a feature of LND that you can switch on. It automatically uses around half of your your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
 
+##### Accept Keysend
+
+Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This is needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).  
+
 ##### Loop
 
-A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop'. You can use it for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again. 
+A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop' - if you have the RTL service installed (see below), then loop will also be available as part of the RTL web interface. You can use Loop for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again. 
 
 [Details on Service](https://github.com/lightninglabs/loop)
 
@@ -553,6 +558,14 @@ BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own Raspi
 
 [Details on Service](https://github.com/janoside/btc-rpc-explorer)
 
+##### Cryptoadvance Specter
+
+Bitcoin Core that you have running on the RaspiBlitz has a very powerful command line interface and a wonderful daemon. Using PSBT and HWI it can also work with hardware wallets, but at the moment it is too linux-way. The same applies to multisignature setups.
+
+The goal of SpecterDesktop is to make a convenient and user-friendly GUI around Bitcoin Core with a focus on multisignature setup with airgapped hardware wallets like Trezor, Ledger, COLDCARD or the Specter-DIY.
+
+![SPECTER](pictures/specter.jpg)
+
 ##### LND Auto-Unlock
 
 The RaspiBlitz will automatically unlock the LND wallet on every start.
@@ -562,18 +575,6 @@ This feature is based on https://github.com/Stadicus/guides/blob/master/raspibol
 It can be activated under "Services" -> "Auto-unlock LND". It's recommended to be turned on, when DynamicDNS is used. Because on a public IP change of your router, LND gets restarted automatically and without Auto-Unlock it will stay inactive/unreachable until you manually unlock it.
 
 * [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
-
-##### BTC UPnP (AutoNAT)
-
-Normally in a home setup your RaspiBlitz runs behind your internet router that is providing a NAT. That means that only your router is reachable from the outside with a public IP and all your other devices (like the RaspiBlitz) have just a local network IP and cannot be directly contacted from the open internet. That's the reason why your [bitcoin address on the LCD might be displayed in red](FAQ.md#why-is-my-bitcoin-ip-on-the-display-red).
-
-Some routers support a feature called UPnP where devices can automatically request a forwarding to be publicly reachable. By turning on `BTC UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
-
-##### LND UPnP (AutoNAT)
-
-Normally in a home setup your RaspiBlitz runs behind your internet router that is providing a NAT. That means that only your router is reachable from the outside with a public IP and all your other devices (like the RaspiBlitz) have just a local network IP and cannot be directly contacted from the open internet. That's the reason why your [Lightning address on the LCD might be displayed in red](FAQ.md#why-is-my-node-address-on-the-display-red).
-
-Some routers support a feature called UPnP where devices can automatically request a forwarding to be publicly reachable. By turning on `LND UPnP` in the main menu `SERVICES` section, you can try if your router supports this feature.
 
 ##### Touchscreen (experimental)
 
@@ -587,8 +588,6 @@ It will give you 4 buttons on the right side.
 - Node - shows the nodeid/uri as QR code (use to open channels from mobile wallets)
 - Invoice - creates an Invoice-QRcode that can be used for donations
 - Off - Shutdown or Restart the RaspiBlitz 
-
-*If this feature works for everybody in the v1.4 release, touchscreen will be default and further developed for future releases.*
 
 ##### LCD Rotate
 
@@ -652,6 +651,18 @@ You can also develop extensions on it.
 
 [Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
 
+##### StaticChannelBackup on DropBox
+
+The [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options to secure your funds against loss. Storing the encrypted Static Channel Backup file to your Dropbox account is an easy and secure way todo this.
+
+##### JoinMarket
+
+JoinMarket is software to create a special kind of bitcoin transaction called a CoinJoin transaction. It's aim is to improve the confidentiality and privacy of bitcoin transactions.
+
+A CoinJoin transaction requires other people to take part. The right resources (coins) have to be in the right place, at the right time, in the right quantity. This isn't a software or tech problem, its an economic problem. JoinMarket works by creating a new kind of market that would allocate these resources in the best way.
+
+Fore more details see [here](https://github.com/JoinMarket-Org/joinmarket-clientserver).
+
 #### MOBILE: Connect Mobile Wallet
 
 This feature should support you in connecting your RaspiBlitz to a mobile wallet on your smartphone.
@@ -664,6 +675,7 @@ At the moment the following mobile wallets are supported:
 * [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet)
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
 * [Fully Noded (iOS over TOR)](https://apps.apple.com/us/app/fully-noded/id1436425586)
+* [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md)
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changing IP of our Home-DSL.
 
@@ -671,17 +683,21 @@ This youtube video explains the "port forwarding" on your router in more detail:
 
 When you have TOR activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over TOR. 
 
+If you run your node behind TOR the SendMany App will just offer to connect when your in the same local network ... for connection over TOR there is no support yet. 
+
 Basically those mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. And then you need to `pair` them with your RaspiBlitz - also with a QR code displayed on the LCD. If you run your RaspiBlitz without a LCD there is the fallback option to display that QR code on the terminal as ASCII code (might involve lowering your terminal font size).
 
-#### EXPORT: Macaroons and TLS.cert
+#### LNDCREDS: Macaroons and TLS.cert
 
-Offers the following options to get the Macaroon and TLS files to be used in other apps and wallets.
+If you want to access your LND APIs (to connect apps and additional services) you need credential files that grant to access (Macaroons & the TLS cert).
 
 *Macaroons: Access Tokens that allow certain command executions on the LND node.*
 
 *TLS: Certificate to secure/encrypt the communication with the LND node.*
 
-<img src="pictures/export.png" alt="export">
+In this menu you can reset and re-sync those or export them as a file or string so that you can import them to the apps and additional services. The following export options are available:
+
+Offers the following options to get the Macaroon and TLS files to be used in other apps and wallets.
 
 ##### Hex-String
 
@@ -772,13 +788,45 @@ Use this if you have closed all channels and removed all funds.*
 
 Use this if you want to setup a fresh RaspiBlitz with an empty HDD.
 
+##### DELETE-ELEC: Delete Electrum Index
+
+If you had Electrum installed you can use this option to make sure also the space consuming electrum index gets deleted to free up space.
+
+##### DELETE-INDEX: Delete Bitcoin TX-Index
+
+If you had the Bitcoin Transaction Index activated you can use this option to make sure also tthis extra space consuming index gets deleted to free up space.
+
 #### UPDATE: Check/Prepare RaspiBlitz Update
 
-You can test if a update for RaspiBlitz is available. If so you can follow the instructions to make the update.
+The `UPDATE` menu gives you options to upadte your RaspiBlitz
+
+![UpdateMenu](pictures/updatemenu.png)
+
+The options are explained in detail:
+
+*Please note that the RaspiBlitz does not support an Auto-Update to ensure that there is no remote control of your node possible from a central server.*
+
+#### RELEASE: Update RaspiBlitz to a new Version
+
+This is common way to update your RaspiBlitz. Choose this option to prepeare your raspiBlitz for a new sd card image containing the new version release.
+
+#### LND: Interim LND Update
+
+Sometimes there is a new LND release that has some breaking changes that once you updated the LND databse that cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND. 
+
+If oyu choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the raspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further garantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps. 
+
+#### PATCH: Patch RaspiBlitz code
+
+With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people that wnat to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.   
+
+#### REBOOT: Reboot RaspiBlitz
+
+A safe way to restart the RaspiBlitz ... have you tried to turn it off and on again?
 
 #### OFF: PowerOff RaspiBlitz
 
-A safe way to shutdown the RaspiBlitz. If then a reboot/restart is needed - unplug/re-plug the power.
+A safe way to shutdown the RaspiBlitz.
 
 #### X: Console Terminal
 
@@ -847,21 +895,11 @@ The word seed you got during wallet setup, to write it down and to keep it at a 
 
 If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completely damaged, stolen or lost) then you can additional setup an off-location or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so it's OK to store the file to untrusted third parties for backup (if you want). The feature is still new ... here is how you can set it up -a t the moment the following two off-location options are available (and/or):
 
-*For the v1.2 Release this Off-Site Backup options you need to manually edit the raspiblitz config: `nano mnt/hdd/raspiblitz.conf` (CTRL+o = save & CTRL+x = exit) So this is more for expert users at the moment. If this feature is validated as OK by expert users - in the following versions it should be more easy to set these Offsite-Backups by menu. Open to more Off-Site Backup options by PR in the future - but they should work without adding more dependencies on other libraries (that are not part of standard debian).*
+#### A) DropBox Backup Target
 
-#### A) SCP Backup Target
+Acticate the StaticChannelBackup to DropBox in the `SERVICES` menu of your RaspiBlitz. It will ask you for the Dropbox-Authtoken - this is how you can get this token:
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
-
-The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, show and transfer ssh-pubkey to a remote server.
-
-To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
-
-#### B) DropBox Backup Target
-
-In the `/mnt/hdd/raspiblitz.conf` the parameter `dropboxBackupTarget='YOUR-DROPBOX-AUTHTOKEN'` can be set to your personal a Dropbox-Authtoken.
-
-Go get your Dropbox-Authtoken, go to your web browser, do the following:
+Go to your web browser, do the following:
 
 1. Go to https://www.dropbox.com/developers/apps/create and sign in
 
@@ -885,9 +923,19 @@ Go get your Dropbox-Authtoken, go to your web browser, do the following:
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` in your dropbox. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
+#### B) SCP Backup Target
+
+*You can also backup the SCB to your own server, but this needs manual setup:*
+
+In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature. On that remote server the publickey of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
+
+The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, show and transfer ssh-pubkey to a remote server.
+
+To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+
 ## Updating RaspiBlitz to new Version
 
-If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE Check/Prepare RaspiBlitz Update` option from the main menu.
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions.
 
 If you have a RaspiBlitz older then version v1.0 please [see here](FAQ.md).
 

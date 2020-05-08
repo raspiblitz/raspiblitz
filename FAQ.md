@@ -5,12 +5,13 @@
 Beside many small improvements and changes, these are most important changes:
 
 - Update: LND version 0.9.2-beta (optional update to 0.10.0-beta)
-- Update: bitcoin-core version 0.19.1-beta
-- Update: Loop 0.5.1 or 0.6.0 (based in LND version)
-- Update: RTL 0.7.0 (Loop In and Out integration)
-- Update: BTCPayServer v1.0.4.2
+- Update: bitcoin-core version 0.19.1-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.19.1.md)
+- Update: Loop 0.5.1 or 0.6.0 (based on LND version) [details](https://github.com/lightninglabs/loop/releases)
+- Update: RTL 0.7.0 (Loop In and Out integration) [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.0)
+- Update: BTCPayServer v1.0.4.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.2)
 - Update: LNbits v0.1 [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v200)
+- Update: lndmanage 0.10.0 [details](https://github.com/bitromortac/lndmanage/releases/tag/v0.10.0)
 - Shoppinglist: Replace Shimfan with passive RP4-Heatcase
 - Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
 - Fix: Screen Rotate on update from v1.3
@@ -246,7 +247,7 @@ One requirement is that the blockchain is from another bitcoin-core client with 
 
 But we don't copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writable by Windows or Mac computers. So I will explain a way to copy the data through your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
 
-Both computers (your RaspberryPi and the other computer with the full blockchain on) need to be connected to the same local network. Make sure that bitcoin is stopped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz run on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
+Both computers (your RaspberryPi and the other computer with the full blockchain on) need to be connected to the same local network. Make sure that bitcoin is stopped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz with v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
 
 If everything of the above is prepared, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - it's OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfer the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands, that will copy the data over your Local Network to your RaspiBlitz.
 
