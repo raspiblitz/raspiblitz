@@ -27,6 +27,8 @@ Beside many small improvements and changes, these are most important changes:
 - New: Sync RaspiBlitz with your forked GitHub repo thru menu [details](FAQ.md#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - Removed: Clone Blockchain from second HDD (use CopyStation script)
 
+DOWNLOAD the new RaspiBlitz v1.5 image [here](README.md#installing-the-software).
+
 ## Whats new in Version 1.4 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:

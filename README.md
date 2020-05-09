@@ -116,13 +116,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.5:**
 
-*IMPORTANT: This is just a Release Candidate - not the final release. Please just use if you feel reckless and like to help on testing. If you have serious funds on your node please wait for the final release before updating.*
+Browser: https://raspiblitz.com/raspiblitz-v1.5-2020-05-08.img.gz
 
-Browser: https://raspiblitz.com/raspiblitz-v1.5RC2-2020-05-04.img.gz
+Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.5/home.admin/assets/raspiblitz-v1.5-2020-05-08.img.gz.torrent
 
-Torrent: TODO just for final release
-
-SHA-256: 344e67c72cadcc3ec9c75d96a05b68b20e90729d33683f0e91dc7937c00565d8 or [SIGNATURE](TODO just for final release)
+SHA-256: 51cf8cc0f5ff9f562327ed8ba6779cffef8ba8e3c6e2b8e21bcd2f931f630584 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.5-2020-05-08.img.gz.sig)
 
 * [Whats new in Version 1.5 of RaspiBlitz?](FAQ.md#whats-new-in-version-15-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
