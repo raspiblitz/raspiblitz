@@ -13,6 +13,7 @@ Beside many small improvements and changes, these are most important changes:
 - Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v200)
 - Update: lndmanage 0.10.0 [details](https://github.com/bitromortac/lndmanage/releases/tag/v0.10.0)
 - Shoppinglist: Replace Shimfan with passive RP4-Heatcase
+- Shoppinglist: 1TB SSD is now default [see deatils to migrate to bigger SSD](README.md#import-a-migration-file)
 - Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
 - Fix: Screen Rotate on update from v1.3
 - New: Specter Desktop (connect DIY Specter-Wallet or ColdCard) [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
