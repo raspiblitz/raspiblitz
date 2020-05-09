@@ -109,6 +109,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
         
     # autostart for joinmarket
+    bash -c "echo '# command: torthistx' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'function torthistx() {' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'echo \"Broadcasting transaction through Tor to the Blockstream API and into the network.\"' >> /home/joinmarket/.bashrc"
+    bash -c "echo 'curl --socks5-hostname localhost:9050 -d \$1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx' >> /home/joinmarket/.bashrc"
+    bash -c "echo '}' >> /home/joinmarket/.bashrc"
     bash -c "echo '# automatically start startup.sh for joinmarket unless' >> /home/joinmarket/.bashrc"
     bash -c "echo '# when running in a tmux session' >> /home/joinmarket/.bashrc"
     bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/joinmarket/.bashrc"
