@@ -82,7 +82,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   echo
   echo "# get Binary"
-  binaryName="lnd-linux-${cpuArchitecture}-${version}.tar.gz"
+  binaryName="faraday-linux-${cpuArchitecture}-${version}.tar.gz"
   sudo -u admin wget -N https://github.com/lightninglabs/faraday/releases/download/${version}/${binaryName}
   checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
   if [ ${checkDownload} -eq 0 ]; then
