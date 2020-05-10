@@ -8,7 +8,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # version and trusted release signer
-version="v0.1.0-alpha"
+version="0.1.0-alpha"
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
 
@@ -65,15 +65,15 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   cd "${downloadDir}"
 
   echo "# extract the SHA256 hash from the manifest file for the corresponding platform"
-  downloadLink="https://github.com/lightninglabs/faraday/releases/download/${version}/manifest-${version}.txt"
+  downloadLink="https://github.com/lightninglabs/faraday/releases/download/v${version}/manifest-v${version}.txt"
   sudo -u admin wget -N ${downloadLink}
-  checkDownload=$(ls manifest-${version}.txt 2>/dev/null | grep -c manifest-${version}.txt)
+  checkDownload=$(ls manifest-v${version}.txt 2>/dev/null | grep -c manifest-v${version}.txt)
   if [ ${checkDownload} -eq 0 ]; then
     echo "downloadLink='${downloadLink}'"
     echo "error='download manifest failed'"
     exit 1
   fi
-  SHA256=$(grep -i "linux-${cpuArchitecture}" manifest-$version.txt | cut -d " " -f1)
+  SHA256=$(grep -i "linux-${cpuArchitecture}" manifest-v$version.txt | cut -d " " -f1)
   echo "# SHA256 hash: $SHA256"
   if [ ${#SHA256} -eq 0 ]; then
     echo "error='getting checksum failed'"
@@ -82,8 +82,8 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   echo
   echo "# get Binary"
-  binaryName="faraday-linux-${cpuArchitecture}-${version}.tar.gz"
-  sudo -u admin wget -N https://github.com/lightninglabs/faraday/releases/download/${version}/${binaryName}
+  binaryName="faraday-linux-${cpuArchitecture}-v${version}.tar.gz"
+  sudo -u admin wget -N https://github.com/lightninglabs/faraday/releases/download/v${version}/${binaryName}
   checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
   if [ ${checkDownload} -eq 0 ]; then
     echo "error='download binary failed'"
@@ -92,7 +92,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   echo
   echo "# check binary was not manipulated (checksum test)"
-  sudo -u admin wget -N https://github.com/lightninglabs/faraday/releases/download/${version}/manifest-${version}.txt.sig
+  sudo -u admin wget -N https://github.com/lightninglabs/faraday/releases/download/v${version}/manifest-v${version}.txt.sig
   sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" ${PGPkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -114,7 +114,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-${version}.txt.sig 2>&1)
+  verifyResult=$(gpg --verify manifest-v${version}.txt.sig 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
