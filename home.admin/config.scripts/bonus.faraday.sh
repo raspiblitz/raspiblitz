@@ -67,7 +67,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# extract the SHA256 hash from the manifest file for the corresponding platform"
   downloadLink="https://github.com/lightninglabs/faraday/releases/download/${version}/manifest-${version}.txt"
   sudo -u admin wget -N ${downloadLink}
-  checkDownload=$(ls manifest-${lndUpdateVersion}.txt 2>/dev/null | grep -c manifest-${version}.txt)
+  checkDownload=$(ls manifest-${version}.txt 2>/dev/null | grep -c manifest-${version}.txt)
   if [ ${checkDownload} -eq 0 ]; then
     echo "downloadLink='${downloadLink}'"
     echo "error='download manifest failed'"
