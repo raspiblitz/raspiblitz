@@ -37,7 +37,11 @@ if [ $(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786') -eq 1 ] ; then
 fi
 
 # check if already installed
-installed=$(sudo -u admin faraday --version)
+installed=0
+installedVersion=$(sudo -u admin faraday --version)
+if [ ${#installedVersion} -gt 0 ]; then
+  installed=1
+fi
 
 # STATUS
 if [ "${mode}" = "status" ]; then
