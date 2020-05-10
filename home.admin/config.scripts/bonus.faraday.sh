@@ -38,7 +38,7 @@ fi
 
 # check if already installed
 installed=0
-installedVersion=$(sudo -u admin faraday --version)
+installedVersion=$(sudo -u admin frcli --version)
 if [ ${#installedVersion} -gt 0 ]; then
   installed=1
 fi
@@ -125,6 +125,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   fi
 
   # install
+  echo
   echo "# unzip binary"
   sudo -u admin tar -xzf ${binaryName}
   # removing the tar.gz ending from the binary
@@ -132,7 +133,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# install binary directory '${directoryName}'"
   sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
   sleep 3
-  installed=$(sudo -u admin faraday --version)
+  installed=$(sudo -u admin frcli --version)
   if [ ${#installed} -eq 0 ]; then
     echo "error='install failed'"
     exit 1
