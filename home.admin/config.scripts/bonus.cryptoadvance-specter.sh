@@ -240,18 +240,6 @@ EOF
   # see /home/admin/config.scripts/bonus.electrsexplorer.sh
   # run every 10 min by _background.sh
 
-  # hot fix see: https://github.com/rootzoll/raspiblitz/issues/1171#issuecomment-628161365
-  sudo su - bitcoin
-  cd .specter
-  . ./.env/bin/activate
-  # Install all the dependies of hwi one by one
-  pip3 install 'ecdsa>=0.13.0,<0.14.0' 'hidapi>=0.7.99,<0.8.0' 'libusb1>=1.7,<2.0' 'mnemonic>=0.18.0,<0.19.0' 'pyaes>=1.6,<2.0' 'typing-extensions>=3.7,<4.0'
-  pip3 install hwi --no-dependencies
-  curl https://raw.githubusercontent.com/cryptoadvance/specter-desktop/master/requirements.txt | xargs -n 1 pip install
-  pip3 install cryptoadvance.specter --no-dependencies
-  exit
-  sudo service cryptoadvance-specter restart
-
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
