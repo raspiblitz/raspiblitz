@@ -29,8 +29,13 @@ fi
 # check if file system was expanded to full capacity and sd card is bigger then 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-if [ ${isRaspbian} -gt 0 ]; then
-  echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
+  if [ ${isRaspbian} -gt 0 ]; then
+    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+  elif [ ${isArmbian} -gt 0 ]; then
+    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+  fi
   sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
   byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
   echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
@@ -47,7 +52,11 @@ if [ ${isRaspbian} -gt 0 ]; then
       sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
       sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
       sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-      sudo raspi-config --expand-rootfs
+      if [ ${isRaspbian} -gt 0 ]; then
+        sudo raspi-config --expand-rootfs
+      elif [ ${isArmbian} -gt 0 ]; then
+        sudo /usr/lib/armbian/armbian-resize-filesystem start
+      fi
       sleep 6
       sudo shutdown -r now
       exit 0
