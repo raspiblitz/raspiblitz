@@ -153,7 +153,7 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3000 comment 'RTL'
+    sudo ufw allow from 192.168.0.0/16 to any port 3000 comment 'RTL'
     sudo ufw --force enable
     echo ""
 
