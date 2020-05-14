@@ -29,7 +29,7 @@ if [ "${MODE}" == "on" ]; then
     whiptail --title " Static Channel Backup on Dropbox " --inputbox "
 Follow the steps described at the following link
 to get the DropBox-Authtoken from your account:
-https://github.com/rootzoll/raspiblitz/#b-dropbox-backup-target" 11 70 2>/home/admin/.tmp
+https://github.com/rootzoll/raspiblitz/#a-dropbox-backup-target" 11 70 2>/home/admin/.tmp
     authtoken=$(cat /home/admin/.tmp)
     shred -u /home/admin/.tmp
   fi
