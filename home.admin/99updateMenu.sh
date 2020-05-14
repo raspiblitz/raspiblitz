@@ -210,7 +210,7 @@ Do you really want to update LND now?
       fi
       # if loop is installed remove
       if [ "${loop}" == "on" ]; then
-        sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
+        sudo -u admin /home/admin/config.scripts/bonus.loop.sh off
       fi
       error=""
       warn=""
