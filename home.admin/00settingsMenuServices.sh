@@ -23,6 +23,7 @@ if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
+if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -87,6 +88,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+f 'Faraday' ${faraday} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -110,6 +112,7 @@ r 'LCD Rotate' ${lcdrotateMenu} \
 e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
+f 'Faraday' ${faraday} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -562,6 +565,21 @@ if [ "${lndmanage}" != "${choice}" ]; then
   fi
 else 
   echo "lndmanage setting unchanged."
+fi
+
+# FARADAY process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${faraday}" != "${choice}" ]; then
+  echo "faraday Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${faraday}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
+  fi
+else 
+  echo "faraday setting unchanged."
 fi
 
 # LNbits process choice
