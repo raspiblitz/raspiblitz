@@ -63,6 +63,9 @@ fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JMARKET "JoinMarket")
 fi
+if [ "${faraday}" == "on" ]; then
+  OPTIONS+=(FARADAY "Faraday Channel Management")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -160,6 +163,9 @@ case $CHOICE in
             ;;
         JMARKET)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+            ;;
+        FARADAY)
+            sudo /home/admin/config.scripts/bonus.faraday.sh menu
             ;;
         lnbalance)
             clear
