@@ -195,7 +195,7 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo rm /etc/systemd/system/faraday.service
 
   echo "# remove faraday user"
-  userdel -r -f faraday
+  sudo userdel -r -f faraday
 
   echo "# modify config file"
   sudo sed -i "s/^faraday=.*/faraday=off/g" /mnt/hdd/raspiblitz.conf
