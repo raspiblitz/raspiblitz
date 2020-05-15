@@ -138,6 +138,43 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     echo "error='install failed'"
     exit 1
   fi
+
+  # make sure faraday user exists (this will run the farday server)
+  echo "# Add the 'faraday' user"
+  sudo adduser --disabled-password --gecos "" faraday
+
+  # add user to group with readonly access on lnd
+  sudo /usr/sbin/usermod --append --groups lndreadonly faraday
+ 
+  # install service
+  echo "*** Install systemd ***"
+  cat > /home/faraday/faraday.service <<EOF
+# systemd unit for faraday
+
+[Unit]
+Description=faraday
+Wants=lnd.service
+After=lnd.service
+
+[Service]
+WorkingDirectory=/home/faraday/
+ExecStart='./faraday --macaroondir=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet --macaroonfile=readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd --rpserver=127.0.0.1:10009'
+User=faraday
+Restart=always
+TimeoutSec=120
+RestartSec=30
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo mv /home/faraday/faraday.service /etc/systemd/system/faraday.service
+  sudo chown root:root /etc/systemd/system/faraday.service
+  sudo systemctl enable faraday
+  sudo systemctl start faraday
+
   echo "# flag in raspiblitz config"
   if [ ${#faraday} -eq 0 ]; then
     echo "faraday='${faraday}'" >> /mnt/hdd/raspiblitz.conf
@@ -145,15 +182,27 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
   fi
 
-  echo "# OK LND Installed"
+  echo "# OK faraday Installed"
   exit 1
 
 fi
 
-# TODO: OFF - DEINSTALL
-if [ "${mode}" = "reckless" ]; then
+# DEINSTALL
+if [ "${mode}" = "off" ] || [ "${mode}" = "0" ];; then
 
-  echo "# DEINSTALL bonus.faraday.sh TODO"
+  echo "# DEINSTALL"
+
+  echo "# remove systemd service"
+  sudo systemctl stop faraday
+  sudo systemctl disable faraday
+  sudo rm /etc/systemd/system/faraday.service
+
+  echo "# remove faraday user"
+  userdel -r -f faraday
+
+  echo "# modify config file"
+  sudo sed -i "s/^faraday=.*/faraday=off/g" /mnt/hdd/raspiblitz.conf
+
   exit 1
  
 fi
