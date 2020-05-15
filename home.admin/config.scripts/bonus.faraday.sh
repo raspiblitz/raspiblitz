@@ -148,9 +148,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
  
   # install service
   echo "*** Install systemd ***"
-  cat > /home/faraday/faraday.service <<EOF
-# systemd unit for faraday
-
+  cat > /mnt/hdd/temp/faraday.service <<EOF
 [Unit]
 Description=faraday
 Wants=lnd.service
@@ -170,7 +168,7 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-  sudo mv /home/faraday/faraday.service /etc/systemd/system/faraday.service
+  sudo mv /mnt/hdd/temp/faraday.service /etc/systemd/system/faraday.service
   sudo chown root:root /etc/systemd/system/faraday.service
   sudo systemctl enable faraday
   sudo systemctl start faraday
