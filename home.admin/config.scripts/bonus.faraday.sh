@@ -185,7 +185,7 @@ EOF
 fi
 
 # DEINSTALL
-if [ "${mode}" = "off" ] || [ "${mode}" = "0" ];; then
+if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
 
   echo "# DEINSTALL"
 
