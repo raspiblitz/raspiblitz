@@ -54,6 +54,20 @@ if [ "${mode}" = "status" ]; then
 
 fi
 
+# MENU INFO
+if [ "${mode}" = "menu" ]; then
+  if [ ${installed} -q 0 ]; then
+    whiptail --title " ERROR " --msgbox "Faraday is not installed" 7 30
+    exit 1
+  fi
+  whiptail --title " Faraday " --msgbox "Faraday is a command line tool. On terminal call:
+frcli --help
+
+For more background read the following article:
+https://lightning.engineering/posts/2020-04-02-faraday" 11 60
+  exit 1
+fi
+
 # INSTALL
 if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
