@@ -149,8 +149,6 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   # install service
   echo "*** Install systemd ***"
   cat > /mnt/hdd/temp/faraday.service <<EOF
-# test: ${binaryName} or $binaryName
-
 [Unit]
 Description=faraday
 Wants=lnd.service
@@ -158,7 +156,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/faraday/
-ExecStart='faraday --macaroondir=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet --macaroonfile=readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert --rpcserver=127.0.0.1:10009'
+ExecStart=faraday --macaroondir=/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net --macaroonfile=readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert --rpcserver=127.0.0.1:10009
 User=faraday
 Restart=always
 TimeoutSec=120
