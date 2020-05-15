@@ -177,10 +177,9 @@ EOF
 
   echo "# flag in raspiblitz config"
   if [ ${#faraday} -eq 0 ]; then
-    echo "faraday='${faraday}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
+    echo "faraday='on'" >> /mnt/hdd/raspiblitz.conf
   fi
+  sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
 
   echo "# OK faraday Installed"
   exit 1
