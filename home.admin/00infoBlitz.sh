@@ -360,3 +360,43 @@ else
   fi
   
 fi
+
+uptime=$(uptime --pretty)
+datetime=$(date)
+
+# write results to a json file on RAM disk cache
+cat <<EOF > /var/cache/raspiblitz/info.json
+{
+    "uptime": "${uptime}",
+    "datetime": "${datetime}",
+    "upsInfo": "${upsInfo}",
+    "hostname": "${hostname}",
+    "network": "${network}",
+    "chain": "${chain}",
+    "load": "${load}",
+    "tempC": "${tempC}",
+    "tempF": "${tempF}",
+    "ram_avail": "${ram_avail}",
+    "network_rx": "${network_rx}",
+    "network_tx": "${network_tx}",
+    "progress": "${progress}",
+    "sync_percentage": "${sync_percentage}",
+    "sync": "${sync}",
+    "mempool": "${mempool}",
+    "ln_sync": "${ln_sync}",
+    "ln_version": "${ln_version}",
+    "ln_walletbalance": "${ln_walletbalance}",
+    "ln_walletbalance_wait": "${ln_walletbalance_wait}",
+    "ln_channelbalance": "${ln_channelbalance}",
+    "ln_channelbalance_pending": "${ln_channelbalance_pending}",
+    "ln_channels_online": "${ln_channels_online}",
+    "ln_channels_total": "${ln_channels_total}",
+    "ln_peers": "${ln_peers}",
+    "ln_channelInfo": "${ln_channelInfo}"
+}
+EOF
+
+# update info.html file
+/usr/local/bin/j2 /var/www/blitzweb/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
+
+# EOF

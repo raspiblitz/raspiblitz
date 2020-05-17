@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
 fi
 
 # using ${APOST} is a workaround to be able to use sed with '
-APOST=\'
+APOST=\'  # close tag for linters: '
 
 
 ###################
@@ -68,6 +68,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo cp -a /home/admin/assets/www_blitzweb/ /var/www/blitzweb
       sudo chown www-data:www-data /var/www/blitzweb
   fi
+
+  # make sure jinja2 is installed and install j2cli
+  sudo apt-get install python3-jinja2 >/dev/null
+  sudo -H python3 -m pip install j2cli
+
 
   # create nginx app-data dir and use LND cert by default
   sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
