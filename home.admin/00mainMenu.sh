@@ -66,6 +66,9 @@ fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
 fi
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Balance of Satoshis")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -166,6 +169,8 @@ case $CHOICE in
             ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
+        BOS)
+            sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;
         lnbalance)
             clear

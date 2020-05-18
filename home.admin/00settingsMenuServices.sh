@@ -24,6 +24,7 @@ if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
+if [ ${#bos} -eq 0 ]; then bos="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -89,6 +90,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 f 'Faraday' ${faraday} \
+o 'Balance of Satoshis' ${bos} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -113,6 +115,7 @@ e 'Electrum Rust Server' ${ElectRS} \
 p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 f 'Faraday' ${faraday} \
+o 'Balance of Satoshis' ${bos} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -582,6 +585,22 @@ else
   echo "faraday setting unchanged."
 fi
 
+
+# Balance of Satoshis process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${bos}" != "${choice}" ]; then
+  echo "Balance of Satoshis Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.bos.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${bos}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
+  fi
+else 
+  echo "Balance of Satoshis setting unchanged."
+fi
+
 # LNbits process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -610,7 +629,7 @@ if [ "${DropboxBackup}" != "${choice}" ]; then
     sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else 
-  echo "lndmanage setting unchanged."
+  echo "Dropbox backup setting unchanged."
 fi
 
 # Keysend process choice
