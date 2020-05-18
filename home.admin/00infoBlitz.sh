@@ -369,39 +369,49 @@ datetime=$(date)
 #  - update info.html file
 if [ "${EUID}" == "$(id -u pi)" ]; then
 
+    json_ln_baseInfo=$(echo "${ln_baseInfo}" | cut -c 11-)  # ToDo(frennkie) this only work if lnd is ok
+
 cat <<EOF > /var/cache/raspiblitz/info.json
 {
     "uptime": "${uptime}",
     "datetime": "${datetime}",
-    "upsInfo": "${upsInfo}",
+    "codeVersion": "${codeVersion}",
     "hostname": "${hostname}",
     "network": "${network}",
-    "chain": "${chain}",
+    "torInfo": "${torInfo}",
     "load": "${load}",
     "tempC": "${tempC}",
     "tempF": "${tempF}",
-    "ram_avail": "${ram_avail}",
+    "ram": "${ram}",
+    "hddUsedInfo": "${hddUsedInfo}",
+    "local_ip": "${local_ip}",
     "network_rx": "${network_rx}",
     "network_tx": "${network_tx}",
+    "runningRTL": "${runningRTL}",
+    "networkVersion": "${networkVersion}",
+    "chain": "${chain}",
     "progress": "${progress}",
     "sync_percentage": "${sync_percentage}",
-    "sync": "${sync}",
+    "public_addr_pre": "${public_addr_pre}",
+    "public_addr": "${public_addr}",
+    "public": "${public}",
+    "networkConnections": "${networkConnections}",
     "mempool": "${mempool}",
     "ln_sync": "${ln_sync}",
     "ln_version": "${ln_version}",
-    "ln_walletbalance": "${ln_walletbalance}",
-    "ln_walletbalance_wait": "${ln_walletbalance_wait}",
-    "ln_channelbalance": "${ln_channelbalance}",
-    "ln_channelbalance_pending": "${ln_channelbalance_pending}",
-    "ln_channels_online": "${ln_channels_online}",
-    "ln_channels_total": "${ln_channels_total}",
+    "ln_baseInfo": "${json_ln_baseInfo}",
     "ln_peers": "${ln_peers}",
-    "ln_channelInfo": "${ln_channelInfo}"
+    "ln_channelInfo": "${ln_channelInfo}",
+    "ln_external": "${ln_external}"
 }
 EOF
 
   # use Jinja2 and apply json data to template to procude static html file
-  /usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
+  res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
+  if ! [ $? -eq 0 ]; then
+    echo "an error occured.. maybe JSON syntax is wrong..!"
+    echo "${res}"
+  fi
 fi
 
 

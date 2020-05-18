@@ -1,147 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>RaspiBlitz Status</title>
     <link rel="stylesheet" href="status.css">
 </head>
-
 <body>
 
-<div id="lcd-regular">
-    <div class="status-bar">
-        <span id="nodename">Status ⚡ Mockup</span>
-
-        <span id="nodeversion">RaspiBlitz v1.0 ({{ uptime }})</span>
-
-    </div>
-    <div class="status-box">
-        <div id="wrapper-temp" class="status-symbol">
-            <svg id="bar-temp">
-                <rect id="bar-temp-background"
-                      x="8" y="2"
-                      rx="5" ry="5"
-                      width="14" height="90"
-                      fill="#404040" />
-                <circle r="12" cx="15" cy="85" fill="#404040" />
-
-                <rect
-                        x="11" y="4"
-                        rx="3" ry="3"
-                        width="8" height="85"
-                        fill="black" />
-                <circle r="9" cx="15" cy="85" fill="black" />
-
-                <rect id="bar-temp-display"
-                      x="12" y="40"
-                      rx="0" ry="0"
-                      width="6" height="45"
-                      fill="green" />
-                <circle r="8" cx="15" cy="85" fill="green" />
-            </svg>
-            <div class="status-text">56°C CPU</div>
-        </div>
-
-        <div id="wrapper-mem" class="status-symbol">
-            <svg id="bar-mem">
-                <defs>
-                    <g id="mem-foot">
-                        <rect x="4" y="0" width="6" height="10" fill="#404040" />
-                        <rect x="0" y="3" width="8" height="4"  fill="#404040" />
-                    </g>
-                </defs>
-
-                <rect id="bar-mem-background"
-                      x="8" y="0"
-                      rx="3" ry="3"
-                      width="35" height="100"
-                      stroke="dimgray"
-                      fill="#202020" />
-
-                <rect id="bar-mem-background-free"
-                      x="16" y="9"
-                      width="19" height="33"
-                      fill="darkgray" />
-                <rect id="bar-mem-background-used"
-                      x="16" y="43"
-                      width="19" height="47"
-                      fill="orange" />
-
-                <use x="0" y="5" xlink:href="#mem-foot" />
-                <use x="0" y="25" xlink:href="#mem-foot" />
-                <use x="0" y="45" xlink:href="#mem-foot" />
-                <use x="0" y="65" xlink:href="#mem-foot" />
-                <use x="0" y="85" xlink:href="#mem-foot" />
-
-                <use x="-51" y="5" xlink:href="#mem-foot" transform="scale(-1,1)" />
-                <use x="-51" y="25" xlink:href="#mem-foot" transform="scale(-1,1)" />
-                <use x="-51" y="45" xlink:href="#mem-foot" transform="scale(-1,1)" />
-                <use x="-51" y="65" xlink:href="#mem-foot" transform="scale(-1,1)" />
-                <use x="-51" y="85" xlink:href="#mem-foot" transform="scale(-1,1)" />
-            </svg>
-            <div class="status-text">386/927 MB free</div>
-        </div>
-
-        <div id="wrapper-hdd" class="status-symbol">
-            <svg>
-                <rect x="0" y="0" rx="5" ry="5" width="50" height="80" fill="#404040" />
-                <path d="M 10 78 Q 10 95 30 90" stroke="#404040" stroke-width="3" fill="transparent" />
-                <rect x="25" y="84" rx="3" ry="3" width="15" height="12" fill="#404040" />
-                <rect x="36" y="85" width="12" height="10" fill="grey" stroke="#404040" />
-                <rect x="31" y="83" width="10" height="14" fill="#404040" />
-                <rect x="43" y="88" width="3"  height="1"  fill="#404040" />
-                <rect x="43" y="91" width="3"  height="1"  fill="#404040" />
-                <circle r="14" cx="25" cy="30" fill="#404040" stroke="dimgray" stroke-width="15" />
-                <circle r="14" cx="25" cy="30" fill="transparent" stroke="darkorange" stroke-width="15" stroke-dasharray="35 96" />
-            </svg>
-            <div class="status-text">602/990 GB free</div>
-        </div>
-
-        <div id="wrapper-load" class="status-symbol">
-            <svg>
-                <circle r="25" cx="35" cy="30" fill="transparent" stroke="#404040" stroke-width="4" />
-                <circle r="25" cx="35" cy="30" fill="transparent" stroke="red"
-                        stroke-width="2" stroke-dasharray="55 250" transform="rotate(273 35 30)" />
-                <circle r="20" cx="35" cy="30" fill="transparent" stroke="lightgrey"
-                        stroke-width="3" stroke-dasharray="1 10" transform="rotate(50 35 30)" />
-                <circle r="22" cx="35" cy="30" fill="transparent" stroke="black"
-                        stroke-width="28" stroke-dasharray="45 200" transform="rotate(32 35 30)" />
-                <circle r="22" cx="35" cy="30" fill="transparent" stroke="black"
-                        stroke-width="28" stroke-dasharray="45 200" transform="rotate(32 35 30)" />
-                <circle r="14" cx="35" cy="30" fill="transparent" stroke="#505050"
-                        stroke-width="17" stroke-dasharray="10 500" transform="rotate(200 35 30)" />
-                <circle r="7" cx="35" cy="30" fill="transparent" stroke="#404040"
-                        stroke-width="17" stroke-dasharray="7 500" transform="rotate(190 35 30)" />
-                <polygon points="32,30 35,5 38,30" fill="orange" transform="rotate(-25 35 30)"/>
-                <circle r="3" cx="35" cy="30" fill="white" stroke="orange" stroke-width="4" />
-            </svg>
-            <pre class="status-text">CPU load
-  1 min∅ 2.7
-  5 min∅ 1.6
- 15 min∅ 1.9</pre>
-        </div>
+<div class="grid-container">
+    <div class="header">
+        <p>Info Dashboard</p>
     </div>
 
-    <div class="status-box">
-        <p>LND 0.5.2-beta wallet 212784 sat</p>
-        <p>6/7 Channels 359780 sat 12 peers</p>
-        <p>Idea: lines for each channel like Shango</p>
-        <p>colors for channel states: pending, open, active, closing</p>
+    <div class="logo">
+        <img src="RaspiBlitz_Logo_Icon_Negative_Cut.png" height="345" width="228" />
     </div>
-    <div class="status-box">
-        <p>bitcoin v0.17.0.1 mainnet Sync OK (100%)</p>
-        <p>▼2.8GiB ▲1002.8MiB</p>
-        <p>37 connections</p>
 
+    <div class="main">
+        <p>RaspiBlitz v{{ codeVersion }} {{ hostname }}</p>
+        <p>{{ network }} Fullnode + Lightning Network {{ torInfo }}</p>
+        <p>&nbsp;<p>
+        <p>CPU load {{ load }}, temp  {{ tempC }}°C {{ tempF }}°F</p>
+        <p>Free Mem {{ ram }} HDDuse {{ hddUsedInfo }}</p>
+        <p>ssh admin@{{ local_ip }} ▼{{ network_rx }} ▲{{ network_tx }}</p>
+        {% if runningRTL == '1' %}
+            <p>web admin --> <a href="http://{{ local_ip }}:3000">http://{{ local_ip }}:3000</a></p>
+            {% endif %}
+        <p>&nbsp;<p>
+        <p>{{ network }} {{ networkVersion }} {{ chain }}net Sync foo OK {{ sync_percentage }}</p>
+        <p>{{ public_addr_pre }} {{ public_addr }} {{ networkConnections }} peers</p>
+        <p>&nbsp;<p>
+        <p>LND {{ ln_version }} {{ ln_baseInfo }} foo <p>
+        <p>{{ ln_channelInfo }} {{ ln_peers }} peers <p>
     </div>
-    <div class="status-box">
-        <p>ssh admin@192.168.178.42</p>
-        <p>web admin http://192.168.178.42:3000</p>
-        <p>DynDNS myblitz.ignorelist.com</p>
+
+    <div class="footer">
+        <p>{{ ln_external }}</p>
     </div>
 </div>
 
-
 </body>
-
 </html>
