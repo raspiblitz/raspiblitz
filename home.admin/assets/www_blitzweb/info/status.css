@@ -1,114 +1,48 @@
+#regular {
+    /* The size of the LCD on shopping list */
+    width: 920px;
+    height: 440px;
+}
+
+.header {
+    grid-area: header;
+    text-align: center;
+}
+
+.logo {
+    grid-area: logo;
+    text-align: center;
+}
+
+.main {
+    grid-area: main;
+}
+
+.footer {
+    grid-area: footer;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-areas: 'header header header header' 'logo main main main' 'footer footer footer footer';
+    grid-gap: 1px;
+    background-color: #02192b;
+    padding: 1px;
+}
+
+.grid-container > div {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    font-size: 30px;
+}
+
 body {
     background-color: black;
-    font-family: sans-serif;
+    font-family: monospace, monospace;
     color: LightSteelBlue;
 }
 
 p {
     font-size: 12px;
-}
-
-#lcd-regular {
-    /* The size of the LCD on shopping list */
-    width: 480px;
-    height: 320px;
-}
-
-#nodename {
-    margin: 3px;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-#nodeversion {
-    margin: 3px;
-    font-size: 16px;
-    float: right;
-}
-
-.status-bar {
-    width: 100%;
-    height: 40px;
-}
-
-.status-box {
-    width: 50%;
-    height: 45%;
-    box-sizing: border-box;
-    margin: 0px;
-    padding: 0px;
-    float: left;
-}
-
-.bar-background {
-    fill: lightgrey;
-}
-
-.bar-load-now {
-    fill: blue;
-}
-
-.bar-load-avg5 {
-    fill: lightblue;
-}
-
-.bar-load-avg5 {
-    fill: grey;
-}
-
-
-#meter {
-    display: inline;
-    width: 100%;
-    height: 100%;
-    transform: rotate(180deg);
-    transform: scale(-0.9);
-}
-
-#wrapper-temp {
-    width: 28px;
-    height: 100px;
-    margin-left: 0px;
-    margin-right: 3px;
-}
-
-#wrapper-mem {
-    width: 50px;
-    height: 100px;
-    margin-left: 3px;
-    margin-right: 3px;
-}
-
-#wrapper-hdd {
-    width: 50px;
-    height: 100px;
-    margin-left: 3px;
-    margin-right: 3px;
-}
-
-#wrapper-load {
-    margin-top: 37px;
-    width: 70px;
-    height: 45px;
-}
-
-.status-symbol {
-    float: left;
-    width: 85px;
-    height: 100%;
-    margin-right: 1em;
-    padding: 0px;
-    box-sizing: border-box;
-}
-
-.status-text {
-    font-family: monospace;
-    padding: 2px;
-    font-size: 8px;
-    text-align: center;
-}
-
-svg {
-    width: 100%;
-    height: 100%;
+    margin: 4px;
 }
