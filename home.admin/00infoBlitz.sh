@@ -364,7 +364,11 @@ fi
 uptime=$(uptime --pretty)
 datetime=$(date)
 
-# write results to a json file on RAM disk cache
+# if running as user "pi":
+#  - write results to a JSON file on RAM disk
+#  - update info.html file
+if [ "${EUID}" == "$(id -u pi)" ]; then
+
 cat <<EOF > /var/cache/raspiblitz/info.json
 {
     "uptime": "${uptime}",
@@ -396,7 +400,9 @@ cat <<EOF > /var/cache/raspiblitz/info.json
 }
 EOF
 
-# update info.html file
-/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
+  # use Jinja2 and apply json data to template to procude static html file
+  /usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
+fi
+
 
 # EOF
