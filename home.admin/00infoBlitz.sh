@@ -397,6 +397,6 @@ cat <<EOF > /var/cache/raspiblitz/info.json
 EOF
 
 # update info.html file
-/usr/local/bin/j2 /var/www/blitzweb/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
+/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html
 
 # EOF

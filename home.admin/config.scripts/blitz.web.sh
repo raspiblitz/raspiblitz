@@ -18,11 +18,11 @@ APOST=\'  # close tag for linters: '
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  echo "Turn ON: Web"
+  echo "Turning ON: Web"
 
   # install
   sudo apt-get update >/dev/null
-  sudo apt-get install -y nginx >/dev/null
+  sudo apt-get install -y nginx apache2-utils >/dev/null
 
   # make sure that it is enabled and started
   sudo systemctl enable nginx >/dev/null
@@ -83,6 +83,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo cp /home/admin/assets/blitzweb.conf /etc/nginx/sites-available/blitzweb.conf
   sudo ln -sf /etc/nginx/sites-available/blitzweb.conf /etc/nginx/sites-enabled/
 
+  if ! [ -f /etc/nginx/.htpasswd ]; then
+    # ToDo(frennkie) hardcoded admin:changeme <- change it!
+    echo "changeme" | sudo htpasswd -c -i /etc/nginx/.htpasswd admin
+    sudo chown www-data:www-data /etc/nginx/.htpasswd
+    sudo chmod 640 /etc/nginx/.htpasswd
+
+  else
+    sudo chown www-data:www-data /etc/nginx/.htpasswd
+    sudo chmod 640 /etc/nginx/.htpasswd
+  fi
+
   # open firewall
   sudo ufw allow 443 comment 'nginx https_443' 2>/dev/null
 
@@ -95,7 +106,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 ###################
 elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  echo "Turn OFF: Web"
+  echo "Turning OFF: Web"
 
   sudo systemctl stop nginx
   sudo systemctl disable nginx >/dev/null
