@@ -58,7 +58,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo /usr/sbin/usermod --append --groups lndadmin bos
   
   # install bos
-  sudo -u bos npm install -g balanceofsatoshis
+  sudo -u bos npm install -g balanceofsatoshis@5.36.0
 
   # setting value in raspi blitz config
   sudo sed -i "s/^bos=.*/bos=on/g" /mnt/hdd/raspiblitz.conf
