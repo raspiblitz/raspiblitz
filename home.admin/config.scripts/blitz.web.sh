@@ -84,8 +84,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ln -sf /etc/nginx/sites-available/blitzweb.conf /etc/nginx/sites-enabled/
 
   if ! [ -f /etc/nginx/.htpasswd ]; then
-    # ToDo(frennkie) hardcoded admin:changeme <- change it!
-    echo "changeme" | sudo htpasswd -c -i /etc/nginx/.htpasswd admin
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    echo "${PASSWORD_B}" | sudo htpasswd -c -i /etc/nginx/.htpasswd admin
     sudo chown www-data:www-data /etc/nginx/.htpasswd
     sudo chmod 640 /etc/nginx/.htpasswd
 
