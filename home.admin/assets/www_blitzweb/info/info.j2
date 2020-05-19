@@ -9,11 +9,11 @@
 
 <div class="grid-container" id="regular">
     <div class="header">
-        <p>Info Dashboard</p>
+        <p>Info Dashboard (Updated: {{ datetime }})</p>
     </div>
 
     <div class="logo">
-        <img src="RaspiBlitz_Logo_Icon_Negative_Cut.png" height="345" width="228" />
+        <img src="RaspiBlitz_Logo_Icon_Negative_Cut.png" height="310" width="196" />
     </div>
 
     <div class="main">
@@ -22,6 +22,7 @@
         <p>&nbsp;<p>
         <p>CPU load {{ load }}, temp  {{ tempC }}°C {{ tempF }}°F</p>
         <p>Free Mem {{ ram }} HDDuse {{ hddUsedInfo }}</p>
+        <p>{{ uptime }}</p>
         <p>ssh admin@{{ local_ip }} ▼{{ network_rx }} ▲{{ network_tx }}</p>
         {% if runningRTL == '1' %}
             <p>web admin --> <a href="http://{{ local_ip }}:3000">http://{{ local_ip }}:3000</a></p>
