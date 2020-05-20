@@ -28,7 +28,7 @@
             <p>web admin --> <a href="http://{{ local_ip }}:3000">http://{{ local_ip }}:3000</a></p>
         {% endif %}
         <p>&nbsp;<p>
-        <p>{{ network }} {{ networkVersion }} {{ chain }}net Sync foo OK {{ sync_percentage }}</p>
+	<p>{{ network }} {{ networkVersion }} {{ chain }}net Sync OK {{ sync_percentage }}</p>  <!-- ToDo(frennkie) this doesn't cover all cases-->
         <p>{{ public_addr_pre }} {{ public_addr }} {{ networkConnections }} peers</p>
         <p>&nbsp;<p>
         <p>LND {{ ln_version }} {{ ln_baseInfo }} <p>
