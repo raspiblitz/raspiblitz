@@ -369,7 +369,6 @@ datetime=$(date)
 #  - update info.html file
 if [ "${EUID}" = "$(id -u pi)" ]; then
 
-    # ToDo(frennkie) this only works if lnd is ok
     json_ln_baseInfo=$(echo "${ln_baseInfo}" | cut -c 11-)
 
     cat <<EOF > /var/cache/raspiblitz/info.json
@@ -407,7 +406,7 @@ if [ "${EUID}" = "$(id -u pi)" ]; then
 }
 EOF
 
-  # use Jinja2 and apply json data to template to procude static html file
+  # use Jinja2 and apply json data to template to produce static html file
   res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
   if ! [ $? -eq 0 ]; then
     echo "an error occured.. maybe JSON syntax is wrong..!"

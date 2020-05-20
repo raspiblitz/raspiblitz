@@ -26,17 +26,21 @@
         <p>ssh admin@{{ local_ip }} ▼{{ network_rx }} ▲{{ network_tx }}</p>
         {% if runningRTL == '1' %}
             <p>web admin --> <a href="http://{{ local_ip }}:3000">http://{{ local_ip }}:3000</a></p>
-            {% endif %}
+        {% endif %}
         <p>&nbsp;<p>
         <p>{{ network }} {{ networkVersion }} {{ chain }}net Sync foo OK {{ sync_percentage }}</p>
         <p>{{ public_addr_pre }} {{ public_addr }} {{ networkConnections }} peers</p>
         <p>&nbsp;<p>
-        <p>LND {{ ln_version }} {{ ln_baseInfo }} foo <p>
-        <p>{{ ln_channelInfo }} {{ ln_peers }} peers <p>
+        <p>LND {{ ln_version }} {{ ln_baseInfo }} <p>
+        {% if ln_version|length %}
+            <p>{{ ln_channelInfo }} {{ ln_peers }} peers <p>
+        {% endif %}
     </div>
 
     <div class="footer">
-        <p>{{ ln_external }}</p>
+        {% if ln_version|length %}
+            <p>{{ ln_external }}</p>
+        {% endif %}
     </div>
 </div>
 
