@@ -104,13 +104,15 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
   sudo rm -rf /home/pi/MagPi
 fi
 
-# remove some (big) packages that are not needed
-sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+# remove some packages that are not needed
+sudo apt-get remove -y --purge oracle-java* python2
 sudo apt-get clean
 sudo apt-get -y autoremove
 
 # make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # update debian
 echo ""
@@ -282,13 +284,15 @@ sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt install -y build-essential
+
+# add armbian-config
 if [ "${baseImage}" = "armbian" ]; then
   # add armbian config
-  sudo apt --fix-broken install -y
   sudo apt install armbian-config -y
-  # dependencies for Armbian Buster minimal kernel 5.4
-  sudo apt install -y python3-venv python3-dev python3-wheel
 fi
+
+# dependencies for minimal images
+sudo apt install -y python3-venv python3-dev python3-wheel
 
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
@@ -305,6 +309,17 @@ sudo apt install -y openssh-client
 sudo apt install -y openssh-sftp-server
 # install killall, fuser
 sudo apt-get install -y psmisc
+
+# install packages for the display, touchscreen and xserver
+sudo apt install -y libxi6 libdrm-amdgpu1 libdrm-common libdrm-nouveau2 \
+libdrm-radeon1 libdrm2 libegl-mesa0 libegl1 libegl1-mesa libepoxy0 \
+libevdev2 libfontenc1 libgbm1 libgl1 libgl1-mesa-dri libglapi-mesa libglvnd0 \
+libglx-mesa0 libglx0 libice6 libllvm9 libmtdev1 libpciaccess0 libpixman-1-0 \
+libsensors-config libsensors5 libsm6 libunwind8 libwayland-client0 libwayland-server0 \
+libx11-xcb1 libxaw7 libxcb-dri2-0 libxcb-dri3-0 libxcb-glx0 libxcb-present0 \
+libxcb-sync1 libxcb-xfixes0 libxdamage1 libxfixes3 libxfont2 libxkbfile1 libxmu6 \
+libxpm4 libxshmfence1 libxt6 libxxf86vm1 x11-common x11-xkb-utils xfonts-base \
+xfonts-encodings xfonts-utils xserver-common xserver-xorg-core xserver-xorg-input-evdev
 
 sudo apt-get clean
 sudo apt-get -y autoremove
@@ -707,21 +722,22 @@ echo ""
 
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-echo "*** LCD DRIVER ***"
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+  echo "*** LCD DRIVER ***"
+  echo "--> Downloading LCD Driver from Github"
+  cd /home/admin/
+  sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+  sudo -u admin chmod -R 755 LCD-show
+  sudo -u admin chown -R admin:admin LCD-show
+  cd LCD-show/
+  # set comit hard to old version - that seemed to run better
+  #
+  sudo -u admin git reset --hard ce52014
 
-echo "--> Downloading LCD Driver from Github"
-cd /home/admin/
-sudo -u admin git clone https://github.com/goodtft/LCD-show.git
-sudo -u admin chmod -R 755 LCD-show
-sudo -u admin chown -R admin:admin LCD-show
-cd LCD-show/
-# set comit hard to old version - that seemed to run better
-#
-sudo -u admin git reset --hard ce52014
-
-# install xinput calibrator package
-  echo "--> install xinput calibrator package"
-sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+  # install xinput calibrator package
+    echo "--> install xinput calibrator package"
+  sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+fi
 
 # make dietpi preparations
 if [ "${baseImage}" = "dietpi" ]; then
@@ -746,8 +762,10 @@ echo "SD CARD BUILD DONE"
 echo "**********************************************"
 echo ""
 echo "Your SD Card Image for RaspiBlitz is almost ready."
-echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-echo ""
+if [ "${baseImage}" = "raspbian" ]; then
+  echo "Last step is to install LCD drivers. This will reboot your Pi when done."
+  echo ""
+fi
 echo "Take the chance & look thru the output above if you can spot any errror."
 echo ""
 echo "After final reboot - your SD Card Image is ready."
@@ -759,9 +777,11 @@ echo ""
 
 # activate LCD and trigger reboot
 # dont do this on dietpi to allow for automatic build
-if [ "${baseImage}" != "dietpi" ]; then
+if [ "${baseImage}" = "raspbian" ]; then
   sudo chmod +x -R /home/admin/LCD-show
   cd /home/admin/LCD-show/
   sudo apt-mark hold raspberrypi-bootloader
   sudo ./LCD35-show
+else
+  echo "Use 'sudo reboot' to restart manually."
 fi
