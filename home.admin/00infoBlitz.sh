@@ -367,11 +367,12 @@ datetime=$(date)
 # if running as user "pi":
 #  - write results to a JSON file on RAM disk
 #  - update info.html file
-if [ "${EUID}" == "$(id -u pi)" ]; then
+if [ "${EUID}" = "$(id -u pi)" ]; then
 
-    json_ln_baseInfo=$(echo "${ln_baseInfo}" | cut -c 11-)  # ToDo(frennkie) this only work if lnd is ok
+    # ToDo(frennkie) this only works if lnd is ok
+    json_ln_baseInfo=$(echo "${ln_baseInfo}" | cut -c 11-)
 
-cat <<EOF > /var/cache/raspiblitz/info.json
+    cat <<EOF > /var/cache/raspiblitz/info.json
 {
     "uptime": "${uptime}",
     "datetime": "${datetime}",

@@ -5,12 +5,98 @@ source /mnt/hdd/raspiblitz.conf
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "the RaspiBlitz Web Interface(s)"
-  echo "blitz.web.sh [on|off]"
+  echo "blitz.web.sh on"
+  echo "blitz.web.sh off"
+  echo "blitz.web.sh listen localhost"
+  echo "blitz.web.sh listen any"
   exit 1
 fi
 
 # using ${APOST} is a workaround to be able to use sed with '
 APOST=\'  # close tag for linters: '
+
+
+###################
+# FUNCTIONS
+###################
+function set_nginx_blitzweb_listen() {
+   # first parameter to function should be either "localhost" or "any"
+   listen_to=${1}
+
+   if [ -f "/etc/nginx/sites-available/blitzweb.conf" ]; then
+       if ! grep -Eq '^\s*#?\s*listen 127.0.0.1:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+           echo "Error: missing expected line for: lo:v4 https"
+           exit 1
+       else
+           if grep -Eq '^\s*#\s*listen 127.0.0.1:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+           #echo "found: lo:v4 https (disabled line)"
+               if [ ${listen_to} = "localhost" ]; then
+                   sudo sed -i -E 's/#\s*(listen 127.0.0.1:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           else
+               #echo "found: lo:v4 https (enabled line)"
+               if [ ${listen_to} = "any" ]; then
+                   sudo sed -i -E 's/(listen 127.0.0.1:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+          fi
+
+       fi
+
+       if ! grep -Eq '^\s*#?\s*listen \[::1\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+           echo "Error: missing expected line for: lo:v6 https"
+           exit 1
+       else
+           if grep -Eq '^\s*#\s*listen \[::1\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+               #echo "found: lo:v6 https (disabled line)"
+               if [ ${listen_to} = "localhost" ]; then
+                   sudo sed -i -E 's/#\s*(listen \[::1\]:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           else
+               #echo "found: lo:v6 https (enabled line)"
+               if [ ${listen_to} = "any" ]; then
+                   sudo sed -i -E 's/(listen \[::1\]:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           fi
+
+       fi
+
+       if ! grep -Eq '^\s*#?\s*listen 443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+           echo "Error: missing expected line for: any:v4 https"
+           exit 1
+       else
+           if grep -Eq '^\s*#\s*listen 443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+               #echo "found: any:v4 https (disabled line)"
+               if [ ${listen_to} = "any" ]; then
+                   sudo sed -i -E 's/#\s*(listen 443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           else
+               #echo "found: any:v4 https (enabled line)"
+               if [ ${listen_to} = "localhost" ]; then
+                   sudo sed -i -E 's/(listen 443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           fi
+
+       fi
+
+       if ! grep -Eq '^\s*#?\s*listen \[::\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+           echo "Error: missing expected line for: any:v6 https"
+           exit 1
+       else
+           if grep -Eq '^\s*#\s*listen \[::\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
+               #echo "found: any:v6 https (disabled line)"
+               if [ ${listen_to} = "any" ]; then
+                   sudo sed -i -E 's/#\s*(listen \[::\]:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           else
+               #echo "found: any:v6 https (enabled line)"
+               if [ ${listen_to} = "localhost" ]; then
+                   sudo sed -i -E 's/(listen \[::\]:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
+               fi
+           fi
+       fi
+   fi
+}
+
 
 
 ###################
@@ -58,9 +144,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
 
-  # open firewall
-  sudo ufw allow 80 comment 'nginx http_80' 2>/dev/null
-
   ### RaspiBlitz Webserver on HTTPS 443
 
   # copy webroot
@@ -94,9 +177,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chmod 640 /etc/nginx/.htpasswd
   fi
 
-  # open firewall
-  sudo ufw allow 443 comment 'nginx https_443' 2>/dev/null
-
   # restart NGINX
   sudo systemctl restart nginx
 
@@ -110,6 +190,19 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl stop nginx
   sudo systemctl disable nginx >/dev/null
+
+
+###################
+# LISTEN
+###################
+elif [ "$1" = "listen" ]; then
+
+  if [ "$2" = "localhost" ] || [ "$2" = "any" ]; then
+    echo "Setting NGINX to listen on: ${2}"
+    set_nginx_blitzweb_listen "${2}"
+  else
+    echo "# FAIL: parameter not known - run with -h for help"
+  fi
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
