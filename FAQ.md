@@ -1,5 +1,11 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.6 of RaspiBlitz?
+
+- Fix: DropBox StaticChannelBackup 
+- New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Faraday [details](https://github.com/lightninglabs/faraday)
+
 ## Whats new in Version 1.5 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
