@@ -111,7 +111,7 @@ fi
 echo "# COPYING from GIT-Directory to /home/admin/"
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 echo "# .."
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
+sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets /home/admin
 echo "# .."
 sudo -u admin chmod +x /home/admin/*.sh
 echo "# .."

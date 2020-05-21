@@ -395,6 +395,24 @@ else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
+# Faraday
+if [ "${faraday}" = "on" ]; then
+  echo "Provisioning Faraday - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Faraday'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Faraday - keep default" >> ${logFile}
+fi
+
+# BOS
+if [ "${bos}" = "on" ]; then
+  echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Balance of Satoshis'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.bos.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
