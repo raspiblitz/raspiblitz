@@ -25,21 +25,22 @@ else
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
     isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
-    VERSION="v12.14.1"
+    VERSION="v12.16.3"
  
     # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
-    # https://nodejs.org/dist/v12.14.1/SHASUMS256.txt
+    # https://nodejs.org/dist/v12.16.3/SHASUMS256.txt
+
     if [ ${isARM} -eq 1 ] ; then
     DISTRO="linux-armv7l"
-    CHECKSUM="ed4e625c84b877905eda4f356c8b4183c642e5ee6d59513d6329674ec23df234"
+    CHECKSUM="8fdf1751c985c4e8048b23bbe9e36aa0cad0011c755427694ea0fda9efad6d97"
     fi
     if [ ${isAARCH64} -eq 1 ] ; then
     DISTRO="linux-arm64"
-    CHECKSUM="6cd28a5e6340f596aec8dbfd6720f444f011e6b9018622290a60dbd17f9baff6"
+    CHECKSUM="8311f513a7d1911200502dd3e00142cef56d600c851d5870f68d939802205b73"
     fi
     if [ ${isX86_64} -eq 1 ] ; then
     DISTRO="linux-x64"
-    CHECKSUM="07cfcaa0aa9d0fcb6e99725408d9e0b07be03b844701588e3ab5dbc395b98e1b"
+    CHECKSUM="1956e196e3c3c8ef5f0c45db76d7c1245af4ccdda2b7ab30a57ce91d6e165caa"
     fi
     if [ ${isX86_32} -eq 1 ] ; then
     echo "FAIL: No X86 32bit build available - will abort setup"
