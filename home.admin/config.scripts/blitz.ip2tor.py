@@ -25,12 +25,14 @@ if sys.argv[1] == "menu":
     d.set_background_title("IP2TOR Subscription Service")
     code, tag = d.menu("OK, then you have two options:",
         choices=[("(1)", "Test HTTP REQUEST thru TOR PROXY"),
-        ("(2)", "Make REST API - JSON request")])
+        ("(2)", "Make REST API - JSON request"),
+        ("(3)", "TOML test"),
+        ("(3)", "Use raspiblitz.conf with TOML")])
     if code == d.OK:
         if tag == "(1)":
+            print("Needs: pip3 install pysocks\n")
             session = requests.session()
             session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
-            print("Needs: pip3 install pysocks\n")
             print("Call 'http://httpbin.org/ip' thru TOR proxy:\n")
             print(session.get("http://httpbin.org/ip").text)
             print("Call 'http://httpbin.org/ip' normal:\n")
@@ -45,5 +47,15 @@ if sys.argv[1] == "menu":
             for key in jData:
                 print (key)
                 print("\n")
+        if tag == "(3)":
+            print ("Needs: pip install toml")
+            import toml
+            toml_string = """
+            """
+        if tag == "(4)":
+            with open('/mnt/hdd/raspiblitz.conf', 'r') as myfile:
+                data=myfile.read().replace('\n', '')
+            print(data)   
+
     else:
         print("Cancel")
