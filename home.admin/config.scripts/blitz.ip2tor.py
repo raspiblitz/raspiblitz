@@ -56,6 +56,7 @@ if sys.argv[1] == "menu":
             with open('/mnt/hdd/raspiblitz.conf', 'r') as myfile:
                 data=myfile.read()
             print(data)
+            import toml
             parsed_toml = toml.loads(data)
             print(parsed_toml)
 
