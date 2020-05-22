@@ -54,7 +54,7 @@ if sys.argv[1] == "menu":
             """
         if tag == "(4)":
             with open('/mnt/hdd/raspiblitz.conf', 'r') as myfile:
-                data=myfile.read().replace('\n', '')
+                data=myfile.read()
             print(data)   
 
     else:
