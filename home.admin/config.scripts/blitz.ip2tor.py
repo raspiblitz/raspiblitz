@@ -48,14 +48,16 @@ if sys.argv[1] == "menu":
                 print (key)
                 print("\n")
         if tag == "(3)":
-            print ("Needs: pip install toml")
+            print ("Needs: pip3 install toml")
             import toml
             toml_string = """
             """
         if tag == "(4)":
             with open('/mnt/hdd/raspiblitz.conf', 'r') as myfile:
                 data=myfile.read()
-            print(data)   
+            print(data)
+            parsed_toml = toml.loads(data)
+            print(parsed_toml)
 
     else:
         print("Cancel")
