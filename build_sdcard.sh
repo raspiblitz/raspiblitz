@@ -586,7 +586,7 @@ echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
 # for setup schell scripts
-sudo apt-get -y install dialog bc python3-dialog
+sudo apt-get -y install dialog bc
 
 # enable copy of blockchain from 2nd HDD formatted with exFAT
 sudo apt-get -y install exfat-fuse
