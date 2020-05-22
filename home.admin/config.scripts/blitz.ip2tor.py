@@ -27,7 +27,7 @@ if sys.argv[1] == "menu":
         choices=[("(1)", "Test HTTP REQUEST thru TOR PROXY"),
         ("(2)", "Make REST API - JSON request"),
         ("(3)", "TOML test"),
-        ("(3)", "Use raspiblitz.conf with TOML")])
+        ("(4)", "Use raspiblitz.conf with TOML")])
     if code == d.OK:
         if tag == "(1)":
             print("Needs: pip3 install pysocks\n")
