@@ -30,18 +30,42 @@ source venv/bin/activate
 pip install BlitzPy
 ```
 
-## Installation
+## Usage
 
-Import and use..
+### Import and use..
 
 ```
 from blitzpy import RaspiBlitzConfig
 cfg = RaspiBlitzConfig()
 cfg.reload()
-print(cfg.__dict__)
 print(cfg.hostname)
 if cfg.run_behind_tor:
     print("using TOR!")
+```
+
+### Changing values
+
+In order to change the content of a setting the `value` attribute needs to be updated!
+
+```
+from blitzpy import RaspiBlitzConfig
+cfg = RaspiBlitzConfig()
+cfg.reload()
+print(cfg.hostname)
+cfg.hostname.value = "New-Hostname!"
+print(cfg.hostname)
+```
+
+### Exporting
+
+Use `cfg.write()` to export file (will use default path - override with cfg.write(path="/tmp/foobar.conf").
+
+```
+from blitzpy import RaspiBlitzConfig
+cfg = RaspiBlitzConfig()
+cfg.reload()
+cfg.rtl_web_interface.value = True
+cfg.write()
 ```
 
 ## License
