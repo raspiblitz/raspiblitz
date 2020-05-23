@@ -5,8 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.47.0] - 2020-05-23
+### Removed
+- remove config.py has been moved to dedicated ackage BlitzPy
+
 ## [0.46.1] - 2020-04-17
-### Added
+### Removed
 - remove LND config check
 
 ## [0.45.0] - 2020-01-25
