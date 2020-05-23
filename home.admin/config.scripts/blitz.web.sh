@@ -120,6 +120,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
   fi
 
+  if [ -f /etc/ssl/certs/dhparam.pem ]; then
+    #can take 5-10+ minutes on a Raspberry Pi 3
+    echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
+    echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
+    sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+  fi
+
   sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
 
   ### Welcome Server on HTTP Port 80
