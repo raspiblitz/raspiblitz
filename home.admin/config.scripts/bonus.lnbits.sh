@@ -202,6 +202,13 @@ EOF
     echo "LNbits already installed."
   fi
 
+  # setup nginx symlinks
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5001_https.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5002_http.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5003_https.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
+
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
 
@@ -218,6 +225,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5001_https.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5002_http.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5003_https.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
   if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
