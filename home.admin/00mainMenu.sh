@@ -169,6 +169,7 @@ case $CHOICE in
             ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
+            ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;
