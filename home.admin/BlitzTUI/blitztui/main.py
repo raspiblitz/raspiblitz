@@ -215,7 +215,7 @@ class AppWindow(QMainWindow):
                 res = True
 
         else:
-            with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+            with ReadOnlyStub(network=self.rb_cfg.network.value, chain=self.rb_cfg.chain.value) as stub_readonly:
                 res, amt_paid_sat = check_invoice_paid(stub_readonly, self.invoice_to_check)
                 log.debug("result of invoice check: {}".format(res))
 
@@ -241,7 +241,7 @@ class AppWindow(QMainWindow):
             log.debug("updating status_lnd")
 
             try:
-                with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                with ReadOnlyStub(network=self.rb_cfg.network.value, chain=self.rb_cfg.chain.value) as stub_readonly:
                     pid_ok, listen_ok, unlocked, synced_to_chain, synced_to_graph = check_lnd(stub_readonly)
                     self.status_lnd_pid_ok = pid_ok
                     self.status_lnd_listen_ok = listen_ok
@@ -264,7 +264,7 @@ class AppWindow(QMainWindow):
             log.debug("updating status_lnd_channels")
 
             try:
-                with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+                with ReadOnlyStub(network=self.rb_cfg.network.value, chain=self.rb_cfg.chain.value) as stub_readonly:
                     self.status_lnd_channel_total_active, self.status_lnd_channel_total_remote_balance = \
                         check_lnd_channels(stub_readonly)
                     # set next due time
@@ -275,9 +275,9 @@ class AppWindow(QMainWindow):
 
     def update_title_bar(self):
         log.debug("updating: Main Window Title Bar")
-        self.setWindowTitle(self._translate("MainWindow", "RaspiBlitz v{} - {} - {}net".format(self.rb_cfg.version,
-                                                                                               self.rb_cfg.network,
-                                                                                               self.rb_cfg.chain)))
+        self.setWindowTitle(self._translate("MainWindow", "RaspiBlitz v{} - {} - {}net".format(self.rb_cfg.version.value,
+                                                                                               self.rb_cfg.network.value,
+                                                                                               self.rb_cfg.chain.value)))
 
     def update_uptime(self):
         if IS_WIN32_ENV:
@@ -443,9 +443,9 @@ class AppWindow(QMainWindow):
 
         dialog_b1.move(0, 0)
 
-        ui.buttonBox.button(QDialogButtonBox.Yes).setText("{} SAT".format(self.rb_cfg.invoice_default_amount))
+        ui.buttonBox.button(QDialogButtonBox.Yes).setText("{} SAT".format(self.rb_cfg.invoice_default_amount.value))
         ui.buttonBox.button(QDialogButtonBox.Ok).setText("Donation")
-        if self.rb_cfg.invoice_allow_donations:
+        if self.rb_cfg.invoice_allow_donations.value:
             ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         else:
             ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
@@ -471,10 +471,10 @@ class AppWindow(QMainWindow):
         a, n = adjective_noun_pair()
         inv_memo = "RB-{}-{}".format(a.capitalize(), n.capitalize())
 
-        new_invoice = self.create_new_invoice(inv_memo, amt=self.rb_cfg.invoice_default_amount)
+        new_invoice = self.create_new_invoice(inv_memo, amt=self.rb_cfg.invoice_default_amount.value)
         data = new_invoice.payment_request
         self.show_qr_code(data, SCREEN_INVOICE, memo=inv_memo, status="Open",
-                          inv_amt=self.rb_cfg.invoice_default_amount)
+                          inv_amt=self.rb_cfg.invoice_default_amount.value)
 
     def b3_invoice_custom_amt(self):
         log.info("b1 option: custom amount")
@@ -549,7 +549,7 @@ class AppWindow(QMainWindow):
             new_invoice = FakeAddInvoiceResponse()
 
         else:
-            with InvoiceStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_invoice:
+            with InvoiceStub(network=self.rb_cfg.network.value, chain=self.rb_cfg.chain.value) as stub_invoice:
                 new_invoice = create_invoice(stub_invoice, memo, amt)
 
         log.info("#{}: {}".format(new_invoice.add_index, new_invoice.payment_request))
@@ -564,7 +564,7 @@ class AppWindow(QMainWindow):
         if IS_DEV_ENV:
             return "535f209faaea75427949e3e6c1fc9edafbf751f08706506bb873fdc93ffc2d4e2c@pqcjuc47eqcv6mk2.onion:9735"
 
-        with ReadOnlyStub(network=self.rb_cfg.network, chain=self.rb_cfg.chain) as stub_readonly:
+        with ReadOnlyStub(network=self.rb_cfg.network.value, chain=self.rb_cfg.chain.value) as stub_readonly:
 
             res = get_node_uri(stub_readonly)
             log.info("Node URI: {}".format(res))
