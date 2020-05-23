@@ -43,7 +43,8 @@ echo "allow: transmission"
 sudo ufw allow 49200:49250/tcp comment 'rtorrent'
 echo "allow: local web admin"
 sudo ufw allow from 192.168.0.0/16 to any port 80 comment 'allow local LAN web'
-echo "open firewall for  auto nat discover (see issue #129)"
+sudo ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN web'
+echo "open firewall for auto nat discover (see issue #129)"
 sudo ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 echo "enable lazy firewall"
 sudo ufw --force enable
