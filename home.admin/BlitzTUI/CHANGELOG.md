@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.47.0] - 2020-05-23
 ### Removed
-- remove config.py has been moved to dedicated ackage BlitzPy
+- remove config.py as it has been moved to the dedicated package BlitzPy
 
 ## [0.46.1] - 2020-04-17
 ### Removed
