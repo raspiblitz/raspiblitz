@@ -123,6 +123,7 @@ echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "# ******************************************"
 
+echo "# Checking if the content of BlitzPy changed .."
 checkSumBlitzPyAfter=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 echo "# checkSumBlitzPyBefore = ${checkSumBlitzPyBefore}"
 echo "# checkSumBlitzPyAfter  = ${checkSumBlitzPyAfter}"
