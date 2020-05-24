@@ -373,14 +373,14 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
   sleep 6
   sync
   # loop until the partion gets available
-  done=0
+  loopdone=0
   loopcount=0
-  while [ ${done} -eq 0 ]
+  while [ ${loopdone} -eq 0 ]
   do
     >&2 echo "# waiting until the partion gets available"
     sleep 2
     sync
-    done=$(lsblk -o NAME | grep -c ${hdd}1)
+    loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 10 ]; then
       echo "error='partition failed'"
@@ -398,14 +398,14 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
   >&2 echo "# Formatting"
   sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
-  done=0
+  loopdone=0
   loopcount=0
-  while [ ${done} -eq 0 ]
+  while [ ${loopdone} -eq 0 ]
   do
     >&2 echo "# waiting until formatted drives gets available"
     sleep 2
     sync
-    done=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
+    loopdone=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 10 ]; then
       echo "error='formatting ext4 failed'"
