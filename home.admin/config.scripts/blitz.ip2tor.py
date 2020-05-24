@@ -493,15 +493,14 @@ if sys.argv[1] == "menu":
 
         # get host list from shop
         shopurl = text
+        os.system('clear')
         hosts = shopList(shopurl)
         if hosts is None:
             # shopurl not working
-            print("NONE")
-            time.sleep(3)
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox("NONE")
         elif len(hosts) == 0:
             # shopurl not working
-            print("NO HOSTS")
-            time.sleep(3)
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox("NO HOSTS")
         else:
             # ok we got hosts - continue
             break
