@@ -29,6 +29,10 @@ if [ "${wantedBranch}" = "-clean" ]; then
   wantedBranch="$2"
   wantedGitHubUser="$3"
 fi
+if [ "${wantedBranch}" = "-install" ]; then
+  wantedBranch="$2"
+  wantedGitHubUser="$3"
+fi
 
 # set to another GutHub repo as origin
 if [ ${#wantedGitHubUser} -gt 0 ]; then
