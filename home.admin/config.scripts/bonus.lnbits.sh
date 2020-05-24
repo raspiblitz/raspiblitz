@@ -168,13 +168,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 5000 comment 'lnbits'
-    sudo ufw --force enable
+    sudo ufw allow 5001 comment 'lnbits'
     echo ""
 
     # install service
     echo "*** Install systemd ***"
-    cat > /home/admin/lnbits.service <<EOF
+    cat <<EOF | sudo tee /etc/systemd/system/lnbits.service >/dev/null
 # systemd unit for lnbits
 
 [Unit]
@@ -184,7 +183,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b :5000 lnbits:app -k gevent'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b 127.0.0.1:5000 lnbits:app -k gevent'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -196,14 +195,19 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service
-    sudo chown root:root /etc/systemd/system/lnbits.service
     sudo systemctl enable lnbits
     echo "# OK - service needs starting: sudo systemctl start lnbits"
 
   else
     echo "LNbits already installed."
   fi
+
+  # setup nginx symlinks
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5001_https.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5002_http.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_5003_https.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
@@ -221,6 +225,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5001_https.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5002_http.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5003_https.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
   if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
