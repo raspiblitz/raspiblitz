@@ -267,6 +267,14 @@ If your RaspiBlitz is not working right and you like to get help from the commun
 
 *PLEASE NOTICE: It's possible that this logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
 
+## Can I run my RaspiBlitz on Solar Energy?
+
+Yes - take a look at the project of [Chimezie Chuta](https://twitter.com/mezie16/status/1264513274080636928?s=20) 
+
+![RaspiSolar](pictures/raspisolar.jpg)
+
+More details in his book ["A-Z of Building your own Full Bitcoin Lightning Node: A hand Book for Enthusiasts"](https://blockspace.shop/products/a-z-of-building-your-own-full-bitcoin-lightning-node-a-hand-book-for-enthusiasts)
+
 ## Why is my "final sync" taking so long?
 
 First of all if you see a final sync over 90% and you can see from time to time small increase - you should be OK ... this can take some looong time to catch up with the network. Only in the case that you actively choose the `SYNC` option in the `Getting the Blockchain` a final sync under 90% is OK. If you did a torrent or a copy from another computer and seeing under 90% something went wrong and the setup process is ignoring your prepared Blockchain and doing a full sync - which can almost take forever on a raspberryPi.
