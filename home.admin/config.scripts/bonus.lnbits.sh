@@ -203,9 +203,18 @@ EOF
   fi
 
   # setup nginx symlinks
-  sudo ln -sf /etc/nginx/sites-available/lnbits_5001_https.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/lnbits_5002_http.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/lnbits_5003_https.conf /etc/nginx/sites-enabled/
+  if ! [ -f /etc/nginx/sites-available/lnbits_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-available/lnbits_ssl.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnbits_tor.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-available/lnbits_tor.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnbits_tor_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-available/lnbits_tor_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-enabled/
   sudo nginx -t
   sudo systemctl reload nginx
 
