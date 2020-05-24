@@ -45,15 +45,7 @@ def parseDate(datestr):
     return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
 
 def secondsLeft(dateObj):
-    return round((dateObj - datetime.datetime.utcnow().total_seconds())-SERVERSECONDSDIFF
-
-#date1=parseDate("2020-05-24T22:25:11.630504Z")
-#date2=parseDate("2020-05-25T22:25:11.630504Z")
-#print(date1)
-#print(date2)
-#print(secondsLeft(date1))
-#print(secondsLeft(date2))
-#print(secondsLeft(date2)-secondsLeft(date1))
+    return round((dateObj - datetime.datetime.utcnow()).total_seconds())
 
 # takes a shopurl from user input and turns it into the format needed
 # also makes sure that .onion addresses run just with http not https
@@ -354,11 +346,6 @@ bridge_id = order['item_details'][0]['product']['id']
 bridge_ip = order['item_details'][0]['product']['host']['ip']
 bridge_port = order['item_details'][0]['product']['port']
 
-print("#### SET SERVER TIME DIFF")
-serverTimeDiffSeconds=round((parseDate(order['ln_invoices'][0]['created_at'])-datetime.datetime.now()).total_seconds())
-setServerTimeDiff(serverTimeDiffSeconds)
-print(serverTimeDiffSeconds)
-
 print("#### DECODE INVOICE")
 print(paymentRequestStr)
 paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
@@ -388,13 +375,12 @@ bridge_id = bridge['id']
 bridge_suspendafter = bridge['suspend_after']
 bridge_port = bridge['port']
 
-print("#### CHECK IF DURATION DELIVERED AS PROMISED (1 hour tolerance)")
+print("#### CHECK IF DURATION DELIVERED AS PROMISED")
 contract_broken=False
 secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
 print("delivered({0}) promised({1})".format(secondsDelivered, duration))
-if (secondsDelivered + 3600) < duration:
+if (secondsDelivered + 600) < duration:
     print("CONTRACT BROKEN - duration delivered is too small")
-    contract_broken=True
     sys.exit()
 
 print("BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
@@ -444,7 +430,16 @@ while True:
 
 print("BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
 
-# TODO: check if extension time is as advertised
+print("#### CHECK IF EXTENSION DURATION WAS CORRECT")
+secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
+secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
+secondsExtended = secondsLeftNew - secondsLeftOld
+print("# secondsExtended({0}) promised({1})".format(secondsExtended, duration))
+if secondsExtended < duration:
+    print("CONTRACT BROKEN - duration delivered is too small")
+    sys.exit()
+else:
+    print("OK")
 
 if False: '''
 
