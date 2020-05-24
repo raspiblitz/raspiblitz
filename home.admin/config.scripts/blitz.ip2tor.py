@@ -15,13 +15,20 @@ from blitzpy import RaspiBlitzConfig
 from lndlibs import rpc_pb2 as lnrpc
 from lndlibs import rpc_pb2_grpc as rpcstub
 
+####### SCRIPT INFO #########
+
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage ip2tor subscriptions for raspiblitz")
     print("# blitz.ip2tor.py menu")
+    print("# blitz.ip2tor.py shop-list [shopurl]")
+    print("# blitz.ip2tor.py shop-order [shopurl] [hostid] [toraddress:port] [duration] [msats]")
+    print("# blitz.ip2tor.py subscriptions-list")
+    print("# blitz.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
     sys.exit(1)
 
-# basic settings
+####### BASIC SETTINGS #########
+
 cfg = RaspiBlitzConfig()
 session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
@@ -40,6 +47,8 @@ else:
     LND_IP="192.168.178.95"
     LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
     LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
+
+####### HELPER FUNCTIONS #########
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -77,6 +86,8 @@ def normalizeShopUrl(shopurlUserInput):
             shopurlUserInput = "https://{0}".format(shopurlUserInput)
 
     return shopurlUserInput
+
+####### IP2TOR API CALLS #########
 
 def apiGetHosts(session, shopurl):
 
@@ -133,7 +144,6 @@ def apiGetHosts(session, shopurl):
             print("error='PARSING HOST ENTRY'")
             return    
 
-        print("({0}) {1} ({2} hours, first: {3} sats, next: {4} sats)".format(idx, hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats']))
         hosts.append(hostEntry)
     
     print("# found {0} valid torbridge hosts".format(len(hosts)))
@@ -266,6 +276,8 @@ def apiGetBridgeStatus(session, shopurl, bridgeid):
 
     return jData
 
+####### LND API CALLS #########
+
 def lndDecodeInvoice(lnInvoiceString):
     try:
         # call LND GRPC API
@@ -318,131 +330,251 @@ def lndPayInvoice(lnInvoiceString):
 
     return response
 
+####### PROCESS FUNCTIONS #########
 
-torTarget = "qrmfuxwgyzk5jdjz.onion:80"
-shopUrl = normalizeShopUrl(DEFAULT_SHOPURL)
+def shopList(shopUrl):
 
-print("#### GET HOSTS")
-hosts = apiGetHosts(session, shopUrl)
-if hosts is None: sys.exit()
-print(hosts)
+    print("#### GET HOSTS")
+    shopUrl=normalizeShopUrl(shopUrl)
+    return apiGetHosts(session, shopUrl)
 
-print("#### PLACE ORDER")
-hostid = hosts[0]['id']
-msatsFirst=hosts[0]['tor_bridge_price_initial']
-msatsNext=hosts[0]['tor_bridge_price_extension']
-duration=hosts[0]['tor_bridge_duration']
-orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
-if orderid is None: sys.exit()
-print(orderid)
+def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
 
-print("#### WAIT UNTIL INVOICE IS AVAILABLE")
-while True:
-    print("## Loop")
-    order = apiGetOrder(session, shopUrl, orderid)
-    if order is None: sys.exit()
-    print(order)
-    if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
-    time.sleep(2)
-paymentRequestStr = order['ln_invoices'][0]['payment_request']
-bridge_id = order['item_details'][0]['product']['id']
-bridge_ip = order['item_details'][0]['product']['host']['ip']
-bridge_port = order['item_details'][0]['product']['port']
+    print("#### PLACE ORDER")
+    shopUrl=normalizeShopUrl(shopUrl)
+    orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
+    if orderid is None: sys.exit()
 
-print("#### DECODE INVOICE")
-print(paymentRequestStr)
-paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
-if paymentRequestDecoded is None: sys.exit()
+    print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+    loopCount=0
+    while True:
+        loopCount+=1
+        print("# Loop {0}".format(loopCount))
+        order = apiGetOrder(session, shopUrl, orderid)
+        if order is None: sys.exit()
+        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
+        if loopCount > 30: 
+            eprint("# server is not able to deliver a invoice within timeout")
+            print("error='timeout on getting invoice'")
+            sys.exit()
+        time.sleep(2)
 
-print("#### CHECK INVOICE")
-print("# is invoice not more then advertised: {0}".format(msatsFirst))
-print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
-if msatsFirst < paymentRequestDecoded.num_msat:
-    print("# invoice wants more the advertised -> EXIT")
-    sys.exit(1)
+    # get data from now complete order
+    paymentRequestStr = order['ln_invoices'][0]['payment_request']
+    bridge_id = order['item_details'][0]['product']['id']
+    bridge_ip = order['item_details'][0]['product']['host']['ip']
+    bridge_port = order['item_details'][0]['product']['port']
 
-print("#### PAY INVOICE")
-payedInvoice = lndPayInvoice(paymentRequestStr)
-if payedInvoice is None: sys.exit()
-print(payedInvoice)
+    print("#### DECODE INVOICE & CHECK)")
+    print("# invoice: {0}".format(paymentRequestStr))
+    paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
+    if paymentRequestDecoded is None: sys.exit()
+    print("# amount as advertised: {0}".format(msatsFirst))
+    print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+    if msatsFirst < paymentRequestDecoded.num_msat:
+        eprint("# invoice wants more the advertised before -> EXIT")
+        print("error='invoice other amount than advertised'")
+        sys.exit(1)
 
-print("#### CHECK IF BRIDGE IS READY")
-while True:
-    print("## Loop")
-    bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
-    if bridge is None: sys.exit()
-    print(bridge)
-    if bridge['status'] == "A": break
-    time.sleep(3)
-bridge_id = bridge['id']
-bridge_suspendafter = bridge['suspend_after']
-bridge_port = bridge['port']
+    print("#### PAY INVOICE")
+    payedInvoice = lndPayInvoice(paymentRequestStr)
+    if payedInvoice is None: sys.exit()
+    print('# OK PAYMENT SENT')
 
-print("#### CHECK IF DURATION DELIVERED AS PROMISED")
-contract_broken=False
-secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
-print("delivered({0}) promised({1})".format(secondsDelivered, duration))
-if (secondsDelivered + 600) < duration:
-    print("CONTRACT BROKEN - duration delivered is too small")
+    print("#### CHECK IF BRIDGE IS READY")
+    loopCount=0
+    while True:
+        loopCount+=1
+        print("## Loop {0}".format(loopCount))
+        bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
+        if bridge is None: sys.exit()
+        if bridge['status'] == "A": break
+        if loopCount > 60: 
+            eprint("# timeout bridge not getting ready")
+            print("error='timeout on waiting for active bridge'")
+            sys.exit()
+        time.sleep(3)
+
+    # get data from ready bride
+    bridge_suspendafter = bridge['suspend_after']
+    bridge_port = bridge['port']
+
+    print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+    secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
+    print("# delivered({0}) promised({1})".format(secondsDelivered, duration))
+    if (secondsDelivered + 600) < duration:
+        print("warning='delivered duration shorter than advertised'")
+
+    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
+
+def subscriptionExtend(shopUrl, bridgeid, duration, msatsFirst):    
+
+    print("#### PLACE EXTENSION ORDER")
+    shopUrl=normalizeShopUrl(shopUrl)
+    orderid = apiPlaceOrderExtension(session, shopUrl, bridgeid)
+    if orderid is None: sys.exit()
+
+    print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+    loopCount=0
+    while True:
+        loopCount+=1
+        print("## Loop {0}".format(loopCount))
+        order = apiGetOrder(session, shopUrl, orderid)
+        if order is None: sys.exit()
+        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
+        if loopCount > 30: 
+            eprint("# server is not able to deliver a invoice within timeout")
+            print("error='timeout on getting invoice'")
+            sys.exit()
+        time.sleep(2)
+    
+    paymentRequestStr = order['ln_invoices'][0]['payment_request']
+
+    print("#### DECODE INVOICE & CHECK AMOUNT")
+    print("# invoice: {0}".format(paymentRequestStr))
+    paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
+    if paymentRequestDecoded is None: sys.exit()
+    print("# amount as advertised: {0}".format(msatsNext))
+    print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+    if msatsNext < paymentRequestDecoded.num_msat:
+        eprint("# invoice wants more the advertised before -> EXIT")
+        print("error='invoice other amount than advertised'")
+        sys.exit(1)
+
+    print("#### PAY INVOICE")
+    payedInvoice = lndPayInvoice(paymentRequestStr)
+    if payedInvoice is None: sys.exit()
+
+    print("#### CHECK IF BRIDGE GOT EXTENDED")
+    loopCount=0
+    while True:
+        loopCount+=1
+        print("## Loop {0}".format(loopCount))
+        bridge = apiGetBridgeStatus(session, shopUrl, bridgeid)
+        if bridge['suspend_after'] != bridge_suspendafter: break
+        if loopCount > 60: 
+            eprint("# timeout bridge not getting ready")
+            print("error='timeout on waiting for extending bridge'")
+            sys.exit()
+        time.sleep(3)
+
+    print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+    secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
+    secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
+    secondsExtended = secondsLeftNew - secondsLeftOld
+    print("# secondsExtended({0}) promised({1})".format(secondsExtended, duration))
+    if secondsExtended < duration:
+        print("warning='delivered duration shorter than advertised'")
+    
+    print("# BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
+
+####### COMMANDS #########
+
+###############
+# MENU
+# use for ssh shell menu
+###############
+
+if sys.argv[1] == "menu":
+
+    # late imports - so that rest of script can run also if dependency is not available
+    from dialog import Dialog
+
+    # TODO: User entry of shopurl - loop until working or cancel
+    shopurl = DEFAULT_SHOPURL
+    hosts = shopList(shopurl)
+    if hosts is None:
+        # TODO: shopurl not working
+        pass
+    elif len(hosts) == 0:
+        # TODO: no hosts
+        pass
+
+    # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
+    choices = []
+    for idx, hostEntry in enumerate(hosts):
+        choices.append(["{0}".format(idx),"{0} ({1} hours, first: {2} sats, next: {3} sats)".format(hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats'])])
+    d = Dialog(dialog="dialog",autowidgetsize=True)
+    d.set_background_title("TOR Bridge Shop: {0}".format(shopurl))
+    code, tag = d.menu("Following bridge hosts are available. Select for details:", choices)
+    seletedIndex = int(tag)
+    
+    hostid = hosts[seletedIndex]['id']
+    msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
+    msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
+    duration=hosts[seletedIndex]['tor_bridge_duration']
+
+    print(hostid)
+
+    # TODO: do rest of menus
+
     sys.exit()
 
-print("BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
+###############
+# SHOP LIST
+# call from web interface
+###############    
 
-time.sleep(10)
+if sys.argv[1] == "shop-list":
 
-print("#### PLACE EXTENSION ORDER")
-orderid = apiPlaceOrderExtension(session, shopUrl, bridge_id)
-if orderid is None: sys.exit()
-print(orderid)
+    # check parameters
+    try:
+        shopurl = sys.argv[2]
+        if len(shopurl) == 0:
+            print("error='invalid parameter'")
+            sys.exit(1)
+    except Exception as e:
+        print("error='invalid parameters'")
+        sys.exit(1)
 
-print("#### WAIT UNTIL INVOICE IS AVAILABLE")
-while True:
-    print("## Loop")
-    order = apiGetOrder(session, shopUrl, orderid)
-    if order is None: sys.exit()
-    print(order)
-    if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
-    time.sleep(2)
-paymentRequestStr = order['ln_invoices'][0]['payment_request']
+    # get data
+    hosts = shopList(shopurl)
+    if hosts is None: sys.exit(1)
 
-print("#### DECODE INVOICE")
-print(paymentRequestStr)
-paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
-if paymentRequestDecoded is None: sys.exit()
+    # output is json list of hosts
+    print(hosts)
+    sys.exit(0)
 
-print("#### CHECK INVOICE (EXTENSION)")
-print("# is invoice not more then advertised: {0}".format(msatsNext))
-print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
-if msatsNext < paymentRequestDecoded.num_msat:
-    print("# invoice wants more the advertised -> EXIT")
-    sys.exit(1)
+###############
+# SHOP ORDER
+# call from web interface
+###############    
 
-print("#### PAY INVOICE")
-payedInvoice = lndPayInvoice(paymentRequestStr)
-if payedInvoice is None: sys.exit()
-print(payedInvoice)
+if sys.argv[1] == "shop-order":
 
-print("#### CHECK IF BRIDGE GOT EXTENDED")
-while True:
-    print("## Loop")
-    bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
-    if bridge is None: sys.exit()
-    print(bridge)
-    if bridge['suspend_after'] != bridge_suspendafter: break
-    time.sleep(3)
+    shopurl = sys.argv[2]
+    hostid = sys.argv[3]
+    toraddress = sys.argv[4]
+    duration = sys.argv[5]
+    msats = sys.argv[6]
 
-print("BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
+    # TODO: basic data input check
 
-print("#### CHECK IF EXTENSION DURATION WAS CORRECT")
-secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
-secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
-secondsExtended = secondsLeftNew - secondsLeftOld
-print("# secondsExtended({0}) promised({1})".format(secondsExtended, duration))
-if secondsExtended < duration:
-    print("CONTRACT BROKEN - duration delivered is too small")
+    shopOrder(shopurl, hostid, toraddress, duration, msats)
+
+    # TODO: print out result data
+
     sys.exit()
-else:
-    print("OK")
+
+#######################
+# SUBSCRIPTIONS RENEW
+# call in intervalls from background process
+#######################
+
+if sys.argv[1] == "subscriptions-renew":
+
+    # secondsBeforeSuspend
+    secondsBeforeSuspend = sys.argv[2]
+    if secondsBeforeSuspend < 0:
+        print("error='invalid parameter'")
+        sys.exit()
+
+    # TODO: check if any active subscrpitions are below the secondsBeforeSuspend - if yes extend
+    # subscriptionExtend(shopurl, hostid, toraddress, duration, msatsFirst)
+
+# unkown command
+print("error='unkown command'")
+sys.exit()
 
 if False: '''
 
@@ -459,18 +591,6 @@ if sys.argv[1] == "menu":
         ("(2)", "Make REST API - JSON request"),
         ("(3)", "TOML test"),
         ("(4)", "Working with .conf files")])
-    if code == d.OK:
-        if tag == "(1)":
-            print("Needs: pip3 install pysocks\n")
-            session = requests.session()
-            session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
-            print("Call 'http://httpbin.org/ip' thru TOR proxy:\n")
-            print(session.get("http://httpbin.org/ip").text)
-            print("Call 'http://httpbin.org/ip' normal:\n")
-            print(requests.get("http://httpbin.org/ip").text)
-            print("Call 'https://shop.ip2t.org/api/v1/public/hosts/' thru TOR:\n")
-            print(session.get("https://shop.ip2t.org/api/v1/public/hosts/").text)
-        if tag == "(2)":
 
         if tag == "(3)":
             print ("Needs: pip3 install toml")
