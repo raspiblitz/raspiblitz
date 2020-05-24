@@ -23,6 +23,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 
 # basic settings
 cfg = RaspiBlitzConfig()
+session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
     print("# blitz.ip2tor.py")
     cfg.reload()
@@ -30,9 +31,10 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     LND_IP="127.0.0.1"
     LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network,cfg.chain)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
+    # make sure to make requests thru TOR
+    session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
 else:
     print("# blitz.ip2tor.py (development env)")
-    cfg.run_behind_tor = False
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="192.168.178.95"
     LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
@@ -318,9 +320,6 @@ def lndPayInvoice(lnInvoiceString):
 
 torTarget = "qrmfuxwgyzk5jdjz.onion:80"
 shopUrl = normalizeShopUrl(DEFAULT_SHOPURL)
-session = requests.session()
-if cfg.run_behind_tor:
-    session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
 
 print("#### GET HOSTS")
 hosts = apiGetHosts(session, shopUrl)
