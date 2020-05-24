@@ -5,10 +5,15 @@ import locale
 import requests
 import json
 import math
-
+import time
+import datetime, time
 import codecs, grpc, os
-from lndlibs import rpc_pb2 as ln
-from lndlibs import rpc_pb2_grpc as lnrpc
+from pathlib import Path
+
+from blitzpy import RaspiBlitzConfig
+
+from lndlibs import rpc_pb2 as lnrpc
+from lndlibs import rpc_pb2_grpc as rpcstub
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
@@ -17,12 +22,71 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     sys.exit(1)
 
 # basic settings
-locale.setlocale(locale.LC_ALL, '')
-USE_TOR=False
-LND_IP="192.168.178.95"
-LND_ADMIN_MACAROON_PATH=""
+cfg = RaspiBlitzConfig()
+if Path("/mnt/hdd/raspiblitz.conf").is_file():
+    print("# blitz.ip2tor.py")
+    cfg.reload()
+    DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
+    LND_IP="127.0.0.1"
+    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon"
+    LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
+else:
+    print("# blitz.ip2tor.py (development env)")
+    cfg.run_behind_tor = False
+    DEFAULT_SHOPURL="shop.ip2t.org"
+    LND_IP="192.168.178.95"
+    LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
+    LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
 
-# TODO: check is still works when shopurl is an onion address
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+def parseDate(datestr):
+    return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
+
+SERVERSECONDSDIFF=0
+def setServerTimeDiff(serverTimeDiffSeconds):
+    SERVERSECONDSDIFF=serverTimeDiffSeconds
+
+def secondsLeft(dateObj):
+    return round((dateObj - datetime.datetime.now()).total_seconds())-SERVERSECONDSDIFF
+
+#date1=parseDate("2020-05-24T22:25:11.630504Z")
+#date2=parseDate("2020-05-25T22:25:11.630504Z")
+#print(date1)
+#print(date2)
+#print(secondsLeft(date1))
+#print(secondsLeft(date2))
+#print(secondsLeft(date2)-secondsLeft(date1))
+
+# takes a shopurl from user input and turns it into the format needed
+# also makes sure that .onion addresses run just with http not https
+def normalizeShopUrl(shopurlUserInput):
+
+    # basic checks and formats
+    if len(shopurlUserInput) < 3: return
+    shopurlUserInput = shopurlUserInput.lower()
+    shopurlUserInput = shopurlUserInput.replace(" ", "")
+    shopurlUserInput = shopurlUserInput.replace("\n", "")
+    shopurlUserInput = shopurlUserInput.replace("\r", "")
+
+    # remove protocol from the beginning (if needed)
+    if shopurlUserInput.find("://") > 0:
+        shopurlUserInput = shopurlUserInput[shopurlUserInput.find("://")+3:]
+
+    # remove all path after domain 
+    if shopurlUserInput.find("/") > 0:
+        shopurlUserInput = shopurlUserInput[:shopurlUserInput.find("/")]
+
+    # add correct protocol again
+    if ( not shopurlUserInput.startswith("http://") and not shopurlUserInput.startswith("https://") ):
+        if shopurlUserInput.endswith(".onion"):
+            shopurlUserInput = "http://{0}".format(shopurlUserInput)
+        else:
+            shopurlUserInput = "https://{0}".format(shopurlUserInput)
+
+    return shopurlUserInput
+
 def apiGetHosts(session, shopurl):
 
     print("# apiGetHosts")
@@ -30,11 +94,13 @@ def apiGetHosts(session, shopurl):
 
     # make HTTP request
     try:
-        response = session.get("https://{0}/api/v1/public/hosts/".format(shopurl))
+        response = session.get("{0}/api/v1/public/hosts/".format(shopurl))
     except Exception as e:
+        eprint(e)
         print("error='FAILED HTTP REQUEST'")
         return
     if response.status_code != 200:
+        eprint(response.content)
         print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
         return
     
@@ -42,6 +108,7 @@ def apiGetHosts(session, shopurl):
     try:
         jData = json.loads(response.content)
     except Exception as e:
+        eprint(e)
         print("error='FAILED JSON PARSING'")
         return
     if not isinstance(jData, list):
@@ -68,34 +135,36 @@ def apiGetHosts(session, shopurl):
             # shorten names to 20 chars max
             hostEntry['name'] = hostEntry['name'][:20]
         except Exception as e:
-          print("error='PARSING HOST ENTRY'")
-          return    
+            eprint(e)
+            print("error='PARSING HOST ENTRY'")
+            return    
 
         print("({0}) {1} ({2} hours, first: {3} sats, next: {4} sats)".format(idx, hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats']))
-        #print(hostEntry)
         hosts.append(hostEntry)
     
     print("# found {0} valid torbridge hosts".format(len(hosts)))
     return hosts
 
-def apiPlaceOrder(session, shopurl, hostid, toraddressWithPort):
+def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
 
-    print("# apiPlaceOrder")
+    print("# apiPlaceOrderNew")
 
-    postData={
-        'product': "tor_bridge",
-        'host_id': hostid,
-        'tos_accepted': True,
-        'comment': 'test',
-        'target': toraddressWithPort,
-        'public_key': ''
-    }
     try:
-        response = session.post("https://{0}/api/v1/public/order/".format(shopurl), data=postData)
+        postData={
+            'product': "tor_bridge",
+            'host_id': hostid,
+            'tos_accepted': True,
+            'comment': 'test',
+            'target': toraddressWithPort,
+            'public_key': ''
+        }  
+        response = session.post("{0}/api/v1/public/order/".format(shopurl), data=postData)
     except Exception as e:
+        eprint(e)
         print("error='FAILED HTTP REQUEST'")
         return
     if response.status_code != 201:
+        eprint(response.content)
         print("error='FAILED HTTP CODE ({0}) != 201'".format(response.status_code))
         return
 
@@ -106,10 +175,41 @@ def apiPlaceOrder(session, shopurl, hostid, toraddressWithPort):
             print("error='MISSING ID'")
             return
     except Exception as e:
+        eprint(e)
         print("error='FAILED JSON PARSING'")
         return
 
     return jData['id']
+
+def apiPlaceOrderExtension(session, shopurl, bridgeid):
+
+    print("# apiPlaceOrderExtension")
+
+    try:
+        url="{0}/api/v1/public/tor_bridges/{1}/extend/".format(shopurl, bridgeid)
+        response = session.post(url)
+    except Exception as e:
+        eprint(url)
+        eprint(e)
+        print("error='FAILED HTTP REQUEST'")
+        return
+    if response.status_code != 200 and response.status_code != 201:
+        eprint(response.content)
+        print("error='FAILED HTTP CODE ({0}) != 201'".format(response.status_code))
+        return
+
+    # parse & validate data
+    try:
+        jData = json.loads(response.content)
+        if len(jData['po_id']) == 0:
+            print("error='MISSING ID'")
+            return
+    except Exception as e:
+        eprint(e)
+        print("error='FAILED JSON PARSING'")
+        return
+
+    return jData['po_id']
 
 
 def apiGetOrder(session, shopurl, orderid):
@@ -118,11 +218,13 @@ def apiGetOrder(session, shopurl, orderid):
 
     # make HTTP request
     try:
-        response = session.get("https://{0}/api/v1/public/pos/{1}/".format(shopurl,orderid))
+        response = session.get("{0}/api/v1/public/pos/{1}/".format(shopurl,orderid))
     except Exception as e:
+        eprint(e)
         print("error='FAILED HTTP REQUEST'")
         return
     if response.status_code != 200:
+        eprint(response.content)
         print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
         return
     
@@ -136,32 +238,216 @@ def apiGetOrder(session, shopurl, orderid):
             print("error='MORE THEN ONE INVOICE'")
             return
     except Exception as e:
+        eprint(e)
+        print("error='FAILED JSON PARSING'")
+        return
+
+    return jData
+
+def apiGetBridgeStatus(session, shopurl, bridgeid):
+
+    print("# apiGetBridgeStatus")
+
+    # make HTTP request
+    try:
+        response = session.get("{0}/api/v1/public/tor_bridges/{1}/".format(shopurl,bridgeid))
+    except Exception as e:
+        eprint(e)
+        print("error='FAILED HTTP REQUEST'")
+        return
+    if response.status_code != 200:
+        eprint(response.content)
+        print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
+        return
+    # parse & validate data
+    try:
+        jData = json.loads(response.content)
+        if len(jData['id']) == 0:
+            print("error='ID IS MISSING'")
+            return
+    except Exception as e:
+        eprint(e)
         print("error='FAILED JSON PARSING'")
         return
 
     return jData
 
 def lndDecodeInvoice(lnInvoiceString):
+    try:
+        # call LND GRPC API
+        macaroon = codecs.encode(open(LND_ADMIN_MACAROON_PATH, 'rb').read(), 'hex')
+        os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+        cert = open(LND_TLS_PATH, 'rb').read()
+        ssl_creds = grpc.ssl_channel_credentials(cert)
+        channel = grpc.secure_channel("{0}:10009".format(LND_IP), ssl_creds)
+        stub = rpcstub.LightningStub(channel)
+        request = lnrpc.PayReqString(
+            pay_req=lnInvoiceString,
+        )
+        response = stub.DecodePayReq(request, metadata=[('macaroon', macaroon)])
 
-    macaroon = codecs.encode(open('LND_DIR/data/chain/bitcoin/simnet/admin.macaroon', 'rb').read(), 'hex')
-    os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-    cert = open('LND_DIR/tls.cert', 'rb').read()
-    ssl_creds = grpc.ssl_channel_credentials(cert)
-    channel = grpc.secure_channel('192.168.178.95:10009', ssl_creds)
-    stub = rpcstub.LightningStub(channel)
-    request = lnrpc.PayReqString(
-        pay_req=lnInvoiceString,
-    )
-    response = stub.DecodePayReq(request, metadata=[('macaroon', macaroon)])
-    print(response)
+        # validate results
+        if response.num_msat <= 0:
+            print("error='ZERO INVOICES NOT ALLOWED'")
+            return  
 
-lndDecodeInvoice("lnbc300n1p0v37m5pp5xncvgrphrp9p5h52c7luqf2tkzq0v3v6ae3f9q08vrnevux9xwtsdraxgukxwpj8pjnvtfkvsun2tf5x56rgtfcxq6kgtfe89nxywpsxq6rsdfhvgazq5z08gsxxdf3xs6nvdn994jnyd33956rydfk95urjcfh943nwd338q6kydmyxgurqcqzpgxqrrsssp5ka6qqqnmuxu35783m8n8avsafmc4pasnh365pgj20vpj2r735xrq9qy9qsq956lq8l66rrt6nec2s20uwh4dcxwgt3ndqyt2pdc02axpdk3xt4k9pjpev0f9tfff0xe3g9eqp3tvl690a8n6u8dwweqm2azycj0utcpz8pkeu")
+    except Exception as e:
+        print("error='FAILED LND INVOICE DECODING'")
+        return
 
+    return response
+
+def lndPayInvoice(lnInvoiceString):
+    try:
+        # call LND GRPC API
+        macaroon = codecs.encode(open(LND_ADMIN_MACAROON_PATH, 'rb').read(), 'hex')
+        os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+        cert = open(LND_TLS_PATH, 'rb').read()
+        ssl_creds = grpc.ssl_channel_credentials(cert)
+        channel = grpc.secure_channel("{0}:10009".format(LND_IP), ssl_creds)
+        stub = rpcstub.LightningStub(channel)
+        request = lnrpc.SendRequest(
+            payment_request=lnInvoiceString,
+        )
+        response = stub.SendPaymentSync(request, metadata=[('macaroon', macaroon)])
+
+        # validate results
+        if len(response.payment_error) > 0:
+            print("error='PAYMENT FAILED'")
+            print("error_detail='{}'".format(response.payment_error))
+            return  
+
+    except Exception as e:
+       print("error='FAILED LND INVOICE PAYMENT'")
+       return
+
+    return response
+
+
+torTarget = "qrmfuxwgyzk5jdjz.onion:80"
+shopUrl = normalizeShopUrl(DEFAULT_SHOPURL)
 session = requests.session()
-#session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
-#apiGetHosts(session, "shop.ip2t.org")
-#orderid = apiPlaceOrder(session, "shop.ip2t.org", "fc747bae-6dbb-498d-89c2-f2445210c8f8", "facebookcorewwwi.onion:80")
-#apiGetOrder(session, "shop.ip2t.org", orderid)
+if cfg.run_behind_tor:
+    session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
+
+print("#### GET HOSTS")
+hosts = apiGetHosts(session, shopUrl)
+if hosts is None: sys.exit()
+print(hosts)
+
+print("#### PLACE ORDER")
+hostid = hosts[0]['id']
+msatsFirst=hosts[0]['tor_bridge_price_initial']
+msatsNext=hosts[0]['tor_bridge_price_extension']
+duration=hosts[0]['tor_bridge_duration']
+orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
+if orderid is None: sys.exit()
+print(orderid)
+
+print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+while True:
+    print("## Loop")
+    order = apiGetOrder(session, shopUrl, orderid)
+    if order is None: sys.exit()
+    print(order)
+    if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
+    time.sleep(2)
+paymentRequestStr = order['ln_invoices'][0]['payment_request']
+bridge_id = order['item_details'][0]['product']['id']
+bridge_ip = order['item_details'][0]['product']['host']['ip']
+bridge_port = order['item_details'][0]['product']['port']
+
+print("#### SET SERVER TIME DIFF")
+serverTimeDiffSeconds=round((parseDate(order['ln_invoices'][0]['created_at'])-datetime.datetime.now()).total_seconds())
+setServerTimeDiff(serverTimeDiffSeconds)
+print(serverTimeDiffSeconds)
+
+print("#### DECODE INVOICE")
+print(paymentRequestStr)
+paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
+if paymentRequestDecoded is None: sys.exit()
+
+print("#### CHECK INVOICE")
+print("# is invoice not more then advertised: {0}".format(msatsFirst))
+print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+if msatsFirst < paymentRequestDecoded.num_msat:
+    print("# invoice wants more the advertised -> EXIT")
+    sys.exit(1)
+
+print("#### PAY INVOICE")
+payedInvoice = lndPayInvoice(paymentRequestStr)
+if payedInvoice is None: sys.exit()
+print(payedInvoice)
+
+print("#### CHECK IF BRIDGE IS READY")
+while True:
+    print("## Loop")
+    bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
+    if bridge is None: sys.exit()
+    print(bridge)
+    if bridge['status'] == "A": break
+    time.sleep(3)
+bridge_id = bridge['id']
+bridge_suspendafter = bridge['suspend_after']
+bridge_port = bridge['port']
+
+print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+contract_broken=False
+secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
+print("delivered({0}) promised({1})".format(secondsDelivered, duration))
+if (secondsDelivered + 600) < duration:
+    print("CONTRACT BROKEN - duration delivered is too small")
+    contract_broken=True
+    sys.exit()
+
+print("BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
+
+time.sleep(10)
+
+print("#### PLACE EXTENSION ORDER")
+orderid = apiPlaceOrderExtension(session, shopUrl, bridge_id)
+if orderid is None: sys.exit()
+print(orderid)
+
+print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+while True:
+    print("## Loop")
+    order = apiGetOrder(session, shopUrl, orderid)
+    if order is None: sys.exit()
+    print(order)
+    if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
+    time.sleep(2)
+paymentRequestStr = order['ln_invoices'][0]['payment_request']
+
+print("#### DECODE INVOICE")
+print(paymentRequestStr)
+paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
+if paymentRequestDecoded is None: sys.exit()
+
+print("#### CHECK INVOICE (EXTENSION)")
+print("# is invoice not more then advertised: {0}".format(msatsNext))
+print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+if msatsNext < paymentRequestDecoded.num_msat:
+    print("# invoice wants more the advertised -> EXIT")
+    sys.exit(1)
+
+print("#### PAY INVOICE")
+payedInvoice = lndPayInvoice(paymentRequestStr)
+if payedInvoice is None: sys.exit()
+print(payedInvoice)
+
+print("#### CHECK IF BRIDGE GOT EXTENDED")
+while True:
+    print("## Loop")
+    bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
+    if bridge is None: sys.exit()
+    print(bridge)
+    if bridge['suspend_after'] != bridge_suspendafter: break
+    time.sleep(3)
+
+print("BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
+
+# TODO: check if extension time is as advertised
 
 if False: '''
 
