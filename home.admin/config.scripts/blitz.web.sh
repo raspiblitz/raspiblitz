@@ -4,11 +4,12 @@ source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "the RaspiBlitz Web Interface(s)"
-  echo "blitz.web.sh on"
-  echo "blitz.web.sh off"
-  echo "blitz.web.sh listen localhost"
-  echo "blitz.web.sh listen any"
+  printf "Manage RaspiBlitz Web Interface(s)\n\n"
+  printf "blitz.web.sh check \t\tprint operational nginx listen status (lsof)\n"
+  printf "blitz.web.sh on \t\tturn on\n"
+  printf "blitz.web.sh off \t\tturn off\n"
+  printf "blitz.web.sh listen localhost \tset port 443 to localhost only\n"
+  printf "blitz.web.sh listen any \tset port 443 to any\n"
   exit 1
 fi
 
@@ -100,9 +101,22 @@ function set_nginx_blitzweb_listen() {
 
 
 ###################
+# CHECK
+###################
+if [ "$1" = "check" ]; then
+
+  active_v4=$(sudo -u www-data lsof -i4 -sTCP:LISTEN -P | awk '{if(NR>1)print}' | awk '{ print $9 }' | awk -F":" '{ print $2, $1 " IPv4" }' | sort -nu)
+  active_v6=$(sudo -u www-data lsof -i6 -sTCP:LISTEN -P | awk '{if(NR>1)print}' | awk '{ print $9 }' | awk -F":" '{ print $2, $1 " IPv6" }' | sort -nu)
+
+  active=$(printf "${active_v4}\n${active_v6}" | sort -n)
+  printf "Proto\tInterface\tPort\n"
+  printf "=====\t=========\t====\n"
+  echo "${active}" | awk '{ if($2 == "*") print $3 "\tany\t\t" $1; else print $3 "\t" $2 "\t" $1 }'
+
+###################
 # SWITCH ON
 ###################
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "Turning ON: Web"
 
