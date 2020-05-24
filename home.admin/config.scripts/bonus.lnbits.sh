@@ -196,7 +196,7 @@ WantedBy=multi-user.target
 EOF
 
     sudo systemctl enable lnbits
-    echo "# OK - service needs starting: sudo systemctl start lnbits"
+    sudo systemctl start lnbits
 
   else
     echo "LNbits already installed."
