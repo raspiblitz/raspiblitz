@@ -493,7 +493,7 @@ if sys.argv[1] == "menu":
     # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
     choices = []
     for idx, hostEntry in enumerate(hosts):
-        choices.append(("{0}".format(idx),"{0} ({1} hours, first: {2} sats, next: {3} sats)".format(hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats')))
+        choices.append( ("{0}".format(idx), "{0} ({1} hours, first: {2} sats, next: {3} sats)".format(hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats'])) )
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("TOR Bridge Shop: {0}".format(shopurl))
     code, tag = d.menu("Following bridge hosts are available. Select for details:", choices=choices)
