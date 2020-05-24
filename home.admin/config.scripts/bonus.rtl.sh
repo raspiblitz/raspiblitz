@@ -154,7 +154,6 @@ EOF
     # open firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow 3000 comment 'RTL'
-    sudo ufw --force enable
     echo ""
 
     # install service

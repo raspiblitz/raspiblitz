@@ -169,7 +169,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "*** Updating Firewall ***"
     sudo ufw allow 5000 comment 'lnbits'
-    sudo ufw --force enable
     echo ""
 
     # install service
