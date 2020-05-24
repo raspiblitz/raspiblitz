@@ -133,28 +133,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo rm -f /etc/nginx/sites-enabled/default
   sudo rm -f /var/www/html/index.nginx-debian.html
 
-  if [ -f /etc/nginx/sites-available/default ]; then
-      sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/public.conf
-  else
-      if ! [ -f /etc/nginx/sites-available/public.conf ]; then
-          echo "fail"
-          exit 1
-      fi
+  if ! [ -f /etc/nginx/sites-available/public.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
   fi
 
-  sudo sed -i 's|root /var/www/html;|root /var/www/public;|g' /etc/nginx/sites-available/public.conf
-  sudo sed -i 's|index index.html index.htm index.nginx-debian.html;|index index.html;|g' /etc/nginx/sites-available/public.conf
-
-  if ! grep -Eq '^\s*sub_filter.*$' /etc/nginx/sites-available/public.conf; then
-    # search for "location /" entry and add three lines below
-    sudo sed -i -E '/^\s*location \/ \{$/a \
-                # make sure to have https link to exact same host that was called\n             sub_filter '$APOST'<a href="https:\/\/HOST_SET_BY_NGINX\/'$APOST' '$APOST'<a href="https:\/\/$host\/'$APOST';\n' /etc/nginx/sites-available/public.conf
+  if ! [ -d /var/www/letsencrypt/.well-known/acme-challenge ]; then
+    sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge >/dev/null
   fi
 
   # copy webroot
   if ! [ -d /var/www/public ]; then
-      sudo cp -a /home/admin/assets/www_public/ /var/www/public
-      sudo chown www-data:www-data /var/www/public
+    sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
+    sudo chown www-data:www-data /var/www/public
   fi
 
   sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
@@ -163,7 +153,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # copy webroot
   if ! [ -d /var/www/blitzweb ]; then
-      sudo cp -a /home/admin/assets/www_blitzweb/ /var/www/blitzweb
+      sudo cp -a /home/admin/assets/nginx/www_blitzweb/ /var/www/blitzweb
       sudo chown www-data:www-data /var/www/blitzweb
   fi
 
