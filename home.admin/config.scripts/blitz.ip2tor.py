@@ -497,7 +497,10 @@ if sys.argv[1] == "menu":
         hosts = shopList(shopurl)
         if hosts is None:
             # shopurl not working
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox("NONE")
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+Cannot reach a shop under that address.
+Please check domain or cancel dialog.
+            ''')
         elif len(hosts) == 0:
             # shopurl not working
             Dialog(dialog="dialog",autowidgetsize=True).msgbox("NO HOSTS")
