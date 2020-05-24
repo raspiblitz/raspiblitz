@@ -28,7 +28,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     cfg.reload()
     DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     LND_IP="127.0.0.1"
-    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon"
+    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network,cfg.chain)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
 else:
     print("# blitz.ip2tor.py (development env)")
@@ -44,12 +44,8 @@ def eprint(*args, **kwargs):
 def parseDate(datestr):
     return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
 
-SERVERSECONDSDIFF=0
-def setServerTimeDiff(serverTimeDiffSeconds):
-    SERVERSECONDSDIFF=serverTimeDiffSeconds
-
 def secondsLeft(dateObj):
-    return round((dateObj - datetime.datetime.now()).total_seconds())-SERVERSECONDSDIFF
+    return round((dateObj - datetime.datetime.utcnow().total_seconds())-SERVERSECONDSDIFF
 
 #date1=parseDate("2020-05-24T22:25:11.630504Z")
 #date2=parseDate("2020-05-25T22:25:11.630504Z")
@@ -292,6 +288,7 @@ def lndDecodeInvoice(lnInvoiceString):
             return  
 
     except Exception as e:
+        eprint(e)
         print("error='FAILED LND INVOICE DECODING'")
         return
 
@@ -391,11 +388,11 @@ bridge_id = bridge['id']
 bridge_suspendafter = bridge['suspend_after']
 bridge_port = bridge['port']
 
-print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+print("#### CHECK IF DURATION DELIVERED AS PROMISED (1 hour tolerance)")
 contract_broken=False
 secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
 print("delivered({0}) promised({1})".format(secondsDelivered, duration))
-if (secondsDelivered + 600) < duration:
+if (secondsDelivered + 3600) < duration:
     print("CONTRACT BROKEN - duration delivered is too small")
     contract_broken=True
     sys.exit()

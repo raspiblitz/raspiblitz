@@ -582,11 +582,18 @@ sudo -u admin bash -c "cd; python3 -m venv --system-site-packages python3-env-ln
 sudo -u admin bash -c "/home/admin/python3-env-lnd/bin/python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
 echo ""
 
-echo ""
-echo "*** RASPIBLITZ EXTRAS ***"
+echo "*** Python DEFAULT libs & depenedencies ***"
 
 # for setup schell scripts
 sudo apt-get -y install dialog bc python3-dialog
+
+# libs
+sudo pip3 install -I grpcio==1.29.0
+sudo pip3 install -I googleapis-common-protos==1.51.0
+
+
+echo ""
+echo "*** RASPIBLITZ EXTRAS ***"
 
 # enable copy of blockchain from 2nd HDD formatted with exFAT
 sudo apt-get -y install exfat-fuse
