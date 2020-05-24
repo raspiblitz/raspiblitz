@@ -485,13 +485,14 @@ if sys.argv[1] == "menu":
 
         # input shop url
         d = Dialog(dialog="dialog",autowidgetsize=True)
-        d.set_background_title("Select ip2tor Bridge Shop")
-        code, text = d.inputbox("Enter domain of ip2tor shop (PRESS ENTER FOR DEFAULT):", height=10, width=60, init=shopurl)
+        d.set_background_title("Select ip2tor Bridge Shop (communication secured thru TOR)")
+        code, text = d.inputbox("Enter Domain of a IP2TOR shop (PRESS ENTER FOR DEFAULT):", height=10, width=60, init=shopurl)
 
         # if user canceled
         if code != d.OK: sys.exit(0)
 
         # get host list from shop
+        shopurl = text
         hosts = shopList(shopurl)
         if hosts is None:
             # shopurl not working
