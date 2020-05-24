@@ -27,12 +27,13 @@ session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
     print("# blitz.ip2tor.py")
     cfg.reload()
-    DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
+    #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
+    DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="127.0.0.1"
     LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network,cfg.chain)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
-    # make sure to make requests thru TOR
-    session.proxies = {'http':  'socks5://127.0.0.1:9050', 'https': 'socks5://127.0.0.1:9050'}
+    # make sure to make requests thru TOR 127.0.0.1:9050
+    session.proxies = {'http':  'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
 else:
     print("# blitz.ip2tor.py (development env)")
     DEFAULT_SHOPURL="shop.ip2t.org"
