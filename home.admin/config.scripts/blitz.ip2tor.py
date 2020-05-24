@@ -82,12 +82,15 @@ def apiGetHosts(session, shopurl):
 
     # make HTTP request
     try:
-        response = session.get("{0}/api/v1/public/hosts/".format(shopurl))
+        url="{0}/api/v1/public/hosts/".format(shopurl)
+        response = session.get(url)
     except Exception as e:
+        eprint(url)
         eprint(e)
         print("error='FAILED HTTP REQUEST'")
         return
     if response.status_code != 200:
+        eprint(url)
         eprint(response.content)
         print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
         return
