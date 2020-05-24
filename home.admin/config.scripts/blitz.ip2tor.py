@@ -480,33 +480,66 @@ if sys.argv[1] == "menu":
     # late imports - so that rest of script can run also if dependency is not available
     from dialog import Dialog
 
-    # TODO: User entry of shopurl - loop until working or cancel
     shopurl = DEFAULT_SHOPURL
-    hosts = shopList(shopurl)
-    if hosts is None:
-        # TODO: shopurl not working
-        pass
-    elif len(hosts) == 0:
-        # TODO: no hosts
-        pass
+    while True:
 
+        # input shop url
+        d = Dialog(dialog="dialog",autowidgetsize=True)
+        d.set_background_title("Select ip2tor Bridge Shop")
+        code, text = d.inputbox("Enter domain of ip2tor shop (PRESS ENTER FOR DEFAULT):", height=10, width=60, init=shopurl)
+
+        # if user canceled
+        if code != d.OK: sys.exit(0)
+
+        # get host list from shop
+        hosts = shopList(shopurl)
+        if hosts is None:
+            # shopurl not working
+            print("NONE")
+            time.sleep(3)
+        elif len(hosts) == 0:
+            # shopurl not working
+            print("NO HOSTS")
+            time.sleep(3)
+        else:
+            # ok we got hosts - continue
+            break
+
+    # TODO: User entry of shopurl - loop until working or cancel
+    
     # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
+    host=None
     choices = []
     for idx, hostEntry in enumerate(hosts):
         choices.append( ("{0}".format(idx), "{0} ({1} hours, first: {2} sats, next: {3} sats)".format(hostEntry['name'].ljust(20), hostEntry['tor_bridge_duration_hours'], hostEntry['tor_bridge_price_initial_sats'], hostEntry['tor_bridge_price_extension_sats'])) )
-    d = Dialog(dialog="dialog",autowidgetsize=True)
-    d.set_background_title("TOR Bridge Shop: {0}".format(shopurl))
-    code, tag = d.menu("Following bridge hosts are available. Select for details:", choices=choices)
-    seletedIndex = int(tag)
     
-    hostid = hosts[seletedIndex]['id']
-    msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
-    msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
-    duration=hosts[seletedIndex]['tor_bridge_duration']
+    while True:
 
+        # show menu with options
+        d = Dialog(dialog="dialog",autowidgetsize=True)
+        d.set_background_title("TOR Bridge Shop: {0}".format(shopurl))
+        code, tag = d.menu("Following TOR bridge hosts are available. Select for details:", choices=choices)
+        if code != d.OK:
+            host=None
+            break
+
+        # get data of selected
+        seletedIndex = int(tag)
+        hostid = hosts[seletedIndex]['id']
+        msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
+        msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
+        duration=hosts[seletedIndex]['tor_bridge_duration']
+
+        # show details of selected
+
+
+    # if user has canceled
+    if host is None:
+        print("cancel")
+        sys.exit(0)
+
+    # TODO: try to subscribe to host
     print(hostid)
-
-    # TODO: do rest of menus
 
     sys.exit()
 
