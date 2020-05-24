@@ -23,7 +23,7 @@ esac
 # additional prep if this is used to replace corrupted blockchain
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
-  echo "stopping servcies ..."
+  echo "stopping services ..."
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
