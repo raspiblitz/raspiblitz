@@ -117,7 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # general nginx settings
   if ! grep -Eq '^\s*server_names_hash_bucket_size.*$' /etc/nginx/nginx.conf; then
     # ToDo(frennkie) verify this
-    sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
+    sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
   fi
 
   if [ -f /etc/ssl/certs/dhparam.pem ]; then
