@@ -581,7 +581,7 @@ More information on the service you can find under:
         code = d.scrollbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=60)
         
         # if user AGREED break loop and continue with selected host
-        if code == d.extra_button: break
+        if code == "extra": break
 
     # if user has canceled
     if host is None:
