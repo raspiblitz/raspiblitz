@@ -578,7 +578,9 @@ More information on the service you can find under:
         host['terms_of_service'],
         host['terms_of_service_url'])
 
-        d.scrollbox(text, title=host['name'] ,width=60)
+        code = d.scrollbox(text, title=host['name'], extra_button=True,  extra_label="AGREE" ,width=60)
+        print(code)
+        sys.exit()
 
     # if user has canceled
     if host is None:
