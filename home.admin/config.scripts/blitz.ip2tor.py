@@ -567,17 +567,19 @@ There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
 The service has the following additional terms:
+{6}
 
 More information on the service you can find under:
+{7}
 '''.format(
         host['name'],
         host['ip'],
+        "secrdrop5wyphb5x.onion:80",
         host['tor_bridge_duration_hours'],
         host['tor_bridge_price_initial_sats'],
         host['tor_bridge_price_extension_sats'])
-
-        #host['terms_of_service'],
-        #host['terms_of_service_url']
+        host['terms_of_service'],
+        host['terms_of_service_url']
 
         d.scrollbox(text, width=60)
 
