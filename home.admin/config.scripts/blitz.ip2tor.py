@@ -514,9 +514,9 @@ Try again later, enter another address or cancel.
         d = Dialog(dialog="dialog",autowidgetsize=True)
         d.set_background_title("IP2TOR Bridge Offer Details: {0}".format(shopurl))
         text='''
-The subscription will renew every {0} hours.
-The first time it will cost: {1} sats
-Every next time it will cost: {2} sats
+The subscription would renew every {0} hours.
+The first time it would cost: {1} sats
+Every next time it would cost: {2} sats
 
 If you AGREE you will subscribe to this service.
 You will get a port on the IP {3} that will
@@ -542,7 +542,7 @@ More information on the service you can find under:
         host['terms_of_service'],
         host['terms_of_service_url'])
 
-        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=60, height=30)
+        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=70, height=30)
         
         # if user AGREED break loop and continue with selected host
         if code == "extra": break
@@ -552,9 +552,7 @@ More information on the service you can find under:
 
     try:
 
-        #bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial_sats'])
-        bridge=[]
-        bridge['contract_breached']=True
+        bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial_sats'])
 
     except BlitzError as be:
 
