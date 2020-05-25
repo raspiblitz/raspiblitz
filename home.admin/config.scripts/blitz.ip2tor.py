@@ -579,7 +579,7 @@ More information on the service you can find under:
         host['tor_bridge_price_initial_sats'],
         host['tor_bridge_price_extension_sats'])
         host['terms_of_service'],
-        host['terms_of_service_url']
+        host['terms_of_service_url'])
 
         d.scrollbox(text, width=60)
 
