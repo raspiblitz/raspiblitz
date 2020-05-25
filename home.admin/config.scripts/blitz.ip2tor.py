@@ -485,8 +485,11 @@ if sys.argv[1] == "menu":
 
         # input shop url
         d = Dialog(dialog="dialog",autowidgetsize=True)
-        d.set_background_title("Select ip2tor Bridge Shop (communication secured thru TOR)")
-        code, text = d.inputbox("Enter Domain of a IP2TOR shop (PRESS ENTER FOR DEFAULT):", height=10, width=60, init=shopurl)
+        d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
+        code, text = d.inputbox(
+            "Enter Address of a IP2TOR Shop (PRESS ENTER FOR DEFAULT):",
+            height=10, width=60, init=shopurl,
+            title="Shop Address")
 
         # if user canceled
         if code != d.OK: sys.exit(0)
@@ -500,10 +503,13 @@ if sys.argv[1] == "menu":
             Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 Cannot reach a shop under that address.
 Please check domain or cancel dialog.
-            ''')
+            ''',title="ERROR")
         elif len(hosts) == 0:
             # shopurl not working
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox("NO HOSTS")
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+The shop has no available offers at the moment.
+Try again later, enter another address or cancel.
+            ''',title="ERROR")
         else:
             # ok we got hosts - continue
             break
@@ -520,21 +526,62 @@ Please check domain or cancel dialog.
 
         # show menu with options
         d = Dialog(dialog="dialog",autowidgetsize=True)
-        d.set_background_title("TOR Bridge Shop: {0}".format(shopurl))
-        code, tag = d.menu("Following TOR bridge hosts are available. Select for details:", choices=choices)
+        d.set_background_title("IP2TOR Bridge Shop: {0}".format(shopurl))
+        code, tag = d.menu(
+            "Following TOR bridge hosts are available. Select for details:",
+            choices=choices, title="Available Subscriptions")
         if code != d.OK:
             host=None
             break
 
         # get data of selected
         seletedIndex = int(tag)
+        host = hosts[seletedIndex]
         hostid = hosts[seletedIndex]['id']
         msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
         msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
         duration=hosts[seletedIndex]['tor_bridge_duration']
 
-        # show details of selected
+        # optimize content for display
+        if len(host['terms_of_service'] == 0: host['terms_of_service'] = "-"
+        if len(host['terms_of_service_url'] == 0: host['terms_of_service_url'] = "-"
 
+        # show details of selected
+        d = Dialog(dialog="dialog",autowidgetsize=True)
+        d.set_background_title("IP2TOR Bridge Offer Details: {0}".format(shopurl))
+        text='''
+Name: {0}
+
+If you AGREE you will subscribe to this service.
+You will get a port on the IP {1} that will
+forward to your RaspiBlitz TOR address:
+{2}
+
+The subscription will renew every {3} hours.
+The first time it will cost: {4} sats
+Every next time it will cost: {5} sats
+
+You can cancel the subscription anytime under
+the "SUBSCRIPTONS" menu on your RaspiBlitz.
+There will be no refunds for not used hours.
+There is no guarantee for quality of service.
+
+The service has the following additional terms:
+{6}
+
+More information on the service you can find under:
+{7}
+'''.format(
+        host['name'],
+        host['ip'],
+        host['tor_bridge_duration_hours'],
+        host['tor_bridge_price_initial_sats'],
+        host['tor_bridge_price_extension_sats'],
+        host['terms_of_service'],
+        host['terms_of_service_url']
+        )
+
+        d.scrollbox(text, width=60)
 
     # if user has canceled
     if host is None:
@@ -611,36 +658,3 @@ if sys.argv[1] == "subscriptions-renew":
 # unkown command
 print("error='unkown command'")
 sys.exit()
-
-if False: '''
-
-###############
-# MENU
-###############
-
-if sys.argv[1] == "menu":
-    from dialog import Dialog
-    d = Dialog(dialog="dialog",autowidgetsize=True)
-    d.set_background_title("IP2TOR Subscription Service")
-    code, tag = d.menu("OK, then you have two options:",
-        choices=[("(1)", "Test HTTP REQUEST thru TOR PROXY"),
-        ("(2)", "Make REST API - JSON request"),
-        ("(3)", "TOML test"),
-        ("(4)", "Working with .conf files")])
-
-        if tag == "(3)":
-            print ("Needs: pip3 install toml")
-            import toml
-            toml_string = """
-            """
-        if tag == "(4)":
-            with open('/mnt/hdd/raspiblitz.conf', 'r') as myfile:
-                data=myfile.read()
-            print(data)
-            import toml
-            parsed_toml = toml.loads(data)
-            print(parsed_toml)
-
-    else:
-        print("Cancel")
-    '''
