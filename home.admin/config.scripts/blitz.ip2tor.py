@@ -25,6 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.ip2tor.py shop-order [shopurl] [hostid] [toraddress:port] [duration] [msats]")
     print("# blitz.ip2tor.py subscriptions-list")
     print("# blitz.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
+    print("# blitz.ip2tor.py subscription-cancel [id]")
     sys.exit(1)
 
 ####### BASIC SETTINGS #########
@@ -37,7 +38,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="127.0.0.1"
-    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network,cfg.chain)
+    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(fg.network.value,cfg.chain.value)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
     # make sure to make requests thru TOR 127.0.0.1:9050
     session.proxies = {'http':  'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
@@ -48,10 +49,28 @@ else:
     LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
     LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
 
+####### HELPER CLASSES #########
+
+class BlitzError(Exception):
+    def __init__(self, errorShort, errorLong="", errorException=None):
+        self.errorShort = str(errorShort)
+        self.errorLong = str(errorLong)
+        self.errorException = errorException
+
 ####### HELPER FUNCTIONS #########
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+def handleException(e):
+    if isinstance(e, BlitzError):
+        eprint(e.errorLong)
+        eprint(e.errorException)
+        print("error='{0}'".format(e.errorShort))
+    else:
+        eprint(e)
+        print("error='{0}'".format(str(e)))
+    sys.exit(1)
 
 def parseDate(datestr):
     return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
@@ -64,7 +83,7 @@ def secondsLeft(dateObj):
 def normalizeShopUrl(shopurlUserInput):
 
     # basic checks and formats
-    if len(shopurlUserInput) < 3: return
+    if len(shopurlUserInput) < 3: return ""
     shopurlUserInput = shopurlUserInput.lower()
     shopurlUserInput = shopurlUserInput.replace(" ", "")
     shopurlUserInput = shopurlUserInput.replace("\n", "")
@@ -99,26 +118,17 @@ def apiGetHosts(session, shopurl):
         url="{0}/api/v1/public/hosts/".format(shopurl)
         response = session.get(url)
     except Exception as e:
-        eprint(url)
-        eprint(e)
-        print("error='FAILED HTTP REQUEST'")
-        return
+        raise BlitzError("falied HTTP request",url,e)
     if response.status_code != 200:
-        eprint(url)
-        eprint(response.content)
-        print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
-        return
+        raise BlitzError("failed HTTP code",response.status_code,)
     
     # parse & validate data
     try:
         jData = json.loads(response.content)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED JSON PARSING'")
-        return
+        raise BlitzError("failed JSON parsing",response.content,e)
     if not isinstance(jData, list):
-        print("error='NOT A JSON LIST'")
-        return    
+        raise BlitzError("hosts not list",response.content)
     for idx, hostEntry in enumerate(jData):
         try:
             # ignore if not offering tor bridge
@@ -140,9 +150,7 @@ def apiGetHosts(session, shopurl):
             # shorten names to 20 chars max
             hostEntry['name'] = hostEntry['name'][:20]
         except Exception as e:
-            eprint(e)
-            print("error='PARSING HOST ENTRY'")
-            return    
+            raise BlitzError("failed host entry pasring",str(hostEntry),e)  
 
         hosts.append(hostEntry)
     
@@ -154,6 +162,7 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
     print("# apiPlaceOrderNew")
 
     try:
+        url="{0}/api/v1/public/order/".format(shopurl)
         postData={
             'product': "tor_bridge",
             'host_id': hostid,
@@ -162,15 +171,11 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
             'target': toraddressWithPort,
             'public_key': ''
         }  
-        response = session.post("{0}/api/v1/public/order/".format(shopurl), data=postData)
+        response = session.post(url, data=postData)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED HTTP REQUEST'")
-        return
+        raise BlitzError("failed HTTP request",url,e)
     if response.status_code != 201:
-        eprint(response.content)
-        print("error='FAILED HTTP CODE ({0}) != 201'".format(response.status_code))
-        return
+        raise BlitzError("failed HTTP code",response.status_code)
 
     # parse & validate data
     try:
@@ -179,9 +184,7 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
             print("error='MISSING ID'")
             return
     except Exception as e:
-        eprint(e)
-        print("error='FAILED JSON PARSING'")
-        return
+        raise BlitzError("failed JSON parsing",response.status_code,e)
 
     return jData['id']
 
@@ -193,14 +196,9 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
         url="{0}/api/v1/public/tor_bridges/{1}/extend/".format(shopurl, bridgeid)
         response = session.post(url)
     except Exception as e:
-        eprint(url)
-        eprint(e)
-        print("error='FAILED HTTP REQUEST'")
-        return
+        raise BlitzError("failed HTTP request",url,e)
     if response.status_code != 200 and response.status_code != 201:
-        eprint(response.content)
-        print("error='FAILED HTTP CODE ({0}) != 201'".format(response.status_code))
-        return
+        raise BlitzError("failed HTTP code",response.status_code)
 
     # parse & validate data
     try:
@@ -209,9 +207,7 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
             print("error='MISSING ID'")
             return
     except Exception as e:
-        eprint(e)
-        print("error='FAILED JSON PARSING'")
-        return
+        raise BlitzError("failed JSON parsing",response.content, e)
 
     return jData['po_id']
 
@@ -222,29 +218,22 @@ def apiGetOrder(session, shopurl, orderid):
 
     # make HTTP request
     try:
-        response = session.get("{0}/api/v1/public/pos/{1}/".format(shopurl,orderid))
+        url="{0}/api/v1/public/pos/{1}/".format(shopurl,orderid)
+        response = session.get(url)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED HTTP REQUEST'")
-        return
+        raise BlitzError("failed HTTP request",url, e)
     if response.status_code != 200:
-        eprint(response.content)
-        print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
-        return
-    
+        raise BlitzError("failed HTTP code",response.status_code)
+
     # parse & validate data
     try:
         jData = json.loads(response.content)
         if len(jData['item_details']) == 0:
-            print("error='MISSING ITEM'")
-            return
+            raise BlitzError("missing item",response.content)
         if len(jData['ln_invoices']) > 1:
-            print("error='MORE THEN ONE INVOICE'")
-            return
+            raise BlitzError("more than one invoice",response.content)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED JSON PARSING'")
-        return
+        raise BlitzError("failed JSON parsing",response.content, e)
 
     return jData
 
@@ -254,25 +243,19 @@ def apiGetBridgeStatus(session, shopurl, bridgeid):
 
     # make HTTP request
     try:
-        response = session.get("{0}/api/v1/public/tor_bridges/{1}/".format(shopurl,bridgeid))
+        url="{0}/api/v1/public/tor_bridges/{1}/".format(shopurl,bridgeid)
+        response = session.get(url)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED HTTP REQUEST'")
-        return
+        raise BlitzError("failed HTTP request",url, e)
     if response.status_code != 200:
-        eprint(response.content)
-        print("error='FAILED HTTP CODE ({0})'".format(response.status_code))
-        return
+        raise BlitzError("failed HTTP code",response.status_code)
     # parse & validate data
     try:
         jData = json.loads(response.content)
         if len(jData['id']) == 0:
-            print("error='ID IS MISSING'")
-            return
+            raise BlitzError("missing id",response.content)
     except Exception as e:
-        eprint(e)
-        print("error='FAILED JSON PARSING'")
-        return
+        raise BlitzError("failed JSON parsing",response.content, e)
 
     return jData
 
@@ -294,13 +277,10 @@ def lndDecodeInvoice(lnInvoiceString):
 
         # validate results
         if response.num_msat <= 0:
-            print("error='ZERO INVOICES NOT ALLOWED'")
-            return  
+            raise BlitzError("zero invoice not allowed",lnInvoiceString)
 
     except Exception as e:
-        eprint(e)
-        print("error='FAILED LND INVOICE DECODING'")
-        return
+        raise BlitzError("failed LND invoice decoding",lnInvoiceString,e)
 
     return response
 
@@ -320,13 +300,10 @@ def lndPayInvoice(lnInvoiceString):
 
         # validate results
         if len(response.payment_error) > 0:
-            print("error='PAYMENT FAILED'")
-            print("error_detail='{}'".format(response.payment_error))
-            return  
+            raise BlitzError(response.payment_error,lnInvoiceString)
 
     except Exception as e:
-       print("error='FAILED LND INVOICE PAYMENT'")
-       return
+        raise BlitzError("payment failed",lnInvoiceString,e)
 
     return response
 
@@ -343,21 +320,18 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     print("#### PLACE ORDER")
     shopUrl=normalizeShopUrl(shopUrl)
     orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
-    if orderid is None: sys.exit()
 
     print("#### WAIT UNTIL INVOICE IS AVAILABLE")
     loopCount=0
     while True:
+        time.sleep(2)
         loopCount+=1
         print("# Loop {0}".format(loopCount))
         order = apiGetOrder(session, shopUrl, orderid)
-        if order is None: sys.exit()
-        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
-        if loopCount > 30: 
-            eprint("# server is not able to deliver a invoice within timeout")
-            print("error='timeout on getting invoice'")
-            sys.exit()
-        time.sleep(2)
+        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None:
+            break
+        if loopCount > 30:
+            raise BlitzError("timeout on getting invoice", order)
 
     # get data from now complete order
     paymentRequestStr = order['ln_invoices'][0]['payment_request']
@@ -372,29 +346,24 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     print("# amount as advertised: {0}".format(msatsFirst))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
     if msatsFirst < paymentRequestDecoded.num_msat:
-        eprint("# invoice wants more the advertised before -> EXIT")
-        print("error='invoice other amount than advertised'")
-        sys.exit(1)
+        raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
 
     print("#### PAY INVOICE")
     payedInvoice = lndPayInvoice(paymentRequestStr)
-    if payedInvoice is None: sys.exit()
     print('# OK PAYMENT SENT')
 
     print("#### CHECK IF BRIDGE IS READY")
     loopCount=0
     while True:
+        time.sleep(3)
         loopCount+=1
         print("## Loop {0}".format(loopCount))
         bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
-        if bridge is None: sys.exit()
-        if bridge['status'] == "A": break
+        if bridge['status'] == "A":
+            break
         if loopCount > 60: 
-            eprint("# timeout bridge not getting ready")
-            print("error='timeout on waiting for active bridge'")
-            sys.exit()
-        time.sleep(3)
-
+            raise BlitzError("timeout bridge not getting ready", bridge)
+        
     # get data from ready bride
     bridge_suspendafter = bridge['suspend_after']
     bridge_port = bridge['port']
@@ -403,30 +372,32 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
     print("# delivered({0}) promised({1})".format(secondsDelivered, duration))
     if (secondsDelivered + 600) < duration:
-        print("warning='delivered duration shorter than advertised'")
+        bridge['contract_breached'] = True
+        bridge['warning'] = "delivered duration shorter than advertised"
+    else:
+        bridge['contract_breached'] = False
 
     print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
-
-def subscriptionExtend(shopUrl, bridgeid, duration, msatsFirst):    
+    return bridge
+    
+def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):    
 
     print("#### PLACE EXTENSION ORDER")
     shopUrl=normalizeShopUrl(shopUrl)
     orderid = apiPlaceOrderExtension(session, shopUrl, bridgeid)
-    if orderid is None: sys.exit()
 
     print("#### WAIT UNTIL INVOICE IS AVAILABLE")
     loopCount=0
     while True:
+        time.sleep(2)
         loopCount+=1
         print("## Loop {0}".format(loopCount))
         order = apiGetOrder(session, shopUrl, orderid)
-        if order is None: sys.exit()
-        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None: break
-        if loopCount > 30: 
-            eprint("# server is not able to deliver a invoice within timeout")
-            print("error='timeout on getting invoice'")
-            sys.exit()
-        time.sleep(2)
+        if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None:
+            break
+        if loopCount > 30:
+            raise BlitzError("timeout on getting invoice", order)
+        
     
     paymentRequestStr = order['ln_invoices'][0]['payment_request']
 
@@ -437,48 +408,43 @@ def subscriptionExtend(shopUrl, bridgeid, duration, msatsFirst):
     print("# amount as advertised: {0}".format(msatsNext))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
     if msatsNext < paymentRequestDecoded.num_msat:
-        eprint("# invoice wants more the advertised before -> EXIT")
-        print("error='invoice other amount than advertised'")
-        sys.exit(1)
+        raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
     print("#### PAY INVOICE")
     payedInvoice = lndPayInvoice(paymentRequestStr)
-    if payedInvoice is None: sys.exit()
 
     print("#### CHECK IF BRIDGE GOT EXTENDED")
     loopCount=0
     while True:
+        time.sleep(3)
         loopCount+=1
         print("## Loop {0}".format(loopCount))
         bridge = apiGetBridgeStatus(session, shopUrl, bridgeid)
-        if bridge['suspend_after'] != bridge_suspendafter: break
+        if bridge['suspend_after'] != bridge_suspendafter:
+            break
         if loopCount > 60: 
-            eprint("# timeout bridge not getting ready")
-            print("error='timeout on waiting for extending bridge'")
-            sys.exit()
-        time.sleep(3)
+            raise BlitzError("timeout on waiting for extending bridge", bridge)
 
     print("#### CHECK IF DURATION DELIVERED AS PROMISED")
     secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
     secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
     secondsExtended = secondsLeftNew - secondsLeftOld
-    print("# secondsExtended({0}) promised({1})".format(secondsExtended, duration))
-    if secondsExtended < duration:
-        print("warning='delivered duration shorter than advertised'")
+    print("# secondsExtended({0}) promised({1})".format(secondsExtended, durationAdvertised))
+    if secondsExtended < durationAdvertised:
+        bridge['contract_breached'] = True
+        bridge['warning'] = "delivered duration shorter than advertised"
+    else:
+        bridge['contract_breached'] = False
     
     print("# BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
+    return bridge
 
-####### COMMANDS #########
+def menuMakeSubscription(blitzServiceName, torAddress, torPort):
 
-###############
-# MENU
-# use for ssh shell menu
-###############
+    torTarget = "{0}:{1}".format(torAddress, torPort)
 
-if sys.argv[1] == "menu":
-
-    # late imports - so that rest of script can run also if dependency is not available
-    from dialog import Dialog
+    ############################
+    # PHASE 1: Enter Shop URL
 
     shopurl = DEFAULT_SHOPURL
     while True:
@@ -497,25 +463,27 @@ if sys.argv[1] == "menu":
         # get host list from shop
         shopurl = text
         os.system('clear')
-        hosts = shopList(shopurl)
-        if hosts is None:
+        try:
+            hosts = shopList(shopurl)
+        except Exception as e:
             # shopurl not working
             Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 Cannot reach a shop under that address.
 Please check domain or cancel dialog.
             ''',title="ERROR")
-        elif len(hosts) == 0:
-            # shopurl not working
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+        else:
+            # when shop is empty
+            if len(hosts) == 0:
+                Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 The shop has no available offers at the moment.
 Try again later, enter another address or cancel.
             ''',title="ERROR")
-        else:
             # ok we got hosts - continue
-            break
+            else: break
 
-    # TODO: User entry of shopurl - loop until working or cancel
-    
+    ###############################
+    # PHASE 2: SELECT SUBSCRIPTION
+
     # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
     host=None
     choices = []
@@ -530,17 +498,13 @@ Try again later, enter another address or cancel.
         code, tag = d.menu(
             "Following TOR bridge hosts are available. Select for details:",
             choices=choices, title="Available Subscriptions")
-        if code != d.OK:
-            host=None
-            break
+        
+        # if user cancels
+        if code != d.OK: sys.exit(0)
 
         # get data of selected
         seletedIndex = int(tag)
         host = hosts[seletedIndex]
-        #hostid = hosts[seletedIndex]['id']
-        #msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
-        #msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
-        #duration=hosts[seletedIndex]['tor_bridge_duration']
 
         # optimize content for display
         if len(host['terms_of_service']) == 0: host['terms_of_service'] = "-"
@@ -574,7 +538,7 @@ More information on the service you can find under:
         host['tor_bridge_price_initial_sats'],
         host['tor_bridge_price_extension_sats'],
         host['ip'],
-        "secrdrop5wyphb5x.onion:80",
+        torTarget,
         host['terms_of_service'],
         host['terms_of_service_url'])
 
@@ -583,13 +547,86 @@ More information on the service you can find under:
         # if user AGREED break loop and continue with selected host
         if code == "extra": break
 
-    # if user has canceled
-    if host is None:
-        print("cancel")
-        sys.exit(0)
+    ############################
+    # PHASE 3: Make Subscription
 
-    # TODO: try to subscribe to host
-    print(host['id'])
+    try:
+
+        #bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial_sats'])
+        bridge=[]
+        bridge['contract_breached']=True
+
+    except BlitzError as be:
+
+        if  be.errorShort == "timeout on waiting for extending bridge":
+
+            # error happend after payment
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+You DID PAY the initial fee.
+But the service was not able to provide service.
+Subscription will be ignored.
+            ''',title="Error on Subscription")
+            sys.exit(1)
+
+        else:
+
+            # error happend before payment
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+You DID NOT PAY the initial fee.
+The service was not able to provide service.
+Subscription will be ignored.
+Error: {0}
+            '''.format(be.errorShort),title="Error on Subscription")
+            sys.exit(1)
+
+    except Exception as e:
+
+            # unkown error happend
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+Unkown Error happend - please report to developers:
+{0}
+            '''.format(str(e)),title="Exception on Subscription")
+            sys.exit(1)
+
+    # warn user if not delivered as advertised
+    if bridge['contract_breached']:
+        Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+The service was payed & delivered, but RaspiBlitz detected:
+{0}
+You may want to consider to cancel the subscription later.
+            '''.format(bridge['warning'],title="Warning")
+
+    # TODO: persist subscription in list
+
+    # Give final result feedback to user
+    Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+OK your service is ready & your subscription is active.
+
+You payed {0} sats for the first {1} hours.
+Next AUTOMATED PAYMENT will be {2} sats.
+
+Your service '{3}' should now publicly be reachable under:
+{4}:{5}
+
+Please test now if the service is performing as promised.
+If not - dont forget to cancel the subscription under:
+MAIN MENU > SUBSCRIPTIONS > MY SUBSCRIPTIONS
+            '''.format(be.errorShort),title="Subscription Active") 
+
+
+####### COMMANDS #########
+
+###############
+# MENU
+# use for ssh shell menu
+###############
+
+if sys.argv[1] == "menu":
+
+    # late imports - so that rest of script can run also if dependency is not available
+    from dialog import Dialog
+
+    menuMakeSubscription("RTL", "s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion", "80")
 
     sys.exit()
 
@@ -603,16 +640,14 @@ if sys.argv[1] == "shop-list":
     # check parameters
     try:
         shopurl = sys.argv[2]
-        if len(shopurl) == 0:
-            print("error='invalid parameter'")
-            sys.exit(1)
     except Exception as e:
-        print("error='invalid parameters'")
-        sys.exit(1)
+        handleException(e)
 
     # get data
-    hosts = shopList(shopurl)
-    if hosts is None: sys.exit(1)
+    try:
+        hosts = shopList(shopurl)
+    except Exception as e:
+        handleException(e)
 
     # output is json list of hosts
     print(hosts)
@@ -625,19 +660,44 @@ if sys.argv[1] == "shop-list":
 
 if sys.argv[1] == "shop-order":
 
-    shopurl = sys.argv[2]
-    hostid = sys.argv[3]
-    toraddress = sys.argv[4]
-    duration = sys.argv[5]
-    msats = sys.argv[6]
+    # check parameters
+    try:
+        shopurl = sys.argv[2]
+        hostid = sys.argv[3]
+        toraddress = sys.argv[4]
+        duration = sys.argv[5]
+        msats = sys.argv[6]
+    except Exception as e:
+        handleException(e)
 
-    # TODO: basic data input check
+    # get data
+    try:
+        bridge = shopOrder(shopurl, hostid, toraddress, duration, msats)
+    except Exception as e:
+        handleException(e)
 
-    shopOrder(shopurl, hostid, toraddress, duration, msats)
+    # TODO: persist subscription
 
-    # TODO: print out result data
-
+    # output json ordered bridge
+    print(bridge)
     sys.exit()
+
+#######################
+# SUBSCRIPTIONS LIST
+# call in intervalls from background process
+#######################
+
+if sys.argv[1] == "subscriptions-list":
+
+    try:
+        
+        # TODO: JSON output of list with all subscrptions
+        print("TODO: implement")
+    
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(0)
 
 #######################
 # SUBSCRIPTIONS RENEW
@@ -646,15 +706,45 @@ if sys.argv[1] == "shop-order":
 
 if sys.argv[1] == "subscriptions-renew":
 
-    # secondsBeforeSuspend
-    secondsBeforeSuspend = sys.argv[2]
-    if secondsBeforeSuspend < 0:
-        print("error='invalid parameter'")
-        sys.exit()
+    # check parameters
+    try:
+        secondsBeforeSuspend = sys.argv[2]
+        if secondsBeforeSuspend < 0: secondsBeforeSuspend = 0
+    except Exception as e:
+        handleException(e)
 
     # TODO: check if any active subscrpitions are below the secondsBeforeSuspend - if yes extend
-    # subscriptionExtend(shopurl, hostid, toraddress, duration, msatsFirst)
+    print("TODO: implement")
+    sys.exit(1)
+
+    # get date
+    try:
+        bridge = subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst)
+    except Exception as e:
+        handleException(e)
+
+    # TODO: persist subscription
+
+    # output json ordered bridge
+    print(bridge)
+    sys.exit()
+
+#######################
+# SUBSCRIPTION CANCEL
+# call in intervalls from background process
+#######################
+
+if sys.argv[1] == "subscription-cancel":
+
+    try:
+        
+        # TODO: JSON output of list with all subscrptions
+        print("TODO: implement")
+    
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(0)
 
 # unkown command
-print("error='unkown command'")
-sys.exit()
+print("# unkown command")
