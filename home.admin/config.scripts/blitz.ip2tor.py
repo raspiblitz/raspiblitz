@@ -537,10 +537,10 @@ Try again later, enter another address or cancel.
         # get data of selected
         seletedIndex = int(tag)
         host = hosts[seletedIndex]
-        hostid = hosts[seletedIndex]['id']
-        msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
-        msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
-        duration=hosts[seletedIndex]['tor_bridge_duration']
+        #hostid = hosts[seletedIndex]['id']
+        #msatsFirst=hosts[seletedIndex]['tor_bridge_price_initial']
+        #msatsNext=hosts[seletedIndex]['tor_bridge_price_extension']
+        #duration=hosts[seletedIndex]['tor_bridge_duration']
 
         # optimize content for display
         if len(host['terms_of_service']) == 0: host['terms_of_service'] = "-"
@@ -567,19 +567,17 @@ There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
 The service has the following additional terms:
-{6}
 
 More information on the service you can find under:
-{7}
 '''.format(
         host['name'],
         host['ip'],
         host['tor_bridge_duration_hours'],
         host['tor_bridge_price_initial_sats'],
-        host['tor_bridge_price_extension_sats'],
-        host['terms_of_service'],
-        host['terms_of_service_url']
-        )
+        host['tor_bridge_price_extension_sats'])
+
+        #host['terms_of_service'],
+        #host['terms_of_service_url']
 
         d.scrollbox(text, width=60)
 
