@@ -616,7 +616,7 @@ MAIN MENU > SUBSCRIPTIONS > MY SUBSCRIPTIONS
         host['tor_bridge_price_extension_sats'],
         blitzServiceName,
         host['ip'],
-        host['port'])
+        bridge['port'])
         ,title="Subscription Active") 
 
 
