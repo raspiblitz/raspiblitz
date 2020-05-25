@@ -577,7 +577,7 @@ More information on the service you can find under:
         "secrdrop5wyphb5x.onion:80",
         host['tor_bridge_duration_hours'],
         host['tor_bridge_price_initial_sats'],
-        host['tor_bridge_price_extension_sats'])
+        host['tor_bridge_price_extension_sats'],
         host['terms_of_service'],
         host['terms_of_service_url'])
 
