@@ -311,17 +311,17 @@ def lndPayInvoice(lnInvoiceString):
 
 def shopList(shopUrl):
 
-    print("#### GET HOSTS")
+    print("#### Getting available options from shop ...")
     shopUrl=normalizeShopUrl(shopUrl)
     return apiGetHosts(session, shopUrl)
 
-def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
+def shopOrder(shopUrl, hostid, torTarget, duration, msatsFirst):
 
-    print("#### PLACE ORDER")
+    print("#### Placeing order ...")
     shopUrl=normalizeShopUrl(shopUrl)
     orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
 
-    print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+    print("#### Waiting until invoice is available ...")
     loopCount=0
     while True:
         time.sleep(2)
@@ -339,20 +339,20 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     bridge_ip = order['item_details'][0]['product']['host']['ip']
     bridge_port = order['item_details'][0]['product']['port']
 
-    print("#### DECODE INVOICE & CHECK)")
+    print("#### Decoding invoice and checking ..)")
     print("# invoice: {0}".format(paymentRequestStr))
     paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
     if paymentRequestDecoded is None: sys.exit()
     print("# amount as advertised: {0}".format(msatsFirst))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
-    if msatsFirst < paymentRequestDecoded.num_msat:
+    if int(msatsFirst) < int(paymentRequestDecoded.num_msat):
         raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
 
-    print("#### PAY INVOICE")
+    print("#### Paying invoice ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
     print('# OK PAYMENT SENT')
 
-    print("#### CHECK IF BRIDGE IS READY")
+    print("#### Waiting until bridge is ready ...")
     loopCount=0
     while True:
         time.sleep(3)
@@ -368,10 +368,10 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     bridge_suspendafter = bridge['suspend_after']
     bridge_port = bridge['port']
 
-    print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+    print("#### Check if duration delivered is as advertised ...")
     secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
     print("# delivered({0}) promised({1})".format(secondsDelivered, duration))
-    if (secondsDelivered + 600) < duration:
+    if (secondsDelivered + 600) < int(duration):
         bridge['contract_breached'] = True
         bridge['warning'] = "delivered duration shorter than advertised"
     else:
@@ -382,11 +382,11 @@ def shopOrder(shopurl, hostid, toraddress, duration, msatsFirst):
     
 def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):    
 
-    print("#### PLACE EXTENSION ORDER")
+    print("#### Placing extension order ...")
     shopUrl=normalizeShopUrl(shopUrl)
     orderid = apiPlaceOrderExtension(session, shopUrl, bridgeid)
 
-    print("#### WAIT UNTIL INVOICE IS AVAILABLE")
+    print("#### Waiting until invoice is available ...")
     loopCount=0
     while True:
         time.sleep(2)
@@ -401,19 +401,19 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):
     
     paymentRequestStr = order['ln_invoices'][0]['payment_request']
 
-    print("#### DECODE INVOICE & CHECK AMOUNT")
+    print("#### Decoding invoice and checking ..)")
     print("# invoice: {0}".format(paymentRequestStr))
     paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
     if paymentRequestDecoded is None: sys.exit()
     print("# amount as advertised: {0}".format(msatsNext))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
-    if msatsNext < paymentRequestDecoded.num_msat:
+    if int(msatsNext) < int(paymentRequestDecoded.num_msat):
         raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
-    print("#### PAY INVOICE")
+    print("#### Paying invoice ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
 
-    print("#### CHECK IF BRIDGE GOT EXTENDED")
+    print("#### Check if bride was extended ...")
     loopCount=0
     while True:
         time.sleep(3)
@@ -425,12 +425,12 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):
         if loopCount > 60: 
             raise BlitzError("timeout on waiting for extending bridge", bridge)
 
-    print("#### CHECK IF DURATION DELIVERED AS PROMISED")
+    print("#### Check if extension duration is as advertised ...")
     secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
     secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
     secondsExtended = secondsLeftNew - secondsLeftOld
     print("# secondsExtended({0}) promised({1})".format(secondsExtended, durationAdvertised))
-    if secondsExtended < durationAdvertised:
+    if secondsExtended < int(durationAdvertised):
         bridge['contract_breached'] = True
         bridge['warning'] = "delivered duration shorter than advertised"
     else:
@@ -648,7 +648,7 @@ if sys.argv[1] == "shop-list":
         handleException(e)
 
     # output is json list of hosts
-    json.dumps(hosts, indent=2)
+    print(json.dumps(hosts, indent=2))
     sys.exit(0)
 
 ###############
@@ -677,7 +677,7 @@ if sys.argv[1] == "shop-order":
     # TODO: persist subscription
 
     # output json ordered bridge
-    json.dumps(bridge, indent=2)
+    print(json.dumps(bridge, indent=2))
     sys.exit()
 
 #######################
