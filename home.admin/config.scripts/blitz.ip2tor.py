@@ -578,9 +578,10 @@ More information on the service you can find under:
         host['terms_of_service'],
         host['terms_of_service_url'])
 
-        code = d.scrollbox(text, title=host['name'], extra_button=True,  extra_label="AGREE" ,width=60)
-        print(code)
-        sys.exit()
+        code = d.scrollbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=60)
+        
+        # if user AGREED break loop and continue with selected host
+        if code == d.extra_button: break
 
     # if user has canceled
     if host is None:
