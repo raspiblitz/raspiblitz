@@ -453,7 +453,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d = Dialog(dialog="dialog",autowidgetsize=True)
         d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
         code, text = d.inputbox(
-            "Enter Address of a IP2TOR Shop (PRESS ENTER FOR DEFAULT):",
+            "Enter Address of a IP2TOR Shop (OR USE DEFAULT):",
             height=10, width=60, init=shopurl,
             title="Shop Address")
 
@@ -552,7 +552,8 @@ More information on the service you can find under:
 
     try:
 
-        bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial_sats'])
+        os.system('clear')
+        bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'])
 
     except BlitzError as be:
 
