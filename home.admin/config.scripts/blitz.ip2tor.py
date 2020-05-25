@@ -550,16 +550,14 @@ Try again later, enter another address or cancel.
         d = Dialog(dialog="dialog",autowidgetsize=True)
         d.set_background_title("IP2TOR Bridge Offer Details: {0}".format(shopurl))
         text='''
-Name: {0}
+The subscription will renew every {0} hours.
+The first time it will cost: {1} sats
+Every next time it will cost: {2} sats
 
 If you AGREE you will subscribe to this service.
-You will get a port on the IP {1} that will
+You will get a port on the IP {3} that will
 forward to your RaspiBlitz TOR address:
-{2}
-
-The subscription will renew every {3} hours.
-The first time it will cost: {4} sats
-Every next time it will cost: {5} sats
+{4}
 
 You can cancel the subscription anytime under
 the "SUBSCRIPTONS" menu on your RaspiBlitz.
@@ -567,21 +565,20 @@ There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
 The service has the following additional terms:
-{6}
+{5}
 
 More information on the service you can find under:
-{7}
+{6}
 '''.format(
-        host['name'],
-        host['ip'],
-        "secrdrop5wyphb5x.onion:80",
         host['tor_bridge_duration_hours'],
         host['tor_bridge_price_initial_sats'],
         host['tor_bridge_price_extension_sats'],
+        host['ip'],
+        "secrdrop5wyphb5x.onion:80",
         host['terms_of_service'],
         host['terms_of_service_url'])
 
-        d.scrollbox(text, width=60)
+        d.scrollbox(text, title=host['name'] ,width=60)
 
     # if user has canceled
     if host is None:
