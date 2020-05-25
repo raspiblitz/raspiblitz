@@ -578,7 +578,7 @@ More information on the service you can find under:
         host['terms_of_service'],
         host['terms_of_service_url'])
 
-        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=60, width=15)
+        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=60, height=15)
         
         # if user AGREED break loop and continue with selected host
         if code == "extra": break
