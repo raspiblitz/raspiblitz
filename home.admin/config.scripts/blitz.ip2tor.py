@@ -610,7 +610,14 @@ Your service '{3}' should now publicly be reachable under:
 Please test now if the service is performing as promised.
 If not - dont forget to cancel the subscription under:
 MAIN MENU > SUBSCRIPTIONS > MY SUBSCRIPTIONS
-            '''.format(be.errorShort),title="Subscription Active") 
+            '''.format(
+        host['tor_bridge_price_initial_sats'],
+        host['tor_bridge_duration_hours'],
+        host['tor_bridge_price_extension_sats'],
+        blitzServiceName,
+        host['ip'],
+        host['port'])
+        ,title="Subscription Active") 
 
 
 ####### COMMANDS #########
