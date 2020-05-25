@@ -543,8 +543,8 @@ Try again later, enter another address or cancel.
         duration=hosts[seletedIndex]['tor_bridge_duration']
 
         # optimize content for display
-        if len(host['terms_of_service'] == 0: host['terms_of_service'] = "-"
-        if len(host['terms_of_service_url'] == 0: host['terms_of_service_url'] = "-"
+        if len(host['terms_of_service']) == 0: host['terms_of_service'] = "-"
+        if len(host['terms_of_service_url']) == 0: host['terms_of_service_url'] = "-"
 
         # show details of selected
         d = Dialog(dialog="dialog",autowidgetsize=True)
