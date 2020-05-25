@@ -594,7 +594,7 @@ Unkown Error happend - please report to developers:
 The service was payed & delivered, but RaspiBlitz detected:
 {0}
 You may want to consider to cancel the subscription later.
-            '''.format(bridge['warning'],title="Warning")
+            '''.format(bridge['warning'],title="Warning"))
 
     # TODO: persist subscription in list
 
@@ -650,7 +650,7 @@ if sys.argv[1] == "shop-list":
         handleException(e)
 
     # output is json list of hosts
-    print(hosts)
+    json.dumps(hosts, indent=2)
     sys.exit(0)
 
 ###############
@@ -679,7 +679,7 @@ if sys.argv[1] == "shop-order":
     # TODO: persist subscription
 
     # output json ordered bridge
-    print(bridge)
+    json.dumps(bridge, indent=2)
     sys.exit()
 
 #######################
@@ -725,9 +725,8 @@ if sys.argv[1] == "subscriptions-renew":
 
     # TODO: persist subscription
 
-    # output json ordered bridge
-    print(bridge)
-    sys.exit()
+    # output - not needed only for debug logs
+    print("# DONE subscriptions-renew")
 
 #######################
 # SUBSCRIPTION CANCEL
