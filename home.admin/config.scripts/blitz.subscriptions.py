@@ -60,18 +60,18 @@ You have no active or inactive subscriptions at the moment.
         lookup[str(lookupIndex)]=sub
         # add to dialog choices
         if sub['active']:
-            activeState="on"
+            activeState="active"
         else:
-            activeState="off"
+            activeState="in-active"
         name="IP2TOR brigde for {0}".format(sub['blitz_service'])
-        choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(20), activeState)) )
+        choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
     
     # show menu with options
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("RaspiBlitz Subscriptions")
     code, tag = d.menu(
-        "You have the following subscriptions (active & inactive). Select for details:",
-        choices=choices, title="My Subscriptions")
+        "\nYou have the following subscriptions - select for details:",
+        choices=choices, width=65, height=15, title="My Subscriptions")
         
     # if user chosses CANCEL
     if code != d.OK: return
