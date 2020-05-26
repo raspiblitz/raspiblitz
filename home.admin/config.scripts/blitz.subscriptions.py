@@ -192,7 +192,7 @@ your RaspiBlitz behind TOR.
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append( ("REST","LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")) )
-    choices.append( ("GRPC","LND GRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
+    choices.append( ("GRPC","LND gRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
     choices.append( ("SELF","Create a custom IP2TOR Bridge") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
@@ -245,10 +245,6 @@ your RaspiBlitz behind TOR.
             print(e)
             time.sleep(3)
             sys.exit(1)
-
-    print(torAddress)
-    print(torPort)
-    sys.exit()
 
     # run creating a new IP2TOR subscription
     os.system("clear")
