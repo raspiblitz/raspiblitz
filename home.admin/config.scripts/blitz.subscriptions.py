@@ -17,8 +17,8 @@ from blitzpy import RaspiBlitzConfig
 cfg = RaspiBlitzConfig()
 cfg.reload()
 
-# basic cvalues
-SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions.toml"
+# basic values
+SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 
 ####### HELPER FUNCTIONS #########
 
