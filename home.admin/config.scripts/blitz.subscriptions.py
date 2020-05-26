@@ -15,6 +15,11 @@ from dialog import Dialog
 
 from blitzpy import RaspiBlitzConfig
 
+
+# constants for standard services
+LND_REST_API = "LND-REST-API"
+LND_REST_API = "LND-GRPC-API"
+
 # load config 
 cfg = RaspiBlitzConfig()
 cfg.reload()
@@ -153,9 +158,13 @@ code, tag = d.menu(
 if code != d.OK:
     sys.exit(0)
 
+####### MANAGE SUBSCRIPTIONS #########
+
 if tag == "LIST":
     mySubscriptions()
     sys.exit(0)
+
+####### NEW IP2TOR BRIDGE #########
 
 if tag == "NEW1":
 
@@ -168,9 +177,80 @@ your RaspiBlitz behind TOR.
         ''',title="Info")
         sys.exit(1)
 
+    # check for which standard services already a active bridge exists
+    lnd_rest_api=False
+    lnd_grpc_api=False
+    try:
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        for sub in subs['subscriptions_ip2tor']:
+            if not subs['active']: next
+            if subs['active'] and subs['blitz_service'] == LND_REST_API: lnd_rest_api=True
+            if subs['active'] and subs['blitz_service'] == LND_GRPC_API: lnd_grpc_api=True
+    except Exception as e:
+        pass
+
+    # ask user for which RaspiBlitz service the bridge should be used
+    choices = []
+    choices.append( ("REST","LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")) )
+    choices.append( ("GRPC","LND GRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
+    choices.append( ("SELF","Create a custom IP2TOR Bridge") )
+
+    d = Dialog(dialog="dialog",autowidgetsize=True)
+    d.set_background_title("RaspiBlitz Subscriptions")
+    code, tag = d.menu(
+        "\nChoose RaspiBlitz Service to create Bridge for:",
+        choices=choices, width=50, height=10, title="Select Service")
+
+    # if user chosses CANCEL
+    if code != d.OK:
+    sys.exit(0)
+
+    torAddress=None
+    torPort=None
+    if tag == "REST":
+        # get TOR address for REST
+    if tag == "GRPC":
+        # get TOR address for REST
+    if tag == "SELF":
+        try:
+            # get custom TOR address
+            code, text = d.inputbox(
+                "Enter TOR Onion-Address:",
+                height=10, width=60, init="",
+                title="IP2TOR Bridge Target")
+            text = text.strip()
+            os.system("clear")
+            if code != d.OK: sys.exit(0)
+            if len(text) == 0: sys.exit(0)
+            if text.find('.onion') < 0 or text.find(' ') > 0 :
+                print("Not a TOR Onion Address")
+                time.sleep(3)
+                sys.exit(0)
+            torAddress = text
+            # get custom TOR port
+            code, text = d.inputbox(
+                "Enter TOR Port Number:",
+                height=10, width=40, init="80",
+                title="IP2TOR Bridge Target")
+            text = text.strip()
+            os.system("clear")
+            if code != d.OK: sys.exit(0)
+            if len(text) == 0: sys.exit(0)
+            torPort = int(text)
+        except Exception as e:
+            print(e)
+            time.sleep(3)
+            sys.exit(1)
+
+    print(torAddress)
+    print(torPort)
+    sys.exit()
+
     # run creating a new IP2TOR subscription
     os.system("clear")
     cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
     print("# running: {0}".format(cmd))
     os.system(cmd)
     sys.exit(0)
+
+    # result = subprocess.run(['python', '/home/admin/config.scripts/blitz.subscriptions.ip2tor.py', 'subscriptions-list'], stdout=subprocess.PIPE).stdout.decode('utf-8')
