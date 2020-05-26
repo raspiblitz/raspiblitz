@@ -34,8 +34,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 cfg = RaspiBlitzConfig()
 session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
+
     print("# blitz.ip2tor.py")
     cfg.reload()
+    if not cfg.run_behind_tor:
+        print("error=''")
+        sys.exit(1)
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="127.0.0.1"
@@ -319,7 +323,7 @@ def shopList(shopUrl):
     shopUrl=normalizeShopUrl(shopUrl)
     return apiGetHosts(session, shopUrl)
 
-def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msatsNext):
+def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msatsNext, description=""):
 
     print("#### Placeing order ...")
     shopUrl=normalizeShopUrl(shopUrl)
@@ -379,7 +383,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
 
     # create subscription data for storage
     subscription = {}
-    subscription['type'] = "ip2tor"
+    subscription['type'] = "ip2tor-v1"
     subscription['id'] = bridge['id']
     subscription['blitz_service'] = servicename
     subscription['shop'] = shopUrl
@@ -393,6 +397,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription['time_created'] = str(datetime.datetime.now())
     subscription['time_lastupdate'] = str(datetime.datetime.now())
     subscription['suspend_after'] = bridge['suspend_after']
+    subscription['description'] = str(description)
     subscription['contract_breached'] = contract_breached
     subscription['warning'] = warning_text
     subscription['tor'] = torTarget
@@ -405,9 +410,9 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         else:
             print("# new toml file")
             subscriptions = {}
-            subscriptions['list'] = []
-        subscriptions['list'].append(subscription)
-        subscriptions['shopurl'] = shopUrl
+            subscriptions['subscriptions_ip2tor'] = []
+        subscriptions['subscriptions_ip2tor'].append(subscription)
+        subscriptions['shop_ip2tor'] = shopUrl
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
             writer.write(toml.dumps(subscriptions))
             writer.close()
@@ -487,7 +492,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
     try:
         print("# load toml file")
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
-        for idx, subscription in enumerate(subscriptions['list']):
+        for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
             if subscription['id'] == bridgeid:
                 subscription['suspend_after'] = str(bridge['suspend_after'])
                 subscription['time_lastupdate'] = str(datetime.datetime.now())
@@ -520,7 +525,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         print("# load toml file - to check for default shop")
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
         if "shopurl" in subscriptions:
-            shopurl = subscriptions['shopurl']
+            shopurl = subscriptions['shop_ip2tor']
 
     while True:
 
@@ -625,10 +630,12 @@ More information on the service you can find under:
     ############################
     # PHASE 3: Make Subscription
 
+    description = "{0} / {1} / {2}".format(host['name'], host['terms_of_service'], host['terms_of_service_url'])
+
     try:
 
         os.system('clear')
-        subscription = shopOrder(shopurl, host['id'], blitzServiceName, torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'],host['tor_bridge_price_extension'])
+        subscription = shopOrder(shopurl, host['id'], blitzServiceName, torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'],host['tor_bridge_price_extension'],description)
 
     except BlitzError as be:
 
@@ -751,12 +758,16 @@ if sys.argv[1] == "shop-order":
         duration = sys.argv[6]
         msatsFirst = sys.argv[7]
         msatsNext = sys.argv[8]
+        if len(sys.argv) >=9:
+            description = sys.argv[9]
+        else:
+            description = ""
     except Exception as e:
         handleException(e)
 
     # get data
     try:
-        subscription = shopOrder(shopurl, hostid, servicename, toraddress, duration, msatsFirst, msatsNext)
+        subscription = shopOrder(shopurl, hostid, servicename, toraddress, duration, msatsFirst, msatsNext, description)
     except Exception as e:
         handleException(e)
 
@@ -777,7 +788,7 @@ if sys.argv[1] == "subscriptions-list":
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             subs = {}
-            subs['list'] = []
+            subs['subscriptions_ip2tor'] = []
         print(json.dumps(subs, indent=2))
     
     except Exception as e:
@@ -808,11 +819,11 @@ if sys.argv[1] == "subscriptions-renew":
             sys.exit(0)
         
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
-        for idx, subscription in enumerate(subscriptions['list']):
+        for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
 
             try:
 
-                if subscription['active'] and subscription['type'] == "ip2tor":
+                if subscription['active'] and subscription['type'] == "ip2tor-v1":
                     secondsToRun = secondsLeft(parseDate(subscription['suspend_after']))
                     if secondsToRun < secondsBeforeSuspend:
                         print("# RENEW: subscription {0} with {1} seconds to run".format(subscription['id'],secondsToRun))
@@ -829,7 +840,7 @@ if sys.argv[1] == "subscriptions-renew":
             except BlitzError as be:
                 # write error into subscription warning
                 subs = toml.load(SUBSCRIPTIONS_FILE)
-                for idx, sub in enumerate(subs['list']):
+                for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                     if sub['id'] == subscription['id']:
                         sub['warning'] = "Exception on Renew: {0}".format(be.errorShort)
                         if be.errorShort == "invoice bigger amount than advertised":
@@ -870,10 +881,10 @@ if sys.argv[1] == "subscription-cancel":
 
         subs = toml.load(SUBSCRIPTIONS_FILE)
         newList = []
-        for idx, sub in enumerate(subs['list']):
+        for idx, sub in enumerate(subs['subscriptions_ip2tor']):
             if sub['id'] != subscriptionID:
                 newList.append(sub)
-        subs['list'] = newList
+        subs['subscriptions_ip2tor'] = newList
 
         # persist change
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
