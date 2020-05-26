@@ -124,12 +124,15 @@ The following additional information is available:
     # user wants to delete this subscription
     # call the responsible sub script for deletion just in case any subscription needs to do some extra api calls when canceling
     if code == "extra":
+        os.system("clear")
         if selectedSub['type'] == "ip2tor-v1":
-            os.system("clear")
             cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
             print("# running: {0}".format(cmd))    
             os.system(cmd)
             time.sleep(2)
+        else:
+            print("# FAIL: unknown subscription type")
+            time.sleep(3)
 
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     mySubscriptions()
