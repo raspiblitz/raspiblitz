@@ -158,6 +158,18 @@ if tag == "LIST":
     sys.exit(0)
 
 if tag == "NEW1":
+
+    # check if Blitz is running behind TOR
+    cfg.reload()
+    if cfg.run_behind_tor:
+        Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+The IP2TOR service just makes sense if you run
+your RaspiBlitz behind TOR.
+        ''',title="Info")
+        sys.exit(1)
+
+    # run creating a new IP2TOR subscription
+    os.system("clear")
     cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
     print("# running: {0}".format(cmd))
     os.system(cmd)
