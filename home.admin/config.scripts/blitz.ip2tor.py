@@ -21,7 +21,7 @@ from lndlibs import rpc_pb2_grpc as rpcstub
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage ip2tor subscriptions for raspiblitz")
-    print("# blitz.ip2tor.py menu")
+    print("# blitz.ip2tor.py create-ssh-dialog [servicename] [toraddress] [torport]")
     print("# blitz.ip2tor.py shop-list [shopurl]")
     print("# blitz.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msats]")
     print("# blitz.ip2tor.py subscriptions-list")
@@ -35,12 +35,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 cfg = RaspiBlitzConfig()
 session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
-
-    print("# blitz.ip2tor.py")
-    cfg.reload()
-    if not cfg.run_behind_tor:
-        print("error=''")
-        sys.exit(1)
+    ENV="PROD"
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="127.0.0.1"
@@ -50,6 +45,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     session.proxies = {'http':  'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
     SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions.toml"
 else:
+    ENV="DEV"
     print("# blitz.ip2tor.py (development env)")
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="192.168.178.95"
@@ -707,23 +703,30 @@ MAIN MENU > SUBSCRIPTIONS > MY SUBSCRIPTIONS
 ####### COMMANDS #########
 
 ###############
-# MENU
+# CREATE SSH DIALOG
 # use for ssh shell menu
 ###############
 
-if sys.argv[1] == "menu":
+if sys.argv[1] == "create-ssh-dialog":
+
+    # check parameters
+    try:
+        servicename = sys.argv[2]
+        toraddress = sys.argv[3]
+        port = sys.argv[4]
+    except Exception as e:
+        handleException(e)
 
     # late imports - so that rest of script can run also if dependency is not available
     from dialog import Dialog
-
-    menuMakeSubscription("RTL", "s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion", "80")
+    menuMakeSubscription(servicename, toraddress, port)
 
     sys.exit()
 
 ###############
 # SHOP LIST
 # call from web interface
-###############    
+###############
 
 if sys.argv[1] == "shop-list":
 
