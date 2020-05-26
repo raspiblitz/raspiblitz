@@ -22,23 +22,26 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3000
+https://${localip}:3001
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
-" 12 67
+" 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3000
+https://${localip}:3001
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 12 57
+" 13 57
   fi
   echo "please wait ..."
   exit 0
@@ -104,7 +107,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-    
+
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
@@ -151,6 +154,22 @@ EOF
     sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
     echo ""
 
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/rtl_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/rtl_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/rtl_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/rtl_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/rtl_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/rtl_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     # open firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow 3000 comment 'RTL'
@@ -181,21 +200,20 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
+    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
     sudo chown root:root /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi
-  
+
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
-    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
+    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   exit 0
 fi
@@ -206,6 +224,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
 
+  # setup nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING RTL ***"
@@ -214,7 +239,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/RTL.service
     sudo rm -rf /home/rtl/RTL
     echo "OK RTL removed."
-  else 
+  else
     echo "RTL is not installed."
   fi
 
