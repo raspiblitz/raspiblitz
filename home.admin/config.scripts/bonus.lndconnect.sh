@@ -63,10 +63,6 @@ if [ ${#error} -eq 0 ]; then
   ip2torGRPC_PORT="${port}"
 fi
 
-echo "${ip2torREST_IP}"
-echo "${ip2torREST_PORT}"
-exit
-
 #### ADAPT PARAMETERS BASED TARGETWALLET 
 
 # defaults
@@ -97,6 +93,12 @@ elif [ "${targetWallet}" = "zap-android" ]; then
     # normal ZAP uses gRPC ports
     port="10009"
   fi
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    forceTOR=0
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi  
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
@@ -152,7 +154,9 @@ fi
 #### ADAPT PARAMETERS BASED RASPIBLITZ CONFIG
 
 # get the local IP as default host
-host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+if [ ${#host} -eq 0 ]; then
+    host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+fi
 
 # change host to dynDNS if set
 if [ ${#dynDomain} -gt 0 ]; then
