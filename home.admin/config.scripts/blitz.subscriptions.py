@@ -209,11 +209,11 @@ your RaspiBlitz behind TOR.
     torPort=None
     if tag == "REST":
         # get TOR address for REST
-        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=8080
     if tag == "GRPC":
         # get TOR address for GRPC
-        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=10009
     if tag == "SELF":
         try:
