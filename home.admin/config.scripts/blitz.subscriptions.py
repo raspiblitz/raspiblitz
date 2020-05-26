@@ -199,7 +199,7 @@ your RaspiBlitz behind TOR.
     d.set_background_title("RaspiBlitz Subscriptions")
     code, tag = d.menu(
         "\nChoose RaspiBlitz Service to create Bridge for:",
-        choices=choices, width=50, height=10, title="Select Service")
+        choices=choices, width=60, height=10, title="Select Service")
 
     # if user chosses CANCEL
     if code != d.OK:
@@ -209,10 +209,12 @@ your RaspiBlitz behind TOR.
     torPort=None
     if tag == "REST":
         # get TOR address for REST
-        pass
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        torPort=8080
     if tag == "GRPC":
         # get TOR address for GRPC
-        pass
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        torPort=10009
     if tag == "SELF":
         try:
             # get custom TOR address
@@ -254,5 +256,3 @@ your RaspiBlitz behind TOR.
     print("# running: {0}".format(cmd))
     os.system(cmd)
     sys.exit(0)
-
-    # result = subprocess.run(['python', '/home/admin/config.scripts/blitz.subscriptions.ip2tor.py', 'subscriptions-list'], stdout=subprocess.PIPE).stdout.decode('utf-8')
