@@ -18,7 +18,7 @@ from blitzpy import RaspiBlitzConfig
 
 # constants for standard services
 LND_REST_API = "LND-REST-API"
-LND_REST_API = "LND-GRPC-API"
+LND_GRPC_API = "LND-GRPC-API"
 
 # load config 
 cfg = RaspiBlitzConfig()
@@ -205,17 +205,21 @@ your RaspiBlitz behind TOR.
     if code != d.OK:
         sys.exit(0)
 
+    servicename=None
     torAddress=None
     torPort=None
     if tag == "REST":
         # get TOR address for REST
+        servicename=LND_REST_API
         torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=8080
     if tag == "GRPC":
         # get TOR address for GRPC
+        servicename=LND_GRPC_API
         torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=10009
     if tag == "SELF":
+        servicename="CUSTOM"
         try:
             # get custom TOR address
             code, text = d.inputbox(
@@ -248,7 +252,7 @@ your RaspiBlitz behind TOR.
 
     # run creating a new IP2TOR subscription
     os.system("clear")
-    cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
+    cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format(servicename,torAddress,torPort)
     print("# running: {0}".format(cmd))
     os.system(cmd)
     sys.exit(0)
