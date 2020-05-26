@@ -203,14 +203,16 @@ your RaspiBlitz behind TOR.
 
     # if user chosses CANCEL
     if code != d.OK:
-    sys.exit(0)
+        sys.exit(0)
 
     torAddress=None
     torPort=None
     if tag == "REST":
         # get TOR address for REST
+        pass
     if tag == "GRPC":
-        # get TOR address for REST
+        # get TOR address for GRPC
+        pass
     if tag == "SELF":
         try:
             # get custom TOR address
