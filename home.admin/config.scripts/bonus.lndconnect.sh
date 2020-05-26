@@ -45,6 +45,28 @@ else
   echo "# lndconnect is already installed" 
 fi
 
+#### CHECK IF IP2TOR BRIDGES ARE AVAILABLE
+ip2torREST_IP=""
+ip2torREST_PORT=""
+error=""
+source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
+if [ ${#error} -eq 0 ]; then
+  ip2torREST_IP="${ip}"
+  ip2torREST_PORT="${port}"
+fi
+ip2torGRPC_IP=""
+ip2torGRPC_PORT=""
+error=""
+source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-GRPC-API)
+if [ ${#error} -eq 0 ]; then
+  ip2torGRPC_IP="${ip}"
+  ip2torGRPC_PORT="${port}"
+fi
+
+echo "${ip2torREST_IP}"
+echo "${ip2torREST_PORT}"
+exit
+
 #### ADAPT PARAMETERS BASED TARGETWALLET 
 
 # defaults
