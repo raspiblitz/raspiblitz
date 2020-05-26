@@ -383,7 +383,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription['id'] = bridge['id']
     subscription['blitz_service'] = servicename
     subscription['shop'] = shopUrl
-    subscription['active'] = 1
+    subscription['active'] = True
     subscription['ip'] = bridge_ip
     subscription['port'] = bridge['port']
     subscription['duration'] = int(duration)
@@ -450,7 +450,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
     print("# amount as advertised: {0}".format(msatsNext))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
     if int(msatsNext) < int(paymentRequestDecoded.num_msat):
-        raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
+        raise BlitzError("invoice bigger amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
     print("#### Paying invoice ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
@@ -495,7 +495,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
                 subscription['contract_breached'] = contract_breached
                 subscription['warning'] = warningTXT
                 if contract_breached:
-                    subscription['active'] = 0
+                    subscription['active'] = False
                 with open(SUBSCRIPTIONS_FILE, 'w') as writer:
                     writer.write(toml.dumps(subscriptions))
                     writer.close()
@@ -772,7 +772,7 @@ if sys.argv[1] == "shop-order":
 if sys.argv[1] == "subscriptions-list":
 
     try:
-        
+
         if Path(SUBSCRIPTIONS_FILE).is_file():
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
@@ -832,6 +832,9 @@ if sys.argv[1] == "subscriptions-renew":
                 for idx, sub in enumerate(subs['list']):
                     if sub['id'] == subscription['id']:
                         sub['warning'] = "Exception on Renew: {0}".format(be.errorShort)
+                        if be.errorShort == "invoice bigger amount than advertised":
+                            sub['contract_breached'] = True 
+                            sub['active'] = False 
                         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
                             writer.write(toml.dumps(subs))
                             writer.close()
