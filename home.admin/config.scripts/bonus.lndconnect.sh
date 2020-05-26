@@ -116,6 +116,14 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
 
   connector="lndconnect"
   port="8080"
+  if [ ${#ip2torREST_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR=1
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torREST_IP}"
+    port="${ip2torREST_PORT}"
+  fi  
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
