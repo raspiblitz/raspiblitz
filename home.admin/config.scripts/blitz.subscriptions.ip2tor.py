@@ -44,7 +44,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
     # make sure to make requests thru TOR 127.0.0.1:9050
     session.proxies = {'http':  'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
-    SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions.toml"
+    SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 else:
     ENV="DEV"
     print("# blitz.ip2tor.py (development env)")
