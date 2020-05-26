@@ -107,7 +107,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-    
+
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
@@ -200,21 +200,19 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
+    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
     sudo chown root:root /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi
-  
+
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
-    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   exit 0
@@ -241,7 +239,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/RTL.service
     sudo rm -rf /home/rtl/RTL
     echo "OK RTL removed."
-  else 
+  else
     echo "RTL is not installed."
   fi
 
