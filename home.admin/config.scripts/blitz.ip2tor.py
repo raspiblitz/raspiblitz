@@ -399,7 +399,6 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
 
     # load, add and store subscriptions
     try:
-        #f = open(SUBSCRIPTIONS_FILE,"w")
         if Path(SUBSCRIPTIONS_FILE).is_file():
             print("# load toml file")
             subscriptions = toml.load(SUBSCRIPTIONS_FILE)
@@ -774,8 +773,12 @@ if sys.argv[1] == "subscriptions-list":
 
     try:
         
-        # TODO: JSON output of list with all subscrptions
-        print("TODO: implement")
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+        else:
+            subs = {}
+            subs['list'] = []
+        print(json.dumps(subs, indent=2))
     
     except Exception as e:
         handleException(e)
@@ -854,11 +857,28 @@ if sys.argv[1] == "subscriptions-renew":
 
 if sys.argv[1] == "subscription-cancel":
 
+    # check parameters
     try:
-        
-        # TODO: JSON output of list with all subscrptions
-        print("TODO: implement")
-    
+        subscriptionID = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        newList = []
+        for idx, sub in enumerate(subs['list']):
+            if sub['id'] != subscriptionID:
+                newList.append(sub)
+        subs['list'] = newList
+
+        # persist change
+        with open(SUBSCRIPTIONS_FILE, 'w') as writer:
+            writer.write(toml.dumps(subs))
+            writer.close()
+
+        print(json.dumps(subs, indent=2))
+
     except Exception as e:
         handleException(e)
 
