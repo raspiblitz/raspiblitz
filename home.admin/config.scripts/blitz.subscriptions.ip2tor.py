@@ -32,9 +32,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 
 ####### BASIC SETTINGS #########
 
-cfg = RaspiBlitzConfig()
 session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
+    cfg = RaspiBlitzConfig()
+    cfg.reload()
     ENV="PROD"
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     DEFAULT_SHOPURL="shop.ip2t.org"
