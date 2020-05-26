@@ -45,7 +45,7 @@ def mySubscriptions():
     except Exception as e: pass
     if countSubscriptions == 0:
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
-You have no active or inactive subscriptions at the moment.
+You have no active or inactive subscriptions.
             ''',title="Info")
         return
         
