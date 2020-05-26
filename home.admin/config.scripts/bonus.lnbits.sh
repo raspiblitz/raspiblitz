@@ -21,24 +21,27 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-http://${localip}:5000\n
+https://${localip}:5001\n
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 11 67
+" 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-http://${localip}:5000\n
+https://${localip}:5001\n
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Activate TOR to access from outside your local network.
-" 12 54
+" 13 54
   fi
 
   echo "please wait ..."
@@ -215,7 +218,7 @@ EOF
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5000
+    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
   exit 0
 fi
