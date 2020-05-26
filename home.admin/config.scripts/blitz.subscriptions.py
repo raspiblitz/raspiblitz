@@ -70,7 +70,7 @@ You have no active or inactive subscriptions.
             activeState="active"
         else:
             activeState="in-active"
-        name="IP2TOR Bridge for {0}".format(sub['blitz_service'])
+        name="IP2TOR Bridge for {0}".format(sub['name'])
         choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
     
     # show menu with options
@@ -117,7 +117,7 @@ The following additional information is available:
             active= "ACTIVE" if selectedSub['active'] else "NOT ACTIVE",
             warning=selectedSub['warning'],
             description=selectedSub['description'],
-            service=selectedSub['blitz_service']
+            service=selectedSub['name']
     )
 
     if selectedSub['active']:
@@ -184,8 +184,8 @@ your RaspiBlitz behind TOR.
         subs = toml.load(SUBSCRIPTIONS_FILE)
         for sub in subs['subscriptions_ip2tor']:
             if not subs['active']: next
-            if subs['active'] and subs['blitz_service'] == LND_REST_API: lnd_rest_api=True
-            if subs['active'] and subs['blitz_service'] == LND_GRPC_API: lnd_grpc_api=True
+            if subs['active'] and subs['name'] == LND_REST_API: lnd_rest_api=True
+            if subs['active'] and subs['name'] == LND_GRPC_API: lnd_grpc_api=True
     except Exception as e:
         pass
 

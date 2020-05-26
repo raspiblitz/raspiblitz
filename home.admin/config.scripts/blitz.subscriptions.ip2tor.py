@@ -383,7 +383,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription = {}
     subscription['type'] = "ip2tor-v1"
     subscription['id'] = bridge['id']
-    subscription['blitz_service'] = servicename
+    subscription['name'] = servicename
     subscription['shop'] = shopUrl
     subscription['active'] = True
     subscription['ip'] = bridge_ip
@@ -919,7 +919,7 @@ if sys.argv[1] == "subscription-by-service":
         subs = toml.load(SUBSCRIPTIONS_FILE)
         newList = []
         for idx, sub in enumerate(subs['subscriptions_ip2tor']):
-            if sub['active'] and sub['blitz_service'] == servicenname:
+            if sub['active'] and sub['name'] == servicenname:
                 print("type='{0}'".format(sub['type']))
                 print("ip='{0}'".format(sub['ip']))
                 print("port='{0}'".format(sub['port']))
