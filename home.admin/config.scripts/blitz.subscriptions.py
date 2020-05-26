@@ -146,8 +146,8 @@ choices.append( ("NEW1","+ new IP2TOR Bridge") )
 d = Dialog(dialog="dialog",autowidgetsize=True)
 d.set_background_title("RaspiBlitz Subscriptions")
 code, tag = d.menu(
-    "\nCheck your existing subscriptions or create new:",
-    choices=choices, width=40, height=10, title="Subscription Management")
+    "\nCheck existing subscriptions or create new:",
+    choices=choices, width=50, height=10, title="Subscription Management")
 
 # if user chosses CANCEL
 if code != d.OK:
@@ -158,7 +158,7 @@ if tag == "LIST":
     sys.exit(0)
 
 if tag == "NEW1":
-    cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
+    cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
     print("# running: {0}".format(cmd))
     os.system(cmd)
     sys.exit(0)
