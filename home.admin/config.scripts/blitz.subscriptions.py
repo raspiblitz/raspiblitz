@@ -149,7 +149,7 @@ The following additional information is available:
     code, tag = d.menu(
         "\nCheck your existing subscriptions or create new:",
         choices=choices, width=40, height=10, title="Subscription Management")
-        
+
     # if user chosses CANCEL
     if code != d.OK: return
 
@@ -158,6 +158,6 @@ The following additional information is available:
         sys.exit(0)
 
     if tag == "NEW1":
-        cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion"."80")
-        print("# running: {0}".format(cmd))    
+        cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
+        print("# running: {0}".format(cmd))
         os.system(cmd)
