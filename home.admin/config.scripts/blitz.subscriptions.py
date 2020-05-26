@@ -8,6 +8,7 @@ import sys
 import math
 import time
 import toml
+import subprocess
 
 from dialog import Dialog
 
@@ -63,7 +64,7 @@ You have no active or inactive subscriptions at the moment.
             activeState="active"
         else:
             activeState="in-active"
-        name="IP2TOR brigde for {0}".format(sub['blitz_service'])
+        name="IP2TOR Bridge for {0}".format(sub['blitz_service'])
         choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
     
     # show menu with options
@@ -123,7 +124,11 @@ The following additional information is available:
     if code == "extra":
         if selectedSub['type'] == "ip2tor-v1":
             # TODO: make call to blitz.ip2tor to cancel/delete subscription
-            pass
+            cmd="/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
+            print("# running: {0}".format(cmd))    
+            result = subprocess.check_output(cmd)
+            print("# result: {0}".format(result))
+            sys.exit()
     
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     mySubscriptions()

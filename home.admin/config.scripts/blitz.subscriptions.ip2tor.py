@@ -392,8 +392,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription['price_initial'] = int(msatsFirst)
     subscription['price_extension'] = int(msatsNext)
     subscription['price_total'] = int(paymentRequestDecoded.num_msat)
-    subscription['time_created'] = str(datetime.datetime.now())
-    subscription['time_lastupdate'] = str(datetime.datetime.now())
+    subscription['time_created'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+    subscription['time_lastupdate'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     subscription['suspend_after'] = bridge['suspend_after']
     subscription['description'] = str(description)
     subscription['contract_breached'] = contract_breached
@@ -493,7 +493,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
         for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
             if subscription['id'] == bridgeid:
                 subscription['suspend_after'] = str(bridge['suspend_after'])
-                subscription['time_lastupdate'] = str(datetime.datetime.now())
+                subscription['time_lastupdate'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
                 subscription['price_total'] += int(paymentRequestDecoded.num_msat)
                 subscription['contract_breached'] = contract_breached
                 subscription['warning'] = warningTXT
