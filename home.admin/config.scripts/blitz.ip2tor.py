@@ -561,7 +561,7 @@ Try again later, enter another address or cancel.
     ###############################
     # PHASE 2: SELECT SUBSCRIPTION
 
-    # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
+    # create menu to select shop
     host=None
     choices = []
     for idx, hostEntry in enumerate(hosts):
@@ -674,8 +674,6 @@ The service was payed & delivered, but RaspiBlitz detected:
 {0}
 You may want to consider to cancel the subscription later.
             '''.format(subscription['warning'],title="Warning"))
-
-    # TODO: persist subscription in list
 
     # Give final result feedback to user
     Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
