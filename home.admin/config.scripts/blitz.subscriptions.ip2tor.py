@@ -519,11 +519,12 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
 
     # see if user had before entered another shop of preference
     shopurl = DEFAULT_SHOPURL
-    if Path(SUBSCRIPTIONS_FILE).is_file():
-        print("# load toml file - to check for default shop")
+    try:
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
-        if "shopurl" in subscriptions:
-            shopurl = subscriptions['shop_ip2tor']
+        shopurl = subscriptions['shop_ip2tor']
+        print("# using last shop url set in subscriptions.toml")
+    except Exception as e:
+        print("# using default shop url")
 
     while True:
 
