@@ -21,13 +21,13 @@ from lndlibs import rpc_pb2_grpc as rpcstub
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage ip2tor subscriptions for raspiblitz")
-    print("# blitz.ip2tor.py create-ssh-dialog [servicename] [toraddress] [torport]")
-    print("# blitz.ip2tor.py shop-list [shopurl]")
-    print("# blitz.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msats]")
-    print("# blitz.ip2tor.py subscriptions-list")
-    print("# blitz.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
-    print("# blitz.ip2tor.py subscription-cancel [id]")
-    print("# blitz.ip2tor.py subscription-by-service [servicename]")
+    print("# blitz.subscriptions.ip2tor.py create-ssh-dialog [servicename] [toraddress] [torport]")
+    print("# blitz.subscriptions.ip2tor.py shop-list [shopurl]")
+    print("# blitz.subscriptions.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msats]")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-list")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
+    print("# blitz.subscriptions.ip2tor.py subscription-cancel [id]")
+    print("# blitz.subscriptions.ip2tor.py subscription-by-service [servicename]")
     sys.exit(1)
 
 ####### BASIC SETTINGS #########
