@@ -124,7 +124,7 @@ The following additional information is available:
     if code == "extra":
         if selectedSub['type'] == "ip2tor-v1":
             # TODO: make call to blitz.ip2tor to cancel/delete subscription
-            cmd="/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
+            cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
             print("# running: {0}".format(cmd))    
             result = subprocess.check_output(cmd)
             print("# result: {0}".format(result))
