@@ -188,8 +188,6 @@ your RaspiBlitz behind TOR.
             if sub['active'] and sub['name'] == LND_GRPC_API: lnd_grpc_api=True
     except Exception as e:
         print(e)
-        time.sleep(4)
-        pass
 
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []

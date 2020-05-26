@@ -248,12 +248,23 @@ do
   fi
 
   ###############################
+  # SUBSCRIPTION RENWES
+  ###############################
+
+  # check every 10min
+  recheckSubscription=$((($counter % 600)+1))
+  if [ ${recheckSubscription} -eq 1 ]; then
+    # IP2TOR subscriptions (that will need renew in next 20min = 1200 secs)
+    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1200
+  fi
+
+  ###############################
   # RAID data check (BRTFS)
   ###############################
   # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
 
   # check every hour
-  recheckRAID=$((($counter % 360)+1))
+  recheckRAID=$((($counter % 3600)+1))
   if [ ${recheckRAID} -eq 1 ]; then
     
     # check if raid is active
