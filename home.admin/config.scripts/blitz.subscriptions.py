@@ -150,7 +150,8 @@ code, tag = d.menu(
     choices=choices, width=40, height=10, title="Subscription Management")
 
 # if user chosses CANCEL
-if code != d.OK: return
+if code != d.OK:
+    sys.exit(0)
 
 if tag == "LIST":
     mySubscriptions()
@@ -160,3 +161,4 @@ if tag == "NEW1":
     cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py blitz.subscriptions.ip2tor.py create-ssh-dialog {0} {1} {2}".format("RTL","s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion","80")
     print("# running: {0}".format(cmd))
     os.system(cmd)
+    sys.exit(0)
