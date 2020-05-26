@@ -599,7 +599,7 @@ Every next time it would cost: {2} sats
 
 If you AGREE you will subscribe to this service.
 You will get a port on the IP {3} that will
-forward to your RaspiBlitz TOR address:
+forward to your RaspiBlitz TOR address for '{7}':
 {4}
 
 You can cancel the subscription anytime under
@@ -619,9 +619,11 @@ More information on the service you can find under:
         host['ip'],
         torTarget,
         host['terms_of_service'],
-        host['terms_of_service_url'])
+        host['terms_of_service_url'],
+        blitzServiceName
+        )
 
-        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=70, height=30)
+        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=75, height=30)
         
         # if user AGREED break loop and continue with selected host
         if code == "extra": break
