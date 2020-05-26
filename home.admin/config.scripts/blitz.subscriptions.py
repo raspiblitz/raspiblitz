@@ -119,7 +119,7 @@ The following additional information is available:
         extraLable = "CANCEL SUBSCRIPTION"
     else:
         extraLable = "DELETE SUBSCRIPTION"
-    code = d.msgbox(text, title="Subscription Detail", ok_label="Back", extra_button=True,  extra_label=extraLable ,width=70, height=30)
+    code = d.msgbox(text, title="Subscription Detail", ok_label="Back", extra_button=True,  extra_label=extraLable ,width=75, height=30)
         
     # user wants to delete this subscription
     # call the responsible sub script for deletion just in case any subscription needs to do some extra api calls when canceling
