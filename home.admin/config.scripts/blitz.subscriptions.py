@@ -116,9 +116,9 @@ The following additional information is available:
     )
 
     if selectedSub['active']:
-        extraLable = "CANCEL"
+        extraLable = "CANCEL SUBSCRIPTION"
     else:
-        extraLable = "DELETE"
+        extraLable = "DELETE SUBSCRIPTION"
     code = d.msgbox(text, title="Subscription Detail", ok_label="Back", extra_button=True,  extra_label=extraLable ,width=70, height=30)
         
     # user wants to delete this subscription
