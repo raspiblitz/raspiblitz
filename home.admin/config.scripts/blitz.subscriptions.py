@@ -9,12 +9,13 @@ import math
 import time
 import toml
 
+from dialog import Dialog
+
 from blitzpy import RaspiBlitzConfig
 
 # load config 
 cfg = RaspiBlitzConfig()
-session = requests.session()
-
+cfg.reload()
 
 # basic cvalues
 SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions.toml"
@@ -45,7 +46,7 @@ def mySubscriptions():
         # list ip2tor subscriptions
         for sub in subs['subscriptions_ip2tor']:
             # remember subscription under lookupindex
-            lookupIndex = += 1
+            lookupIndex += 1
             lookup[str(lookupIndex)]=sub
             # add to dialog choices
             if sub['active']:
@@ -57,7 +58,7 @@ def mySubscriptions():
     
         # show menu with options
         d = Dialog(dialog="dialog",autowidgetsize=True)
-        d.set_background_title("RaspiBlitz Subscriptions"
+        d.set_background_title("RaspiBlitz Subscriptions")
         code, tag = d.menu(
             "You have the following subscriptions (active & inactive). Select for details:",
             choices=choices, title="My Subscriptions")
@@ -89,7 +90,7 @@ The state of the subscription is: {active} {warning}
 
 The following additional information is available:
 {description}
-'''.format( initdate=selectedSub'time_created'],
+'''.format( initdate=selectedSub['time_created'],
             shop=selectedSub['shop'],
             publicaddress="{0}:{1}".format(selectedSub['ip'],selectedSub['port']),
             toraddress=selectedSub['tor'],
@@ -104,7 +105,7 @@ The following additional information is available:
 
         if selectedSub['active']:
             extraLable = "CANCEL"
-        else
+        else:
             extraLable = "DELETE"
         code = d.msgbox(text, title="Subscription Detail", ok_label="Back", extra_button=True,  extra_label=extraLable ,width=70, height=30)
         
