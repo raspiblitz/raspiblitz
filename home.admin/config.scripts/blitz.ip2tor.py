@@ -27,6 +27,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.ip2tor.py subscriptions-list")
     print("# blitz.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
     print("# blitz.ip2tor.py subscription-cancel [id]")
+    print("# blitz.ip2tor.py subscription-by-service [servicename]")
     sys.exit(1)
 
 ####### BASIC SETTINGS #########
@@ -868,7 +869,6 @@ if sys.argv[1] == "subscriptions-renew":
 # SUBSCRIPTION CANCEL
 # call in intervalls from background process
 #######################
-
 if sys.argv[1] == "subscription-cancel":
 
     # check parameters
@@ -897,6 +897,39 @@ if sys.argv[1] == "subscription-cancel":
         handleException(e)
 
     sys.exit(0)
+
+#######################
+# GET ADDRESS BY SERVICENAME
+# gets called by other scripts to check if service has a ip2tor bridge address
+# output is bash key/value style so that it can be imported with source
+#######################
+if sys.argv[1] == "subscription-by-service":
+
+    # check parameters
+    try:
+        servicenname = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        newList = []
+        for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+            if sub['active'] and sub['blitz_service'] == servicenname:
+                print("type='{0}'".format(sub['type']))
+                print("ip='{0}'".format(sub['ip']))
+                print("port='{0}'".format(sub['port']))
+                print("tor='{0}'".format(sub['tor']))
+                sys.exit(0)
+
+        print("error='not found'")
+        sys.exit(0)
+
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(1)
 
 # unkown command
 print("# unkown command")
