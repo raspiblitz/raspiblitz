@@ -35,6 +35,18 @@ def secondsLeft(dateObj):
 
 def mySubscriptions():
 
+    # check if any subscriptions are available
+    countSubscriptions=0
+    try:
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        countSubscriptions += len(subs['subscriptions_ip2tor'])
+    except Exception as e: pass
+    if countSubscriptions == 0:
+        Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+You have no active or inactive subscriptions at the moment.
+            ''',title="Info")
+        return
+        
     while True:
 
         # load subscriptions and make dialog choices out of it
