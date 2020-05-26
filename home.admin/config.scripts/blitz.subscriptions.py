@@ -8,6 +8,7 @@ import sys
 import math
 import time
 import toml
+import os
 import subprocess
 
 from dialog import Dialog
@@ -123,13 +124,12 @@ The following additional information is available:
     # user wants to delete this subscription
     if code == "extra":
         if selectedSub['type'] == "ip2tor-v1":
-            # TODO: make call to blitz.ip2tor to cancel/delete subscription
+            os.system("clear")
             cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
             print("# running: {0}".format(cmd))    
-            result = subprocess.check_output(cmd)
-            print("# result: {0}".format(result))
-            sys.exit()
-    
+            os.system(cmd)
+            time.sleep(2)
+
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     mySubscriptions()
 
