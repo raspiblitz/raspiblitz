@@ -179,9 +179,10 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  checkIP2TOR LND-GRPC-API
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
+	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
+      #if [ ${#ip2tor} -eq 0 ]; then
+	  #  choose_IP_or_TOR
+	  #fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
@@ -197,9 +198,10 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  checkIP2TOR LND-GRPC-API
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
+	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
+      #if [ ${#ip2tor} -eq 0 ]; then
+	  #  choose_IP_or_TOR
+	  #fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
