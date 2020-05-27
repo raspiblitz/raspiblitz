@@ -78,16 +78,12 @@ ip2tor=""
 checkIP2TOR()
 {
 
-  echo "checkIP2TOR"
-  echo $1
-  sleep 10
-
   # check if IP2TOR service is already available
-  #error=""
-  #source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
-  #if [ ${#error} -eq 0 ]; then
-  #  ip2tor=$1
-  #fi
+  error=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
+  if [ ${#error} -eq 0 ]; then
+    ip2tor="$1"
+  fi
   
   # if IP2TOR is not already available:
   # and the checks from avove showed there is SSH forwarding / dynDNS
@@ -102,15 +98,17 @@ checkIP2TOR()
 #	    port="8080"
 #		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 #	  fi
-#	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog $1 $toraddress $port
+#	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
 #	fi
 
   # check again if IP2TOR service is now already available
-  #error=""
-  #source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
-  #if [ ${#error} -eq 0 ]; then
-  #  ip2tor=$1
-  #fi
+  error=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service "$1")
+  if [ ${#error} -eq 0 ]; then
+    ip2tor="$1"
+  fi
+
+  sleep 10
 }
 
 # Options
