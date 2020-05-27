@@ -296,11 +296,7 @@ do
       if [ ${locked} -gt 0 ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
-
-        # building REST command
-        passwordC=$(sudo cat /root/lnd.autounlock.pwd)
-        command="sudo python3 /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
-        bash -c "${command}"
+        sudo /home/admin/config.scripts/lnd.unlock.sh '${passwordC}'
         
       fi
     fi

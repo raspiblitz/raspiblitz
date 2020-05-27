@@ -49,9 +49,9 @@ Password C will be stored on the device.
   echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
-  result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
-  invalid=$(echo "${result}" | grep -c 'invalid')
-  if [ ${invalid} -gt 0 ];then
+  error=""
+  source <(sudo /home/admin/config.scripts/lnd.unlock.sh '${passwordC}')
+  if [ ${error} -gt 0 ];then
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
