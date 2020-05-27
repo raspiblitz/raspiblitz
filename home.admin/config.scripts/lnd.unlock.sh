@@ -43,15 +43,16 @@ while :
     result=$(echo "${passwordC}" | sudo -u bitcoin lncli unlock --recovery_window=5000 --stdin 3>&1 1>&2 2>&3)
     sleep 4
 
-
-    if [ $(echo "${result} | grep -c 'successfully unlocked'") -gt 0 ]; then
+    wasUnlocked=$(echo "${result} | grep -c 'successfully unlocked'")
+    wrongPassword=$(echo "${result} | grep -c 'invalid passphrase'")
+    if [ ${wasUnlocked} -gt 0 ]; then
 
         # SUCCESS UNLOCK
 
         echo "# OK LND wallet unlocked"
         exit 0
 
-    elif [ $(echo "${result} | grep -c 'invalid passphrase'") -gt 0 ]; then
+    elif [ ${wrongPassword} -gt 0 ]; then
 
         # WRONG PASSWORD
 
