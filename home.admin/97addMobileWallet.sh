@@ -83,37 +83,34 @@ checkIP2TOR()
   sleep 10
 
   # check if IP2TOR service is already available
-  error=""
-  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
-  if [ ${#error} -eq 0 ]; then
-    ip2tor=$1
-  fi
+  #error=""
+  #source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
+  #if [ ${#error} -eq 0 ]; then
+  #  ip2tor=$1
+  #fi
   
   # if IP2TOR is not already available:
   # and the checks from avove showed there is SSH forwarding / dynDNS
   # then ask user if IP2TOR subscription is wanted
-  if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
-    whiptail --title " Want to use a IP2TOR Bridge? " \
-	--yes-button "Go To Shop" \
-	--no-button "No Thanks" \
-	--yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service that will make it easy to connect your mobile wallet?" 12 60
-	if [ $? -eq 0 ]; then
-	  echo "# yes-button -> Send To Shop"
-	  port="10009"
-	  toraddress=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
-	  if [ "$1" == "LND-REST-API" ]; then
-	    port="8080"
-		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-	  fi
-	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog $1 $toraddress $port
-	fi
+  #if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
+  #  whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service that will make it easy to connect your mobile wallet?" 12 60
+  #	if [ $? -eq 0 ]; then
+  #	  echo "# yes-button -> Send To Shop"
+#	  port="10009"
+#	  toraddress=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
+#	  if [ "$1" == "LND-REST-API" ]; then
+#	    port="8080"
+#		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+#	  fi
+#	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog $1 $toraddress $port
+#	fi
 
   # check again if IP2TOR service is now already available
-  error=""
-  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
-  if [ ${#error} -eq 0 ]; then
-    ip2tor=$1
-  fi
+  #error=""
+  #source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
+  #if [ ${#error} -eq 0 ]; then
+  #  ip2tor=$1
+  #fi
 }
 
 # Options
