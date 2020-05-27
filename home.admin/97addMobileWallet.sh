@@ -80,6 +80,7 @@ checkIP2TOR()
 
   echo "checkIP2TOR"
   echo "$1"
+  sleep 10
   exit
 
   # check if IP2TOR service is already available
@@ -244,7 +245,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      checkIP2TOR "LND-REST-API"
+      checkIP2TOR LND-REST-API
       # choose IP or TOR --> function call
       if [ ${#ip2tor} -eq 0 ]; then
 	    choose_IP_or_TOR
