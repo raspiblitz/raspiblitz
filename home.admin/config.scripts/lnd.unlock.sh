@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
+if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
  echo "lnd.unlock.sh [passwordC]"
  exit 1
