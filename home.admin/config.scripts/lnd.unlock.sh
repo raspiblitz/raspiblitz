@@ -6,6 +6,13 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
+# check if wallet is already unlocked
+walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 3>&1 1>&2 2>&3 | grep -c "already unlocked")
+if [ ${walletUnlocked} -eq 1 ]; then
+    echo "# OK LND wallet was already unlocked"
+    exit(0)
+fi
+
 # 1. parameter
 passwordC="$1"
 
@@ -60,16 +67,17 @@ while :
 
         # UNKOWN RESULT
 
+        # check if wallet was unlocked anyway
+        walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 3>&1 1>&2 2>&3 | grep -c "already unlocked")
+        if [ ${walletUnlocked} -eq 1 ]; then
+            echo "# OK LND wallet unlocked"
+            exit(0)
+        fi
+
         echo "# unkown error"
         if [ ${manualEntry} -eq 1 ]; then
-            clear
-            echo "#################################"
-            echo "# LND ERROR on unlocking wallet"
-            echo "#################################"
-            echo
-            echo "${result}"
-            echo
-            echo "PRES ENTER to retry .."
+            whiptail --title " LND ERROR " --msgbox "${result}" --ok-button "Try Again" 8 60
+            sleep 4
         else
             # maybe lncli is waiting to get ready (wait and loop)
             if [ ${loopCount} -gt 10 ]; then
