@@ -89,7 +89,7 @@ checkIP2TOR()
   # and the checks from avove showed there is SSH forwarding / dynDNS
   # then ask user if IP2TOR subscription is wanted
   if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
-    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service that will make it easy to connect your mobile wallet?" 12 60
+    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
   	if [ $? -eq 0 ]; then
   	  echo "# yes-button -> Send To Shop"
 	  port="10009"
@@ -148,6 +148,7 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
       /home/admin/config.scripts/bonus.lndconnect.sh shango-ios ${connect}
 	  exit 1;
@@ -162,13 +163,12 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android ${connect}
       exit 1;
       ;;
   ZAP_IOS)
-  	  # choose IP or TOR --> function call
-      choose_IP_or_TOR
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
@@ -178,13 +178,15 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  checkIP2TOR LND-GRPC-API
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
+	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
     ;;
   ZAP_ANDROID)
-      # choose IP or TOR --> function call
-      choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
@@ -193,6 +195,10 @@ case $CHOICE in
 		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  fi
+	  checkIP2TOR LND-GRPC-API
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
@@ -220,6 +226,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 1;
@@ -234,16 +241,12 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  checkIP2TOR LND-REST-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios ${connect}
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      checkIP2TOR LND-REST-API
-      # choose IP or TOR --> function call
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zeus on your Android Phone" \
@@ -252,6 +255,10 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  fi
+	  checkIP2TOR LND-REST-API
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android ${connect}
