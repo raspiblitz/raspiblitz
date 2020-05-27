@@ -99,6 +99,7 @@ checkIP2TOR()
 		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 	  fi
 	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+      clear
 	fi
   fi
 
@@ -108,9 +109,6 @@ checkIP2TOR()
   if [ ${#error} -eq 0 ]; then
     ip2tor="$1"
   fi
-
-  echo $ip2tor
-  sleep 10
 }
 
 # Options
