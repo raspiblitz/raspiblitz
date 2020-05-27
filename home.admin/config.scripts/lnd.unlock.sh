@@ -10,7 +10,7 @@ fi
 walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 3>&1 1>&2 2>&3 | grep -c "already unlocked")
 if [ ${walletUnlocked} -eq 1 ]; then
     echo "# OK LND wallet was already unlocked"
-    exit(0)
+    exit0
 fi
 
 # 1. parameter
@@ -49,7 +49,7 @@ while :
         # SUCCESS UNLOCK
 
         echo "# OK LND wallet unlocked"
-        exit(0)
+        exit 0
 
     elif [ $(echo "${result} | grep -c 'invalid passphrase'") -gt 0 ]; then
 
@@ -60,7 +60,7 @@ while :
             passwordC=$(whiptail --passwordbox "\nEnter Password C again:\n" 9 52 "" --title " Password was Wrong " --backtitle "RaspiBlitz - LND Wallet" 3>&1 1>&2 2>&3)
         else
             print("error='wrong password'")
-            exit(1)
+            exit 1
         fi
 
     else
@@ -71,7 +71,7 @@ while :
         walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 3>&1 1>&2 2>&3 | grep -c "already unlocked")
         if [ ${walletUnlocked} -eq 1 ]; then
             echo "# OK LND wallet unlocked"
-            exit(0)
+            exit 0
         fi
 
         echo "# unkown error"
@@ -82,7 +82,7 @@ while :
             # maybe lncli is waiting to get ready (wait and loop)
             if [ ${loopCount} -gt 10 ]; then
                 echo "error='failed to unlock'"
-                exit(1)
+                exit 1
             fi
             sleep 2
         fi
