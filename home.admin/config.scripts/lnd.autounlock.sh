@@ -82,30 +82,6 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # get hash of lnd.conf before edit (to detect if changed later)
-  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-
-  # make sure config values are uncommented
-  sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
-
-  # make sure config values exits
-  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
-  if [ ${exists} -eq 0 ]; then
-    sudo sed -n -i 'p;4a restlisten=' /mnt/hdd/lnd/lnd.conf
-  fi
-
-  # set needed config values
-  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-
-  # refresh TLS cert (if lnd.conf was changed)
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
-    echo "# lnd.conf changed - TLS certs need refreshing"
-    sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
-  else
-    echo "# lnd.conf NOT changed - keep TLS certs"
-  fi
-
   echo "# switching the Auto-Unlock ON"
 
   # setting value in raspi blitz config
