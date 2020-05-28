@@ -7,13 +7,15 @@
 if [ $# -eq 0 ]; then
  echo "script to set and config TLS Cert for LND"
  echo "lnd.tlscert.sh refresh"
+ echo "lnd.tlscert.sh ip-add [ip]"
+ echo "lnd.tlscert.sh ip-remove [ip]"
  exit 1
 fi
 
 TLSPATH="/mnt/hdd/lnd"
 LNDCONF="/mnt(hdd/lnd/lnd.conf"
 
-def lndCreateFreshTLS()
+lndCreateFreshTLS()
 {
 
   echo "# making sure services are not running"
