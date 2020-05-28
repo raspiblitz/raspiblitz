@@ -140,7 +140,8 @@ do
         if [ ${#dynDomain} -gt 0 ]; then
           echo "restart LND with new environment config"
           # restart and let to auto-unlock (if activated) do the rest
-          sudo systemctl restart lnd.service
+          sudo systemctl stop lnd
+          sudo systemctl start lnd
         fi
 
         # 2) trigger update if dnyamic domain (if set)
