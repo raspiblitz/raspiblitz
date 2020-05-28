@@ -270,7 +270,7 @@ sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile bsdm
 sudo apt-get install -y vnstat
 
 # prepare for BTRFS data drive raid
-sudo apt-get install -y btrfs-tools
+sudo apt-get install -y btrfs-progs btrfs-tools
 
 # prepare for ssh reverse tunneling
 sudo apt-get install -y autossh
@@ -692,7 +692,7 @@ fi
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""
-echo "*** RASPI BOOSTRAP SERVICE ***"
+echo "*** RASPI BOOTSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
