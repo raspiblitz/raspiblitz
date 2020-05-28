@@ -15,7 +15,6 @@ from dialog import Dialog
 
 from blitzpy import RaspiBlitzConfig
 
-
 # constants for standard services
 LND_REST_API = "LND-REST-API"
 LND_GRPC_API = "LND-GRPC-API"

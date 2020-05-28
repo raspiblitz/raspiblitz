@@ -671,6 +671,12 @@ Unkown Error happend - please report to developers:
             '''.format(str(e)),title="Exception on Subscription")
             sys.exit(1)
 
+    # if LND REST or LND GRPS service ... add bridge IP to TLS
+    if servicename == "LND-REST-API" or servicename == "LND-GRPC-API":
+        os.system("sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add {0}".format(subscription['ip']))
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh reset tls")
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh sync")
+
     # warn user if not delivered as advertised
     if subscription['contract_breached']:
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
@@ -912,7 +918,7 @@ if sys.argv[1] == "subscription-by-service":
 
     # check parameters
     try:
-        servicenname = sys.argv[2]
+        servicename = sys.argv[2]
     except Exception as e:
         handleException(e)
 
@@ -921,7 +927,7 @@ if sys.argv[1] == "subscription-by-service":
         subs = toml.load(SUBSCRIPTIONS_FILE)
         newList = []
         for idx, sub in enumerate(subs['subscriptions_ip2tor']):
-            if sub['active'] and sub['name'] == servicenname:
+            if sub['active'] and sub['name'] == servicename:
                 print("type='{0}'".format(sub['type']))
                 print("ip='{0}'".format(sub['ip']))
                 print("port='{0}'".format(sub['port']))
