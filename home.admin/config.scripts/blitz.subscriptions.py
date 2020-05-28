@@ -77,7 +77,7 @@ You have no active or inactive subscriptions.
     d.set_background_title("RaspiBlitz Subscriptions")
     code, tag = d.menu(
         "\nYou have the following subscriptions - select for details:",
-        choices=choices, cancel_label="Back" width=65, height=15, title="My Subscriptions")
+        choices=choices, cancel_label="Back", width=65, height=15, title="My Subscriptions")
         
     # if user chosses CANCEL
     if code != d.OK: return
