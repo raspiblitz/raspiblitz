@@ -188,7 +188,7 @@ if sys.argv[1] == "on":
         newConfigHash=subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
         if oldConfigHash != newConfigHash:
             print("lnd.conf changed ... generating new TLS cert")
-            subprocess.call("sudo /home/admin/config.scripts/lnd.newtlscert.sh", shell=True)
+            subprocess.call(sudo /home/admin/config.scripts/lnd.tlscert.sh refresh", shell=True)
         else:
             print("lnd.conf unchanged... keep TLS cert")
 
