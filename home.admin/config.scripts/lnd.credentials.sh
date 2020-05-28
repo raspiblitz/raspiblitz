@@ -106,7 +106,6 @@ if [ "$1" = "reset" ]; then
 
   # unlock wallet after restart
   sudo /home/admin/config.scripts/lnd.unlock.sh
-  echo "- creating new macaroons ... wait 10 secs"
   sleep 10
 
   if [ ${resetMacaroons} -eq 1 ]; then

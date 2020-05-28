@@ -193,7 +193,7 @@ case $CHOICE in
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
+		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 67
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
