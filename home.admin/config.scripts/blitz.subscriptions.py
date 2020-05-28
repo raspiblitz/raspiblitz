@@ -90,7 +90,7 @@ You have no active or inactive subscriptions.
     d.set_background_title("My Subscriptions")
     if selectedSub['type'] == "ip2tor-v1":
         if len(selectedSub['warning']) > 0:
-            selectedSub['warning'] = "\n{0}".formart(selectedSub['warning'])
+            selectedSub['warning'] = "\n{0}".format(selectedSub['warning'])
         text='''
 This is a IP2TOR subscription bought on {initdate} at
 {shop}
