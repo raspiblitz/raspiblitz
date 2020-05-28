@@ -297,7 +297,7 @@ do
       if [ ${locked} -gt 0 ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
-        sudo /home/admin/config.scripts/lnd.unlock.sh '${passwordC}'
+        sudo /home/admin/config.scripts/lnd.unlock.sh
         
       fi
     fi
