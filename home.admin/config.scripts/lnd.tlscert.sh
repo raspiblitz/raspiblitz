@@ -22,8 +22,16 @@ if [ "$1" = "ip-add" ]; then
   # 2. parameter: ip
   ip=$2
   countDots=$(echo "$ip" | grep -c '.')
-  if [ "${countDots}" != "4" ]; then
+  if [ ${countDots} -eq 0 ]; then
     echo "error='missing or invalid ip'"
+    exit
+  fi
+
+  # check if IP is already added
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
+  if [ ${found} -gt 0 ]; then
+    echo "# OK the IP was already added lnd.conf"
+    exit
   fi
 
   # simply add the line to the LND conf
