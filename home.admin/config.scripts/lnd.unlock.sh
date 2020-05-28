@@ -29,6 +29,7 @@ fi
 # if still no password get from user
 manualEntry=0
 if [ ${#passwordC} -eq 0 ]; then
+    echo "# manual input"
     manualEntry=1
     passwordC=$(whiptail --passwordbox "\nEnter Password C to unlock wallet:\n" 9 52 "" --title " LND Wallet " --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 fi
