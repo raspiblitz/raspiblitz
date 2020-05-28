@@ -77,8 +77,13 @@ while :
 
         echo "# unkown error"
         if [ ${manualEntry} -eq 1 ]; then
-            whiptail --title " LND ERROR " --msgbox "${result}" --ok-button "Try Again" 8 60
-            sleep 4
+            LND
+            whiptail --title " LND ERROR " --msgbox "${result}" --ok-button "Try CLI" 8 60
+            # fall back to direct CLI input
+            echo "Calling: lncli unlock"
+            echo "Please re-enter Password C:"
+            lncli unlock --recovery_window=5000
+            exit 1
         else
             # maybe lncli is waiting to get ready (wait and loop)
             if [ ${loopCount} -gt 10 ]; then
