@@ -13,57 +13,7 @@ if [ $# -eq 0 ]; then
 fi
 
 TLSPATH="/mnt/hdd/lnd"
-LNDCONF="/mnt(hdd/lnd/lnd.conf"
-
-lndCreateFreshTLS()
-{
-
-  echo "# making sure services are not running"
-  sudo systemctl stop lnd 2>/dev/null
-
-  echo "# keep old tls data as backup"
-  sudo rm ${TLSPATH}/tls.cert.old 2>/dev/null
-  sudo rm ${TLSPATH}/tls.key.old 2>/dev/null
-  sudo mv ${TLSPATH}/tls.cert ${TLSPATH}/tls.cert.old 
-  sudo mv ${TLSPATH}/tls.key ${TLSPATH}/tls.key.old 
-
-  echo "# start to create new generate new TLSCert"
-  sudo systemctl start lnd
-  echo "# wait until generated"
-  newCertExists=0
-  count=0
-  while [ ${newCertExists} -eq 0 ]
-  do
-    count=$(($count + 1))
-    echo "# (${count}/60) check for cert"
-    if [ ${count} -gt 60 ]; then
-      sudo systemctl stop lnd
-      echo "error='failed to generate new LND cert'"
-      exit 1
-    fi
-    newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c '.cert')
-    sleep 2
-  done
-
-  # stop lnd and let outside decide to restart or not
-  sudo systemctl stop lnd
-  sudo chmod 664 ${TLSPATH}/tls.cert
-  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
-
-  echo "# symlink new cert to lnd app-data directory"
-  if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
-    sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
-    sudo ln -s ${TLSPATH}/tls.cert /home/admin/.lnd/tls.cert   # and create symlink
-  fi
-  echo "# OK TLS certs are fresh"
-}
-
-### REFRESH
-
-if [ "$1" = "refresh" ]; then 
-  lndCreateFreshTLS
-  exit
-fi
+LNDCONF="/mnt/hdd/lnd/lnd.conf"
 
 ### ADD IP
 
@@ -112,6 +62,50 @@ if [ "$1" = "ip-remove" ]; then
   fi
 
   echo "# OK removed IP from lnd.conf - refresh of TLS cert is needed"
+  exit
+fi
+
+### REFRESH
+
+if [ "$1" = "refresh" ]; then 
+  echo "# making sure services are not running"
+  sudo systemctl stop lnd 2>/dev/null
+
+  echo "# keep old tls data as backup"
+  sudo rm ${TLSPATH}/tls.cert.old 2>/dev/null
+  sudo rm ${TLSPATH}/tls.key.old 2>/dev/null
+  sudo mv ${TLSPATH}/tls.cert ${TLSPATH}/tls.cert.old 
+  sudo mv ${TLSPATH}/tls.key ${TLSPATH}/tls.key.old 
+
+  echo "# start to create new generate new TLSCert"
+  sudo systemctl start lnd
+  echo "# wait until generated"
+  newCertExists=0
+  count=0
+  while [ ${newCertExists} -eq 0 ]
+  do
+    count=$(($count + 1))
+    echo "# (${count}/60) check for cert"
+    if [ ${count} -gt 60 ]; then
+      sudo systemctl stop lnd
+      echo "error='failed to generate new LND cert'"
+      exit 1
+    fi
+    newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c '.cert')
+    sleep 2
+  done
+
+  # stop lnd and let outside decide to restart or not
+  sudo systemctl stop lnd
+  sudo chmod 664 ${TLSPATH}/tls.cert
+  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
+
+  echo "# symlink new cert to lnd app-data directory"
+  if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
+    sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
+    sudo ln -s ${TLSPATH}/tls.cert /home/admin/.lnd/tls.cert   # and create symlink
+  fi
+  echo "# OK TLS certs are fresh"
   exit
 fi
 
