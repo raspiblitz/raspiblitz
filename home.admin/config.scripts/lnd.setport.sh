@@ -4,7 +4,7 @@
 # based on: https://github.com/rootzoll/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
- echo "small config script set the port LND is running on"
+ echo "script set the port LND is running on"
  echo "lnd.setport.sh [portnumber]"
  exit 1
 fi
