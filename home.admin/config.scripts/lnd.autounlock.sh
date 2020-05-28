@@ -101,7 +101,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
   if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
     echo "# lnd.conf changed - TLS certs need refreshing"
-    sudo /home/admin/config.scripts/lnd.newtlscert.sh
+    sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
   else
     echo "# lnd.conf NOT changed - keep TLS certs"
   fi

@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "tool to reset or sync credentials (e.g. macaroons)"
-  echo "lnd.credentials.sh [reset|sync]"
+  echo "lnd.credentials.sh [reset|sync] [?tls|macaroons]"
   exit 1
 fi
 
@@ -63,35 +63,65 @@ function copy_mac_set_perms() {
 # RESET Macaroons and TLS
 ###########################
 if [ "$1" = "reset" ]; then
+
   clear
-  echo "###### RESET MACAROONS AND TLS.cert ######"
-  echo ""
-  echo "All your macaroons and the tls.cert get deleted and recreated."
-  echo "Use this to invalidate former EXPORTS for example if you loose a device."
-  echo ""
-  cd || exit
-  echo "- deleting old macaroons"
-  sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
-  sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
-  sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
-  echo "- resetting TLS cert"
-  sudo /home/admin/config.scripts/lnd.newtlscert.sh
+  echo "### lnd.credentials.sh reset"
+
+  # default reset both
+  resetTLS=1
+  resetMacaroons=1
+
+  # optional second paramter to just reset one on them
+  if [ "$2" == "tls" ]; then
+    echo "# just resetting TLS"
+    resetTLS=1
+    resetMacaroons=0
+  fi
+  if [ "$2" == "macaroons" ]; then
+    echo "# just resetting Macaroons"
+    resetTLS=0
+    resetMacaroons=1
+  fi
+  
+  if [ ${resetMacaroons} -eq 1 ]; then
+    echo "## Resetting Macaroons"
+    echo "# all your macaroons get deleted and recreated"
+    cd || exit
+    sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
+    sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
+    sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
+  fi
+
+  if [ ${resetTLS} -eq 1 ]; then
+    echo "## Resetting TLS"
+    echo "# tls cert gets deleted and recreated"
+    cd || exit
+    sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
+  fi
+
+  # unlock wallet after restart
   echo "- restarting LND ... wait 10 secs"
   sudo systemctl start lnd
   sleep 10
-  sudo -u bitcoin lncli --chain="${network}" --network="${chain}"net unlock
+
+  # unlock wallet after restart
+  sudo /home/admin/config.scripts/lnd.unlock.sh
   echo "- creating new macaroons ... wait 10 secs"
   sleep 10
-  echo "- copy new macaroons to central app-data directory and ensure unix ownerships and permissions"
-  copy_mac_set_perms admin.macaroon lndadmin "${network}" "${chain}"
-  copy_mac_set_perms invoice.macaroon lndinvoice "${network}" "${chain}"
-  copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
-  echo "OK DONE"
+
+  if [ ${resetMacaroons} -eq 1 ]; then
+    echo "# copy new macaroons to central app-data directory and ensure unix ownerships and permissions"
+    copy_mac_set_perms admin.macaroon lndadmin "${network}" "${chain}"
+    copy_mac_set_perms invoice.macaroon lndinvoice "${network}" "${chain}"
+    copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
+    echo "# OK DONE"
+  fi
 
 ###########################
 # SYNC
 ###########################
 elif [ "$1" = "sync" ]; then
+
   echo "###### SYNCING MACAROONS, RPC Password AND TLS Certificate ######"
 
   echo "# make sure LND app-data directories exist"
