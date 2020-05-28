@@ -100,7 +100,7 @@ if [ "$1" = "reset" ]; then
   fi
 
   # unlock wallet after restart
-  echo "- restarting LND ... wait 10 secs"
+  echo "# restarting LND ... wait 10 secs"
   sudo systemctl start lnd
   sleep 10
 
