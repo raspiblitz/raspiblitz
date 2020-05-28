@@ -23,7 +23,7 @@ if [ "$1" = "ip-add" ]; then
   ip=$2
   countDots=$(echo "$ip" | grep -c '.')
   if [ ${countDots} -eq 0 ]; then
-    echo "error='missing or invalid ip'"
+    echo "error='missing or invalid IP'"
     exit
   fi
 
@@ -55,8 +55,9 @@ if [ "$1" = "ip-remove" ]; then
   # 2. parameter: ip
   ip=$2
   countDots=$(echo "$ip" | grep -c '.')
-  if [ "${countDots}" != "4" ]; then
-    echo "error='missing or invalid ip'"
+  if [ ${countDots} -eq 0 ]; then
+    echo "error='missing or invalid IP'"
+    exit
   fi
 
   # remove the line to the LND conf
