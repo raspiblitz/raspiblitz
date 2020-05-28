@@ -446,7 +446,7 @@ echo "*** Copy LND Macaroons to user admin ***"
 # check if macaroon exists and if not try to unlock LND wallet first
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
   sleep 3
 fi
 
@@ -472,7 +472,7 @@ echo "*** Check Wallet Lock ***"
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
 else
   echo "OK - Wallet is already unlocked"
 fi

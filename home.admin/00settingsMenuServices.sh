@@ -434,10 +434,7 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   if [ "${choice}" = "on" ]; then
     l1="AUTO-UNLOCK IS NOW ACTIVE"
   fi  
-  l2="-------------------------"
-  l3="mobile/external wallets may need reconnect"
-  l4="possible change in macaroon / TLS cert"
-  dialog --title 'OK' --msgbox "${l1}\n${l2}\n${l3}\n${l4}" 11 60
+  dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
   needsReboot=1
 else
   echo "LND Autounlock Setting unchanged."
