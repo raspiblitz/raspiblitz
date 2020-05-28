@@ -35,7 +35,7 @@ if [ "$1" = "ip-add" ]; then
   fi
 
   # simply add the line to the LND conf
-  sudo sed -i "8itlsextraip=${ip}" ${LNDCONF}
+  sudo sed -i "10itlsextraip=${ip}" ${LNDCONF}
 
   # check if line is added
   found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
