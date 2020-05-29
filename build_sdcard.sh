@@ -111,6 +111,8 @@ sudo apt-get -y autoremove
 
 # make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # update debian
 echo ""
@@ -268,7 +270,7 @@ sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile bsdm
 sudo apt-get install -y vnstat
 
 # prepare for BTRFS data drive raid
-sudo apt-get install -y btrfs-tools
+sudo apt-get install -y btrfs-progs btrfs-tools
 
 # prepare for ssh reverse tunneling
 sudo apt-get install -y autossh
@@ -282,13 +284,15 @@ sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
 sudo apt install -y build-essential
+
+# add armbian-config
 if [ "${baseImage}" = "armbian" ]; then
   # add armbian config
-  sudo apt --fix-broken install -y
   sudo apt install armbian-config -y
-  # dependencies for Armbian Buster minimal kernel 5.4
-  sudo apt install -y python3-venv python3-dev python3-wheel
 fi
+
+# dependencies for minimal images
+sudo apt install -y python3-venv python3-dev python3-wheel
 
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
@@ -702,7 +706,7 @@ fi
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""
-echo "*** RASPI BOOSTRAP SERVICE ***"
+echo "*** RASPI BOOTSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
@@ -721,21 +725,22 @@ echo ""
 
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-echo "*** LCD DRIVER ***"
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+  echo "*** LCD DRIVER ***"
+  echo "--> Downloading LCD Driver from Github"
+  cd /home/admin/
+  sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+  sudo -u admin chmod -R 755 LCD-show
+  sudo -u admin chown -R admin:admin LCD-show
+  cd LCD-show/
+  # set comit hard to old version - that seemed to run better
+  #
+  sudo -u admin git reset --hard ce52014
 
-echo "--> Downloading LCD Driver from Github"
-cd /home/admin/
-sudo -u admin git clone https://github.com/goodtft/LCD-show.git
-sudo -u admin chmod -R 755 LCD-show
-sudo -u admin chown -R admin:admin LCD-show
-cd LCD-show/
-# set comit hard to old version - that seemed to run better
-#
-sudo -u admin git reset --hard ce52014
-
-# install xinput calibrator package
-  echo "--> install xinput calibrator package"
-sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+  # install xinput calibrator package
+    echo "--> install xinput calibrator package"
+  sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+fi
 
 # make dietpi preparations
 if [ "${baseImage}" = "dietpi" ]; then
@@ -760,8 +765,10 @@ echo "SD CARD BUILD DONE"
 echo "**********************************************"
 echo ""
 echo "Your SD Card Image for RaspiBlitz is almost ready."
-echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-echo ""
+if [ "${baseImage}" = "raspbian" ]; then
+  echo "Last step is to install LCD drivers. This will reboot your Pi when done."
+  echo ""
+fi
 echo "Take the chance & look thru the output above if you can spot any errror."
 echo ""
 echo "After final reboot - your SD Card Image is ready."
@@ -773,9 +780,11 @@ echo ""
 
 # activate LCD and trigger reboot
 # dont do this on dietpi to allow for automatic build
-if [ "${baseImage}" != "dietpi" ]; then
+if [ "${baseImage}" = "raspbian" ]; then
   sudo chmod +x -R /home/admin/LCD-show
   cd /home/admin/LCD-show/
   sudo apt-mark hold raspberrypi-bootloader
   sudo ./LCD35-show
+else
+  echo "Use 'sudo reboot' to restart manually."
 fi
