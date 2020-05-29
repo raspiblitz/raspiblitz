@@ -35,7 +35,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   echo "*** INSTALL BALANCE OF SATOSHIS ***"
   # check and install NodeJS
-  /home/admin/config.scripts/bonus.nodejs.sh
+  /home/admin/config.scripts/bonus.nodejs.sh on
   
   # create bos user
   sudo adduser --disabled-password --gecos "" bos
