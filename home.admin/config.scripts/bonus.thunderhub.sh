@@ -72,12 +72,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create thunderhub user
     sudo adduser --disabled-password --gecos "" thunderhub
 
-    # change to thunderhub user
-    cd /home/thunderhub
-
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
-    cd thunderhub
+    cd /home/thunderhub/thunderhub
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -94,9 +91,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # make sure thunderhub is member of lndadmin
     sudo /usr/sbin/usermod --append --groups lndadmin thunderhub
 
-    ##################
+    #################
     # .env
-    ##################
+    #################
 
     echo "*** create ThunderHub .env file ***"
     cat > /home/admin/thunderhub.env <<EOF
@@ -139,7 +136,7 @@ accounts:
     macaroonPath: '/home/thunderhub/.lnd/data/chain/bitcoin/mainnet/admin.macaroon'
     certificatePath: '/home/thunderhub/.lnd/tls.cert'
 EOF
-    sudo rm -f /home/thunderhub/thunderhub/.env
+    sudo rm -f /home/thunderhub/thubConfig.yaml
     sudo mv /home/admin/thubConfig.yaml /home/thunderhub/thubConfig.yaml
     sudo chown thunderhub:thunderhub /home/thunderhub/thubConfig.yaml
     sudo chown 600 /home/thunderhub/thubConfig.yaml | exit 1
