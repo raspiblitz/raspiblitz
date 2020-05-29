@@ -192,13 +192,16 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  
+  echo "*** REMOVING THUNDERHUB ***"
+  sudo userdel -rf thunderhub
+  sudo systemctl disable thunderhub
+  sudo rm -f /etc/systemd/system/thunderhub.service
+  echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
   sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
 
-  echo "*** REMOVING THUNDERHUB ***"
-  sudo userdel -rf thunderhub
-  echo "OK ThunderHub removed."
   exit 0
 fi
 
