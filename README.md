@@ -120,7 +120,7 @@ Browser: http://blitz.rotzoll.de/raspiblitz-v1.5-2020-05-08.img.gz
 
 Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.5/home.admin/assets/raspiblitz-v1.5-2020-05-08.img.gz.torrent
 
-SHA-256: 51cf8cc0f5ff9f562327ed8ba6779cffef8ba8e3c6e2b8e21bcd2f931f630584 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.5-2020-05-08.img.gz.sig)
+SHA-256: 51cf8cc0f5ff9f562327ed8ba6779cffef8ba8e3c6e2b8e21bcd2f931f630584 or [SIGNATURE](http://blitz.rotzoll.de/raspiblitz-v1.5-2020-05-08.img.gz.sig)
 
 * [Whats new in Version 1.5 of RaspiBlitz?](FAQ.md#whats-new-in-version-15-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
