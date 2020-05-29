@@ -166,7 +166,7 @@ waitUntilChainNetworkIsReady()
 
           whiptail --title "RaspiBlitz - Repair Script" --yes-button "DELETE+REPAIR" --no-button "Ignore" --yesno "Your blockchain data needs to be repaired.
 This can be due to power problems or a failing HDD.
-For more info see: https://raspiblitz.com -> FAQ
+For more info see: https://raspiblitz.org -> FAQ
 
 Before RaspiBlitz can offer you repair options the old
 corrupted blockchain needs to be deleted while your LND
