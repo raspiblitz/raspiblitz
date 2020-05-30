@@ -1018,12 +1018,12 @@ Assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS servi
 get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous 
 renewals. 
 
-As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
-
 ```
 export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
 ~/.acme.sh/acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
 ```
+
+As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
 
 ### Let's Encrypt eMail Address
 
