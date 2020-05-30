@@ -992,7 +992,7 @@ most common standards for verification of control are `HTTP-01` and `DNS-01`.
 The **acme.sh** client supports both modes and has a large number of DNS services (more than 50) it can interact with. 
 More details can be found on the [acme.sh wiki](https://github.com/acmesh-official/acme.sh/wiki).
 
-### HTTP-01
+### Let's Encrypt - HTTP-01
 
 To use `HTTP-01` your RaspiBlitz needs to be accessible directly from the Internet on a **public IP address** on **port 
 80**. If you don't have a public IPv4/IPv6 IP on either `eth0` or `wlan0` then it might be possible to use **NAT port 
@@ -1007,7 +1007,7 @@ Just run this once and then lean back and forget about it. :-D
 ~/.acme.sh/acme.sh --keylength ec-256 --issue -d hostname.example.com -w /var/www/letsencrypt/ 
 ```
 
-### DNS-01
+### Let's Encrypt - DNS-01
 
 The `DNS-01` standard **proves ownership** by creating `DNS TXT` records on the domain or subdomain you want to use.
 This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates` 
@@ -1025,7 +1025,7 @@ export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
 
 As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
 
-### Let's Encrypt eMail Address
+### Let's Encrypt - eMail Address
 
 The installation process of the `acme.sh` client includes a prompt for an eMail address. The data entered there is 
 stored in the `accounts.conf` file as `ACCOUNT_EMAIL`. This address is used by Let's Encrypt to notify you about 
@@ -1034,7 +1034,7 @@ the expiry of certificates (which is not really needed as renewals are automated
 
 It is currently considered completely fine to leave this field empty and not provide an eMail address.  
 
-### Installation details
+### Let's Encrypt - Installation details
 
 The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
 external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
