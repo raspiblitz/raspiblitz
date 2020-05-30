@@ -38,8 +38,8 @@ pip install BlitzPy
 from blitzpy import RaspiBlitzConfig
 cfg = RaspiBlitzConfig()
 cfg.reload()
-print(cfg.hostname)
-if cfg.run_behind_tor:
+print(cfg.hostname.value)
+if cfg.run_behind_tor.value:
     print("using TOR!")
 ```
 
@@ -51,9 +51,9 @@ In order to change the content of a setting the `value` attribute needs to be up
 from blitzpy import RaspiBlitzConfig
 cfg = RaspiBlitzConfig()
 cfg.reload()
-print(cfg.hostname)
+print(cfg.hostname.value)
 cfg.hostname.value = "New-Hostname!"
-print(cfg.hostname)
+print(cfg.hostname.value)
 ```
 
 ### Exporting
