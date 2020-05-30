@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.48.0] - 2020-05-30
+### Add
+- move log file to /var/cache/raspiblitz/ if it exists
+
 ## [0.47.0] - 2020-05-23
 ### Removed
 - remove config.py as it has been moved to the dedicated package BlitzPy
