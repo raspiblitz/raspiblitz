@@ -1010,14 +1010,15 @@ Just run this once and then lean back and forget about it. :-D
 ### DNS-01
 
 The `DNS-01` standard **proves ownership** by creating `DNS TXT` records on the domain or subdomain you want to use.
-This requires interaction with and access to a domain server but comes with the benefit that `wildcard certificates` 
+This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates` 
 can be issued. 
 
 It is beyond the scope of this FAQ entry to explain all details of this - please refer to the official documentation. 
-But assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS service then the following command will
-get a certificate (including a wildcard subject alternative name (SAN) listing) and will also take care of continuous 
-renewals. As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) 
-are supported.   
+Assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS service then the following command will
+get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous 
+renewals. 
+
+As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
 
 ```
 export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
