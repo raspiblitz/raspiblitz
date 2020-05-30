@@ -5,7 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.48.0] - 2020-05-30
+## [0.48.1] - 2020-05-30
 ### Add
 - move log file to /var/cache/raspiblitz/ if it exists
 

@@ -44,7 +44,7 @@ def setup_logging(default_path=os.path.abspath(os.path.expanduser('~/.blitz-tui.
                                        'level': log_level,
                                        'formatter': 'extended',
                                        'filename': log_file,
-                                       # 'maxBytes': 2*1024*1024,  # 2 MB
+                                       'maxBytes': 2*1024*1024,  # 2 MB
                                        'backupCount': 1,
                                        'encoding': 'utf8'}},
             loggers={'infoblitz': {'level': 'DEBUG',
