@@ -1021,7 +1021,7 @@ are supported.
 
 ```
 export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
-acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
+~/.acme.sh/acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
 ```
 
 ### Let's Encrypt eMail Address
