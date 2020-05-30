@@ -17,9 +17,9 @@ None
 
 ```
 cd ~/raspiblitz/home.admin/BlitzPy
-pip install dist/BlitzPy-0.1.0-py2.py3-none-any.whl
+pip install dist/BlitzPy-0.2.0-py2.py3-none-any.whl
 OR
-sudo -H python -m pip install dist/BlitzPy-0.1.0-py2.py3-none-any.whl
+sudo -H python -m pip install dist/BlitzPy-0.2.0-py2.py3-none-any.whl
 ```
 
 **or** consider using a virtual environment
