@@ -23,7 +23,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage ip2tor subscriptions for raspiblitz")
     print("# blitz.subscriptions.ip2tor.py create-ssh-dialog [servicename] [toraddress] [torport]")
     print("# blitz.subscriptions.ip2tor.py shop-list [shopurl]")
-    print("# blitz.subscriptions.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msats]")
+    print("# blitz.subscriptions.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msatsFirst] [msatsNext] [?description]")
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
     print("# blitz.subscriptions.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel [id]")
@@ -719,7 +719,7 @@ if sys.argv[1] == "create-ssh-dialog":
 
     # check parameters
     try:
-        if len(sys.argv) < 5: raise BlitzError("incorrect parameters","")
+        if len(sys.argv) <= 4: raise BlitzError("incorrect parameters","")
         servicename = sys.argv[2]
         toraddress = sys.argv[3]
         port = sys.argv[4]
@@ -765,7 +765,7 @@ if sys.argv[1] == "shop-order":
 
     # check parameters
     try:
-        if len(sys.argv) <= 9: raise BlitzError("incorrect parameters","")
+        if len(sys.argv) <= 8: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
         servicename = sys.argv[3]
         hostid = sys.argv[4]
