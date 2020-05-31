@@ -10,7 +10,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitz Sync Scripts"
-  echo "XXsyncScripts.sh [-clean] [-install] branch [repo]"
+  echo "XXsyncScripts.sh [-clean] branch [repo]"
   exit 1
 fi
 
