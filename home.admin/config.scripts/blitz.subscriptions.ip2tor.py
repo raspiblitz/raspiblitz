@@ -718,8 +718,8 @@ MAIN MENU > Manage Subscriptions > My Subscriptions
 if sys.argv[1] == "create-ssh-dialog":
 
     # check parameters
-    if len(sys.argv) < 5: raise BlitzError("incorrect parameters","")
     try:
+        if len(sys.argv) < 5: raise BlitzError("incorrect parameters","")
         servicename = sys.argv[2]
         toraddress = sys.argv[3]
         port = sys.argv[4]
@@ -763,8 +763,8 @@ if sys.argv[1] == "shop-list":
 if sys.argv[1] == "shop-order":
 
     # check parameters
-    if len(sys.argv) < 9: raise BlitzError("incorrect parameters","")
     try:
+        if len(sys.argv) < 9: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
         servicename = sys.argv[3]
         hostid = sys.argv[4]
@@ -889,6 +889,7 @@ if sys.argv[1] == "subscription-cancel":
 
     # check parameters
     try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
         subscriptionID = sys.argv[2]
     except Exception as e:
         handleException(e)
@@ -923,6 +924,7 @@ if sys.argv[1] == "subscription-by-service":
 
     # check parameters
     try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
         servicename = sys.argv[2]
     except Exception as e:
         handleException(e)
