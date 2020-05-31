@@ -155,8 +155,8 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
-	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
       /home/admin/config.scripts/bonus.lndconnect.sh shango-ios ${connect}
 	  exit 1;
 	  ;;
@@ -170,8 +170,8 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
-	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android ${connect}
       exit 1;
       ;;
@@ -185,12 +185,12 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
 	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
       #if [ ${#ip2tor} -eq 0 ]; then
 	  #  choose_IP_or_TOR
 	  #fi
-	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
     ;;
@@ -204,12 +204,12 @@ case $CHOICE in
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
 	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
       #if [ ${#ip2tor} -eq 0 ]; then
 	  #  choose_IP_or_TOR
 	  #fi
-	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
     ;;
@@ -235,8 +235,8 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
-	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 1;
     ;;
@@ -250,8 +250,8 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
-	  checkIP2TOR LND-REST-API
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-REST-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios ${connect}
   	  exit 1;
   	;;
@@ -265,11 +265,11 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
+	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-REST-API
       if [ ${#ip2tor} -eq 0 ]; then
 	    choose_IP_or_TOR
 	  fi
-	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android ${connect}
   	  exit 1;
   	;;
