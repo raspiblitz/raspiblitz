@@ -763,6 +763,7 @@ if sys.argv[1] == "shop-list":
 if sys.argv[1] == "shop-order":
 
     # check parameters
+    if len(sys.argv) < 9: raise BlitzError("incorrect parameters","")
     try:
         shopurl = sys.argv[2]
         servicename = sys.argv[3]
@@ -771,7 +772,7 @@ if sys.argv[1] == "shop-order":
         duration = sys.argv[6]
         msatsFirst = sys.argv[7]
         msatsNext = sys.argv[8]
-        if len(sys.argv) >=9:
+        if len(sys.argv) >=10:
             description = sys.argv[9]
         else:
             description = ""
