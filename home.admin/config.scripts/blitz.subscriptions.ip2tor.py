@@ -78,7 +78,7 @@ def handleException(e):
     sys.exit(1)
 
 def parseDate(datestr):
-    return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
+    return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%SZ")
 
 def secondsLeft(dateObj):
     return round((dateObj - datetime.datetime.utcnow()).total_seconds())
