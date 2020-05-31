@@ -741,6 +741,7 @@ if sys.argv[1] == "shop-list":
 
     # check parameters
     try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
     except Exception as e:
         handleException(e)
@@ -764,7 +765,7 @@ if sys.argv[1] == "shop-order":
 
     # check parameters
     try:
-        if len(sys.argv) < 9: raise BlitzError("incorrect parameters","")
+        if len(sys.argv) <= 9: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
         servicename = sys.argv[3]
         hostid = sys.argv[4]
