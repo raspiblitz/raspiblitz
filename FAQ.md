@@ -1,5 +1,10 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.5.1 of RaspiBlitz?
+
+- Bugfix: DropBox Backup of Static-Channel-Backup
+- Bugfix: Torrentfiles with active tracker 
+
 ## Whats new in Version 1.5 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
