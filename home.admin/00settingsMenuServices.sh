@@ -25,6 +25,7 @@ if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
+if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -37,20 +38,20 @@ if [ "${chain}" = "test" ]; then chainValue="on"; fi
 echo "map domain to on/off"
 domainValue="off"
 dynDomainMenu='DynamicDNS'
-if [ ${#dynDomain} -gt 0 ]; then 
+if [ ${#dynDomain} -gt 0 ]; then
   domainValue="on"
   dynDomainMenu="${dynDomain}"
 fi
 
 echo "map lcdrotate to on/off"
 lcdrotateMenu='off'
-if [ ${lcdrotate} -gt 0 ]; then 
+if [ ${lcdrotate} -gt 0 ]; then
   lcdrotateMenu='on'
 fi
 
 echo "map touchscreen to on/off"
 touchscreenMenu='off'
-if [ ${touchscreen} -gt 0 ]; then 
+if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
@@ -82,6 +83,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+c 'Let`s Encrypt Client' ${letsencrypt} \
 s 'Cryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 9 'Touchscreen' ${touchscreenMenu} \
@@ -105,6 +107,7 @@ l 'Lightning Loop' ${loop} \
 4 'Run behind TOR' ${runBehindTor} \
 5 'RTL Webinterface' ${rtlWebinterface} \
 b 'BTC-RPC-Explorer' ${BTCRPCexplorer} \
+c 'Let`s Encrypt Client' ${letsencrypt} \
 s 'Cryptoadvance Specter' ${specter} \
 6 'LND Auto-Unlock' ${autoUnlock} \
 7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
@@ -173,13 +176,13 @@ if [ "${chain}" != "${choice}" ]; then
           echo "Creating a new LND Wallet for ${network}/${choice}net"
           echo "****************************************************************************"
           echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
-          echo "B) Answere 'n' because you dont have a 'cipher seed mnemonic' (24 words) yet" 
+          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
           echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
           echo "****************************************************************************"
           sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>error.out
           error=`sudo cat error.out`
           if [ ${#error} -eq 0 ]; then
-            sleep 2  
+            sleep 2
             # WIN
             tryAgain=0
             echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
@@ -217,10 +220,10 @@ if [ "${chain}" != "${choice}" ]; then
     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
     sudo chown -R admin:admin /home/admin/.lnd/
-    
+
     needsReboot=1
   fi
-else 
+else
   echo "Testnet Setting unchanged."
 fi
 
@@ -232,7 +235,7 @@ if [ "${autoPilot}" != "${choice}" ]; then
   anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
   needsReboot=1
-else 
+else
   echo "Autopilot Setting unchanged."
 fi
 
@@ -256,7 +259,7 @@ if [ "${loop}" != "${choice}" ]; then
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-else 
+else
   echo "Loop Setting unchanged."
 fi
 
@@ -331,7 +334,7 @@ Please keep in mind that thru your LND node id & your previous IP history with y
 " 16 76
 
     # make sure AutoNAT & UPnP is off
-    /home/admin/config.scripts/lnd.autonat.sh off 
+    /home/admin/config.scripts/lnd.autonat.sh off
     /home/admin/config.scripts/network.upnp.sh off
   fi
 
@@ -340,7 +343,7 @@ Please keep in mind that thru your LND node id & your previous IP history with y
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
   needsReboot=1
 
-else 
+else
   echo "TOR Setting unchanged."
 fi
 
@@ -395,6 +398,36 @@ When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
   fi
 else
   echo "BTC-RPC-Explorer Setting unchanged."
+fi
+
+# Let's Encrypt process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${letsencrypt}" != "${choice}" ]; then
+  echo "Let's Encrypt Client Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.letsencrypt.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      msg="Successfully installed."
+    else
+      msg="Failed to install!"
+    fi
+  else
+    if [ ${errorOnInstall} -eq 0 ]; then
+      msg="Successfully removed."
+    else
+      msg="Failed to remove!"
+    fi
+  fi
+
+  dialog --backtitle "Additional Services" \
+      --title "Let's Encrypt Client" \
+      --infobox "\n${msg}" 5 40 ; sleep 3
+
+else
+  echo "Let's Encrypt Client Setting unchanged."
 fi
 
 # cryptoadvance Specter process choice
@@ -510,7 +543,7 @@ When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
       extraparameter="deleteindex"
 	  fi
     /home/admin/config.scripts/bonus.electrs.sh off ${extraparameter}
-  fi  
+  fi
 
 else
   echo "ElectRS Setting unchanged."
@@ -563,7 +596,7 @@ if [ "${lndmanage}" != "${choice}" ]; then
   if [ "${lndmanage}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
   fi
-else 
+else
   echo "lndmanage setting unchanged."
 fi
 
@@ -578,7 +611,7 @@ if [ "${faraday}" != "${choice}" ]; then
   if [ "${faraday}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
   fi
-else 
+else
   echo "faraday setting unchanged."
 fi
 
@@ -594,7 +627,7 @@ if [ "${bos}" != "${choice}" ]; then
   if [ "${bos}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
   fi
-else 
+else
   echo "Balance of Satoshis setting unchanged."
 fi
 
@@ -609,7 +642,7 @@ if [ "${LNBits}" != "${choice}" ]; then
     sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
   fi
-else 
+else
   echo "LNbits setting unchanged."
 fi
 
@@ -625,7 +658,7 @@ if [ "${DropboxBackup}" != "${choice}" ]; then
     source /mnt/hdd/raspiblitz.conf
     sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
   fi
-else 
+else
   echo "Dropbox backup setting unchanged."
 fi
 
@@ -638,7 +671,7 @@ if [ "${keysend}" != "${choice}" ]; then
   needsReboot=1
   sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
   dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
-else 
+else
   echo "keysend setting unchanged."
 fi
 

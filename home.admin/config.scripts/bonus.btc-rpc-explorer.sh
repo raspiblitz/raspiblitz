@@ -157,7 +157,6 @@ EOF
     # open firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow 3002 comment 'btc-rpc-explorer'
-    sudo ufw --force enable
     echo ""
 
     # install service

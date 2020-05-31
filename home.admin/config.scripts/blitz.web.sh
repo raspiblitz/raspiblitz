@@ -155,6 +155,9 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge >/dev/null
   fi
 
+  # make sure admin can write here even without sudo
+  sudo chown -R admin:www-data /var/www/letsencrypt
+
   # copy webroot
   if ! [ -d /var/www/public ]; then
     sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public

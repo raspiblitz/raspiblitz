@@ -5,6 +5,7 @@
 - Fix: DropBox StaticChannelBackup 
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
+- New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
 
 ## Whats new in Version 1.5 of RaspiBlitz?
 
@@ -977,3 +978,63 @@ If you cannot login per SSH into your RaspiBlitz your SSH RaspiBlitz certs might
 - then try again to SSH login
 
 If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login thats what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor. 
+
+## How to use the Let's Encrypt client
+
+The [Let's Encrypt](https://letsencrypt.org/) client software [acme.sh](https://github.com/acmesh-official/acme.sh) is 
+included (since v1.6) and can be used to create TLS certificates that are signed by the Certificate Authority (*Root 
+CA*) **Let's Encrypt** and which are therefore trusted on all modern platforms.
+
+In order to successfully get a signed certificate you need to **verify ownership** over a **DNS domain** or a **full 
+qualified domain name** (**FQDN**). Currently Let's Encrypt **doesn't** issue certificates for IP addresses. The two 
+most common standards for verification of control are `HTTP-01` and `DNS-01`.
+
+The **acme.sh** client supports both modes and has a large number of DNS services (more than 50) it can interact with. 
+More details can be found on the [acme.sh wiki](https://github.com/acmesh-official/acme.sh/wiki).
+
+### Let's Encrypt - HTTP-01
+
+To use `HTTP-01` your RaspiBlitz needs to be accessible directly from the Internet on a **public IP address** on **port 
+80**. If you don't have a public IPv4/IPv6 IP on either `eth0` or `wlan0` then it might be possible to use **NAT port 
+forwarding** or an **autossh-tunnel** to fulfill this requirement.
+
+If everything (this includes creating a `DNS A` or `DNS CNAME` record that points to a static or dynamic IP address) is 
+set up so that the Let's Encrypt servers can reach your RaspiBlitz on port 80 then the following command will perform 
+the initial creation of a signed certificate and will also store the configuration data needed to regularly refresh it. 
+Just run this once and then lean back and forget about it. :-D
+
+```
+~/.acme.sh/acme.sh --keylength ec-256 --issue -d hostname.example.com -w /var/www/letsencrypt/ 
+```
+
+### Let's Encrypt - DNS-01
+
+The `DNS-01` standard **proves ownership** by creating `DNS TXT` records on the domain or subdomain you want to use.
+This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates` 
+can be issued. 
+
+It is beyond the scope of this FAQ entry to explain all details of this - please refer to the official documentation. 
+Assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS service then the following command will
+get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous 
+renewals. 
+
+```
+export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
+~/.acme.sh/acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
+```
+
+As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
+
+### Let's Encrypt - eMail Address
+
+The installation process of the `acme.sh` client includes a prompt for an eMail address. The data entered there is 
+stored in the `accounts.conf` file as `ACCOUNT_EMAIL`. This address is used by Let's Encrypt to notify you about 
+the expiry of certificates (which is not really needed as renewals are automated) and also about changes to their 
+**Terms of Service**. For more details please check their [privacy policy](https://letsencrypt.org/privacy/).
+
+It is currently considered completely fine to leave this field empty and not provide an eMail address.  
+
+### Let's Encrypt - Installation details
+
+The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
+external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
