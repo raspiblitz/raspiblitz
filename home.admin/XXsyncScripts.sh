@@ -6,6 +6,14 @@
 # IF YOU WANT TO UPDATE YOUR RASPIBLITZ:
 # https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-to-update-my-raspiblitz-after-version-098
 
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+  echo "FOR DEVELOPMENT USE ONLY!"
+  echo "RaspiBlitz Sync Scripts"
+  echo "XXsyncScripts.sh [-clean] [-install] branch [repo]"
+  exit 1
+fi
+
 cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
@@ -13,7 +21,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
 
-# if parameter is "info" just give back basic info about sync 
+# if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
@@ -84,6 +92,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
 else
   echo ""
   echo "USAGE-INFO: ./XXsyncScripts.sh '[BRANCHNAME]'"
+  exit 1
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
@@ -137,7 +146,7 @@ else
   blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
   blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
   echo "# BlitzPy changed --> UPDATING to Version ${blitzpy_version}"
-  sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
+  sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
 fi
 
 if [ "${touchscreen}" = "1" ]; then
