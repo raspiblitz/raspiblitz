@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.5 with lnd 0.9.2-beta (0.10.0-beta optional) and bitcoin 0.19.1 (or litecoin 0.17.1)`
+`Version 1.5.1 with lnd 0.9.2-beta (0.10.0-beta optional) and bitcoin 0.19.1 (or litecoin 0.17.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -114,13 +114,11 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.5:**
+**Download SD-Card image - Version 1.5.1:**
 
-Browser: http://blitz.rotzoll.de/raspiblitz-v1.5-2020-05-08.img.gz
+Browser: https://files.rotzoll.de/raspiblitz-v1.5.1-2020-05-30.img.gz
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.5/home.admin/assets/raspiblitz-v1.5-2020-05-08.img.gz.torrent
-
-SHA-256: 51cf8cc0f5ff9f562327ed8ba6779cffef8ba8e3c6e2b8e21bcd2f931f630584 or [SIGNATURE](http://blitz.rotzoll.de/raspiblitz-v1.5-2020-05-08.img.gz.sig)
+SHA-256: e896c7c1cc38622b02037569c2b76ad56b72dfb93c01024a0cb278d0d899d210 or [SIGNATURE](https://files.rotzoll.de/raspiblitz-v1.5.1-2020-05-30.img.gz.sig)
 
 * [Whats new in Version 1.5 of RaspiBlitz?](FAQ.md#whats-new-in-version-15-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
