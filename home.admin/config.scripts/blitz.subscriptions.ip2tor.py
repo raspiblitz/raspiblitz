@@ -718,6 +718,7 @@ MAIN MENU > Manage Subscriptions > My Subscriptions
 if sys.argv[1] == "create-ssh-dialog":
 
     # check parameters
+    if len(sys.argv) < 5: raise BlitzError("incorrect parameters","")
     try:
         servicename = sys.argv[2]
         toraddress = sys.argv[3]
