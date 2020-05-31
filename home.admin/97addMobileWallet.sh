@@ -98,7 +98,14 @@ checkIP2TOR()
 	    port="8080"
 		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 	  fi
-	  /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+
+	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')
+	  if [ ${userHasActiveChannels} -gt 0 ]; then
+	    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+	  else
+	  	whiptail --title " Lightning not Ready " --msgbox "\nYou need at least one active Lightning channel.\n\nPlease make sure that your node is funded and\nyou have a confirmed and active channel running.\nThen try again to connect the mobile wallet." 13 52
+	  	exit 0
+	  fi
       clear
 	fi
   fi
