@@ -815,15 +815,18 @@ if sys.argv[1] == "subscriptions-list":
 
 if sys.argv[1] == "subscriptions-renew":
 
+    print("# RUNNING subscriptions-renew")
+
     # check parameters
     try:
         secondsBeforeSuspend = int(sys.argv[2])
         if secondsBeforeSuspend < 0: secondsBeforeSuspend = 0
     except Exception as e:
-        handleException(e)
+        print("# running with secondsBeforeSuspend=0")
+        secondsBeforeSuspend = 0
 
     # check if any active subscrpitions are below the secondsBeforeSuspend - if yes extend
-    print("# RUNNING subscriptions-renew")
+    
     try:
         
         if not Path(SUBSCRIPTIONS_FILE).is_file():
