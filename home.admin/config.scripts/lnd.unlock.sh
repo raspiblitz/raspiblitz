@@ -11,8 +11,8 @@ passwordC="$1"
 
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
-walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 2>&1 | grep -c "already unlocked")
-if [ ${walletUnlocked} -eq 1 ]; then
+walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+if [ ${walletLocked} -eq 0 ]; then
     echo "# OK LND wallet was already unlocked"
     exit 0
 fi
@@ -82,8 +82,8 @@ while [ ${fallback} -eq 0 ]
         # UNKOWN RESULT
 
         # check if wallet was unlocked anyway
-        walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 3>&1 1>&2 2>&3 | grep -c "already unlocked")
-        if [ ${walletUnlocked} -eq 1 ]; then
+        walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+        if [ ${walletUnlocked} -eq 0 ]; then
             echo "# OK LND wallet unlocked"
             exit 0
         fi
@@ -105,8 +105,8 @@ while [ ${fallback} -eq 0 ]
   done
 
 # FALBACK LND CLI UNLOCK
-unlocked=0
-while [ ${unlocked} -eq 0 ]
+walletLocked=1
+while [ ${walletLocked} -gt 0 ]
 do
     # do CLI unlock
     echo
@@ -116,12 +116,11 @@ do
     lncli unlock --recovery_window=5000
 
     # test unlock
-    walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 2>&1 | grep -c "already unlocked")
-    if [ ${wasUnlocked} -gt 0 ]; then
-        echo "# OK LND wallet unlocked"
-        exit 0
+    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+    if [ ${walletLocked} -eq 0 ]; then
+        echo "# --> OK LND wallet unlocked"
     else
-        echo "--> Was not able to unlock wallet ... try again or use CTRL-C to exit"
+        echo "# --> Was not able to unlock wallet ... try again or use CTRL-C to exit"
     fi
 
 done
