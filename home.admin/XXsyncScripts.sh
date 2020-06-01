@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitz Sync Scripts"
   echo "XXsyncScripts.sh info"
-  echo "XXsyncScripts.sh [-clean|-install] branch [repo]"
+  echo "XXsyncScripts.sh [-run|-clean|-install] branch [repo]"
   exit 1
 fi
 
@@ -33,6 +33,10 @@ fi
 clean=0
 wantedBranch="$1"
 wantedGitHubUser="$2"
+if [ "${wantedBranch}" = "-run" ]; then
+  wantedBranch=""
+  wantedGitHubUser=""
+fi
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
   wantedBranch="$2"
