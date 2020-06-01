@@ -2,9 +2,12 @@
 
 if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
- echo "lnd.unlock.sh [passwordC]"
+ echo "lnd.unlock.sh [?passwordC]"
  exit 1
 fi
+
+# 1. parameter
+passwordC="$1"
 
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
@@ -14,8 +17,18 @@ if [ ${walletUnlocked} -eq 1 ]; then
     exit 0
 fi
 
-# 1. parameter
-passwordC="$1"
+
+# check if LND is below 0.10 (has no STDIN password option)
+fallback=0
+source <(/home/admin/config.scripts/lnd.update.sh info)
+if [ ${lndInstalledVersionMajor} -eq 0 ] && [ ${lndInstalledVersionMain} -lt 10 ]; then
+    if [ ${#passwordC} -gt 0 ]; then
+        echo "error='lnd version too old'"
+        exit 1
+    else
+      fallback=1
+    fi
+fi
 
 # if no password check if stored for auto-unlock
 if [ ${#passwordC} -eq 0 ]; then
@@ -28,14 +41,14 @@ fi
 
 # if still no password get from user
 manualEntry=0
-if [ ${#passwordC} -eq 0 ]; then
+if [ ${#passwordC} -eq 0 ] && [ ${fallback} -eq 0 ]; then
     echo "# manual input"
     manualEntry=1
     passwordC=$(whiptail --passwordbox "\nEnter Password C to unlock wallet:\n" 9 52 "" --title " LND Wallet " --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 fi
 
 loopCount=0
-while :
+while [ ${fallback} -eq 0 ]:
   do
     
     # TRY TO UNLOCK ...
@@ -77,13 +90,8 @@ while :
 
         echo "# unkown error"
         if [ ${manualEntry} -eq 1 ]; then
-            LND
             whiptail --title " LND ERROR " --msgbox "${result}" --ok-button "Try CLI" 8 60
-            # fall back to direct CLI input
-            echo "Calling: lncli unlock"
-            echo "Please re-enter Password C:"
-            lncli unlock --recovery_window=5000
-            exit 1
+            fallback=1
         else
             # maybe lncli is waiting to get ready (wait and loop)
             if [ ${loopCount} -gt 10 ]; then
@@ -95,3 +103,24 @@ while :
     fi
 
   done
+
+# FALBACK LND CLI UNLOCK
+unlocked=0
+while [ ${unlocked} -eq 0 ]:
+do
+    # do CLI unlock
+    echo "############################"
+    echo "Calling: lncli unlock"
+    echo "Please re-enter Password C:"
+    lncli unlock --recovery_window=5000
+
+    # test unlock
+    walletUnlocked=$(echo "" | sudo -u bitcoin lncli unlock --stdin 2>&1 | grep -c "already unlocked")
+    if [ ${wasUnlocked} -gt 0 ]; then
+        echo "# OK LND wallet unlocked"
+        exit 0
+    else
+        echo "--> Was not able to unlock wallet ... try again or use CTRL-C to exit"
+    fi
+    
+done
