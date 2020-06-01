@@ -20,7 +20,7 @@ if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 12 55 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
