@@ -48,7 +48,7 @@ if [ ${#passwordC} -eq 0 ] && [ ${fallback} -eq 0 ]; then
 fi
 
 loopCount=0
-while [ ${fallback} -eq 0 ]:
+while [ ${fallback} -eq 0 ]
   do
     
     # TRY TO UNLOCK ...
@@ -106,7 +106,7 @@ while [ ${fallback} -eq 0 ]:
 
 # FALBACK LND CLI UNLOCK
 unlocked=0
-while [ ${unlocked} -eq 0 ]:
+while [ ${unlocked} -eq 0 ]
 do
     # do CLI unlock
     echo "############################"
@@ -122,5 +122,5 @@ do
     else
         echo "--> Was not able to unlock wallet ... try again or use CTRL-C to exit"
     fi
-    
+
 done
