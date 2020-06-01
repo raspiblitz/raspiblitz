@@ -2,8 +2,8 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install or uninstall balance of satoshis"
- echo "bonus.bos.sh [on|off|menu]"
+ echo "config script to install, update or uninstall Balance of Satoshis"
+ echo "bonus.bos.sh [on|off|menu|update]"
  exit 1
 fi
 
@@ -82,6 +82,14 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# OK, bos is removed."
   exit 0
 
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "*** UPDATING BALANCE OF SATOSHIS ***"
+  sudo -u bos npm i -g balanceofsatoshis
+  echo "*** Balance of Satoshis is updated to the latest in https://github.com/alexbosworth/balanceofsatoshis ***"
+  exit 0
 fi
 
 echo "FAIL - Unknown Parameter $1"

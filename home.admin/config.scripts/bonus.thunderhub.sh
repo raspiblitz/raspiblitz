@@ -2,8 +2,8 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch ThunderHub on or off"
- echo "bonus.thunderhub.sh [on|off|menu]"
+ echo "config script to install, update or uninstall ThunderHub"
+ echo "bonus.thunderhub.sh [on|off|menu|update]"
  exit 1
 fi
 
@@ -199,6 +199,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
 
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "*** UPDATING THUNDERHUB ***"
+  cd /home/thunderhub/thunderhub
+  sudo -u thunderhub git pull
+  sudo -u thunderhub npm install
+  sudo -u thunderhub npm run build
+  echo "*** ThunderHub is updated to the latest in https://github.com/apotdevin/thunderhub ***"
+  echo ""
+  echo "*** Starting the ThunderHub service ... *** "
+  sudo systemctl start thunderhub
   exit 0
 fi
 
