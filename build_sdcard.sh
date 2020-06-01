@@ -493,7 +493,7 @@ sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/
 
 # check if checksums are signed by lnd dev team
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
+sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
 gpg ./pgp_keys.asc
 fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
