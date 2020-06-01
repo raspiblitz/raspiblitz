@@ -34,8 +34,8 @@ clean=0
 wantedBranch="$1"
 wantedGitHubUser="$2"
 if [ "${wantedBranch}" = "-run" ]; then
-  wantedBranch=""
-  wantedGitHubUser=""
+  wantedBranch="${activeBranch}"
+  wantedGitHubUser="${activeGitHubUser}"
 fi
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
