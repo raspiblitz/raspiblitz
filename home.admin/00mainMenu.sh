@@ -70,6 +70,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
 
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "ThunderHub")
+fi
+
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 OPTIONS+=(FUNDING "Fund your LND Wallet")
@@ -172,6 +176,9 @@ case $CHOICE in
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+        THUB)
+            sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
             ;;
         lnbalance)
             clear

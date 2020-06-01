@@ -25,6 +25,7 @@ if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
+if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -91,6 +92,7 @@ p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 f 'Faraday' ${faraday} \
 o 'Balance of Satoshis' ${bos} \
+t 'ThunderHub' ${thunderhub}
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -595,10 +597,25 @@ if [ "${bos}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.bos.sh ${choice}
   source /mnt/hdd/raspiblitz.conf
   if [ "${bos}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
+    sudo -u admin /home/admin/config.scripts/bonus.bos.sh menu
   fi
 else 
   echo "Balance of Satoshis setting unchanged."
+fi
+
+# thunderhub process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${thunderhub}" != "${choice}" ]; then
+  echo " ThunderHub setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${thunderhub}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh menu
+  fi
+else 
+  echo "ThunderHub setting unchanged."
 fi
 
 # LNbits process choice
