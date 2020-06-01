@@ -2,6 +2,7 @@
 
 ## Whats new in Version 1.6 of RaspiBlitz?
 
+- Update: Raspberry Pi OS Base Image (May 2020)
 - Fix: DropBox StaticChannelBackup 
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
