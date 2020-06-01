@@ -263,7 +263,7 @@ This is also the best option if you don't like to run your RaspberryPi 3 with a 
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-#### 3. Torrent Fallback
+#### 3. Torrent Fallback (NOTE: to-be-deprecated in 1.6)
 
 *This is recommended for old RaspberryPi 3s - for the newer RaspberryPi 4 you might consider the `SYNC` option.*
 
