@@ -209,7 +209,7 @@ if [ "$1" = "update" ]; then
   sudo -u thunderhub git pull
   sudo -u thunderhub npm install
   sudo -u thunderhub npm run build
-  echo "*** ThunderHub is updated to the latest in https://github.com/apotdevin/thunderhub ***"
+  echo "*** Updated to the latest in https://github.com/apotdevin/thunderhub ***"
   echo ""
   echo "*** Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub

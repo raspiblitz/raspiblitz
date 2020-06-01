@@ -88,7 +88,7 @@ fi
 if [ "$1" = "update" ]; then
   echo "*** UPDATING BALANCE OF SATOSHIS ***"
   sudo -u bos npm i -g balanceofsatoshis
-  echo "*** Balance of Satoshis is updated to the latest in https://github.com/alexbosworth/balanceofsatoshis ***"
+  echo "*** Updated to the latest in https://github.com/alexbosworth/balanceofsatoshis ***"
   exit 0
 fi
 
