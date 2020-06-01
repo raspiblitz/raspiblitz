@@ -931,17 +931,16 @@ if sys.argv[1] == "subscription-by-service":
         handleException(e)
 
     try:
-
-        subs = toml.load(SUBSCRIPTIONS_FILE)
-        newList = []
-        for idx, sub in enumerate(subs['subscriptions_ip2tor']):
-            if sub['active'] and sub['name'] == servicename:
-                print("type='{0}'".format(sub['type']))
-                print("ip='{0}'".format(sub['ip']))
-                print("port='{0}'".format(sub['port']))
-                print("tor='{0}'".format(sub['tor']))
-                sys.exit(0)
-
+        if os.path.isfile(SUBSCRIPTIONS_FILE):
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+            for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+                if sub['active'] and sub['name'] == servicename:
+                    print("type='{0}'".format(sub['type']))
+                    print("ip='{0}'".format(sub['ip']))
+                    print("port='{0}'".format(sub['port']))
+                    print("tor='{0}'".format(sub['tor']))
+                    sys.exit(0)
+                    
         print("error='not found'")
         sys.exit(0)
 

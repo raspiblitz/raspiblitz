@@ -180,11 +180,12 @@ your RaspiBlitz behind TOR.
     lnd_rest_api=False
     lnd_grpc_api=False
     try:
-        subs = toml.load(SUBSCRIPTIONS_FILE)
-        for sub in subs['subscriptions_ip2tor']:
-            if not sub['active']: next
-            if sub['active'] and sub['name'] == LND_REST_API: lnd_rest_api=True
-            if sub['active'] and sub['name'] == LND_GRPC_API: lnd_grpc_api=True
+        if os.path.isfile(SUBSCRIPTIONS_FILE):
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+            for sub in subs['subscriptions_ip2tor']:
+                if not sub['active']: next
+                if sub['active'] and sub['name'] == LND_REST_API: lnd_rest_api=True
+                if sub['active'] and sub['name'] == LND_GRPC_API: lnd_grpc_api=True
     except Exception as e:
         print(e)
 
