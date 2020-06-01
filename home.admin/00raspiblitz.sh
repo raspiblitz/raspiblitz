@@ -206,7 +206,7 @@ How do you want to continue?
             # check how many times LND was restarted
             source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
             if [ ${startcountLightning} -lt 4 ]; then
-              /home/admin/AAunlockLND.sh
+              /home/admin/config.scripts/lnd.unlock.sh
               echo "Starting up Wallet ... (10sec)"
               sleep 5
               sleep 5

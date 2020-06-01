@@ -591,10 +591,10 @@ echo "*** Python DEFAULT libs & depenedencies ***"
 # for setup schell scripts
 sudo apt-get -y install dialog bc python3-dialog
 
-# libs
+# libs (for global python scripts)
 sudo pip3 install -I grpcio==1.29.0
 sudo pip3 install -I googleapis-common-protos==1.51.0
-
+sudo pip3 install -I toml==0.10.1
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"

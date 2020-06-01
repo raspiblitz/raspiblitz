@@ -64,7 +64,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       fi
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: sudo shutdown -r now"
+      echo "-> To try restart: restart"
       echo ""
     fi
   else
@@ -123,7 +123,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
       echo
       echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
       echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: sudo shutdown -r now"
+      echo "-> To try restart: restart"
       echo ""
       exit 1
     else

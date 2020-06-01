@@ -9,6 +9,7 @@ import time
 import datetime, time
 import codecs, grpc, os
 from pathlib import Path
+import toml
 
 from blitzpy import RaspiBlitzConfig
 
@@ -20,34 +21,38 @@ from lndlibs import rpc_pb2_grpc as rpcstub
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage ip2tor subscriptions for raspiblitz")
-    print("# blitz.ip2tor.py menu")
-    print("# blitz.ip2tor.py shop-list [shopurl]")
-    print("# blitz.ip2tor.py shop-order [shopurl] [hostid] [toraddress:port] [duration] [msats]")
-    print("# blitz.ip2tor.py subscriptions-list")
-    print("# blitz.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
-    print("# blitz.ip2tor.py subscription-cancel [id]")
+    print("# blitz.subscriptions.ip2tor.py create-ssh-dialog [servicename] [toraddress] [torport]")
+    print("# blitz.subscriptions.ip2tor.py shop-list [shopurl]")
+    print("# blitz.subscriptions.ip2tor.py shop-order [shopurl] [servicename] [hostid] [toraddress:port] [duration] [msatsFirst] [msatsNext] [?description]")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-list")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-renew [secondsBeforeSuspend]")
+    print("# blitz.subscriptions.ip2tor.py subscription-cancel [id]")
+    print("# blitz.subscriptions.ip2tor.py subscription-by-service [servicename]")
     sys.exit(1)
 
 ####### BASIC SETTINGS #########
 
-cfg = RaspiBlitzConfig()
 session = requests.session()
 if Path("/mnt/hdd/raspiblitz.conf").is_file():
-    print("# blitz.ip2tor.py")
+    cfg = RaspiBlitzConfig()
     cfg.reload()
+    ENV="PROD"
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="127.0.0.1"
-    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network,cfg.chain)
+    LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network.value,cfg.chain.value)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
     # make sure to make requests thru TOR 127.0.0.1:9050
     session.proxies = {'http':  'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
+    SUBSCRIPTIONS_FILE="/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 else:
+    ENV="DEV"
     print("# blitz.ip2tor.py (development env)")
     DEFAULT_SHOPURL="shop.ip2t.org"
     LND_IP="192.168.178.95"
     LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
     LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
+    SUBSCRIPTIONS_FILE="/Users/rotzoll/Downloads/RaspiBlitzCredentials/subscriptions.toml"
 
 ####### HELPER CLASSES #########
 
@@ -73,7 +78,7 @@ def handleException(e):
     sys.exit(1)
 
 def parseDate(datestr):
-    return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%S.%fZ")
+    return datetime.datetime.strptime(datestr,"%Y-%m-%dT%H:%M:%SZ")
 
 def secondsLeft(dateObj):
     return round((dateObj - datetime.datetime.utcnow()).total_seconds())
@@ -201,6 +206,7 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
         raise BlitzError("failed HTTP code",response.status_code)
 
     # parse & validate data
+    print("# parse")
     try:
         jData = json.loads(response.content)
         if len(jData['po_id']) == 0:
@@ -315,7 +321,7 @@ def shopList(shopUrl):
     shopUrl=normalizeShopUrl(shopUrl)
     return apiGetHosts(session, shopUrl)
 
-def shopOrder(shopUrl, hostid, torTarget, duration, msatsFirst):
+def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msatsNext, description=""):
 
     print("#### Placeing order ...")
     shopUrl=normalizeShopUrl(shopUrl)
@@ -346,7 +352,7 @@ def shopOrder(shopUrl, hostid, torTarget, duration, msatsFirst):
     print("# amount as advertised: {0}".format(msatsFirst))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
     if int(msatsFirst) < int(paymentRequestDecoded.num_msat):
-        raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
+        raise BlitzError("invoice bigger amount than advertised", "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
 
     print("#### Paying invoice ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
@@ -364,23 +370,62 @@ def shopOrder(shopUrl, hostid, torTarget, duration, msatsFirst):
         if loopCount > 60: 
             raise BlitzError("timeout bridge not getting ready", bridge)
         
-    # get data from ready bride
-    bridge_suspendafter = bridge['suspend_after']
-    bridge_port = bridge['port']
-
     print("#### Check if duration delivered is as advertised ...")
-    secondsDelivered=secondsLeft(parseDate(bridge_suspendafter))
+    contract_breached = False
+    warning_text = ""
+    secondsDelivered=secondsLeft(parseDate(bridge['suspend_after']))
     print("# delivered({0}) promised({1})".format(secondsDelivered, duration))
     if (secondsDelivered + 600) < int(duration):
-        bridge['contract_breached'] = True
-        bridge['warning'] = "delivered duration shorter than advertised"
-    else:
-        bridge['contract_breached'] = False
+        contract_breached = True
+        warning_text = "delivered duration shorter than advertised"
 
-    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
-    return bridge
+    # create subscription data for storage
+    subscription = {}
+    subscription['type'] = "ip2tor-v1"
+    subscription['id'] = bridge['id']
+    subscription['name'] = servicename
+    subscription['shop'] = shopUrl
+    subscription['active'] = True
+    subscription['ip'] = bridge_ip
+    subscription['port'] = bridge['port']
+    subscription['duration'] = int(duration)
+    subscription['price_initial'] = int(msatsFirst)
+    subscription['price_extension'] = int(msatsNext)
+    subscription['price_total'] = int(paymentRequestDecoded.num_msat)
+    subscription['time_created'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+    subscription['time_lastupdate'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+    subscription['suspend_after'] = bridge['suspend_after']
+    subscription['description'] = str(description)
+    subscription['contract_breached'] = contract_breached
+    subscription['warning'] = warning_text
+    subscription['tor'] = torTarget
+
+    # load, add and store subscriptions
+    try:
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            print("# load toml file")
+            subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+        else:
+            print("# new toml file")
+            subscriptions = {}
+            subscriptions['subscriptions_ip2tor'] = []
+        subscriptions['subscriptions_ip2tor'].append(subscription)
+        subscriptions['shop_ip2tor'] = shopUrl
+        with open(SUBSCRIPTIONS_FILE, 'w') as writer:
+            writer.write(toml.dumps(subscriptions))
+            writer.close()
     
-def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):    
+    except Exception as e:
+        eprint(e)
+        raise BlitzError("fail on subscription storage",subscription, e)
+
+    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, subscription['port'], torTarget))
+    return subscription
+    
+def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_suspendafter):    
+
+    warningTXT=""
+    contract_breached=False
 
     print("#### Placing extension order ...")
     shopUrl=normalizeShopUrl(shopUrl)
@@ -408,36 +453,62 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst):
     print("# amount as advertised: {0}".format(msatsNext))
     print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
     if int(msatsNext) < int(paymentRequestDecoded.num_msat):
-        raise BlitzError("invoice other amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
+        raise BlitzError("invoice bigger amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
     print("#### Paying invoice ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
 
-    print("#### Check if bride was extended ...")
+    print("#### Check if bridge was extended ...")
     loopCount=0
     while True:
         time.sleep(3)
         loopCount+=1
         print("## Loop {0}".format(loopCount))
-        bridge = apiGetBridgeStatus(session, shopUrl, bridgeid)
-        if bridge['suspend_after'] != bridge_suspendafter:
+        try: 
+            bridge = apiGetBridgeStatus(session, shopUrl, bridgeid)
+            if bridge['suspend_after'] != bridge_suspendafter:
+                break
+        except Exception as e:
+            eprint(e)
+            print("# EXCEPTION on apiGetBridgeStatus")
+        if loopCount > 60:
+            warningTXT="timeout on last payed extension"
+            contract_breached=True
             break
-        if loopCount > 60: 
-            raise BlitzError("timeout on waiting for extending bridge", bridge)
 
-    print("#### Check if extension duration is as advertised ...")
-    secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
-    secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
-    secondsExtended = secondsLeftNew - secondsLeftOld
-    print("# secondsExtended({0}) promised({1})".format(secondsExtended, durationAdvertised))
-    if secondsExtended < int(durationAdvertised):
-        bridge['contract_breached'] = True
-        bridge['warning'] = "delivered duration shorter than advertised"
-    else:
-        bridge['contract_breached'] = False
+    if not contract_breached:
+        print("#### Check if extension duration is as advertised ...")
+        secondsLeftOld = secondsLeft(parseDate(bridge_suspendafter))
+        secondsLeftNew = secondsLeft(parseDate(bridge['suspend_after']))
+        secondsExtended = secondsLeftNew - secondsLeftOld
+        print("# secondsExtended({0}) promised({1})".format(secondsExtended, durationAdvertised))
+        if secondsExtended < int(durationAdvertised):
+            contract_breached = True
+            warningTXT = "delivered duration shorter than advertised"
+
+    # load, update and store subscriptions
+    try:
+        print("# load toml file")
+        subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+        for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
+            if subscription['id'] == bridgeid:
+                subscription['suspend_after'] = str(bridge['suspend_after'])
+                subscription['time_lastupdate'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+                subscription['price_total'] += int(paymentRequestDecoded.num_msat)
+                subscription['contract_breached'] = contract_breached
+                subscription['warning'] = warningTXT
+                if contract_breached:
+                    subscription['active'] = False
+                with open(SUBSCRIPTIONS_FILE, 'w') as writer:
+                    writer.write(toml.dumps(subscriptions))
+                    writer.close()
+                break
     
+    except Exception as e:
+        eprint(e)
+        raise BlitzError("fail on subscription storage",subscription, e)
+
     print("# BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
-    return bridge
 
 def menuMakeSubscription(blitzServiceName, torAddress, torPort):
 
@@ -446,7 +517,15 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     ############################
     # PHASE 1: Enter Shop URL
 
+    # see if user had before entered another shop of preference
     shopurl = DEFAULT_SHOPURL
+    try:
+        subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+        shopurl = subscriptions['shop_ip2tor']
+        print("# using last shop url set in subscriptions.toml")
+    except Exception as e:
+        print("# using default shop url")
+
     while True:
 
         # input shop url
@@ -484,7 +563,7 @@ Try again later, enter another address or cancel.
     ###############################
     # PHASE 2: SELECT SUBSCRIPTION
 
-    # create menu to select shop - TODO: also while loop list & detail until cancel or subscription
+    # create menu to select shop
     host=None
     choices = []
     for idx, hostEntry in enumerate(hosts):
@@ -520,7 +599,7 @@ Every next time it would cost: {2} sats
 
 If you AGREE you will subscribe to this service.
 You will get a port on the IP {3} that will
-forward to your RaspiBlitz TOR address:
+forward to your RaspiBlitz TOR address for '{7}':
 {4}
 
 You can cancel the subscription anytime under
@@ -540,9 +619,11 @@ More information on the service you can find under:
         host['ip'],
         torTarget,
         host['terms_of_service'],
-        host['terms_of_service_url'])
+        host['terms_of_service_url'],
+        blitzServiceName
+        )
 
-        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=70, height=30)
+        code = d.msgbox(text, title=host['name'], ok_label="Back", extra_button=True,  extra_label="AGREE" ,width=75, height=30)
         
         # if user AGREED break loop and continue with selected host
         if code == "extra": break
@@ -550,14 +631,17 @@ More information on the service you can find under:
     ############################
     # PHASE 3: Make Subscription
 
+    description = "{0} / {1} / {2}".format(host['name'], host['terms_of_service'], host['terms_of_service_url'])
+
     try:
 
         os.system('clear')
-        bridge = shopOrder(shopurl, host['id'], torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'])
+        subscription = shopOrder(shopurl, host['id'], blitzServiceName, torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'],host['tor_bridge_price_extension'],description)
 
     except BlitzError as be:
 
-        if  be.errorShort == "timeout on waiting for extending bridge":
+        if  (be.errorShort == "timeout on waiting for extending bridge" or
+             be.errorShort == "fail on subscription storage") :
 
             # error happend after payment
             Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
@@ -587,57 +671,77 @@ Unkown Error happend - please report to developers:
             '''.format(str(e)),title="Exception on Subscription")
             sys.exit(1)
 
+    # if LND REST or LND GRPS service ... add bridge IP to TLS
+    if servicename == "LND-REST-API" or servicename == "LND-GRPC-API":
+        os.system("sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add {0}".format(subscription['ip']))
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh reset tls")
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh sync")
+
     # warn user if not delivered as advertised
-    if bridge['contract_breached']:
+    if subscription['contract_breached']:
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 The service was payed & delivered, but RaspiBlitz detected:
 {0}
 You may want to consider to cancel the subscription later.
-            '''.format(bridge['warning'],title="Warning"))
-
-    # TODO: persist subscription in list
+            '''.format(subscription['warning'],title="Warning"))
 
     # Give final result feedback to user
     Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 OK your service is ready & your subscription is active.
 
 You payed {0} sats for the first {1} hours.
-Next AUTOMATED PAYMENT will be {2} sats.
+Next AUTOMATED PAYMENTS will be {2} sats each.
 
 Your service '{3}' should now publicly be reachable under:
 {4}:{5}
 
 Please test now if the service is performing as promised.
 If not - dont forget to cancel the subscription under:
-MAIN MENU > SUBSCRIPTIONS > MY SUBSCRIPTIONS
-            '''.format(be.errorShort),title="Subscription Active") 
+MAIN MENU > Manage Subscriptions > My Subscriptions
+            '''.format(
+        host['tor_bridge_price_initial_sats'],
+        host['tor_bridge_duration_hours'],
+        host['tor_bridge_price_extension_sats'],
+        blitzServiceName,
+        subscription['ip'],
+        subscription['port'])
+        ,title="Subscription Active") 
 
 
 ####### COMMANDS #########
 
 ###############
-# MENU
+# CREATE SSH DIALOG
 # use for ssh shell menu
 ###############
 
-if sys.argv[1] == "menu":
+if sys.argv[1] == "create-ssh-dialog":
+
+    # check parameters
+    try:
+        if len(sys.argv) <= 4: raise BlitzError("incorrect parameters","")
+        servicename = sys.argv[2]
+        toraddress = sys.argv[3]
+        port = sys.argv[4]
+    except Exception as e:
+        handleException(e)
 
     # late imports - so that rest of script can run also if dependency is not available
     from dialog import Dialog
-
-    menuMakeSubscription("RTL", "s7foqiwcstnxmlesfsjt7nlhwb2o6w44hc7glv474n7sbyckf76wn6id.onion", "80")
+    menuMakeSubscription(servicename, toraddress, port)
 
     sys.exit()
 
 ###############
 # SHOP LIST
 # call from web interface
-###############    
+###############
 
 if sys.argv[1] == "shop-list":
 
     # check parameters
     try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
     except Exception as e:
         handleException(e)
@@ -661,24 +765,29 @@ if sys.argv[1] == "shop-order":
 
     # check parameters
     try:
+        if len(sys.argv) <= 8: raise BlitzError("incorrect parameters","")
         shopurl = sys.argv[2]
-        hostid = sys.argv[3]
-        toraddress = sys.argv[4]
-        duration = sys.argv[5]
-        msats = sys.argv[6]
+        servicename = sys.argv[3]
+        hostid = sys.argv[4]
+        toraddress = sys.argv[5]
+        duration = sys.argv[6]
+        msatsFirst = sys.argv[7]
+        msatsNext = sys.argv[8]
+        if len(sys.argv) >=10:
+            description = sys.argv[9]
+        else:
+            description = ""
     except Exception as e:
         handleException(e)
 
     # get data
     try:
-        bridge = shopOrder(shopurl, hostid, toraddress, duration, msats)
+        subscription = shopOrder(shopurl, hostid, servicename, toraddress, duration, msatsFirst, msatsNext, description)
     except Exception as e:
         handleException(e)
 
-    # TODO: persist subscription
-
     # output json ordered bridge
-    print(json.dumps(bridge, indent=2))
+    print(json.dumps(subscription, indent=2))
     sys.exit()
 
 #######################
@@ -689,9 +798,13 @@ if sys.argv[1] == "shop-order":
 if sys.argv[1] == "subscriptions-list":
 
     try:
-        
-        # TODO: JSON output of list with all subscrptions
-        print("TODO: implement")
+
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+        else:
+            subs = {}
+            subs['subscriptions_ip2tor'] = []
+        print(json.dumps(subs, indent=2))
     
     except Exception as e:
         handleException(e)
@@ -705,44 +818,137 @@ if sys.argv[1] == "subscriptions-list":
 
 if sys.argv[1] == "subscriptions-renew":
 
+    print("# RUNNING subscriptions-renew")
+
     # check parameters
     try:
-        secondsBeforeSuspend = sys.argv[2]
+        secondsBeforeSuspend = int(sys.argv[2])
         if secondsBeforeSuspend < 0: secondsBeforeSuspend = 0
     except Exception as e:
-        handleException(e)
+        print("# running with secondsBeforeSuspend=0")
+        secondsBeforeSuspend = 0
 
-    # TODO: check if any active subscrpitions are below the secondsBeforeSuspend - if yes extend
-    print("TODO: implement")
-    sys.exit(1)
-
-    # get date
+    # check if any active subscrpitions are below the secondsBeforeSuspend - if yes extend
+    
     try:
-        bridge = subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsFirst)
+        
+        if not Path(SUBSCRIPTIONS_FILE).is_file():
+            print("# no subscriptions")
+            sys.exit(0)
+        
+        subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+        for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
+
+            try:
+
+                if subscription['active'] and subscription['type'] == "ip2tor-v1":
+                    secondsToRun = secondsLeft(parseDate(subscription['suspend_after']))
+                    if secondsToRun < secondsBeforeSuspend:
+                        print("# RENEW: subscription {0} with {1} seconds to run".format(subscription['id'],secondsToRun))
+                        subscriptionExtend(
+                            subscription['shop'], 
+                            subscription['id'], 
+                            subscription['duration'], 
+                            subscription['price_extension'],
+                            subscription['suspend_after']
+                            )
+                    else:
+                        print("# GOOD: subscription {0} with {1} seconds to run".format(subscription['id'],secondsToRun))
+
+            except BlitzError as be:
+                # write error into subscription warning
+                subs = toml.load(SUBSCRIPTIONS_FILE)
+                for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+                    if sub['id'] == subscription['id']:
+                        sub['warning'] = "Exception on Renew: {0}".format(be.errorShort)
+                        if be.errorShort == "invoice bigger amount than advertised":
+                            sub['contract_breached'] = True 
+                            sub['active'] = False 
+                        with open(SUBSCRIPTIONS_FILE, 'w') as writer:
+                            writer.write(toml.dumps(subs))
+                            writer.close()
+                        break
+                print("# BLITZERROR on subscriptions-renew of subscription index {0}: {1}".format(idx, be.errorShort))
+                print("# {0}".format(be.errorShort))
+
+            except Exception as e:
+                print("# EXCEPTION on subscriptions-renew of subscription index {0}".format(idx))
+                eprint(e)
+                
     except Exception as e:
         handleException(e)
-
-    # TODO: persist subscription
 
     # output - not needed only for debug logs
     print("# DONE subscriptions-renew")
+    sys.exit(1)
 
 #######################
 # SUBSCRIPTION CANCEL
 # call in intervalls from background process
 #######################
-
 if sys.argv[1] == "subscription-cancel":
 
+    # check parameters
     try:
-        
-        # TODO: JSON output of list with all subscrptions
-        print("TODO: implement")
-    
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
+        subscriptionID = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        newList = []
+        for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+            if sub['id'] != subscriptionID:
+                newList.append(sub)
+        subs['subscriptions_ip2tor'] = newList
+
+        # persist change
+        with open(SUBSCRIPTIONS_FILE, 'w') as writer:
+            writer.write(toml.dumps(subs))
+            writer.close()
+
+        print(json.dumps(subs, indent=2))
+
     except Exception as e:
         handleException(e)
 
     sys.exit(0)
+
+#######################
+# GET ADDRESS BY SERVICENAME
+# gets called by other scripts to check if service has a ip2tor bridge address
+# output is bash key/value style so that it can be imported with source
+#######################
+if sys.argv[1] == "subscription-by-service":
+
+    # check parameters
+    try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
+        servicename = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        newList = []
+        for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+            if sub['active'] and sub['name'] == servicename:
+                print("type='{0}'".format(sub['type']))
+                print("ip='{0}'".format(sub['ip']))
+                print("port='{0}'".format(sub['port']))
+                print("tor='{0}'".format(sub['tor']))
+                sys.exit(0)
+
+        print("error='not found'")
+        sys.exit(0)
+
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(1)
 
 # unkown command
 print("# unkown command")
