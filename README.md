@@ -758,7 +758,7 @@ This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download pe
 
 *NOTICE: If you start your RaspiBlitz after this backup again the backup is outdated and using it can risk loosing your channel funds.*
 
-##### MIGRATION: Migrate Bitz Date to new Hardware
+##### MIGRATION: Migrate Blitz Data to new Hardware
 
 This stops your RaspiBlitz and creates a Migration ZIP file you can download/export per SCP to your laptop. This contains all important data of your RaspiBlitz including LND, your Blitz configuration and also data from your installed apps. Can be used to migrate your RaspiBlitz to a new hardware - for example if your want to replace the HDD with a SSD. How to import a Migration File [see here](README.md#import-a-migration-file).
 

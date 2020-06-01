@@ -9,7 +9,7 @@ fi
 
 # check input
 if [ "$1" != "testnet" ] && [ "$1" != "mainnet" ]; then
- echo "FAIL - unknnown value: $1"
+ echo "FAIL - unknown value: $1"
  exit 1
 fi
 

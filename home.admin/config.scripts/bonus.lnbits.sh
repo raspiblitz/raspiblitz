@@ -21,24 +21,27 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-http://${localip}:5000\n
+https://${localip}:5001\n
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 11 67
+" 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-http://${localip}:5000\n
+https://${localip}:5001\n
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Activate TOR to access from outside your local network.
-" 12 54
+" 13 54
   fi
 
   echo "please wait ..."
@@ -168,13 +171,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 5000 comment 'lnbits'
-    sudo ufw --force enable
+    sudo ufw allow 5001 comment 'lnbits'
     echo ""
 
     # install service
     echo "*** Install systemd ***"
-    cat > /home/admin/lnbits.service <<EOF
+    cat <<EOF | sudo tee /etc/systemd/system/lnbits.service >/dev/null
 # systemd unit for lnbits
 
 [Unit]
@@ -184,7 +186,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b :5000 lnbits:app -k gevent'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b 127.0.0.1:5000 lnbits:app -k gevent'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -196,8 +198,6 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/lnbits.service /etc/systemd/system/lnbits.service
-    sudo chown root:root /etc/systemd/system/lnbits.service
     sudo systemctl enable lnbits
     echo "# OK - service needs starting: sudo systemctl start lnbits"
 
@@ -205,13 +205,29 @@ EOF
     echo "LNbits already installed."
   fi
 
+  # setup nginx symlinks
+  if ! [ -f /etc/nginx/sites-available/lnbits_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-available/lnbits_ssl.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnbits_tor.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-available/lnbits_tor.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnbits_tor_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-available/lnbits_tor_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
+
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5000
+    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
   exit 0
 fi
@@ -221,6 +237,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5001_https.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5002_http.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_5003_https.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
   if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then

@@ -91,7 +91,6 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   echo "$TOR_ADDRESS"
   echo "use with the port: $toPort"
   echo ""
-  alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
   if [ ${#toPort2} -gt 0 ]; then
     if [ ${alreadyThere} -eq 0 ]; then
       echo "or the port: $toPort2"

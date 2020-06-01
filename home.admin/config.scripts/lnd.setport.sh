@@ -79,6 +79,5 @@ sudo systemctl enable lnd
 
 # make sure port is open on firewall
 sudo ufw allow ${portnumber} comment 'LND Port'
-sudo ufw --force enable
 
 echo "needs reboot to activate new setting -> sudo shutdown -r now"

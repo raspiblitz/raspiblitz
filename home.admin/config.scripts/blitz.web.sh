@@ -4,11 +4,12 @@ source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "the RaspiBlitz Web Interface(s)"
-  echo "blitz.web.sh on"
-  echo "blitz.web.sh off"
-  echo "blitz.web.sh listen localhost"
-  echo "blitz.web.sh listen any"
+  printf "Manage RaspiBlitz Web Interface(s)\n\n"
+  printf "blitz.web.sh check \t\tprint operational nginx listen status (lsof)\n"
+  printf "blitz.web.sh on \t\tturn on\n"
+  printf "blitz.web.sh off \t\tturn off\n"
+  printf "blitz.web.sh listen localhost \tset port 443 to localhost only\n"
+  printf "blitz.web.sh listen any \tset port 443 to any\n"
   exit 1
 fi
 
@@ -100,9 +101,22 @@ function set_nginx_blitzweb_listen() {
 
 
 ###################
+# CHECK
+###################
+if [ "$1" = "check" ]; then
+
+  active_v4=$(sudo -u www-data lsof -i4 -sTCP:LISTEN -P | awk '{if(NR>1)print}' | awk '{ print $9 }' | awk -F":" '{ print $2, $1 " IPv4" }' | sort -nu)
+  active_v6=$(sudo -u www-data lsof -i6 -sTCP:LISTEN -P | awk '{if(NR>1)print}' | awk '{ print $9 }' | awk -F":" '{ print $2, $1 " IPv6" }' | sort -nu)
+
+  active=$(printf "${active_v4}\n${active_v6}" | sort -n)
+  printf "Proto\tInterface\tPort\n"
+  printf "=====\t=========\t====\n"
+  echo "${active}" | awk '{ if($2 == "*") print $3 "\tany\t\t" $1; else print $3 "\t" $2 "\t" $1 }'
+
+###################
 # SWITCH ON
 ###################
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "Turning ON: Web"
 
@@ -114,32 +128,40 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl enable nginx >/dev/null
   sudo systemctl start nginx
 
+  # general nginx settings
+  if ! grep -Eq '^\s*server_names_hash_bucket_size.*$' /etc/nginx/nginx.conf; then
+    # ToDo(frennkie) verify this
+    sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
+  fi
+
+  if [ -f /etc/ssl/certs/dhparam.pem ]; then
+    #can take 5-10+ minutes on a Raspberry Pi 3
+    echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
+    echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
+    sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+  fi
+
+  sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
+
   ### Welcome Server on HTTP Port 80
   sudo rm -f /etc/nginx/sites-enabled/default
   sudo rm -f /var/www/html/index.nginx-debian.html
 
-  if [ -f /etc/nginx/sites-available/default ]; then
-      sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/public.conf
-  else
-      if ! [ -f /etc/nginx/sites-available/public.conf ]; then
-          echo "fail"
-          exit 1
-      fi
+  if ! [ -f /etc/nginx/sites-available/public.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
   fi
 
-  sudo sed -i 's|root /var/www/html;|root /var/www/public;|g' /etc/nginx/sites-available/public.conf
-  sudo sed -i 's|index index.html index.htm index.nginx-debian.html;|index index.html;|g' /etc/nginx/sites-available/public.conf
-
-  if ! grep -Eq '^\s*sub_filter.*$' /etc/nginx/sites-available/public.conf; then
-    # search for "location /" entry and add three lines below
-    sudo sed -i -E '/^\s*location \/ \{$/a \
-                # make sure to have https link to exact same host that was called\n             sub_filter '$APOST'<a href="https:\/\/HOST_SET_BY_NGINX\/'$APOST' '$APOST'<a href="https:\/\/$host\/'$APOST';\n' /etc/nginx/sites-available/public.conf
+  if ! [ -d /var/www/letsencrypt/.well-known/acme-challenge ]; then
+    sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge >/dev/null
   fi
+
+  # make sure admin can write here even without sudo
+  sudo chown -R admin:www-data /var/www/letsencrypt
 
   # copy webroot
   if ! [ -d /var/www/public ]; then
-      sudo cp -a /home/admin/assets/www_public/ /var/www/public
-      sudo chown www-data:www-data /var/www/public
+    sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
+    sudo chown www-data:www-data /var/www/public
   fi
 
   sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
@@ -148,7 +170,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # copy webroot
   if ! [ -d /var/www/blitzweb ]; then
-      sudo cp -a /home/admin/assets/www_blitzweb/ /var/www/blitzweb
+      sudo cp -a /home/admin/assets/nginx/www_blitzweb/ /var/www/blitzweb
       sudo chown www-data:www-data /var/www/blitzweb
   fi
 

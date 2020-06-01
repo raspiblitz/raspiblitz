@@ -29,6 +29,10 @@ if [ "${wantedBranch}" = "-clean" ]; then
   wantedBranch="$2"
   wantedGitHubUser="$3"
 fi
+if [ "${wantedBranch}" = "-install" ]; then
+  wantedBranch="$2"
+  wantedGitHubUser="$3"
+fi
 
 # set to another GutHub repo as origin
 if [ ${#wantedGitHubUser} -gt 0 ]; then
@@ -83,6 +87,7 @@ else
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
+checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
 echo "# *** SYNCING SHELL SCRIPTS WITH GITHUB ***"
@@ -121,12 +126,26 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "# ******************************************"
+
+echo "# Checking if the content of BlitzPy changed .."
+checkSumBlitzPyAfter=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
+echo "# checkSumBlitzPyBefore = ${checkSumBlitzPyBefore}"
+echo "# checkSumBlitzPyAfter  = ${checkSumBlitzPyAfter}"
+if [ "${checkSumBlitzPyBefore}" = "${checkSumBlitzPyAfter}" ] && [ "$1" != "-install" ]; then
+  echo "# BlitzPy did not changed."
+else
+  blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
+  blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
+  echo "# BlitzPy changed --> UPDATING to Version ${blitzpy_version}"
+  sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
+fi
+
 if [ "${touchscreen}" = "1" ]; then
   echo "# Checking if the content of BlitzTUI changed .."
   checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
   echo "# checkSumBlitzTUIBefore = ${checkSumBlitzTUIBefore}"
   echo "# checkSumBlitzTUIAfter  = ${checkSumBlitzTUIAfter}"
-  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ]; then
+  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ "$1" != "-install" ]; then
     echo "# BlitzTUI did not changed."
   else
     echo "# BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."

@@ -125,7 +125,6 @@ EOF
     # open firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow 25441 comment 'cryptoadvance-specter'
-    sudo ufw --force enable
     echo ""
 
     echo "*** Installing udev-rules for hardware-wallets ***"

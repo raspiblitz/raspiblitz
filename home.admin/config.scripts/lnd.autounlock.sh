@@ -87,21 +87,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # make sure config values are uncommented
   sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^#tlsextraip=.*/tlsextraip=/g" /mnt/hdd/lnd/lnd.conf
 
   # make sure config values exits
   exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
   if [ ${exists} -eq 0 ]; then
     sudo sed -n -i 'p;4a restlisten=' /mnt/hdd/lnd/lnd.conf
   fi
-  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tlsextraip')
-  if [ ${exists} -eq 0 ]; then
-    sudo sed -n -i 'p;5a tlsextraip=' /mnt/hdd/lnd/lnd.conf
-  fi
 
   # set needed config values
   sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^tlsextraip=.*/tlsextraip=0.0.0.0/g" /mnt/hdd/lnd/lnd.conf
 
   # refresh TLS cert (if lnd.conf was changed)
   md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
