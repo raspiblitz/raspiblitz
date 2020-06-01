@@ -109,6 +109,7 @@ unlocked=0
 while [ ${unlocked} -eq 0 ]
 do
     # do CLI unlock
+    echo
     echo "############################"
     echo "Calling: lncli unlock"
     echo "Please re-enter Password C:"
