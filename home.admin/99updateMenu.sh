@@ -122,7 +122,7 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/XXsyncScripts.sh
+      sudo -u admin /home/admin/XXsyncScripts.sh -run
       sleep 4
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
