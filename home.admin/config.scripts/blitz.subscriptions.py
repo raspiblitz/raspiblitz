@@ -169,7 +169,7 @@ if tag == "NEW1":
 
     # check if Blitz is running behind TOR
     cfg.reload()
-    if not cfg.run_behind_tor:
+    if not cfg.run_behind_tor.value:
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 The IP2TOR service just makes sense if you run
 your RaspiBlitz behind TOR.
