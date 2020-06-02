@@ -100,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh
+    /home/admin/config.scripts/bonus.nodejs.sh on
 
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on

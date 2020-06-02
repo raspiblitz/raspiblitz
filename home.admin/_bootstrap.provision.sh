@@ -422,6 +422,15 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
+# thunderhub
+if [ "${thunderhub}" = "on" ]; then
+  echo "Provisioning ThunderHub - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup ThunderHub'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning ThunderHub - keep default" >> ${logFile}
+fi
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}

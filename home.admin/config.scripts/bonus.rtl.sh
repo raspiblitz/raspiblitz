@@ -66,7 +66,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   else
     # check and install NodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh
+    /home/admin/config.scripts/bonus.nodejs.sh on
 
     # check for Python2 (install if missing)
     # TODO remove Python2 ASAP!

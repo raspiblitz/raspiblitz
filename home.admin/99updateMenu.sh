@@ -13,7 +13,14 @@ OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
          PATCH "Patch RaspiBlitz v${codeVersion}"
 	)
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "Update ThunderHub")
+fi
+
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 12 55 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
@@ -264,5 +271,11 @@ case $CHOICE in
     ;;
   LND)
     lnd
+    ;;
+  BOS)
+    /home/admin/config.scripts/bonus.bos.sh update
+    ;;
+  THUB)
+    /home/admin/config.scripts/bonus.thunderhub.sh update
     ;;
 esac
