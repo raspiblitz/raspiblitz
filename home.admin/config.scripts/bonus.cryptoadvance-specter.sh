@@ -111,7 +111,7 @@ EOF
 
     echo "*** installing specter ***"
 
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'hidapi>=0.7.99,<0.8.0' 'pyaes>=1.6,<2.0' 'libusb1<2.0,>=1.7' 'mnemonic<0.19.0,>=0.18.0' 'ecdsa<0.14.0,>=0.13.0'
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'hidapi>=0.7.99,<0.8.0' 'pyaes>=1.6,<2.0' 'libusb1<2.0,>=1.7' 'mnemonic<0.19.0,>=0.18.0' 'ecdsa<0.14.0,>=0.13.0' 'docker==4.1.0' 'pytest==5.2.2'
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install hwi --no-dependencies
 
     # basically turned the requirement.txt into thses three lines
