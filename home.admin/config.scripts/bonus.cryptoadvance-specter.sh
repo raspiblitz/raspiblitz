@@ -110,13 +110,12 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "*** installing specter ***"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
-    
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.4.0
     
     # Creating self-signed-certificate
     # Mandatory as the camera doesn't work without https
     echo "*** Creating self-signed certificate ***"
-   openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
+    openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
     sudo mv /tmp/cert.pem /home/bitcoin/.specter
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/cert.pem
     sudo mv /tmp/key.pem /home/bitcoin/.specter
@@ -235,11 +234,7 @@ EOF
   # setting value in raspi blitz config
   sudo sed -i "s/^specter=.*/specter=on/g" /mnt/hdd/raspiblitz.conf
   
-  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
-  # run every 10 min by _background.sh
-
-  # Hidden Service for BTC-RPC-explorer if Tor is active
+  # TOR hiden service (if needed)
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
