@@ -96,6 +96,7 @@ if [ "${chain}" = "main" ]; then
 fi
 
 OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(LNDCREDS "Manage LND Credentials")
 OPTIONS+=(NAME "Change Name/Alias of Node")
@@ -179,6 +180,9 @@ case $CHOICE in
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
+            ;;
+        SUBSCRIBE)
+            /home/admin/config.scripts/blitz.subscriptions.py
             ;;
         lnbalance)
             clear

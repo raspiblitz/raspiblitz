@@ -140,7 +140,8 @@ do
         if [ ${#dynDomain} -gt 0 ]; then
           echo "restart LND with new environment config"
           # restart and let to auto-unlock (if activated) do the rest
-          sudo systemctl restart lnd.service
+          sudo systemctl stop lnd
+          sudo systemctl start lnd
         fi
 
         # 2) trigger update if dnyamic domain (if set)
@@ -248,12 +249,23 @@ do
   fi
 
   ###############################
+  # SUBSCRIPTION RENWES
+  ###############################
+
+  # check every 10min
+  recheckSubscription=$((($counter % 600)+1))
+  if [ ${recheckSubscription} -eq 1 ]; then
+    # IP2TOR subscriptions (that will need renew in next 20min = 1200 secs)
+    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1200
+  fi
+
+  ###############################
   # RAID data check (BRTFS)
   ###############################
   # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
 
   # check every hour
-  recheckRAID=$((($counter % 360)+1))
+  recheckRAID=$((($counter % 3600)+1))
   if [ ${recheckRAID} -eq 1 ]; then
     
     # check if raid is active
@@ -285,11 +297,7 @@ do
       if [ ${locked} -gt 0 ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
-
-        # building REST command
-        passwordC=$(sudo cat /root/lnd.autounlock.pwd)
-        command="sudo python3 /home/admin/config.scripts/lnd.unlock.py '${passwordC}'"
-        bash -c "${command}"
+        sudo /home/admin/config.scripts/lnd.unlock.sh
         
       fi
     fi

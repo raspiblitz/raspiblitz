@@ -5,25 +5,30 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 justLocal=1
+aks4IP2TOR=0
+
+# if TOR is activated then outside reach is possible (no notice)
+if [ "${runBehindTor}" = "on" ]; then
+  justLocal=0
+  aks4IP2TOR=1
+fi
 
 # if dynDomain is set connect from outside is possible (no notice)
 if [ ${#dynDomain} -gt 0 ]; then
   justLocal=0
+  aks4IP2TOR=0
 fi
 
 # if sshtunnel to 10009/8080 then outside reach is possible (no notice)
 isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
 if [ ${isForwarded} -gt 0 ]; then
   justLocal=0
+  aks4IP2TOR=0
 fi
 isForwarded=$(echo ${sshtunnel} | grep -c "8080<")
 if [ ${isForwarded} -gt 0 ]; then
   justLocal=0
-fi
-
-# if TOR is activated then outside reach is possible (no notice)
-if [ "${runBehindTor}" = "on" ]; then
-  justLocal=0
+  aks4IP2TOR=0
 fi
 
 # check if dynamic domain is set
@@ -67,6 +72,52 @@ choose_IP_or_TOR()
 	fi
 }
 
+# fuction to if already activated or user wants to activate IP2TOR
+# needs parameter: #1 "LND-REST-API" or "LND-GRPC-API"
+ip2tor=""
+checkIP2TOR()
+{
+
+  # check if IP2TOR service is already available
+  error=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
+  if [ ${#error} -eq 0 ]; then
+    ip2tor="$1"
+  fi
+  
+  # if IP2TOR is not already available:
+  # and the checks from avove showed there is SSH forwarding / dynDNS
+  # then ask user if IP2TOR subscription is wanted
+  if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
+    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
+  	if [ $? -eq 0 ]; then
+  	  echo "# yes-button -> Send To Shop"
+	  port="10009"
+	  toraddress=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
+	  if [ "$1" == "LND-REST-API" ]; then
+	    port="8080"
+		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+	  fi
+
+	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')
+	  if [ ${userHasActiveChannels} -gt 0 ]; then
+	    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+	  else
+	  	whiptail --title " Lightning not Ready " --msgbox "\nYou need at least one active Lightning channel.\n\nPlease make sure that your node is funded and\nyou have a confirmed and active channel running.\nThen try again to connect the mobile wallet." 13 52
+	  	exit 0
+	  fi
+      clear
+	fi
+  fi
+
+  # check again if IP2TOR service is now already available
+  error=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service "$1")
+  if [ ${#error} -eq 0 ]; then
+    ip2tor="$1"
+  fi
+}
+
 # Options
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
@@ -81,10 +132,8 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
 
-# Additinal Options with no TOR
-#if [ "${runBehindTor}" != "on" ]; then
-  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
-#fi
+# add SEND MANY APP
+OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -107,6 +156,7 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
       /home/admin/config.scripts/bonus.lndconnect.sh shango-ios ${connect}
 	  exit 1;
 	  ;;
@@ -121,11 +171,11 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
 	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android ${connect}
       exit 1;
       ;;
   ZAP_IOS)
-      choose_IP_or_TOR
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Testflight and Zap on your iOS device" \
@@ -136,22 +186,30 @@ case $CHOICE in
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
+	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
+      #if [ ${#ip2tor} -eq 0 ]; then
+	  #  choose_IP_or_TOR
+	  #fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
     ;;
   ZAP_ANDROID)
-      # choose IP or TOR --> function call
-      choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zap from PlayStore on your Android device" \
 	    --yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
+		--yesno "Find & install the Zap Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 67
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
+	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
+      #if [ ${#ip2tor} -eq 0 ]; then
+	  #  choose_IP_or_TOR
+	  #fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
     ;;
@@ -178,6 +236,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-GRPC-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 1;
     ;;
@@ -192,12 +251,11 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-REST-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios ${connect}
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      # choose IP or TOR --> function call
-      choose_IP_or_TOR
       appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zeus on your Android Phone" \
@@ -208,6 +266,10 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
+	  checkIP2TOR LND-REST-API
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
+	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android ${connect}
   	  exit 1;
   	;;

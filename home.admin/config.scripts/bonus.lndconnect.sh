@@ -45,6 +45,24 @@ else
   echo "# lndconnect is already installed" 
 fi
 
+#### CHECK IF IP2TOR BRIDGES ARE AVAILABLE
+ip2torREST_IP=""
+ip2torREST_PORT=""
+error=""
+source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
+if [ ${#error} -eq 0 ]; then
+  ip2torREST_IP="${ip}"
+  ip2torREST_PORT="${port}"
+fi
+ip2torGRPC_IP=""
+ip2torGRPC_PORT=""
+error=""
+source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-GRPC-API)
+if [ ${#error} -eq 0 ]; then
+  ip2torGRPC_IP="${ip}"
+  ip2torGRPC_PORT="${port}"
+fi
+
 #### ADAPT PARAMETERS BASED TARGETWALLET 
 
 # defaults
@@ -53,6 +71,7 @@ host=""
 port=""
 extraparameter=""
 supportsTOR=0
+usingIP2TOR=""
 
 if [ "${targetWallet}" = "zap-ios" ]; then
   connector="lndconnect"
@@ -64,6 +83,14 @@ if [ "${targetWallet}" = "zap-ios" ]; then
     # normal ZAP uses gRPC ports
     port="10009"
   fi
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-GRPC-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi  
   
 elif [ "${targetWallet}" = "zap-android" ]; then
   connector="lndconnect"
@@ -75,20 +102,44 @@ elif [ "${targetWallet}" = "zap-android" ]; then
     # normal ZAP uses gRPC ports
     port="10009"
   fi
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-GRPC-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi  
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
   connector="lndconnect"
+  port="8080"
+  if [ ${#ip2torREST_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-REST-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torREST_IP}"
+    port="${ip2torREST_PORT}"
+  fi  
   if [ ${forceTOR} -eq 1 ]; then
     echo "error='no tor support'"
     exit 1
   fi
-  port="8080"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
   connector="lndconnect"
   port="8080"
+  if [ ${#ip2torREST_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-REST-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torREST_IP}"
+    port="${ip2torREST_PORT}"
+  fi  
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
@@ -103,25 +154,49 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     forceTOR=0
   fi
   port="10009"
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-GRPC-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi  
 
 elif [ "${targetWallet}" = "shango-ios" ]; then
 
   connector="shango"
+  port="10009"
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-GRPC-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi  
   if [ ${forceTOR} -eq 1 ]; then
     echo "error='no tor support'"
     exit 1
   fi
-  port="10009"
 
 elif [ "${targetWallet}" = "shango-android" ]; then
 
   connector="shango"
+  port="10009"
+  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
+    # when IP2TOR bridge is available - force using that
+    usingIP2TOR="LND-GRPC-API"
+    forceTOR=0
+    extraparameter=""
+    host="${ip2torGRPC_IP}"
+    port="${ip2torGRPC_PORT}"
+  fi
   if [ ${forceTOR} -eq 1 ]; then
     echo "error='no tor support'"
     exit 1
   fi
-  port="10009"
-
+ 
 else
   echo "error='unknown target wallet'"
   exit 1
@@ -130,7 +205,9 @@ fi
 #### ADAPT PARAMETERS BASED RASPIBLITZ CONFIG
 
 # get the local IP as default host
-host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+if [ ${#host} -eq 0 ]; then
+    host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+fi
 
 # change host to dynDNS if set
 if [ ${#dynDomain} -gt 0 ]; then
@@ -210,6 +287,9 @@ fi
 msg=""
 if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
+fi
+if [ ${#usingIP2TOR} -gt 0 ]; then
+  msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection.\n\n"
 fi
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <continue> or <console QRcode> to see it in this window."
 whiptail --backtitle "Connecting Mobile Wallet" \

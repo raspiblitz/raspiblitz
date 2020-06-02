@@ -49,9 +49,9 @@ Password C will be stored on the device.
   echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
-  result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
-  invalid=$(echo "${result}" | grep -c 'invalid')
-  if [ ${invalid} -gt 0 ];then
+  error=""
+  source <(sudo /home/admin/config.scripts/lnd.unlock.sh "$passwordC")
+  if [ ${error} -gt 0 ];then
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
@@ -81,30 +81,6 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
-  # get hash of lnd.conf before edit (to detect if changed later)
-  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-
-  # make sure config values are uncommented
-  sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
-
-  # make sure config values exits
-  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
-  if [ ${exists} -eq 0 ]; then
-    sudo sed -n -i 'p;4a restlisten=' /mnt/hdd/lnd/lnd.conf
-  fi
-
-  # set needed config values
-  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-
-  # refresh TLS cert (if lnd.conf was changed)
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
-    echo "# lnd.conf changed - TLS certs need refreshing"
-    sudo /home/admin/config.scripts/lnd.newtlscert.sh
-  else
-    echo "# lnd.conf NOT changed - keep TLS certs"
-  fi
 
   echo "# switching the Auto-Unlock ON"
 

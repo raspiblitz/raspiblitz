@@ -1,16 +1,16 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspbian Buster Desktop (2020-02-13)
+# Raspbian Buster Desktop (2020-05-27)
 # https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: a82ed4139dfad31c3167e60e943bcbe28c404d1858f4713efe5530c08a419f50
+# SHA256: b9a5c5321b3145e605b3bcd297ca9ffc350ecb1844880afd8fb75a7589b7bd04
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.5   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.6   *"
 echo "*****************************************"
 echo ""
 
@@ -493,7 +493,7 @@ sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/
 
 # check if checksums are signed by lnd dev team
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
-sudo -u admin wget -N -O "pgp_keys.asc" ${PGPpkeys}
+sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
 gpg ./pgp_keys.asc
 fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
 if [ ${fingerprint} -lt 1 ]; then
@@ -591,10 +591,10 @@ echo "*** Python DEFAULT libs & depenedencies ***"
 # for setup schell scripts
 sudo apt-get -y install dialog bc python3-dialog
 
-# libs
+# libs (for global python scripts)
 sudo pip3 install -I grpcio==1.29.0
 sudo pip3 install -I googleapis-common-protos==1.51.0
-
+sudo pip3 install -I toml==0.10.1
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"

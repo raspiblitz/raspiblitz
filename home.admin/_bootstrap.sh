@@ -506,6 +506,18 @@ else
   echo "OK: Temp cleaned" >> $logFile
 fi
 
+######################################
+# PREPARE SUBSCRIPTIONS DATA DIRECTORY
+######################################
+
+if [ -d "/mnt/hdd/app-data/subscrptions" ]; then
+  echo "OK: subscription data directory exists"
+else
+  echo "CREATE: subscription data directory"
+  sudo mkdir /mnt/hdd/app-data/subscriptions
+  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
+fi
+
 ################################
 # IDENTIFY BASEIMAGE
 ################################

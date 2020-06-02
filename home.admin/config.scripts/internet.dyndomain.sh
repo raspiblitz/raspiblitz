@@ -129,7 +129,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 # refresh TLS cert
-sudo /home/admin/config.scripts/lnd.newtlscert.sh
+sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
 
 echo "may needs reboot to run normal again"
 exit 0
