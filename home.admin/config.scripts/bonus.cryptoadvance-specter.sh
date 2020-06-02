@@ -112,6 +112,7 @@ EOF
     echo "*** installing specter ***"
 
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'hidapi>=0.7.99,<0.8.0' 'pyaes>=1.6,<2.0'
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install hwi --no-dependencies
 
     # basically turned the requirement.txt into thses three lines
     # https://raw.githubusercontent.com/cryptoadvance/specter-desktop/v0.4.0/requirements.txt
