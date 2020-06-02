@@ -178,7 +178,6 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get install python3-jinja2 >/dev/null
   sudo -H python3 -m pip install j2cli
 
-
   # create nginx app-data dir and use LND cert by default
   sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
   sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert

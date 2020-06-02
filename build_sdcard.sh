@@ -292,7 +292,7 @@ if [ "${baseImage}" = "armbian" ]; then
 fi
 
 # dependencies for minimal images
-sudo apt install -y python3-venv python3-dev python3-wheel
+sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2
 
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
@@ -592,9 +592,10 @@ echo "*** Python DEFAULT libs & depenedencies ***"
 sudo apt-get -y install dialog bc python3-dialog
 
 # libs (for global python scripts)
-sudo pip3 install -I grpcio==1.29.0
-sudo pip3 install -I googleapis-common-protos==1.51.0
-sudo pip3 install -I toml==0.10.1
+sudo -H python3 -m pip install grpcio==1.29.0
+sudo -H python3 -m pip install googleapis-common-protos==1.51.0
+sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install j2cli==0.3.10
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
@@ -685,7 +686,7 @@ echo "*** HARDENING ***"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
 
 # fail2ban (no config required)
-sudo apt-get install -y --no-install-recommends python3-systemd fail2ban
+sudo apt-get install -y --no-install-recommends python3-systemd fail2ban 
 
 if [ "${baseImage}" = "raspbian" ]; then
   echo ""

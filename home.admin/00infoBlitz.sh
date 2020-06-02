@@ -407,12 +407,14 @@ if [ "${EUID}" = "$(id -u pi)" ]; then
 EOF
 
   # use Jinja2 and apply json data to template to produce static html file
-  res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
-  if ! [ $? -eq 0 ]; then
-    echo "an error occured.. maybe JSON syntax is wrong..!"
-    echo "${res}"
+  templateExists=$(sudo ls /var/cache/raspiblitz/info.html 2>/dev/null | grep -c 'info.html')
+  if [ ${templateExists} -gt 0 ]; then
+    res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
+    if ! [ $? -eq 0 ]; then
+      echo "an error occured.. maybe JSON syntax is wrong..!"
+      echo "${res}"
+    fi
   fi
+
 fi
-
-
 # EOF
