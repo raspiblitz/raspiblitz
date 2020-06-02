@@ -3,6 +3,7 @@
 ## Whats new in Version 1.6 of RaspiBlitz?
 
 - Update: Raspberry Pi OS Base Image (May 2020)
+- Update: Specter Desktop 0.4.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Fix: DropBox StaticChannelBackup 
 - New: Subscriptions Management
 - New: IP2Tor Bridge (optional subscription service)
