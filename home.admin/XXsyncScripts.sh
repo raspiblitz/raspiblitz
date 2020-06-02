@@ -119,10 +119,10 @@ git pull 1>&2
 cd ..
 if [ ${clean} -eq 1 ]; then
   echo "# Cleaning scripts & assets/config.scripts"
-  rm -f *.sh
-  rm -rf assets
+  sudo rm -f *.sh
+  sudo rm -rf assets
   mkdir assets
-  rm -rf config.scripts
+  sudo rm -rf config.scripts
   mkdir config.scripts
 else
   echo "# ******************************************"
