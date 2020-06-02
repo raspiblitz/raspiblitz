@@ -102,10 +102,6 @@ if [ ${#wantedBranch} -gt 0 ]; then
 
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
   fi
-else
-  echo ""
-  echo "USAGE-INFO: ./XXsyncScripts.sh '[BRANCHNAME]'"
-  exit 1
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
