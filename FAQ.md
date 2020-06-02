@@ -554,6 +554,26 @@ Like the way above you can build a new feature or test a change. Once you have s
 
 See more info: https://yangsu.github.io/pull-request-tutorial/
 
+## How can I help testing a Pull Request?
+
+Make sure to have the correct base image.
+Then go to the command line and create a branch for the PR:
+
+```
+cd /home/admin/raspiblitz
+git fetch origin pull/[PRNUMBER]/head:pr[PRNUMBER]
+git checkout pr[PRNUMBER]
+cd /home/admin
+./XXsyncScripts.sh -justinstall
+```
+
+Now you have the code of the PR active - depending on what scripts are changes you might need to reboot.
+
+To change back to the code:
+```
+./XXsyncScripts.sh master
+```
+
 ## How to attach the RaspberryPi to the HDD?
 
 Try some rubber band.

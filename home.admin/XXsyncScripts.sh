@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitz Sync Scripts"
   echo "XXsyncScripts.sh info"
-  echo "XXsyncScripts.sh [-run|-clean|-install] branch [repo]"
+  echo "XXsyncScripts.sh [-run|-clean|-install|-justinstall] branch [repo]"
   exit 1
 fi
 
@@ -43,8 +43,15 @@ if [ "${wantedBranch}" = "-clean" ]; then
   wantedGitHubUser="$3"
 fi
 if [ "${wantedBranch}" = "-install" ]; then
+  install=1
   wantedBranch="$2"
   wantedGitHubUser="$3"
+fi
+if [ "${wantedBranch}" = "-justinstall" ]; then
+  clean=1
+  install=1
+  wantedBranch=""
+  wantedGitHubUser=""
 fi
 
 # set to another GutHub repo as origin
@@ -145,7 +152,7 @@ echo "# Checking if the content of BlitzPy changed .."
 checkSumBlitzPyAfter=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 echo "# checkSumBlitzPyBefore = ${checkSumBlitzPyBefore}"
 echo "# checkSumBlitzPyAfter  = ${checkSumBlitzPyAfter}"
-if [ "${checkSumBlitzPyBefore}" = "${checkSumBlitzPyAfter}" ] && [ "$1" != "-install" ]; then
+if [ "${checkSumBlitzPyBefore}" = "${checkSumBlitzPyAfter}" ] && [ ${install} -eq 0 ]; then
   echo "# BlitzPy did not changed."
 else
   blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
@@ -159,7 +166,7 @@ if [ "${touchscreen}" = "1" ]; then
   checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
   echo "# checkSumBlitzTUIBefore = ${checkSumBlitzTUIBefore}"
   echo "# checkSumBlitzTUIAfter  = ${checkSumBlitzTUIAfter}"
-  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ "$1" != "-install" ]; then
+  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ ${install} -eq 0 ]; then
     echo "# BlitzTUI did not changed."
   else
     echo "# BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."
