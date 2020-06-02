@@ -72,6 +72,7 @@ sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
 if [ "${touchscreen}" = "1" ]; then
+  echo ""
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
   echo "sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log"
   sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log
@@ -81,6 +82,7 @@ else
 fi
 
 if [ "${loop}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 LOOP LOGS ***"
   echo "sudo journalctl -u loopd -b --no-pager -n20"
   sudo journalctl -u loopd -b --no-pager -n20
@@ -90,6 +92,7 @@ else
 fi
 
 if [ "${rtlWebinterface}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 RTL LOGS ***"
   echo "sudo journalctl -u RTL -b --no-pager -n20"
   sudo journalctl -u RTL -b --no-pager -n20
@@ -99,6 +102,7 @@ else
 fi
 
 if [ "${ElectRS}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 ElectRS LOGS ***"
   echo "sudo journalctl -u electrs -b --no-pager -n20"
   sudo journalctl -u electrs -b --no-pager -n20
@@ -111,14 +115,17 @@ else
 fi
 
 if [ "${BTCPayServer}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 BTCPayServer LOGS ***"
   echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
   sudo journalctl -u btcpayserver -b --no-pager -n20
+  echo ""
 else
   echo "- BTCPayServer is OFF by config"
 fi
 
 if [ "${LNBits}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 LNbits LOGS ***"
   echo "sudo journalctl -u lnbits -b --no-pager -n20"
   sudo journalctl -u lnbits -b --no-pager -n20
@@ -128,6 +135,7 @@ else
 fi
 
 if [ "${thunderhub}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 Thunderhub LOGS ***"
   echo "sudo journalctl -u thunderhub -b --no-pager -n20"
   sudo journalctl -u thunderhub -b --no-pager -n20
@@ -137,6 +145,7 @@ else
 fi
 
 if [ "${specter}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 SPECTER LOGS ***"
   echo "sudo journalctl -u cryptoadvance-specter -b --no-pager -n20"
   sudo journalctl -u cryptoadvance-specter -b --no-pager -n20
