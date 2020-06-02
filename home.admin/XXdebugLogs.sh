@@ -78,7 +78,6 @@ if [ "${touchscreen}" = "1" ]; then
   echo ""
 else
   echo "- TOUCHSCREEN is OFF by config"
-  echo ""
 fi
 
 if [ "${loop}" = "on" ]; then
@@ -88,7 +87,6 @@ if [ "${loop}" = "on" ]; then
   echo ""
 else
   echo "- Loop is OFF by config"
-  echo ""
 fi
 
 if [ "${rtlWebinterface}" = "on" ]; then
@@ -98,7 +96,6 @@ if [ "${rtlWebinterface}" = "on" ]; then
   echo ""
 else
   echo "- RTL is OFF by config"
-  echo ""
 fi
 
 if [ "${ElectRS}" = "on" ]; then
@@ -111,17 +108,14 @@ if [ "${ElectRS}" = "on" ]; then
   echo ""
 else
   echo "- Electrum Rust Server is OFF by config"
-  echo ""
 fi
 
 if [ "${BTCPayServer}" = "on" ]; then
   echo "*** LAST 20 BTCPayServer LOGS ***"
   echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
   sudo journalctl -u btcpayserver -b --no-pager -n20
-  echo ""
 else
   echo "- BTCPayServer is OFF by config"
-  echo ""
 fi
 
 if [ "${LNBits}" = "on" ]; then
@@ -131,7 +125,15 @@ if [ "${LNBits}" = "on" ]; then
   echo ""
 else
   echo "- LNbits is OFF by config"
+fi
+
+if [ "${thunderhub}" = "on" ]; then
+  echo "*** LAST 20 Thunderhub LOGS ***"
+  echo "sudo journalctl -u thunderhub -b --no-pager -n20"
+  sudo journalctl -u thunderhub -b --no-pager -n20
   echo ""
+else
+  echo "- Thunderhub is OFF by config"
 fi
 
 if [ "${specter}" = "on" ]; then
@@ -141,7 +143,6 @@ if [ "${specter}" = "on" ]; then
   echo ""
 else
   echo "- SPECTER is OFF by config"
-  echo ""
 fi
 
 echo "*** HARDWARE TEST RESULTS ***"
