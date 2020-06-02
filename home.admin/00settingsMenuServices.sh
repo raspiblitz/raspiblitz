@@ -635,7 +635,7 @@ else
 fi
 
 # thunderhub process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${thunderhub}" != "${choice}" ]; then
   echo " ThunderHub setting changed .."

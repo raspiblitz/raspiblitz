@@ -4,9 +4,12 @@
 
 - Update: Raspberry Pi OS Base Image (May 2020)
 - Fix: DropBox StaticChannelBackup 
+- New: Subscriptions Management
+- New: IP2Tor Bridge (optional subscription service)
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
+- New: ThunderHub [details](https://www.thunderhub.io)
 
 ## Whats new in Version 1.5 of RaspiBlitz?
 
