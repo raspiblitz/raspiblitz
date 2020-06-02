@@ -31,6 +31,7 @@ fi
 
 # change branch if set as parameter
 clean=0
+install=0
 wantedBranch="$1"
 wantedGitHubUser="$2"
 if [ "${wantedBranch}" = "-run" ]; then
