@@ -703,6 +703,10 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
 fi
 
+# *** CACHE DISK IN RAM ***
+echo "Activating CACHE RAM DISK ... "
+sudo /home/admin/config.scripts/blitz.cache.sh on
+
 # *** BOOTSTRAP ***
 # see background README for details
 echo ""
