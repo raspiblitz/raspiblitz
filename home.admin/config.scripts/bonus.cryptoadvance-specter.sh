@@ -110,7 +110,17 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "*** installing specter ***"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.4.0
+
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'hidapi>=0.7.99,<0.8.0' 'pyaes>=1.6,<2.0'
+
+    # basically turned the requirement.txt into thses three lines
+    # https://raw.githubusercontent.com/cryptoadvance/specter-desktop/v0.4.0/requirements.txt
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'certifi==2019.9.11' 'chardet==3.0.4' 'Click==7.0' 'ecdsa>=0.13.3' 'Flask==1.1.1' 'Flask-Login==0.5.0' 'hidapi==0.7.99.post21' 'pyOpenSSL==19.1.0'
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'hwi==1.1.0' 'idna==2.8' 'itsdangerous==1.1.0' 'Jinja2==2.10.3' 'libusb1==1.7.1' 'MarkupSafe==1.1.1' 'mnemonic==0.18' 'pbkdf2==1.3' 'pyaes>=1.6.1'
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install 'python-dotenv==0.10.3' 'requests==2.22.0' 'six==1.12.0' 'stem==1.7.1' 'typing-extensions==3.7.4' 'urllib3==1.25.6' 'Werkzeug==0.16.0' 'pyserial==3.4' 'daemonize==2.5.0'
+
+    # install fixed version
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install cryptoadvance.specter==0.4.0 --no-dependencies
     
     # Creating self-signed-certificate
     # Mandatory as the camera doesn't work without https
