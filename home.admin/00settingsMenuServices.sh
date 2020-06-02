@@ -94,7 +94,7 @@ p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 f 'Faraday' ${faraday} \
 o 'Balance of Satoshis' ${bos} \
-t 'ThunderHub' ${thunderhub}
+t 'ThunderHub' ${thunderhub} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
@@ -121,6 +121,7 @@ p 'BTCPayServer' ${BTCPayServer} \
 m 'lndmanage' ${lndmanage} \
 f 'Faraday' ${faraday} \
 o 'Balance of Satoshis' ${bos} \
+t 'ThunderHub' ${thunderhub} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
