@@ -165,7 +165,11 @@ do
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
     echo "BlitzTUI Monitoring Check"
-    latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
+    if [ -d "/var/cache/raspiblitz" ]; then
+        latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
+    else
+        latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
+    fi
     if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
       #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
