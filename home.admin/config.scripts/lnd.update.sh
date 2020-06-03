@@ -19,7 +19,7 @@ mode="$1"
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 
 lndUpdateVersion="0.10.1-beta"
-lndUpdateComment="Some optional apps might not work with this update. You will not be able to downgrade after LND database migration."
+lndUpdateComment="There is no optional update at the moment."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
