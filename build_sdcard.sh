@@ -372,7 +372,7 @@ echo "*** PREPARING BITCOIN & Co ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.19.1"
+bitcoinVersion="0.20.0"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -409,7 +409,7 @@ correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
-  echo "!!! BUILD FAILED --> PGP Verify not OK / signatute(${goodSignature}) verify(${correctKey})"
+  echo "!!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
 else
   echo ""
