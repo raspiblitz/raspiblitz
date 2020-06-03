@@ -259,30 +259,30 @@ if [ ${walletExists} -eq 0 ]; then
       exit 1
     fi
 
-    # recovering from an old wallet while node is not synced is not possible at the moment
-    # because LND will forget the recovery window on restart and not be able to recover funds
-    # TODO: https://github.com/rootzoll/raspiblitz/issues/1126 
-    if [ ${setupStep} -lt 100 ]; then
-      if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
-        whiptail --title "UNDER CONSTRUCTION" --msgbox "
-To recover an old wallet from SEED or SEED+SCB please
-create an empty NEW WALLET first and setup everything
-else until you get to the main menu.
-
-Then once your in the MAIN MENU go to REPAIR > RESET-LND
-skip all the backups and recover your old wallet.
-
-Sorry, this process will be optimized soon.
-      " 15 63
-        /home/admin/70initLND.sh
-        exit 1
-      fi
-    fi
+#    # recovering from an old wallet while node is not synced is not possible at the moment
+#    # because LND will forget the recovery window on restart and not be able to recover funds
+#    # TODO: https://github.com/rootzoll/raspiblitz/issues/1126 
+#    if [ ${setupStep} -lt 100 ]; then
+#      if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
+#        whiptail --title "UNDER CONSTRUCTION" --msgbox "
+#To recover an old wallet from SEED or SEED+SCB please
+#create an empty NEW WALLET first and setup everything
+#else until you get to the main menu.
+#
+#Then once your in the MAIN MENU go to REPAIR > RESET-LND
+#skip all the backups and recover your old wallet.
+#
+#Sorry, this process will be optimized soon.
+#      " 15 63
+#        /home/admin/70initLND.sh
+#        exit 1
+#      fi
+#    fi
 
     # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
 
-      # ket people know about the difference between SEED & SEED+SCB
+      # let people know about the difference between SEED & SEED+SCB
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
 To also try to recover the open channel funds you need the
