@@ -259,26 +259,6 @@ if [ ${walletExists} -eq 0 ]; then
       exit 1
     fi
 
-#    # recovering from an old wallet while node is not synced is not possible at the moment
-#    # because LND will forget the recovery window on restart and not be able to recover funds
-#    # TODO: https://github.com/rootzoll/raspiblitz/issues/1126 
-#    if [ ${setupStep} -lt 100 ]; then
-#      if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
-#        whiptail --title "UNDER CONSTRUCTION" --msgbox "
-#To recover an old wallet from SEED or SEED+SCB please
-#create an empty NEW WALLET first and setup everything
-#else until you get to the main menu.
-#
-#Then once your in the MAIN MENU go to REPAIR > RESET-LND
-#skip all the backups and recover your old wallet.
-#
-#Sorry, this process will be optimized soon.
-#      " 15 63
-#        /home/admin/70initLND.sh
-#        exit 1
-#      fi
-#    fi
-
     # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
 
@@ -403,8 +383,8 @@ to protect the seed words. Most users did not set this.
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
 
-IMPORTANT: Please dont reboot the RaspiBlitz until
-the LND was able to rescan the Blockchain again.
+IMPORTANT: LND needs now to scan the blockchain
+for your funds - this can take some extra time.
       " 10 60
       clear
 

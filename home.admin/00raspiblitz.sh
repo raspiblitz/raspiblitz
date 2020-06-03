@@ -337,10 +337,7 @@ else
 LND accepted the channel.backup file you uploaded. 
 It will now take around a hour until you can see,
 if LND was able to recover funds from your channels.
-
-IMPORTANT: Please dont reboot the RaspiBlitz until
-the LND was able to rescan the Blockchain again.
-     " 12 56
+     " 9 56
     fi
   
   fi
