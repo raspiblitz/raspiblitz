@@ -6,13 +6,13 @@
 - Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
 - Update: Specter Desktop 0.4.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Fix: DropBox StaticChannelBackup 
 - New: Subscriptions Management
 - New: IP2Tor Bridge (optional subscription service)
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
 - New: ThunderHub [details](https://www.thunderhub.io)
+- Fix: DropBox StaticChannelBackup
 
 ## Whats new in Version 1.5 of RaspiBlitz?
 
