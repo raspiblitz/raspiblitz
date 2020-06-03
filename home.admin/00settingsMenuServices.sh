@@ -638,12 +638,22 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${thunderhub}" != "${choice}" ]; then
-  echo " ThunderHub setting changed .."
+  echo "ThunderHub Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${thunderhub}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh menu
+  /home/admin/config.scripts/bonus.thunderhub.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start thunderhub
+      echo "waiting 10 secs .."
+      sleep 10
+      /home/admin/config.scripts/bonus.thunderhub.sh menu
+    else
+      l1="!!! FAIL on ThunderHub install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.thunderhub.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
   fi
 else 
   echo "ThunderHub setting unchanged."
