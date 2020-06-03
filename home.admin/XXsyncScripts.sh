@@ -167,7 +167,7 @@ if [ "${touchscreen}" = "1" ]; then
     echo "# BlitzTUI did not changed."
   else
     echo "# BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."
-    sudo ./config.scripts/blitz.touchscreen.sh update
+    sudo /home/admin/config.scripts/blitz.touchscreen.sh update
   fi
 fi
 echo "# ******************************************"
