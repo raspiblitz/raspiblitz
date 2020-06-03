@@ -75,6 +75,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
+    # https://github.com/apotdevin/thunderhub/releases
+    sudo -u thunderhub git reset --hard v0.6.13
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -139,7 +141,7 @@ EOF
     sudo rm -f /home/thunderhub/thubConfig.yaml
     sudo mv /home/admin/thubConfig.yaml /home/thunderhub/thubConfig.yaml
     sudo chown thunderhub:thunderhub /home/thunderhub/thubConfig.yaml
-    sudo chown 600 /home/thunderhub/thubConfig.yaml | exit 1
+    sudo chmod 600 /home/thunderhub/thubConfig.yaml | exit 1
 
     ##################
     # SYSTEMD SERVICE
@@ -191,9 +193,11 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   
   echo "*** REMOVING THUNDERHUB ***"
-  sudo userdel -rf thunderhub
+  # remove systemd service
   sudo systemctl disable thunderhub
   sudo rm -f /etc/systemd/system/thunderhub.service
+  # delete user and home directory
+  sudo userdel -rf thunderhub
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
