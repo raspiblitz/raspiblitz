@@ -66,13 +66,13 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 
 *The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
 
-* RaspBerry Pi 4 2GB (or 4GB) [amazon](https://geni.us/raspiblitz-4-2gb)
-* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
-* 1TB SSD: [amazon](https://geni.us/raspiblitz-1000gb-san)
-* SSD-Case: [amazon](https://geni.us/raspiblitz-ssd-case) 
-* Micro SD-Card 32GB: [amazon](https://geni.us/raspiblitz-sc-card)
-* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
-* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4) 
+* RaspberryPi 4 4GB (or 8GB) [amazon referral link](https://geni.us/raspiblitz-4-2gb)
+* Power Supply - USB-C, 5V, >=3A [amazon referral link](https://geni.us/raspiblitz-ps)
+* 1TB SSD - SanDisk SSD Plus 1TB 2.5" : [amazon referral link](https://geni.us/raspiblitz-1000gb-san)
+* SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case) 
+* MicroSDCard 32GB - Samsung PRO Endurance 32 GB microSDHC UHS-I U1: [amazon referral link](https://geni.us/raspiblitz-sc-card)
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
+* Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4) 
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -81,19 +81,19 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 *The minimal package aims for the cheapest price and allows you to use old hardware. It will always be possible to run all the basic features of a Bitcoin- & Lightning-Fullnode, but the system might be too slow to validate the blockchain history by itself and run some resource intensive extended services.*
 
 Basic Parts:
-* 1TB Hard Drive: [amazon](https://geni.us/raspiblitz-hdd)
-* Micro SD-Card 16GB: [amazon](https://geni.us/raspiblitz-sd-card16gb)
-* LCD-Display: [amazon](https://geni.us/raspiblitz-touchscreen) 
+* 1TB Hard Drive: [amazon referral link](https://geni.us/raspiblitz-hdd)
+* Micro SD-Card 16GB: [amazon referral link](https://geni.us/raspiblitz-sd-card16gb)
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
 
 When RaspberryPi 3 --> add following parts:
-* RaspBerry Pi 3: [amazon](https://geni.us/raspiblitz-rpi3)
-* Heatsink-Case RP3: [amazon](https://geni.us/raspiblitz-heatsink)
-* Powersupply >=3A: [amazon](https://geni.us/raspiblitz-3A-power)
+* RaspperryPi 3B+ : [amazon referral link](https://geni.us/raspiblitz-rpi3)
+* Heatsink-Case for RPi3: [amazon referral link](https://geni.us/raspiblitz-heatsink)
+* Powersupply microUSB, 5V, >=3A: [amazon referral link](https://geni.us/raspiblitz-3A-power)
 
 When RaspberryPi 4 2GB --> add following parts:
-* RaspBerry Pi 4 2GB [amazon](https://geni.us/raspiblitz-4-2gb)
-* RaspBerry Power Supply [amazon](https://geni.us/raspiblitz-ps)
-* RaspberryPi Heatsink Case: [amazon](https://geni.us/heatsink-raspi4)
+* RaspberryPi 4 2GB [amazon referral link](https://geni.us/raspiblitz-4-2gb)
+* Power Supply - USB-C, 5V, >=3A [amazon referral link](https://geni.us/raspiblitz-ps)
+* Heatsink Case for RPi4: [amazon referral link](https://geni.us/heatsink-raspi4)
 
 [What other case options do I have?](FAQ.md#what-other-case-options-do-i-have)
 
