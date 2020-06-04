@@ -7,7 +7,8 @@
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
 - Update: Specter Desktop 0.4.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Loop 0.6.2 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
-- New: Subscriptions Management
+- Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
+- New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
