@@ -519,6 +519,23 @@ else
 fi
 
 ################################
+# IDENTIFY CPU ARCHITECTURE
+################################
+
+cpu="?"
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -gt 0 ]; then
+  cpu="arm"
+elif [ ${isAARCH64} -gt 0 ]; then
+  cpu="aarch64"
+elif [ ${isX86_64} -gt 0 ]; then
+  cpu="x86_64"
+fi
+echo "cpu=${cpu}" >> $infoFile
+
+################################
 # IDENTIFY BASEIMAGE
 ################################
 

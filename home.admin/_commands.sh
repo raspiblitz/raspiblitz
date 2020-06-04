@@ -47,7 +47,7 @@ function restart() {
   ./XXshutdown.sh reboot
 }
 
-# command: restart
+# command: off
 function off() {
   cd /home/admin
   ./XXshutdown.sh
@@ -88,4 +88,9 @@ function torthistx() {
     echo "Not running behind Tor - to install run:"
     echo "sudo /home/admin/config.scripts/internet.tor.sh on"
   fi
+}
+
+# command: status
+function status() {
+  sudo -u pi /home/admin/00infoLCD.sh
 }

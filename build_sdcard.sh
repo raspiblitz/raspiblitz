@@ -43,8 +43,7 @@ echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isX86_32} -eq 0 ] ; then
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
   echo "!!! FAIL !!!"
   echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
   uname -m
@@ -109,10 +108,19 @@ sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscra
 sudo apt-get clean
 sudo apt-get -y autoremove
 
-# make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
-# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
-sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+if [ -f "/usr/bin/python3.7" ]; then
+  # make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+  echo "python calls python3.7"
+elif [ -f "/usr/bin/python3.8" ]; then
+  # use python 3.8 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+  echo "python calls python3.8"
+else
+  echo "!!! FAIL !!!"
+  echo "There is no tested version of python present"
+  exit 1
+fi
 
 # update debian
 echo ""
@@ -291,8 +299,11 @@ if [ "${baseImage}" = "armbian" ]; then
   sudo apt install armbian-config -y
 fi
 
-# dependencies for minimal images
-sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2
+# dependencies for python
+sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
@@ -429,9 +440,6 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
 fi
-if [ ${isX86_32} -eq 1 ] ; then
-  bitcoinOSversion="i686-pc-linux-gnu"
-fi
 bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
 
 echo ""
@@ -533,10 +541,6 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   lndOSversion="amd64"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  lndOSversion="386"
   lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
 fi
 

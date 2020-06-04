@@ -7,7 +7,6 @@ goVersion="1.13.3"
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
 
 # make sure go is installed
 
@@ -25,9 +24,6 @@ if [ ${goInstalled} -eq 0 ];then
   fi
   if [ ${isX86_64} -eq 1 ] ; then
     goOSversion="amd64"
-  fi 
-  if [ ${isX86_32} -eq 1 ] ; then
-    goOSversion="386"
   fi 
 
   echo "*** Installing Go v${goVersion} for ${goOSversion} ***"
