@@ -123,7 +123,7 @@ def apiGetHosts(session, shopurl):
         url="{0}/api/v1/public/hosts/".format(shopurl)
         response = session.get(url)
     except Exception as e:
-        raise BlitzError("falied HTTP request",url,e)
+        raise BlitzError("failed HTTP request",url,e)
     if response.status_code != 200:
         raise BlitzError("failed HTTP code",response.status_code,)
     

@@ -600,6 +600,7 @@ sudo -H python3 -m pip install grpcio==1.29.0
 sudo -H python3 -m pip install googleapis-common-protos==1.51.0
 sudo -H python3 -m pip install toml==0.10.1
 sudo -H python3 -m pip install j2cli==0.3.10
+sudo -H python3 -m pip install requests[socks]==2.21.0
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
