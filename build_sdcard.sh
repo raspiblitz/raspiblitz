@@ -109,10 +109,19 @@ sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscra
 sudo apt-get clean
 sudo apt-get -y autoremove
 
-# make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
-# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
-sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+if [ -f "/usr/bin/python3.7" ]; then
+  # make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+  echo "python calls python3.7"
+elif [ -f "/usr/bin/python3.8" ]; then
+  # use python 3.8 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+  echo "python calls python3.8"
+else
+  echo "!!! FAIL !!!"
+  echo "There is no tested version of python present"
+  exit 1
+fi
 
 # update debian
 echo ""
@@ -291,8 +300,11 @@ if [ "${baseImage}" = "armbian" ]; then
   sudo apt install armbian-config -y
 fi
 
-# dependencies for minimal images
-sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2
+# dependencies for python
+sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
