@@ -26,7 +26,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
-    isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
     VERSION="v12.16.3"
   
     # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
@@ -41,9 +40,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     elif [ ${isX86_64} -eq 1 ] ; then
       DISTRO="linux-x64"
       CHECKSUM="1956e196e3c3c8ef5f0c45db76d7c1245af4ccdda2b7ab30a57ce91d6e165caa"
-    elif [ ${isX86_32} -eq 1 ] ; then
-      echo "FAIL: No X86 32bit build available - will abort setup"
-      exit 1
     elif [ ${#DISTRO} -eq 0 ]; then
       echo "FAIL: Was not able to determine architecture"
       exit 1

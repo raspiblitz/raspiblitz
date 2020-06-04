@@ -13,8 +13,7 @@ echo "Detecting CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-isX86_32=$(uname -m | grep -c 'i386\|i486\|i586\|i686\|i786')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] && [ ${isX86_32} -eq 0 ] ; then
+if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
   echo "!!! FAIL !!!"
   echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
   uname -m
@@ -89,9 +88,6 @@ if [ ${isAARCH64} -eq 1 ] ; then
 fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
-fi
-if [ ${isX86_32} -eq 1 ] ; then
-  bitcoinOSversion="i686-pc-linux-gnu"
 fi
 bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
 
