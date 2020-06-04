@@ -10,6 +10,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /mnt/hdd/raspiblitz.conf
+# get cpu architecture
+source /home/admin/raspiblitz.info
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -146,35 +148,62 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "***"
     echo ""
 
+
+
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
+    # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
-    dotnetName="dotnet-sdk-3.1.101-linux-arm.tar.gz"
+    
+    if [ "${cpu}" = "arm" ]; then
+      binaryVersion="arm"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/f2e1cb4a-0c70-49b6-871c-ebdea5ebf09d/acb1ea0c0dbaface9e19796083fe1a6b/dotnet-sdk-3.1.300-linux-arm.tar.gz"
+      dotNetChecksum="510de2931522633e5a35cfbaebac255704bb2a282e4980e7597c924531564b1a2f769cf67b3d1f196442ceca3d0d9a53e0a6dcb12adc9b0c6c1500742e7b1ee5"
+    elif [ "${cpu}" = "aarch64" ]; then
+      binaryVersion="arm64"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/e5e70860-a6d4-48cf-b0d1-eeba32657d80/2da3c605aaa65c7e4ac2ad0507a2e429/dotnet-sdk-3.1.300-linux-arm64.tar.gz"
+      dotNetChecksum="b1d806dd719e61ae27297515d26e6ef12e615da131db4fd1c29b2acc4d6a68a6b0e4ce94ead4f8f737c203328d596422068c78495eba331a5759f595ed9ed149"
+    elif [ "${cpu}" = "x86_64" ]; then
+      binaryVersion="x64"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/0c795076-b679-457e-8267-f9dd20a8ca28/02446ea777b6f5a5478cd3244d8ed65b/dotnet-sdk-3.1.300-linux-x64.tar.gz"
+      dotNetChecksum="1c3844ea5f8847d92372dae67529ebb08f09999cac0aa10ace571c63a9bfb615adbf8b9d5cebb2f960b0a81f6a5fba7d80edb69b195b77c2c7cca174cbc2fd0b"
+    fi
+
+    dotNetName="dotnet-sdk-3.1.300-linux-${binaryVersion}.tar.gz"
     sudo rm /home/btcpay/${dotnetName} 2>/dev/null
-    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/d52fa156-1555-41d5-a5eb-234305fbd470/173cddb039d613c8f007c9f74371f8bb/${dotnetName}"
+    sudo -u btcpay wget "${dotNetdirectLink}"
     # check binary is was not manipulated (checksum test)
-    binaryChecksum="bd68786e16d59b18096658ccab2a662f35cd047065a6c87a9c6790a893a580a6aa81b1338360087e58d5b5e5fdca08269936281e41a7a7e7051667efb738a613"
-    actualChecksum=$(sha512sum /home/btcpay/${dotnetName} | cut -d " " -f1)
-    if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
-      echo "!!! FAIL !!! Downloaded ${dotnetName} not matching SHA512 checksum: ${binaryChecksum}"
+    actualChecksum=$(sha512sum /home/btcpay/${dotNetName} | cut -d " " -f1)
+    if [ "${actualChecksum}" != "${dotNetChecksum}" ]; then
+      echo "!!! FAIL !!! Downloaded ${dotNetName} not matching SHA512 checksum: ${dotNetChecksum}"
       exit 1
     fi
 
     # download aspnetcore-runtime
-    aspnetcoreName="aspnetcore-runtime-3.1.1-linux-arm.tar.gz"
-    sudo rm /home/btcpay/${aspnetcoreName} 2>/dev/null
-    sudo -u btcpay wget "https://download.visualstudio.microsoft.com/download/pr/da60c9fc-c329-42d6-afaf-b8ef2bbadcf3/14655b5928319349e78da3327874592a/${aspnetcoreName}"
+    if [ "${cpu}" = "arm" ]; then
+      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/06f9feeb-cd19-49e9-a5cd-a230e1d8c52f/a232fbb4a6e6a90bbe624225e180308a/aspnetcore-runtime-3.1.4-linux-arm.tar.gz"
+      AspNetChecksum="58fe16baf370cebda96b93735be9bc57cf9a846b56ecbdc3c745c83399ad5b59518251996b75ac959ee3a8eb438a92e2ea3d088af4f0631caed3c86006d4ed2d"
+    elif [ "${cpu}" = "aarch64" ]; then
+      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/0f94ccdf-a791-4978-a0e1-0309911f60a4/d734c7f79e6b180b7b91f3d7e78d24d8/aspnetcore-runtime-3.1.4-linux-arm64.tar.gz"
+      AspNetChecksum="db91ea66e796e3d27ee08d50cb0532d1fb74060d5a8f1c90d2f34cb66ad74d50d6a8d128457693c15216b3c94d6c1acb7bd342fe0a0fa770117e21211972abda"
+    elif [ "${cpu}" = "x86_64" ]; then
+      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/a1ddc998-933c-47af-b8c7-dc2503e44e91/42d8cd08b2055df52c9457c993911f2e/aspnetcore-runtime-3.1.4-linux-x64.tar.gz"
+      AspNetChecksum="a761fd3652a0bc838c33b2846724d21e82410a5744bd37cbfab96c60327c89ee89c177e480a519b0e0d62ee58ace37e2c2a4b12b517e5eb0af601ad9804e028f"
+    fi
+
+    aspNetCoreName="aspnetcore-runtime-3.1.4-linux-${binaryVersion}.tar.gz"
+    sudo rm /home/btcpay/${aspNetCoreName} 2>/dev/null
+    sudo -u btcpay wget "${AspNetdirectLink}"
     # check binary is was not manipulated (checksum test)
-    binaryChecksum="5171cdd232f02fbd41abee893ebe3722fe442436bef9792fec9c687a746357d22b4499aa6f0a9e35285bc04783c54e400810acb365c5a1c3401f23a65e6b062f"
-    actualChecksum=$(sha512sum /home/btcpay/${aspnetcoreName} | cut -d " " -f1)
-    if [ "${actualChecksum}" != "${binaryChecksum}" ]; then
-      echo "!!! FAIL !!! Downloaded ${aspnetcoreName} not matching SHA512 checksum: ${binaryChecksum}"
+    actualAspNetChecksum=$(sha512sum /home/btcpay/${aspNetCoreName} | cut -d " " -f1)
+    if [ "${actualAspNetChecksum}" != "${AspNetChecksum=}" ]; then
+      echo "!!! FAIL !!! Downloaded ${aspNetCoreName} not matching SHA512 checksum: ${AspNetChecksum=}"
       exit 1
     fi
 
     sudo -u btcpay mkdir /home/btcpay/dotnet
-    sudo -u btcpay tar -xvf ${dotnetName} -C /home/btcpay/dotnet
-    sudo -u btcpay tar -xvf ${aspnetcoreName} -C /home/btcpay/dotnet
+    sudo -u btcpay tar -xvf ${dotNetName} -C /home/btcpay/dotnet
+    sudo -u btcpay tar -xvf ${aspNetCoreName} -C /home/btcpay/dotnet
     sudo rm -f *.tar.gz*
 
     # opt out of telemetry
@@ -281,7 +310,9 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases
-    sudo -u btcpay git reset --hard v1.0.4.2
+    # sudo -u btcpay git reset --hard v1.0.4.2
+    # use latest commit (v1.0.4.4+) to fix build with latest dotNet
+    sudo -u btcpay git checkout f2bb24f6ab6d402af8214c67f84e08116eb650e7
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
 
