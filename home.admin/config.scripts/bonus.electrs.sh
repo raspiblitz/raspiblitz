@@ -39,7 +39,6 @@ if [ "$1" = "status" ]; then
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "tipSynced=1"
     else
-      if 
       echo "tipSynced=0"
     fi
 
