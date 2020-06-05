@@ -340,7 +340,7 @@ else
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
     source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
-    if [ "${isSynced}" = "0" ]; then
+    if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
   fi

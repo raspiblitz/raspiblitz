@@ -30,10 +30,6 @@ if [ "$1" = "status" ]; then
 
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
-  if [ ${serviceRunning} -eq 0 ]; then
-    echo "infoSync='Not running - check: sudo journalctl -u electrs'"
-  fi
-
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
@@ -41,10 +37,31 @@ if [ "$1" = "status" ]; then
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "isSynced=1"
+      echo "tipSynced=1"
     else
-      echo "isSynced=0"
-      echo "infoSync='Syncing / Building Index (please wait)'"
+      if 
+      echo "tipSynced=0"
+    fi
+
+    # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
+    electrumResponding=$(echo exit | telnet 127.0.0.1 50001 2>/dev/null | grep -c "Connected to")
+    if [ ${electrumResponding} -gt 1 ]; then
+      electrumResponding=1
+    fi
+    echo "electrumResponding=${electrumResponding}"
+
+    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
+      # set file flag for the future
+      sudo touch /mnt/hdd/app-storage/electrs/initial-sync.done
+      sudo chmod 544 /mnt/hdd/app-storage/electrs/initial-sync.done
+      fileFlagExists=1
+    fi
+    if [ ${fileFlagExists} -eq 0 ]; then
+      echo "initialSynced=0"
+      echo "infoSync='Building Index (please wait)'"
+    else
+      echo "initialSynced=1"
     fi
 
     # check local IPv4 port
@@ -86,7 +103,10 @@ if [ "$1" = "status" ]; then
     echo "nginxTest=$nginxTest"
 
   else
-    echo "isSynced=0"
+    echo "tipSynced=0"
+    echo "initialSynced=0"
+    echo "electrumResponding=0"
+    echo "infoSync='Not running - check: sudo journalctl -u electrs'"
   fi
 
   exit 0
@@ -114,7 +134,7 @@ Please check the following debug info.
     exit 0
   fi
 
-  if [ ${isSynced} -eq 0 ]; then
+  if [ ${initialSynced} -eq 0 ]; then
     dialog --title "Electrum Index Not Ready" --msgbox "
 Electrum server is still building its index.
 Please wait and try again later.
