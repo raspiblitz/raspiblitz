@@ -15,6 +15,7 @@
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
 - New: ThunderHub [details](https://www.thunderhub.io)
 - Fix: DropBox StaticChannelBackup
+- Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
 ## Whats new in Version 1.5 of RaspiBlitz?
 
