@@ -171,5 +171,5 @@ if [ "${touchscreen}" = "1" ]; then
   fi
 fi
 echo "# ******************************************"
-echo "# OK - shell scripts and assests are synced"
+echo "# OK - shell scripts and assets are synced"
 echo "# Reboot recommended"
