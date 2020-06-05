@@ -212,6 +212,7 @@ Check 'sudo nginx -t' for a detailed error message.
     sudo systemctl stop electrs
     echo "# deleting index"
     sudo rm -r /mnt/hdd/app-storage/electrs/db
+    sudo rm /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null
     echo "# starting service"
     sudo systemctl start electrs
     echo "# ok"
