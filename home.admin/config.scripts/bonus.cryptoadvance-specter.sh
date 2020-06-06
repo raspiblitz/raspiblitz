@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # https://github.com/cryptoadvance/specter-desktop  
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
@@ -76,27 +76,23 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
-# stop service
-echo "making sure services are not running"
-sudo systemctl stop cryptoadvance-specter 2>/dev/null
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL Cryptoadvance Specter ***"
+  echo "    --> INSTALL Cryptoadvance Specter ***"
 
-  isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
+  isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service' || /bin/true)
   if [ ${isInstalled} -eq 0 ]; then
 
-    echo "*** Enable wallets in Bitcoin Core ***"
+    echo "    --> Enable wallets in Bitcoin Core"
     sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /home/bitcoin/.bitcoin/bitcoin.conf
     sudo service bitcoind stop
     sudo service bitcoind start
 
-    echo "*** Installing prerequisites ***"
-    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libssl-dev
+    echo "    --> Installing prerequisites"
+    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv
 
     # activating Authentication here ...
-    echo "*** creating App-config ***"
+    echo "    --> creating App-config"
     cat > /home/admin/config.json <<EOF
 {
 	"auth":"rpcpasswordaspin"
@@ -106,16 +102,15 @@ EOF
     sudo mv /home/admin/config.json /home/bitcoin/.specter/config.json
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter
 
-    echo "*** creating a virtualenv ***"
+    echo "    --> creating a virtualenv"
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
-    echo "*** installing specter ***"
+    echo "    --> pip-installing specter"
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
     
     
-    # Creating self-signed-certificate
     # Mandatory as the camera doesn't work without https
-    echo "*** Creating self-signed certificate ***"
+    echo "    --> Creating self-signed certificate"
    openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
     sudo mv /tmp/cert.pem /home/bitcoin/.specter
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/cert.pem
@@ -123,12 +118,12 @@ EOF
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/key.pem
 
     # open firewall
-    echo "*** Updating Firewall ***"
+    echo "    --> Updating Firewall"
     sudo ufw allow 25441 comment 'cryptoadvance-specter'
     sudo ufw --force enable
     echo ""
 
-    echo "*** Installing udev-rules for hardware-wallets ***"
+    echo "    --> Installing udev-rules for hardware-wallets"
     cat > /home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl"
@@ -197,11 +192,11 @@ EOF
     sudo chown root:root /etc/udev/rules.d/*
     sudo udevadm trigger
     sudo udevadm control --reload-rules
-    sudo groupadd plugdev
+    sudo groupadd plugdev || /bin/true
     sudo usermod -aG plugdev bitcoin
 
     # install service
-    echo "*** Install cryptoadvance-specter systemd service ***"
+    echo "    --> Install cryptoadvance-specter systemd service"
     cat > /home/admin/cryptoadvance-specter.service <<EOF
 # systemd unit for Cryptoadvance Specter
 
@@ -213,7 +208,7 @@ After=${network}d.service
 [Service]
 ExecStart=/home/bitcoin/.specter/.env/bin/python3 -m cryptoadvance.specter server --host 0.0.0.0 --cert=/home/bitcoin/.specter/cert.pem --key=/home/bitcoin/.specter/key.pem
 User=bitcoin
-Environment=PATH=/home/bitcoin/.specter/.env/bin:/home/bitcoin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
+Environment=PATH=/home/bitcoin/.specter.env/bin:/home/bitcoin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -228,22 +223,18 @@ EOF
     sudo systemctl enable cryptoadvance-specter
     sudo systemctl start cryptoadvance-specter
 
-    echo "OK - the cryptoadvance-specter service is now enabled and started"
+    echo "    --> OK - the cryptoadvance-specter service is now enabled and started"
   else 
-    echo "cryptoadvance-specter already installed."
+    echo "    --> cryptoadvance-specter already installed."
   fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^specter=.*/specter=on/g" /mnt/hdd/raspiblitz.conf
   
-  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
-  # run every 10 min by _background.sh
-
-  # Hidden Service for BTC-RPC-explorer if Tor is active
+  # Hidden Service for SERVICE if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
+    echo "    --> correct old Hidden Service with port"
     sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:25441/HiddenServicePort 80 127.0.0.1:25441/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 80 25441
   fi
@@ -258,13 +249,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING Cryptoadvance Specter ***"
+    echo "    --> REMOVING Cryptoadvance Specter"
     sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
 
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
-      echo "*** Removing wallets in core ***"
+      echo "    --> Removing wallets in core"
       bitcoin-cli listwallets | jq -r .[] | tail -n +2
       for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2) 
       do  
@@ -273,13 +264,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       done
       sudo rm -rf /home/bitcoin/.bitcoin/specter
 
-      echo "*** Removing /home/bitcoin/.specter ***"
+      echo "    --> Removing /home/bitcoin/.specter"
       sudo rm -rf /home/bitcoin/.specter
     fi
 
-    echo "OK Cryptoadvance Specter removed."
+    echo "    --> OK Cryptoadvance Specter removed."
   else 
-    echo "Cryptoadvance Specter is not installed."
+    echo "    --> Cryptoadvance Specter is not installed."
   fi
   exit 0
 fi
