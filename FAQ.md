@@ -5,7 +5,7 @@
 - Update: Raspberry Pi OS Base Image (May 2020)
 - Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
-- Update: Specter Desktop 0.4.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Loop 0.6.3 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
 - New: Subscriptions Management 
