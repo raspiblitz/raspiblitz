@@ -76,7 +76,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.6.13
+    sudo -u thunderhub git reset --hard v0.7.1
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -122,6 +122,7 @@ EOF
     sudo rm -f /home/thunderhub/thunderhub/.env
     sudo mv /home/admin/thunderhub.env /home/thunderhub/thunderhub/.env
     sudo chown thunderhub:thunderhub /home/thunderhub/thunderhub/.env
+
 
     ##################
     # thubConfig.yaml
@@ -210,9 +211,32 @@ fi
 if [ "$1" = "update" ]; then
   echo "*** UPDATING THUNDERHUB ***"
   cd /home/thunderhub/thunderhub
-  sudo -u thunderhub git pull
-  sudo -u thunderhub npm install
-  sudo -u thunderhub npm run build
+  # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+  # fetch latest master
+  sudo -u thunderhub git fetch
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "You are up-to-date on version" $TAG
+  else
+    echo "Pulling latest changes..."
+    sudo -u thunderhub git pull -p
+
+    # install deps
+    echo "Installing dependencies..."
+    sudo -u thunderhub npm install --quiet
+
+    # build nextjs
+    echo "Building application..."
+    sudo -u thunderhub npm run build
+
+    TAG=$(git tag | sort -V | tail -1)
+    echo "Updated to version" $TAG
+  fi
+
   echo "*** Updated to the latest in https://github.com/apotdevin/thunderhub ***"
   echo ""
   echo "*** Starting the ThunderHub service ... *** "
