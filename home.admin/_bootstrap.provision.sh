@@ -431,6 +431,17 @@ else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
 fi
 
+# letsencrypt
+if [ "${letsencrypt}" = "on" ]; then
+  echo "Provisioning letsencrypt - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup letsencrypt'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.letsencrypt.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning letsencrypt - keep default" >> ${logFile}
+fi
+
+
+
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
