@@ -593,7 +593,7 @@ sudo -H python3 -m pip install requests[socks]==2.21.0
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
-# for background downloading
+# for background processes
 sudo apt-get -y install screen
 
 # for multiple (detachable/background) sessions when using SSH
