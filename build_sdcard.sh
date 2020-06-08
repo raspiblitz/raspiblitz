@@ -584,12 +584,6 @@ echo ""
 echo "*** LND API for Python ***"
 sudo chown -R admin /home/admin
 
-# This Python3 virtualenv includes the site-packages because access to the PyQt5
-# libs - which are installed system-wide (via apt-get) - is needed for TouchUI.
-sudo -u admin bash -c "cd; python3 -m venv --system-site-packages python3-env-lnd"
-sudo -u admin bash -c "/home/admin/python3-env-lnd/bin/python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2"
-echo ""
-
 echo "*** Python DEFAULT libs & depenedencies ***"
 
 # for setup schell scripts
