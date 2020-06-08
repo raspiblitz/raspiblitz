@@ -176,18 +176,6 @@ if [ ${isMounted} -eq 1 ]; then
     fi
   fi
 
-  # check if there is torrent data to continue
-  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
-  if [ ${torrentProgressExists} -eq 1 ]; then
-    # check if there is a running screen session to return to
-    noScreenSession=$(screen -ls | grep -c "No Sockets found")
-    if [ ${noScreenSession} -eq 0 ]; then 
-      echo "found torrent data .. resuming"
-      /home/admin/50torrentHDD.sh
-      exit 1
-    fi
-  fi
-
   # HDD is empty - get Blockchain
 
   # detect hardware version of RaspberryPi
@@ -202,8 +190,7 @@ if [ ${isMounted} -eq 1 ]; then
     echo "Bitcoin-RP3 Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
-    T "TORRENT --> Download thru Torrent (TRUSTED DEFAULT ±1day)" \
-    C "COPY    --> Copy from laptop/node (OVER LAN ±6hours)" \
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" \
     S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
 
   # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
@@ -212,8 +199,7 @@ if [ ${isMounted} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
     S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
-    C "COPY    --> Copy from laptop/node (OVER LAN ±4hours)" \
-    T "TORRENT --> Download thru Torrent (TRUSTED FALLBACK ±1day)" 2>&1 >/dev/tty)
+    C "COPY    --> Copy from laptop/node over LAN (±4hours)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -233,9 +219,6 @@ if [ ${isMounted} -eq 1 ]; then
 
   clear
   case $menuitem in
-          T)
-              /home/admin/50torrentHDD.sh
-              ;;
           C)
               /home/admin/50copyHDD.sh
               ;;      

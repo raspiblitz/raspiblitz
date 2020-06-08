@@ -58,15 +58,6 @@ if [ "${state}" = "reindex" ]; then
   exit 1
 fi
 
-# singal that torrent is in re-download
-if [ "${state}" = "retorrent" ]; then
-  echo "Re-Index in progress ... start monitoring:"
-  /home/admin/50torrentHDD.sh
-  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
-  /home/admin/00raspiblitz.sh
-  exit
-fi
-
 # singal that copstation is running
 if [ "${state}" = "copystation" ]; then
   echo "Copy Station is Runnning ..."
