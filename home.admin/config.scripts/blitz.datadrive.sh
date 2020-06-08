@@ -347,6 +347,7 @@ if [ "$1" = "format" ]; then
   >&2 echo "# Wiping all partitions"
   for v_partition in $(parted -s /dev/${hdd} print|awk '/^ / {print $1}')
   do
+   >&2 echo "# sudo parted -s /dev/${hdd} rm ${v_partition}"
    sudo parted -s /dev/${hdd} rm ${v_partition}
    sleep 2
   done
