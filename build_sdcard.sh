@@ -576,12 +576,6 @@ if [ ${#installed} -eq 0 ]; then
   echo "!!! BUILD FAILED --> Was not able to install LND"
   exit 1
 fi
-
-# prepare python for lnd api use
-# https://dev.lightning.community/guides/python-grpc/
-
-echo ""
-echo "*** LND API for Python ***"
 sudo chown -R admin /home/admin
 
 echo "*** Python DEFAULT libs & depenedencies ***"
@@ -598,9 +592,6 @@ sudo -H python3 -m pip install requests[socks]==2.21.0
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
-
-# enable copy of blockchain from 2nd HDD formatted with exFAT
-sudo apt-get -y install exfat-fuse
 
 # for blockchain torrent download
 sudo apt-get -y install transmission-cli
