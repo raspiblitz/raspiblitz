@@ -593,11 +593,6 @@ sudo -H python3 -m pip install requests[socks]==2.21.0
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
-# for blockchain torrent download
-sudo apt-get -y install transmission-cli
-sudo apt-get -y install rtorrent
-sudo apt-get -y install cpulimit
-
 # for background downloading
 sudo apt-get -y install screen
 
