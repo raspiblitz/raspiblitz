@@ -3,10 +3,10 @@ Do this on a raspberrypi with the exact same python version the scripts will be 
 See https://dev.lightning.community/guides/python-grpc/
 
 
-To generate the lnd RPC libs:
+To generate the lnd RPC libs - login as admin and run:
 ```
 cd
-source /home/admin/python3-env-lnd/bin/activate
+python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2
 git clone https://github.com/googleapis/googleapis.git
 curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
 python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
