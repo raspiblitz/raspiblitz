@@ -31,7 +31,7 @@ if [ "$1" = "menu" ]; then
 https://${localip}:3001
 SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
+Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
 " 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
@@ -233,14 +233,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING RTL ***"
-    sudo systemctl stop RTL
     sudo systemctl disable RTL
     sudo rm /etc/systemd/system/RTL.service
-    sudo rm -rf /home/rtl/RTL
+    # delete user and home directory
+    sudo userdel -rf rtl
     echo "OK RTL removed."
   else
     echo "RTL is not installed."
   fi
+
+  # close port on firewall
+  sudo ufw deny 3000
 
   echo "needs reboot to activate new setting"
   exit 0
