@@ -214,6 +214,7 @@ EOF
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
+    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   exit 0
