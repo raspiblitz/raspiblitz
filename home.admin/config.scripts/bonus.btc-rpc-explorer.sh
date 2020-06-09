@@ -159,6 +159,26 @@ EOF
     sudo ufw allow 3020 comment 'btc-rpc-explorer'
     echo ""
 
+    
+    ##################
+    # NGINX
+    ##################
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_ssl.conf /etc/nginx/sites-available/btcrpcexplorer_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_tor.conf /etc/nginx/sites-available/btcrpcexplorer_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_tor_ssl.conf /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     # install service
     echo "*** Install btc-rpc-explorer systemd ***"
     cat > /home/admin/btc-rpc-explorer.service <<EOF
@@ -204,8 +224,8 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3020/g" /etc/tor/torrc
-    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3020
+    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3022/g" /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
 fi
@@ -223,9 +243,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/btc-rpc-explorer.service
     # delete user and home directory
     sudo userdel -rf btcrpcexplorer
-    # close firewall
-    sudo ufw deny 3020
+
+    # setup nginx symlinks
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor_ssl.conf
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     echo "OK BTC-RPC-explorer removed."
+  
   else 
     echo "BTC-RPC-explorer is not installed."
   fi
