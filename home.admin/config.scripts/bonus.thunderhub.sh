@@ -210,7 +210,9 @@ EOF
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3010
+      # correct old Hidden Service with port
+      sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3001/HiddenServicePort 80 127.0.0.1:3012/g" /etc/tor/torrc
+      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
     fi
   fi
   exit 0
