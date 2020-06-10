@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.7.4
+    sudo -u thunderhub git reset --hard v0.7.8
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -116,8 +116,16 @@ LOG_LEVEL='debug'
 # -----------
 THEME='dark'
 CURRENCY='sat'
+
+# -----------
+# Privacy Configs
+# -----------
 FETCH_PRICES=false
 FETCH_FEES=false
+HODL_HODL=false
+DISABLE_LINKS=true
+NO_CLIENT_ACCOUNTS=true
+NO_VERSION_CHECK=true
 
 # -----------
 # Account Configs
