@@ -168,6 +168,10 @@ sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
 
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
+# BLITZ WEB SERVICE
+echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
+/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   sudo sed -i "s/^message=.*/message='Provisioning LND update'/g" ${infoFile}
