@@ -28,7 +28,7 @@ if [ "$1" = "menu" ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3011
+https://${localip}:3011
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
@@ -38,7 +38,7 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3011
+https://${localip}:3011
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
@@ -178,7 +178,8 @@ EOF
     
     # open the firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow from any to any port 3010 comment 'allow ThunderHub'
+    sudo ufw allow from any to any port 3010 comment 'allow ThunderHub HTTP'
+    sudo ufw allow from any to any port 3011 comment 'allow ThunderHub HTTPS'
     echo ""
         
     ##################
@@ -235,8 +236,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/systemd/system/thunderhub.service
   # delete user and home directory
   sudo userdel -rf thunderhub
-  # close port on firewall
+  # close ports on firewall
   sudo ufw deny 3010
+  sudo ufw deny 3011
 
   # setup nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/thub_ssl.conf

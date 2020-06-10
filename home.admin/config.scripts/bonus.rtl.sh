@@ -174,7 +174,8 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3000 comment 'RTL'
+    sudo ufw allow 3000 comment 'RTL HTTP'
+    sudo ufw allow 3001 comment 'RTL HTTPS'
     echo ""
 
     # install service
@@ -245,8 +246,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "RTL is not installed."
   fi
 
-  # close port on firewall
+  # close ports on firewall
   sudo ufw deny 3000
+  sudo ufw deny 3001
 
   echo "needs reboot to activate new setting"
   exit 0

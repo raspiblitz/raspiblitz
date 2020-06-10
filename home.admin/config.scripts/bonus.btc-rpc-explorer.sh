@@ -39,7 +39,7 @@ This can take multiple hours.
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3020
+https://${localip}:3021
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
@@ -49,7 +49,7 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3020
+https://${localip}:3021
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
 " 12 54
@@ -156,7 +156,8 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3020 comment 'btc-rpc-explorer'
+    sudo ufw allow 3020 comment 'btc-rpc-explorer HTTP'
+    sudo ufw allow 3021 comment 'btc-rpc-explorer HTTPS'
     echo ""
 
     
@@ -257,8 +258,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "BTC-RPC-explorer is not installed."
   fi
 
-  # close port on firewall
+  # close ports on firewall
   sudo ufw deny 3020
+  sudo ufw deny 3021
   exit 0
 fi
 
