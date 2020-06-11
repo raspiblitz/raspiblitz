@@ -245,7 +245,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # delete user and home directory
     sudo userdel -rf btcrpcexplorer
 
-    # setup nginx symlinks
+    # remove nginx symlinks
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor_ssl.conf

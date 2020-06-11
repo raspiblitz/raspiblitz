@@ -240,7 +240,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo ufw deny 3010
   sudo ufw deny 3011
 
-  # setup nginx symlinks
+  # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/thub_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor_ssl.conf

@@ -227,7 +227,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
 
-  # setup nginx symlinks
+  # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
