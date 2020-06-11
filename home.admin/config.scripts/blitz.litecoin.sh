@@ -22,8 +22,8 @@ else
   # based on https://medium.com/@jason.hcwong/litecoin-lightning-with-raspberry-pi-3-c3b931a82347
 
   # set version (change if update is available)
-  litecoinVersion="0.17.1"
-  litecoinSHA256="7e6f5a1f0b190de01aa20ecf5c5a2cc5a64eb7ede0806bcba983bcd803324d8a"
+  litecoinVersion="0.18.1"
+  litecoinSHA256="59b73bc8f034208295634da56a175d74668b07613cf6484653cb467deafb1d52"
 
   # cleaning download folder 
   sudo rm -r /home/admin/download 1>/dev/null
