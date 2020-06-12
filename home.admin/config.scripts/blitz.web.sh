@@ -121,11 +121,11 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "Turning ON: Web"
 
   # install
-  sudo apt-get update >/dev/null
-  sudo apt-get install -y nginx apache2-utils >/dev/null
+  sudo apt-get update
+  sudo apt-get install -y nginx apache2-utils
 
   # make sure that it is enabled and started
-  sudo systemctl enable nginx >/dev/null
+  sudo systemctl enable nginx 
   sudo systemctl start nginx
 
   # general nginx settings
@@ -134,7 +134,7 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
   fi
 
-  if [ -f /etc/ssl/certs/dhparam.pem ]; then
+  if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
     #can take 5-10+ minutes on a Raspberry Pi 3
     echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
     echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
@@ -152,7 +152,7 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   if ! [ -d /var/www/letsencrypt/.well-known/acme-challenge ]; then
-    sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge >/dev/null
+    sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge
   fi
 
   # make sure admin can write here even without sudo
@@ -175,7 +175,7 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # make sure jinja2 is installed and install j2cli
-  sudo apt-get install python3-jinja2 >/dev/null
+  sudo apt-get install -y python3-jinja2
   sudo -H python3 -m pip install j2cli
 
   # create nginx app-data dir and use LND cert by default

@@ -32,6 +32,9 @@ sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.co
 # make sure all files are linked correct
 sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
+# BLITZ WEB SERVICE
+/home/admin/config.scripts/blitz.web.sh on
+
 ###### ACTIVATE TOR IF SET DURING SETUP
 if [ "${runBehindTor}" = "on" ]; then
      

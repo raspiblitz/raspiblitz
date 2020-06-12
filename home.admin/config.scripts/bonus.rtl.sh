@@ -29,19 +29,21 @@ if [ "$1" = "menu" ]; then
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
 https://${localip}:3001
-SHA1 Thumb/Fingerprint: ${fingerprint}\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
-" 14 67
+Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
+" 15 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
 https://${localip}:3001
-SHA1 Thumb/Fingerprint: ${fingerprint}\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 13 57
+" 14 57
   fi
   echo "please wait ..."
   exit 0
@@ -172,7 +174,8 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3000 comment 'RTL'
+    sudo ufw allow 3000 comment 'RTL HTTP'
+    sudo ufw allow 3001 comment 'RTL HTTPS'
     echo ""
 
     # install service
@@ -212,6 +215,7 @@ EOF
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
+    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   exit 0
@@ -223,7 +227,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
 
-  # setup nginx symlinks
+  # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
@@ -233,14 +237,18 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING RTL ***"
-    sudo systemctl stop RTL
     sudo systemctl disable RTL
     sudo rm /etc/systemd/system/RTL.service
-    sudo rm -rf /home/rtl/RTL
+    # delete user and home directory
+    sudo userdel -rf rtl
     echo "OK RTL removed."
   else
     echo "RTL is not installed."
   fi
+
+  # close ports on firewall
+  sudo ufw deny 3000
+  sudo ufw deny 3001
 
   echo "needs reboot to activate new setting"
   exit 0

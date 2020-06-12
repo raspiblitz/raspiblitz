@@ -39,7 +39,7 @@ This can take multiple hours.
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3002
+https://${localip}:3021
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
@@ -49,7 +49,7 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3002
+https://${localip}:3021
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
 " 12 54
@@ -127,7 +127,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Host/Port to bind to
 # Defaults: shown
 BTCEXP_HOST=0.0.0.0
-BTCEXP_PORT=3002
+BTCEXP_PORT=3020
 # Bitcoin RPC Credentials (URI -OR- HOST/PORT/USER/PASS)
 # Defaults:
 #   - [host/port]: 127.0.0.1:8332
@@ -156,8 +156,29 @@ EOF
 
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3002 comment 'btc-rpc-explorer'
+    sudo ufw allow 3020 comment 'btc-rpc-explorer HTTP'
+    sudo ufw allow 3021 comment 'btc-rpc-explorer HTTPS'
     echo ""
+
+    
+    ##################
+    # NGINX
+    ##################
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_ssl.conf /etc/nginx/sites-available/btcrpcexplorer_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_tor.conf /etc/nginx/sites-available/btcrpcexplorer_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/btcrpcexplorer_tor_ssl.conf /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
 
     # install service
     echo "*** Install btc-rpc-explorer systemd ***"
@@ -204,8 +225,8 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 3002 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
-    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3002
+    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3022/g" /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
 fi
@@ -219,15 +240,27 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING BTC-RPC-explorer ***"
-    sudo systemctl stop btc-rpc-explorer
     sudo systemctl disable btc-rpc-explorer
     sudo rm /etc/systemd/system/btc-rpc-explorer.service
-    sudo rm -rf /home/btcrpcexplorer/btc-rpc-explorer
-    sudo rm -f /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    # delete user and home directory
+    sudo userdel -rf btcrpcexplorer
+
+    # remove nginx symlinks
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor_ssl.conf
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     echo "OK BTC-RPC-explorer removed."
+  
   else 
     echo "BTC-RPC-explorer is not installed."
   fi
+
+  # close ports on firewall
+  sudo ufw deny 3020
+  sudo ufw deny 3021
   exit 0
 fi
 
