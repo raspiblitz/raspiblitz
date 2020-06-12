@@ -239,9 +239,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
 
   # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/lnbits_5001_https.conf
-  sudo rm -f /etc/nginx/sites-enabled/lnbits_5002_http.conf
-  sudo rm -f /etc/nginx/sites-enabled/lnbits_5003_https.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/lnbits_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 
