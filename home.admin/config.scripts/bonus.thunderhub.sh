@@ -22,23 +22,28 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3010
+https://${localip}:3011
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
-" 12 67
+Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
+" 15 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3010
+https://${localip}:3011
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 12 57
+" 14 57
   fi
   echo "please wait ..."
   exit 0
@@ -76,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.7.1
+    sudo -u thunderhub git reset --hard v0.7.8
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -110,9 +115,17 @@ LOG_LEVEL='debug'
 # Interface Configs
 # -----------
 THEME='dark'
-# CURRENCY='sat'
-# FETCH_PRICES=false
-# FETCH_FEES=false
+CURRENCY='sat'
+
+# -----------
+# Privacy Configs
+# -----------
+FETCH_PRICES=false
+FETCH_FEES=false
+HODL_HODL=false
+DISABLE_LINKS=true
+NO_CLIENT_ACCOUNTS=true
+NO_VERSION_CHECK=true
 
 # -----------
 # Account Configs
@@ -143,7 +156,32 @@ EOF
     sudo mv /home/admin/thubConfig.yaml /home/thunderhub/thubConfig.yaml
     sudo chown thunderhub:thunderhub /home/thunderhub/thubConfig.yaml
     sudo chmod 600 /home/thunderhub/thubConfig.yaml | exit 1
-
+    
+    ##################
+    # NGINX
+    ##################
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/thub_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-available/thub_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/thub_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/thub_tor.conf /etc/nginx/sites-available/thub_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/thub_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/thub_tor_ssl.conf /etc/nginx/sites-available/thub_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/thub_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/thub_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+    
+    # open the firewall
+    echo "*** Updating Firewall ***"
+    sudo ufw allow from any to any port 3010 comment 'allow ThunderHub HTTP'
+    sudo ufw allow from any to any port 3011 comment 'allow ThunderHub HTTPS'
+    echo ""
+        
     ##################
     # SYSTEMD SERVICE
     ##################
@@ -176,15 +214,14 @@ EOF
     sudo systemctl enable thunderhub
     echo "OK - the ThunderHub service is now enabled"
 
-    # open the firewall
-    sudo ufw allow from any to any port 3010 comment 'allow ThunderHub'
-
     # setting value in raspiblitz config
     sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3010
+      # correct old Hidden Service with port
+      sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3001/HiddenServicePort 80 127.0.0.1:3012/g" /etc/tor/torrc
+      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
     fi
   fi
   exit 0
@@ -199,6 +236,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/systemd/system/thunderhub.service
   # delete user and home directory
   sudo userdel -rf thunderhub
+  # close ports on firewall
+  sudo ufw deny 3010
+  sudo ufw deny 3011
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/thub_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/thub_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/thub_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
