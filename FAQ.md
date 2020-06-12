@@ -9,6 +9,7 @@
 - Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Loop 0.6.3 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
+- New: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
 - New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
