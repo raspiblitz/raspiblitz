@@ -109,12 +109,44 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # exit 1
   #fi
 
-  if [ "$2" == "tor" ]; then
-    sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
-    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
-  else
-    echo "# FAIL - at the moment only BTCPay Server over TOR is supported"
-    exit 1
+  #if [ "$2" == "tor" ]; then
+  #  sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
+  #  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
+  #else
+  #  echo "# FAIL - at the moment only BTCPay Server over TOR is supported"
+  #  exit 1
+  #fi
+
+  ##################
+  # NGINX
+  ##################
+  # setup nginx symlinks
+  if ! [ -f /etc/nginx/sites-available/btcpay_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/btcpay_ssl.conf /etc/nginx/sites-available/btcpay_ssl.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/btcpay_tor.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/btcpay_tor.conf /etc/nginx/sites-available/btcpay_tor.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/btcpay_tor_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/btcpay_tor_ssl.conf /etc/nginx/sites-available/btcpay_tor_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/btcpay_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/btcpay_tor.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/btcpay_tor_ssl.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
+  
+  # open the firewall
+  echo "*** Updating Firewall ***"
+  sudo ufw allow 23000 comment 'allow BTCPay HTTP'
+  sudo ufw allow 23001 comment 'allow BTCPay HTTPS'
+  echo ""
+
+  # Hidden Service for BTCPay if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    # correct old Hidden Service with port
+    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:23000/HiddenServicePort 80 127.0.0.1:23002/g" /etc/tor/torrc
+    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
   fi
 
   # check for $BTCPayDomain
@@ -147,8 +179,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Installing .NET"
     echo "***"
     echo ""
-
-
 
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
@@ -392,9 +422,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # clear app config (not user data)
     sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
     sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
-    # clear nginx config
+    # clear nginx config (from btcpaysetdomain)
     sudo rm -f /etc/nginx/sites-enabled/btcpayserver
     sudo rm -f /etc/nginx/sites-available/btcpayserver
+    # remove nginx symlinks
+    sudo rm -f /etc/nginx/sites-enabled/btcpay_ssl.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcpay_tor.conf
+    sudo rm -f /etc/nginx/sites-enabled/btcpay_tor_ssl.conf
+    sudo nginx -t
+    sudo systemctl reload nginx
     # nuke user
     sudo userdel -rf btcpay 2>/dev/null
     echo "OK BTCPayServer removed."
