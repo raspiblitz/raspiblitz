@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [on|off|status|menu]"
+ echo "bonus.electrs.sh [on|off|status[showAddress]|menu]"
  exit 1
 fi
 
@@ -66,7 +66,9 @@ if [ "$1" = "status" ]; then
     # check local IPv4 port
     localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
-    echo "publicIP='${publicIP}'"
+    if [ "$2" = "showAddress" ]; then
+      echo "publicIP='${publicIP}'"
+    fi
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
@@ -92,8 +94,10 @@ if [ "$1" = "status" ]; then
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
       echo "TORrunning=1"
-      TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-      echo "TORaddress='${TORaddress}'"
+      if [ "$2" = "showAddress" ]; then
+        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        echo "TORaddress='${TORaddress}'"
+      fi
     else
       echo "TORrunning=0"
     fi
@@ -115,7 +119,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -153,7 +157,7 @@ Check 'sudo nginx -t' for a detailed error message.
       sudo mkdir /var/log/nginx
       sudo systemctl restart nginx
     fi
-    /home/admin/config.scripts/internet.selfsignedcert.sh
+    /home/admin/config.scripts/blitz.web.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -328,13 +332,6 @@ EOF
 
     echo ""
     echo "***"
-    echo "Open port 50001 on UFW "
-    echo "***"
-    echo ""
-    sudo ufw allow 50001 comment 'electrs TCP'
-
-    echo ""
-    echo "***"
     echo "Checking for config.toml"
     echo "***"
     echo ""
@@ -345,9 +342,6 @@ EOF
         else
             echo "OK"
     fi
-
-    # create a self-signed ssl certificate
-    /home/admin/config.scripts/internet.selfsignedcert.sh
 
     echo ""
     echo "***"
@@ -372,11 +366,11 @@ stream {
         server {
                 listen 50002 ssl;
                 proxy_pass electrs;
-                ssl_certificate /etc/ssl/certs/localhost.crt;
-                ssl_certificate_key /etc/ssl/private/localhost.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-electrs:1m;
                 ssl_session_timeout 4h;
-                ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
                 ssl_prefer_server_ciphers on;
         }
 }" | sudo tee -a /etc/nginx/nginx.conf
@@ -390,11 +384,11 @@ stream {
         server {
                 listen 50002 ssl;
                 proxy_pass electrs;
-                ssl_certificate /etc/ssl/certs/localhost.crt;
-                ssl_certificate_key /etc/ssl/private/localhost.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-electrs:1m;
                 ssl_session_timeout 4h;
-                ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
                 ssl_prefer_server_ciphers on;
         }
 }" | sudo tee -a /etc/nginx/nginx.conf
@@ -405,11 +399,15 @@ stream {
             fi
     fi
 
-    echo "allow port 50002 on ufw"
-    sudo ufw allow 50002 comment 'electrs-nginx SSL'
-
-    sudo systemctl enable nginx
     sudo systemctl restart nginx
+
+    echo ""
+    echo "***"
+    echo "Open ports 50001 and 5002 on UFW "
+    echo "***"
+    echo ""
+    sudo ufw allow 50001 comment 'electrs TCP'
+    sudo ufw allow 50002 comment 'electrs SSL'
 
     echo ""
     echo "***"
@@ -485,17 +483,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "#*** REMOVING ELECTRS ***"
-
-    sudo systemctl stop electrs
     sudo systemctl disable electrs
-
     sudo rm /etc/systemd/system/electrs.service
-
-    sudo rm -rf /home/electrs/electrs
-    sudo rm -rf /home/electrs/.cargo
-    sudo rm -rf /home/electrs/.rustup
-    sudo rm -rf /home/electrs/.profile
-
+    # delete user and home directory
+    sudo userdel -rf electrs 
+    # close ports on firewall
+    sudo ufw deny 50001
+    sudo ufw deny 50002 
     echo "# OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
