@@ -114,15 +114,17 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.5:**
+**Download SD-Card image - Version 1.6:**
 
-Browser: https://raspiblitz.com/raspiblitz-v1.5-2020-05-08.img.gz
+THIS IS A RELEASE CANDIDATE - NOT THE FINAL VERSION - DONT USE FOR PRODUCTION NODE!
 
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.5/home.admin/assets/raspiblitz-v1.5-2020-05-08.img.gz.torrent
+Browser: https://files.rotzoll.de/raspiblitz-v1.6rc1-2020-06-12.img.gz
 
-SHA-256: 51cf8cc0f5ff9f562327ed8ba6779cffef8ba8e3c6e2b8e21bcd2f931f630584 or [SIGNATURE](https://raspiblitz.com/raspiblitz-v1.5-2020-05-08.img.gz.sig)
+Torrent: [TODO]
 
-* [Whats new in Version 1.5 of RaspiBlitz?](FAQ.md#whats-new-in-version-15-of-raspiblitz)
+SHA-256: c9bed779eb3eb2fe17dd879cd9f797bf4ba1ed2d10977946aca6146f4354d8e0 or [SIGNATURE](https://todo)
+
+* [Whats new in Version 1.6 of RaspiBlitz?](FAQ.md#whats-new-in-version-16-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the sd card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
