@@ -47,33 +47,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import
   if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash; fi
 
-  # Ask the user for the ZeroTier Network ID
-  networkID=""
-  while [ "$networkID" = "" ]; do
-
-    exec 3>&1
-    networkID=$(dialog --backtitle "Join Zerotier Network" --inputbox "Enter your ZeroTier Network ID as dispayed in your account on my.zerotier.com:" 10 52 2>&1 1>&3)
-    exitcode=$?
-    exec 3>&-
-
-    if [ ${exitcode} -eq 1 ]; then
-      echo "# Cancel joining ZeroTier Network"
-      sleep 2
-      exit 1
-    fi
-  done
-
-  # Join
-  echo "# Joining ZeroTier Network $networkID"
-  sudo zerotier-cli join ${networkID}
-  sleep 3
-
   # setting value in raspi blitz config
   sudo sed -i "s/^zerotier=.*/zerotier=on/g" /mnt/hdd/raspiblitz.conf
 
   echo ""
-  echo "# Your RaspiBlitz is now connected to your ZeroTier Network"
-  echo "# Please authorize the device here: https://my.zerotier.com/network/$networkID"
+  echo "# ZeroTier is now installed on your RaspiBlitz"
+  echo "# Check the ZeroTier menu entry for more details."
   echo ""
 
   exit 0
