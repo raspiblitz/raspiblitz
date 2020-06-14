@@ -739,12 +739,12 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${zerotier}" != "${choice}" ]; then
-  echo "keysend setting changed .."
+  echo "zerotier setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
   dialog --msgbox "ZeroTier is now ${choice}." 5 46
 else
-  echo "keysend setting unchanged."
+  echo "ZeroTier setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
