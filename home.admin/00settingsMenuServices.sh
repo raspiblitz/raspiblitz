@@ -27,6 +27,7 @@ if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
+if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -98,6 +99,7 @@ t 'ThunderHub' ${thunderhub} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
+z 'ZeroTier' ${zerotier} \
 2>&1 >/dev/tty)
 else
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
@@ -125,6 +127,7 @@ t 'ThunderHub' ${thunderhub} \
 i 'LNbits' ${LNBits} \
 d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
 j 'JoinMarket' ${joinmarket} \
+z 'ZeroTier' ${zerotier} \
 2>&1 >/dev/tty)
 fi
 
@@ -469,7 +472,7 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   l1="AUTO-UNLOCK IS NOW OFF"
   if [ "${choice}" = "on" ]; then
     l1="AUTO-UNLOCK IS NOW ACTIVE"
-  fi  
+  fi
   dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
   needsReboot=1
 else
@@ -655,7 +658,7 @@ if [ "${thunderhub}" != "${choice}" ]; then
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-else 
+else
   echo "ThunderHub setting unchanged."
 fi
 
@@ -730,6 +733,18 @@ Then try activating JoinMarket again in SERVICES.\n
   fi
 else
   echo "JoinMarket not changed."
+fi
+
+# ZeroTier process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${zerotier}" != "${choice}" ]; then
+  echo "keysend setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
+  dialog --msgbox "ZeroTier is now ${choice}." 5 46
+else
+  echo "keysend setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
