@@ -648,7 +648,8 @@ More information on the service you can find under:
 You DID PAY the initial fee.
 But the service was not able to provide service.
 Subscription will be ignored.
-            ''',title="Error on Subscription")
+Error: {0}
+            '''.format(be.errorShort),title="Error on Subscription")
             sys.exit(1)
 
         else:
