@@ -134,7 +134,7 @@ if [ "${CHOICE}" = "BLITZ" ]; then
   echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another RaspiBlitz"
   echo "********************************************************************************"
   echo ""
-  echo "The other RaspiBlitz needs a minimum version of 1.5 (if lower, update first)."
+  echo "The other RaspiBlitz needs a minimum version of 1.6 (if lower, update first)."
   echo "Make sure that the other RaspiBlitz is on the same local network."
   echo ""
   echo "Open a fresh terminal and login per SSH into that other RaspiBlitz."
