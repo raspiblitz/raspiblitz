@@ -95,7 +95,8 @@ if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")  
 fi
 
-OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(SETTINGS "Node Settings & Options")
+OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(LNDCREDS "Manage LND Credentials")
