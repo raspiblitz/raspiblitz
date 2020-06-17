@@ -141,10 +141,7 @@ if [ "${CHOICE}" = "BLITZ" ]; then
   echo "Once in the main menu go: MAINMENU > REPAIR > COPY-SOURCE"
   echo "Follow the given instructions ..."
   echo ""
-  echo "The LOCAL IP of this RaspiBlitz is: ${localip}"
-  echo ""
-  echo "If you get asked for a script - its this line:"
-  echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo "The LOCAL IP of this target RaspiBlitz is: ${localip}"
 fi
 echo "" 
 echo "It can take multiple hours until transfer is complete - be patient."
