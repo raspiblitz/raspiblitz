@@ -28,8 +28,8 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
   if [ "${state}" = "copysource" ]; then
     l1="Copy Blockchain Source Modus\n"
-    l2="Please restart RaspiBlitz when done.\n"
-    l3="Restart from Terminal: sudo shutdown -r now"
+    l2="May needs restart node when done.\n"
+    l3="Restart from Terminal: restart"
     dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localIP}" --infobox "$l1$l2$l3" 5 45
     sleep 3
     exit 1
