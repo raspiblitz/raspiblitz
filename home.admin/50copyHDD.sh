@@ -13,7 +13,7 @@ OPTIONS=(WINDOWS "Windows" \
          BLITZ "RaspiBlitz >=1.5"
         )
 
-CHOICE=$(dialog --clear --title " Copy Blockchain from another laptop/node over LAN " --menu "Which System is running on the other laptop/node?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --title " Copy Blockchain from another laptop/node over LAN " --menu "\nWhich System is running on the other laptop/node you want to copy the blockchain from?/n" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
