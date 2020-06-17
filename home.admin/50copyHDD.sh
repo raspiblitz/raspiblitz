@@ -142,6 +142,7 @@ if [ "${CHOICE}" = "BLITZ" ]; then
   echo "Follow the given instructions ..."
   echo ""
   echo "The local IP if this RaspiBlitz is: ${localip}"
+  echo ""
   echo "If you get asked for a script - its this line:"
   echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
 fi

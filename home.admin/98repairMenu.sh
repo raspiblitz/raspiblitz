@@ -49,17 +49,26 @@ RaspiBlitz image to your SD card.
 copyHost()
 {
   clear
+  echo
+  echo "# *** Copy Blockchain Source Modus ***"
   sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
+  echo "# stopping servives ..."
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   cd /mnt/hdd/${network}
-  echo
-  echo "*** Copy Blockchain Source Modus ***"
-  echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
-  echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
-  echo "2. Then run the script given by the other RaspiBlitz in Terminal"
-  echo "3. When you are done - Restart RaspiBlitz: sudo shutdown -r now"
-  echo
+  echo "# install dependencies ..."
+  sudo apt-get install -y sshpass
+  echo "# get IP of RaspiBlitz to copy to ..."
+  targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
+  targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
+
+  sudo sshpass -p "${targetPassword}" rsync -avhW --progress ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+
+  #echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
+  #echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
+  #echo "2. Then run the script given by the other RaspiBlitz in Terminal"
+  #echo "3. When you are done - Restart RaspiBlitz: sudo shutdown -r now"
+  #echo
   exit 99
 }
 
