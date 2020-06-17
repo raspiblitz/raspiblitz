@@ -55,20 +55,45 @@ copyHost()
   echo "# stopping servives ..."
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
+  sudo systemctl disable ${network}d
   cd /mnt/hdd/${network}
+
   echo "# install dependencies ..."
   sudo apt-get install -y sshpass
+
   echo "# get IP of RaspiBlitz to copy to ..."
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
+  targetIP=$(echo "${targetIP[0]}")
+  localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  if [ "${localIP}" == "${targetIP}" ]; then
+    whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
+  canPingIP=$(ping ${targetIP} -c 1 | grep -c "1 received")
+  if [ ${canPingIP} -eq 0 ]; then
+    whiptail --msgbox "Was not able to contact/ping: ${targetIP}\n\n- check if IP of target RaspiBlitz is correct.\n- check to be on the same local network.\n- try again ..." 11 58 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
+  
+  echo "# get Password of RaspiBlitz to copy to ..."
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --progress ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  chanLogin=$(sudo sshpass -p "${targetPassword}" ssh -t bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
+  if [ ${chanLogin} -eq 0 ]; then
+    whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
 
-  #echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
-  #echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
-  #echo "2. Then run the script given by the other RaspiBlitz in Terminal"
-  #echo "3. When you are done - Restart RaspiBlitz: sudo shutdown -r now"
-  #echo
-  exit 99
+  echo "# Starting copy over LAN (around 4 hours) ..."
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+
+  echo "# start servives again ..."
+  sudo systemctl enable ${network}d
+  sudo systemctl start ${network}d
+  sudo systemctl start lnd
+
+  echo "# show final message"
+  whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
+
 }
 
 # Basic Options

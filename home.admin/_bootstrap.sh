@@ -578,5 +578,8 @@ fi
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
 
+# make sure that bitcoin service is active
+sudo systemctl enable ${network}d
+
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
