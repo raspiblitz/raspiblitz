@@ -7,16 +7,20 @@ source /home/admin/raspiblitz.info
 localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # Basic Options
-OPTIONS=(UNIX "MacOS or Linux" \
-        WINDOWS "Windows"
+OPTIONS=(WINDOWS "Windows" \
+         MACOS "Apple MacOSX" \
+         LINUX "Linux" \
+         BLITZ "RaspiBlitz >=1.5"
         )
 
-CHOICE=$(dialog --clear --title "Which System is running on the other computer?" --menu "" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --title " Copy Blockchain from another laptop/node over LAN " --menu "Which System is running on the other laptop/node?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
-        UNIX) echo "Linus";;
+        MACOS) echo "Steve";;
+        LNIX) echo "Linus";;
         WINDOWS) echo "Bill";;
+        BLITZ) echo "Satoshi";;
         *) exit 1;;
 esac
 
