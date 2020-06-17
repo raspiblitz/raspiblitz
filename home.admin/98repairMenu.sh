@@ -87,12 +87,14 @@ copyHost()
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
-  cd /mnt/hdd/${network}
-
+  sleep 5
+  sudo systemctl stop bitcoind 2>/dev/null
+  
   clear
   echo
   echo "# Starting copy over LAN (around 4-6 hours) ..."
   sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
+  cd /mnt/hdd/${network}
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
 
