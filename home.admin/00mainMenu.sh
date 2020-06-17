@@ -226,6 +226,9 @@ case $CHOICE in
         SERVICES)
             /home/admin/00settingsMenuServices.sh
             ;;
+        SETTINGS)
+            /home/admin/00settingsMenuBasics.sh
+            ;;
         CLOSEALL)
             /home/admin/BBcloseAllChannels.sh
             echo "Press ENTER to return to main menu."
