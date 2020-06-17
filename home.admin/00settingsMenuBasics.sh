@@ -7,25 +7,13 @@ source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
-if [ ${#loop} -eq 0 ]; then loop="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
-if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
-if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
-if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
-if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
-if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
-if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
-if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
-if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
-if [ ${#bos} -eq 0 ]; then bos="off"; fi
-if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
 
 echo "map dropboxbackup to on/off"
@@ -75,40 +63,23 @@ fi
 echo "run dialog ..."
 
 OPTIONS=()
+OPTIONS+=(4 'Run behind TOR' ${runBehindTor})
+OPTIONS+=(9 'Touchscreen' ${touchscreenMenu})  
+OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 OPTIONS+=(1 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
+OPTIONS+=(2 'Testnet' ${chainValue})    
+OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
+OPTIONS+=(6 'LND Auto-Unlock' ${autoUnlock})  
+OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})  
+
+if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
+  OPTIONS+=(3 ${dynDomainMenu} ${domainValue})
+  OPTIONS+=(7 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+  OPTIONS+=(8 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
+fi 
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
-
-#if [ "${runBehindTor}" = "on" ]; then
-#CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
-#1 'Channel Autopilot' ${autoPilot} \
-#k 'Accept Keysend' ${keysend} \
-#2 'Testnet' ${chainValue} \
-#3 ${dynDomainMenu} ${domainValue} \
-#4 'Run behind TOR' ${runBehindTor} \
-#c 'Let`s Encrypt Client' ${letsencrypt} \
-#6 'LND Auto-Unlock' ${autoUnlock} \
-#9 'Touchscreen' ${touchscreenMenu} \
-#r 'LCD Rotate' ${lcdrotateMenu} \
-#d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
-#2>&1 >/dev/tty)
-#else
-#CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12 \
-#1 'Channel Autopilot' ${autoPilot} \
-#k 'Accept Keysend' ${keysend} \
-#2 'Testnet' ${chainValue} \
-#3 ${dynDomainMenu} ${domainValue} \
-#4 'Run behind TOR' ${runBehindTor} \
-#c 'Let`s Encrypt Client' ${letsencrypt} \
-#6 'LND Auto-Unlock' ${autoUnlock} \
-#7 'BTC UPnP (AutoNAT)' ${networkUPnP} \
-#8 'LND UPnP (AutoNAT)' ${autoNatDiscovery} \
-#9 'Touchscreen' ${touchscreenMenu} \
-#r 'LCD Rotate' ${lcdrotateMenu} \
-#d 'StaticChannelBackup on DropBox' ${DropboxBackup} \
-#2>&1 >/dev/tty)
-#fi
 
 dialogcancel=$?
 echo "done dialog"
@@ -224,30 +195,6 @@ else
   echo "Autopilot Setting unchanged."
 fi
 
-# LOOP process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${loop}" != "${choice}" ]; then
-  echo "Loop Setting changed .."
-  anychange=1
-  needsReboot=1 # always reboot so that RTL gets restarted to show/hide support loop
-  /home/admin/config.scripts/bonus.loop.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start loopd
-      /home/admin/config.scripts/bonus.loop.sh menu
-    else
-      l1="FAILED to install Lightning LOOP"
-      l2="Try manual install in the terminal with:"
-      l3="/home/admin/config.scripts/bonus.loop.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "Loop Setting unchanged."
-fi
-
 # Dynamic Domain
 choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -332,59 +279,6 @@ else
   echo "TOR Setting unchanged."
 fi
 
-# RTL process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${rtlWebinterface}" != "${choice}" ]; then
-  echo "RTL Webinterface Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start RTL
-      echo "waiting 10 secs .."
-      sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu
-    else
-      l1="!!! FAIL on RTL install !!!"
-      l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "RTL Webinterface Setting unchanged."
-fi
-
-# BTC-RPC-Explorer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "b")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${BTCRPCexplorer}" != "${choice}" ]; then
-  echo "RTL Webinterface Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo sytemctl start btc-rpc-explorer
-      whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
-The txindex may need to be created before BTC-RPC-Explorer can be active.\n
-This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
-When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
-" 14 50
-      needsReboot=1
-    else
-      l1="!!! FAIL on BTC-RPC-Explorer install !!!"
-      l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.btc-rpc-explorer.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "BTC-RPC-Explorer Setting unchanged."
-fi
-
 # Let's Encrypt process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -413,32 +307,6 @@ if [ "${letsencrypt}" != "${choice}" ]; then
 
 else
   echo "Let's Encrypt Client Setting unchanged."
-fi
-
-# cryptoadvance Specter process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${specter}" != "${choice}" ]; then
-  echo "Cryptoadvance Specter Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      #sudo sytemctl start cryptoadvance-specter
-      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
-      #whiptail --title " Installed Cryptoadvance Specter " --msgbox "\
-      #You should be able to reach specter on port 25441. The Login is Password B.\n
-      #" 14 50
-    else
-      l1="!!! FAIL on Cryptoadvance Specter install !!!"
-      l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "Cryptoadvance Specter Setting unchanged."
 fi
 
 # LND Auto-Unlock
@@ -485,177 +353,6 @@ else
   echo "LCD Rotate Setting unchanged."
 fi
 
-# ElectRS process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${ElectRS}" != "${choice}" ]; then
-  echo "ElectRS Setting changed .."
-  anychange=1
-  extraparameter=""
-  if [ "${choice}" =  "on" ]; then
-    # check on HDD size
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ ${hddGigaBytes} -lt 800 ]; then
-      whiptail --title " HDD/SSD TOO SMALL " --msgbox "\
-Since v1.5 we recommend at least a 1TB HDD/SSD if you want to run ElectRS.\n
-This is due to the eletcrum index that will grow over time and needs space.\n
-To migrate to a bigger HDD/SSD check RaspiBlitz README on 'migration'.\n
-" 14 50
-    else
-      /home/admin/config.scripts/bonus.electrs.sh on ${extraparameter}
-      errorOnInstall=$?
-      if [ ${errorOnInstall} -eq 0 ]; then
-        sudo systemctl start electrs
-        whiptail --title " Installed ElectRS Server " --msgbox "\
-The index database needs to be created before Electrum Server can be used.\n
-This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
-When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
-" 14 50
-      else
-        l1="!!! FAIL on ElectRS install !!!"
-        l2="Try manual install on terminal after reboot with:"
-        l3="/home/admin/config.scripts/bonus.electrs.sh on"
-        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-      fi
-    fi
-  fi
-  if [ "${choice}" =  "off" ]; then
-	  whiptail --title "Delete Electrum Index?" \
-    --yes-button "Keep Index" \
-    --no-button "Delete Index" \
-    --yesno "ElectRS is getting uninstalled. Do you also want to delete the Electrum Index? It contains no important data, but can take multiple hours to rebuild if needed again." 10 60
-	  if [ $? -eq 1 ]; then
-      extraparameter="deleteindex"
-	  fi
-    /home/admin/config.scripts/bonus.electrs.sh off ${extraparameter}
-  fi
-
-else
-  echo "ElectRS Setting unchanged."
-fi
-
-# BTCPayServer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${BTCPayServer}" != "${choice}" ]; then
-  echo "BTCPayServer setting changed .."
-  # check if TOR is installed
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
-    whiptail --title " BTCPayServer needs TOR " --msgbox "\
-At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
-Please activate TOR in SERVICES first.\n
-Then try activating BTCPayServer again in SERVICES.\n
-" 13 42
-  else
-    anychange=1
-    /home/admin/config.scripts/bonus.btcpayserver.sh ${choice} tor
-    errorOnInstall=$?
-    if [ "${choice}" =  "on" ]; then
-      if [ ${errorOnInstall} -eq 0 ]; then
-        source /home/btcpay/.btcpayserver/Main/settings.config
-        whiptail --title " Installed BTCPay Server " --msgbox "\
-BTCPay server was installed.\n
-Use the new 'BTCPay' entry in Main Menu for more info.\n
-" 10 35
-      else
-        l1="BTCPayServer installation is cancelled"
-        l2="Try again from the menu or install from the terminal with:"
-        l3="/home/admin/config.scripts/bonus.btcpayserver.sh on"
-        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-      fi
-    fi
-  fi
-else
-  echo "BTCPayServer setting not changed."
-fi
-
-# LNDMANAGE process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${lndmanage}" != "${choice}" ]; then
-  echo "lndmanage Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${lndmanage}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
-  fi
-else
-  echo "lndmanage setting unchanged."
-fi
-
-# FARADAY process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${faraday}" != "${choice}" ]; then
-  echo "faraday Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${faraday}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
-  fi
-else
-  echo "faraday setting unchanged."
-fi
-
-
-# Balance of Satoshis process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${bos}" != "${choice}" ]; then
-  echo "Balance of Satoshis Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.bos.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${bos}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.bos.sh menu
-  fi
-else
-  echo "Balance of Satoshis setting unchanged."
-fi
-
-# thunderhub process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${thunderhub}" != "${choice}" ]; then
-  echo "ThunderHub Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.thunderhub.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start thunderhub
-      echo "waiting 10 secs .."
-      sleep 10
-      /home/admin/config.scripts/bonus.thunderhub.sh menu
-    else
-      l1="!!! FAIL on ThunderHub install !!!"
-      l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.thunderhub.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else 
-  echo "ThunderHub setting unchanged."
-fi
-
-# LNbits process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${LNBits}" != "${choice}" ]; then
-  echo "LNbits Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    sudo systemctl start lnbits
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
-  fi
-else
-  echo "LNbits setting unchanged."
-fi
-
 # DropBox process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -683,35 +380,6 @@ if [ "${keysend}" != "${choice}" ]; then
   dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
 else
   echo "keysend setting unchanged."
-fi
-
-# JoinMarket process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "j")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${joinmarket}" != "${choice}" ]; then
-  echo "JoinMarket setting changed .."
-  # check if TOR is installed
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
-    whiptail --title " Use Tor with JoinMarket" --msgbox "\
-It is highly recommended to use Tor with JoinMarket.\n
-Please activate TOR in SERVICES first.\n
-Then try activating JoinMarket again in SERVICES.\n
-" 13 42
-  else
-    anychange=1
-    sudo /home/admin/config.scripts/bonus.joinmarket.sh ${choice}
-    errorOnInstall=$?
-    if [ "${choice}" =  "on" ]; then
-      if [ ${errorOnInstall} -eq 0 ]; then
-         sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
-      else
-        whiptail --title 'FAIL' --msgbox "JoinMarket installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.joinmarket.sh on" 9 65
-      fi
-    fi
-  fi
-else
-  echo "JoinMarket not changed."
 fi
 
 if [ ${anychange} -eq 0 ]; then
