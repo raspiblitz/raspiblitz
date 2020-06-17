@@ -62,7 +62,7 @@ copyHost()
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
 
-  sudo sshpass -p "${targetPassword}" rsync -avhW --progress ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo sshpass -o StrictHostKeyChecking=no -p "${targetPassword}" rsync -avhW --progress ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
 
   #echo "Your RaspiBlitz has now stopped LND and ${network}d ..."
   #echo "1. Use command to change to source dir: cd /mnt/hdd/$network"
