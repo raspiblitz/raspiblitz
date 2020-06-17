@@ -90,7 +90,7 @@ copyHost()
   fi
 
   echo "# Starting copy over LAN (around 4 hours) ..."
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
 
   echo "# start servives again ..."
   sudo systemctl enable ${network}d
