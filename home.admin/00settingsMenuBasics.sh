@@ -63,20 +63,20 @@ fi
 echo "run dialog ..."
 
 OPTIONS=()
-OPTIONS+=(4 'Run behind TOR' ${runBehindTor})
-OPTIONS+=(9 'Touchscreen' ${touchscreenMenu})  
+OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
+OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})  
 OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
-OPTIONS+=(1 'Channel Autopilot' ${autoPilot}) 
+OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
-OPTIONS+=(2 'Testnet' ${chainValue})    
+OPTIONS+=(n 'Testnet' ${chainValue})    
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
-OPTIONS+=(6 'LND Auto-Unlock' ${autoUnlock})  
+OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})  
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
-  OPTIONS+=(3 ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(7 'BTC UPnP (AutoNAT)' ${networkUPnP})  
-  OPTIONS+=(8 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
+  OPTIONS+=(y ${dynDomainMenu} ${domainValue})
+  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+  OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi 
 
 CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -99,7 +99,7 @@ needsReboot=0
 anychange=0
 
 # TESTNET process choice - KEEP FIRST IN ORDER
-choice="main"; check=$(echo "${CHOICES}" | grep -c "2")
+choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="test"; fi
 if [ "${chain}" != "${choice}" ]; then
   if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
@@ -184,7 +184,7 @@ else
 fi
 
 # AUTOPILOT process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "1")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoPilot}" != "${choice}" ]; then
   echo "Autopilot Setting changed .."
@@ -196,7 +196,7 @@ else
 fi
 
 # Dynamic Domain
-choice="off"; check=$(echo "${CHOICES}" | grep -c "3")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "y")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${domainValue}" != "${choice}" ]; then
   echo "Dynamic Domain changed .."
@@ -208,7 +208,7 @@ else
 fi
 
 # UPnP
-choice="off"; check=$(echo "${CHOICES}" | grep -c "7")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "b")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${networkUPnP}" != "${choice}" ]; then
   echo "BTC UPnP Setting changed .."
@@ -229,7 +229,7 @@ else
 fi
 
 # AutoNAT
-choice="off"; check=$(echo "${CHOICES}" | grep -c "8")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoNatDiscovery}" != "${choice}" ]; then
   echo "AUTO NAT Setting changed .."
@@ -250,7 +250,7 @@ else
 fi
 
 # TOR process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "4")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "TOR Setting changed .."
@@ -310,7 +310,7 @@ else
 fi
 
 # LND Auto-Unlock
-choice="off"; check=$(echo "${CHOICES}" | grep -c "6")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${autoUnlock}" != "${choice}" ]; then
   echo "LND Autounlock Setting changed .."
@@ -327,7 +327,7 @@ else
 fi
 
 # touchscreen
-choice="0"; check=$(echo "${CHOICES}" | grep -c "9")
+choice="0"; check=$(echo "${CHOICES}" | grep -c "s")
 if [ ${check} -eq 1 ]; then choice="1"; fi
 if [ "${touchscreen}" != "${choice}" ]; then
   echo "Touchscreen Setting changed .."

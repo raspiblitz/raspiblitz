@@ -24,7 +24,7 @@ echo "run dialog ..."
 
 OPTIONS=()
 OPTIONS+=(l 'Lightning Loop' ${loop})
-OPTIONS+=(5 'RTL Webinterface' ${rtlWebinterface})
+OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
 OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
@@ -80,7 +80,7 @@ else
 fi
 
 # RTL process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "5")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
