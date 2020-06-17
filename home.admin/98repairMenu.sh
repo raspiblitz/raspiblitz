@@ -65,6 +65,9 @@ copyHost()
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetIP=$(echo "${targetIP[0]}")
   localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  if [ ${#targetIP} -eq 0 ]; then
+    return
+  fi
   if [ "${localIP}" == "${targetIP}" ]; then
     whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
     return
@@ -77,8 +80,11 @@ copyHost()
   
   echo "# get Password of RaspiBlitz to copy to ..."
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
-  chanLogin=$(sudo sshpass -p "${targetPassword}" ssh -t bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
-  if [ ${chanLogin} -eq 0 ]; then
+  if [ ${#targetPassword} -eq 0 ]; then
+    return
+  fi
+  canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
+  if [ ${canLogin} -eq 0 ]; then
     whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
     return
   fi
