@@ -83,7 +83,7 @@ copyHost()
     return
   fi
 
-  echo "# stopping servives ..."
+  echo "# stopping services ..."
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
@@ -98,7 +98,7 @@ copyHost()
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
 
-  echo "# start servives again ..."
+  echo "# start services again ..."
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
   sudo systemctl start lnd
