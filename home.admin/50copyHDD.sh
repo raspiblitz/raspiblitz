@@ -68,9 +68,9 @@ sudo chmod 777 /mnt/hdd/bitcoin
 echo 
 clear
 if [ "${CHOICE}" = "WINDOWS" ]; then
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a WINDOWS computer"
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo ""
   echo "ON YOUR WINDOWS COMPUTER download and validate the blockchain with the Bitcoin"
   echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
@@ -88,9 +88,9 @@ if [ "${CHOICE}" = "WINDOWS" ]; then
   echo "If asked for a password use PASSWORD A (or 'raspiblitz')."
 fi
 if [ "${CHOICE}" = "MACOS" ]; then
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a MacOSX computer"
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo ""
   echo "ON YOUR MacOSX COMPUTER download and validate the blockchain with the Bitcoin"
   echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
@@ -109,9 +109,9 @@ if [ "${CHOICE}" = "MACOS" ]; then
   echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
 fi
 if [ "${CHOICE}" = "LINUX" ]; then
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a LINUX computer"
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo ""
   echo "ON YOUR LINUX COMPUTER download and validate the blockchain with the Bitcoin"
   echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
@@ -130,9 +130,9 @@ if [ "${CHOICE}" = "LINUX" ]; then
   echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
 fi
 if [ "${CHOICE}" = "BLITZ" ]; then
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another RaspiBlitz"
-  echo "********************************************************************************"
+  echo "****************************************************************************"
   echo ""
   echo "The other RaspiBlitz needs a minimum version of 1.6 (if lower, update first)."
   echo "Make sure that the other RaspiBlitz is on the same local network."
@@ -145,7 +145,7 @@ if [ "${CHOICE}" = "BLITZ" ]; then
 fi
 echo "" 
 echo "It can take multiple hours until transfer is complete - be patient."
-echo "********************************************************************************"
+echo "****************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another option."
 sleep 2
 read key
