@@ -210,5 +210,6 @@ case $CHOICE in
     ;;
   COPY-SOURCE)
     copyHost
+    /home/admin/config.scripts/lnd.unlock.sh
     ;;
 esac
