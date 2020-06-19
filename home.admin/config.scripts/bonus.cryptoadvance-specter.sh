@@ -30,11 +30,13 @@ if [ "$1" = "menu" ]; then
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
 https://${localip}:25441
+
 You have to accept the self-signed-certificate.
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
+
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}\n
-" 16 70
+" 15 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
@@ -236,7 +238,9 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     echo "#    --> correct old Hidden Service with port"
     sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:25441/HiddenServicePort 80 127.0.0.1:25441/g" /etc/tor/torrc
-    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 80 25441
+    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:80/HiddenServicePort 443 127.0.0.1:25441/g" /etc/tor/torrc
+    # port 25441 is HTTPS with self-signed cert
+    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
   exit 0
 fi
