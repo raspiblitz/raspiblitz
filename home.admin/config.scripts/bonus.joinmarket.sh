@@ -107,35 +107,56 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'
     pip install qrcode[pil]
     pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
-        
+
+    # add the joininbox menu
+    sudo rm -rf /home/joinmarket/joininbox
+    sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
+    sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
+    sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
+    sudo chmod +x /home/joinmarket/*.sh
+
+    # joinin.conf settings
+    sudo -u joinmarket touch /home/joinmarket/joinin.conf
+    # tor config
+    # add default value to joinin.conf if needed
+    checkTorEntry=$(sudo -u joinmarket cat /home/joinmarket/joinin.conf | grep -c "runBehindTor")
+    if [ ${checkTorEntry} -eq 0 ]; then
+      echo "runBehindTor=off" | sudo -u joinmarket tee -a /home/joinmarket/joinin.conf
+    fi
+    checkAllowOutboundLocalhost=$(sudo cat /etc/tor/torsocks.conf | grep -c "AllowOutboundLocalhost 1")
+    if [ ${checkAllowOutboundLocalhost} -eq 0 ]; then
+      echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
+      sudo systemctl restart tor
+    fi
+    # setting value in joinin config
+    checkBlitzTorEntry=$(cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor=on")
+    if [ ${checkBlitzTorEntry} -gt 0 ]; then
+      sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
+    fi
+
     # autostart for joinmarket
-    bash -c "echo '# command: torthistx' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'function torthistx() {' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'echo \"Broadcasting transaction through Tor to the Blockstream API and into the network.\"' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'curl --socks5-hostname localhost:9050 -d \$1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx' >> /home/joinmarket/.bashrc"
-    bash -c "echo '}' >> /home/joinmarket/.bashrc"
-    bash -c "echo '# automatically start startup.sh for joinmarket unless' >> /home/joinmarket/.bashrc"
-    bash -c "echo '# when running in a tmux session' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/joinmarket/.bashrc"
-    bash -c "echo '  /home/joinmarket/startup.sh' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'fi' >> /home/joinmarket/.bashrc"
-    bash -c "echo '# always activate jmvenv with PySide2 and cd to scripts' >> /home/joinmarket/.bashrc"    
-    bash -c "echo '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate' >> /home/joinmarket/.bashrc"
-    bash -c "echo '/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"' >> /home/joinmarket/.bashrc"
-    bash -c "echo 'cd /home/joinmarket/joinmarket-clientserver/scripts/' >> /home/joinmarket/.bashrc"
+    echo "
+# automatically start startup.sh for joinmarket unless
+# when running in a tmux session
+if [ -z \"\$TMUX\" ]; then
+  /home/joinmarket/startup.sh
+fi
+# always activate jmvenv with PySide2 and cd to scripts'
+. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
+/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
+cd /home/joinmarket/joinmarket-clientserver/scripts/
+# shortcut commands
+source /home/joinmarket/_commands.sh
+# automatically start main menu for joinmarket unless
+# when running in a tmux session
+if [ -z \"\$TMUX\" ]; then
+  /home/joinmarket/menu.sh
+fi
+" | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
     cat > /home/admin/startup.sh <<EOF
 # check for joinmarket.cfg
-if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-  echo ""
-  echo "Welcome to the JoinMarket command line!"
-  echo ""  
-  echo "Notes on usage:"
-  echo "https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md"
-  echo ""
-  echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
-  echo ""
-else
+if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   echo "Generating the joinmarket.cfg"
   echo ""
   . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate &&\
@@ -158,21 +179,11 @@ else
   sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Edited the joinmarket.cfg to communicate over Tor only."
-  echo ""
-  echo "Welcome to the JoinMarket command line!"
-  echo ""  
-  echo "Notes on usage:"
-  echo "https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md"
-  echo ""
-  echo "To return to the RaspiBlitz menu open a new a terminal window or use: exit"
-  echo ""
 fi
 EOF
-
     mv /home/admin/startup.sh /home/joinmarket/startup.sh
     chown joinmarket:joinmarket /home/joinmarket/startup.sh
     chmod +x /home/joinmarket/startup.sh
-    
   else
     echo "JoinMarket is already installed"
     echo ""
@@ -192,9 +203,8 @@ EOF
     echo " Failed to install JoinMarket"
     exit 1
   fi
-  
-  exit 0
 
+  exit 0
 fi
 
 # switch off
