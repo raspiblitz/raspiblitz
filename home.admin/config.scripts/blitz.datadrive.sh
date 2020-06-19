@@ -70,7 +70,7 @@ if [ "$1" = "status" ]; then
   echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
-  echo "isSSD=${isBTRFS}"
+  echo "isSSD=${isSSD}"
 
   # if HDD is not mounted system is in the pre-setup phase
   # deliver all the detailes needed about the data drive
