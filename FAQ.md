@@ -10,12 +10,14 @@
 - Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
 - New: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
+- New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
-- New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Balance of Satoshis v5.39.4 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
-- New: ThunderHub 0.7.1 [details](https://www.thunderhub.io)
+- New: ThunderHub v0.8.0 (with update option) [details](https://www.thunderhub.io)
+- New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
