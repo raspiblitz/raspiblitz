@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspbian Buster Desktop (2020-05-27)
-# https://www.raspberrypi.org/downloads/raspbian/
-# SHA256: b9a5c5321b3145e605b3bcd297ca9ffc350ecb1844880afd8fb75a7589b7bd04
+# Raspberry PiOS Buster Lite (2020-05-27)
+# https://www.raspberrypi.org/downloads/raspberry-pi-os/
+# SHA256: f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -20,18 +20,73 @@ echo "*** CHECK INPUT PARAMETERS ***"
 wantedBranch="$1"
 if [ ${#wantedBranch} -eq 0 ]; then
   wantedBranch="master"
+else
+  if [ "${wantedBranch}" == "-h" -o "${wantedBranch}" == "--help" ]; then
+     echo "Usage: [branch] [github user] [root partition] [LCD screen installed true|false] [Wifi disabled true|false]"
+     echo "Example (USB boot, no LCD and no wifi): $0 v1.6 rootzoll /dev/sdb2 false true"
+     exit 1
+  fi
 fi
 echo "will use code from branch --> '${wantedBranch}'"
 
 # 2nd optional parameter is the GITHUB-USERNAME to get code from when
 # provisioning sd card with raspiblitz assets/scripts later on
 # if 2nd parameter is used - 1st is mandatory
-echo "*** CHECK INPUT PARAMETERS ***"
 githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
 echo "will use code from user --> '${githubUser}'"
+
+# 3rd optional parameter is the root partition
+rootPartition="$3"
+if [ ${#rootPartition} -eq 0 ]; then
+  rootPartition="/dev/mmcblk0p2"
+fi
+echo "will use root partition --> '${rootPartition}'"
+
+# 4th optional parameter is the LCD screen
+lcdInstalled="$4"
+if [ ${#lcdInstalled} -eq 0 ]; then
+  lcdInstalled="true"
+else
+  if [ "${lcdInstalled}" != "false" ]; then
+     lcdInstalled="true"
+  fi
+fi
+echo "will activate LCD screen --> '${lcdInstalled}'"
+
+# 5th optional parameter is Wifi
+disableWifi="$5"
+if [ ${#disableWifi} -eq 0 ]; then
+  disableWifi="false"
+else
+  if [ "${disableWifi}" != "true" ]; then
+     disableWifi="false"
+  fi
+fi
+echo "will disable wifi --> '${disableWifi}'"
+
+# 6th optional parameter is Wifi country
+wifiCountry="$6"
+if [ ${#wifiCountry} -eq 0 ]; then
+  wifiCountry="US"
+fi
+if [ "${disableWifi}" == "false" ]; then
+   echo "will use Wifi country --> '${wifiCountry}'"
+fi
+
+echo -n "Do you wish to install Raspiblitz branch ${wantedBranch}? (yes/no) "
+read installRaspiblitzAnswer
+if [ "$installRaspiblitzAnswer" == "yes" ] ;then
+   echo ""
+   echo ""
+else
+   exit 1
+fi
+
+
+echo "Installing Raspiblitz..."
 
 sleep 3
 
@@ -104,12 +159,12 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packages that are not needed
-sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+sudo apt-get remove -y --purge python2 python2-minimal
 sudo apt-get clean
 sudo apt-get -y autoremove
 
 if [ -f "/usr/bin/python3.7" ]; then
-  # make sure /usr/bin/python exists (and calls Python3.7 in Debian Buster)
+  # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
   echo "python calls python3.7"
 elif [ -f "/usr/bin/python3.8" ]; then
@@ -124,7 +179,7 @@ fi
 
 # update debian
 echo ""
-echo "*** UPDATE DEBIAN ***"
+echo "*** UPDATE ***"
 sudo apt-get update -y
 sudo apt-get upgrade -f -y
 
@@ -144,15 +199,32 @@ if [ "${baseImage}" = "raspbian" ]; then
   # set to wait until network is available on boot (0 seems to yes)
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
-  sudo raspi-config nonint do_wifi_country US
+  if [ "${disableWifi}" == "false" ]; then
+     sudo raspi-config nonint do_wifi_country $wifiCountry
+  fi
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
   echo "max_usb_current=1" | sudo tee -a /boot/config.txt
   # run fsck on sd boot partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
-  # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
-  sudo tune2fs -c 1 /dev/mmcblk0p2
+  # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
+  sudo tune2fs -c 1 ${rootPartition}
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
-  sudo sed -i 's/^/fsck.mode=force fsck.repair=yes /g' /boot/cmdline.txt
+
+  # edit kernel parameters
+  kernelOptionsFile=/boot/cmdline.txt
+  fsOption1="fsck.mode=force"
+  fsOption2="fsck.repair=yes"
+  kernelOptions=$(cat $kernelOptionsFile)
+  fsOption1InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption1})
+  fsOption2InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption2})
+
+  if [ ${fsOption1InFile} -eq 0 ]; then
+     sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
+  fi
+  if [ ${fsOption2InFile} -eq 0 ]; then
+     sudo sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
+  fi
+
 fi
 
 # special prepare when Ubuntu or Armbian
@@ -172,30 +244,32 @@ echo ""
 echo "*** CONFIG ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
 
-# set new default passwort for root user
+# set new default password for root user
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-if [ "${baseImage}" = "raspbian" ]; then
-  # set Raspi to boot up automatically with user pi (for the LCD)
-  # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-  sudo raspi-config nonint do_boot_behaviour B2
-  sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-  sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-fi
+if [ "${lcdInstalled}" == "true" ]; then
+   if [ "${baseImage}" = "raspbian" ]; then
+      # set Raspi to boot up automatically with user pi (for the LCD)
+      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+      sudo raspi-config nonint do_boot_behaviour B2
+      sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+   fi
 
-if [ "${baseImage}" = "dietpi" ]; then
-  # set DietPi to boot up automatically with user pi (for the LCD)
-  # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
-  # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
-  sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
-fi
+   if [ "${baseImage}" = "dietpi" ]; then
+      # set DietPi to boot up automatically with user pi (for the LCD)
+      # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
+      # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
+      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+   fi
 
-if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
-  sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
-  sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
-  sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+   if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
+      sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
+      sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
+      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+   fi
 fi
 
 # change log rotates
@@ -647,23 +721,25 @@ sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
 sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
 sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
 sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+ 
+if [ "${lcdInstalled}" == "true" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
+     # bash autostart for pi
+     # run as exec to dont allow easy physical access by keyboard
+     # see https://github.com/rootzoll/raspiblitz/issues/54
+     sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+     sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+     sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+     sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+   fi
 
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
-  # bash autostart for pi
-  # run as exec to dont allow easy physical access by keyboard
-  # see https://github.com/rootzoll/raspiblitz/issues/54
-  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-  sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-fi
-
-if [ "${baseImage}" = "dietpi" ]; then
-  # bash autostart for dietpi
-  sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-  sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-  sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-  sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+   if [ "${baseImage}" = "dietpi" ]; then
+     # bash autostart for dietpi
+     sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+     sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+     sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+     sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+   fi
 fi
 
 echo ""
@@ -674,6 +750,13 @@ echo "*** HARDENING ***"
 sudo apt-get install -y --no-install-recommends python3-systemd fail2ban 
 
 if [ "${baseImage}" = "raspbian" ]; then
+  if [ "${disableWifi}" == "true" ]; then
+     echo ""
+     echo "*** DISABLE WIFI ***"
+     sudo systemctl disable wpa_supplicant.service
+     sudo ifconfig wlan0 down
+  fi
+
   echo ""
   echo "*** DISABLE BLUETOOTH ***"
 
@@ -715,37 +798,40 @@ echo ""
 
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
-  echo "*** LCD DRIVER ***"
-  echo "--> Downloading LCD Driver from Github"
-  cd /home/admin/
-  sudo -u admin git clone https://github.com/goodtft/LCD-show.git
-  sudo -u admin chmod -R 755 LCD-show
-  sudo -u admin chown -R admin:admin LCD-show
-  cd LCD-show/
-  # set comit hard to old version - that seemed to run better
-  #
-  sudo -u admin git reset --hard ce52014
+if [ "${lcdInstalled}" == "true" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+     echo "*** LCD DRIVER ***"
+     echo "--> Downloading LCD Driver from Github"
+     cd /home/admin/
+     sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+     sudo -u admin chmod -R 755 LCD-show
+     sudo -u admin chown -R admin:admin LCD-show
+     cd LCD-show/
+     # set comit hard to old version - that seemed to run better
+     #
+     sudo -u admin git reset --hard ce52014
 
-  # install xinput calibrator package
-    echo "--> install xinput calibrator package"
-  sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
-fi
+     # install xinput calibrator package
+     echo "--> install xinput calibrator package"
+     sudo apt-get install -y libxi6
+     sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+   fi
 
-# make dietpi preparations
-if [ "${baseImage}" = "dietpi" ]; then
-  echo "--> dietpi preparations"
-  sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-  sudo mkdir /etc/X11/xorg.conf.d
-  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-  sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-  sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-  sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-  sudo cp ./usr/cmdline.txt /DietPi/
-  sudo cp ./usr/inittab /etc/
-  sudo cp ./boot/config-35.txt /DietPi/config.txt
-  # make LCD screen rotation correct
-  sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+   # make dietpi preparations
+   if [ "${baseImage}" = "dietpi" ]; then
+     echo "--> dietpi preparations"
+     sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+     sudo mkdir /etc/X11/xorg.conf.d
+     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+     sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+     sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+     sudo cp ./usr/cmdline.txt /DietPi/
+     sudo cp ./usr/inittab /etc/
+     sudo cp ./boot/config-35.txt /DietPi/config.txt
+     # make LCD screen rotation correct
+     sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+   fi
 fi
 
 # *** RASPIBLITZ IMAGE READY ***
@@ -754,27 +840,36 @@ echo "**********************************************"
 echo "SD CARD BUILD DONE"
 echo "**********************************************"
 echo ""
-echo "Your SD Card Image for RaspiBlitz is almost ready."
-if [ "${baseImage}" = "raspbian" ]; then
-  echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-  echo ""
+
+if [ "${lcdInstalled}" == "true" ]; then
+   echo "Your SD Card Image for RaspiBlitz is almost ready."
+   if [ "${baseImage}" = "raspbian" ]; then
+      echo "Last step is to install LCD drivers. This will reboot your Pi when done."
+      echo ""
+   fi
+else
+   echo "Your SD Card Image for RaspiBlitz is ready."
 fi
 echo "Take the chance & look thru the output above if you can spot any errror."
 echo ""
-echo "After final reboot - your SD Card Image is ready."
-echo ""
+if [ "${lcdInstalled}" == "true" ]; then
+   echo "After final reboot - your SD Card Image is ready."
+   echo ""
+fi
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
 echo "REMEMBER for login now use --> user:admin password:raspiblitz"
 echo ""
 
-# activate LCD and trigger reboot
-# dont do this on dietpi to allow for automatic build
-if [ "${baseImage}" = "raspbian" ]; then
-  sudo chmod +x -R /home/admin/LCD-show
-  cd /home/admin/LCD-show/
-  sudo apt-mark hold raspberrypi-bootloader
-  sudo ./LCD35-show
-else
-  echo "Use 'sudo reboot' to restart manually."
+sudo chmod +x -R /home/admin/LCD-show
+if [ "${lcdInstalled}" == "true" ]; then
+   # activate LCD and trigger reboot
+   # dont do this on dietpi to allow for automatic build
+   if [ "${baseImage}" = "raspbian" ]; then
+      cd /home/admin/LCD-show/
+      sudo apt-mark hold raspberrypi-bootloader
+      sudo ./LCD35-show
+   else
+     echo "Use 'sudo reboot' to restart manually."
+   fi
 fi
