@@ -203,7 +203,19 @@ if [ "${baseImage}" = "raspbian" ]; then
      sudo raspi-config nonint do_wifi_country $wifiCountry
   fi
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
-  echo "max_usb_current=1" | sudo tee -a /boot/config.txt
+
+  configFile="/boot/config.txt"
+  max_usb_current="max_usb_current=1"
+  max_usb_currentDone=$(cat $configFile|grep -c "$max_usb_current")
+
+  if [ ${max_usb_currentDone} -eq 0 ]; then
+    sudo echo "" >> $configFile
+    sudo echo "# Raspiblitz" >> $configFile
+    echo "$max_usb_current" | sudo tee -a $configFile
+  else
+    echo "$max_usb_current already in $configFile"
+  fi
+
   # run fsck on sd boot partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
@@ -214,15 +226,20 @@ if [ "${baseImage}" = "raspbian" ]; then
   kernelOptionsFile=/boot/cmdline.txt
   fsOption1="fsck.mode=force"
   fsOption2="fsck.repair=yes"
-  kernelOptions=$(cat $kernelOptionsFile)
   fsOption1InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption1})
   fsOption2InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption2})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
      sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
+     echo "$fsOption1 added to $kernelOptionsFile"
+  else
+     echo "$fsOption1 already in $kernelOptionsFile"
   fi
   if [ ${fsOption2InFile} -eq 0 ]; then
      sudo sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
+     echo "$fsOption2 added to $kernelOptionsFile"
+  else
+     echo "$fsOption2 already in $kernelOptionsFile"
   fi
 
 fi
@@ -362,36 +379,36 @@ sudo apt-get install -y autossh telnet
 sudo apt-get install -y fbi
 
 # prepare for powertest
-sudo apt install -y sysbench
+sudo apt-get install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
-sudo apt install -y build-essential
+sudo apt-get install -y build-essential
 
 # add armbian-config
 if [ "${baseImage}" = "armbian" ]; then
   # add armbian config
-  sudo apt install armbian-config -y
+  sudo apt-get install armbian-config -y
 fi
 
 # dependencies for python
-sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+sudo apt-get install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # rsync is needed to copy from HDD
-sudo apt install -y rsync
+sudo apt-get install -y rsync
 # install ifconfig
-sudo apt install -y net-tools
+sudo apt-get install -y net-tools
 #to display hex codes
-sudo apt install -y xxd
+sudo apt-get install -y xxd
 # setuptools needed for Nyx
 sudo pip install setuptools
 # netcat for 00infoBlitz.sh
-sudo apt install -y netcat
+sudo apt-get install -y netcat
 # install OpenSSH client + server
-sudo apt install -y openssh-client
-sudo apt install -y openssh-sftp-server
+sudo apt-get install -y openssh-client
+sudo apt-get install -y openssh-sftp-server
 # install killall, fuser
 sudo apt-get install -y psmisc
 
@@ -680,15 +697,26 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
 sudo apt-get -y install fzf
-sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+
+homeFile=/home/admin/.bashrc
+keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
+keyBindingsDone=$(cat ${homeFile}|grep -c ${keyBindings})
+
+if [ ${keyBindingsDone} -eq 0 ]; then
+   sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+   echo "key-bindings added to $homeFile"
+else
+   echo "key-bindings already in $homeFile"
+fi
 
 # *** SHELL SCRIPTS AND ASSETS
 
 # move files from gitclone
 cd /home/admin/
+sudo -u admin rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b ${wantedBranch} https://github.com/${githubUser}/raspiblitz.git
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
@@ -713,32 +741,61 @@ fi
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
-# bash autostart for admin
-sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
-sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
-sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
-sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
-sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+homeFile=/home/admin/.bashrc
+autostart="automatically start main menu"
+autostartDone=$(cat $homeFile|grep -c "$autostart")
+
+if [ ${autostartDone} -eq 0 ]; then
+   # bash autostart for admin
+   sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+   sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
+   sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+   sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+   sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+   sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+   sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+   echo "autostart added to $homeFile"
+else
+   echo "autostart already in $homeFile"
+fi
  
 if [ "${lcdInstalled}" == "true" ]; then
    if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
-     # bash autostart for pi
-     # run as exec to dont allow easy physical access by keyboard
-     # see https://github.com/rootzoll/raspiblitz/issues/54
-     sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-     sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-     sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-     sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+
+     homeFile=/home/pi/.bashrc
+     autostart="automatic start the LCD"
+     autostartDone=$(cat $homeFile|grep -c "$autostart")
+
+     if [ ${autostartDone} -eq 0 ]; then
+        # bash autostart for pi
+        # run as exec to dont allow easy physical access by keyboard
+        # see https://github.com/rootzoll/raspiblitz/issues/54
+        sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+        sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+        sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+        sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+        echo "autostart LCD added to $homeFile"
+     else
+        echo "autostart LCD already in $homeFile"
+     fi
    fi
 
    if [ "${baseImage}" = "dietpi" ]; then
-     # bash autostart for dietpi
-     sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-     sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-     sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-     sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+
+     homeFile=/home/dietpi/.bashrc
+     startLCD="automatic start the LCD"
+     autostartDone=$(cat $homeFile|grep -c "$startLCD")
+
+     if [ ${autostartDone} -eq 0 ]; then
+        # bash autostart for dietpi
+        sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+        sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+        sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+        sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+        echo "autostart LCD added to $homeFile"
+     else
+        echo "autostart LCD already in $homeFile"
+     fi
    fi
 fi
 
@@ -760,16 +817,26 @@ if [ "${baseImage}" = "raspbian" ]; then
   echo ""
   echo "*** DISABLE BLUETOOTH ***"
 
-  # disable bluetooth module
-  sudo sh -c "echo 'dtoverlay=pi3-disable-bt' >> /boot/config.txt"
-  sudo sh -c "echo 'dtoverlay=disable-bt' >> /boot/config.txt"
+  configFile="/boot/config.txt"
+  disableBT="dtoverlay=disable-bt"
+  disableBTDone=$(cat $configFile|grep -c "$disableBT")
+
+  if [ ${disableBTDone} -eq 0 ]; then
+    # disable bluetooth module
+    sudo echo "" >> $configFile
+    sudo echo "# Raspiblitz" >> $configFile
+    echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
+    echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
+  else
+    echo "disable BT already in $configFile"
+  fi
 
   # remove bluetooth services
   sudo systemctl disable bluetooth.service
   sudo systemctl disable hciuart.service
 
   # remove bluetooth packages
-  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  sudo apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
 fi
 
 # *** CACHE DISK IN RAM ***
@@ -861,11 +928,11 @@ echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease
 echo "REMEMBER for login now use --> user:admin password:raspiblitz"
 echo ""
 
-sudo chmod +x -R /home/admin/LCD-show
 if [ "${lcdInstalled}" == "true" ]; then
    # activate LCD and trigger reboot
    # dont do this on dietpi to allow for automatic build
    if [ "${baseImage}" = "raspbian" ]; then
+      sudo chmod +x -R /home/admin/LCD-show
       cd /home/admin/LCD-show/
       sudo apt-mark hold raspberrypi-bootloader
       sudo ./LCD35-show
