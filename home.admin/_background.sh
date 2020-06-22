@@ -260,7 +260,7 @@ do
   recheckSubscription=$((($counter % 600)+1))
   if [ ${recheckSubscription} -eq 1 ]; then
     # IP2TOR subscriptions (that will need renew in next 20min = 1200 secs)
-    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1200
+    sudo -u admin /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1200
   fi
 
   ###############################
