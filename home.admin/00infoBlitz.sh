@@ -185,7 +185,7 @@ if [ "${runBehindTor}" = "on" ]; then
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
-  torInfo="+ TOR"
+  torInfo="+ Tor"
 
 else
 

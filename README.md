@@ -22,7 +22,7 @@ As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is availa
 
 There are further Services that can be switched on:
 
-* **TOR** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
+* **Tor** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
 * **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
@@ -33,7 +33,7 @@ There are further Services that can be switched on:
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Faraday** (Channel Analysis & Recommendations CLI) [details](https://github.com/lightninglabs/faraday/blob/master/README.md)
-* **Balance Of Satoshi** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
+* **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -225,15 +225,15 @@ Then the user is asked to enter the Password B - this is internally used for the
 
 *The other passwords C & D will be needed later on. They will be used during the lightning wallet setup.*
 
-### Running behind TOR
+### Running behind Tor
 
-On setup you can now decide if you want to run your RaspiBlitz behind TOR or make your IP public to the lightning network.
+On setup you can now decide if you want to run your RaspiBlitz behind Tor or make your IP public to the lightning network.
 
 ![TOR](pictures/chooseTOR.png)
 
-Your IP can reveal your location (at least to a certain radius) to everyone and your internet provider has a record of your personal identity tied to your IP. When you choose to run behind the TOR network this personal data is much better protected. But running behind TOR reduces speed and might makes it more difficult to connect to you for other nodes or pairing other devices and apps to it.
+Your IP can reveal your location (at least to a certain radius) to everyone and your internet provider has a record of your personal identity tied to your IP. When you choose to run behind the Tor network this personal data is much better protected. But running behind Tor reduces speed and might makes it more difficult to connect to you for other nodes or pairing other devices and apps to it.
 
-You can switch TOR off later on. Also you can switch TOR on also after the setup, but keep in mind that once running your node with your public IP leaves records on the internet connecting your lightning node id to your public IP.
+You can switch Tor off later on. Also you can switch Tor on also after the setup, but keep in mind that once running your node with your public IP leaves records on the internet connecting your lightning node id to your public IP.
 
 After this the setup process will need some time and the user will see a lot of console outputs - just wait until its finished:
 
@@ -527,22 +527,22 @@ You will be asked for your dynamic domain name such like "mynode.crabdance.org" 
 
 *NOTE: DynamicDNS just works if you can forward ports on your router and you have a temporary public IP address (your ISP is not running you behind a NAT - like on most mobile connections). Another solution to make your ports reachable from the public internet is to use reverse ssh tunneling - see FAQ on ['How to setup port-forwarding with a SSH tunnel?'](FAQ.md#how-to-setup-port-forwarding-with-a-ssh-tunnel)*
 
-##### Run behind TOR
+##### Run behind Tor
 
-You can run your Bitcoin- & Lightning-Node and also additional Apps as a TOR hidden service - replacing your IP with an .onion-address
+You can run your Bitcoin- & Lightning-Node and also additional Apps as a Tor hidden service - replacing your IP with an .onion-address
 
 ![tor1](pictures/tor1.png)
 
 This has some benefits:
 
 * You don't publish your IP running a node so it's much harder to resolve your real name and location.
-* You tunnel through the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes.
-* By using a TOR address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
+* You tunnel through the NAT of your router and make Bitcoin and Lightning reachable to all other Tor nodes.
+* By using a Tor address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
 
 But this also comes with the following side effects:
 
-* Some Mobile wallets don't support connecting to RaspiBlitz over TOR yet
-* Lightning nodes that don't run TOR cannot reach you (like behind NAT)
+* Some Mobile wallets don't support connecting to RaspiBlitz over Tor yet
+* Lightning nodes that don't run Tor cannot reach you (like behind NAT)
 
 To try it out just switch on the service - you can deactivate later on if it's not working for you.
 
@@ -615,7 +615,7 @@ BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It
 
 ![BTCPAY](pictures/btcpay.png)
 
-*At the moment the RaspiBlitz can just make the BTCPayServer publicly available to the outside over the TOR network (Hidden Service).*
+*At the moment the RaspiBlitz can just make the BTCPayServer publicly available to the outside over the Tor network (Hidden Service).*
 
 [Details on Service](https://btcpayserver.org/)
 
@@ -680,16 +680,16 @@ At the moment the following mobile wallets are supported:
 * [ZAP (iOS/Android)](https://github.com/LN-Zap/zap-iOS)
 * [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet)
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
-* [Fully Noded (iOS over TOR)](https://apps.apple.com/us/app/fully-noded/id1436425586)
+* [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md)
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changing IP of our Home-DSL.
 
 This youtube video explains the "port forwarding" on your router in more detail: https://www.youtube.com/watch?v=KESo7hHXQtg
 
-When you have TOR activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over TOR. 
+When you have Tor activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over Tor. 
 
-If you run your node behind TOR the SendMany App will just offer to connect when your in the same local network ... for connection over TOR there is no support yet. 
+If you run your node behind Tor the SendMany App will just offer to connect when your in the same local network ... for connection over Tor there is no support yet. 
 
 Basically those mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. And then you need to `pair` them with your RaspiBlitz - also with a QR code displayed on the LCD. If you run your RaspiBlitz without a LCD there is the fallback option to display that QR code on the terminal as ASCII code (might involve lowering your terminal font size).
 
@@ -844,7 +844,7 @@ With the command `raspiblitz` it's possible to return to the main menu.
 
 As mentioned above you can export a Migration File from your Raspiblitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
 
-A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, TOR/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
+A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
 
 If you want to it to import it again to a new RaspiBlitz (for example with an updated HDD/SSD) you can choose the MIGRATION option on the first setup dialog after the Hardwaretest (where you normally choose between Bitcoin & Litecoin).
 
@@ -885,7 +885,7 @@ To develop your own scripts/apps and to connect other services/apps to your Rasp
 * `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
 * `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
 
-If you activate TOR then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
+If you activate Tor then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
 
 ### Backup for On-Chain- & Channel-Funds
 
