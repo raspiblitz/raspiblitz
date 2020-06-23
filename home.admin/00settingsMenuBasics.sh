@@ -392,7 +392,7 @@ if [ "${zerotier}" != "${choice}" ]; then
   anychange=1
   error=""
   source <(sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice})
-  if [ "${choice}" != "on" ]; then
+  if [ "${choice}" == "on" ]; then
     if [ ${#error} -eq 0 ]; then
       dialog --msgbox "Your RaspiBlitz joined the ZeroTier network." 6 46
     else
