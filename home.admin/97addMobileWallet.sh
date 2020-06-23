@@ -101,7 +101,7 @@ checkIP2TOR()
 
 	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')
 	  if [ ${userHasActiveChannels} -gt 0 ]; then
-	    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+	    sudo -u admin /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
 	  else
 	  	whiptail --title " Lightning not Ready " --msgbox "\nYou need at least one active Lightning channel.\n\nPlease make sure that your node is funded and\nyou have a confirmed and active channel running.\nThen try again to connect the mobile wallet." 13 52
 	  	exit 0

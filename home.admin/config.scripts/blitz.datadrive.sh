@@ -70,7 +70,7 @@ if [ "$1" = "status" ]; then
   echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
-  echo "isSSD=${isBTRFS}"
+  echo "isSSD=${isSSD}"
 
   # if HDD is not mounted system is in the pre-setup phase
   # deliver all the detailes needed about the data drive
@@ -344,13 +344,14 @@ if [ "$1" = "format" ]; then
   fi
 
   # wipe all partitions and write fresh GPT
-  >&2 echo "# Wiping all partitions"
-  for v_partition in $(parted -s /dev/${hdd} print|awk '/^ / {print $1}')
-  do
-   >&2 echo "# sudo parted -s /dev/${hdd} rm ${v_partition}"
-   sudo parted -s /dev/${hdd} rm ${v_partition}
-   sleep 2
-  done
+  >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+  sudo sfdisk --delete /dev/${hdd}
+  sudo wipefs -a /dev/${hdd}
+  partitions=$(lsblk | grep -c "─${hdd}")
+  if [ ${partitions} -gt 0 ]; then
+    >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
+    sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+  fi
   partitions=$(lsblk | grep -c "─${hdd}")
   if [ ${partitions} -gt 0 ]; then
     echo "error='partition cleaning failed'"

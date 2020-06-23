@@ -97,7 +97,8 @@ if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")
 fi
 
-OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(SETTINGS "Node Settings & Options")
+OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(LNDCREDS "Manage LND Credentials")
@@ -229,6 +230,9 @@ case $CHOICE in
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
+            ;;
+        SETTINGS)
+            /home/admin/00settingsMenuBasics.sh
             ;;
         CLOSEALL)
             /home/admin/BBcloseAllChannels.sh

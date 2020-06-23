@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 import grpc
-from lndlibs import rpc_pb2 as ln
-from lndlibs import rpc_pb2_grpc as lnrpc
+from lndlibs import walletunlocker_pb2 as lnrpc
+from lndlibs import walletunlocker_pb2_grpc as rpcstub
 
 if sys.version_info < (3, 0):
     print("Can't run on Python2")
@@ -14,9 +14,6 @@ if sys.version_info < (3, 0):
 
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
-    print("# ! always activate virtual env first: source /home/admin/python3-env-lnd/bin/activate")
-    print("# ! and run with with: python3 /home/admin/config.scripts/lnd.initwallet.py")
-    print("# ! Or: /home/admin/python3-env-lnd/bin/python3 /home/admin/config.scripts/lnd.initwallet.py")
     print("# creating or recovering the LND wallet")
     print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
     print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
@@ -26,14 +23,13 @@ if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
 
 mode = sys.argv[1]
 
-
 def new(stub, wallet_password="", seed_entropy=None):
     if seed_entropy:
         # provide 16-bytes of static data to get reproducible seeds for TESTING!)
         print("WARNING: Use this for testing only!!")
-        request = ln.GenSeedRequest(seed_entropy=seed_entropy)
+        request = lnrpc.GenSeedRequest(seed_entropy=seed_entropy)
     else:
-        request = ln.GenSeedRequest()
+        request = lnrpc.GenSeedRequest()
 
     try:
         response = stub.GenSeed(request)
@@ -65,7 +61,7 @@ def new(stub, wallet_password="", seed_entropy=None):
         print("err='GenSeedRequest'")
         sys.exit(1)
 
-    request = ln.InitWalletRequest(
+    request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=seed_words
     )
@@ -86,7 +82,7 @@ def new(stub, wallet_password="", seed_entropy=None):
 
 
 def seed(stub, wallet_password="", seed_words="", seed_password=""):
-    request = ln.InitWalletRequest(
+    request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
         recovery_window=5000,
@@ -115,7 +111,7 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
     scb_hex_str = binascii.hexlify(content)
     print(scb_hex_str)
 
-    request = ln.InitWalletRequest(
+    request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
         recovery_window=5000,
@@ -218,7 +214,7 @@ def main():
     cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
     channel = grpc.secure_channel('localhost:10009', ssl_creds)
-    stub = lnrpc.WalletUnlockerStub(channel)
+    stub = rpcstub.WalletUnlockerStub(channel)
 
     wallet_password, seed_words, seed_password, file_path_scb = parse_args()
 

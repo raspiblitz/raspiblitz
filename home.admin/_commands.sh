@@ -91,6 +91,29 @@ function torthistx() {
 }
 
 # command: status
+# start the status screen in the terminal
 function status() {
   sudo -u pi /home/admin/00infoLCD.sh
+}
+
+# command: balance
+# switch to the bos user for Balance of Satoshis
+function balance() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "bos=on") -eq 1 ]; then
+    sudo su - bos
+  else
+    echo "Balance of Satoshis is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.bos.sh on"
+  fi
+}
+
+# command: jmarket
+# switch to the joinmarket user for the JoininBox menu
+function jmarket() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+    sudo su - joinmarket
+  else
+    echo "JoinMarket is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
 }

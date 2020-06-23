@@ -4,16 +4,20 @@
 
 - Update: Raspberry Pi OS Base Image (May 2020)
 - Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
+- Update: litecoin version 0.18.1-beta [details](https://blog.litecoin.org/litecoin-core-v0-18-1-release-233cabc26440)
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
 - Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Loop 0.6.3 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
+- Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
+- Update: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
+- New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
-- New: Balance of Satoshis [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Balance of Satoshis v5.39.4 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
-- New: ThunderHub 0.7.1 [details](https://www.thunderhub.io)
+- New: ThunderHub v0.8.0 (with update option) [details](https://www.thunderhub.io)
+- New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
@@ -66,7 +70,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 - New: LNbits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 - New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
-- New: TOR Support to connect mobile Apps
+- New: Tor Support to connect mobile Apps
 - New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
 - New: Start without LCD (switch to HDMI) [details](FAQ.md#can-i-run-the-raspiblitz-without-a-displaylcd)
 - New: Recovery Sheet (PDF) [details](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
@@ -88,12 +92,12 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 - Update: New Torrent files
 - New: Logo (see folder raspiblitz/logos)
 - New: Sync/Validate Blockchain as default for RP4
-- New: Switch on TOR during setup
+- New: Switch on Tor during setup
 - New: Support Zap Mobile for Android
 - New: Repair Options in main menu
 - New: UPNP (AutoNAT) support in services menu
 - New: LCD rotate 180 degrees in services menu
-- Fix: TOR switch on/off
+- Fix: Tor switch on/off
 - Fix: Zap iOS Mobile Wallet connect
 - Fix: Shango Mobile Wallet connect
 - Experimental: LCD Touchscreen Support
