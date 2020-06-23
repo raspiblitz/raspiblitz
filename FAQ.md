@@ -18,6 +18,7 @@
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
 - New: ThunderHub v0.8.0 (with update option) [details](https://www.thunderhub.io)
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
+- New: ZeroTier [details](https://zerotier.com/manual/)
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
