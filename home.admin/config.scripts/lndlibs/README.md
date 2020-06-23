@@ -8,13 +8,20 @@ To generate the lnd RPC libs - login as admin and run:
 cd
 python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2
 git clone https://github.com/googleapis/googleapis.git
-curl -o rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
-python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
+mkdir protobuffs
+curl -o ./rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
+curl -o ./walletunlocker.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/walletunlocker.proto
+python3 -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./protobuffs --grpc_python_out=./protobuffs ./rpc.proto ./walletunlocker.proto
+cp ./*.proto ./protobuffs
 ````
 
 *NOTE: If LND master branch is already a version ahead .. use the rpc.proto from the version tagged branch.*
 
-Make sure the first 3 lines of the rpc_pb2_grpc.py look like the following for python3 compatibility:
+Now copy the generated RPC libs per SCP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
+
+scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
+
+Make sure the first 3 lines of the `rpc_pb2_grpc.py` & `walletunlocker_pb2_grpc.py` look like the following for python3 compatibility:
 ```
 from __future__ import absolute_import
 import grpc
@@ -22,9 +29,4 @@ import grpc
 from . import rpc_pb2 as rpc__pb2
 ```
 
-Now copy the generated RPC libs per SCP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
-
-scp admin@192.168.X.X:/home/admin/rpc_pb2_grpc.py ./
-scp admin@192.168.X.X:/home/admin/rpc.proto ./
-scp admin@192.168.X.X:/home/admin/rpc_pb2.py ./
 
