@@ -159,9 +159,9 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packages that are not needed
-sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
-sudo apt-get clean
-sudo apt-get -y autoremove
+sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+sudo apt clean
+sudo apt -y autoremove
 
 if [ -f "/usr/bin/python3.7" ]; then
   # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
@@ -180,8 +180,8 @@ fi
 # update debian
 echo ""
 echo "*** UPDATE ***"
-sudo apt-get update -y
-sudo apt-get upgrade -f -y
+sudo apt update -y
+sudo apt upgrade -f -y
 
 echo ""
 echo "*** PREPARE ${baseImage} ***"
@@ -363,57 +363,57 @@ echo "*** SOFTWARE UPDATE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
 
 # installs like on RaspiBolt
-sudo apt-get install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
+sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
 
 # installs bandwidth monitoring for future statistics
-sudo apt-get install -y vnstat
+sudo apt install -y vnstat
 
 # prepare for BTRFS data drive raid
-sudo apt-get install -y btrfs-progs btrfs-tools
+sudo apt install -y btrfs-progs btrfs-tools
 
 # network tools
-sudo apt-get install -y autossh telnet
+sudo apt install -y autossh telnet
 
 # prepare for display graphics mode
 # see https://github.com/rootzoll/raspiblitz/pull/334
-sudo apt-get install -y fbi
+sudo apt install -y fbi
 
 # prepare for powertest
-sudo apt-get install -y sysbench
+sudo apt install -y sysbench
 
 # check for dependencies on DietPi, Ubuntu, Armbian
-sudo apt-get install -y build-essential
+sudo apt install -y build-essential
 
 # add armbian-config
 if [ "${baseImage}" = "armbian" ]; then
   # add armbian config
-  sudo apt-get install armbian-config -y
+  sudo apt install armbian-config -y
 fi
 
 # dependencies for python
-sudo apt-get install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # rsync is needed to copy from HDD
-sudo apt-get install -y rsync
+sudo apt install -y rsync
 # install ifconfig
-sudo apt-get install -y net-tools
+sudo apt install -y net-tools
 #to display hex codes
-sudo apt-get install -y xxd
+sudo apt install -y xxd
 # setuptools needed for Nyx
 sudo pip install setuptools
 # netcat for 00infoBlitz.sh
-sudo apt-get install -y netcat
+sudo apt install -y netcat
 # install OpenSSH client + server
-sudo apt-get install -y openssh-client
-sudo apt-get install -y openssh-sftp-server
+sudo apt install -y openssh-client
+sudo apt install -y openssh-sftp-server
 # install killall, fuser
-sudo apt-get install -y psmisc
+sudo apt install -y psmisc
 
-sudo apt-get clean
-sudo apt-get -y autoremove
+sudo apt clean
+sudo apt -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
@@ -672,7 +672,7 @@ sudo chown -R admin /home/admin
 echo "*** Python DEFAULT libs & depenedencies ***"
 
 # for setup schell scripts
-sudo apt-get -y install dialog bc python3-dialog
+sudo apt -y install dialog bc python3-dialog
 
 # libs (for global python scripts)
 sudo -H python3 -m pip install grpcio==1.29.0
@@ -685,18 +685,18 @@ echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
 # for background processes
-sudo apt-get -y install screen
+sudo apt -y install screen
 
 # for multiple (detachable/background) sessions when using SSH
 # https://github.com/rootzoll/raspiblitz/issues/990
-sudo apt-get -y install tmux
+sudo apt -y install tmux
 
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
 sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 
 # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-sudo apt-get -y install fzf
+sudo apt -y install fzf
 
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
@@ -804,7 +804,7 @@ echo "*** HARDENING ***"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
 
 # fail2ban (no config required)
-sudo apt-get install -y --no-install-recommends python3-systemd fail2ban 
+sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
 if [ "${baseImage}" = "raspbian" ]; then
   if [ "${disableWifi}" == "true" ]; then
@@ -836,7 +836,7 @@ if [ "${baseImage}" = "raspbian" ]; then
   sudo systemctl disable hciuart.service
 
   # remove bluetooth packages
-  sudo apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
+  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
 fi
 
 # *** CACHE DISK IN RAM ***
@@ -880,7 +880,7 @@ if [ "${lcdInstalled}" == "true" ]; then
 
      # install xinput calibrator package
      echo "--> install xinput calibrator package"
-     sudo apt-get install -y libxi6
+     sudo apt install -y libxi6
      sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
    fi
 
