@@ -18,8 +18,12 @@ if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 
 echo "map dropboxbackup to on/off"
-DropboxBackup="off";
+DropboxBackup="off"
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
+
+echo "map zerotier to on/off"
+zerotierSwitch="off"
+if [ "${zerotier}" != "off" ]; then zerotierSwitch="off"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -73,7 +77,7 @@ OPTIONS+=(n 'Testnet' ${chainValue})
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
-OPTIONS+=(z 'ZeroTier' ${zerotier})
+OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
