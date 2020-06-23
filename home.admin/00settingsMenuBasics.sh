@@ -15,6 +15,7 @@ if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
+if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off";
@@ -71,7 +72,8 @@ OPTIONS+=(k 'Accept Keysend' ${keysend})
 OPTIONS+=(n 'Testnet' ${chainValue})    
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
-OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})  
+OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+OPTIONS+=(z 'ZeroTier' ${zerotier})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
@@ -380,6 +382,18 @@ if [ "${keysend}" != "${choice}" ]; then
   dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
 else
   echo "keysend setting unchanged."
+fi
+
+# ZeroTier process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${zerotier}" != "${choice}" ]; then
+  echo "zerotier setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
+  dialog --msgbox "ZeroTier is now ${choice}." 5 46
+else
+  echo "ZeroTier setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
