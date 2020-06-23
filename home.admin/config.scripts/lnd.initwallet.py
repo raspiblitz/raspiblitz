@@ -6,7 +6,7 @@ from pathlib import Path
 
 import grpc
 from lndlibs import rpc_pb2 as lnrpc
-from lndlibs import prc_pb2_grpc as rpcstub
+from lndlibs import rpc_pb2_grpc as rpcstub
 
 if sys.version_info < (3, 0):
     print("Can't run on Python2")
