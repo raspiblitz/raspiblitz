@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# Raspberry PiOS Buster Lite (2020-05-27)
-# https://www.raspberrypi.org/downloads/raspberry-pi-os/
-# SHA256: f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
+# Raspbian Buster Desktop (2020-05-27)
+# https://www.raspberrypi.org/downloads/raspbian/
+# SHA256: b9a5c5321b3145e605b3bcd297ca9ffc350ecb1844880afd8fb75a7589b7bd04
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -159,7 +159,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packages that are not needed
-sudo apt-get remove -y --purge python2 python2-minimal
+sudo apt-get remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
 sudo apt-get clean
 sudo apt-get -y autoremove
 
