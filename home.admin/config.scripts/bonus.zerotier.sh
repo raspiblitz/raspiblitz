@@ -47,7 +47,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     networkID=$(whiptail --inputbox "\nPlease enter the ZeroTier networkID to connect to:" 10 38 "" --title " Join ZeroTier Network " --backtitle "RaspiBlitz - Settings" 3>&1 1>&2 2>&3)
     networkID=$(echo "${networkID[0]}")
     if [ ${#networkID} -eq 0 ]; then
-      echo "# no id entered - cancel"
+      echo "error='cancel'"
       exit 0
     fi
   fi

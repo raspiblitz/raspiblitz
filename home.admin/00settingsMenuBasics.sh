@@ -390,8 +390,16 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${zerotier}" != "${choice}" ]; then
   echo "zerotier setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
-  dialog --msgbox "ZeroTier is now ${choice}." 5 46
+  error=""
+  source <(sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice})
+  if [ ${#error} -eq 0 ]; then
+    dialog --msgbox "ZeroTier is now ${choice}." 5 46
+  else
+    if [ "${error}" != "cancel" ]; then
+      dialog --msgbox "ZeroTier Error:\n${error}" 5 46
+    fi
+  fi
+  
 else
   echo "ZeroTier setting unchanged."
 fi
