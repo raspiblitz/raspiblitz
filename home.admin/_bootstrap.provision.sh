@@ -354,6 +354,15 @@ else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
 
+# ZEROTIER
+if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
+    echo "Provisioning ZeroTier - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup ZeroTier'/g" ${infoFile}
+    sudo /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+else
+    echo "Provisioning ZeroTier - not active" >> ${logFile}
+fi
+
 # LCD ROTATE
 if [ "${#lcdrotate}" -eq 0 ]; then
   # when upgrading from an old raspiblitz - enforce lcdrotate = 0
