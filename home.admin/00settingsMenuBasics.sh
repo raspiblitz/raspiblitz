@@ -23,7 +23,7 @@ if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
 echo "map zerotier to on/off"
 zerotierSwitch="off"
-if [ "${zerotier}" != "off" ]; then zerotierSwitch="off"; fi
+if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
 echo "map chain to on/off"
 chainValue="off"
