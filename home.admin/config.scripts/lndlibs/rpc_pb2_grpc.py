@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import grpc
 
-import rpc_pb2 as rpc__pb2
+from . import rpc_pb2 as rpc__pb2
 
 
 class LightningStub(object):

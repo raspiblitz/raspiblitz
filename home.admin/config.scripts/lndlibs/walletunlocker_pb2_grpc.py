@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import grpc
 
-import walletunlocker_pb2 as walletunlocker__pb2
+from . import walletunlocker_pb2 as walletunlocker__pb2
 
 
 class WalletUnlockerStub(object):

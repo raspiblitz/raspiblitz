@@ -21,12 +21,20 @@ Now copy the generated RPC libs per SCP over to your Laptop and add them to the 
 
 scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
-Make sure the first 3 lines of the `rpc_pb2_grpc.py` & `walletunlocker_pb2_grpc.py` look like the following for python3 compatibility:
+Make sure the first 3 lines of the `rpc_pb2_grpc.py` look like the following for python3 compatibility:
 ```
 from __future__ import absolute_import
 import grpc
 
 from . import rpc_pb2 as rpc__pb2
+```
+
+Make sure the first 3 lines of the `walletunlocker_pb2_grpc.py` look like the following for python3 compatibility:
+```
+from __future__ import absolute_import
+import grpc
+
+from . import walletunlocker_pb2 as walletunlocker__pb2
 ```
 
 
