@@ -55,8 +55,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# *** INSTALL ZeroTier ***"
 
   # Download ZeroTier GPG key and install ZeroTier
-  curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import
-  if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash; fi
+  $(curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import)
+  if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash 1>&2; fi
 
   echo "# ZeroTier is now installed on your RaspiBlitz"
   echo "# Joining zerotier network: ${networkID}"
@@ -69,7 +69,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s/^zerotier=.*/zerotier=${networkID}/g" /mnt/hdd/raspiblitz.conf
 
   else
-    echo "error='ZweroTier join failed'"
+    sudo -u admin sudo apt -y purge zerotier-one 1>&2
+    echo "error='ZeroTier join failed'"
   fi
   exit 0
 fi
@@ -77,13 +78,11 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-
   echo "# *** REMOVING ZEROTIER ***"
 
-
   # leaving network & deinstall
-  sudo zerotier-cli leave ${zerotier} 1>/dev/null 2>/dev/null
-  sudo -u admin sudo apt -y purge zerotier-one
+  sudo zerotier-cli leave ${zerotier} 1>&2
+  sudo -u admin sudo apt -y purge zerotier-one 1>&2
 
   # setting value in raspi blitz config
   sudo sed -i "s/^zerotier=.*/zerotier=off/g" /mnt/hdd/raspiblitz.conf
