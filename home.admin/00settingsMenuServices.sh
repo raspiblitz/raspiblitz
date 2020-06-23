@@ -310,7 +310,7 @@ if [ "${thunderhub}" != "${choice}" ]; then
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
-else 
+else
   echo "ThunderHub setting unchanged."
 fi
 
