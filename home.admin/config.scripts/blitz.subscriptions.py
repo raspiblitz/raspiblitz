@@ -44,6 +44,7 @@ def mySubscriptions():
     # check if any subscriptions are available
     countSubscriptions=0
     try:
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
         countSubscriptions += len(subs['subscriptions_ip2tor'])
     except Exception as e: pass
@@ -181,6 +182,7 @@ your RaspiBlitz behind TOR.
     lnd_grpc_api=False
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for sub in subs['subscriptions_ip2tor']:
                 if not sub['active']: next

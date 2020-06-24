@@ -25,7 +25,7 @@ if [ ${mode} = "backup" ]; then
   # BACKUP
   ################################
 
-  echo "*** LND.RESCUE --> BACKUP"
+  echo "# *** LND.RESCUE --> BACKUP"
 
   # stop LND
   echo "# Stopping lnd..."
