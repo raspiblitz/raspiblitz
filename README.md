@@ -463,7 +463,7 @@ With this feature you can close down all open channels and get funds locked up i
 
 It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
 
-#### CHASHOUT: Remove Funds fro, on-chain Wallet
+#### CASHOUT: Remove Funds fro, on-chain Wallet
 
 Use if the want to remove all funds from the RaspiBlitz.
 
