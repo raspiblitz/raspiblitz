@@ -10,7 +10,6 @@ import datetime, time
 import codecs, grpc, os
 from pathlib import Path
 import toml
-
 from blitzpy import RaspiBlitzConfig
 
 from lndlibs import rpc_pb2 as lnrpc
@@ -402,6 +401,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
 
     # load, add and store subscriptions
     try:
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         if Path(SUBSCRIPTIONS_FILE).is_file():
             print("# load toml file")
             subscriptions = toml.load(SUBSCRIPTIONS_FILE)
@@ -414,7 +414,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
             writer.write(toml.dumps(subscriptions))
             writer.close()
-    
+
     except Exception as e:
         eprint(e)
         raise BlitzError("fail on subscription storage",subscription, e)
@@ -489,6 +489,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
     # load, update and store subscriptions
     try:
         print("# load toml file")
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
         for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
             if subscription['id'] == bridgeid:
@@ -801,6 +802,7 @@ if sys.argv[1] == "subscriptions-list":
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             subs = {}
@@ -837,6 +839,7 @@ if sys.argv[1] == "subscriptions-renew":
             print("# no subscriptions")
             sys.exit(0)
         
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
         for idx, subscription in enumerate(subscriptions['subscriptions_ip2tor']):
 
@@ -898,6 +901,7 @@ if sys.argv[1] == "subscription-cancel":
 
     try:
 
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
         newList = []
         for idx, sub in enumerate(subs['subscriptions_ip2tor']):
@@ -933,6 +937,7 @@ if sys.argv[1] == "subscription-by-service":
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == servicename:
