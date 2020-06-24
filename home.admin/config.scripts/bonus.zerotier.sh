@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.zerotier.sh off"
  echo "bonus.zerotier.sh menu"
  exit 1
-fi
+fi 
 
 # add default value to raspi config if needed
 if ! grep -Eq "^zerotier=" /mnt/hdd/raspiblitz.conf; then
@@ -67,6 +67,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # setting value in raspi blitz config
     sudo sed -i "s/^zerotier=.*/zerotier=${networkID}/g" /mnt/hdd/raspiblitz.conf
+
+    # adding zero tier IP to LND TLS cert
+    # sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add 172.X
+    # sudo /home/admin/config.scripts/lnd.credentials.sh reset tls
+    # sudo /home/admin/config.scripts/lnd.credentials.sh sync
 
   else
     sudo -u admin sudo apt -y purge zerotier-one 1>&2
