@@ -35,12 +35,15 @@ See LCD of RaspiBlitz for QR code of this address if you want to open on mobile 
       BTCPayDomain="${localip}:23001"
     fi
 
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+    
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
 https://${BTCPayDomain}\n
+SHA1 Thumb/Fingerprint: ${fingerprint}\n
 For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz
-" 11 67
+" 12 67
   fi
 
   echo "please wait ..."
