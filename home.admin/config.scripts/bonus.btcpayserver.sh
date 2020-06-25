@@ -31,6 +31,10 @@ See LCD of RaspiBlitz for QR code of this address if you want to open on mobile 
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
+    if [ "${BTCPayDomain}" == "off" ]; then
+      BTCPayDomain="${localip}:23001"
+    fi
+
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
 https://${BTCPayDomain}\n
