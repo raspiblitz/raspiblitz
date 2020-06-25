@@ -37,13 +37,16 @@ See LCD of RaspiBlitz for QR code of this address if you want to open on mobile 
 
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
     
+    torinfo="For details or troubleshoot check for 'BTCPay'\nin README of https://github.com/rootzoll/raspiblitz"
+    if [ "${runBehindTor}" == "on" ] && [ ${#toraddress} -gt 0 ]; then
+      torinfo="To reach BTCPay Server oder Tor use:\n${toraddress}"
+    fi
+
     # IP + Domain
     whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
 https://${BTCPayDomain}\n
 SHA1 Thumb/Fingerprint: ${fingerprint}\n
-For details or troubleshoot check for 'BTCPay'
-in README of https://github.com/rootzoll/raspiblitz
-" 14 67
+${torinfo}" 14 67
   fi
 
   echo "please wait ..."
