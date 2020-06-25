@@ -43,7 +43,7 @@ https://${BTCPayDomain}\n
 SHA1 Thumb/Fingerprint: ${fingerprint}\n
 For details or troubleshoot check for 'BTCPay'
 in README of https://github.com/rootzoll/raspiblitz
-" 12 67
+" 14 67
   fi
 
   echo "please wait ..."
