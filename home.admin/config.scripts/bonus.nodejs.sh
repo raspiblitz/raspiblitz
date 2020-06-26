@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to install NodeJs"
  echo "bonus.nodejs.sh [on|off]"
  exit 1

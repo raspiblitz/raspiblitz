@@ -33,7 +33,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 0 ]; then
-    /home/admin/config.scripts/bonus.go.sh
+    /home/admin/config.scripts/bonus.go.sh on
     
     # get Go vars
     source /etc/profile

@@ -33,7 +33,7 @@ isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   echo "# Installing lndconnect.."
   # make sure Go is installed
-  /home/admin/config.scripts/bonus.go.sh
+  /home/admin/config.scripts/bonus.go.sh on
   # get Go vars
   source /etc/profile
   # Install latest lndconnect from source:
