@@ -439,6 +439,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/nginx/sites-enabled/btcpay_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/btcpay_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/btcpay_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_tor.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_tor_ssl.conf
     sudo nginx -t
     sudo systemctl reload nginx
     # nuke user
