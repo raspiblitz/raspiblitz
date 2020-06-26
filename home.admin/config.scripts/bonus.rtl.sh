@@ -231,6 +231,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 

@@ -249,6 +249,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_tor.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf
     sudo nginx -t
     sudo systemctl reload nginx
 

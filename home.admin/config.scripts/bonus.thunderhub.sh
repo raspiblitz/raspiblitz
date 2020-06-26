@@ -162,7 +162,7 @@ EOF
     ##################
     # setup nginx symlinks
     if ! [ -f /etc/nginx/sites-available/thub_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-available/thub_ssl.conf
+       sudo cp -f /home/admin/assets/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-available/thub_ssl.conf
     fi
     if ! [ -f /etc/nginx/sites-available/thub_tor.conf ]; then
        sudo cp /home/admin/assets/nginx/sites-available/thub_tor.conf /etc/nginx/sites-available/thub_tor.conf
@@ -244,6 +244,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/nginx/sites-enabled/thub_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/thub_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/thub_tor.conf
+  sudo rm -f /etc/nginx/sites-available/thub_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 

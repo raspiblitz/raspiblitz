@@ -242,6 +242,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/lnbits_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/lnbits_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/lnbits_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/lnbits_tor.conf
+  sudo rm -f /etc/nginx/sites-available/lnbits_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 
