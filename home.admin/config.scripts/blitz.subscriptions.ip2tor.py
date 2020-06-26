@@ -695,7 +695,7 @@ You payed {0} sats for the first {1} hours.
 Next AUTOMATED PAYMENTS will be {2} sats each.
 
 Your service '{3}' should now publicly be reachable under:
-{4}:{5}
+https://{4}:{5}
 
 Please test now if the service is performing as promised.
 If not - dont forget to cancel the subscription under:
