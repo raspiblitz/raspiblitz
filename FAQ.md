@@ -772,8 +772,8 @@ If you want to use the HDMI output you can place a file called `hdmi` on the `bo
 
 If you are already logged in you can use on the console the commands:
 
-- `hdmi` --> to witch to HDMI
-- `lcd` --> to witch to LCD
+- `hdmi` --> switch to HDMI
+- `lcd` --> switch to LCD
 
 ## How do I set up VNC?
 
