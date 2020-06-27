@@ -93,6 +93,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
         print("send mail")
         print("msg: {}".format(message))
         print("to: {}".format(recipient))
+        print("from: {} <{}>".format(from_name, from_address))
         print("subject: {}".format(subject))
         print("cert: {}".format(cert))
         print("encrypt: {}".format(encrypt))
@@ -103,7 +104,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
 
         msg_content = [
             "To: {}".format(recipient),
-            'From: "{} <{}>'.format(from_name, from_address),
+            'From: {} <{}>'.format(from_name, from_address),
             "Subject: {}".format(subject),
             "",
             "{}".format(message)
@@ -118,7 +119,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
         msg = EmailMessage()
 
         msg['Subject'] = "{}".format(subject)
-        msg['From'] = '"{} <{}>'.format(from_name, from_address),
+        msg['From'] = '{} <{}>'.format(from_name, from_address),
         msg['To'] = recipient
 
         msg.set_payload(message)
