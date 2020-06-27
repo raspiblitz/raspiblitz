@@ -138,9 +138,9 @@ if [ "$1" = "send" ]; then
     /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
   elif [ "${notifyMethod}" = "mail" ]; then
     if [ "${notifyMailEncrypt}" = "on" ]; then
-      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail --cert ${notifyMailToCert} --encrypt ${notifyMailTo} "$2"
+      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" --cert ${notifyMailToCert} --encrypt ${notifyMailTo} "$2"
     else
-      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail ${notifyMailTo} "$2"
+      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" ${notifyMailTo} "$2"
     fi
   elif [ "${notifyMethod}" = "slack" ]; then
     /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
