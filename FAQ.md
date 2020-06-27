@@ -16,7 +16,7 @@
 - New: Balance of Satoshis v5.39.4 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
-- New: ThunderHub v0.8.0 (with update option) [details](https://www.thunderhub.io)
+- New: ThunderHub v0.8.4 (with update option) [details](https://www.thunderhub.io)
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - New: ZeroTier [details](https://zerotier.com/manual/)
 - Fix: DropBox StaticChannelBackup
