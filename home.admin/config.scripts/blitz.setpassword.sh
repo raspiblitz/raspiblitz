@@ -247,6 +247,15 @@ EOF
     echo "# changing the password for the 'joinmarket' user"
     echo "joinmarket:${newPassword}" | sudo chpasswd
   fi
+
+  # ThunderHub
+  if [ "${thunderhub}" = "on" ]; then
+    echo "# changing the password for ThunderHub"
+    sed -i "s/^masterPassword: '.*' # Default password unless defined in account/\
+masterPassword: '${newPassword}' # Default password unless defined in account/g" \
+/mnt/hdd/app-data/thunderhub/thubConfig.yaml 2>/dev/null
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
   exit 0
