@@ -23,7 +23,6 @@ if [ "${chain}" = "test" ]; then
 	  pathAdd="/testnet3"
 fi
 
-
 ###################
 # STATUS
 ###################
@@ -65,6 +64,8 @@ fi
 # switch on
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # check txindex (parsed and sourced from bitcoin network config above)
   if [ ${txindex} == 0 ]; then
     sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/${network}/${network}.conf
     echo "switching txindex=1 and restarting ${network}d"
