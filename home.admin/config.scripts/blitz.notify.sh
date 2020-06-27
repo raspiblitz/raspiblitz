@@ -33,7 +33,11 @@ if ! grep -Eq "^notifyMailTo=.*" /mnt/hdd/raspiblitz.conf; then
 fi
 
 if ! grep -Eq "^notifyMailServer=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailServer=mail@example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    echo "notifyMailServer=mail.example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+fi
+
+if ! grep -Eq "^notifyMailHostname=.*" /mnt/hdd/raspiblitz.conf; then
+    echo "notifyMailHostname=$(hostname)" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
 fi
 
 if ! grep -Eq "^notifyMailUser=.*" /mnt/hdd/raspiblitz.conf; then
@@ -81,13 +85,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 #
 # The person who gets all mail for userids < 1000
 # Make this empty to disable rewriting.
-root=${notifyMailTo}
+Root=${notifyMailTo}
 
 # hostname of this system
-hostname=${hostname}
+Hostname=${notifyMailHostname}
 
 # relay/smarthost server settings
-mailhub=${notifyMailServer}
+Mailhub=${notifyMailServer}
 AuthUser=${notifyMailUser}
 AuthPass=${notifyMailPass}
 UseSTARTTLS=YES
@@ -141,7 +145,7 @@ if [ "$1" = "send" ]; then
   elif [ "${notifyMethod}" = "slack" ]; then
     /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
   else
-    echo "unknown notification method - check /mnt/hdd/raspiblitz.con"
+    echo "unknown notification method - check /mnt/hdd/raspiblitz.conf"
   fi
 
   exit 0
