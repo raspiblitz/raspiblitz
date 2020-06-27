@@ -95,6 +95,7 @@ Mailhub=${notifyMailServer}
 AuthUser=${notifyMailUser}
 AuthPass=${notifyMailPass}
 UseSTARTTLS=YES
+FromLineOverride=YES
 EOF
 
   # edit raspi blitz config
