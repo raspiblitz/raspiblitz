@@ -98,6 +98,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # make sure thunderhub is member of lndadmin
     sudo /usr/sbin/usermod --append --groups lndadmin thunderhub
 
+    # persist settings in app-data
+    sudo mkdir -p /mnt/hdd/app-data/thunderhub
+
     #################
     # .env
     #################
@@ -132,10 +135,13 @@ NO_VERSION_CHECK=true
 # -----------
 ACCOUNT_CONFIG_PATH='/home/thunderhub/thubConfig.yaml'
 EOF
-    sudo rm -f /home/thunderhub/thunderhub/.env
-    sudo mv /home/admin/thunderhub.env /home/thunderhub/thunderhub/.env
-    sudo chown thunderhub:thunderhub /home/thunderhub/thunderhub/.env
-
+    # remove symlink or old file
+    sudo rm -f /home/thunderhub/thunderhub/.env.local
+    # move to app-data
+    sudo mv /home/admin/thunderhub.env /mnt/hdd/app-data/thunderhub/.env.local
+    sudo chown thunderhub:thunderhub /mnt/hdd/app-data/thunderhub/.env.local
+    # symlink to app directory
+    sudo ln -s /mnt/hdd/app-data/thunderhub/.env.local /home/thunderhub/thunderhub/
 
     ##################
     # thubConfig.yaml
@@ -152,10 +158,15 @@ accounts:
     macaroonPath: '/home/thunderhub/.lnd/data/chain/bitcoin/mainnet/admin.macaroon'
     certificatePath: '/home/thunderhub/.lnd/tls.cert'
 EOF
+    # remove symlink or old file
     sudo rm -f /home/thunderhub/thubConfig.yaml
-    sudo mv /home/admin/thubConfig.yaml /home/thunderhub/thubConfig.yaml
-    sudo chown thunderhub:thunderhub /home/thunderhub/thubConfig.yaml
-    sudo chmod 600 /home/thunderhub/thubConfig.yaml | exit 1
+    # move to app-data
+    sudo mv /home/admin/thubConfig.yaml /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    # secure
+    sudo chown thunderhub:thunderhub /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    sudo chmod 600 /mnt/hdd/app-data/thunderhub/thubConfig.yaml | exit 1
+    # symlink
+    sudo ln -s /mnt/hdd/app-data/thunderhub/thubConfig.yaml /home/thunderhub/
     
     ##################
     # NGINX
