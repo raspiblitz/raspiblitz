@@ -165,27 +165,38 @@ do
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
     echo "BlitzTUI Monitoring Check"
-    if [ -d "/var/cache/raspiblitz" ]; then
+
+    # prevent restart if COPY OVER LAN is running
+    # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
+    source ${infoFile}
+    if [ "${state}" == "copysource" ]; then 
+      echo "- skip BlitzTUI check while COPY over LAN is running"
+    else
+
+      if [ -d "/var/cache/raspiblitz" ]; then
         latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
-    else
+      else
         latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
-    fi
-    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
-      #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
-      #echo "latestHeartBeatLine(${latestHeartBeatLine})"
-      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
-        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-        fi
-        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-        sudo init 3 ; sleep 2 ; sudo init 5
       fi
-    else
-      echo "blitzTUIHeartBeatLine is empty - skipping check"
+      if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
+        #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
+        #echo "latestHeartBeatLine(${latestHeartBeatLine})"
+        if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
+          echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+          blitzTUIRestarts=$(($blitzTUIRestarts +1))
+          if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
+            echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
+          fi
+          sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
+          sudo init 3 ; sleep 2 ; sudo init 5
+        fi
+      else
+        echo "blitzTUIHeartBeatLine is empty - skipping check"
+      fi
+      blitzTUIHeartBeatLine="${latestHeartBeatLine}"
+
     fi
-    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
+
   fi
   
   ###############################
