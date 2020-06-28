@@ -50,7 +50,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   if [ "$USER" != "admin" ]; then
 
     if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
-      infoStr=" The ${network}d service is not running.\n Login for more details & options:"
+      infoStr=" The ${network}d service is NOT RUNNING!\n\n Login for more details & options:"
     else
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
     fi
