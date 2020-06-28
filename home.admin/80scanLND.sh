@@ -42,9 +42,23 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   height=6
   width=43
   title="Blockchain Info"
-  if [ ${uptime} -gt 600 ] || [ "${1}" == "blockchain-error" ]; then
-    infoStr=" The ${network}d service is not running.\n Login for more details:"
-    if [ "$USER" == "admin" ]; then
+
+  if [ ${#bitcoinErrorShort} -eq 0 ]; then
+    bitcoinErrorShort="Initial Startup - Please Wait"
+  fi
+
+  if [ "$USER" != "admin" ]; then
+
+    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+      infoStr=" The ${network}d service is not running.\n Login for more details & options:"
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+    fi
+
+  else
+
+    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+
       clear
       echo ""
       echo "*****************************************"
@@ -86,13 +100,23 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       echo "-> Use command 'menu' to open main menu."
       echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
+      echo "Use CTRL+c to EXIT to Terminal"
+      sleep 10
       exit 1
+
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 10min ..."
+    fi
+
+  fi
+
+  if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+    
+    if [ "$USER" == "admin" ]; then
+
     fi
   else
-    height=6
-    if [ ${#bitcoinErrorShort} -eq 0 ]; then
-      bitcoinErrorShort="Initial Startup - Please Wait"
-    fi
+    
     infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
     if [ "$USER" == "admin" ]; then
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
