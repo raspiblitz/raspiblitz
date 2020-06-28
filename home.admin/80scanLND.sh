@@ -57,6 +57,8 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
   else
 
+    # output when user login in as admin and bitcoind is not running
+
     if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
 
       clear
@@ -108,19 +110,6 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 10min ..."
     fi
 
-  fi
-
-  if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
-    
-    if [ "$USER" == "admin" ]; then
-
-    fi
-  else
-    
-    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
-    if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
-    fi
   fi
 
 # LND errors second
