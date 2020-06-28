@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch txindex on or off"
- echo "network.txindex.sh [status|on|off]"
+ echo "network.txindex.sh [status|on|off|delete]"
  exit 1
 fi
 
