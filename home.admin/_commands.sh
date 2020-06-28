@@ -41,6 +41,13 @@ function debug() {
   ./XXdebugLogs.sh
 }
 
+# command: patch
+# syncs script with latest set github and branch
+function patch() {
+  cd /home/admin
+  ./XXsyncScripts.sh -run
+}
+
 # command: restart
 function restart() {
   cd /home/admin
