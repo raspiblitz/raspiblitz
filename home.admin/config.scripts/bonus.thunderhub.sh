@@ -28,22 +28,22 @@ if [ "$1" = "menu" ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3011
+https://${localip}:3011\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 15 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3011
+https://${localip}:3011\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 14 57
+" 15 57
   fi
   echo "please wait ..."
   exit 0
