@@ -325,7 +325,7 @@ elif [ "${abcd}" = "x" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
       exit 1
     fi
 
@@ -334,7 +334,7 @@ elif [ "${abcd}" = "x" ]; then
       # password zero
       if [ ${#password1} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
         exit 1
       fi
 
@@ -342,14 +342,14 @@ elif [ "${abcd}" = "x" ]; then
       clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
       if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
         exit 1
       fi
 
       # password longer than 8
       if [ ${#password1} -lt 8 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
         exit 1
       fi
 
