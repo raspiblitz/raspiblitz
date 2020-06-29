@@ -125,10 +125,10 @@ EOF
     # sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/key.pem
 
     # setup nginx symlinks
-    if ! [ -f /etc/nginx/sites-available/rtl_ssl.conf ]; then
+    if ! [ -f /etc/nginx/sites-available/specter_ssl.conf ]; then
        sudo cp /home/admin/assets/nginx/sites-available/specter_ssl.conf /etc/nginx/sites-available/specter_ssl.conf
     fi
-    if ! [ -f /etc/nginx/sites-available/rtl_tor_ssl.conf ]; then
+    if ! [ -f /etc/nginx/sites-available/specter_tor_ssl.conf]; then
        sudo cp /home/admin/assets/nginx/sites-available/specter_tor_ssl.conf /etc/nginx/sites-available/specter_tor_ssl.conf
     fi
     sudo ln -sf /etc/nginx/sites-available/specter_ssl.conf /etc/nginx/sites-enabled/
