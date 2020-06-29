@@ -87,6 +87,9 @@ echo "$result"
       echo ""
       echo "15 6 * * * /home/$USERNAME/stack-sats.sh"
     fi
+
+    # setting value in raspi blitz config
+    sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=on/g" /mnt/hdd/raspiblitz.conf
   else
     echo "STACKING-SATS-KRAKEN already installed."
   fi
@@ -101,6 +104,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING STACKING-SATS-KRAKEN ***"
+
+    # setting value in raspi blitz config
+    sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=off/g" /mnt/hdd/raspiblitz.conf
 
     sudo rm -rf /home/$USERNAME/stack-sats-kraken.sh
     sudo rm -rf /home/$USERNAME/stacking-sats-kraken

@@ -72,7 +72,7 @@ fi
 sudo chmod 777 ${configFile}
 source ${configFile}
 
-# check if the system was configured for HDMI and needs switch 
+# check if the system was configured for HDMI and needs switch
 # keep as one of the first so that user can see video output
 if [ "${lcd2hdmi}" == "on" ]; then
   echo "RaspiBlitz has config to run with HDMI video outout." >> ${logFile}
@@ -462,7 +462,14 @@ else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
 fi
 
-
+# stacking-sats-kraken
+if [ "${stackingSatsKraken}" = "on" ]; then
+  echo "Provisioning Stacking Sats Kraken - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Stacking Sats Kraken'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
+fi
 
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324
