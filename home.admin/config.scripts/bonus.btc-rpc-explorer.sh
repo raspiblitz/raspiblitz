@@ -46,7 +46,7 @@ ${fingerprint}\n
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 14 67
+" 15 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
