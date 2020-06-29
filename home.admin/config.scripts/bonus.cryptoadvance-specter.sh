@@ -22,7 +22,7 @@ if [ "$1" = "menu" ]; then
 
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=https://$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
