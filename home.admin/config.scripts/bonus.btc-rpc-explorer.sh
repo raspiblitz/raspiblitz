@@ -21,7 +21,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
 
   # check if index is ready
-  if [ ${isIndexed} -eq 0 ]; then
+  if [ "${isIndexed}" == "0" ]; then
     dialog --title " Blockchain Index Not Ready " --msgbox "
 The Blockchain Index is still getting build.
 Please wait and try again later.
