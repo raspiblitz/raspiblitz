@@ -5,7 +5,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
- echo "blitz.setpassword.sh [x] [text] [result-file]"
+ echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  echo "exits on 0 = needs reboot"
  exit 1
 fi
@@ -327,7 +327,7 @@ elif [ "${abcd}" = "x" ]; then
     fi
 
     # password zero
-    if [ ${#password1} -eq 0 ]; then
+    if [ ${#password1} -eq 0 ] && [ "$4" != "empty-allowed" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
@@ -342,7 +342,7 @@ elif [ "${abcd}" = "x" ]; then
     fi
 
     # password longer than 8
-    if [ ${#password1} -lt 8 ]; then
+    if [ ${#password1} -lt 8 ] && [ "$4" != "empty-allowed" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
       sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
       exit 1
