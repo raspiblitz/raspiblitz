@@ -317,7 +317,10 @@ elif [ "${abcd}" = "x" ]; then
     password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
+    password2=""
+    if [ ${#password1} -gt 0 ]; then
+      password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
+    fi
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
