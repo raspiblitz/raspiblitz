@@ -23,6 +23,7 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=https://$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -31,23 +32,28 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
 https://${localip}:25441
 
-You have to accept the self-signed-certificate.
+SHA1 Thumb/Fingerprint:
+${fingerprint}
+
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}\n
-" 15 74
+" 17 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
 https://${localip}:25441
-You have to accept the self-signed-certificate.
+
+SHA1 Thumb/Fingerprint:
+${fingerprint}
+
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.\n
 Activate TOR to access the web block explorer from outside your local network.
 Unfortunately the camera is currently not usable via Tor, though.
-" 12 54
+" 15 54
   fi
 
   echo "# please wait ..."
