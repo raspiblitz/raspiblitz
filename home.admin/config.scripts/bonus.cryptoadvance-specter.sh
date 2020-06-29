@@ -116,30 +116,18 @@ EOF
     echo "#    --> pip-installing specter"
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
     
+    
     # Mandatory as the camera doesn't work without https
-    # echo "#    --> Creating self-signed certificate"
-    # openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
-    # sudo mv /tmp/cert.pem /home/bitcoin/.specter
-    # sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/cert.pem
-    # sudo mv /tmp/key.pem /home/bitcoin/.specter
-    # sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/key.pem
-
-    # setup nginx symlinks
-    if ! [ -f /etc/nginx/sites-available/specter_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/specter_ssl.conf /etc/nginx/sites-available/specter_ssl.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/specter_tor_ssl.conf]; then
-       sudo cp /home/admin/assets/nginx/sites-available/specter_tor_ssl.conf /etc/nginx/sites-available/specter_tor_ssl.conf
-    fi
-    sudo ln -sf /etc/nginx/sites-available/specter_ssl.conf /etc/nginx/sites-enabled/
-    sudo ln -sf /etc/nginx/sites-available/specter_tor_ssl.conf /etc/nginx/sites-enabled/
-    sudo nginx -t
-    sudo systemctl reload nginx
+    echo "#    --> Creating self-signed certificate"
+   openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
+    sudo mv /tmp/cert.pem /home/bitcoin/.specter
+    sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/cert.pem
+    sudo mv /tmp/key.pem /home/bitcoin/.specter
+    sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/key.pem
 
     # open firewall
     echo "#    --> Updating Firewall"
-    sudo ufw allow 25441 comment 'SPECTER HTTP'
-    sudo ufw allow 25442 comment 'SPECTER HTTPS'
+    sudo ufw allow 25441 comment 'cryptoadvance-specter'
     sudo ufw --force enable
     echo ""
 
@@ -226,7 +214,7 @@ Wants=${network}d.service
 After=${network}d.service
 
 [Service]
-ExecStart=/home/bitcoin/.specter/.env/bin/python3 -m cryptoadvance.specter server --host 0.0.0.0
+ExecStart=/home/bitcoin/.specter/.env/bin/python3 -m cryptoadvance.specter server --host 0.0.0.0 --cert=/home/bitcoin/.specter/cert.pem --key=/home/bitcoin/.specter/key.pem
 User=bitcoin
 Environment=PATH=/home/bitcoin/.specter.env/bin:/home/bitcoin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
 Restart=always
@@ -254,7 +242,11 @@ EOF
   # Hidden Service for SERVICE if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25444
+    echo "#    --> correct old Hidden Service with port"
+    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:25441/HiddenServicePort 80 127.0.0.1:25441/g" /etc/tor/torrc
+    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:80/HiddenServicePort 443 127.0.0.1:25441/g" /etc/tor/torrc
+    # port 25441 is HTTPS with self-signed cert
+    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
   exit 0
 fi
@@ -271,14 +263,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
-
-    # remove nginx symlinks
-    sudo rm -f /etc/nginx/sites-enabled/specter_ssl.conf
-    sudo rm -f /etc/nginx/sites-enabled/specter_tor_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/specter_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/specter_tor_ssl.conf
-    sudo nginx -t
-    sudo systemctl reload nginx
 
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
       echo "#    --> Removing wallets in core"
