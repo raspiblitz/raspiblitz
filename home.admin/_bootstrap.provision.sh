@@ -28,44 +28,57 @@ fi
 
 # check if file system was expanded to full capacity and sd card is bigger then 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
-  if [ ${isRaspbian} -gt 0 ]; then
-    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  elif [ ${isArmbian} -gt 0 ]; then
-    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  fi
-  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
-  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
-  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
-  if [ ${byteSizeSdCard} -lt 8192000 ]; then
-    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
-    if [ ${fsexpanded} -eq 1 ]; then
-      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
-      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-      exit 1
-    else
-      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-      if [ ${isRaspbian} -gt 0 ]; then
-        sudo raspi-config --expand-rootfs
-      elif [ ${isArmbian} -gt 0 ]; then
-        sudo /usr/lib/armbian/armbian-resize-filesystem start
+source ${infoFile}
+isRaspbian=$(echo $baseimage | grep -c 'raspbian')
+isArmbian=$(echo $baseimage | grep -c 'armbian')
+isx8664bit=$(echo $(uname -a) | grep -c 'x86_64')
+resizeRaspbian="/usr/binraspi-config"
+resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
+
+minimumSize=8192000
+minimumSizeGB=$((minimumSize/1000/1000))
+
+rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
+rootPartitionLength=${#rootPartition}
+rootDisk=${rootPartition:5:rootPartitionLength-6}
+rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
+
+if [ ${#rootDisk} -gt 0 ]; then
+   echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
+   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
+   echo "Size in Bytes is: ${rootDiskSize} ($rootDisk)" >> ${logFile}
+   if [ $rootDiskSize -lt $minimumSize ]; then
+      echo "Disk filesystem is smaller then ${minimumSizeGB}GB." >> ${logFile}
+      if [ ${fsexpanded} -eq 1 ]; then
+         echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
+         echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+         exit 1
+      else
+         echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+         sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+         if [ ${isx8664bit} -gt 0 ]; then
+            echo "Please expand disk size." >> ${logFile}
+         elif [ ${isRaspbian} -gt 0 ]; then
+              if [ -x ${resizeRaspbian} ]; then
+                 sudo raspi-config --expand-rootfs
+	      fi
+         elif [ ${isArmbian} -gt 0 ]; then
+              if [ -x ${resizeArmbian} ]; then
+                 $(sudo $resizeArmbian start)
+	      fi
+         fi
+         sleep 6
+         #sudo shutdown -r now
       fi
-      sleep 6
-      sudo shutdown -r now
-      exit 0
-    fi
-  else
-    echo "Size looks good. Bigger then 8GB card is used." >> ${logFile}
-  fi
+   else
+      echo "Size looks good. Bigger then ${minimumSizeGB}GB disk is used." >> ${logFile}
+   fi
 else
-  echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
+   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
@@ -352,6 +365,15 @@ if [ "${#sshtunnel}" -gt 0 ]; then
     sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
 else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
+fi
+
+# ZEROTIER
+if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
+    echo "Provisioning ZeroTier - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup ZeroTier'/g" ${infoFile}
+    sudo /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+else
+    echo "Provisioning ZeroTier - not active" >> ${logFile}
 fi
 
 # LCD ROTATE
