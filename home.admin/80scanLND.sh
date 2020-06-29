@@ -155,6 +155,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
         echo ${lndErrorFull}
       fi
       echo
+      echo "-> Use command 'repair' and then choose 'BACKUP-LND' to make a just in case backup."
       echo "-> Use command 'debug' for more log output you can use for getting support."
       echo "-> Use command 'menu' to open main menu."
       echo "-> Have you tried to turn it off and on again? Use command 'restart'"
