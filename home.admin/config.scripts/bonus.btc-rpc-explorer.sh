@@ -33,6 +33,7 @@ This can take multiple hours.
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -40,19 +41,23 @@ This can take multiple hours.
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
 https://${localip}:3021
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 12 67
+" 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
 https://${localip}:3021
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
-" 12 54
+" 14 54
   fi
 
   echo "please wait ..."
