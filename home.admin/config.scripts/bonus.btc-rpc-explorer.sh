@@ -24,7 +24,7 @@ if [ "$1" = "menu" ]; then
   if [ "${isIndexed}" == "0" ]; then
     dialog --title " Blockchain Index Not Ready " --msgbox "
 The Blockchain Index is still getting build.
-Please wait and try again later.
+${indexInfo}
 This can take multiple hours.
       " 9 48
     exit 0
