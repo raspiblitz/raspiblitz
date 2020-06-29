@@ -40,24 +40,24 @@ This can take multiple hours.
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3021
+https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 15 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3021
+https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
-" 14 54
+" 16 54
   fi
 
   echo "please wait ..."
