@@ -341,7 +341,7 @@ elif [ "${abcd}" = "x" ]; then
       # check that password does not contain bad characters
       clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
       if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
-        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 62
         sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
         exit 1
       fi
