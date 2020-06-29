@@ -23,7 +23,7 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -38,7 +38,7 @@ ${fingerprint}
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
 Hidden Service address for TOR Browser (QR see LCD):
-${toraddress}\n
+https://${toraddress}\n
 " 17 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
@@ -119,7 +119,7 @@ EOF
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
-   openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
+    openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
     sudo mv /tmp/cert.pem /home/bitcoin/.specter
     sudo chown -R bitcoin:bitcoin /home/bitcoin/.specter/cert.pem
     sudo mv /tmp/key.pem /home/bitcoin/.specter
