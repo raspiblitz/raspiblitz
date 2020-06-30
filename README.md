@@ -67,15 +67,15 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 
 #### Package: Standard (around 250 USD)
 
-*The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
+*The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.*
 
 * RaspberryPi 4 4GB (or 8GB) [amazon referral link](https://geni.us/raspiblitz-4gb-new)
 * Power Supply - USB-C, 5V, >=3A [amazon referral link](https://geni.us/raspiblitz-ps)
 * 1TB SSD - SanDisk SSD Plus 1TB 2.5" : [amazon referral link](https://geni.us/raspiblitz-1000gb-san) *other 1TB SSD models might cause power issues*
-* SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case) 
+* SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case)
 * MicroSDCard 32GB - Samsung PRO Endurance 32 GB microSDHC UHS-I U1: [amazon referral link](https://geni.us/raspiblitz-sc-card)
-* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
-* Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4) 
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen)
+* Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -86,7 +86,7 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 Basic Parts:
 * 1TB Hard Drive: [amazon referral link](https://geni.us/raspiblitz-hdd)
 * Micro SD-Card 16GB: [amazon referral link](https://geni.us/raspiblitz-sd-card16gb)
-* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen)
 
 When RaspberryPi 3 --> add following parts:
 * RaspperryPi 3B+ : [amazon referral link](https://geni.us/raspiblitz-rpi3)
@@ -447,7 +447,7 @@ Pay an invoice through lightning.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
-If you are looking for something to test pay with Lightning ... why not [donate some satoshis to the RaspiBlitz development[(https://tallyco.in/s/r5lx23/)? Thanks :) 
+If you are looking for something to test pay with Lightning ... why not [donate some satoshis to the RaspiBlitz development[(https://tallyco.in/s/r5lx23/)? Thanks :)
 
 #### RECEIVE: Create Invoice/PaymentRequest
 
@@ -476,12 +476,12 @@ Use if the want to remove all funds from the RaspiBlitz.
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
 
 
-#### lnfwdreport: Report on your earned fees for Forwarding Payments 
+#### lnfwdreport: Report on your earned fees for Forwarding Payments
 
 If you connected your node well within the Lightning Network you can become a "Routing Node" other users select your Node as part of a Lightnig Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
 
 Beware - earning fees as a routing node does not come automatic. Its a bit of hard work of building the right channels to be attractive for other people to route thru. Check the interet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
-  
+
 #### SERVICES: Activate/Deactivate Services
 
 The RaspiBlitz offers further Services, Apps and configuration (scroll down in the to see all in the RaspiBlitz):
@@ -496,11 +496,11 @@ The autopilot is a feature of LND that you can switch on. It automatically uses 
 
 ##### Accept Keysend
 
-Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This is needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).  
+Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This is needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
 
 ##### Loop
 
-A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop' - if you have the RTL service installed (see below), then loop will also be available as part of the RTL web interface. You can use Loop for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again. 
+A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop' - if you have the RTL service installed (see below), then loop will also be available as part of the RTL web interface. You can use Loop for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again.
 
 [Details on Service](https://github.com/lightninglabs/loop)
 
@@ -558,7 +558,7 @@ Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RT
 
 ##### BTC-RPC-Explorer
 
-BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own RaspiBlitz. See an example running on: https://btc-explorer.com 
+BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own RaspiBlitz. See an example running on: https://btc-explorer.com
 
 ![EXPLORER](pictures/blockexplorer.png)
 
@@ -588,12 +588,12 @@ Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this n
 
 ![RTL](pictures/touchscreen.png)
 
-It will give you 4 buttons on the right side. 
+It will give you 4 buttons on the right side.
 
 - Info - to defined later
 - Node - shows the nodeid/uri as QR code (use to open channels from mobile wallets)
 - Invoice - creates an Invoice-QRcode that can be used for donations
-- Off - Shutdown or Restart the RaspiBlitz 
+- Off - Shutdown or Restart the RaspiBlitz
 
 ##### LCD Rotate
 
@@ -611,7 +611,7 @@ For example if you use your Trezor Hardware Wallet with the trezor.io wallet it 
 
 ##### BTCPayServer
 
-BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free. 
+BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free.
 
 ![BTCPAY](pictures/btcpay.png)
 
@@ -631,7 +631,7 @@ To run it change to the RaspiBlitz terminal and type 'manage'. This starts the L
 * __Display the node summary ```status```__
 * __Advanced channel listings ```listchannels```__
   * ```listchannels rebalance```: list channels for rebalancing
-  * ```listchannels forwardings```: list forwarding statistics for each channel 
+  * ```listchannels forwardings```: list forwarding statistics for each channel
   * ```listchannels hygiene```: information for closing of active channels
   * ```listchannels inactive```: information on inactive channels
 * __Rebalancing command ```rebalance```__
@@ -687,9 +687,9 @@ Please keep in mind that if you also want to connect to your smartphone also fro
 
 This youtube video explains the "port forwarding" on your router in more detail: https://www.youtube.com/watch?v=KESo7hHXQtg
 
-When you have Tor activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over Tor. 
+When you have Tor activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over Tor.
 
-If you run your node behind Tor the SendMany App will just offer to connect when your in the same local network ... for connection over Tor there is no support yet. 
+If you run your node behind Tor the SendMany App will just offer to connect when your in the same local network ... for connection over Tor there is no support yet.
 
 Basically those mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. And then you need to `pair` them with your RaspiBlitz - also with a QR code displayed on the LCD. If you run your RaspiBlitz without a LCD there is the fallback option to display that QR code on the terminal as ASCII code (might involve lowering your terminal font size).
 
@@ -759,7 +759,7 @@ Use this if you want to report a software problem with your RaspiBlitz so that o
 
 ##### BACKUP-LND: Backup your LND data (Rescue-File)
 
-This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download per SCP to your laptop. This can be used to move your LND id, wallet & channels to another RaspiBlitz. 
+This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download per SCP to your laptop. This can be used to move your LND id, wallet & channels to another RaspiBlitz.
 
 *NOTICE: If you start your RaspiBlitz after this backup again the backup is outdated and using it can risk loosing your channel funds.*
 
@@ -818,13 +818,13 @@ This is common way to update your RaspiBlitz. Choose this option to prepeare you
 
 #### LND: Interim LND Update
 
-Sometimes there is a new LND release that has some breaking changes that once you updated the LND databse that cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND. 
+Sometimes there is a new LND release that has some breaking changes that once you updated the LND databse that cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND.
 
 If you choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the raspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further garantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps.
 
 #### PATCH: Patch RaspiBlitz code
 
-With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people that wnat to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.   
+With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people that wnat to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
 
 #### REBOOT: Reboot RaspiBlitz
 
@@ -844,7 +844,7 @@ With the command `raspiblitz` it's possible to return to the main menu.
 
 As mentioned above you can export a Migration File from your Raspiblitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
 
-A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
+A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware.
 
 If you want to it to import it again to a new RaspiBlitz (for example with an updated HDD/SSD) you can choose the MIGRATION option on the first setup dialog after the Hardwaretest (where you normally choose between Bitcoin & Litecoin).
 
@@ -856,7 +856,7 @@ If you start MIGRATION you will need in the next step to format your HDD/SSD.
 
 Normally you choose here the EXT4 format. But you have also have the option to choose the BTRFS format which is an expiremental feature under RaspiBlitz - see [FAQ for details on BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz).
 
-Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you. 
+Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you.
 
 Finally you need to decide how to get a copy of the blockchain data again for your RaspiBlitz.
 
