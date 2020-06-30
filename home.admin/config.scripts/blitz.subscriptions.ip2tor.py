@@ -37,7 +37,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     cfg.reload()
     ENV="PROD"
     #DEFAULT_SHOPURL="shopdeu2vdhazvmllyfagdcvlpflzdyt5gwftmn4hjj3zw2oyelksaid.onion"
-    DEFAULT_SHOPURL="shop.ip2t.org"
+    DEFAULT_SHOPURL="ip2tor.fulmo.org"
     LND_IP="127.0.0.1"
     LND_ADMIN_MACAROON_PATH="/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network.value,cfg.chain.value)
     LND_TLS_PATH="/mnt/hdd/app-data/lnd/tls.cert"
@@ -47,7 +47,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
 else:
     ENV="DEV"
     print("# blitz.ip2tor.py (development env)")
-    DEFAULT_SHOPURL="shop.ip2t.org"
+    DEFAULT_SHOPURL="ip2tor.fulmo.org"
     LND_IP="192.168.178.95"
     LND_ADMIN_MACAROON_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/admin.macaroon"
     LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
