@@ -230,6 +230,21 @@ do
         sudo cp $scbPath $localTimestampedPath
         echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}'"
 
+        # check if a local backup target is set
+        # parameter in raspiblitz.conf:
+        # localBackupTarget='[DIRPATH-WITHOUT-ENDING-/]'
+        if [ ${#localBackupTarget} -gt 0 ]; then
+          echo "--> Onsite-Backup SCP Server"
+          sudo cp ${localBackupPath} ${localBackupTarget}/
+          sudo cp ${localTimestampedPath} ${localBackupTarget}/
+          result=$?
+          if [ ${result} -eq 0 ]; then
+            echo "OK - Local Backup exited with 0"
+          else
+            echo "FAIL - Local Backup exited with ${result}"
+          fi
+        fi
+
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
