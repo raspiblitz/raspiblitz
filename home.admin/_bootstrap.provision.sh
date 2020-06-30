@@ -31,8 +31,7 @@ fi
 source ${infoFile}
 isRaspbian=$(echo $baseimage | grep -c 'raspbian')
 isArmbian=$(echo $baseimage | grep -c 'armbian')
-isx8664bit=$(echo $(uname -a) | grep -c 'x86_64')
-resizeRaspbian="/usr/binraspi-config"
+resizeRaspbian="/usr/bin/raspi-config"
 resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
 
 minimumSize=8192000
@@ -60,11 +59,12 @@ if [ ${#rootDisk} -gt 0 ]; then
          sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
          sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
          sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-         if [ ${isx8664bit} -gt 0 ]; then
+         if [ "${cpu}" == "x86_64"  ]; then
             echo "Please expand disk size." >> ${logFile}
+	    # TODO: Expand disk size on x86_64
          elif [ ${isRaspbian} -gt 0 ]; then
               if [ -x ${resizeRaspbian} ]; then
-                 sudo raspi-config --expand-rootfs
+		      $(sudo $resizeRaspbian --expand-rootfs)
 	      fi
          elif [ ${isArmbian} -gt 0 ]; then
               if [ -x ${resizeArmbian} ]; then
