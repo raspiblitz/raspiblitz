@@ -28,22 +28,22 @@ if [ "$1" = "menu" ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3001
+https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
-" 15 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3001
+https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 14 57
+" 15 57
   fi
   echo "please wait ..."
   exit 0
@@ -214,7 +214,7 @@ EOF
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
+    echo "# Creating Tor Hidden Service"
     sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi

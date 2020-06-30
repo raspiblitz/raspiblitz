@@ -354,7 +354,7 @@ to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp empty-allowed
         passwordD=`sudo cat /home/admin/.pass.tmp`
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
       fi

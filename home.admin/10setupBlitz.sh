@@ -199,7 +199,7 @@ if [ ${isMounted} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
     S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
-    C "COPY    --> Copy from laptop/node over LAN (±4hours)" 2>&1 >/dev/tty)
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then

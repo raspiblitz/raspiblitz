@@ -34,15 +34,27 @@ fi
 # switch on
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+  
+  if ! grep -Eq "^wallet=wallet.dat" /mnt/hdd/${network}/${network}.conf; then
+    echo "Enable the multiwallet feature in ${network} core and specify wallet.dat" 
+    echo "wallet=wallet.dat" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
+    restartService=1
+  else
+    echo "Multiwallet is active and wallet.dat is used." 
+    restartService=0
+  fi
   if [ ${disablewallet} == 1 ]; then
     sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /mnt/hdd/${network}/${network}.conf
-    echo "switching the ${network} core wallet on and restarting ${network}d"
-    sudo systemctl restart ${network}d
-    exit 0
+    echo "Switching the ${network} core wallet on"
+    restartService=1
   else
     echo "The ${network} core wallet is already on"    
-    exit 0
   fi
+  if [ ${restartService} == 1 ]; then
+    echo "Restarting ${network}d"
+    sudo systemctl restart ${network}d
+  fi
+  exit 0
 fi
 
 

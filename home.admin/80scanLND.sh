@@ -42,9 +42,25 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   height=6
   width=43
   title="Blockchain Info"
-  if [ ${uptime} -gt 600 ] || [ "${1}" == "blockchain-error" ]; then
-    infoStr=" The ${network}d service is not running.\n Login for more details:"
-    if [ "$USER" == "admin" ]; then
+
+  if [ ${#bitcoinErrorShort} -eq 0 ]; then
+    bitcoinErrorShort="Initial Startup - Please Wait"
+  fi
+
+  if [ "$USER" != "admin" ]; then
+
+    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+      infoStr=" The ${network}d service is NOT RUNNING!\n\n Login for more details & options:"
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+    fi
+
+  else
+
+    # output when user login in as admin and bitcoind is not running
+
+    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
+
       clear
       echo ""
       echo "*****************************************"
@@ -62,20 +78,38 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
         echo ${bitcoinErrorFull}
         echo
       fi
-      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: restart"
+
+      # check if maybe problems with txindex
+      source <(/home/admin/config.scripts/network.txindex.sh status)
+      if [ "${txindex}" == "1" ]; then
+        if [ "${indexFinished}" == "0" ]; then
+          # bitcoind is not starting while still building index - recommend turning off index and restart
+	        whiptail --title "Problems with Bitcoin Index" --yes-button "TurnOff TxIndex" --no-button "Do Nothing" --yesno "It looks like ${network}d has problems building the txindex. Turning Off the txindex and restart is recommended." 10 60
+	        if [ $? -eq 0 ]; then
+            # delete txindex, turn off and deactivate apps needed index
+	          sudo /home/admin/config.scripts/network.txindex.sh delete
+            whiptail --msgbox "OK txindex was turned off.\n\nTo be able to build a valid txindex in the future you might need to reset/redownload the blockchain." 10 56 "" --title " TXINDEX OFF "
+            /home/admin/XXshutdown.sh reboot
+	        fi
+        else
+          # bitcoind is not starting but index was build in the past - recommend repair with turning off index
+          echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
+        fi
+      fi
+
+      echo "-> Use command 'repair' and then choose 'RESET-CHAIN' to try downloading new blockchain."
+      echo "-> Use command 'debug' for more log output you can use for getting support."
+      echo "-> Use command 'menu' to open main menu."
+      echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
+      echo "Use CTRL+c to EXIT to Terminal"
+      sleep 10
+      exit 1
+
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 10min ..."
     fi
-  else
-    height=6
-    if [ ${#bitcoinErrorShort} -eq 0 ]; then
-      bitcoinErrorShort="Initial Startup - Please Wait"
-    fi
-    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
-    if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
-    fi
+
   fi
 
 # LND errors second
@@ -121,9 +155,10 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
         echo ${lndErrorFull}
       fi
       echo
-      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: restart"
+      echo "-> Use command 'repair' and then choose 'BACKUP-LND' to make a just in case backup."
+      echo "-> Use command 'debug' for more log output you can use for getting support."
+      echo "-> Use command 'menu' to open main menu."
+      echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
       exit 1
     else
