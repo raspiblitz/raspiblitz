@@ -3,7 +3,9 @@
 # https://github.com/dennisreimann/stacking-sats-kraken
 
 USERNAME=stackingsats
-CONFIG_FILE=/mnt/hdd/app-data/stacking-sats-kraken/.env
+APP_DATA_DIR=/mnt/hdd/app-data/stacking-sats-kraken
+HOME_DIR=/home/$USERNAME
+CONFIG_FILE=$APP_DATA_DIR/.env
 SCRIPT_NAME=stack-sats.sh
 
 # command info
@@ -17,24 +19,24 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL STACKING-SATS-KRAKEN ***"
 
-  isInstalled=$(sudo ls /home/$USERNAME 2>/dev/null | grep -c 'stacking-sats-kraken')
+  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c 'stacking-sats-kraken')
   if [ ${isInstalled} -eq 0 ]; then
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh
 
-    echo "*** Add the 'stackingsats' user ***"
+    # add user
     sudo adduser --disabled-password --gecos "" $USERNAME
 
     # install stacking-sats-kraken
-    cd /home/$USERNAME
+    cd $HOME_DIR
     sudo -u $USERNAME git clone https://github.com/dennisreimann/stacking-sats-kraken.git
     cd stacking-sats-kraken
     sudo -u $USERNAME npm install
 
     # setup stacking config
-    sudo mkdir /mnt/hdd/app-data/stacking-sats-kraken
-    sudo chown $USERNAME:$USERNAME /mnt/hdd/app-data/stacking-sats-kraken
+    sudo mkdir $APP_DATA_DIR
+    sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
     configFile=/home/admin/stacking-sats-kraken.env
     touch $configFile
@@ -57,7 +59,7 @@ KRAKEN_DRY_RUN_PLACE_NO_ORDER=1
     sudo chown $USERNAME:$USERNAME $CONFIG_FILE
 
     # setup stacking script
-    scriptFile="/home/admin/$SCRIPT_NAME"
+    scriptFile="$HOME_DIR/$SCRIPT_NAME"
     touch $scriptFile
     sudo chmod 700 $scriptFile || exit 1
     echo '#!/bin/bash
@@ -87,8 +89,8 @@ if [[ ${KRAKEN_MAIL_SUBJECT} && ${KRAKEN_MAIL_FROM_ADDRESS} && ${KRAKEN_MAIL_FRO
 fi
 ' > $scriptFile
 
-    sudo mv $scriptFile /home/$USERNAME/$SCRIPT_NAME
-    sudo chown $USERNAME:$USERNAME /home/$USERNAME/$SCRIPT_NAME
+    sudo mv $scriptFile $HOME_DIR/$SCRIPT_NAME
+    sudo chown $USERNAME:$USERNAME $HOME_DIR/$SCRIPT_NAME
 
     echo "OK - the STACKING-SATS-KRAKEN script is now installed."
     echo ""
@@ -108,7 +110,7 @@ fi
     echo ""
     echo "Here is an example for daily usage at 6:15am ..."
     echo ""
-    echo "15 6 * * * /home/$USERNAME/$SCRIPT_NAME"
+    echo "15 6 * * * $HOME_DIR/$SCRIPT_NAME"
   fi
 
   exit 0
@@ -117,7 +119,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** UNINSTALL STACKING-SATS-KRAKEN ***"
-  isInstalled=$(sudo ls /home/$USERNAME 2>/dev/null | grep -c 'stacking-sats-kraken')
+  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c 'stacking-sats-kraken')
 
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING STACKING-SATS-KRAKEN ***"
@@ -125,18 +127,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # setting value in raspi blitz config
     sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=off/g" /mnt/hdd/raspiblitz.conf
 
-    # remove script and config
-    sudo rm -rf /home/$USERNAME/$SCRIPT_NAME
-    sudo rm -rf /home/$USERNAME/stacking-sats-kraken
-    sudo rm -rf /mnt/hdd/app-data/stacking-sats-kraken
+    # remove sconfig
+    sudo rm -rf $APP_DATA_DIR
+
+    # delete user and home directory
+    sudo userdel -rf $USERNAME
 
     echo "OK STACKING-SATS-KRAKEN removed."
-
-    cron_count=$(sudo -u $USERNAME crontab -l | grep "$SCRIPT_NAME" -c)
-    if [ "${cron_count}" != "0" ]; then
-      echo ""
-      echo "You should remove any cronjob that ran the script."
-    fi
   else
     echo "STACKING-SATS-KRAKEN is not installed."
   fi
