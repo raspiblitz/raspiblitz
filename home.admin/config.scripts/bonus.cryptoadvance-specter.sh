@@ -92,9 +92,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     echo "#    --> Enable wallets in Bitcoin Core"
-    sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /home/bitcoin/.bitcoin/bitcoin.conf
-    sudo service bitcoind stop
-    sudo service bitcoind start
+    /home/admin/config.scripts/network.wallet.sh on
 
     echo "#    --> Installing prerequisites"
     sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv

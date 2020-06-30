@@ -85,6 +85,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
     chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
+    # specify wallet.dat in old config for multiwallet for multiwallet support
+    if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
+      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+      echo "Specified to use wallet.dat in the recovered joinmarket.cfg"
+    fi
 
     # install joinmarket
     cd /home/joinmarket
@@ -169,6 +174,8 @@ if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   PASSWORD_B=\$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Filled the bitcoin RPC password (PASSWORD_B)"
+  sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  echo "Using the bitcoind wallet: wallet.dat"
   #communicate with IRC servers via Tor
   sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sed -i "s/^#host = darksci3bfoka7tw.onion/host = darksci3bfoka7tw.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
