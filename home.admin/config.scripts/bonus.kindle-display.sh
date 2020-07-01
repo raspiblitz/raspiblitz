@@ -10,6 +10,7 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
+APP_VERSION=0.2.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -30,14 +31,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt install -y firefox-esr pngcrush jo
 
     # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh
+    /home/admin/config.scripts/bonus.nodejs.sh on
 
     # add user
     sudo adduser --disabled-password --gecos "" $USERNAME
 
     # install kindle-display
     cd $HOME_DIR
-    sudo -u $USERNAME git clone https://github.com/dennisreimann/kindle-display.git
+    sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
+    sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
+    sudo -u $USERNAME rm v$APP_VERSION.tar.gz
     cd kindle-display/server
     sudo -u $USERNAME npm install
 
@@ -45,24 +49,29 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     RPC_PASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    sudo mkdir $APP_DATA_DIR
+    sudo mkdir -p $APP_DATA_DIR
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
-    configFile=/home/admin/kindle-display.env
-    touch $configFile
-    sudo chmod 600 $configFile || exit 1
-    cat > $configFile <<EOF
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+      configFile=/home/admin/kindle-display.env
+      touch $configFile
+      sudo chmod 600 $configFile || exit 1
+      cat > $configFile <<EOF
 # Server port
 DISPLAY_SERVER_PORT=$SERVER_PORT
 DISPLAY_BITCOIN_RPC_USER="$RPC_USER"
 DISPLAY_BITCOIN_RPC_PASS="$RPC_PASS"
-# BTCPay Settings for rate fetching
-BTCPAY_HOST="https://my.btcpayserver.com"
+# BTCPay Settings for rate fetching – omit these setting to use Bitstamp as a fallback
 # Generate API via Store > Access Tokens > Legacy API Keys
-BTCPAY_API_TOKEN="myBtcPayLegacyApiKey"
+# BTCPAY_HOST="https://my.btcpayserver.com"
+# BTCPAY_API_TOKEN="myBtcPayLegacyApiKey"
 EOF
-    sudo mv $configFile $CONFIG_FILE
+      sudo mv $configFile $CONFIG_FILE
+    fi
+
     sudo chown $USERNAME:$USERNAME $CONFIG_FILE
+
+    # link config to app
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
 
     # generate initial data
