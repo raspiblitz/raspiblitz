@@ -120,7 +120,7 @@ EOF
     echo ""
     echo "SHELL=/bin/bash"
     echo "PATH=/bin:/usr/bin:/usr/local/bin"
-    echo "*/5 * * * * /bin/bash $CRON_FILE"
+    echo "*/5 * * * * /bin/bash $CRON_FILE > /dev/null 2>&1 || true"
   fi
 
   exit 0
