@@ -6,7 +6,7 @@ USERNAME=stackingsats
 APP_DATA_DIR=/mnt/hdd/app-data/stacking-sats-kraken
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
-SCRIPT_NAME=stack-sats.sh
+SCRIPT_NAME=stacksats.sh
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -23,7 +23,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh
+    /home/admin/config.scripts/bonus.nodejs.sh on
 
     # add user
     sudo adduser --disabled-password --gecos "" $USERNAME
@@ -72,16 +72,16 @@ export NODE_OPTIONS="--no-deprecation"
 set -a; source /mnt/hdd/app-data/stacking-sats-kraken/.env; set +a
 
 # run script
-cd ~/stacking-sats-kraken
-if [[ -z "${KRAKEN_DRY_RUN_PLACE_NO_ORDER}" ]]; then
-  result=$(npm run stack-sats 2>&1)
+cd ./stacking-sats-kraken
+if [[ "${KRAKEN_DRY_RUN_PLACE_NO_ORDER}" ]]; then
+  result=$(node index.js --validate 2>&1)
 else
-  result=$(npm test 2>&1)
+  result=$(node index.js 2>&1)
 fi
 echo "$result"
 
 # send email
-if [[ ${KRAKEN_MAIL_SUBJECT} && ${KRAKEN_MAIL_FROM_ADDRESS} && ${KRAKEN_MAIL_FROM_NAME} ]]; then
+if [[ "${KRAKEN_MAIL_SUBJECT}" && "${KRAKEN_MAIL_FROM_ADDRESS}" && "${KRAKEN_MAIL_FROM_NAME}" ]]; then
   /home/admin/config.scripts/blitz.notify.sh send "$result" \
     --subject "$KRAKEN_MAIL_SUBJECT" \
     --from-name "$KRAKEN_MAIL_FROM_NAME" \
@@ -110,7 +110,9 @@ fi
     echo ""
     echo "Here is an example for daily usage at 6:15am ..."
     echo ""
-    echo "15 6 * * * $HOME_DIR/$SCRIPT_NAME"
+    echo "SHELL=/bin/bash"
+    echo "PATH=/bin:/usr/sbin/usr/bin:/usr/local/bin"
+    echo "15 6 * * * $HOME_DIR/$SCRIPT_NAME > /dev/null 2>&1"
   fi
 
   exit 0
