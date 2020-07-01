@@ -100,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    git reset --hard v0.6.2
+    git reset --hard v0.6.3.1
 
     # set up jmvenv 
     sudo apt install -y virtualenv
