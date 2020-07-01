@@ -7,6 +7,7 @@ APP_DATA_DIR=/mnt/hdd/app-data/stacking-sats-kraken
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
 SCRIPT_NAME=stacksats.sh
+SCRIPT_VERSION=0.2.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -30,7 +31,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install stacking-sats-kraken
     cd $HOME_DIR
-    sudo -u $USERNAME git clone https://github.com/dennisreimann/stacking-sats-kraken.git
+    sudo -u $USERNAME wget https://github.com/dennisreimann/stacking-sats-kraken/archive/v$SCRIPT_VERSION.tar.gz
+    sudo -u $USERNAME tar -xzf v$SCRIPT_VERSION.tar.gz
+    sudo -u $USERNAME mv stacking-sats-kraken{-$SCRIPT_VERSION,}
+    sudo -u $USERNAME rm v$SCRIPT_VERSION.tar.gz
     cd stacking-sats-kraken
     sudo -u $USERNAME npm install
 
