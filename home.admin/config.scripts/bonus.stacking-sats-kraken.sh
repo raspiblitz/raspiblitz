@@ -39,12 +39,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME npm install
 
     # setup stacking config
-    sudo mkdir $APP_DATA_DIR
+    sudo mkdir -p $APP_DATA_DIR
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
-    configFile=/home/admin/stacking-sats-kraken.env
-    touch $configFile
-    sudo chmod 600 $configFile || exit 1
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+      configFile=/home/admin/stacking-sats-kraken.env
+      touch $configFile
+      sudo chmod 600 $configFile || exit 1
 echo '# Required settings
 KRAKEN_API_KEY="apiKeyFromTheKrakenSettings"
 KRAKEN_API_SECRET="privateKeyFromTheKrakenSettings"
@@ -59,7 +60,9 @@ KRAKEN_BUY_AMOUNT=21
 # Remove this line after verifying everything works
 KRAKEN_DRY_RUN_PLACE_NO_ORDER=1
 ' > $configFile
-    sudo mv $configFile $CONFIG_FILE
+      sudo mv $configFile $CONFIG_FILE
+    fi
+
     sudo chown $USERNAME:$USERNAME $CONFIG_FILE
 
     # setup stacking script
@@ -133,7 +136,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # setting value in raspi blitz config
     sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=off/g" /mnt/hdd/raspiblitz.conf
 
-    # remove sconfig
+    # remove config
     sudo rm -rf $APP_DATA_DIR
 
     # delete user and home directory
