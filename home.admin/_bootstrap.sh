@@ -461,6 +461,8 @@ if [ ${#localBackupDeviceUUID} -gt 0 ]; then
   else
     echo "FAIL BackupDrive mount - check if device is connected & UUID is correct" >> $logFile
   fi
+else
+  echo "No additional nackup device was configured." >> $logFile
 fi
 
 ################################
