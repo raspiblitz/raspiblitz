@@ -139,11 +139,11 @@ elif [ "${abcd}" = "b" ]; then
   if [ ${#newPassword} -eq 0 ]; then
     clear
 
-    # ask user for new password A (first time)
-    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    # ask user for new password B (first time)
+    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
-    # ask user for new password A (second time)
-    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    # ask user for new password B (second time)
+    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
