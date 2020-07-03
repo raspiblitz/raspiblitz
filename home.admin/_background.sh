@@ -209,19 +209,42 @@ do
     #echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
-    scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
+    scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+    scbExists=$(sudo ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
+      # timestamp backup filename
+      timestampedFileName=channel-$(date "+%Y%m%d-%H%M%S").backup
+      localBackupDir=/home/admin/backups/scb/
+      localBackupPath=${localBackupDir}/channel.backup
+      localTimestampedPath=${localBackupDir}/${timestampedFileName}
+
       #echo "Found Channel Backup File .. check if changed .."
-      md5checksumORG=$(sudo md5sum /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
-      md5checksumCPY=$(sudo md5sum /home/admin/backups/scb/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumORG=$(sudo md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumCPY=$(sudo md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
         sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
-        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/backups/scb/channel.backup
-        echo "OK channel.backup copied to '/home/admin/backups/scb/channel.backup'"
-      
+        sudo cp $scbPath $localBackupPath
+        sudo cp $scbPath $localTimestampedPath
+        echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}'"
+
+        # check if a local backup target is set
+        # parameter in raspiblitz.conf:
+        # localBackupTarget='[DIRPATH-WITHOUT-ENDING-/]'
+        if [ ${#localBackupTarget} -gt 0 ]; then
+          echo "--> Onsite-Backup SCP Server"
+          sudo cp ${localBackupPath} ${localBackupTarget}/
+          sudo cp ${localTimestampedPath} ${localBackupTarget}/
+          result=$?
+          if [ ${result} -eq 0 ]; then
+            echo "OK - Local Backup exited with 0"
+          else
+            echo "FAIL - Local Backup exited with ${result}"
+          fi
+        fi
+
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
@@ -231,7 +254,8 @@ do
           echo "--> Offsite-Backup SCP Server"
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localBackupPath} ${scpBackupTarget}/
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
@@ -246,7 +270,8 @@ do
         # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
         if [ ${#dropboxBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup Dropbox"
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup)
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localBackupPath})
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localTimestampedPath})
           if [ ${#err} -gt 0 ]; then
             echo "FAIL -  ${err}"
             echo "${errMore}"

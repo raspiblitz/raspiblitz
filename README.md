@@ -939,6 +939,14 @@ The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, sho
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
+#### C) Local Backup Target
+
+*You can also backup the SCB to another local drive, e.g. an USB stick:*
+
+In the `/mnt/hdd/raspiblitz.conf` the parameter `localBackupTarget='[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
+
+To test it - open or close a channel and check if you find a copy of `channel.backup` in the specified location. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+
 ## Updating RaspiBlitz to new Version
 
 If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions.
