@@ -10,6 +10,7 @@
 - Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
 - Update: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
+- Update: ElectRS 0.8.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#085-1-july-2020)
 - New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
