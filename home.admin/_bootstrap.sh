@@ -451,8 +451,9 @@ fi
 # raspiblitz.conf mount it on boot
 ################################
 source ${configFile}
+echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
 if [ ${#localBackupDeviceUUID} -gt 0 ]; then
-  echo "Mounting BackupDrive: ${${localBackupDeviceUUID}}" >> $logFile
+  echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
   sudo mkdir -p /mnt/backup 2>/dev/null
   sudo mount --uuid ${localBackupDeviceUUID} /mnt/backup >> $logFile
   mountWorked=$(df | grep -c "/mnt/backup")
