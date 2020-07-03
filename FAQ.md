@@ -8,9 +8,10 @@
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
 - Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
-- Update: BTCPayServer v1.0.4.4+ [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.4.4)
+- Update: BTCPayServer v1.0.5.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.2)
 - Update: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
 - Update: ElectRS 0.8.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#085-1-july-2020)
+- Update: JoinMarket v0.6.3.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.6.3.1)
 - New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
