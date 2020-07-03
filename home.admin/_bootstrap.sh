@@ -431,6 +431,7 @@ fi
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
+
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
 #################################
@@ -442,6 +443,24 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
 else 
   echo "skipping LND credientials sync" >> $logFile
+fi
+
+################################
+# MOUNT BACKUP DRIVE
+# if "localBackupDeviceUUID" is set in
+# raspiblitz.conf mount it on boot
+################################
+source ${configFile}
+if [ ${#localBackupDeviceUUID} -gt 0 ]; then
+  echo "Mounting BackupDrive: ${${localBackupDeviceUUID}}" >> $logFile
+  sudo mkdir -p /mnt/backup 2>/dev/null
+  sudo mount --uuid ${localBackupDeviceUUID} /mnt/backup >> $logFile
+  mountWorked=$(df | grep -c "/mnt/backup")
+  if [ ${mountWorked} -gt 0 ]; then
+    echo "OK BackupDrive mounted to: /mnt/backup" >> $logFile
+  else
+    echo "FAIL BackupDrive mount - check if device is connected & UUID is correct" >> $logFile
+  fi
 fi
 
 ################################

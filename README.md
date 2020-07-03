@@ -939,11 +939,15 @@ The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, sho
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
-#### C) Local Backup Target
+#### C) Local Backup Target (USB Thumbdrive)
 
 *You can also backup the SCB to another local drive, e.g. an USB stick:*
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `localBackupTarget='[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
+You can use a small USB thumb drive (everything over 128MB is fine). Format it on your laptop as FAT32 (or ext4 if you have a linux laptop). Then plug it into a free USB port on your RaspiBlitz (use one of the USB 2 port - not the blue ones if possible).
+
+In the `/mnt/hdd/raspiblitz.conf` the parameter `localBackupDeviceUUID='[DEVICEUUID]'` can be set to activate this feature.
+
+The `DEVICEUUID` of your Thumbdrive you get when you see if you call on the terminal `lsblk -o NAME,SIZE,UUID`
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` in the specified location. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 

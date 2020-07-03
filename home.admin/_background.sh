@@ -228,20 +228,32 @@ do
         sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
         sudo cp $scbPath $localBackupPath
         sudo cp $scbPath $localTimestampedPath
-        echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}'"
+        sudo cp $scbPath /boot/channel.backup
+        echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
 
-        # check if a local backup target is set
+        # check if a additional local backup target is set
         # parameter in raspiblitz.conf:
-        # localBackupTarget='[DIRPATH-WITHOUT-ENDING-/]'
-        if [ ${#localBackupTarget} -gt 0 ]; then
-          echo "--> Onsite-Backup SCP Server"
-          sudo cp ${localBackupPath} ${localBackupTarget}/
-          sudo cp ${localTimestampedPath} ${localBackupTarget}/
-          result=$?
-          if [ ${result} -eq 0 ]; then
-            echo "OK - Local Backup exited with 0"
+        # localBackupDeviceUUID='[DEVICEUUID]'
+        if [ ${#localBackupDeviceUUID} -gt 0 ]; then
+
+          # check if device got mounted on "/mnt/backup" (gets mounted by _bootstrap.sh)
+          backupDeviceExists=$(df | grep -c "/mnt/backup")
+          if [ ${backupDeviceExists} -gt 0 ]; then
+
+            echo "--> Additional Local Backup Device"
+            sudo cp ${localBackupPath} /mnt/backup/
+            sudo cp ${localTimestampedPath} /mnt/backup/
+
+            # check reseults
+            result=$?
+            if [ ${result} -eq 0 ]; then
+              echo "OK - Sucessfull Copy to additional Backup Device"
+            else
+              echo "FAIL - Copy to additional Backup Device exited with ${result}"
+            fi
+
           else
-            echo "FAIL - Local Backup exited with ${result}"
+            echo "FAIL - BackupDrive mount - check if device is connected & UUID is correct" >> $logFile
           fi
         fi
 
