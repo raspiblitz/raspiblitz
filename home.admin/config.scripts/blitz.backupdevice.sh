@@ -106,7 +106,7 @@ if [ "$1" = "on" ]; then
     fi
 
     whiptail --title " FORMATTING DEVICE " --yes-button "FORMAT" --no-button "Cancel" --yesno "Will format the following device as Backup drive:
-${backupCandidate[0]}
+---> ${backupCandidate[0]}
 
 THIS WILL DELETE ALL DATA ON THAT DEVICE!
     " 10 55
@@ -115,10 +115,8 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       exit 1
     fi
 
-    echo "# TODO: will go with ${backupCandidate[0]}"
     uuid=$(echo "${backupCandidate[0]}" | cut -d " " -f 1)
-    echo "# TODO: format device ${uuid}"
-    exit 1
+    echo "# will format device ${uuid}"
   fi
 
   # check that device is connected
