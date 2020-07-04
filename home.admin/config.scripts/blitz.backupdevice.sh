@@ -84,6 +84,8 @@ if [ "$1" = "on" ]; then
     # check if backup devcie is already connected
     if [ ${backupCandidates} -eq 0 ]; then
       dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 128 MB.\nBest on a USB2 port (not the blue ones).' 7 50
+      echo 
+      echo "detecting device ..."
       sleep 3
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
       if [ ${backupCandidates} -eq 0 ]; then
