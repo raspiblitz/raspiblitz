@@ -69,10 +69,12 @@ fi
 if [ "$1" = "on" ]; then
 
   echo "# BACKUP DEVICE ADD"
+  userinteraction=0
 
   # select and format device if UUID is not given
   uuid=$2
   if [ "${uuid}" == "" ]; then
+    userinteraction=1
 
     # get status data
     source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
@@ -83,7 +85,7 @@ if [ "$1" = "on" ]; then
 
     # check if backup devcie is already connected
     if [ ${backupCandidates} -eq 0 ]; then
-      dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 128 MB.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 8 50
+      dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 128 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
       clear
       echo 
       echo "detecting device ... (please wait)"
@@ -100,6 +102,17 @@ if [ "$1" = "on" ]; then
     if [ ${backupCandidates} -gt 1 ]; then
       dialog --title ' FAIL ' --msgbox 'There is more then one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
       clear
+      exit 1
+    fi
+
+    whiptail --title " FORMATTING DEVICE " --yes-button "FORMAT" --no-button "Cancel" --yesno "
+Will format the following device as Backup drive:
+${backupCandidate[0]}
+
+THIS WILL DELETE ALL DATA ON THAT DEVICE!
+    " 6 60
+    if [ $? -eq 0 ]; then
+      echo "# CANCEL"
       exit 1
     fi
 
@@ -166,6 +179,15 @@ if [ "$1" = "on" ]; then
   echo "isMounted=${isMounted}"
   if [ ${isMounted} -eq 0 ]; then
     echo "error='failed to mount'"
+  fi
+
+  if [ ${userinteraction} -eq 1 ]; then
+    if [ ${isMounted} -eq 0 ]; then
+      sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID=off/g" /mnt/hdd/raspiblitz.conf
+      dialog --title ' Adding Backup Device ' --msgbox '\nFAIL - Not able to add device.' 7 40
+    else
+      dialog --title ' Adding Backup Device ' --msgbox '\nOK - Device added for Backup.' 7 40
+    fi
   fi
 
   exit 0
