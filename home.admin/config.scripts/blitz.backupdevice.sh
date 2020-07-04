@@ -110,8 +110,8 @@ Will format the following device as Backup drive:
 ${backupCandidate[0]}
 
 THIS WILL DELETE ALL DATA ON THAT DEVICE!
-    " 6 60
-    if [ $? -eq 0 ]; then
+    " 9 60
+    if [ $? -eq 1 ]; then
       echo "# CANCEL"
       exit 1
     fi
