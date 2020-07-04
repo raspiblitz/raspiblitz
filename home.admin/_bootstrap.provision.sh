@@ -453,6 +453,15 @@ else
   echo "Provisioning letsencrypt - keep default" >> ${logFile}
 fi
 
+# kindle-display
+if [ "${kindleDisplay}" = "on" ]; then
+  echo "Provisioning kindle-display - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup kindle-display'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.kindle-display.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning kindle-display - keep default" >> ${logFile}
+fi
+
 
 
 # replay backup LND conf & tlscerts

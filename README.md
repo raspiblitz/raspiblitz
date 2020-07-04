@@ -34,6 +34,7 @@ There are further Services that can be switched on:
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Faraday** (Channel Analysis & Recommendations CLI) [details](https://github.com/lightninglabs/faraday/blob/master/README.md)
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
+* **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
