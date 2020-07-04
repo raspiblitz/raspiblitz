@@ -16,7 +16,7 @@ source /mnt/hdd/raspiblitz.conf
 #########################
 
 # is on or off
-if [ ${#localBackupDeviceUUID} -eq 0 ]; then
+if [ "${localBackupDeviceUUID}" == "" ]; then
 
   # get all the devices that are not mounted and possible candidates
   drivecounter=0
@@ -34,7 +34,6 @@ if [ ${#localBackupDeviceUUID} -eq 0 ]; then
     fi
   done
   echo "backupCandidates=${drivecounter}"
-
 fi
 
 if [ "$1" = "status" ]; then
@@ -47,6 +46,7 @@ if [ "$1" = "status" ]; then
     echo "backupdevice=off"
   fi
 
+  exit 0
 fi
 
 #########################
@@ -56,7 +56,7 @@ fi
 if [ "$1" = "on" ]; then
 
   echo "# BACKUP DEVICE ADD"
-
+  exit 0
 fi
 
 #########################
@@ -66,7 +66,7 @@ fi
 if [ "$1" = "off" ]; then
 
   echo "# BACKUP DEVICE REMOVE"
-
+  exit 0
 fi
 
 echo "error='unkown command'"
