@@ -84,6 +84,13 @@ if [ "$1" = "on" ]; then
     isDeviceName=$(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1 | grep -c "${uuid}")
     if [ ${isDeviceName} -eq 1 ]; then
       hdd="${uuid}"
+      # check if mounted
+      checkIfAlreadyMounted=$(lsblk | grep "${hdd}" | grep -c '/mnt/')
+      if [ ${checkIfAlreadyMounted} -gt 0 ]; then
+        echo "# cannot format a device that is mounted"
+        echo "error='device is used'"
+        exit 1
+      fi
       echo "# OK found device name ${hdd} that will now be formatted ..."
       echo "# Wiping all partitions (sfdisk/wipefs)"
       sudo sfdisk --delete /dev/${hdd} 1>&2
