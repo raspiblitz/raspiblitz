@@ -85,7 +85,7 @@ if [ "$1" = "on" ]; then
 
     # check if backup devcie is already connected
     if [ ${backupCandidates} -eq 0 ]; then
-      dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 128 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
+      dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 120 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
       clear
       echo 
       echo "detecting device ... (please wait)"
