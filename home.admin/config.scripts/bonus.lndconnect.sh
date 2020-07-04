@@ -95,9 +95,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
 elif [ "${targetWallet}" = "zap-android" ]; then
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses REST
-    port="8080"
-    extraparameter="--nocert"
+    # when ZAP runs on TOR it uses gRPC
+    port="10009"
   else
     # normal ZAP uses gRPC ports
     port="10009"
