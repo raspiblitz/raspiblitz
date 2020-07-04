@@ -109,7 +109,9 @@ if [ "$1" = "on" ]; then
 ${backupCandidate[0]}
 
 THIS WILL DELETE ALL DATA ON THAT DEVICE!
-    " 11 60
+    " 10 60
+    echo $?
+    exit 1
     if [ $? -eq 0 ]; then
       echo "# CANCEL"
       exit 1
