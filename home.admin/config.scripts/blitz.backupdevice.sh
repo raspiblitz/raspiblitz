@@ -3,7 +3,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# adding and removing a backup device (usb thumbdrive)"
  echo "# blitz.backupdevice.sh status"
- echo "# blitz.backupdevice.sh on [?DEVICEUUID]"
+ echo "# blitz.backupdevice.sh on [?DEVICEUUID|DEVICENAME]"
  echo "# blitz.backupdevice.sh off"
  echo "# blitz.backupdevice.sh mount"
  echo "error='missing parameters'"
@@ -17,30 +17,10 @@ source /mnt/hdd/raspiblitz.conf
 # STATUS
 #########################
 
-# is on or off
-if [ "${localBackupDeviceUUID}" == "" ] || [ "${localBackupDeviceUUID}" == "off" ]; then
-
-  # get all the devices that are not mounted and possible candidates
-  drivecounter=0
-  for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
-  do
-    devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-    # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-    if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
-      sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
-      sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
-      vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
-      mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
-      echo "backupCandidate[${drivecounter}]='${mountoption}'"
-      drivecounter=$(($drivecounter +1))
-    fi
-  done
-  echo "backupCandidates=${drivecounter}"
-fi
-
 if [ "$1" = "status" ]; then
 
-  if [ "${localBackupDeviceUUID}" == "" ] || [ "${localBackupDeviceUUID}" == "off" ]; then
+  if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+
     echo "backupdevice=1"
     echo "UUID='${localBackupDeviceUUID}'"
 
@@ -54,8 +34,23 @@ if [ "$1" = "status" ]; then
 
   else
     echo "backupdevice=0"
-    echo "UUID=''"
-    echo "isMounted=0"
+    
+    # get all the devices that are not mounted and possible candidates
+    drivecounter=0
+    for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
+    do
+      devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
+      # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+        sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
+        sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
+        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
+        mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
+        echo "backupCandidate[${drivecounter}]='${mountoption}'"
+        drivecounter=$(($drivecounter +1))
+      fi
+    done
+    echo "backupCandidates=${drivecounter}"
   fi
 
   exit 0
@@ -79,8 +74,38 @@ if [ "$1" = "on" ]; then
   # check that device is connected
   uuidConnected=$(lsblk -o UUID | grep -c "${uuid}")
   if [ ${uuidConnected} -eq 0 ]; then
-    echo "error='device not found'"
-    exit 1
+    echo "# UUID not found - test is its a valid device name like sdb ..."
+    isDeviceName=$(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1 | grep -c "${uuid}")
+    if [ ${isDeviceName} -eq 1 ]; then
+      hdd="${uuid}"
+      echo "# OK found device name ${hdd} that will now be formatted ..."
+      echo "# Wiping all partitions (sfdisk/wipefs)"
+      sudo sfdisk --delete /dev/${hdd} 1>&2
+      sudo wipefs -a /dev/${hdd} 1>&2
+      partitions=$(lsblk | grep -c "─${hdd}")
+      if [ ${partitions} -gt 0 ]; then
+        echo "# WARNING: partitions are still not clean"
+        error='partitioning failed'
+        exit 1
+      fi
+      # using FAT32 here so that the backup can be easily opened on Windows and Mac
+      echo "# Create on big partition"
+      sudo parted /dev/${hdd} mklabel msdos
+      sudo parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
+      echo "# Formatting FAT32"
+      sudo mkfs.vfat -F 32 -n 'BLITZBACKUP' /dev/${hdd}1 1>&2
+      echo "# Getting new UUID"
+      uuid=$(lsblk -o UUID,NAME | grep "${hdd}1" | cut -d " " -f 1)
+      if [ "${uuid}" == "" ]; then
+        error='formatting failed'
+        exit 1
+      fi
+      echo "# OK device formatted --> UUID is ${uuid}"
+
+    else
+      echo "error='device not found'"
+      exit 1
+    fi
   fi
 
   # change raspiblitz.conf
@@ -97,7 +122,7 @@ if [ "$1" = "on" ]; then
   if [ ${isMounted} -eq 0 ]; then
     echo "error='failed to mount'"
   fi
-  
+
   exit 0
 fi
 
