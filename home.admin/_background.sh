@@ -234,7 +234,7 @@ do
         # check if a additional local backup target is set
         # parameter in raspiblitz.conf:
         # localBackupDeviceUUID='[DEVICEUUID]'
-        if [ ${#localBackupDeviceUUID} -gt 0 ]; then
+        if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ];; then
 
           # check if device got mounted on "/mnt/backup" (gets mounted by _bootstrap.sh)
           backupDeviceExists=$(df | grep -c "/mnt/backup")

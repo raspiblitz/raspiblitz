@@ -5,10 +5,12 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# blitz.backupdevice.sh status"
  echo "# blitz.backupdevice.sh on [?DEVICEUUID]"
  echo "# blitz.backupdevice.sh off"
+ echo "# blitz.backupdevice.sh mount"
  echo "error='missing parameters'"
  exit 1
 fi
 
+echo "# blitz.backupdevice.sh"
 source /mnt/hdd/raspiblitz.conf
 
 #########################
@@ -16,7 +18,7 @@ source /mnt/hdd/raspiblitz.conf
 #########################
 
 # is on or off
-if [ "${localBackupDeviceUUID}" == "" ]; then
+if [ "${localBackupDeviceUUID}" == "" ] || [ "${localBackupDeviceUUID}" == "off" ]; then
 
   # get all the devices that are not mounted and possible candidates
   drivecounter=0
@@ -38,12 +40,22 @@ fi
 
 if [ "$1" = "status" ]; then
 
-  echo "# Backup Device Status"
-  if [ ${#localBackupDeviceUUID} -gt 0 ]; then
-    echo "backupdevice=on"
-    echo "backupdeviceUUID='${localBackupDeviceUUID}'"
+  if [ "${localBackupDeviceUUID}" == "" ] || [ "${localBackupDeviceUUID}" == "off" ]; then
+    echo "backupdevice=1"
+    echo "UUID='${localBackupDeviceUUID}'"
+
+    # check if nackup device is mounted
+    backupDeviceExists=$(df | grep -c "/mnt/backup")
+    if [ ${backupDeviceExists} -gt 0 ]; then
+      echo "isMounted=1"
+    else
+      echo "isMounted=0"
+    fi
+
   else
-    echo "backupdevice=off"
+    echo "backupdevice=0"
+    echo "UUID=''"
+    echo "isMounted=0"
   fi
 
   exit 0
@@ -56,6 +68,72 @@ fi
 if [ "$1" = "on" ]; then
 
   echo "# BACKUP DEVICE ADD"
+
+  # select and format device if UUID is not given
+  uuid=$2
+  if [ "${uuid}" == "" ]; then
+    echo "# TODO: dialog to connect, choose and format device"
+    exit 1
+  fi
+
+  # check that device is connected
+  uuidConnected=$(lsblk -o UUID | grep -c "${uuid}")
+  if [ ${uuidConnected} -eq 0 ]; then
+    echo "error='device not found'"
+    exit 1
+  fi
+
+  # change raspiblitz.conf
+  entryExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c 'localBackupDeviceUUID=')
+  if [ ${entryExists} -eq 0]; then
+    echo "localBackupDeviceUUID='off'" >> /mnt/hdd/raspiblitz.conf
+  fi
+  sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID='${uuid}'/g" /mnt/hdd/raspiblitz.conf
+  echo "activated=1'"
+
+  # mount device (so that no reboot is needed)
+  source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh mount)
+  echo "isMounted=${isMounted}"
+  if [ ${isMounted} -eq 0 ]; then
+    echo "error='failed to mount'"
+  fi
+  
+  exit 0
+fi
+
+#########################
+# MOUNT
+#########################
+
+if [ "$1" = "mount" ]; then
+
+  echo "# BACKUP DEVICE MOUNT"
+
+  # check if feature is on
+  if [ "${localBackupDeviceUUID}" == "" ] || [ "${localBackupDeviceUUID}" == "off" ]; then
+    echo "error='feature is off'"
+    exit 1
+  fi
+
+  checkIfAlreadyMounted=$(df | grep -c "/mnt/backup")
+  if [ ${checkIfAlreadyMounted} -gt 0 ]; then
+    echo "# there is something already mounted on /mnt/backup"
+    echo "error='already mounted'"
+    exit 1
+  fi
+
+  sudo mkdir -p /mnt/backup 1>&2
+  sudo mount --uuid ${localBackupDeviceUUID} /mnt/backup 1>&2
+  mountWorked=$(df | grep -c "/mnt/backup")
+  if [ ${mountWorked} -gt 0 ]; then
+    echo "# OK BackupDrive mounted to: /mnt/backup"
+    echo "isMounted=1"
+  else
+    echo "# FAIL BackupDrive mount - check if device is connected & UUID is correct"
+    echo "isMounted=0"
+    echo "error='mount failed'"
+  fi
+
   exit 0
 fi
 

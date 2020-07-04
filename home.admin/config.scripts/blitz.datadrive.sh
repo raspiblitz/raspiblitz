@@ -561,7 +561,7 @@ if [ "$1" = "fstab" ]; then
 
     # write new /etc/fstab & mount
     >&2 echo "# updating /etc/fstab & mount"
-    sudo mkdir -p /mnt/hdd 1>2&
+    sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo sed "3 a UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
     sync
     sudo mount -a 1>/dev/null
