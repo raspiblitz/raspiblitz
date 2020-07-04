@@ -21,6 +21,10 @@ echo "map dropboxbackup to on/off"
 DropboxBackup="off"
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
+echo "map localbackup to on/off"
+LocalBackup="off"
+if [ ${#localBackupDeviceUUID} -gt 0 ] && [ "${localBackupDeviceUUID}" != "off" ]; then LocalBackup="on"; fi
+
 echo "map zerotier to on/off"
 zerotierSwitch="off"
 if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
@@ -77,6 +81,7 @@ OPTIONS+=(n 'Testnet' ${chainValue})
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+OPTIONS+=(u 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
@@ -373,6 +378,17 @@ if [ "${DropboxBackup}" != "${choice}" ]; then
   fi
 else
   echo "Dropbox backup setting unchanged."
+fi
+
+# LocalBackup process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${LocalBackup}" != "${choice}" ]; then
+  echo "BackupdDevice Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.backupdevice.sh ${choice}
+else
+  echo "BackupdDevice setting unchanged."
 fi
 
 # Keysend process choice

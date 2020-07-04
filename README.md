@@ -943,11 +943,9 @@ To test it - open or close a channel and check if you find a copy of `channel.ba
 
 *You can also backup the SCB to another local drive, e.g. an USB stick:*
 
-You can use a small USB thumb drive (everything over 128MB is fine). Format it on your laptop as FAT32 (or ext4 if you have a linux laptop). Then plug it into a free USB port on your RaspiBlitz (use one of the USB 2 port - not the blue ones if possible).
+You can use a small USB thumb drive (everything over 120MB is fine). Please dont use a second HDD/SSD for this because that might drain too much power and could hurt the security of your data more then it helps.
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `localBackupDeviceUUID='[DEVICEUUID]'` can be set to activate this feature.
-
-The `DEVICEUUID` of your Thumbdrive you get when you see if you call on the terminal `lsblk -o NAME,SIZE,UUID`
+To activate this feature go to MAINMENU > SETTINGS > 'StaticChannelBackup on USB Drive' and follow the instructions.
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` in the specified location. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
