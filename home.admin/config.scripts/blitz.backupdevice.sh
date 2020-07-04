@@ -120,7 +120,7 @@ if [ "$1" = "on" ]; then
     echo "localBackupDeviceUUID='off'" >> /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID='${uuid}'/g" /mnt/hdd/raspiblitz.conf
-  echo "activated=1'"
+  echo "activated=1"
 
   # mount device (so that no reboot is needed)
   source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh mount)
