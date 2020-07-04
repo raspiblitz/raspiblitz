@@ -91,6 +91,7 @@ if [ "$1" = "on" ]; then
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
       if [ ${backupCandidates} -eq 0 ]; then
         dialog --title ' FAIL ' --msgbox 'NOT able to detect a possible backup device.\nProcess was not sucessful.' 6 50
+        clear
         exit 1
       fi
     fi
@@ -98,6 +99,7 @@ if [ "$1" = "on" ]; then
     # check if there is only one candidate
     if [ ${backupCandidates} -gt 1 ]; then
       dialog --title ' FAIL ' --msgbox 'There is more then one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
+      clear
       exit 1
     fi
 
