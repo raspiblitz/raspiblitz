@@ -73,6 +73,18 @@ if [ "$1" = "on" ]; then
   # select and format device if UUID is not given
   uuid=$2
   if [ "${uuid}" == "" ]; then
+
+    # get status data
+    source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
+    if [ ${backupdevice} -eq 1 ]; then
+      echo "error='already on'"
+      exit 1
+    fi
+
+    
+
+
+
     echo "# TODO: dialog to connect, choose and format device"
     exit 1
   fi
@@ -180,8 +192,10 @@ fi
 #########################
 
 if [ "$1" = "off" ]; then
-
   echo "# BACKUP DEVICE REMOVE"
+  sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID=off/g" /mnt/hdd/raspiblitz.conf
+  sudo umount /mnt/backup 2>/dev/null
+  echo "# OK backup device is off"
   exit 0
 fi
 
