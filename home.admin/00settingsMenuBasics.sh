@@ -90,7 +90,7 @@ if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi 
 
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 19 45 11  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -407,7 +407,7 @@ fi
 # ZeroTier process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${zerotier}" != "${choice}" ]; then
+if [ "${zerotierSwitch}" != "${choice}" ]; then
   echo "zerotier setting changed .."
   anychange=1
   error=""
