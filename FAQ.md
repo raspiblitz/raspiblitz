@@ -21,6 +21,7 @@
 - New: ThunderHub v0.8.4 (with update option) [details](https://www.thunderhub.io)
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - New: ZeroTier [details](https://zerotier.com/manual/)
+- New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 - New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
