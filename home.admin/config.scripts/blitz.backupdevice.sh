@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-echo "# blitz.backupdevice.sh"
+echo "### blitz.backupdevice.sh ###"
 source /mnt/hdd/raspiblitz.conf
 
 #########################
