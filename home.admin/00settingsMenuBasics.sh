@@ -81,7 +81,7 @@ OPTIONS+=(n 'Testnet' ${chainValue})
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
-OPTIONS+=(u 'StaticChannelBackup on USB Drive' ${LocalBackup})
+OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
@@ -381,7 +381,7 @@ else
 fi
 
 # LocalBackup process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LocalBackup}" != "${choice}" ]; then
   echo "BackupdDevice Setting changed .."
