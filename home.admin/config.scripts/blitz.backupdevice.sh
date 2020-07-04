@@ -105,14 +105,12 @@ if [ "$1" = "on" ]; then
       exit 1
     fi
 
-    whiptail --title " FORMATTING DEVICE " --yes-button "Cancel" --no-button "FORMAT" --yesno "Will format the following device as Backup drive:
+    whiptail --title " FORMATTING DEVICE " --yes-button "FORMAT" --no-button "Cancel" --yesno "Will format the following device as Backup drive:
 ${backupCandidate[0]}
 
 THIS WILL DELETE ALL DATA ON THAT DEVICE!
-    " 10 60
-    echo $?
-    exit 1
-    if [ $? -eq 0 ]; then
+    " 10 55
+    if [ $? -gt 0 ]; then
       echo "# CANCEL"
       exit 1
     fi
