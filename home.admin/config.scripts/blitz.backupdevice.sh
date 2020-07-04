@@ -88,7 +88,7 @@ if [ "$1" = "on" ]; then
       checkIfAlreadyMounted=$(lsblk | grep "${hdd}" | grep -c '/mnt/')
       if [ ${checkIfAlreadyMounted} -gt 0 ]; then
         echo "# cannot format a device that is mounted"
-        echo "error='device is used'"
+        echo "error='device is in use'"
         exit 1
       fi
       echo "# OK found device name ${hdd} that will now be formatted ..."
