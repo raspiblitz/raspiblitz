@@ -206,10 +206,9 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
-	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
-      #if [ ${#ip2tor} -eq 0 ]; then
-	  #  choose_IP_or_TOR
-	  #fi
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
+	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
     ;;
