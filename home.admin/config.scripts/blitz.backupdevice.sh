@@ -81,11 +81,25 @@ if [ "$1" = "on" ]; then
       exit 1
     fi
 
-    
+    # check if backup devcie is already connected
+    if [ ${backupCandidates} -eq 0 ]; then
+      echo "Please connect device .. press ENTER"
+      read key
+      source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
+      if [ ${backupCandidates} -eq 0 ]; then
+        echo "Still not found - exit."
+        exit 1
+      fi
+    fi
 
+    # check if there is only one candidate
+    if [ ${backupCandidates} -gt 1 ]; then
+      echo "There are too many devices connected - exit."
+      exit 1
+    fi
 
-
-    echo "# TODO: dialog to connect, choose and format device"
+    echo "# TODO: will go with ${backupCandidate[0]}"
+    echo "# TODO: format device"
     exit 1
   fi
 
