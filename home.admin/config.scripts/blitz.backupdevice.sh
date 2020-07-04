@@ -145,7 +145,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       fi
       # using FAT32 here so that the backup can be easily opened on Windows and Mac
       echo "# Create on big partition"
-      sudo parted /dev/${hdd} mklabel msdos
+      sudo parted /dev/${hdd} mklabel msdos 1>&2
       sudo parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
       echo "# Formatting FAT32"
       sudo mkfs.vfat -F 32 -n 'BLITZBACKUP' /dev/${hdd}1 1>&2
@@ -177,6 +177,9 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
   if [ ${isMounted} -eq 0 ]; then
     echo "error='failed to mount'"
   fi
+
+  # copy SCB over
+  cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /mnt/backup/channel.backup 1>&2
 
   if [ ${userinteraction} -eq 1 ]; then
     if [ ${isMounted} -eq 0 ]; then
