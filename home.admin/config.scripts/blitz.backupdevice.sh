@@ -56,6 +56,12 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='missing sudo'"
+  exit 1
+fi
+
 #########################
 # TURN ON
 #########################
@@ -110,7 +116,7 @@ if [ "$1" = "on" ]; then
 
   # change raspiblitz.conf
   entryExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c 'localBackupDeviceUUID=')
-  if [ ${entryExists} -eq 0]; then
+  if [ ${entryExists} -eq 0 ]; then
     echo "localBackupDeviceUUID='off'" >> /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID='${uuid}'/g" /mnt/hdd/raspiblitz.conf
