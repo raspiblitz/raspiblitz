@@ -83,23 +83,24 @@ if [ "$1" = "on" ]; then
 
     # check if backup devcie is already connected
     if [ ${backupCandidates} -eq 0 ]; then
-      echo "Please connect device .. press ENTER"
-      read key
+      dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 128 MB.\nBest on a USB2 port (not the blue ones).' 7 50
+      sleep 3
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
       if [ ${backupCandidates} -eq 0 ]; then
-        echo "Still not found - exit."
+        dialog --title ' FAIL ' --msgbox 'NOT able to detect a possible backup device.\nProcess was not sucessful.' 6 50
         exit 1
       fi
     fi
 
     # check if there is only one candidate
     if [ ${backupCandidates} -gt 1 ]; then
-      echo "There are too many devices connected - exit."
+      dialog --title ' FAIL ' --msgbox 'There is more then one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
       exit 1
     fi
 
     echo "# TODO: will go with ${backupCandidate[0]}"
-    echo "# TODO: format device"
+    uuid=$(echo "${backupCandidate[0]}" | cut -d " " -f 1)
+    echo "# TODO: format device ${uuid}"
     exit 1
   fi
 
