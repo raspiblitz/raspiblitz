@@ -91,7 +91,7 @@ if [ "$1" = "on" ]; then
       partitions=$(lsblk | grep -c "─${hdd}")
       if [ ${partitions} -gt 0 ]; then
         echo "# WARNING: partitions are still not clean"
-        error='partitioning failed'
+        echo "error='partitioning failed'"
         exit 1
       fi
       # using FAT32 here so that the backup can be easily opened on Windows and Mac
@@ -103,7 +103,7 @@ if [ "$1" = "on" ]; then
       echo "# Getting new UUID"
       uuid=$(lsblk -o UUID,NAME | grep "${hdd}1" | cut -d " " -f 1)
       if [ "${uuid}" == "" ]; then
-        error='formatting failed'
+        echo "error='formatting failed'"
         exit 1
       fi
       echo "# OK device formatted --> UUID is ${uuid}"
