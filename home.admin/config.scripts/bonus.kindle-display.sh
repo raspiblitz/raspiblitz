@@ -10,7 +10,7 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.2.1
+APP_VERSION=0.2.3
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -129,7 +129,7 @@ EOF
     echo ""
     echo "SHELL=/bin/bash"
     echo "PATH=/bin:/usr/bin:/usr/local/bin"
-    echo "*/5 * * * * /bin/bash $CRON_FILE > /dev/null 2>&1 || true"
+    echo "*/5 * * * * $CRON_FILE 2>&1 > /dev/null"
   fi
 
   exit 0
@@ -147,6 +147,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" /mnt/hdd/raspiblitz.conf
 
     # uninstall service
+    sudo systemctl stop kindle-display
     sudo systemctl disable kindle-display
     sudo rm /etc/systemd/system/kindle-display.service
 
