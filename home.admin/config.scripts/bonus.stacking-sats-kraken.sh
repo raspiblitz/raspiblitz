@@ -6,6 +6,7 @@ USERNAME=stackingsats
 APP_DATA_DIR=/mnt/hdd/app-data/stacking-sats-kraken
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
+RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 SCRIPT_NAME=stacksats.sh
 SCRIPT_VERSION=0.2.0
 
@@ -66,7 +67,7 @@ KRAKEN_DRY_RUN_PLACE_NO_ORDER=1
     sudo chown $USERNAME:$USERNAME $CONFIG_FILE
 
     # setup stacking script
-    scriptFile="$HOME_DIR/$SCRIPT_NAME"
+    scriptFile="/home/admin/$SCRIPT_NAME"
     touch $scriptFile
     sudo chmod 700 $scriptFile || exit 1
     echo '#!/bin/bash
@@ -104,7 +105,7 @@ fi
     echo "Switch to the '$USERNAME' user and adapt the settings in $CONFIG_FILE"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=on/g" /mnt/hdd/raspiblitz.conf
+    grep -q '^stackingSatsKraken' $RASPIBLITZ_FILE && sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=on/g" $RASPIBLITZ_FILE || echo 'stackingSatsKraken=on' >> $RASPIBLITZ_FILE
   else
     echo "STACKING-SATS-KRAKEN already installed."
   fi
@@ -118,7 +119,7 @@ fi
     echo "Here is an example for daily usage at 6:15am ..."
     echo ""
     echo "SHELL=/bin/bash"
-    echo "PATH=/bin:/usr/sbin/usr/bin:/usr/local/bin"
+    echo "PATH=/bin:/usr/sbin:/usr/bin:/usr/local/bin"
     echo "15 6 * * * $HOME_DIR/$SCRIPT_NAME > /dev/null 2>&1"
   fi
 
@@ -134,7 +135,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** REMOVING STACKING-SATS-KRAKEN ***"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=off/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^stackingSatsKraken=.*/stackingSatsKraken=off/g" $RASPIBLITZ_FILE
 
     # remove config
     sudo rm -rf $APP_DATA_DIR
