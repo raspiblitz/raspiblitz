@@ -142,11 +142,8 @@ if [ "${specter}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      #sudo sytemctl start cryptoadvance-specter
+      sudo systemctl start cryptoadvance-specter
       /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
-      #whiptail --title " Installed Cryptoadvance Specter " --msgbox "\
-      #You should be able to reach specter on port 25441. The Login is Password B.\n
-      #" 14 50
     else
       l1="!!! FAIL on Cryptoadvance Specter install !!!"
       l2="Try manual install on terminal after reboot with:"
