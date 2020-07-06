@@ -7,6 +7,7 @@ SERVER_PORT=3030
 APP_DATA_DIR=/mnt/hdd/app-data/kindle-display
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
+RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
@@ -114,7 +115,7 @@ EOF
     echo "Switch to the '$USERNAME' user and adapt the settings in $CONFIG_FILE"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" /mnt/hdd/raspiblitz.conf
+    grep -q '^kindleDisplay' $RASPIBLITZ_FILE && sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" $RASPIBLITZ_FILE || echo 'kindleDisplay=on' >> $RASPIBLITZ_FILE
   else
     echo "KINDLE-DISPLAY already installed."
   fi
@@ -129,7 +130,7 @@ EOF
     echo ""
     echo "SHELL=/bin/bash"
     echo "PATH=/bin:/usr/bin:/usr/local/bin"
-    echo "*/5 * * * * $CRON_FILE 2>&1 > /dev/null"
+    echo "*/5 * * * * $CRON_FILE > /dev/null 2>&1"
   fi
 
   exit 0
@@ -144,7 +145,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** REMOVING KINDLE-DISPLAY ***"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" $RASPIBLITZ_FILE
 
     # uninstall service
     sudo systemctl stop kindle-display
