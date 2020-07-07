@@ -335,7 +335,7 @@ else
 fi
 
 # ROOT SSH KEYS
-# check if a backup on HDD exists and when retsore back
+# check if a backup on HDD exists – if so, restore it
 backupRootSSH=$(sudo ls /mnt/hdd/ssh/root_backup 2>/dev/null | grep -c "id_rsa")
 if [ ${backupRootSSH} -gt 0 ]; then
     echo "Provisioning Root SSH Keys - RESTORING from HDD" >> ${logFile}
