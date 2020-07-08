@@ -11,7 +11,7 @@ RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.2.4
+APP_VERSION=0.3.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -60,12 +60,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       cat > $configFile <<EOF
 # Server port
 DISPLAY_SERVER_PORT=$SERVER_PORT
+
+# Bitcoin RPC credentials for getting the blockcount.
+# Omit these setting to use blockchain.info as a fallback.
 DISPLAY_BITCOIN_RPC_USER="$RPC_USER"
 DISPLAY_BITCOIN_RPC_PASS="$RPC_PASS"
-# BTCPay Settings for rate fetching – omit these setting to use Bitstamp as a fallback
+
+# BTCPay Settings for rate fetching.
 # Generate API via Store > Access Tokens > Legacy API Keys
+# Omit these setting to use Kraken as a fallback.
 # BTCPAY_HOST="https://my.btcpayserver.com"
 # BTCPAY_API_TOKEN="myBtcPayLegacyApiKey"
+
+# Shall the fallbacks be used?
+DISPLAY_FALLBACK_BLOCK=false
+DISPLAY_FALLBACK_RATES=true
 EOF
       sudo mv $configFile $CONFIG_FILE
     fi
