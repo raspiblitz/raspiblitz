@@ -35,9 +35,11 @@ fi
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
-  if ! grep -Eq "^wallet=wallet.dat" /mnt/hdd/${network}/${network}.conf; then
+  # specify wallet.dat for mainnet to avoid error on testnet
+  sudo sed -i "s/^wallet=wallet.dat/main.wallet=wallet.dat/g" /mnt/hdd/${network}/${network}.conf
+  if ! grep -Eq "^main.wallet=wallet.dat" /mnt/hdd/${network}/${network}.conf; then
     echo "Enable the multiwallet feature in ${network} core and specify wallet.dat" 
-    echo "wallet=wallet.dat" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
+    echo "main.wallet=wallet.dat" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
     restartService=1
   else
     echo "Multiwallet is active and wallet.dat is used." 
