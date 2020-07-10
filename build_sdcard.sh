@@ -538,26 +538,32 @@ echo ""
 echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # download resources
+downloadOK=0
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-if [ ! -f "./${binaryName}" ]
-then
-    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+if [ ! -f "./${binaryName}" ]; then
+   sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+fi
+if [ ! -f "./${binaryName}" ]; then
+   echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+else
+   # check binary checksum test
+   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+      echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+      rm -v ./${binaryName}
+   else
+      downloadOK=1
+   fi
+fi
+if [ downloadOK == 0 ]; then
     exit 1
 fi
 
-# check binary checksum test
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-  exit 1
-else
-  echo ""
-  echo "****************************************"
-  echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
-  echo "****************************************"
-  echo ""
-fi
+echo ""
+echo "****************************************"
+echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+echo "****************************************"
+echo ""
 
 # install
 sudo -u admin tar -xvf ${binaryName}
@@ -643,12 +649,15 @@ echo ""
 
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]; then
+   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+fi
 
 # check binary was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+  rm -v ./${binaryName}
   exit 1
 else
   echo ""
