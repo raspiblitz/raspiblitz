@@ -11,7 +11,7 @@ RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.3.0
+APP_VERSION=0.4.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -61,10 +61,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Server port
 DISPLAY_SERVER_PORT=$SERVER_PORT
 
+# Require Tor for outside API calls
+DISPLAY_FORCE_TOR=true
+
 # Bitcoin RPC credentials for getting the blockcount.
 # Omit these setting to use blockchain.info as a fallback.
 DISPLAY_BITCOIN_RPC_USER="$RPC_USER"
 DISPLAY_BITCOIN_RPC_PASS="$RPC_PASS"
+
+# Exchange rates to show.
+# Use identifiers supported by BTCPay/Kraken, e.g. EUR, CHF
+DISPLAY_RATE1="USD"
+DISPLAY_RATE2="EUR"
 
 # BTCPay Settings for rate fetching.
 # Generate API via Store > Access Tokens > Legacy API Keys
