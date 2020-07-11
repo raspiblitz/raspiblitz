@@ -642,7 +642,8 @@ More information on the service you can find under:
     except BlitzError as be:
 
         if  (be.errorShort == "timeout on waiting for extending bridge" or
-             be.errorShort == "fail on subscription storage") :
+             be.errorShort == "fail on subscription storage" or 
+             be.errorShort == "timeout bridge not getting ready") :
 
             # error happend after payment
             Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
