@@ -699,9 +699,12 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
 sudo apt -y install fzf
 
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
+
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
-keyBindingsDone=$(cat ${homeFile}|grep -c ${keyBindings})
+keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
 
 if [ ${keyBindingsDone} -eq 0 ]; then
    sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
