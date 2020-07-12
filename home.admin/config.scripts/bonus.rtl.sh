@@ -70,16 +70,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # check for Python2 (install if missing)
-    # TODO remove Python2 ASAP!
-    echo "*** Check for Python2 ***"
-    /usr/bin/which python2 &>/dev/null
-    if ! [ $? -eq 0 ]; then
-      echo "*** Install Python2 ***"
-      sudo apt-get update
-      sudo apt-get install -y python2
-    fi
-
     # create rtl user
     sudo adduser --disabled-password --gecos "" rtl
 
@@ -98,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.7.1
+    sudo -u rtl git reset --hard v0.8.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -114,6 +104,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
+
     cd ..
     # check if node_modules exist now
     if [ -d "/home/rtl/RTL/node_modules" ]; then
@@ -124,11 +115,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-
-    # now remove Python2 again
-    echo "*** Now remove Python2 again ***"
-    sudo apt-get purge -y python2
-    sudo apt-get autoremove -y
 
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"
