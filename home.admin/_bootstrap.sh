@@ -452,7 +452,7 @@ fi
 ################################
 source ${configFile}
 echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
-if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ];; then
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
   echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
   sudo /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
 else
