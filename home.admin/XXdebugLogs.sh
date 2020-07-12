@@ -74,6 +74,8 @@ echo ""
 echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
+echo "--> CHECK CONFIG: sudo nginx -t"
+sudo nginx -t
 echo ""
 
 if [ "${touchscreen}" = "1" ]; then
