@@ -53,6 +53,11 @@ else:
     LND_TLS_PATH="/Users/rotzoll/Downloads/RaspiBlitzCredentials/tls.cert"
     SUBSCRIPTIONS_FILE="/Users/rotzoll/Downloads/RaspiBlitzCredentials/subscriptions.toml"
 
+if cfg.chain.value == "test":
+    is_testnet = True
+else:
+    is_testnet = False
+
 ####### HELPER CLASSES #########
 
 class BlitzError(Exception):
@@ -119,7 +124,7 @@ def apiGetHosts(session, shopurl):
 
     # make HTTP request
     try:
-        url="{0}/api/v1/public/hosts/".format(shopurl)
+        url="{0}/api/v1/public/hosts/?is_testnet={1}".format(shopurl, int(is_testnet))
         response = session.get(url)
     except Exception as e:
         raise BlitzError("failed HTTP request",url,e)
