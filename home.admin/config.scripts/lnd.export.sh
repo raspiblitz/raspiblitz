@@ -79,23 +79,23 @@ elif [ "${exportType}" = "hexstring" ]; then
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
   echo "The password needed during download is your Password A."
   echo ""
   echo "admin.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
+  echo "scp bitcoin@${localip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
   echo ""
   echo "invoice.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon ./"
+  echo "scp bitcoin@${localip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon ./"
   echo ""
   echo "readonly.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
+  echo "scp bitcoin@${localip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
   echo ""
   echo "tls.cert:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
+  echo "scp bitcoin@${localip}:/home/bitcoin/.lnd/tls.cert ./"
   echo ""
 
 ###########################
@@ -103,13 +103,13 @@ elif [ "${exportType}" = "scp" ]; then
 ###########################
 elif [ "${exportType}" = "http" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear
   echo "###### DOWNLOAD BY HTTP ######"
   echo ""
-  echo "Open in your browser --> http://${local_ip}:${randomPortNumber}"
+  echo "Open in your browser --> http://${localip}:${randomPortNumber}"
   echo ""
   echo "You need to be on the same local network - not reachable from outside."
   echo "In browser click on files or use 'save as' from context menu to download."
