@@ -15,7 +15,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
 
   if [ "${BTCPayDomain}" == "localhost" ]; then

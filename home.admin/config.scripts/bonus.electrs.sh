@@ -48,7 +48,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # check local IPv4 port
-    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "publicIP='${publicIP}'"
     echo "portTCP='50001'"

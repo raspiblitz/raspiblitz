@@ -20,7 +20,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -93,7 +93,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-    
+
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
@@ -150,7 +150,7 @@ EOF
     echo "OK - the RTL service is now enabled"
 
   fi
-  
+
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
@@ -177,7 +177,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/RTL.service
     sudo rm -r /home/admin/RTL
     echo "OK RTL removed."
-  else 
+  else
     echo "RTL is not installed."
   fi
 

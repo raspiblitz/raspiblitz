@@ -78,7 +78,7 @@ echo "***"
 echo ""
 
 if [ $ownDomain -eq 1 ]; then
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   echo ""
   echo "***"
   echo "Confirm that the ports 80, 443 and 9735 are forwarded to your RaspiBlitz" 

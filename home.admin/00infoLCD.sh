@@ -83,7 +83,7 @@ while :
     ###########################   
 
     # get the local network IP to be displayed on the lCD
-    localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
     # waiting for IP in general
     if [ ${#localip} -eq 0 ]; then
