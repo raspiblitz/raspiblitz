@@ -183,6 +183,8 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
         response = session.post(url, data=postData)
     except Exception as e:
         raise BlitzError("failed HTTP request",url,e)
+    if response.status_code == 420:
+        raise BlitzError("forwarding this address was rejected",response.status_code)
     if response.status_code != 201:
         raise BlitzError("failed HTTP code",response.status_code)
 
@@ -206,6 +208,8 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
         response = session.post(url)
     except Exception as e:
         raise BlitzError("failed HTTP request",url,e)
+    if response.status_code == 420:
+        raise BlitzError("forwarding this address was rejected",response.status_code)
     if response.status_code != 200 and response.status_code != 201:
         raise BlitzError("failed HTTP code",response.status_code)
 
