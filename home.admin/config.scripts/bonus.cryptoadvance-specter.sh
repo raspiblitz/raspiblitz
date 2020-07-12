@@ -227,7 +227,6 @@ EOF
 
     sudo mv /home/admin/cryptoadvance-specter.service /etc/systemd/system/cryptoadvance-specter.service
     sudo systemctl enable cryptoadvance-specter
-    sudo systemctl start cryptoadvance-specter
 
     echo "#    --> OK - the cryptoadvance-specter service is now enabled and started"
   else 

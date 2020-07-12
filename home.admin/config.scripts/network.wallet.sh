@@ -8,6 +8,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /mnt/hdd/raspiblitz.conf
+source /home/admin/raspiblitz.info
 
 # add disablewallet with default value (0) to bitcoin.conf if missing
 if ! grep -Eq "^disablewallet=.*" /mnt/hdd/${network}/${network}.conf; then
@@ -50,13 +51,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   else
     echo "The ${network} core wallet is already on"    
   fi
-  if [ ${restartService} == 1 ]; then
+  if [ ${restartService} == 1 ] && [ ${state} != "recovering" ]; then
     echo "Restarting ${network}d"
     sudo systemctl restart ${network}d
   fi
   exit 0
 fi
-
 
 ###################
 # switch off
