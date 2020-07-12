@@ -6,12 +6,15 @@ if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  exit 1
 fi
 
+# load raspiblitz conf
+source /mnt/hdd/raspiblitz.conf
+
 # 1. parameter
 passwordC="$1"
 
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
-walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
 if [ ${walletLocked} -eq 0 ]; then
     echo "# OK LND wallet was already unlocked"
     exit 0
@@ -55,7 +58,7 @@ while [ ${fallback} -eq 0 ]
 
     loopCount=$(($loopCount +1))
     echo "# calling: lncli unlock"
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli unlock --recovery_window=5000 --stdin 2>&1)
+    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock --recovery_window=5000 --stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
@@ -82,8 +85,8 @@ while [ ${fallback} -eq 0 ]
         # UNKOWN RESULT
 
         # check if wallet was unlocked anyway
-        walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
-        if [ ${walletUnlocked} -eq 0 ]; then
+        walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+        if [ "${walletUnlocked}" = "0" ]; then
             echo "# OK LND wallet unlocked"
             exit 0
         fi
@@ -113,7 +116,7 @@ do
     echo "############################"
     echo "Calling: lncli unlock"
     echo "Please re-enter Password C:"
-    lncli unlock --recovery_window=5000
+    lncli --chain=${network} --network=${chain}net unlock --recovery_window=5000
 
     # test unlock
     walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
