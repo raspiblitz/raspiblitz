@@ -7,10 +7,23 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to configure a Tor Hidden Service"
  echo "internet.hiddenservice.sh [service] [toPort] [fromPort] [optional-toPort2] [optional-fromPort2]"
+ echo "internet.hiddenservice.sh off [service]"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
+
+# delete a hidden service
+if [ "$1" == "off" ]; then
+  service="$2"
+  if [ ${#service} -eq 0 ]; then
+    echo "ERROR: service name is missing"
+    exit 1
+  fi
+  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+  echo "# OK service is removed restart of TOR may be needed"
+  exit 1
+fi
 
 service="$1"
 if [ ${#service} -eq 0 ]; then
