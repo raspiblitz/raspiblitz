@@ -479,6 +479,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /mnt/hdd/app-storage/electrs/
   fi
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off electrs
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 

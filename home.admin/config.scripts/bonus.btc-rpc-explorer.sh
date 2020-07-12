@@ -259,6 +259,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo nginx -t
     sudo systemctl reload nginx
 
+    # Hidden Service if Tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      /home/admin/config.scripts/internet.hiddenservice.sh off btc-rpc-explorer
+    fi
+
     echo "# OK BTC-RPC-explorer removed."
   
   else 

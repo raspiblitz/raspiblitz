@@ -21,7 +21,10 @@ if [ "$1" == "off" ]; then
     exit 1
   fi
   sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
-  echo "# OK service is removed restart of TOR may be needed"
+  echo "# OK service is removed - restarting TOR ..."
+  sudo systemctl restart tor
+  sleep 10
+  echo "# Done"
   exit 1
 fi
 

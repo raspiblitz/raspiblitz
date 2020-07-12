@@ -248,6 +248,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo nginx -t
   sudo systemctl reload nginx
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off lnbits
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
   if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
     echo "*** REMOVING LNbits ***"

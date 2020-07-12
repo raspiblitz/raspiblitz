@@ -254,6 +254,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^specter=.*/specter=off/g" /mnt/hdd/raspiblitz.conf
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off cryptoadvance-specter
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "#    --> REMOVING Cryptoadvance Specter"
