@@ -211,7 +211,6 @@ class RaspiBlitzConfig(BaseConfig):
         self.touchscreen = BoolSetting('touchscreen', default=False)
         self.version = StrSetting('raspiBlitzVersion')
         self.lnbits = BoolSetting('LNBits', aliases=['LNbits', 'lnbits'], default=False)
-        self.letsencrypt = BoolSetting('letsencrypt', default=False)
 
 class RaspiBlitzInfo(BaseConfig):
     def __init__(self, abs_path="/home/admin/raspiblitz.info"):
