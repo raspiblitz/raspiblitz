@@ -93,7 +93,7 @@ def subscriptionsNew(ip, dnsservice, id, token):
     if not cfg.letsencrypt:
         print("# installing letsencrypt ..")
         #os.system("/home/admin/config.scripts/bonus.letsencrypt.sh on")
-    else
+    else:
        print("# letsencrypt is installed")
     time.sleep(4)
 
