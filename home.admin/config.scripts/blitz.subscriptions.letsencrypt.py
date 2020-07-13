@@ -91,12 +91,18 @@ def subscriptionsNew(ip, dnsservice, id, token):
         raise BlitzError("id already exists", id)
 
     # todo: install lets encrypt if first subscription
+    
+    # dyndns
+    realip=ip
+    if ip == "dyndns":
+        # todo: activate DynDNS (set in raspiBlitz Config the update url)
+        realip=cfg.public_ip
 
-    # todo: check given IP (is dynDNS, IP of IP2TOR, or just fixed)
+    # update DNS with actual IP
+    if dnsservice == "duckdns":
+        duckDNSupdate(getsubdomain(id), token, realip)
 
-    # todo: activate DynDNS if needed  (set in raspiBlitz Config the update url)
-
-    # todo: update DNS with IP
+    # todo: run the ACME script
 
     # create subscription data for storage
     subscription = {}
