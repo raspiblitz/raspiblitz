@@ -23,6 +23,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
     print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip duckdns|freedns id token")
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
+    print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     sys.exit(1)
@@ -78,13 +79,17 @@ def duckDNSupdate(domain, token, ip):
     except Exception as e:
         raise BlitzError("failed HTTP request",url,e)
     if response.status_code != 200:
-        raise BlitzError("failed HTTP code",response.status_code,)
+        raise BlitzError("failed HTTP code",response.status_code)
     
     return response.content
 
 ####### PROCESS FUNCTIONS #########
 
 def subscriptionsNew(ip, dnsservice, id, token):
+
+    # check if id already exists
+    if len(getSubscription(id)) > 0:
+        raise BlitzError("id already exists", id)
 
     # todo: install lets encrypt if first subscription
 
@@ -145,6 +150,25 @@ def subscriptionsCancel(id):
     print(json.dumps(subs, indent=2))
 
     # todo: deinstall letsencrypt if this was last subscription
+
+def getSubscription(subscriptionID):
+
+    try:
+
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+        else:
+            return []
+        if "subscriptions_letsencrypt" not in subs:
+            return []
+        for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
+            if sub['id'] == subscriptionID:
+                return sub
+        return []
+    
+    except Exception as e:
+        return []
 
 def menuMakeSubscription():
 
@@ -234,6 +258,28 @@ if sys.argv[1] == "subscriptions-list":
 
     sys.exit(0)
 
+#######################
+# SUBSCRIPTION DETAIL
+#######################
+if sys.argv[1] == "subscription-detaikl":
+
+    # check parameters
+    try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
+        subscriptionID = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+        sub = getSubscription(subscriptionID)
+        print(json.dumps(sub, indent=2))
+
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(0)
+
+    
 #######################
 # SUBSCRIPTION CANCEL
 #######################
