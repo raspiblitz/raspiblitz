@@ -113,12 +113,8 @@ def subscriptionsNew(ip, dnsservice, id, token):
         else:
             print("# new toml file")
             subscriptions = {}
-        try:
-            subscriptions['subscriptions_letsencrypt']
-            print("# section exists")
-        except IndexError:
+        if "subscriptions_letsencrypt" not in subs:
             subscriptions['subscriptions_letsencrypt'] = []
-            print("# section created")
         subscriptions['subscriptions_letsencrypt'].append(subscription)
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
             writer.write(toml.dumps(subscriptions))

@@ -417,12 +417,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         else:
             print("# new toml file")
             subscriptions = {}
-        try:
-            subscriptions['subscriptions_ip2tor']
-            print("# section exists")
-        except IndexError:
+        if "subscriptions_ip2tor" not in subs:
             subscriptions['subscriptions_ip2tor'] = []
-            print("# section created")
         subscriptions['subscriptions_ip2tor'].append(subscription)
         subscriptions['shop_ip2tor'] = shopUrl
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
@@ -821,9 +817,7 @@ if sys.argv[1] == "subscriptions-list":
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             subs = {}
-        try:
-            subs['subscriptions_ip2tor']
-        except IndexError:
+        if "subscriptions_ip2tor" not in subs:
             subs['subscriptions_ip2tor'] = []
         print(json.dumps(subs['subscriptions_ip2tor'], indent=2))
     
