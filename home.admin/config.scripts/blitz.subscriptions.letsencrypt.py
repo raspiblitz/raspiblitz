@@ -25,7 +25,6 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
-    print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     sys.exit(1)
 
 ####### BASIC SETTINGS #########
@@ -179,7 +178,7 @@ def menuMakeSubscription():
 
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
-    choices.append( ("DUCKDNS", "Use duckdns.org")) )
+    choices.append( ("DUCKDNS", "Use duckdns.org") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")
@@ -254,9 +253,9 @@ This looks not like a valid token.
 
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
-    choices.append( ("IP2TOR", "HTTPS for a IP2TOR Bridge")) )
-    choices.append( ("DYNDNS", "HTTPS for {0} DynamicIP DNS".format(dnsservice.upper()))) )
-    choices.append( ("STATIC", "HTTPS for a static IP")) )
+    choices.append( ("IP2TOR", "HTTPS for a IP2TOR Bridge") )
+    choices.append( ("DYNDNS", "HTTPS for {0} DynamicIP DNS".format(dnsservice.upper())) )
+    choices.append( ("STATIC", "HTTPS for a static IP") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")
