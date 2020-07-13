@@ -163,6 +163,8 @@ def menuMakeSubscription():
     ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
+    return False
+
 ####### COMMANDS #########
 
 ###############
