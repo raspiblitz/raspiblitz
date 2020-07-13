@@ -117,7 +117,7 @@ This is a LetsEncrypt subscription using the free DNS service
 It allows using HTTPS for the domain:
 {domain}
 
-The domain is routed set to the IP:
+The domain is pointing to the IP:
 {ip}
 
 The state of the subscription is: {active} {warning}

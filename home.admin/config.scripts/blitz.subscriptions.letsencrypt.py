@@ -177,13 +177,172 @@ def menuMakeSubscription():
     ############################
     # PHASE 1: Choose DNS service
 
+    # ask user for which RaspiBlitz service the bridge should be used
+    choices = []
+    choices.append( ("DUCKDNS", "Use duckdns.org")) )
+
+    d = Dialog(dialog="dialog",autowidgetsize=True)
+    d.set_background_title("LetsEncrypt Subscription")
+    code, tag = d.menu(
+        "\nChoose a free DNS service to work with:",
+        choices=choices, width=60, height=10, title="Select Service")
+
+    # if user chosses CANCEL
+    if code != d.OK:
+        sys.exit(0)
+
+    # get the fixed dnsservice string
+    dnsservice=tag.lower()
+
     ############################
     # PHASE 2: Enter ID & API token for service
+
+    if dnsservice == "duckdns":
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+If you havent already go to https://duckdns.org and create an account. 
+Make sure you have a subdomain added that is still free.
+Consider using the TOR browser to hide your laptop IP.
+        ''',title="DuckDNS Account needed")
+
+        # enter the subdomain
+        code, text = d.inputbox(
+                "Enter yor duckDNS subdomain:",
+                height=10, width=40, init="",
+                title="DuckDNS Domain")
+        subdomain = text.strip()
+        subdomain = subdomain.split(' ')[0]
+        subdomain = getsubdomain(subdomain)
+        domain = "{0}.duckdns.org".format(subdomain)
+        os.system("clear")
+
+        # check for valid input
+        if len(subdomain) == 0:
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+This looks not like a valid subdomain.
+        ''',title="Unvalid Input")
+            sys.exit(0)
+
+        # enter the token
+        code, text = d.inputbox(
+                "Enter your duckDNS token of your account:",
+                height=10, width=40, init="",
+                title="DuckDNS Token")
+        token = text.strip()
+        token = token.split(' ')[0]
+
+        # check for valid input
+        try:
+            token.index("-")
+        except Exception as e:
+            token=""
+        if len(token) == 0:
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+This looks not like a valid token.
+        ''',title="Unvalid Input")
+            sys.exit(0)
+
+    else:
+        os.system("clear")
+        print("Not supported yet: {0}".format(dnsservice))
+        time.sleep(4)
+        sys.exit(0)      
 
     ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
-    return False
+    # ask user for which RaspiBlitz service the bridge should be used
+    choices = []
+    choices.append( ("IP2TOR", "HTTPS for a IP2TOR Bridge")) )
+    choices.append( ("DYNDNS", "HTTPS for {0} DynamicIP DNS".format(dnsservice.upper()))) )
+    choices.append( ("STATIC", "HTTPS for a static IP")) )
+
+    d = Dialog(dialog="dialog",autowidgetsize=True)
+    d.set_background_title("LetsEncrypt Subscription")
+    code, tag = d.menu(
+        "\nChoose the kind of IP you want to use:",
+        choices=choices, width=60, height=10, title="Select Service")
+
+    # if user chosses CANCEL
+    if code != d.OK:
+        sys.exit(0)
+
+    if tag == "IP2TOR":
+
+        # get all active IP2TOR subscriptions (just in case)
+        ip2torSubs=[]
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+            for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+                if sub['active']:
+                    ip2torSubs.append(sub)
+        
+        # when user has no IP2TOR subs yet
+        if len(ip2torSubs) == 0:
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+You have no active IP2TOR subscriptions.
+Create one first and try again.
+        ''',title="No IP2TOR available")
+            sys.exit(0)  
+
+        # let user select a IP2TOR subscription
+        choices = []
+        for idx, sub in enumerate(ip2torSubs):
+            choices.append( ("{0}".idx, "IP2TOR {0} {1}:{2}".format(sub['name'], sub['ip'], sub['port'])) )
+        
+        d = Dialog(dialog="dialog",autowidgetsize=True)
+        d.set_background_title("LetsEncrypt Subscription")
+        code, tag = d.menu(
+            "\nChoose the IP2TOR subscription:",
+            choices=choices, width=60, height=10, title="Select")
+
+        # if user chosses CANCEL
+        if code != d.OK:
+            sys.exit(0)
+
+        # get the slected IP2TOR bridge
+        ip2torSelect=ip2torSubs[int(tag)]
+        ip=ip2torSelect["ip"]
+
+    elif tag == "DYNDNS":
+
+        # todo: activate DYNDNS for duckDNS (set in raspiBlitz Config the update url)
+        ip=cfg.public_ip
+
+    elif tag == "STATIC":
+
+        # enter the static IP
+        code, text = d.inputbox(
+                "Enter the static public IP of this RaspiBlitz:",
+                height=10, width=40, init="",
+                title="Static IP")
+        ip = text.strip()
+        ip = token.split(' ')[0]
+
+        # check for valid input
+        try:
+            ip.index(".")
+        except Exception as e:
+            ip=""
+        if len(ip) == 0:
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+This looks not like a valid IP.
+        ''',title="Unvalid Input")
+            sys.exit(0)
+
+    # create the letsenscrip subscription
+    try:
+        subscription = subscriptionsNew(ip, dnsservice, domain, token)
+    except Exception as e:
+
+            # unkown error happend
+            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+Unkown Error happend - please report to developers:
+{0}
+            '''.format(str(e)),title="Exception on Subscription")
+            sys.exit(1)
 
 ####### COMMANDS #########
 
@@ -194,19 +353,11 @@ def menuMakeSubscription():
 
 if sys.argv[1] == "create-ssh-dialog":
 
-    # check parameters
-    try:
-        if len(sys.argv) <= 4: raise BlitzError("incorrect parameters","")
-        servicename = sys.argv[2]
-        toraddress = sys.argv[3]
-        port = sys.argv[4]
-    except Exception as e:
-        handleException(e)
-
     # late imports - so that rest of script can run also if dependency is not available
     from dialog import Dialog
-    menuMakeSubscription(servicename, toraddress, port)
 
+    menuMakeSubscription()
+    
     sys.exit()
 
 ###############
@@ -226,7 +377,7 @@ if sys.argv[1] == "subscriptions-new":
     except Exception as e:
         handleException(e)
 
-    # get data
+    # create the subscription
     try:
         subscription = subscriptionsNew(ip, dnsservice_type, dnsservice_id, dnsservice_token)
     except Exception as e:
