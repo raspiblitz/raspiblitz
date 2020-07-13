@@ -108,7 +108,8 @@ You have no active or inactive subscriptions.
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("My Subscriptions")
     if selectedSub['type'] == "letsencrypt-v1":
-
+        if len(selectedSub['warning']) > 0:
+            selectedSub['warning'] = "\n{0}".format(selectedSub['warning'])
         text='''
 This is a LetsEncrypt subscription using the free DNS service
 {dnsservice}
