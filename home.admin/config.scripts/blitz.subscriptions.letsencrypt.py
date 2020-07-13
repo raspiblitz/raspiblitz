@@ -90,8 +90,13 @@ def subscriptionsNew(ip, dnsservice, id, token):
     if len(getSubscription(id)) > 0:
         raise BlitzError("id already exists", id)
 
-    # todo: install lets encrypt if first subscription
-    
+    if not cfg.letsencrypt:
+        print("# installing letsencrypt ..")
+        #os.system("/home/admin/config.scripts/bonus.letsencrypt.sh on")
+    else
+       print("# letsencrypt is installed")
+    time.sleep(4)
+
     # dyndns
     realip=ip
     if ip == "dyndns":
