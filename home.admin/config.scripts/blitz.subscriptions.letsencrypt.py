@@ -261,7 +261,7 @@ if sys.argv[1] == "subscriptions-list":
 #######################
 # SUBSCRIPTION DETAIL
 #######################
-if sys.argv[1] == "subscription-detaikl":
+if sys.argv[1] == "subscription-detail":
 
     # check parameters
     try:
