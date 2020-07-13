@@ -189,7 +189,7 @@ case $CHOICE in
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
-            sleep 10
+            sleep 4
             ;;
         lnbalance)
             clear
