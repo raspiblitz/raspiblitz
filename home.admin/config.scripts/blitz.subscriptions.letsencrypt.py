@@ -229,12 +229,8 @@ if sys.argv[1] == "subscriptions-list":
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             subs = {}
-
-        try:
-            subs['subscriptions_letsencrypt']
-        except IndexError:
+        if "subscriptions_letsencrypt" not in subs:
             subs['subscriptions_letsencrypt'] = []
-
         print(json.dumps(subs['subscriptions_letsencrypt'], indent=2))
     
     except Exception as e:
