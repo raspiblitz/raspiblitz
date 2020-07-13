@@ -88,7 +88,7 @@ You have no active or inactive subscriptions.
                 activeState="active"
             else:
                 activeState="in-active"
-            name="LETSENCRYPT {0} {1}".format(sub['dnsservice_type'], sub['id'])
+            name="LETSENCRYPT {0}".format(sub['id'])
             choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
     
     # show menu with options

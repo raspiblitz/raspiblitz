@@ -94,7 +94,9 @@ def subscriptionsNew(ip, dnsservice, id, token):
 
     # todo: check given IP (is dynDNS, IP of IP2TOR, or just fixed)
 
-    # todo: update DNS
+    # todo: activate DynDNS if needed  (set in raspiBlitz Config the update url)
+
+    # todo: update DNS with IP
 
     # create subscription data for storage
     subscription = {}
@@ -201,9 +203,9 @@ def menuMakeSubscription():
         # show basic info on duck dns
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 If you havent already go to https://duckdns.org
-Create an account. 
-Make sure you have a subdomain added that is still free.
-Consider using the TOR browser to hide your laptop IP.
+- consider using the TOR browser
+- create an account or login
+- make sure you have a subdomain added
         ''',title="DuckDNS Account needed")
 
         # enter the subdomain
@@ -237,7 +239,7 @@ This looks not like a valid subdomain.
             token.index("-")
         except Exception as e:
             token=""
-        if len(token) == 0:
+        if len(token) < 20:
             Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 This looks not like a valid token.
         ''',title="Unvalid Input")
@@ -308,8 +310,8 @@ Create one first and try again.
 
     elif tag == "DYNDNS":
 
-        # todo: activate DYNDNS for duckDNS (set in raspiBlitz Config the update url)
-        ip=cfg.public_ip
+        # the subscriptioNew method will handle acrivating the dnydns part
+        ip="dyndns"
 
     elif tag == "STATIC":
 
@@ -332,9 +334,18 @@ This looks not like a valid IP.
         ''',title="Unvalid Input")
             sys.exit(0)
 
-    # create the letsenscrip subscription
+    # create the letsenscript subscription
     try:
         subscription = subscriptionsNew(ip, dnsservice, domain, token)
+
+        # success dialog
+        Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+OK your LetsEncrypt subscription is now ready.
+Go to SUBSCRIBE > LIST to see details.
+Use the correct port on {0}
+to reach the service you wanted.
+            '''.format(domain),title="OK LetsEncrypt Created")
+
     except Exception as e:
 
             # unkown error happend
