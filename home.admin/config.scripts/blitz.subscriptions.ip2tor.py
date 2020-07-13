@@ -417,7 +417,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         else:
             print("# new toml file")
             subscriptions = {}
-        if "subscriptions_ip2tor" not in subs:
+        if "subscriptions_ip2tor" not in subscriptions:
             subscriptions['subscriptions_ip2tor'] = []
         subscriptions['subscriptions_ip2tor'].append(subscription)
         subscriptions['shop_ip2tor'] = shopUrl

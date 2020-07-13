@@ -21,7 +21,7 @@ from blitzpy import RaspiBlitzConfig
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
-    print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip dnsservice id token")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip duckdns|freedns id token")
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
@@ -113,7 +113,7 @@ def subscriptionsNew(ip, dnsservice, id, token):
         else:
             print("# new toml file")
             subscriptions = {}
-        if "subscriptions_letsencrypt" not in subs:
+        if "subscriptions_letsencrypt" not in subscriptions:
             subscriptions['subscriptions_letsencrypt'] = []
         subscriptions['subscriptions_letsencrypt'].append(subscription)
         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
@@ -124,7 +124,7 @@ def subscriptionsNew(ip, dnsservice, id, token):
         eprint(e)
         raise BlitzError("fail on subscription storage",subscription, e)
 
-    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, subscription['port'], torTarget))
+    print("# OK - LETSENCRYPT DOMAIN IS READY")
     return subscription
 
 def subscriptionsCancel(id):
