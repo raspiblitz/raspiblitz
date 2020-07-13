@@ -132,8 +132,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # setting value in RaspiBlitz config
     sudo sed -i "s/^letsencrypt=.*/letsencrypt=on/g" /mnt/hdd/raspiblitz.conf
 
-    address=$(menu_enter_email)
-    echo ""
+    address="$2"
+    if [ "$2" == "enter-email" ]; then
+      address=$(menu_enter_email)
+      echo ""
+    fi
 
     acme_install "${address}"
     echo ""
