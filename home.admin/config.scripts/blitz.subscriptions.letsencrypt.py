@@ -200,7 +200,8 @@ def menuMakeSubscription():
 
         # show basic info on duck dns
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
-If you havent already go to https://duckdns.org and create an account. 
+If you havent already go to https://duckdns.org
+Create an account. 
 Make sure you have a subdomain added that is still free.
 Consider using the TOR browser to hide your laptop IP.
         ''',title="DuckDNS Account needed")
@@ -225,8 +226,8 @@ This looks not like a valid subdomain.
 
         # enter the token
         code, text = d.inputbox(
-                "Enter your duckDNS token of your account:",
-                height=10, width=40, init="",
+                "Enter the duckDNS token of your account:",
+                height=10, width=50, init="",
                 title="DuckDNS Token")
         token = text.strip()
         token = token.split(' ')[0]
@@ -289,7 +290,7 @@ Create one first and try again.
         # let user select a IP2TOR subscription
         choices = []
         for idx, sub in enumerate(ip2torSubs):
-            choices.append( ("{0}".idx, "IP2TOR {0} {1}:{2}".format(sub['name'], sub['ip'], sub['port'])) )
+            choices.append( ("{0}".format(idx), "IP2TOR {0} {1}:{2}".format(sub['name'], sub['ip'], sub['port'])) )
         
         d = Dialog(dialog="dialog",autowidgetsize=True)
         d.set_background_title("LetsEncrypt Subscription")
