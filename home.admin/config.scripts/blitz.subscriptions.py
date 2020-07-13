@@ -46,7 +46,10 @@ def mySubscriptions():
     try:
         os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
-        countSubscriptions += len(subs['subscriptions_ip2tor'])
+        if 'subscriptions_ip2tor' in subs:
+            countSubscriptions += len(subs['subscriptions_ip2tor'])
+        if 'subscriptions_letsencrypt' in subs:
+            countSubscriptions += len(subs['subscriptions_letsencrypt'])
     except Exception as e: pass
     if countSubscriptions == 0:
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
@@ -61,17 +64,32 @@ You have no active or inactive subscriptions.
     subs = toml.load(SUBSCRIPTIONS_FILE)    
         
     # list ip2tor subscriptions
-    for sub in subs['subscriptions_ip2tor']:
-        # remember subscription under lookupindex
-        lookupIndex += 1
-        lookup[str(lookupIndex)]=sub
-        # add to dialog choices
-        if sub['active']:
-            activeState="active"
-        else:
-            activeState="in-active"
-        name="IP2TOR Bridge for {0}".format(sub['name'])
-        choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
+    if 'subscriptions_ip2tor' in subs:
+        for sub in subs['subscriptions_ip2tor']:
+            # remember subscription under lookupindex
+            lookupIndex += 1
+            lookup[str(lookupIndex)]=sub
+            # add to dialog choices
+            if sub['active']:
+                activeState="active"
+            else:
+                activeState="in-active"
+            name="IP2TOR Bridge for {0}".format(sub['name'])
+            choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
+
+    # list letsencrypt subscriptions
+    if 'subscriptions_letsencrypt' in subs:
+        for sub in subs['subscriptions_letsencrypt']:
+            # remember subscription under lookupindex
+            lookupIndex += 1
+            lookup[str(lookupIndex)]=sub
+            # add to dialog choices
+            if sub['active']:
+                activeState="active"
+            else:
+                activeState="in-active"
+            name="LETSENCRYPT {0} {1}".format(sub['dnsservice_type'], sub['id'])
+            choices.append( ("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)) )
     
     # show menu with options
     d = Dialog(dialog="dialog",autowidgetsize=True)
@@ -89,7 +107,31 @@ You have no active or inactive subscriptions.
     # show details of selected
     d = Dialog(dialog="dialog",autowidgetsize=True)
     d.set_background_title("My Subscriptions")
-    if selectedSub['type'] == "ip2tor-v1":
+    if selectedSub['type'] == "letsencrypt-v1":
+
+        text='''
+This is a LetsEncrypt subscription using the free DNS service
+{dnsservice}
+
+It allows using HTTPS for the domain:
+{domain}
+
+The domain is routed set to the IP:
+{ip}
+
+The state of the subscription is: {active} {warning}
+
+The following additional information is available:
+{description}
+'''.format( dnsservice=selectedSub['dnsservice_type'],
+            domain=selectedSub['id'],
+            ip=selectedSub['ip'],
+            active= "ACTIVE" if selectedSub['active'] else "NOT ACTIVE",
+            warning=selectedSub['warning'],
+            description=selectedSub['description']
+    )
+
+    elif selectedSub['type'] == "ip2tor-v1":
         if len(selectedSub['warning']) > 0:
             selectedSub['warning'] = "\n{0}".format(selectedSub['warning'])
         text='''
@@ -130,7 +172,12 @@ The following additional information is available:
     # call the responsible sub script for deletion just in case any subscription needs to do some extra api calls when canceling
     if code == "extra":
         os.system("clear")
-        if selectedSub['type'] == "ip2tor-v1":
+        if selectedSub['type'] == "letsencrypt-v1":
+            cmd="python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-cancel {0}".format(selectedSub['id'])
+            print("# running: {0}".format(cmd))    
+            os.system(cmd)
+            time.sleep(2)
+        elif selectedSub['type'] == "ip2tor-v1":
             cmd="python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(selectedSub['id'])
             print("# running: {0}".format(cmd))    
             os.system(cmd)
@@ -146,7 +193,8 @@ The following additional information is available:
 
 choices = []
 choices.append( ("LIST","My Subscriptions") )
-choices.append( ("NEW1","+ new IP2TOR Bridge") )
+choices.append( ("NEW1","+ IP2TOR Bridge (paid)") )
+choices.append( ("NEW2","+ LetsEncrypt HTTPS Domain (free)") )
 
 d = Dialog(dialog="dialog",autowidgetsize=True)
 d.set_background_title("RaspiBlitz Subscriptions")
@@ -162,6 +210,17 @@ if code != d.OK:
 
 if tag == "LIST":
     mySubscriptions()
+    sys.exit(0)
+
+####### NEW LETSENCRYPT HTTPS DOMAIN #########
+
+if tag == "NEW2":
+
+    # run creating a new IP2TOR subscription
+    os.system("clear")
+    cmd="python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog"
+    print("# running: {0}".format(cmd))
+    os.system(cmd)
     sys.exit(0)
 
 ####### NEW IP2TOR BRIDGE #########
