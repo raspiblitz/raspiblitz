@@ -240,13 +240,14 @@ your RaspiBlitz behind TOR.
         ''',title="Info")
         sys.exit(1)
 
+    os.system("clear")
     print("please wait ..")
 
     # check for which standard services already a active bridge exists
     lnd_rest_api=False
     lnd_grpc_api=False
     lnbits=False
-    btcbay=False
+    btcpay=False
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
