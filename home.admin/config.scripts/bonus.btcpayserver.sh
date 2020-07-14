@@ -13,42 +13,102 @@ source /mnt/hdd/raspiblitz.conf
 # get cpu architecture
 source /home/admin/raspiblitz.info
 
+if [ "$1" = "status" ]; then
+  if [ "${BTCPayServer}" = "on" ]; then
+    echo "installed=1"
+
+    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    echo "localIP='${localIP}'"
+    echo "httpsPort='23001'"
+    echo "publicIP='${publicIP}'"
+
+    # check for LetsEnryptDomain for DynDns
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+    if [ ${#error} -eq 0 ]; then
+      echo "publicDomain='${domain}'"
+    fi
+
+    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+    echo "sslFingerprintIP='${sslFingerprintIP}'"
+
+    toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+    echo "toraddress='${toraddress}'"
+
+    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+
+    # check for IP2TOR
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
+    if [ ${#error} -eq 0 ]; then
+      echo "ip2torType='${ip2tor-v1}'"
+      echo "ip2torID='${id}'"
+      echo "ip2torIP='${ip}'"
+      echo "ip2torPort='${port}'"
+      # check for LetsEnryptDomain on IP2TOR
+      error=""
+      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
+      if [ ${#error} -eq 0 ]; then
+        echo "ip2torDomain='${domain}'"
+      fi
+    fi
+
+    # check for error
+    isDead=$(sudo systemctl status btcpayserver | grep -c 'inactive (dead)')
+    if [ ${isDead} -eq 1 ]; then
+      echo "error='Service Failed'"
+    fi
+
+  else
+    echo "installed=0"
+  fi
+  exit 0
+fi
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+  # get LNbits status info
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.btcpayserver.sh status)
 
-  if [ "${BTCPayDomain}" == "localhost" ]; then
+  text="Local Webrowser: https://${localIP}:${httpsPort}"
 
-    # TOR
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTCPay Server (TOR) " --msgbox "Have TOR Browser installed on your laptop and open:\n
-${toraddress}\n
-See LCD of RaspiBlitz for QR code of this address if you want to open on mobile devices with TOR browser.
-" 12 67
-    /home/admin/config.scripts/blitz.lcd.sh hide
-  else
-
-    if [ "${BTCPayDomain}" == "off" ]; then
-      BTCPayDomain="${localip}:23001"
-    fi
-
-    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-    
-    torinfo="For details or troubleshoot check for 'BTCPay'\nin README of https://github.com/rootzoll/raspiblitz"
-    if [ "${runBehindTor}" == "on" ] && [ ${#toraddress} -gt 0 ]; then
-      torinfo="To reach BTCPay Server oder Tor use:\n${toraddress}"
-    fi
-
-    # IP + Domain
-    whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
-https://${BTCPayDomain}\n
-SHA1 Thumb/Fingerprint: ${fingerprint}\n
-${torinfo}" 14 67
+  if [ ${#publicDomain} -gt 0 ]; then
+     text="${text}
+Public Domain: https://${publicDomain}:${httpsPort}
+port forwarding on router needs to be active & may change port" 
   fi
 
+  text="${text}
+SHA1 ${sslFingerprintIP}" 
+
+  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    text="${text}\n
+TOR Browser Hidden Service address (QR see LCD):
+${toraddress}"
+  fi
+  
+  if [ ${#ip2torDomain} -gt 0 ]; then
+    text="${text}\n
+IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
+SHA1 ${sslFingerprintTOR}"
+  elif [ ${#ip2torIP} -gt 0 ]; then
+    text="${text}\n
+IP2TOR: https://${ip2torIP}:${ip2torPort}
+SHA1 ${sslFingerprintTOR}
+go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+  elif [ ${#publicDomain} -eq 0 ]; then
+    text="${text}\n
+To enable easy reachablity with normal brower from the outside
+consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+  fi
+
+  whiptail --title " BTCPay Server " --msgbox "${text}" 15 69
+  
+  /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
   exit 0
 fi

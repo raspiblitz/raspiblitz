@@ -19,6 +19,7 @@ from blitzpy import RaspiBlitzConfig
 LND_REST_API = "LND-REST-API"
 LND_GRPC_API = "LND-GRPC-API"
 LNBITS = "LNBITS"
+BTCPAY = "BTCPAY"
 
 # load config 
 cfg = RaspiBlitzConfig()
@@ -243,6 +244,7 @@ your RaspiBlitz behind TOR.
     lnd_rest_api=False
     lnd_grpc_api=False
     lnbits=False
+    btcbay=False
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
@@ -252,15 +254,24 @@ your RaspiBlitz behind TOR.
                 if sub['active'] and sub['name'] == LND_REST_API: lnd_rest_api=True
                 if sub['active'] and sub['name'] == LND_GRPC_API: lnd_grpc_api=True
                 if sub['active'] and sub['name'] == LNBITS: lnbits=True
+                if sub['active'] and sub['name'] == BTCPAY: btcpay=True
     except Exception as e:
         print(e)
+
+    # check if BTCPayserver is installed
+    btcPayServer=False
+    statusData= subprocess.run(['/home/admin/config.scripts/bonus.btcpayserver.sh', 'status'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    if statusData.find("BTCPayServer=on") > -1:
+        btcPayServer=True
 
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append( ("REST","LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")) )
     choices.append( ("GRPC","LND gRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
     if cfg.lnbits:
-        choices.append( ("LNBITS","LNbits Webinterface {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )  
+        choices.append( ("LNBITS","LNbits Webinterface {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
+    if btcPayServer:
+        choices.append( ("BTCPAY","BTCPay Server Webinterface {0}".format("--> ALREADY BRIDGED" if btcpay else "")) )  
     choices.append( ("SELF","Create a custom IP2TOR Bridge") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
@@ -290,6 +301,11 @@ your RaspiBlitz behind TOR.
         # get TOR address for LNBits
         servicename=LNBITS
         torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lnbits/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        torPort=443
+    if tag == "BTCPAY":
+        # get TOR address for BTCPAY
+        servicename=BTCPAY
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/btcpay/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=443
     if tag == "SELF":
         servicename="CUSTOM"
