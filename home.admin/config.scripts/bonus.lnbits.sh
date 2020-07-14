@@ -32,7 +32,7 @@ SHA1 ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     text="${text}\n
-Hidden Service address for TOR Browser (QR see LCD):
+TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
   fi
   
@@ -47,7 +47,8 @@ SHA1 ${sslFingerprintTOR}
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
-consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)"
+To enable easy reachablity with normal brower from the outside
+consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
   whiptail --title " LNbits " --msgbox "${text}" 14 69
