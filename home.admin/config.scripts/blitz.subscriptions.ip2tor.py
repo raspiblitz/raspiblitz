@@ -725,10 +725,10 @@ MAIN MENU > Manage Subscriptions > My Subscriptions
         host['tor_bridge_price_extension_sats'],
         blitzServiceName,
         subscription['ip'],
-        subscription['port']),
-        protocol,
-        title="Subscription Active"
-        ) 
+        subscription['port'],
+        protocol),
+    title="Subscription Active"
+    ) 
 
 
 ####### COMMANDS #########
