@@ -70,7 +70,7 @@ def getsubdomain(fulldomainstring):
 
 def duckDNSupdate(domain, token, ip):
 
-    print("# duckDNS update IP API call")
+    print("# duckDNS update IP API call for {0}".format(domain))
     
     # make HTTP request
     try:
@@ -109,7 +109,7 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
         duckDNSupdate(getsubdomain(id), token, realip)
 
     # run the ACME script
-    acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target], stdout=subprocess.PIPE)
+    acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target], stdout=subprocess.PIPE, stderr = subprocess.STDOUT, encoding='utf8')
     out, err = acmeResult.communicate()
     if out.find("error=") > -1:
         time.sleep(6)
@@ -167,7 +167,7 @@ def subscriptionsCancel(id):
 
     # run the ACME script to remove cert
     if removedCert:
-        acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']], stdout=subprocess.PIPE)
+        acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']], stdout=subprocess.PIPE, stderr = subprocess.STDOUT, encoding='utf8')
         out, err = acmeResult.communicate()
         if out.find("error=") > -1:
             time.sleep(6)
