@@ -106,9 +106,8 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
 
     # run the ACME script
     acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
-    print(acmeResult)
-    time.sleep(6)
     if (acmeResult.find("error=") > -1):
+        time.sleep(6)
         raise BlitzError("letsancrypt acme failed", acmeResult)
 
     # create subscription data for storage
@@ -120,6 +119,7 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     subscription['dnsservice_type'] = dnsservice
     subscription['dnsservice_token'] = token
     subscription['ip'] = ip
+    subscription['target'] = target
     subscription['description'] = "For {0}".format(target)
     subscription['time_created'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     subscription['warning'] = ""
@@ -152,10 +152,20 @@ def subscriptionsCancel(id):
     os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
     subs = toml.load(SUBSCRIPTIONS_FILE)
     newList = []
+    removedCert = False
     for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
         if sub['id'] != subscriptionID:
             newList.append(sub)
+        else:
+            removedCert=sub
     subs['subscriptions_letsencrypt'] = newList
+
+    # run the ACME script to remove cert
+    if removedCert:
+        acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']])
+        if (acmeResult.find("error=") > -1):
+            time.sleep(6)
+            raise BlitzError("letsancrypt acme failed", acmeResult)
 
     # persist change
     with open(SUBSCRIPTIONS_FILE, 'w') as writer:

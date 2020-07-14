@@ -5,6 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "config script to install or remove the Let's Encrypt Client (ACME.SH)"
   echo "bonus.letsencrypt.sh [on|off]"
   echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
+  echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
   exit 1
 fi
 
@@ -214,7 +215,7 @@ elif [ "$1" = "issue-cert" ]; then
     sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
   fi
 
-  # todo maybe allow certs for single servies later
+  # todo maybe allow certs for single services later
   if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
     echo "error='option not supported yet'"
     exit 1
@@ -233,6 +234,68 @@ elif [ "$1" = "issue-cert" ]; then
   echo "# restarting nginx"
   sudo systemctl restart nginx 2>&1
 
+###################
+# REMOVE-CERT
+###################
+
+elif [ "$1" = "remove-cert" ]; then
+
+  # check if letsencrypt is on
+  if [ "${letsencrypt}" != "on" ]; then
+    echo "error='letsenscrypt is not on'"
+    exit 1
+  fi
+
+  # get and check parameters
+  FQDN=$2
+  options=$3
+  if [ ${#FQDN} -eq 0 ]; then
+    echo "error='invalid parameters'"
+    exit 1
+  fi
+  if [ ${#options} -eq 0 ]; then
+    options="ip&tor"
+  fi
+
+  # remove cert from renewal
+  $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
+
+  # replace certs for clearnet
+  if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing IP certs"
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+  fi
+
+  # repleace certs for tor
+  if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing TOR certs"
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+  fi
+
+  # todo maybe allow certs for single services later
+  if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
+    echo "error='option not supported yet'"
+    exit 1
+  fi
+
+  # test nginx config
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  # restart nginx
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
 
 ###################
 # OFF
