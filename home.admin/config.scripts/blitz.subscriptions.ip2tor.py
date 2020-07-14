@@ -360,8 +360,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     print("# invoice: {0}".format(paymentRequestStr))
     paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
     if paymentRequestDecoded is None: sys.exit()
-    print("# amount as advertised: {0}".format(msatsFirst))
-    print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+    print("# amount as advertised: {0} milliSats".format(msatsFirst))
+    print("# amount in invoice is: {0} milliSats".format(paymentRequestDecoded.num_msat))
     if int(msatsFirst) < int(paymentRequestDecoded.num_msat):
         raise BlitzError("invoice bigger amount than advertised", "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
 
@@ -463,8 +463,8 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
     print("# invoice: {0}".format(paymentRequestStr))
     paymentRequestDecoded = lndDecodeInvoice(paymentRequestStr)
     if paymentRequestDecoded is None: sys.exit()
-    print("# amount as advertised: {0}".format(msatsNext))
-    print("# amount in invoice is: {0}".format(paymentRequestDecoded.num_msat))
+    print("# amount as advertised: {0} milliSats".format(msatsNext))
+    print("# amount in invoice is: {0} milliSats".format(paymentRequestDecoded.num_msat))
     if int(msatsNext) < int(paymentRequestDecoded.num_msat):
         raise BlitzError("invoice bigger amount than advertised", "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
