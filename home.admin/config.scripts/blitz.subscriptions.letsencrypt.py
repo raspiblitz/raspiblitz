@@ -25,6 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
     print("# blitz.subscriptions.ip2tor.py subscription-new dyndns|ip duckdns|freedns id token ip|tor|ip&tor")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
+    print("# blitz.subscriptions.ip2tor.py domain-by-ip ip")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
     sys.exit(1)
 
@@ -201,6 +202,32 @@ def getSubscription(subscriptionID):
     
     except Exception as e:
         return []
+
+
+def getDomainByIP(ip):
+
+    try:
+
+        if Path(SUBSCRIPTIONS_FILE).is_file():
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+        else:
+            raise BlitzError("no match")
+        if "subscriptions_letsencrypt" not in subs:
+            raise BlitzError("no match")
+        for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
+            # if IP is a direct match
+            if sub['ip'] == ip:
+                return sub['id']
+            # if IP is a dynamicIP - check with the publicIP from the config
+            if sub['ip'] == "dyndns":
+                if cfg.public_ip == ip:
+                    return sub['id']
+        raise BlitzError("no match")
+    
+    except Exception as e:
+        raise BlitzError("Exception")
+
 
 def menuMakeSubscription():
 
@@ -481,8 +508,30 @@ if sys.argv[1] == "subscription-detail":
         handleException(e)
 
     sys.exit(0)
-
     
+#######################
+# DOMAIN BY IP
+# to check if an ip has a domain mapping
+#######################
+if sys.argv[1] == "domain-by-ip":
+
+    # check parameters
+    try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
+        ip = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+
+        domain=getDomainByIP(ip)
+        print("domain='{0}'".format(domain))
+
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(0)
+
 #######################
 # SUBSCRIPTION CANCEL
 #######################
