@@ -27,7 +27,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}
-SHA1: ${sslFingerprintIP}" 
+SHA1 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
@@ -43,14 +43,14 @@ SHA1 Fingerprint: ${sslFingerprintTOR}"
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}
 IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1: ${sslFingerprintTOR}
+SHA1 ${sslFingerprintTOR}
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
-consider adding a MAINMENU > SUBSCRIBE > IP2TOR Bridge"
+consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)"
   fi
 
-  whiptail --title " LNbits " --msgbox "${text}" 14 68
+  whiptail --title " LNbits " --msgbox "${text}" 14 69
   
   /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
