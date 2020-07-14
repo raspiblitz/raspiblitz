@@ -72,7 +72,7 @@ if [ "$1" = "status" ]; then
     toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
-    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tl_tor.cert -fingerprint -noout | cut -d"=" -f2)
+    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls_tor.cert -fingerprint -noout | cut -d"=" -f2)
     echo "sslFingerprintTOR='${sslFingerprintTOR}'"
 
     # check for IP2TOR
