@@ -193,8 +193,9 @@ elif [ "$1" = "issue-cert" ]; then
   # create certicicates
   echo "# creating certs for ${FQDN}"
   $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
-  success=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
-  if [ ${success} -eq 0 ]; then
+  success1=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
+  success2=$(sudo ls ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key | grep -c "${FQDN}.key")
+  if [ ${success1} -eq 0 ] || [ ${success2} -eq 0 ]; then
     sleep 6
     echo "error='acme failed'"
     exit 1
