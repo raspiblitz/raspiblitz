@@ -110,7 +110,7 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
 
     # run the ACME script
     acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
-    if acmeResult not 0:
+    if acmeResult != 0:
         time.sleep(6)
         raise BlitzError("letsancrypt acme failed", acmeResult)
 
@@ -167,7 +167,7 @@ def subscriptionsCancel(id):
     # run the ACME script to remove cert
     if removedCert:
         acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']])
-        if acmeResult not 0:
+        if acmeResult != 0:
             time.sleep(6)
             raise BlitzError("letsancrypt acme failed", acmeResult)
 
