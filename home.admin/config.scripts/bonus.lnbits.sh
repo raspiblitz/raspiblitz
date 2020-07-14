@@ -66,13 +66,13 @@ if [ "$1" = "status" ]; then
       echo "publicDomain='${domain}'"
     fi
 
-    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
     toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
-    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls_tor.cert -fingerprint -noout | cut -d"=" -f2)
+    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintTOR='${sslFingerprintTOR}'"
 
     # check for IP2TOR
