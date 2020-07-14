@@ -22,7 +22,7 @@ from blitzpy import RaspiBlitzConfig
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
-    print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip duckdns|freedns id token")
+    print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip duckdns|freedns id token ip|tor|ip&tor")
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
@@ -68,7 +68,7 @@ def getsubdomain(fulldomainstring):
 
 ####### API Calls to DNS Servcies #########
 
-def duckDNSupdate(domain, token, ip):
+def duckDNSupdate(domain, token, ip, target):
 
     print("# duckDNS update IP API call")
     
@@ -85,7 +85,7 @@ def duckDNSupdate(domain, token, ip):
 
 ####### PROCESS FUNCTIONS #########
 
-def subscriptionsNew(ip, dnsservice, id, token):
+def subscriptionsNew(ip, dnsservice, id, token, target):
 
     # check if id already exists
     if len(getSubscription(id)) > 0:
@@ -97,15 +97,15 @@ def subscriptionsNew(ip, dnsservice, id, token):
     # dyndns
     realip=ip
     if ip == "dyndns":
-        # todo: activate DynDNS (set in raspiBlitz Config the update url)
+        # TODO: activate DynDNS (set in raspiBlitz Config the update url)
         realip=cfg.public_ip
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
         duckDNSupdate(getsubdomain(id), token, realip)
 
-    # todo: run the ACME script
-    acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", "duckdns", "testblitz2.duckdns.org", "056d28ae-d2c4-4e7e-ac66-32f96f3c9eca", "tor"])
+    # run the ACME script
+    acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
     print(acmeResult)
     time.sleep(6)
     if (acmeResult.find("error=") > -1):
@@ -120,6 +120,7 @@ def subscriptionsNew(ip, dnsservice, id, token):
     subscription['dnsservice_type'] = dnsservice
     subscription['dnsservice_token'] = token
     subscription['ip'] = ip
+    subscription['description'] = "For {0}".format(target)
     subscription['time_created'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     subscription['warning'] = ""
 
@@ -283,6 +284,9 @@ This looks not like a valid token.
     if code != d.OK:
         sys.exit(0)
 
+    # default target are the nginx ip ports
+    target="ip"
+
     if tag == "IP2TOR":
 
         # get all active IP2TOR subscriptions (just in case)
@@ -320,6 +324,7 @@ Create one first and try again.
         # get the slected IP2TOR bridge
         ip2torSelect=ip2torSubs[int(tag)]
         ip=ip2torSelect["ip"]
+        target="tor"
 
     elif tag == "DYNDNS":
 
@@ -349,7 +354,7 @@ This looks not like a valid IP.
 
     # create the letsenscript subscription
     try:
-        subscription = subscriptionsNew(ip, dnsservice, domain, token)
+        subscription = subscriptionsNew(ip, dnsservice, domain, token, target)
 
         # success dialog
         Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
@@ -398,12 +403,16 @@ if sys.argv[1] == "subscriptions-new":
         dnsservice_type = sys.argv[3]
         dnsservice_id = sys.argv[4]
         dnsservice_token = sys.argv[5]
+        if len(sys.argv) <= 6:
+            target = sys.argv[6]
+        else:
+            target = "ip&tor"
     except Exception as e:
         handleException(e)
 
     # create the subscription
     try:
-        subscription = subscriptionsNew(ip, dnsservice_type, dnsservice_id, dnsservice_token)
+        subscription = subscriptionsNew(ip, dnsservice_type, dnsservice_id, dnsservice_token, target)
     except Exception as e:
         handleException(e)
 
