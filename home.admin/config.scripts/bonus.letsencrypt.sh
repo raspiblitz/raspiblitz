@@ -175,6 +175,7 @@ elif [ "$1" = "issue-cert" ]; then
       echo "# preparing DUCKDNS"
       dnsservice="dns_duckdns"
       export DuckDNS_Token="${token}"
+      exec "$@"
   else
     echo "error='not supported dnsservice'"
     exit 1
