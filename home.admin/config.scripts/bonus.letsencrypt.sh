@@ -188,8 +188,8 @@ elif [ "$1" = "issue-cert" ]; then
 
   # create certicicates
   echo "# creating certs for ${FQDN}"
-  /home/admin/.acme.sh/acme.sh --force --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
-  success=$(/home/admin/.acme.sh/acme.sh --list | grep -c "${FQDN}")
+  $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
+  success=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
   if [ ${success} -eq 0 ]; then
     sleep 6
     echo "error='acme failed'"
@@ -201,8 +201,8 @@ elif [ "$1" = "issue-cert" ]; then
     echo "# replacing IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tls.key 
-    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
   fi
 
   # repleace certs for tor
@@ -210,8 +210,8 @@ elif [ "$1" = "issue-cert" ]; then
     echo "# replacing TOR certs"
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
   fi
 
   # todo maybe allow certs for single servies later
