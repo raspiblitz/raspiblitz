@@ -80,7 +80,7 @@ if [ "$1" = "status" ]; then
     source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
     if [ ${#error} -eq 0 ]; then
       echo "ip2torType='${ip2tor-v1}'"
-      echo "ip2torId='${id}'"
+      echo "ip2torID='${id}'"
       echo "ip2torIP='${ip}'"
       echo "ip2torPort='${port}'"
       # check for LetsEnryptDomain on IP2TOR
