@@ -18,6 +18,7 @@ from blitzpy import RaspiBlitzConfig
 # constants for standard services
 LND_REST_API = "LND-REST-API"
 LND_GRPC_API = "LND-GRPC-API"
+LNBITS = "LNBITS"
 
 # load config 
 cfg = RaspiBlitzConfig()
@@ -241,6 +242,7 @@ your RaspiBlitz behind TOR.
     # check for which standard services already a active bridge exists
     lnd_rest_api=False
     lnd_grpc_api=False
+    lnbits=False
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
@@ -249,6 +251,7 @@ your RaspiBlitz behind TOR.
                 if not sub['active']: next
                 if sub['active'] and sub['name'] == LND_REST_API: lnd_rest_api=True
                 if sub['active'] and sub['name'] == LND_GRPC_API: lnd_grpc_api=True
+                if sub['active'] and sub['name'] == LNBITS: lnbits=True
     except Exception as e:
         print(e)
 
@@ -256,6 +259,8 @@ your RaspiBlitz behind TOR.
     choices = []
     choices.append( ("REST","LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")) )
     choices.append( ("GRPC","LND gRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
+    if cfg.lnbits:
+        choices.append( ("LNBITS","LNbits {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )  
     choices.append( ("SELF","Create a custom IP2TOR Bridge") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
@@ -281,6 +286,11 @@ your RaspiBlitz behind TOR.
         servicename=LND_GRPC_API
         torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         torPort=10009
+    if tag == "LNBITS":
+        # get TOR address for LNBits
+        servicename=LNBITS
+        torAddress = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lnbits/hostname'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        torPort=443
     if tag == "SELF":
         servicename="CUSTOM"
         try:

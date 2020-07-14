@@ -41,7 +41,7 @@ ${toraddress}"
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
 SHA1 Fingerprint: ${sslFingerprintTOR}"
   elif [ ${#ip2torIP} -gt 0 ]; then
-    text="${text}
+    text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
 SHA1 ${sslFingerprintTOR}
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
@@ -51,7 +51,7 @@ To enable easy reachablity with normal brower from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  whiptail --title " LNbits " --msgbox "${text}" 14 69
+  whiptail --title " LNbits " --msgbox "${text}" 15 69
   
   /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
@@ -182,7 +182,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# get the github code"
     sudo rm -r /home/lnbits/lnbits 2>/dev/null
     cd /home/lnbits
-    sudo -u lnbits git clone https://github.com/arcbtc/lnbits.git
+    sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
     cd /home/lnbits/lnbits
     sudo -u lnbits git checkout tags/raspiblitz
 
