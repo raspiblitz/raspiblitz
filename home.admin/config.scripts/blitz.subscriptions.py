@@ -122,11 +122,15 @@ The domain is pointing to the IP:
 
 The state of the subscription is: {active} {warning}
 
+The following additional information is available:
+{description}
+
 '''.format( dnsservice=selectedSub['dnsservice_type'],
             domain=selectedSub['id'],
             ip=selectedSub['ip'],
             active= "ACTIVE" if selectedSub['active'] else "NOT ACTIVE",
-            warning=selectedSub['warning']
+            warning=selectedSub['warning'],
+            description=selectedSub['description']
     )
 
     elif selectedSub['type'] == "ip2tor-v1":
