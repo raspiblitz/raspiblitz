@@ -85,9 +85,9 @@ sudo systemctl stop lnd 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "switching the DynamicDNS ON"
-  echo "dynDomain(${dynDomain})"
-  echo "dynUpdateUrl(${dynUpdateUrl})"
+  echo "# switching the DynamicDNS ON"
+  echo "# dynDomain(${dynDomain})"
+  echo "# dynUpdateUrl(${dynUpdateUrl})"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
@@ -101,7 +101,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chmod 777 /mnt/hdd/raspiblitz.conf
   #sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
 
-  echo "changing lnd.conf"
+  echo "# changing lnd.conf"
 
   # lnd.conf: uncomment tlsextradomain (just if it is still uncommented)
   sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
@@ -109,27 +109,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # lnd.conf: domain value
   sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${dynDomain}/g" /mnt/hdd/lnd/lnd.conf
 
-  echo "DynamicDNS is now ON"
+  echo "# DynamicDNS is now ON"
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  echo "switching DynamicDNS OFF"
+  echo "# switching DynamicDNS OFF"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^dynDomain=.*/dynDomain=/g" /mnt/hdd/raspiblitz.conf
   sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl=/g" /mnt/hdd/raspiblitz.conf
 
-  echo "changing lnd.conf"
+  echo "# changing lnd.conf"
 
   # lnd.conf: comment tlsextradomain out
   sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
 
-  echo "DynamicDNS is now OFF"
+  echo "# DynamicDNS is now OFF"
 fi
 
 # refresh TLS cert
 sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
 
-echo "may needs reboot to run normal again"
+echo "# may needs reboot to run normal again"
 exit 0

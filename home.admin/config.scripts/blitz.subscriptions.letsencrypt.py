@@ -102,7 +102,10 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     # dyndns
     realip=ip
     if ip == "dyndns":
-        # TODO: activate DynDNS (set in raspiBlitz Config the update url)
+        updateURL=""
+        if dnsservice == "duckdns":
+            updateURL=="https://www.duckdns.org/update?domains={0}&token={1}".format(getsubdomain(domain), token, ip)
+        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', id, updateURL], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         realip=cfg.public_ip
 
     # update DNS with actual IP
