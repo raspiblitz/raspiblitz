@@ -243,6 +243,21 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
+    # revert to old self-singed certs
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo rm -r ${ACME_CONFIG_HOME}
+
+    # restart nginx
+    echo "# restarting nginx"
+    sudo systemctl restart nginx 2>&1
+
   else
     echo "*** Let's Encrypt Client 'acme.sh' not installed ***"
   fi
