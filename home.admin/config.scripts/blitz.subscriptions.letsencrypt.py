@@ -281,6 +281,7 @@ This looks not like a valid token.
         choices=choices, width=60, height=10, title="Select Service")
 
     # if user chosses CANCEL
+    os.system("clear")
     if code != d.OK:
         sys.exit(0)
 
