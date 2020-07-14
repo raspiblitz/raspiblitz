@@ -168,7 +168,7 @@ def subscriptionsCancel(id):
     if removedCert:
         acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']], stdout=subprocess.PIPE)
         out, err = acmeResult.communicate()
-        if acmeResult.find("error=") > -1:
+        if out.find("error=") > -1:
             time.sleep(6)
             raise BlitzError("letsancrypt acme failed", acmeResult)
 
