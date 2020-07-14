@@ -174,8 +174,7 @@ elif [ "$1" = "issue-cert" ]; then
   if [ "${dnsservice}" == "duckdns" ]; then
       echo "# preparing DUCKDNS"
       dnsservice="dns_duckdns"
-      export DuckDNS_Token="${token}"
-      exec "$@"
+      envVars="DuckDNS_Token=${token}"
   else
     echo "error='not supported dnsservice'"
     exit 1
@@ -183,7 +182,8 @@ elif [ "$1" = "issue-cert" ]; then
 
   # create certicicates
   echo "# creating certs"
-  /home/admin/.acme.sh/acme.sh --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 1>&2
+  result=$(export ${envVars} | /home/admin/.acme.sh/acme.sh --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1)
+  >&2 echo "${result}" 
 
   # replace certs for clearnet
   if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
