@@ -107,7 +107,6 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     # update DNS with actual IP
     if dnsservice == "duckdns":
         duckDNSupdate(getsubdomain(id), token, realip)
-        if [id]
 
     # run the ACME script
     acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
