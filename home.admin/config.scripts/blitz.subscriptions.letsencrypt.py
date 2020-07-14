@@ -68,7 +68,7 @@ def getsubdomain(fulldomainstring):
 
 ####### API Calls to DNS Servcies #########
 
-def duckDNSupdate(domain, token, ip, target):
+def duckDNSupdate(domain, token, ip):
 
     print("# duckDNS update IP API call")
     
