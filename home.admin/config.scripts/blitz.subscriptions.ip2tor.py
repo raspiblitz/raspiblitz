@@ -989,7 +989,7 @@ if sys.argv[1] == "ip-by-tor":
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
-                if sub['active'] and sub['tor'] == onion:
+                if sub['active'] and (sub['tor'] == onion or sub['tor'].split(":")[0] == onion):
                     print("id='{0}'".format(sub['id']))
                     print("type='{0}'".format(sub['type']))
                     print("ip='{0}'".format(sub['ip']))
