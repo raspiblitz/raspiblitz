@@ -22,8 +22,8 @@ from blitzpy import RaspiBlitzConfig
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
-    print("# blitz.subscriptions.ip2tor.py subscriptions-new dyndns|ip duckdns|freedns id token ip|tor|ip&tor")
     print("# blitz.subscriptions.ip2tor.py subscriptions-list")
+    print("# blitz.subscriptions.ip2tor.py subscription-new dyndns|ip duckdns|freedns id token ip|tor|ip&tor")
     print("# blitz.subscriptions.ip2tor.py subscription-detail id")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
     sys.exit(1)
@@ -413,7 +413,7 @@ if sys.argv[1] == "create-ssh-dialog":
 # call from web interface
 ###############    
 
-if sys.argv[1] == "subscriptions-new":
+if sys.argv[1] == "subscription-new":
 
     # check parameters
     try:
