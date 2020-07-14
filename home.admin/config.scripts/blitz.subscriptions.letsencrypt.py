@@ -355,6 +355,7 @@ This looks not like a valid IP.
 
     # create the letsenscript subscription
     try:
+        os.system("clear")
         subscription = subscriptionsNew(ip, dnsservice, domain, token, target)
 
         # success dialog
