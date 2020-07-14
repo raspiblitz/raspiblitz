@@ -18,27 +18,22 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-https://${localip}:5001\n
-SHA1 Thumb/Fingerprint: ${fingerprint}\n
+https://${localIP}:5001\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
+SHA1 Thumb/Fingerprint: ${sslFingerprintTOR}\n
 " 14 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
     whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-https://${localip}:5001\n
+https://${localIP}:5001\n
 SHA1 Thumb/Fingerprint: ${fingerprint}\n
 Activate TOR to access from outside your local network.
 " 13 54
@@ -58,6 +53,43 @@ if [ "$1" = "status" ]; then
 
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
+
+    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    echo "localIP='${localIP}'"
+    echo "httpsPort='5001'"
+    echo "publicIP='${publicIP}'"
+
+    # check for LetsEnryptDomain for DynDns
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+    if [ ${#error} -eq 0 ]; then
+      echo "publicDomain='${domain}'"
+    fi
+
+    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+    echo "sslFingerprintIP='${sslFingerprintIP}'"
+
+    toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
+    echo "toraddress='${toraddress}'"
+
+    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tl_tor.cert -fingerprint -noout | cut -d"=" -f2)
+    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+
+    # check for IP2TOR
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
+    if [ ${#error} -eq 0 ]; then
+      echo "ip2torType='${ip2tor-v1}'"
+      echo "ip2torId='${id}'"
+      echo "ip2torIP='${ip}'"
+      echo "ip2torPort='${port}'"
+      # check for LetsEnryptDomain on IP2TOR
+      error=""
+      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
+      if [ ${#error} -eq 0 ]; then
+        echo "ip2torDomain='${domain}'"
+      fi
+    fi
 
     # check for error
     isDead=$(sudo systemctl status lnbits | grep -c 'inactive (dead)')
