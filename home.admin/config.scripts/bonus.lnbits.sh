@@ -14,31 +14,45 @@ source /mnt/hdd/raspiblitz.conf
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  # get status
+  # get LNbits status info
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
 
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+  text="Local Webrowser: https://${localIP}:${httpsPort}"
 
-    # TOR
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-https://${localIP}:5001\n
-Hidden Service address for TOR Browser (QR see LCD):
-${toraddress}
-SHA1 Thumb/Fingerprint: ${sslFingerprintTOR}\n
-" 14 67
-    /home/admin/config.scripts/blitz.lcd.sh hide
-  else
-
-    # IP + Domain
-    whiptail --title " LNbits " --msgbox "Open the following URL in your local web browser:
-https://${localIP}:5001\n
-SHA1 Thumb/Fingerprint: ${fingerprint}\n
-Activate TOR to access from outside your local network.
-" 13 54
+  if [ ${#publicDomain} -gt 0 ]; then
+     text="${text}
+Public Domain: https://${publicDomain}:${httpsPort}
+port forwarding on router needs to be active & may change port" 
   fi
 
+  text="${text}
+SHA1 Fingerprint: ${sslFingerprintIP}" 
+
+  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    text="${text}\n
+Hidden Service address for TOR Browser (QR see LCD):
+${toraddress}"
+  fi
+  
+  if [ ${#ip2torDomain} -gt 0 ]; then
+    text="${text}
+IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
+SHA1 Fingerprint: ${sslFingerprintTOR}"
+  elif [ ${#ip2torIP} -gt 0 ]; then
+    text="${text}
+IP2TOR: https://${ip2torIP}:${ip2torPort}
+SHA1 Fingerprint: ${sslFingerprintTOR}
+go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+  elif [ ${#publicDomain} -eq 0 ]; then
+    text="${text}
+consider adding a MAINMENU > SUBSCRIBE > IP2TOR Bridge"
+  fi
+
+  whiptail --title " LNbits " --msgbox "${text}" 14 67
+  
+  /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
   exit 0
 fi
