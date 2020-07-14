@@ -109,6 +109,7 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
         duckDNSupdate(getsubdomain(id), token, realip)
 
     # run the ACME script
+    print("# Running letsencrypt ACME script ...")
     acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target], stdout=subprocess.PIPE, stderr = subprocess.STDOUT, encoding='utf8')
     out, err = acmeResult.communicate()
     if out.find("error=") > -1:
@@ -422,9 +423,9 @@ if sys.argv[1] == "subscriptions-new":
         dnsservice_id = sys.argv[4]
         dnsservice_token = sys.argv[5]
         if len(sys.argv) <= 6:
-            target = sys.argv[6]
-        else:
             target = "ip&tor"
+        else:
+            target = sys.argv[6]
     except Exception as e:
         handleException(e)
 
