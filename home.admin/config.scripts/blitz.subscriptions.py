@@ -261,7 +261,7 @@ your RaspiBlitz behind TOR.
     # check if BTCPayserver is installed
     btcPayServer=False
     statusData= subprocess.run(['/home/admin/config.scripts/bonus.btcpayserver.sh', 'status'], stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-    if statusData.find("BTCPayServer=on") > -1:
+    if statusData.find("installed=1") > -1:
         btcPayServer=True
 
     # ask user for which RaspiBlitz service the bridge should be used
