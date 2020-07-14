@@ -110,10 +110,10 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
 
     # run the ACME script
     acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target], stdout=subprocess.PIPE)
-        out, err = acmeResult.communicate()
-        if out.find("error=") > -1:
-            time.sleep(6)
-            raise BlitzError("letsancrypt acme failed", out)
+    out, err = acmeResult.communicate()
+    if out.find("error=") > -1:
+        time.sleep(6)
+        raise BlitzError("letsancrypt acme failed", out)
 
     # create subscription data for storage
     subscription = {}
