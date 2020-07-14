@@ -701,6 +701,11 @@ The service was payed & delivered, but RaspiBlitz detected:
 You may want to consider to cancel the subscription later.
             '''.format(subscription['warning'],title="Warning"))
 
+    # decide if https:// address
+    protocol=""
+    if blitzServiceName == "LNBITS":
+        protocol="https://"
+
     # Give final result feedback to user
     Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 OK your service is ready & your subscription is active.
@@ -709,7 +714,7 @@ You payed {0} sats for the first {1} hours.
 Next AUTOMATED PAYMENTS will be {2} sats each.
 
 Your service '{3}' should now publicly be reachable under:
-{4}:{5}
+{6}{4}:{5}
 
 Please test now if the service is performing as promised.
 If not - dont forget to cancel the subscription under:
@@ -720,8 +725,10 @@ MAIN MENU > Manage Subscriptions > My Subscriptions
         host['tor_bridge_price_extension_sats'],
         blitzServiceName,
         subscription['ip'],
-        subscription['port'])
-        ,title="Subscription Active") 
+        subscription['port']),
+        protocol,
+        title="Subscription Active"
+        ) 
 
 
 ####### COMMANDS #########

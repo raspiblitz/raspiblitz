@@ -37,9 +37,9 @@ ${toraddress}"
   fi
   
   if [ ${#ip2torDomain} -gt 0 ]; then
-    text="${text}
+    text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
-SHA1 Fingerprint: ${sslFingerprintTOR}"
+SHA1 ${sslFingerprintTOR}"
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
