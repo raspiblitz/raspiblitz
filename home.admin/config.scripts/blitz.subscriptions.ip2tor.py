@@ -27,7 +27,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.ip2tor.py subscriptions-renew secondsBeforeSuspend")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel id")
     print("# blitz.subscriptions.ip2tor.py subscription-by-service servicename")
+    print("# blitz.subscriptions.ip2tor.py ip-by-tor onionaddress")
     sys.exit(1)
+
+    
 
 ####### BASIC SETTINGS #########
 
@@ -953,6 +956,41 @@ if sys.argv[1] == "subscription-by-service":
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == servicename:
+                    print("type='{0}'".format(sub['type']))
+                    print("ip='{0}'".format(sub['ip']))
+                    print("port='{0}'".format(sub['port']))
+                    print("tor='{0}'".format(sub['tor']))
+                    sys.exit(0)
+                    
+        print("error='not found'")
+        sys.exit(0)
+
+    except Exception as e:
+        handleException(e)
+
+    sys.exit(1)
+
+#######################
+# GET IP BY ONIONADDRESS
+# gets called by other scripts to check if a onion address as a IP2TOR bridge
+# output is bash key/value style so that it can be imported with source
+#######################
+if sys.argv[1] == "ip-by-tor":
+
+    # check parameters
+    try:
+        if len(sys.argv) <= 2: raise BlitzError("incorrect parameters","")
+        onion = sys.argv[2]
+    except Exception as e:
+        handleException(e)
+
+    try:
+        if os.path.isfile(SUBSCRIPTIONS_FILE):
+            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+            for idx, sub in enumerate(subs['subscriptions_ip2tor']):
+                if sub['active'] and sub['tor'] == onion:
+                    print("id='{0}'".format(sub['id']))
                     print("type='{0}'".format(sub['type']))
                     print("ip='{0}'".format(sub['ip']))
                     print("port='{0}'".format(sub['port']))
