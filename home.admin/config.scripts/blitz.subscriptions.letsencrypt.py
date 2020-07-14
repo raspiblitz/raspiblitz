@@ -206,27 +206,25 @@ def getSubscription(subscriptionID):
 
 def getDomainByIP(ip):
 
-    try:
-
-        if Path(SUBSCRIPTIONS_FILE).is_file():
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
-            subs = toml.load(SUBSCRIPTIONS_FILE)
-        else:
-            raise BlitzError("no match")
-        if "subscriptions_letsencrypt" not in subs:
-            raise BlitzError("no match")
-        for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
-            # if IP is a direct match
-            if sub['ip'] == ip:
-                return sub['id']
-            # if IP is a dynamicIP - check with the publicIP from the config
-            if sub['ip'] == "dyndns":
-                if cfg.public_ip == ip:
-                    return sub['id']
+    # does subscriptin file exists
+    if Path(SUBSCRIPTIONS_FILE).is_file():
+        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+    else:
         raise BlitzError("no match")
-    
-    except Exception as e:
-        raise BlitzError("Exception")
+    # section with letsencrypt subs exists
+    if "subscriptions_letsencrypt" not in subs:
+        raise BlitzError("no match")
+    # go thru subscription and check of a match
+    for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
+        # if IP is a direct match
+        if sub['ip'] == ip:
+            return sub['id']
+        # if IP is a dynamicIP - check with the publicIP from the config
+        if sub['ip'] == "dyndns":
+            if cfg.public_ip == ip:
+                return sub['id']
+    raise BlitzError("no match")
 
 
 def menuMakeSubscription():
