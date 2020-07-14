@@ -260,7 +260,7 @@ your RaspiBlitz behind TOR.
     choices.append( ("REST","LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")) )
     choices.append( ("GRPC","LND gRPC API {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )
     if cfg.lnbits:
-        choices.append( ("LNBITS","LNbits {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )  
+        choices.append( ("LNBITS","LNbits Webinterface {0}".format("--> ALREADY BRIDGED" if lnd_grpc_api else "")) )  
     choices.append( ("SELF","Create a custom IP2TOR Bridge") )
 
     d = Dialog(dialog="dialog",autowidgetsize=True)
