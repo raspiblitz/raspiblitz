@@ -87,6 +87,10 @@ def duckDNSupdate(domain, token, ip):
 
 def subscriptionsNew(ip, dnsservice, id, token, target):
 
+    # id needs to the full domain name
+    if id.find(".") == -1:
+        raise BlitzError("not a fully qualified domainname", dnsservice_id)
+
     # check if id already exists
     if len(getSubscription(id)) > 0:
         raise BlitzError("id already exists", id)
@@ -103,10 +107,11 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     # update DNS with actual IP
     if dnsservice == "duckdns":
         duckDNSupdate(getsubdomain(id), token, realip)
+        if [id]
 
     # run the ACME script
     acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
-    if (acmeResult.find("error=") > -1):
+    if acmeResult not 0:
         time.sleep(6)
         raise BlitzError("letsancrypt acme failed", acmeResult)
 
@@ -163,7 +168,7 @@ def subscriptionsCancel(id):
     # run the ACME script to remove cert
     if removedCert:
         acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'], removedCert['target']])
-        if (acmeResult.find("error=") > -1):
+        if acmeResult not 0:
             time.sleep(6)
             raise BlitzError("letsancrypt acme failed", acmeResult)
 

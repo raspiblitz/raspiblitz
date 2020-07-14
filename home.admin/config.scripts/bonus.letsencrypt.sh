@@ -148,8 +148,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     acme_install "${address}"
     echo ""
 
+    exit 0
+
   else
-    echo "*** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
+    echo "# *** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
+    exit 1
   fi
 
 ###################
@@ -234,6 +237,8 @@ elif [ "$1" = "issue-cert" ]; then
   echo "# restarting nginx"
   sudo systemctl restart nginx 2>&1
 
+  exit 0
+
 ###################
 # REMOVE-CERT
 ###################
@@ -300,6 +305,8 @@ elif [ "$1" = "remove-cert" ]; then
   echo "# restarting nginx"
   sudo systemctl restart nginx 2>&1
 
+  exit 0
+
 ###################
 # OFF
 ###################
@@ -333,8 +340,11 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# restarting nginx"
     sudo systemctl restart nginx 2>&1
 
+    exit 0
+
   else
-    echo "*** Let's Encrypt Client 'acme.sh' not installed ***"
+    echo "# *** Let's Encrypt Client 'acme.sh' not installed ***"
+    exit 1
   fi
 
 else
