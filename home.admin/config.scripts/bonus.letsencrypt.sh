@@ -161,7 +161,7 @@ elif [ "$1" = "issue-cert" ]; then
   dnsservice=$2
   FQDN=$3
   apitoken=$4
-  options=$4
+  options=$5
   if [ ${#dnsservice} -eq 0 ] || [ ${#FQDN} -eq 0 ] || [ ${#apitoken} -eq 0 ]; then
     echo "error='invalid parameters'"
     exit 1
@@ -184,28 +184,26 @@ elif [ "$1" = "issue-cert" ]; then
   echo "# creating certs"
   /home/admin/.acme.sh/acme.sh --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
 
-  if [ "${options}" == "tor" ] || [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
-  
-    # replace certs for clearnet
-    if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
-      echo "# replacing IP certs"
-      sudo rm /mnt/hdd/app-data/nginx/tls.cert
-      sudo rm /mnt/hdd/app-data/nginx/tls.key 
-      sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
-      sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
-    fi
+  # replace certs for clearnet
+  if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing IP certs"
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+  fi
 
-    # repleace certs for tor
-    if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
-      echo "# replacing TOR certs"
-      sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-      sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
-    fi
-  
-  else
-    # todo maybe allow certs for single services later
+  # repleace certs for tor
+  if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing TOR certs"
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+  fi
+
+  # todo maybe allow certs for single servies later
+  if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
     echo "error='option not supported yet'"
     exit 1
   fi
