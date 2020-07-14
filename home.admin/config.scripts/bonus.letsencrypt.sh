@@ -4,6 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "config script to install or remove the Let's Encrypt Client (ACME.SH)"
   echo "bonus.letsencrypt.sh [on|off]"
+  echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
   exit 1
 fi
 
@@ -138,12 +139,88 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo ""
     fi
 
+    # make sure storage directory exist
+    sudo mkdir -p /mnt/hdd/app-data/letsencrypt/certs 2>/dev/null
+    sudo chown -R admin:admin /mnt/hdd/app-data/letsencrypt
+    sudo chmod -R 733 /mnt/hdd/app-data/letsencrypt
+
     acme_install "${address}"
     echo ""
 
   else
     echo "*** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
   fi
+
+###################
+# ISSUE-CERT
+###################
+
+elif [ "$1" = "issue-cert" ]; then
+
+  # get and check parameters
+  dnsservice=$2
+  FQDN=$3
+  apitoken=$4
+  options=$4
+  if [ ${#dnsservice} -eq 0 ] || [ ${#FQDN} -eq 0 ] || [ ${#apitoken} -eq 0 ]; then
+    echo "error='invalid parameters'"
+    exit 1
+  fi
+  if [ ${#options} -eq 0 ]; then
+    options="ip&tor"
+  fi
+
+  # prepare values and exports based on dnsservice
+  if [ "${dnsservice}" == "duckdns" ]; then
+      echo "# preparing DUCKDNS"
+      dnsservice="dns_duckdns"
+      export DuckDNS_Token="${token}"
+  else
+    echo "error='not supported dnsservice'"
+    exit 1
+  fi
+
+  # create certicicates
+  echo "# creating certs"
+  /home/admin/.acme.sh/acme.sh --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 1>&2
+
+  # replace certs for clearnet
+  if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing IP certs"
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+  fi
+
+  # repleace certs for tor
+  if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+    echo "# replacing TOR certs"
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -s /mnt/hdd/app-data/letsencrypt/certs/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+  fi
+
+  # todo maybe allow certs for single servies later
+  if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
+    echo "error='option not supported yet'"
+    exit 1
+  fi
+
+  # test nginx config
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  # restart nginx
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
+
 
 ###################
 # OFF
