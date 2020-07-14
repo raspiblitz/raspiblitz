@@ -249,6 +249,9 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
+    # remove old script install
+    sudo rm -r ${ACME_INSTALL_HOME}
+
     # revert to old self-singed certs
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tls.key 
