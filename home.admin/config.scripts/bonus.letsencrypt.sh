@@ -284,6 +284,9 @@ elif [ "$1" = "remove-cert" ]; then
     exit 1
   fi
 
+  # delete cert files
+  sudo rm -r  ${ACME_CERT_HOME}/${FQDN}_ecc
+
   # test nginx config
   syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
   testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
