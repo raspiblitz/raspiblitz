@@ -109,10 +109,11 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
         duckDNSupdate(getsubdomain(id), token, realip)
 
     # run the ACME script
-    acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target])
-    if acmeResult != 0:
-        time.sleep(6)
-        raise BlitzError("letsancrypt acme failed", acmeResult)
+    acmeResult=subprocess.Popen(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target], stdout=subprocess.PIPE)
+        out, err = acmeResult.communicate()
+        if out.find("error=") > -1:
+            time.sleep(6)
+            raise BlitzError("letsancrypt acme failed", out)
 
     # create subscription data for storage
     subscription = {}
@@ -170,7 +171,7 @@ def subscriptionsCancel(id):
         out, err = acmeResult.communicate()
         if out.find("error=") > -1:
             time.sleep(6)
-            raise BlitzError("letsancrypt acme failed", acmeResult)
+            raise BlitzError("letsancrypt acme failed", out)
 
     # persist change
     with open(SUBSCRIPTIONS_FILE, 'w') as writer:
