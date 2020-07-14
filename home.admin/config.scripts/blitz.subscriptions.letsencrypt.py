@@ -7,6 +7,7 @@ import json
 import math
 import time
 import datetime, time
+import subprocess
 import codecs, grpc, os
 from pathlib import Path
 import toml
@@ -104,6 +105,11 @@ def subscriptionsNew(ip, dnsservice, id, token):
         duckDNSupdate(getsubdomain(id), token, realip)
 
     # todo: run the ACME script
+    acmeResult=subprocess.check_output(["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", "duckdns", "testblitz2.duckdns.org", "056d28ae-d2c4-4e7e-ac66-32f96f3c9eca", "tor"])
+    print(acmeResult)
+    time.sleep(6)
+    if (acmeResult.find("error=") > -1):
+        raise BlitzError("letsancrypt acme failed", acmeResult)
 
     # create subscription data for storage
     subscription = {}
