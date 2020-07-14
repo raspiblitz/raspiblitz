@@ -240,6 +240,8 @@ your RaspiBlitz behind TOR.
         ''',title="Info")
         sys.exit(1)
 
+    print("please wait ..")
+
     # check for which standard services already a active bridge exists
     lnd_rest_api=False
     lnd_grpc_api=False
