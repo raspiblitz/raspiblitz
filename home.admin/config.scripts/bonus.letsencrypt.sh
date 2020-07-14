@@ -157,6 +157,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 elif [ "$1" = "issue-cert" ]; then
 
+  # check if letsencrypt is on
+  if [ "${letsencrypt}" != "on" ]; then
+    echo "error='letsenscrypt is not on'"
+    exit 1
+  fi
+
   # get and check parameters
   dnsservice=$2
   FQDN=$3
@@ -183,7 +189,7 @@ elif [ "$1" = "issue-cert" ]; then
   # create certicicates
   echo "# creating certs for ${FQDN}"
   /home/admin/.acme.sh/acme.sh --force --home "/home/admin/.acme.sh" --config-home "/mnt/hdd/app-data/letsencrypt" --cert-home "/mnt/hdd/app-data/letsencrypt/certs" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
-  success=$(./.acme.sh/acme.sh --list | grep -c "${FQDN}")
+  success=$(/home/admin/.acme.sh/acme.sh --list | grep -c "${FQDN}")
   if [ ${success} -eq 0 ]; then
     sleep 6
     echo "error='acme failed'"
