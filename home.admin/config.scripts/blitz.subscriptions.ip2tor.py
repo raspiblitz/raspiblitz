@@ -350,6 +350,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         if loopCount > 30:
             raise BlitzError("timeout on getting invoice", order)
 
+    raise BlitzError("test error",order)
+
     # get data from now complete order
     paymentRequestStr = order['ln_invoices'][0]['payment_request']
     bridge_id = order['item_details'][0]['product']['id']
@@ -650,7 +652,6 @@ More information on the service you can find under:
     try:
 
         os.system('clear')
-        raise BlitzError("test error",host)
         subscription = shopOrder(shopurl, host['id'], blitzServiceName, torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'],host['tor_bridge_price_extension'],description)
 
     except BlitzError as be:
@@ -683,12 +684,12 @@ Error: {0}
             os.system('clear')
             print('###### ERROR DETAIL FOR DEBUG #######')
             print("")
+            print("Error Short:")
+            print(be.errorShort)
             print('Shop:')
             print(shopurl)
             print('Bridge:')
             print(str(host))
-            print("Error Short:")
-            print(be.errorShort)
             print("Error Detail:")
             print(be.errorLong)
             print("")
