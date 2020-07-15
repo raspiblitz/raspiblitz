@@ -679,7 +679,7 @@ Error: {0}
             '''.format(be.errorShort),title="Error on Subscription")
 
         # show more details (when user used extra button)
-        if exitcode=Dialog.EXTRA:
+        if exitcode == Dialog.EXTRA:
             os.system('clear')
             print('###### ERROR DETAIL FOR DEBUG #######')
             print("")
