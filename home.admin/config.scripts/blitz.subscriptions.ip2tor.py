@@ -345,12 +345,12 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         loopCount+=1
         print("# Loop {0}".format(loopCount))
         order = apiGetOrder(session, shopUrl, orderid)
+        if order['status'] == "R":
+            raise BlitzError("Subscription Rejected",order)
         if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None:
             break
         if loopCount > 30:
             raise BlitzError("timeout on getting invoice", order)
-
-    raise BlitzError("test error",order)
 
     # get data from now complete order
     paymentRequestStr = order['ln_invoices'][0]['payment_request']
