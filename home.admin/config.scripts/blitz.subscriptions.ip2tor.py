@@ -349,7 +349,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
             raise BlitzError("Subscription Rejected",order)
         if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None:
             break
-        if loopCount > 30:
+        if loopCount > 60:
             raise BlitzError("timeout on getting invoice", order)
 
     # get data from now complete order
@@ -380,7 +380,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
         if bridge['status'] == "A":
             break
-        if loopCount > 60: 
+        if loopCount > 120: 
             raise BlitzError("timeout bridge not getting ready", bridge)
         
     print("#### Check if duration delivered is as advertised ...")
@@ -455,7 +455,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
         order = apiGetOrder(session, shopUrl, orderid)
         if len(order['ln_invoices']) > 0 and order['ln_invoices'][0]['payment_request'] is not None:
             break
-        if loopCount > 30:
+        if loopCount > 120:
             raise BlitzError("timeout on getting invoice", order)
         
     
@@ -486,7 +486,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
         except Exception as e:
             eprint(e)
             print("# EXCEPTION on apiGetBridgeStatus")
-        if loopCount > 60:
+        if loopCount > 240:
             warningTXT="timeout on last payed extension"
             contract_breached=True
             break
