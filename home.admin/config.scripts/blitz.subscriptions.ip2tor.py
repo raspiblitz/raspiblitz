@@ -650,42 +650,67 @@ More information on the service you can find under:
     try:
 
         os.system('clear')
+        raise BlitzError("test error",host)
         subscription = shopOrder(shopurl, host['id'], blitzServiceName, torTarget, host['tor_bridge_duration'], host['tor_bridge_price_initial'],host['tor_bridge_price_extension'],description)
 
     except BlitzError as be:
+
+        exitcode=0
 
         if  (be.errorShort == "timeout on waiting for extending bridge" or
              be.errorShort == "fail on subscription storage" or 
              be.errorShort == "timeout bridge not getting ready") :
 
             # error happend after payment
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+            exitcode=Dialog(dialog="dialog",autowidgetsize=True,extra_button=True,extra_label="Details").msgbox('''
 You DID PAY the initial fee.
 But the service was not able to provide service.
 Subscription will be ignored.
 Error: {0}
             '''.format(be.errorShort),title="Error on Subscription")
-            sys.exit(1)
-
         else:
 
             # error happend before payment
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
+            exitcode=Dialog(dialog="dialog",autowidgetsize=True,extra_button=True,extra_label="Details").msgbox('''
 You DID NOT PAY the initial fee.
 The service was not able to provide service.
 Subscription will be ignored.
 Error: {0}
             '''.format(be.errorShort),title="Error on Subscription")
-            sys.exit(1)
+
+        # show more details (when user used extra button)
+        if exitcode=Dialog.EXTRA:
+            os.system('clear')
+            print('###### ERROR DETAIL FOR DEBUG #######')
+            print("")
+            print('Shop:')
+            print(shopUrl)
+            print('BridgeID:')
+            print(bridgeid)
+            print("Error Short:")
+            print(be.errorShort)
+            print("Error Detail:")
+            print(be.errorLong)
+            print("")
+            input("Press Enter to continue ...")
+        
+        sys.exit(1)
 
     except Exception as e:
 
-            # unkown error happend
-            Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
-Unkown Error happend - please report to developers:
-{0}
-            '''.format(str(e)),title="Exception on Subscription")
-            sys.exit(1)
+        # unkown error happend
+        os.system('clear')
+        print('###### EXCEPTION DETAIL FOR DEBUG #######')
+        print("")
+        print('Shop:')
+        print(shopUrl)
+        print('BridgeID:')
+        print(bridgeid)
+        print("EXCEPTION:")
+        print(str(e))
+        print("")
+        input("Press Enter to continue ...")
+        sys.exit(1)
 
     # if LND REST or LND GRPS service ... add bridge IP to TLS
     if servicename == "LND-REST-API" or servicename == "LND-GRPC-API":
