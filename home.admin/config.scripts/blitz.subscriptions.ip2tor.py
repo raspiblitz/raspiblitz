@@ -662,21 +662,21 @@ More information on the service you can find under:
              be.errorShort == "timeout bridge not getting ready") :
 
             # error happend after payment
-            exitcode=Dialog(dialog="dialog",autowidgetsize=True,extra_button=True,extra_label="Details").msgbox('''
+            exitcode=Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 You DID PAY the initial fee.
 But the service was not able to provide service.
 Subscription will be ignored.
 Error: {0}
-            '''.format(be.errorShort),title="Error on Subscription")
+            '''.format(be.errorShort),title="Error on Subscription",extra_button=True,extra_label="Details")
         else:
 
             # error happend before payment
-            exitcode=Dialog(dialog="dialog",autowidgetsize=True,extra_button=True,extra_label="Details").msgbox('''
+            exitcode=Dialog(dialog="dialog",autowidgetsize=True).msgbox('''
 You DID NOT PAY the initial fee.
 The service was not able to provide service.
 Subscription will be ignored.
 Error: {0}
-            '''.format(be.errorShort),title="Error on Subscription")
+            '''.format(be.errorShort),title="Error on Subscription",extra_button=True,extra_label="Details")
 
         # show more details (when user used extra button)
         if exitcode == Dialog.EXTRA:
