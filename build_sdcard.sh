@@ -217,7 +217,7 @@ if [ "${baseImage}" = "raspbian" ]; then
     echo "$max_usb_current already in $configFile"
   fi
 
-  # run fsck on sd boot partition on every startup to prevent "maintenance login" screen
+  # run fsck on sd root partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
   sudo tune2fs -c 1 ${rootPartition}
