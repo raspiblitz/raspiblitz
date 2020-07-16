@@ -112,7 +112,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.5.5
     
     
     # Mandatory as the camera doesn't work without https
@@ -261,10 +261,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
   if [ ${isInstalled} -eq 1 ]; then
+
     echo "#    --> REMOVING Cryptoadvance Specter"
     sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
 
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
       echo "#    --> Removing wallets in core"
