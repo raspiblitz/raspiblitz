@@ -579,7 +579,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.10.2-beta.rc4"
+lndVersion="0.10.4-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -679,7 +679,7 @@ if [ ${#installed} -eq 0 ]; then
 fi
 sudo chown -R admin /home/admin
 
-echo "*** Python DEFAULT libs & depenedencies ***"
+echo "*** Python DEFAULT libs & dependencies ***"
 
 # for setup schell scripts
 sudo apt -y install dialog bc python3-dialog
