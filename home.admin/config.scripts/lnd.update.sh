@@ -18,7 +18,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 
-lndUpdateVersion="0.10.1-beta"
+lndUpdateVersion="0.10.4-beta"
 lndUpdateComment="There is no optional update at the moment."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
