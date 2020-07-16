@@ -116,6 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # add the joininbox menu
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
+    # check the latest at:
+    # https://github.com/openoms/joininbox/releases/
+    sudo -u joinmarket git reset --hard v0.1.2
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
