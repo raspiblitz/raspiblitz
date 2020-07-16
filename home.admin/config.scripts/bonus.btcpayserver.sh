@@ -17,7 +17,7 @@ if [ "$1" = "status" ]; then
   if [ "${BTCPayServer}" = "on" ]; then
     echo "installed=1"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "httpsPort='23001'"
     echo "publicIP='${publicIP}'"
