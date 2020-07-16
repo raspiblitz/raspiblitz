@@ -26,6 +26,11 @@
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
+## Whats new in Version 1.5.1 of RaspiBlitz?
+
+- Bugfix: DropBox Backup of Static-Channel-Backup
+- Bugfix: Torrentfiles with active tracker 
+
 ## Whats new in Version 1.5 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
@@ -813,8 +818,8 @@ If you want to use the HDMI output you can place a file called `hdmi` on the `bo
 
 If you are already logged in you can use on the console the commands:
 
-- `hdmi` --> to witch to HDMI
-- `lcd` --> to witch to LCD
+- `hdmi` --> switch to HDMI
+- `lcd` --> switch to LCD
 
 ## How do I set up VNC?
 

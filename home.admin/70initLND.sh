@@ -172,7 +172,7 @@ if [ ${walletExists} -eq 0 ]; then
 
   # UI: Ask if user wants NEW wallet or RECOVER a wallet
   OPTIONS=(NEW "Setup a brand new Lightning Node (DEFAULT)" \
-           OLD "I had a old Node I want to recover/restore")
+           OLD "I had an old Node I want to recover/restore")
   CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   echo "choice($CHOICE)"
 
