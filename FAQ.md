@@ -7,7 +7,7 @@
 - Update: litecoin version 0.18.1-beta [details](https://blog.litecoin.org/litecoin-core-v0-18-1-release-233cabc26440)
 - Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
 - Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
+- Update: Loop 0.6.5 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.5.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.2)
 - Update: RTL 0.8.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
 - Update: ElectRS 0.8.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#085-1-july-2020)
@@ -15,10 +15,10 @@
 - New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
-- New: Balance of Satoshis v5.39.4 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Balance of Satoshis v5.41.0 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
-- New: ThunderHub v0.8.4 (with update option) [details](https://www.thunderhub.io)
+- New: ThunderHub v0.8.12 (with update option) [details](https://www.thunderhub.io)
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - New: ZeroTier [details](https://zerotier.com/manual/)
 - New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)

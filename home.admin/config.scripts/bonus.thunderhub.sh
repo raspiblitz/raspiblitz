@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.8.4
+    sudo -u thunderhub git reset --hard v0.8.12
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -155,7 +155,7 @@ masterPassword: '$PASSWORD_B' # Default password unless defined in account
 accounts:
   - name: '$hostname'
     serverUrl: '127.0.0.1:10009'
-    macaroonPath: '/home/thunderhub/.lnd/data/chain/bitcoin/mainnet/admin.macaroon'
+    macaroonPath: '/home/thunderhub/.lnd/data/chain/${network}/${chain}net/admin.macaroon'
     certificatePath: '/home/thunderhub/.lnd/tls.cert'
 EOF
     # remove symlink or old file
@@ -220,7 +220,6 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
     sudo mv /home/admin/thunderhub.service /etc/systemd/system/thunderhub.service 
-    sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/thunderhub.service
     sudo chown root:root /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
     echo "OK - the ThunderHub service is now enabled"
