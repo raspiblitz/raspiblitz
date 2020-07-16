@@ -462,7 +462,15 @@ else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
 fi
 
-
+# custom install script from user
+customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
+if [ ${customInstallAvailable} -gt 0 ]; then
+  echo "Running the custom install script ..." >> ${logFile}
+  sudo /mnt/hdd/app-data/custom-installs.sh >> ${logFile}
+else
+  echo "No custom install script ... adding the placeholder." >> ${logFile}
+  sudo cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
+fi
 
 # replay backup LND conf & tlscerts
 # https://github.com/rootzoll/raspiblitz/issues/324

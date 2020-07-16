@@ -1077,3 +1077,10 @@ It is currently considered completely fine to leave this field empty and not pro
 
 The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
 external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
+
+### How can I customize my RaspiBlitz or add other software?
+
+The RaspiBlitz is your computer to experiment with. Feel free to add your own scripts, edit the system or install further software from the command line. Just keep in mind that after an update/recovery the RaspiBlitz starts with a fresh and clean operating system again. So all your editings and installs might be gone. To prevent this you should do the following:
+
+- place own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
+- put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` that will be started automatically on a recovery/update.
