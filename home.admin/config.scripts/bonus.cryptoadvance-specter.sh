@@ -29,7 +29,7 @@ if [ "$1" = "menu" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:
@@ -44,7 +44,7 @@ https://${toraddress}\n
   else
 
     # IP + Domain
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:

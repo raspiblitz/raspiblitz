@@ -27,7 +27,7 @@ if [ "$1" = "menu" ]; then
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
@@ -37,7 +37,7 @@ Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n

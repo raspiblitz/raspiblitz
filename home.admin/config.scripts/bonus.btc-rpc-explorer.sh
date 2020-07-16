@@ -39,7 +39,7 @@ This can take multiple hours.
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
@@ -51,7 +51,7 @@ ${toraddress}
   else
 
     # IP + Domain
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
