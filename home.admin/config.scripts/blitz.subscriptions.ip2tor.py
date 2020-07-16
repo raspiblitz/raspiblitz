@@ -383,6 +383,10 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         if loopCount > 120: 
             raise BlitzError("timeout bridge not getting ready", bridge)
         
+    print("#### Check if port is valid ...")
+    if not bridge['port'].isdigit():
+        raise BlitzError("invalid port", bridge)
+
     print("#### Check if duration delivered is as advertised ...")
     contract_breached = False
     warning_text = ""
@@ -659,7 +663,8 @@ More information on the service you can find under:
         exitcode=0
 
         if  (be.errorShort == "timeout on waiting for extending bridge" or
-             be.errorShort == "fail on subscription storage" or 
+             be.errorShort == "fail on subscription storage" or
+             be.errorShort == "invalid port" or 
              be.errorShort == "timeout bridge not getting ready") :
 
             # error happend after payment
