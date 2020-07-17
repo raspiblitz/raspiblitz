@@ -466,12 +466,15 @@ fi
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
   echo "Running the custom install script ..." >> ${logFile}
-  sudo chmod +x /mnt/hdd/app-data/custom-installs.sh
+  # copy script over to admin (in case HDD is not allowing exec)
+  cp -av /mnt/hdd/app-data/custom-install.sh /home/admin/custom-install.sh >> ${logFile}
+  # make sure script is executable
+  sudo chmod +x /home/admin/custom-install.sh >> ${logFile}
+  #run it
   sudo /mnt/hdd/app-data/custom-installs.sh >> ${logFile}
 else
   echo "No custom install script ... adding the placeholder." >> ${logFile}
   sudo cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
-  sudo chmod +x /mnt/hdd/app-data/custom-installs.sh
 fi
 
 # replay backup LND conf & tlscerts
