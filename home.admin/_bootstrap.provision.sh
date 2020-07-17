@@ -457,13 +457,15 @@ fi
 # custom install script from user
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
-  echo "Running the custom install script ..." >> ${logFile}
+  echo "Running the custom install script .." >> ${logFile}
   # copy script over to admin (in case HDD is not allowing exec)
-  cp -av /mnt/hdd/app-data/custom-install.sh /home/admin/custom-install.sh >> ${logFile}
+  sudo cp -av /mnt/hdd/app-data/custom-installs.sh /home/admin/custom-install.sh >> ${logFile}
   # make sure script is executable
   sudo chmod +x /home/admin/custom-install.sh >> ${logFile}
-  #run it
-  sudo /mnt/hdd/app-data/custom-installs.sh >> ${logFile}
+  # run it & delete it again
+  sudo /home/admin/custom-install.sh >> ${logFile}
+  sudo rm /home/admin/custom-install.sh >> ${logFile}
+  echo "Done" >> ${logFile}
 else
   echo "No custom install script ... adding the placeholder." >> ${logFile}
   sudo cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
