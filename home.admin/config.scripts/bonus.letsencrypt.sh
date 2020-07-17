@@ -156,6 +156,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
 ###################
+# UPDATE-CERTS
+###################
+
+elif [ "$1" = "link-certs" ]; then
+
+    certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    IFS='  ' read -ra ADDR <<< "${certsDirectories}"
+    for i in "${ADDR[@]}"; do
+      echo ${i}
+    done
+    exit 1
+
+    # replace certs for clearnet
+    if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+      echo "# replacing IP certs"
+      sudo rm /mnt/hdd/app-data/nginx/tls.cert
+      sudo rm /mnt/hdd/app-data/nginx/tls.key 
+      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+    fi
+
+    # repleace certs for tor
+    if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+      echo "# replacing TOR certs"
+      sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+      sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+    fi
+
+###################
 # ISSUE-CERT
 ###################
 
@@ -219,7 +250,7 @@ elif [ "$1" = "issue-cert" ]; then
     sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
   fi
 
-  # todo maybe allow certs for single services later
+  # todo maybe allow certs for single services later (dont forget that these also need to be replaced in 'on' then)
   if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
     echo "error='option not supported yet'"
     exit 1
