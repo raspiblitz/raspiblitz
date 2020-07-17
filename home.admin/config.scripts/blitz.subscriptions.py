@@ -83,7 +83,7 @@ You have no active or inactive subscriptions.
                 activeState = "active"
             else:
                 activeState = "in-active"
-            name = "IP2TOR Bridge for {0}".format(sub['name'])
+            name = "IP2TOR Bridge for {0} {1}".format(sub['name'], sub['port'])
             choices.append(("{0}".format(lookupIndex), "{0} ({1})".format(name.ljust(30), activeState)))
 
     # list letsencrypt subscriptions
