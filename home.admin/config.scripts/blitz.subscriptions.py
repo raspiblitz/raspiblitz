@@ -167,7 +167,7 @@ The following additional information is available:
            toraddress=selectedSub['tor'],
            renewhours=(round(int(selectedSub['duration']) / 3600)),
            renewsats=(round(int(selectedSub['price_extension']) / 1000)),
-           totalsats=(round(int(selectedSub['price_extension']) / 1000)),
+           totalsats=(round(int(selectedSub['price_total']) / 1000)),
            active="ACTIVE" if selectedSub['active'] else "NOT ACTIVE",
            warning=selectedSub['warning'],
            description=selectedSub['description'],
