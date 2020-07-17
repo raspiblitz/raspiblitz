@@ -284,19 +284,11 @@ else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
 
-# BTCPAYSERVER - not restored due to need for domain name and port forwarding
+# BTCPAYSERVER 
 if [ "${BTCPayServer}" = "on" ]; then
-  # --> TODO: BTCPay Server install does not run clean during provision
-  # --> needs install when everything is already 'running'
-  #if [ "${runBehindTor}" = "on" ] && [ "${BTCPayDomain}" = "localhost" ]; then
-  #  echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
-  #  sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
-  #  sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on tor >> ${logFile} 2>&1
-  #else
-    # provisioning non-TOR BTCPayServer is not supported yet - needs manual reinstall
-    echo "Setting BTCPayServer to be off - will need to be reinstalled from the menu again" >> ${logFile}
-    sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
-  #fi
+  echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi

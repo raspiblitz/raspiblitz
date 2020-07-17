@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch BTCPay Server on or off"
-  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon] [ip|tor]"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
   exit 1
 fi
 
@@ -169,23 +169,6 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
-
-  # --> just serving directly thru TOR for now
-  # setting up nginx and the SSL certificate
-  #/home/admin/config.scripts/bonus.btcpaysetdomain.sh
-  #errorOnInstall=$?
-  #if [ ${errorOnInstall} -eq 1 ]; then
-  # echo "exiting as user cancelled BTCPayServer installation"
-  # exit 1
-  #fi
-
-  #if [ "$2" == "tor" ]; then
-  #  sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
-  #  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
-  #else
-  #  echo "# FAIL - at the moment only BTCPay Server over TOR is supported"
-  #  exit 1
-  #fi
 
   ##################
   # NGINX
