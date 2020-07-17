@@ -415,8 +415,12 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
             raise BlitzError("timeout bridge not getting ready", bridge)
 
     print("#### Check if port is valid ...")
-    if not bridge['port'].isdigit():
-        raise BlitzError("invalid port", bridge)
+    try:
+        bridge_port = int(bridge['port'])
+    except KeyError:
+        raise BlitzError("invalid port (key not found)", bridge)
+    except ValueError:
+        raise BlitzError("invalid port (not a number)", bridge)
 
     print("#### Check if duration delivered is as advertised ...")
     contract_breached = False
@@ -435,7 +439,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription['shop'] = shopUrl
     subscription['active'] = True
     subscription['ip'] = bridge_ip
-    subscription['port'] = bridge['port']
+    subscription['port'] = bridge_port
     subscription['duration'] = int(duration)
     subscription['price_initial'] = int(msatsFirst)
     subscription['price_extension'] = int(msatsNext)
@@ -469,7 +473,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         eprint(e)
         raise BlitzError("fail on subscription storage", str(subscription), e)
 
-    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, subscription['port'], torTarget))
+    print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
     return subscription
 
 
