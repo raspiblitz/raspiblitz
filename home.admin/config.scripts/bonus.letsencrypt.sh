@@ -6,6 +6,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "bonus.letsencrypt.sh [on|off]"
   echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
   echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
+  echo "bonus.letsencrypt.sh refresh-ngnix-certs"
   exit 1
 fi
 
@@ -102,6 +103,68 @@ function acme_install() {
 
 }
 
+function refresh_certs_with_nginx() {
+
+    if [ ! -d "${ACME_CERT_HOME}" ]; then
+      echo "# no cert directory to link: ${ACME_CERT_HOME}"
+      return
+    fi
+
+    # FIRST: SET ALL TO DEFAULT SELF SIGNED
+
+    echo "# default IP certs"
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+
+    echo "# default TOR certs"
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+
+    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
+
+    certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
+    for i in "${directoryArray[@]}"; do
+      FQDN=$(echo "${i}" | cut -d "_" -f1)
+      # check if there is a LetsEncrypt Subscription for this domain
+      details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
+      if [ ${#details} -gt 10 ]; then
+
+        # get target for that domain
+        options=$(echo "${details}" | jq -r ".target")
+        
+        # replace certs for clearnet
+        if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+          echo "# replacing IP certs for ${FQDN}"
+          sudo rm /mnt/hdd/app-data/nginx/tls.cert
+          sudo rm /mnt/hdd/app-data/nginx/tls.key 
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+        fi
+
+        # repleace certs for tor
+        if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+          echo "# replacing TOR certs for ${FQDN}"
+          sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+          sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+        fi
+
+        # todo maybe allow certs for single services later (dont forget that these also need to be replaced in 'on' then)
+        if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
+          echo "# FAIL target '${options}' not supported yet'"
+        fi
+
+      fi
+    done
+
+}
+
 
 ###################
 # running as admin
@@ -145,8 +208,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R admin:admin /mnt/hdd/app-data/letsencrypt
     sudo chmod -R 733 /mnt/hdd/app-data/letsencrypt
 
+    # install the acme script
     acme_install "${address}"
     echo ""
+
+    # make sure already existing certs get refreshed in to nginx
+    refresh_certs_with_nginx
+    echo "# restarting nginx"
+    sudo systemctl restart nginx 2>&1
 
     exit 0
 
@@ -154,42 +223,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# *** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
     exit 1
   fi
-
-###################
-# UPDATE-CERTS
-###################
-
-elif [ "$1" = "link-certs" ]; then
-
-    if [ ! -d "${ACME_CERT_HOME}" ]; then
-      echo "# no cert directory to link: ${ACME_CERT_HOME}"
-      exit 0
-    fi
-
-    certsDirectories=$(sudo ls ${ACME_CERT_HOME})
-    directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
-    for i in "${directoryArray[@]}"; do
-      echo ${i}
-    done
-    exit 1
-
-    # replace certs for clearnet
-    if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
-      echo "# replacing IP certs"
-      sudo rm /mnt/hdd/app-data/nginx/tls.cert
-      sudo rm /mnt/hdd/app-data/nginx/tls.key 
-      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
-      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
-    fi
-
-    # repleace certs for tor
-    if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
-      echo "# replacing TOR certs"
-      sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
-    fi
 
 ###################
 # ISSUE-CERT
@@ -237,31 +270,8 @@ elif [ "$1" = "issue-cert" ]; then
     exit 1
   fi
 
-  # replace certs for clearnet
-  if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
-    echo "# replacing IP certs"
-    sudo rm /mnt/hdd/app-data/nginx/tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tls.key 
-    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
-  fi
-
-  # repleace certs for tor
-  if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
-    echo "# replacing TOR certs"
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
-  fi
-
-  # todo maybe allow certs for single services later (dont forget that these also need to be replaced in 'on' then)
-  if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
-    echo "error='option not supported yet'"
-    exit 1
-  fi
-
   # test nginx config
+  refresh_certs_with_nginx
   syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
   testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
   if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
@@ -302,34 +312,11 @@ elif [ "$1" = "remove-cert" ]; then
   # remove cert from renewal
   $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
 
-  # replace certs for clearnet
-  if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
-    echo "# replacing IP certs"
-    sudo rm /mnt/hdd/app-data/nginx/tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tls.key 
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
-  fi
-
-  # repleace certs for tor
-  if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
-    echo "# replacing TOR certs"
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
-  fi
-
-  # todo maybe allow certs for single services later
-  if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
-    echo "error='option not supported yet'"
-    exit 1
-  fi
-
   # delete cert files
   sudo rm -r  ${ACME_CERT_HOME}/${FQDN}_ecc
 
   # test nginx config
+  refresh_certs_with_nginx
   syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
   testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
   if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
@@ -343,6 +330,27 @@ elif [ "$1" = "remove-cert" ]; then
   sudo systemctl restart nginx 2>&1
 
   exit 0
+
+
+###################
+# REMOVE-CERT
+###################
+
+elif [ "$1" = "refresh-ngnix-certs" ]; then
+
+  # refresh nginx
+  refresh_certs_with_nginx
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
+  
 
 ###################
 # OFF
@@ -359,23 +367,14 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
-    # remove old script install
-    sudo rm -r ${ACME_INSTALL_HOME}
-
-    # revert to old self-singed certs
-    sudo rm /mnt/hdd/app-data/nginx/tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tls.key 
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo rm -r ${ACME_CONFIG_HOME}
-
-    # restart nginx
+    # refresh nginx
+    refresh_certs_with_nginx
     echo "# restarting nginx"
     sudo systemctl restart nginx 2>&1
+
+    # remove old script install
+    sudo rm -r ${ACME_INSTALL_HOME}
+    sudo rm -r ${ACME_CONFIG_HOME}
 
     exit 0
 
