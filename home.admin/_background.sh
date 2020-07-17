@@ -51,7 +51,7 @@ do
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
-    localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localip(${localip})"
 
     # detect a missing DHCP config 
@@ -165,27 +165,38 @@ do
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
     echo "BlitzTUI Monitoring Check"
-    if [ -d "/var/cache/raspiblitz" ]; then
+
+    # prevent restart if COPY OVER LAN is running
+    # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
+    source ${infoFile}
+    if [ "${state}" == "copysource" ]; then 
+      echo "- skip BlitzTUI check while COPY over LAN is running"
+    else
+
+      if [ -d "/var/cache/raspiblitz" ]; then
         latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
-    else
+      else
         latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
-    fi
-    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
-      #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
-      #echo "latestHeartBeatLine(${latestHeartBeatLine})"
-      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
-        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-        fi
-        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-        sudo init 3 ; sleep 2 ; sudo init 5
       fi
-    else
-      echo "blitzTUIHeartBeatLine is empty - skipping check"
+      if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
+        #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
+        #echo "latestHeartBeatLine(${latestHeartBeatLine})"
+        if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
+          echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+          blitzTUIRestarts=$(($blitzTUIRestarts +1))
+          if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
+            echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
+          fi
+          sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
+          sudo init 3 ; sleep 2 ; sudo init 5
+        fi
+      else
+        echo "blitzTUIHeartBeatLine is empty - skipping check"
+      fi
+      blitzTUIHeartBeatLine="${latestHeartBeatLine}"
+
     fi
-    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
+
   fi
   
   ###############################
@@ -198,19 +209,53 @@ do
     #echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
-    scbExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | grep -c 'channel.backup')
+    scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+    scbExists=$(sudo ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
+      # timestamp backup filename
+      timestampedFileName=channel-$(date "+%Y%m%d-%H%M%S").backup
+      localBackupDir=/home/admin/backups/scb/
+      localBackupPath=${localBackupDir}/channel.backup
+      localTimestampedPath=${localBackupDir}/${timestampedFileName}
+
       #echo "Found Channel Backup File .. check if changed .."
-      md5checksumORG=$(sudo md5sum /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
-      md5checksumCPY=$(sudo md5sum /home/admin/backups/scb/channel.backup 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumORG=$(sudo md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumCPY=$(sudo md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
         sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
-        sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /home/admin/backups/scb/channel.backup
-        echo "OK channel.backup copied to '/home/admin/backups/scb/channel.backup'"
-      
+        sudo cp $scbPath $localBackupPath
+        sudo cp $scbPath $localTimestampedPath
+        sudo cp $scbPath /boot/channel.backup
+        echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
+
+        # check if a additional local backup target is set
+        # see ./config.scripts/blitz.backupdevice.sh
+        if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+
+          # check if device got mounted on "/mnt/backup" (gets mounted by _bootstrap.sh)
+          backupDeviceExists=$(df | grep -c "/mnt/backup")
+          if [ ${backupDeviceExists} -gt 0 ]; then
+
+            echo "--> Additional Local Backup Device"
+            sudo cp ${localBackupPath} /mnt/backup/
+            sudo cp ${localTimestampedPath} /mnt/backup/
+
+            # check reseults
+            result=$?
+            if [ ${result} -eq 0 ]; then
+              echo "OK - Sucessfull Copy to additional Backup Device"
+            else
+              echo "FAIL - Copy to additional Backup Device exited with ${result}"
+            fi
+
+          else
+            echo "FAIL - BackupDrive mount - check if device is connected & UUID is correct" >> $logFile
+          fi
+        fi
+
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
@@ -220,7 +265,8 @@ do
           echo "--> Offsite-Backup SCP Server"
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup ${scpBackupTarget}/channel.backup
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localBackupPath} ${scpBackupTarget}/
+          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
@@ -235,7 +281,8 @@ do
         # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
         if [ ${#dropboxBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup Dropbox"
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup)
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localBackupPath})
+          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localTimestampedPath})
           if [ ${#err} -gt 0 ]; then
             echo "FAIL -  ${err}"
             echo "${errMore}"
@@ -256,11 +303,11 @@ do
   # SUBSCRIPTION RENWES
   ###############################
 
-  # check every 10min
-  recheckSubscription=$((($counter % 600)+1))
+  # check every 20min
+  recheckSubscription=$((($counter % 1200)+1))
   if [ ${recheckSubscription} -eq 1 ]; then
     # IP2TOR subscriptions (that will need renew in next 20min = 1200 secs)
-    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1200
+    sudo -u admin /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscriptions-renew 1800
   fi
 
   ###############################

@@ -101,7 +101,7 @@ checkIP2TOR()
 
 	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')
 	  if [ ${userHasActiveChannels} -gt 0 ]; then
-	    /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
+	    sudo -u admin /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
 	  else
 	  	whiptail --title " Lightning not Ready " --msgbox "\nYou need at least one active Lightning channel.\n\nPlease make sure that your node is funded and\nyou have a confirmed and active channel running.\nThen try again to connect the mobile wallet." 13 52
 	  	exit 0
@@ -187,10 +187,10 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
-	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
-      #if [ ${#ip2tor} -eq 0 ]; then
-	  #  choose_IP_or_TOR
-	  #fi
+	  see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
+	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
       exit 1;
     ;;
@@ -206,10 +206,9 @@ case $CHOICE in
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
-	  # see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
-      #if [ ${#ip2tor} -eq 0 ]; then
-	  #  choose_IP_or_TOR
-	  #fi
+      if [ ${#ip2tor} -eq 0 ]; then
+	    choose_IP_or_TOR
+	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
       exit 1;
     ;;

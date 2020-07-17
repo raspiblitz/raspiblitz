@@ -33,7 +33,7 @@ isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
 if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
   echo "# Installing lndconnect.."
   # make sure Go is installed
-  /home/admin/config.scripts/bonus.go.sh
+  /home/admin/config.scripts/bonus.go.sh on
   # get Go vars
   source /etc/profile
   # Install latest lndconnect from source:
@@ -95,9 +95,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
 elif [ "${targetWallet}" = "zap-android" ]; then
   connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses REST
-    port="8080"
-    extraparameter="--nocert"
+    # when ZAP runs on TOR it uses gRPC
+    port="10009"
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -206,7 +205,7 @@ fi
 
 # get the local IP as default host
 if [ ${#host} -eq 0 ]; then
-    host=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    host=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 fi
 
 # change host to dynDNS if set

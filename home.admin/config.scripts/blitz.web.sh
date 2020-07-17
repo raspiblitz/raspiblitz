@@ -182,6 +182,8 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
   sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
   sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+  sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+  sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
 
   # config
   sudo cp /home/admin/assets/blitzweb.conf /etc/nginx/sites-available/blitzweb.conf

@@ -148,7 +148,7 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 public_ip="${publicIP}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
@@ -185,7 +185,7 @@ if [ "${runBehindTor}" = "on" ]; then
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
-  torInfo="+ TOR"
+  torInfo="+ Tor"
 
 else
 

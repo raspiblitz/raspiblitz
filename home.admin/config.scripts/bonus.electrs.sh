@@ -64,7 +64,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # check local IPv4 port
-    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     if [ "$2" = "showAddress" ]; then
       echo "publicIP='${publicIP}'"
@@ -278,7 +278,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
-    sudo -u electrs git reset --hard v0.8.3
+    sudo -u electrs git reset --hard v0.8.5
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
     echo ""
@@ -477,6 +477,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ "$2" == "deleteindex" ]; then
     echo "# deleting electrum index"
     sudo rm -rf /mnt/hdd/app-storage/electrs/
+  fi
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off electrs
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')

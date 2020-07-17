@@ -16,7 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 mode="$1"
 if [ ${mode} = "backup" ]; then
@@ -25,45 +25,62 @@ if [ ${mode} = "backup" ]; then
   # BACKUP
   ################################
 
-  echo "*** LND.RESCUE --> BACKUP"
+  echo "# *** LND.RESCUE --> BACKUP"
 
   # stop LND
-  echo "Stopping lnd..."
+  echo "# Stopping lnd..."
   sudo systemctl stop lnd
   sleep 5
-  echo "OK"
+  echo "# OK"
   echo 
 
   # zip it
-  sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd
-  sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
+  sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
+  sudo chown admin:admin /home/admin/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm /home/admin/lnd-rescue-*.tar.gz 2>/dev/null
+  rm /home/admin/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
-  mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
+  mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz 1>&2
+  echo "file='lnd-rescue-${md5checksum}.tar.gz'"
+  echo "path='/home/admin/'"
+
+  byteSize=$(ls -l /home/admin/lnd-rescue-${md5checksum}.tar.gz | awk '{print $5}')
+  echo "size=${byteSize}"
+
+  if [ ${byteSize} -lt 100 ]; then
+    echo "error='backup is empty'"
+    echo
+    echo "# *****************************"
+    echo "# * BACKUP ERROR              *"
+    echo "# *****************************"
+    echo "# The byte size of the created rescue-file is too small (${byteSize}) - might be empty!"
+    echo "# If you plan any update or recovery please stop and report this error to dev team. Thx."
+    exit 0
+  fi
 
   # stop here in case of 'no-download' option
   if [ "${2}" == "no-download" ]; then
-    echo "No download of LND data requested."
+    echo "# No download of LND data requested."
     exit 0
   fi
 
   # offer SCP for download
   clear
   echo
-  echo "*****************************"
-  echo "* DOWNLOAD THE REASCUE FILE *"
-  echo "*****************************"
+  echo "****************************"
+  echo "* DOWNLOAD THE RESCUE FILE *"
+  echo "****************************"
   echo 
   echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo ""
   echo "Use password A to authenticate file transfer."
+  echo "Check for correct file size after transfer: ${byteSize} byte"
   echo
-  echo "BEWARE: Your Lightning node is now stopped. Its safe to backup the data and"
+  echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
   echo "again or rebooted its not adviced to restore the backup file anymore because"
   echo "it cointains then outdated channel data & can lead to loss of channel funds."
@@ -129,8 +146,8 @@ elif [ ${mode} = "restore" ]; then
           echo "OK -> checksum looks good: ${md5checksum}"
         else
           echo "!!! FAIL -> Checksum not correct."
-          echo "Maybe transfer failed? Continue on your own risk!"
-          echo "Recommend to abort and upload again!"
+          echo "Maybe transfer failed? Continue at your own risk!"
+          echo "It is recommended to abort and upload again!"
         fi
 
         # overrride test

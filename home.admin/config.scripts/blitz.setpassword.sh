@@ -5,7 +5,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
- echo "blitz.setpassword.sh [x] [text] [result-file]"
+ echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  echo "exits on 0 = needs reboot"
  exit 1
 fi
@@ -139,11 +139,11 @@ elif [ "${abcd}" = "b" ]; then
   if [ ${#newPassword} -eq 0 ]; then
     clear
 
-    # ask user for new password A (first time)
-    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    # ask user for new password B (first time)
+    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
-    # ask user for new password A (second time)
-    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    # ask user for new password B (second time)
+    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -247,6 +247,15 @@ EOF
     echo "# changing the password for the 'joinmarket' user"
     echo "joinmarket:${newPassword}" | sudo chpasswd
   fi
+
+  # ThunderHub
+  if [ "${thunderhub}" = "on" ]; then
+    echo "# changing the password for ThunderHub"
+    sed -i "s/^masterPassword: '.*' # Default password unless defined in account/\
+masterPassword: '${newPassword}' # Default password unless defined in account/g" \
+/mnt/hdd/app-data/thunderhub/thubConfig.yaml 2>/dev/null
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
   exit 0
@@ -308,35 +317,42 @@ elif [ "${abcd}" = "x" ]; then
     password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
+    password2=""
+    if [ ${#password1} -gt 0 ]; then
+      password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
+    fi
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
       exit 1
     fi
 
-    # password zero
-    if [ ${#password1} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
-    fi
+    if [ "$4" != "empty-allowed" ]; then
 
-    # check that password does not contain bad characters
-    clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
-    fi
+      # password zero
+      if [ ${#password1} -eq 0 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
 
-    # password longer than 8
-    if [ ${#password1} -lt 8 ]; then
-      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
+      # check that password does not contain bad characters
+      clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+      if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 62
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
+
+      # password longer than 8
+      if [ ${#password1} -lt 8 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
+
     fi
 
     # store result is file

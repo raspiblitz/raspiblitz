@@ -580,6 +580,7 @@ if [ "$1" = "fstab" ]; then
        echo "# updating /etc/fstab"
        sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
     fi
+
     sync
     sudo mount -a 1>/dev/null
 

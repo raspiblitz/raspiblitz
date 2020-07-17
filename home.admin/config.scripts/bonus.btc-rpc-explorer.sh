@@ -6,8 +6,8 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch BTC-RPC-explorer on or off"
- echo "bonus.btc-rpc-explorer.sh [status|on|off]"
+ echo "# small config script to switch BTC-RPC-explorer on or off"
+ echo "# bonus.btc-rpc-explorer.sh [status|on|off]"
  exit 1
 fi
 
@@ -21,38 +21,43 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
 
   # check if index is ready
-  if [ ${isIndexed} -eq 0 ]; then
+  if [ "${isIndexed}" == "0" ]; then
     dialog --title " Blockchain Index Not Ready " --msgbox "
 The Blockchain Index is still getting build.
-Please wait and try again later.
+${indexInfo}
 This can take multiple hours.
       " 9 48
     exit 0
   fi
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3021
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3021\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
-" 12 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
     # IP + Domain
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3021
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3021\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
-" 12 54
+" 16 54
   fi
 
   echo "please wait ..."
@@ -89,12 +94,12 @@ if [ "$1" = "status" ]; then
 fi
 
 # stop service
-echo "making sure services are not running"
+echo "# making sure services are not running"
 sudo systemctl stop btc-rpc-explorer 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL BTC-RPC-EXPLORER ***"
+  echo "# *** INSTALL BTC-RPC-EXPLORER ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -116,7 +121,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcrpcexplorer npm install
 
     # prepare .env file
-    echo "getting RPC credentials from the ${network}.conf"
+    echo "# getting RPC credentials from the ${network}.conf"
 
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
@@ -155,7 +160,7 @@ EOF
     sudo chown btcrpcexplorer:btcrpcexplorer /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
     # open firewall
-    echo "*** Updating Firewall ***"
+    echo "# *** Updating Firewall ***"
     sudo ufw allow 3020 comment 'btc-rpc-explorer HTTP'
     sudo ufw allow 3021 comment 'btc-rpc-explorer HTTPS'
     echo ""
@@ -205,17 +210,17 @@ EOF
 
     sudo mv /home/admin/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service 
     sudo systemctl enable btc-rpc-explorer
-    echo "OK - the BTC-RPC-explorer service is now enabled"
+    echo "# OK - the BTC-RPC-explorer service is now enabled"
 
   else 
-    echo "BTC-RPC-explorer already installed."
+    echo "# BTC-RPC-explorer already installed."
   fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCRPCexplorer=.*/BTCRPCexplorer=on/g" /mnt/hdd/raspiblitz.conf
   
-  echo "needs to finish creating txindex to be functional"
-  echo "monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+  echo "# needs to finish creating txindex to be functional"
+  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
   # see /home/admin/config.scripts/bonus.electrsexplorer.sh
@@ -224,8 +229,7 @@ EOF
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3002/HiddenServicePort 80 127.0.0.1:3022/g" /etc/tor/torrc
+    echo "# Creating Tor Hidden Service"
     /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
@@ -239,7 +243,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING BTC-RPC-explorer ***"
+    echo "# *** REMOVING BTC-RPC-explorer ***"
     sudo systemctl disable btc-rpc-explorer
     sudo rm /etc/systemd/system/btc-rpc-explorer.service
     # delete user and home directory
@@ -249,13 +253,21 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_tor.conf
+    sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf
     sudo nginx -t
     sudo systemctl reload nginx
 
-    echo "OK BTC-RPC-explorer removed."
+    # Hidden Service if Tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      /home/admin/config.scripts/internet.hiddenservice.sh off btc-rpc-explorer
+    fi
+
+    echo "# OK BTC-RPC-explorer removed."
   
   else 
-    echo "BTC-RPC-explorer is not installed."
+    echo "# BTC-RPC-explorer is not installed."
   fi
 
   # close ports on firewall
@@ -264,5 +276,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
+echo "error='unknown parameter'
 exit 1

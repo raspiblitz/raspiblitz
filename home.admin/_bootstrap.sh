@@ -195,7 +195,7 @@ fi
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#localip} -eq 0 ]; then
     # display user to connect LAN
     sed -i "s/^state=.*/state=noIP/g" ${infoFile}
@@ -404,7 +404,7 @@ if [ ${configExists} -eq 1 ]; then
       # prevent having no publicIP set at all and LND getting stuck
       # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
       if [ ${#publicIP} -eq 0 ]; then
-        localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+        localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
         freshPublicIP="${localIP}"
       fi
@@ -440,6 +440,7 @@ fi
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
+
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
 #################################
@@ -451,6 +452,20 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
 else 
   echo "skipping LND credientials sync" >> $logFile
+fi
+
+################################
+# MOUNT BACKUP DRIVE
+# if "localBackupDeviceUUID" is set in
+# raspiblitz.conf mount it on boot
+################################
+source ${configFile}
+echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+  echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
+  sudo /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
+else
+  echo "No additional backup device was configured." >> $logFile
 fi
 
 ################################

@@ -15,10 +15,19 @@ if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
+if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 
 echo "map dropboxbackup to on/off"
-DropboxBackup="off";
+DropboxBackup="off"
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
+
+echo "map localbackup to on/off"
+LocalBackup="off"
+if [ ${#localBackupDeviceUUID} -gt 0 ] && [ "${localBackupDeviceUUID}" != "off" ]; then LocalBackup="on"; fi
+
+echo "map zerotier to on/off"
+zerotierSwitch="off"
+if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
 echo "map chain to on/off"
 chainValue="off"
@@ -71,7 +80,9 @@ OPTIONS+=(k 'Accept Keysend' ${keysend})
 OPTIONS+=(n 'Testnet' ${chainValue})    
 OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
-OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})  
+OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
+OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
@@ -79,7 +90,7 @@ if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi 
 
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 19 45 11  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -369,6 +380,17 @@ else
   echo "Dropbox backup setting unchanged."
 fi
 
+# LocalBackup process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${LocalBackup}" != "${choice}" ]; then
+  echo "BackupdDevice Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.backupdevice.sh ${choice}
+else
+  echo "BackupdDevice setting unchanged."
+fi
+
 # Keysend process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -380,6 +402,30 @@ if [ "${keysend}" != "${choice}" ]; then
   dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
 else
   echo "keysend setting unchanged."
+fi
+
+# ZeroTier process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${zerotierSwitch}" != "${choice}" ]; then
+  echo "zerotier setting changed .."
+  anychange=1
+  error=""
+  source <(sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice})
+  if [ "${choice}" == "on" ]; then
+    if [ ${#error} -eq 0 ]; then
+      dialog --msgbox "Your RaspiBlitz joined the ZeroTier network." 6 46
+    else
+      if [ "${error}" != "cancel" ]; then
+        dialog --msgbox "ZeroTier Error:\n${error}" 8 46
+      fi
+    fi
+  else
+    dialog --msgbox "ZeroTier is now OFF." 5 46
+  fi
+  
+else
+  echo "ZeroTier setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

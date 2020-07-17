@@ -85,6 +85,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
     chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
+    # specify wallet.dat in old config for multiwallet for multiwallet support
+    if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
+      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+      echo "Specified to use wallet.dat in the recovered joinmarket.cfg"
+    fi
 
     # install joinmarket
     cd /home/joinmarket
@@ -95,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    git reset --hard v0.6.2
+    git reset --hard v0.6.3.1
 
     # set up jmvenv 
     sudo apt install -y virtualenv
@@ -111,6 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # add the joininbox menu
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
+    # check the latest at:
+    # https://github.com/openoms/joininbox/releases/
+    sudo -u joinmarket git reset --hard v0.1.2
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
@@ -169,6 +177,8 @@ if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   PASSWORD_B=\$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Filled the bitcoin RPC password (PASSWORD_B)"
+  sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  echo "Using the bitcoind wallet: wallet.dat"
   #communicate with IRC servers via Tor
   sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sed -i "s/^#host = darksci3bfoka7tw.onion/host = darksci3bfoka7tw.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg

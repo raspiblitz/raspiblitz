@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6 with lnd 0.10.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6 with lnd 0.10.4 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -22,7 +22,7 @@ As an alternative to the SSH menu the "Ride the Lightning" (RTL) WebUI is availa
 
 There are further Services that can be switched on:
 
-* **TOR** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
+* **Tor** (Run as Hidden Service) [details](https://en.wikipedia.org/wiki/Tor_(anonymity_network)#Onion_services)
 * **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
@@ -33,7 +33,8 @@ There are further Services that can be switched on:
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Faraday** (Channel Analysis & Recommendations CLI) [details](https://github.com/lightninglabs/faraday/blob/master/README.md)
-* **Balance Of Satoshi** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
+* **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
+* **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -67,15 +68,15 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 
 #### Package: Standard (around 250 USD)
 
-*The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.* 
+*The "Standard Package" is most tested and recommended if you can effort it. It aims to give you the best economic value to run all the RaspiBlitz features at a good performance and even allows you to self-validate your blockchain in under 3 days.*
 
 * RaspberryPi 4 4GB (or 8GB) [amazon referral link](https://geni.us/raspiblitz-4gb-new)
 * Power Supply - USB-C, 5V, >=3A [amazon referral link](https://geni.us/raspiblitz-ps)
-* 1TB SSD - SanDisk SSD Plus 1TB 2.5" : [amazon referral link](https://geni.us/raspiblitz-1000gb-san)
-* SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case) 
+* 1TB SSD - SanDisk SSD Plus 1TB 2.5" : [amazon referral link](https://geni.us/raspiblitz-1000gb-san) *other 1TB SSD models might cause power issues*
+* SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case)
 * MicroSDCard 32GB - Samsung PRO Endurance 32 GB microSDHC UHS-I U1: [amazon referral link](https://geni.us/raspiblitz-sc-card)
-* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
-* Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4) 
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen)
+* Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4)
 
 *You can even pay your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -86,7 +87,7 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 Basic Parts:
 * 1TB Hard Drive: [amazon referral link](https://geni.us/raspiblitz-hdd)
 * Micro SD-Card 16GB: [amazon referral link](https://geni.us/raspiblitz-sd-card16gb)
-* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen) 
+* LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen)
 
 When RaspberryPi 3 --> add following parts:
 * RaspperryPi 3B+ : [amazon referral link](https://geni.us/raspiblitz-rpi3)
@@ -119,13 +120,13 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.6:**
 
-THIS IS A RELEASE CANDIDATE - NOT THE FINAL VERSION - DONT USE FOR PRODUCTION NODE!
+THIS IS A RELEASE CANDIDATE - NOT THE FINAL VERSION - DONT USE FOR A PRODUCTION NODE!
 
-Browser: https://files.rotzoll.de/raspiblitz-v1.6rc1-2020-06-12.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6rc2-2020-07-06.img.gz
 
 Torrent: [TODO]
 
-SHA-256: c9bed779eb3eb2fe17dd879cd9f797bf4ba1ed2d10977946aca6146f4354d8e0 or [SIGNATURE](https://todo)
+SHA-256: 2b578caa14fcff28e490366a4ad97c6095e12be8e357fcd0ed95db1bd9342afb or [SIGNATURE](https://todo)
 
 * [Whats new in Version 1.6 of RaspiBlitz?](FAQ.md#whats-new-in-version-16-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
@@ -225,15 +226,15 @@ Then the user is asked to enter the Password B - this is internally used for the
 
 *The other passwords C & D will be needed later on. They will be used during the lightning wallet setup.*
 
-### Running behind TOR
+### Running behind Tor
 
-On setup you can now decide if you want to run your RaspiBlitz behind TOR or make your IP public to the lightning network.
+On setup you can now decide if you want to run your RaspiBlitz behind Tor or make your IP public to the lightning network.
 
 ![TOR](pictures/chooseTOR.png)
 
-Your IP can reveal your location (at least to a certain radius) to everyone and your internet provider has a record of your personal identity tied to your IP. When you choose to run behind the TOR network this personal data is much better protected. But running behind TOR reduces speed and might makes it more difficult to connect to you for other nodes or pairing other devices and apps to it.
+Your IP can reveal your location (at least to a certain radius) to everyone and your internet provider has a record of your personal identity tied to your IP. When you choose to run behind the Tor network this personal data is much better protected. But running behind Tor reduces speed and might makes it more difficult to connect to you for other nodes or pairing other devices and apps to it.
 
-You can switch TOR off later on. Also you can switch TOR on also after the setup, but keep in mind that once running your node with your public IP leaves records on the internet connecting your lightning node id to your public IP.
+You can switch Tor off later on. Also you can switch Tor on also after the setup, but keep in mind that once running your node with your public IP leaves records on the internet connecting your lightning node id to your public IP.
 
 After this the setup process will need some time and the user will see a lot of console outputs - just wait until its finished:
 
@@ -270,7 +271,7 @@ This is also the best option if you don't like to run your RaspberryPi 3 with a 
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-#### 3. Torrent Fallback
+#### 3. Torrent Fallback (NOTE: to-be-deprecated in 1.6)
 
 *This is recommended for old RaspberryPi 3s - for the newer RaspberryPi 4 you might consider the `SYNC` option.*
 
@@ -421,7 +422,7 @@ This is the screen that gets displayed on the LCD/display. It's useful to call i
 
 Before you can open channels with other nodes you need to put some coins onto your LND on-chain wallet. Use this option to generate an address to send funds to.
 
-*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/#privacy) before sending them to any Lightning Network wallet.*
+*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of losing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/#privacy) before sending them to any Lightning Network wallet.*
 
 You can make multiple fundings - so you can start with small amounts first to test. LND will generate always a different address, but all funds you send will get into the same LND on-chain wallet.
 
@@ -447,7 +448,7 @@ Pay an invoice through lightning.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
-If you are looking for something to test pay with Lightning ... why not [donate some satoshis to the RaspiBlitz development[(https://tallyco.in/s/r5lx23/)? Thanks :) 
+If you are looking for something to test pay with Lightning ... why not [donate some satoshis to the RaspiBlitz development[(https://tallyco.in/s/r5lx23/)? Thanks :)
 
 #### RECEIVE: Create Invoice/PaymentRequest
 
@@ -463,7 +464,7 @@ With this feature you can close down all open channels and get funds locked up i
 
 It might even offer you to force close some channels where the channel-partner is no longer reachable. Keep in mind that those force closings can take a much longer time until your funds are available again on your on-chain wallet.
 
-#### CHASHOUT: Remove Funds fro, on-chain Wallet
+#### CASHOUT: Remove Funds fro, on-chain Wallet
 
 Use if the want to remove all funds from the RaspiBlitz.
 
@@ -476,12 +477,12 @@ Use if the want to remove all funds from the RaspiBlitz.
 <img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
 
 
-#### lnfwdreport: Report on your earned fees for Forwarding Payments 
+#### lnfwdreport: Report on your earned fees for Forwarding Payments
 
 If you connected your node well within the Lightning Network you can become a "Routing Node" other users select your Node as part of a Lightnig Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
 
 Beware - earning fees as a routing node does not come automatic. Its a bit of hard work of building the right channels to be attractive for other people to route thru. Check the interet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
-  
+
 #### SERVICES: Activate/Deactivate Services
 
 The RaspiBlitz offers further Services, Apps and configuration (scroll down in the to see all in the RaspiBlitz):
@@ -496,11 +497,11 @@ The autopilot is a feature of LND that you can switch on. It automatically uses 
 
 ##### Accept Keysend
 
-Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This is needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).  
+Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This is needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
 
 ##### Loop
 
-A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop' - if you have the RTL service installed (see below), then loop will also be available as part of the RTL web interface. You can use Loop for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again. 
+A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz terminal with the command 'loop' - if you have the RTL service installed (see below), then loop will also be available as part of the RTL web interface. You can use Loop for example to send satoshies from one of your channel to a on-chain bitcoin address without closing the channel for a fee. This can be use full to send earned satoshies to your hardware wallet while freeing up your inbound liquidity on your channels again.
 
 [Details on Service](https://github.com/lightninglabs/loop)
 
@@ -527,22 +528,22 @@ You will be asked for your dynamic domain name such like "mynode.crabdance.org" 
 
 *NOTE: DynamicDNS just works if you can forward ports on your router and you have a temporary public IP address (your ISP is not running you behind a NAT - like on most mobile connections). Another solution to make your ports reachable from the public internet is to use reverse ssh tunneling - see FAQ on ['How to setup port-forwarding with a SSH tunnel?'](FAQ.md#how-to-setup-port-forwarding-with-a-ssh-tunnel)*
 
-##### Run behind TOR
+##### Run behind Tor
 
-You can run your Bitcoin- & Lightning-Node and also additional Apps as a TOR hidden service - replacing your IP with an .onion-address
+You can run your Bitcoin- & Lightning-Node and also additional Apps as a Tor hidden service - replacing your IP with an .onion-address
 
 ![tor1](pictures/tor1.png)
 
 This has some benefits:
 
 * You don't publish your IP running a node so it's much harder to resolve your real name and location.
-* You tunnel through the NAT of your router and make Bitcoin and Lightning reachable to all other TOR nodes.
-* By using a TOR address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
+* You tunnel through the NAT of your router and make Bitcoin and Lightning reachable to all other Tor nodes.
+* By using a Tor address it's possible to move the node to a different IPv4 address and keep the existing (=preciously open and funded) channels functional.
 
 But this also comes with the following side effects:
 
-* Some Mobile wallets don't support connecting to RaspiBlitz over TOR yet
-* Lightning nodes that don't run TOR cannot reach you (like behind NAT)
+* Some Mobile wallets don't support connecting to RaspiBlitz over Tor yet
+* Lightning nodes that don't run Tor cannot reach you (like behind NAT)
 
 To try it out just switch on the service - you can deactivate later on if it's not working for you.
 
@@ -558,7 +559,7 @@ Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RT
 
 ##### BTC-RPC-Explorer
 
-BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own RaspiBlitz. See an example running on: https://btc-explorer.com 
+BTC-RPC-Explorer is a blockchain explorer webseite you can run on your own RaspiBlitz. See an example running on: https://btc-explorer.com
 
 ![EXPLORER](pictures/blockexplorer.png)
 
@@ -588,12 +589,12 @@ Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this n
 
 ![RTL](pictures/touchscreen.png)
 
-It will give you 4 buttons on the right side. 
+It will give you 4 buttons on the right side.
 
 - Info - to defined later
 - Node - shows the nodeid/uri as QR code (use to open channels from mobile wallets)
 - Invoice - creates an Invoice-QRcode that can be used for donations
-- Off - Shutdown or Restart the RaspiBlitz 
+- Off - Shutdown or Restart the RaspiBlitz
 
 ##### LCD Rotate
 
@@ -611,11 +612,11 @@ For example if you use your Trezor Hardware Wallet with the trezor.io wallet it 
 
 ##### BTCPayServer
 
-BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free. 
+BTCPay Server is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free.
 
 ![BTCPAY](pictures/btcpay.png)
 
-*At the moment the RaspiBlitz can just make the BTCPayServer publicly available to the outside over the TOR network (Hidden Service).*
+*At the moment the RaspiBlitz can just make the BTCPayServer publicly available to the outside over the Tor network (Hidden Service).*
 
 [Details on Service](https://btcpayserver.org/)
 
@@ -631,7 +632,7 @@ To run it change to the RaspiBlitz terminal and type 'manage'. This starts the L
 * __Display the node summary ```status```__
 * __Advanced channel listings ```listchannels```__
   * ```listchannels rebalance```: list channels for rebalancing
-  * ```listchannels forwardings```: list forwarding statistics for each channel 
+  * ```listchannels forwardings```: list forwarding statistics for each channel
   * ```listchannels hygiene```: information for closing of active channels
   * ```listchannels inactive```: information on inactive channels
 * __Rebalancing command ```rebalance```__
@@ -680,16 +681,16 @@ At the moment the following mobile wallets are supported:
 * [ZAP (iOS/Android)](https://github.com/LN-Zap/zap-iOS)
 * [Shango (iOS/Android)](https://github.com/neogeno/shango-lightning-wallet)
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
-* [Fully Noded (iOS over TOR)](https://apps.apple.com/us/app/fully-noded/id1436425586)
+* [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md)
 
 Please keep in mind that if you also want to connect to your smartphone also from the outside (when you are outside of your local network) with your RaspiBlitz you might need to open/forward ports on your router and should look into the DynamicDNS features to handle changing IP of our Home-DSL.
 
 This youtube video explains the "port forwarding" on your router in more detail: https://www.youtube.com/watch?v=KESo7hHXQtg
 
-When you have TOR activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over TOR. 
+When you have Tor activated you can also try to connect mobile wallets that support this. The Fully Noded Wallet can only connect over Tor.
 
-If you run your node behind TOR the SendMany App will just offer to connect when your in the same local network ... for connection over TOR there is no support yet. 
+If you run your node behind Tor the SendMany App will just offer to connect when your in the same local network ... for connection over Tor there is no support yet.
 
 Basically those mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. And then you need to `pair` them with your RaspiBlitz - also with a QR code displayed on the LCD. If you run your RaspiBlitz without a LCD there is the fallback option to display that QR code on the terminal as ASCII code (might involve lowering your terminal font size).
 
@@ -759,7 +760,7 @@ Use this if you want to report a software problem with your RaspiBlitz so that o
 
 ##### BACKUP-LND: Backup your LND data (Rescue-File)
 
-This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download per SCP to your laptop. This can be used to move your LND id, wallet & channels to another RaspiBlitz. 
+This stops your RaspiBlitz and creates a LND-Rescue ZIP file you can download per SCP to your laptop. This can be used to move your LND id, wallet & channels to another RaspiBlitz.
 
 *NOTICE: If you start your RaspiBlitz after this backup again the backup is outdated and using it can risk loosing your channel funds.*
 
@@ -818,13 +819,13 @@ This is common way to update your RaspiBlitz. Choose this option to prepeare you
 
 #### LND: Interim LND Update
 
-Sometimes there is a new LND release that has some breaking changes that once you updated the LND databse that cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND. 
+Sometimes there is a new LND release that has some breaking changes that once you updated the LND databse that cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND.
 
-If oyu choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the raspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further garantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps. 
+If you choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the raspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further garantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps.
 
 #### PATCH: Patch RaspiBlitz code
 
-With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people that wnat to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.   
+With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people that wnat to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
 
 #### REBOOT: Reboot RaspiBlitz
 
@@ -844,7 +845,7 @@ With the command `raspiblitz` it's possible to return to the main menu.
 
 As mentioned above you can export a Migration File from your Raspiblitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
 
-A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, TOR/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware. 
+A Migration file contains all the important data of your RaspiBlitz like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also the data of installed apps. You can use this to migrate your RaspiBlitz to a new hardware.
 
 If you want to it to import it again to a new RaspiBlitz (for example with an updated HDD/SSD) you can choose the MIGRATION option on the first setup dialog after the Hardwaretest (where you normally choose between Bitcoin & Litecoin).
 
@@ -856,7 +857,7 @@ If you start MIGRATION you will need in the next step to format your HDD/SSD.
 
 Normally you choose here the EXT4 format. But you have also have the option to choose the BTRFS format which is an expiremental feature under RaspiBlitz - see [FAQ for details on BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz).
 
-Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you. 
+Then you wil be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you.
 
 Finally you need to decide how to get a copy of the blockchain data again for your RaspiBlitz.
 
@@ -885,7 +886,7 @@ To develop your own scripts/apps and to connect other services/apps to your Rasp
 * `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
 * `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
 
-If you activate TOR then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
+If you activate Tor then your LND gRPC & REST APIs are also reachable publicly as a Hidden Service.
 
 ### Backup for On-Chain- & Channel-Funds
 
@@ -938,6 +939,16 @@ In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER
 The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on init, show and transfer ssh-pubkey to a remote server.
 
 To test it - open or close a channel and check if you find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+
+#### C) Local Backup Target (USB Thumbdrive)
+
+*You can also backup the SCB to another local drive, e.g. an USB stick:*
+
+You can use a small USB thumb drive (everything over 120MB is fine). Please dont use a second HDD/SSD for this because that might drain too much power and could hurt the security of your data more then it helps.
+
+To activate this feature go to MAINMENU > SETTINGS > 'StaticChannelBackup on USB Drive' and follow the instructions.
+
+To test it - open or close a channel and check if you find a copy of `channel.backup` in the specified location. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
 ## Updating RaspiBlitz to new Version
 

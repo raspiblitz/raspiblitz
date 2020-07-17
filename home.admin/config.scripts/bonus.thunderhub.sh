@@ -20,30 +20,30 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3011
+    whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3011\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 15 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3011
+    whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3011\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 14 57
+" 15 57
   fi
   echo "please wait ..."
   exit 0
@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.8.0
+    sudo -u thunderhub git reset --hard v0.8.12
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     sudo -u thunderhub npm run build
@@ -97,6 +97,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure thunderhub is member of lndadmin
     sudo /usr/sbin/usermod --append --groups lndadmin thunderhub
+
+    # persist settings in app-data
+    sudo mkdir -p /mnt/hdd/app-data/thunderhub
 
     #################
     # .env
@@ -132,10 +135,13 @@ NO_VERSION_CHECK=true
 # -----------
 ACCOUNT_CONFIG_PATH='/home/thunderhub/thubConfig.yaml'
 EOF
-    sudo rm -f /home/thunderhub/thunderhub/.env
-    sudo mv /home/admin/thunderhub.env /home/thunderhub/thunderhub/.env
-    sudo chown thunderhub:thunderhub /home/thunderhub/thunderhub/.env
-
+    # remove symlink or old file
+    sudo rm -f /home/thunderhub/thunderhub/.env.local
+    # move to app-data
+    sudo mv /home/admin/thunderhub.env /mnt/hdd/app-data/thunderhub/.env.local
+    sudo chown thunderhub:thunderhub /mnt/hdd/app-data/thunderhub/.env.local
+    # symlink to app directory
+    sudo ln -s /mnt/hdd/app-data/thunderhub/.env.local /home/thunderhub/thunderhub/
 
     ##################
     # thubConfig.yaml
@@ -149,20 +155,25 @@ masterPassword: '$PASSWORD_B' # Default password unless defined in account
 accounts:
   - name: '$hostname'
     serverUrl: '127.0.0.1:10009'
-    macaroonPath: '/home/thunderhub/.lnd/data/chain/bitcoin/mainnet/admin.macaroon'
+    macaroonPath: '/home/thunderhub/.lnd/data/chain/${network}/${chain}net/admin.macaroon'
     certificatePath: '/home/thunderhub/.lnd/tls.cert'
 EOF
+    # remove symlink or old file
     sudo rm -f /home/thunderhub/thubConfig.yaml
-    sudo mv /home/admin/thubConfig.yaml /home/thunderhub/thubConfig.yaml
-    sudo chown thunderhub:thunderhub /home/thunderhub/thubConfig.yaml
-    sudo chmod 600 /home/thunderhub/thubConfig.yaml | exit 1
+    # move to app-data
+    sudo mv /home/admin/thubConfig.yaml /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    # secure
+    sudo chown thunderhub:thunderhub /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    sudo chmod 600 /mnt/hdd/app-data/thunderhub/thubConfig.yaml | exit 1
+    # symlink
+    sudo ln -s /mnt/hdd/app-data/thunderhub/thubConfig.yaml /home/thunderhub/
     
     ##################
     # NGINX
     ##################
     # setup nginx symlinks
     if ! [ -f /etc/nginx/sites-available/thub_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-available/thub_ssl.conf
+       sudo cp -f /home/admin/assets/nginx/sites-available/thub_ssl.conf /etc/nginx/sites-available/thub_ssl.conf
     fi
     if ! [ -f /etc/nginx/sites-available/thub_tor.conf ]; then
        sudo cp /home/admin/assets/nginx/sites-available/thub_tor.conf /etc/nginx/sites-available/thub_tor.conf
@@ -209,7 +220,6 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
     sudo mv /home/admin/thunderhub.service /etc/systemd/system/thunderhub.service 
-    sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/thunderhub.service
     sudo chown root:root /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
     echo "OK - the ThunderHub service is now enabled"
@@ -244,8 +254,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/nginx/sites-enabled/thub_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/thub_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/thub_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/thub_tor.conf
+  sudo rm -f /etc/nginx/sites-available/thub_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off thunderhub
+  fi
 
   echo "OK ThunderHub removed."
 

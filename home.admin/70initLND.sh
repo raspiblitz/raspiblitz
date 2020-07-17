@@ -172,7 +172,7 @@ if [ ${walletExists} -eq 0 ]; then
 
   # UI: Ask if user wants NEW wallet or RECOVER a wallet
   OPTIONS=(NEW "Setup a brand new Lightning Node (DEFAULT)" \
-           OLD "I had a old Node I want to recover/restore")
+           OLD "I had an old Node I want to recover/restore")
   CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   echo "choice($CHOICE)"
 
@@ -197,7 +197,6 @@ if [ ${walletExists} -eq 0 ]; then
     # generate wallet with seed and set passwordC
     clear
     echo "Generating new Wallet ...."
-    source /home/admin/python3-env-lnd/bin/activate
     python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
     sudo shred -u /home/admin/.pass.tmp 2>/dev/null
@@ -355,7 +354,7 @@ to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp empty-allowed
         passwordD=`sudo cat /home/admin/.pass.tmp`
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
       fi

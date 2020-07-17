@@ -20,30 +20,30 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3001
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
-" 15 67
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-https://${localip}:3001
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3001\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 14 57
+" 15 57
   fi
   echo "please wait ..."
   exit 0
@@ -70,16 +70,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # check for Python2 (install if missing)
-    # TODO remove Python2 ASAP!
-    echo "*** Check for Python2 ***"
-    /usr/bin/which python2 &>/dev/null
-    if ! [ $? -eq 0 ]; then
-      echo "*** Install Python2 ***"
-      sudo apt-get update
-      sudo apt-get install -y python2
-    fi
-
     # create rtl user
     sudo adduser --disabled-password --gecos "" rtl
 
@@ -98,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.7.1
+    sudo -u rtl git reset --hard v0.8.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -114,6 +104,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
+
     cd ..
     # check if node_modules exist now
     if [ -d "/home/rtl/RTL/node_modules" ]; then
@@ -124,11 +115,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-
-    # now remove Python2 again
-    echo "*** Now remove Python2 again ***"
-    sudo apt-get purge -y python2
-    sudo apt-get autoremove -y
 
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"
@@ -214,7 +200,7 @@ EOF
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
+    echo "# Creating Tor Hidden Service"
     sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3002/g" /etc/tor/torrc
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
@@ -231,8 +217,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
   sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off RTL
+  fi
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then

@@ -170,6 +170,7 @@ if [ -f "/usr/bin/python3.7" ]; then
 elif [ -f "/usr/bin/python3.8" ]; then
   # use python 3.8 if available
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+  sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
   echo "python calls python3.8"
 else
   echo "!!! FAIL !!!"
@@ -216,7 +217,7 @@ if [ "${baseImage}" = "raspbian" ]; then
     echo "$max_usb_current already in $configFile"
   fi
 
-  # run fsck on sd boot partition on every startup to prevent "maintenance login" screen
+  # run fsck on sd root partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
   sudo tune2fs -c 1 ${rootPartition}
@@ -537,26 +538,32 @@ echo ""
 echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # download resources
+downloadOK=0
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-if [ ! -f "./${binaryName}" ]
-then
-    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+if [ ! -f "./${binaryName}" ]; then
+   sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+fi
+if [ ! -f "./${binaryName}" ]; then
+   echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+else
+   # check binary checksum test
+   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+      echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+      rm -v ./${binaryName}
+   else
+      downloadOK=1
+   fi
+fi
+if [ downloadOK == 0 ]; then
     exit 1
 fi
 
-# check binary checksum test
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-  exit 1
-else
-  echo ""
-  echo "****************************************"
-  echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
-  echo "****************************************"
-  echo ""
-fi
+echo ""
+echo "****************************************"
+echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+echo "****************************************"
+echo ""
 
 # install
 sudo -u admin tar -xvf ${binaryName}
@@ -572,7 +579,7 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.10.1-beta"
+lndVersion="0.10.4-beta"
 
 # olaoluwa
 PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
@@ -642,12 +649,15 @@ echo ""
 
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+if [ ! -f "./${binaryName}" ]; then
+   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+fi
 
 # check binary was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+  rm -v ./${binaryName}
   exit 1
 else
   echo ""
@@ -669,7 +679,7 @@ if [ ${#installed} -eq 0 ]; then
 fi
 sudo chown -R admin /home/admin
 
-echo "*** Python DEFAULT libs & depenedencies ***"
+echo "*** Python DEFAULT libs & dependencies ***"
 
 # for setup schell scripts
 sudo apt -y install dialog bc python3-dialog
@@ -698,9 +708,12 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
 sudo apt -y install fzf
 
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
+
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
-keyBindingsDone=$(cat ${homeFile}|grep -c ${keyBindings})
+keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
 
 if [ ${keyBindingsDone} -eq 0 ]; then
    sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"

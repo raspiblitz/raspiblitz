@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch BTCPay Server on or off"
-  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon] [ip|tor]"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
   exit 1
 fi
 
@@ -13,32 +13,102 @@ source /mnt/hdd/raspiblitz.conf
 # get cpu architecture
 source /home/admin/raspiblitz.info
 
+if [ "$1" = "status" ]; then
+  if [ "${BTCPayServer}" = "on" ]; then
+    echo "installed=1"
+
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    echo "localIP='${localIP}'"
+    echo "httpsPort='23001'"
+    echo "publicIP='${publicIP}'"
+
+    # check for LetsEnryptDomain for DynDns
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+    if [ ${#error} -eq 0 ]; then
+      echo "publicDomain='${domain}'"
+    fi
+
+    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+    echo "sslFingerprintIP='${sslFingerprintIP}'"
+
+    toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+    echo "toraddress='${toraddress}'"
+
+    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+
+    # check for IP2TOR
+    error=""
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
+    if [ ${#error} -eq 0 ]; then
+      echo "ip2torType='${ip2tor-v1}'"
+      echo "ip2torID='${id}'"
+      echo "ip2torIP='${ip}'"
+      echo "ip2torPort='${port}'"
+      # check for LetsEnryptDomain on IP2TOR
+      error=""
+      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
+      if [ ${#error} -eq 0 ]; then
+        echo "ip2torDomain='${domain}'"
+      fi
+    fi
+
+    # check for error
+    isDead=$(sudo systemctl status btcpayserver | grep -c 'inactive (dead)')
+    if [ ${isDead} -eq 1 ]; then
+      echo "error='Service Failed'"
+    fi
+
+  else
+    echo "installed=0"
+  fi
+  exit 0
+fi
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+  # get LNbits status info
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.btcpayserver.sh status)
 
-  if [ "${BTCPayDomain}" == "localhost" ]; then
+  text="Local Webrowser: https://${localIP}:${httpsPort}"
 
-    # TOR
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTCPay Server (TOR) " --msgbox "Have TOR Browser installed on your laptop and open:\n
-${toraddress}\n
-See LCD of RaspiBlitz for QR code of this address if you want to open on mobile devices with TOR browser.
-" 12 67
-    /home/admin/config.scripts/blitz.lcd.sh hide
-  else
-
-    # IP + Domain
-    whiptail --title " BTCPay Server (Domain) " --msgbox "Open the following URL in your local web browser:
-https://${BTCPayDomain}\n
-For details or troubleshoot check for 'BTCPay'
-in README of https://github.com/rootzoll/raspiblitz
-" 11 67
+  if [ ${#publicDomain} -gt 0 ]; then
+     text="${text}
+Public Domain: https://${publicDomain}:${httpsPort}
+port forwarding on router needs to be active & may change port" 
   fi
 
+  text="${text}
+SHA1 ${sslFingerprintIP}" 
+
+  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    text="${text}\n
+TOR Browser Hidden Service address (QR see LCD):
+${toraddress}"
+  fi
+  
+  if [ ${#ip2torDomain} -gt 0 ]; then
+    text="${text}\n
+IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
+SHA1 ${sslFingerprintTOR}"
+  elif [ ${#ip2torIP} -gt 0 ]; then
+    text="${text}\n
+IP2TOR: https://${ip2torIP}:${ip2torPort}
+SHA1 ${sslFingerprintTOR}
+go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+  elif [ ${#publicDomain} -eq 0 ]; then
+    text="${text}\n
+To enable easy reachablity with normal brower from the outside
+consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+  fi
+
+  whiptail --title " BTCPay Server " --msgbox "${text}" 15 69
+  
+  /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
   exit 0
 fi
@@ -99,23 +169,6 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL BTCPAYSERVER ***"
-
-  # --> just serving directly thru TOR for now
-  # setting up nginx and the SSL certificate
-  #/home/admin/config.scripts/bonus.btcpaysetdomain.sh
-  #errorOnInstall=$?
-  #if [ ${errorOnInstall} -eq 1 ]; then
-  # echo "exiting as user cancelled BTCPayServer installation"
-  # exit 1
-  #fi
-
-  #if [ "$2" == "tor" ]; then
-  #  sudo sed -i "s/^BTCPayDomain=.*/BTCPayDomain='localhost'/g" /mnt/hdd/raspiblitz.conf
-  #  /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
-  #else
-  #  echo "# FAIL - at the moment only BTCPay Server over TOR is supported"
-  #  exit 1
-  #fi
 
   ##################
   # NGINX
@@ -265,7 +318,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer
     # check https://github.com/dgarage/NBXplorer/releases
-    sudo -u btcpay git reset --hard v2.1.24
+    sudo -u btcpay git reset --hard v2.1.34
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
 
@@ -340,9 +393,9 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases
-    # sudo -u btcpay git reset --hard v1.0.4.2
+    sudo -u btcpay git reset --hard v1.0.5.2
     # use latest commit (v1.0.4.4+) to fix build with latest dotNet
-    sudo -u btcpay git checkout f2bb24f6ab6d402af8214c67f84e08116eb650e7
+    # sudo -u btcpay git checkout f2bb24f6ab6d402af8214c67f84e08116eb650e7
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
 
@@ -402,6 +455,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off btcpay
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
@@ -429,6 +487,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/nginx/sites-enabled/btcpay_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/btcpay_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/btcpay_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_tor.conf
+    sudo rm -f /etc/nginx/sites-available/btcpay_tor_ssl.conf
     sudo nginx -t
     sudo systemctl reload nginx
     # nuke user
