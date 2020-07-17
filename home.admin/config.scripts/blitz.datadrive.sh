@@ -574,7 +574,7 @@ if [ "$1" = "fstab" ]; then
 
     # write new /etc/fstab & mount
     echo "# mount /mnt/hdd"
-    sudo mkdir -p /mnt/hdd > /dev/null 2>&1
+    sudo mkdir -p /mnt/hdd 1>/dev/null
     updated=$(cat /etc/fstab | grep -c "/mnt/hdd")
     if [ $updated -eq 0 ]; then
        echo "# updating /etc/fstab"
@@ -594,7 +594,7 @@ if [ "$1" = "fstab" ]; then
       mountactive1=$(df | grep -c /mnt/hdd)
       loopcount=$(($loopcount +1))
       if [ ${loopcount} -gt 10 ]; then
-        echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        echo "# WARNING was not able freshly mount new devices - might need reboot or check /etc/fstab"
         echo "needsReboot=1"
         exit 0
       fi
@@ -689,7 +689,7 @@ if [ "$1" = "fstab" ]; then
       mountactive3=$(df | grep -c /mnt/storage)  
       loopcount=$(($loopcount +1))
       if [ ${loopcount} -gt 10 ]; then
-        >&2 echo "# WARNING was not able freshly mount new devives - might need reboot or check /etc/fstab"
+        >&2 echo "# WARNING was not able freshly mount new devices - might need reboot or check /etc/fstab"
         echo "needsReboot=1"
         exit 1
       fi
