@@ -49,7 +49,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
   if [ "$USER" != "admin" ]; then
 
-    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
       infoStr=" The ${network}d service is NOT RUNNING!\n\n Login for more details & options:"
     else
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
@@ -59,7 +59,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
     # output when user login in as admin and bitcoind is not running
 
-    if [ ${uptime} -gt 600 ] ||  ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
+    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
 
       clear
       echo ""
