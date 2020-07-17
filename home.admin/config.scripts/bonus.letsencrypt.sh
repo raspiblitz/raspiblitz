@@ -161,9 +161,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 elif [ "$1" = "link-certs" ]; then
 
+    certDirectoryExists=$(ls ${ACME_CERT_HOME} | grep -c 'certs')
+    if [ ${certDirectoryExists} -eq 0 ]; then
+      echo "# no cert directory to link: ${ACME_CERT_HOME}"
+      exit 0
+    fi
+
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
-    IFS='  ' read -ra ADDR <<< "${certsDirectories}"
-    for i in "${ADDR[@]}"; do
+    directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
+    for i in "${directoryArray[@]}"; do
       echo ${i}
     done
     exit 1
