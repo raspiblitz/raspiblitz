@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import ast
 import codecs
 import json
 import math
@@ -713,6 +714,9 @@ More information on the service you can find under:
 
         exitcode = 0
 
+        order = ast.literal_eval(be.errorLong)
+        message = order['message']
+
         if (be.errorShort == "timeout on waiting for extending bridge" or
                 be.errorShort == "fail on subscription storage" or
                 be.errorShort == "invalid port" or
@@ -723,8 +727,10 @@ More information on the service you can find under:
 You DID PAY the initial fee.
 But the service was not able to provide service.
 Subscription will be ignored.
+
 Error: {0}
-            '''.format(be.errorShort), title="Error on Subscription", extra_button=True, extra_label="Details")
+Message: {1}
+            '''.format(be.errorShort, message), title="Error on Subscription", extra_button=True, extra_label="Details")
         else:
 
             # error happened before payment
@@ -732,8 +738,10 @@ Error: {0}
 You DID NOT PAY the initial fee.
 The service was not able to provide service.
 Subscription will be ignored.
+
 Error: {0}
-            '''.format(be.errorShort), title="Error on Subscription", extra_button=True, extra_label="Details")
+Message: {1}
+            '''.format(be.errorShort, message), title="Error on Subscription", extra_button=True, extra_label="Details")
 
         # show more details (when user used extra button)
         if exitcode == Dialog.EXTRA:
