@@ -105,11 +105,6 @@ function acme_install() {
 
 function refresh_certs_with_nginx() {
 
-    if [ ! -d "${ACME_CERT_HOME}" ]; then
-      echo "# no cert directory to link: ${ACME_CERT_HOME}"
-      return
-    fi
-
     # FIRST: SET ALL TO DEFAULT SELF SIGNED
 
     echo "# default IP certs"
@@ -125,6 +120,16 @@ function refresh_certs_with_nginx() {
     sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
 
     # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
+
+    if [ "${letsencrypt}" != "on" ]; then
+      echo "# lets encrypt is off - so no certs replacements"
+      return
+    fi
+
+    if [ ! -d "${ACME_CERT_HOME}" ]; then
+      echo "# no cert directory to link: ${ACME_CERT_HOME}"
+      return
+    fi
 
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
     directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
