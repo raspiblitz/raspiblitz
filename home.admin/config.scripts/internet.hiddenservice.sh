@@ -15,17 +15,24 @@ source /mnt/hdd/raspiblitz.conf
 
 # delete a hidden service
 if [ "$1" == "off" ]; then
+
   service="$2"
   if [ ${#service} -eq 0 ]; then
     echo "ERROR: service name is missing"
     exit 1
   fi
+
+  # remove service paragraph
   sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+  # remove double lines  
+  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > .tmp && sudo mv .tmp /etc/tor/torrc
+
   echo "# OK service is removed - restarting TOR ..."
+  sudo chmod 644 /etc/tor/torrc
   sudo systemctl restart tor
   sleep 10
   echo "# Done"
-  exit 1
+  exit 0
 fi
 
 service="$1"
