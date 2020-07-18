@@ -730,7 +730,10 @@ More information on the service you can find under:
         exitcode = 0
 
         order = ast.literal_eval(be.errorLong)
-        message = order['message']
+        try :
+            message = order['message']
+        except Exception as e:
+            message = "n/a"
 
         if (be.errorShort == "timeout on waiting for extending bridge" or
                 be.errorShort == "fail on subscription storage" or

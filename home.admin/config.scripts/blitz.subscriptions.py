@@ -251,7 +251,6 @@ if tag == "NEW2":
 # NEW IP2TOR BRIDGE
 ###############################
 
-
 if tag == "NEW1":
 
     # check if Blitz is running behind TOR
