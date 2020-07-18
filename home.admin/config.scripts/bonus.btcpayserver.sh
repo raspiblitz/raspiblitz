@@ -464,6 +464,7 @@ WantedBy=multi-user.target
     #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
     #    fi
     #done
+    sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
 
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 

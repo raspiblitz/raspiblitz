@@ -439,7 +439,6 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
             warningTXT = "rejected: {0}".format(bridge['message'])
         except Exception as e:
             warningTXT = "rejected: n/a"
-        break
 
     # create subscription data for storage
     subscription = dict()
