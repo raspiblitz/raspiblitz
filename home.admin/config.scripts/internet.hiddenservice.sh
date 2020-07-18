@@ -111,13 +111,10 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   echo "The Tor Hidden Service address for $service is:"
   echo "$TOR_ADDRESS"
   echo "use with the port: $toPort"
-  echo ""
   if [ ${#toPort2} -gt 0 ]; then
-    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
-    if [ ${alreadyThere} -eq 0 ]; then
+    wasAdded=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
+    if [ ${wasAdded} -gt 0 ]; then
       echo "or the port: $toPort2"
-    else
-      echo "The port $fromPort2 is forwarded for another Hidden Service. Check the /etc/tor/torrc for the details."
     fi
   fi
 else
