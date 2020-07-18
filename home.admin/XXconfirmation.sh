@@ -2,10 +2,10 @@
 
 confirmation()
 {
-  text=$1
-  defaultno=$2
-  height=$3
-  width=$4
+  local text=$1
+  local defaultno=$2
+  local height=$3
+  local width=$4
 
   if [ $defaultno ]; then
      whiptail --title " Confirmation " --defaultno --yes-button "Yes" --no-button "No" --yesno " $1 
