@@ -126,11 +126,6 @@ function refresh_certs_with_nginx() {
       return
     fi
 
-    if [ ! -d "${ACME_CERT_HOME}" ]; then
-      echo "# no cert directory to link: ${ACME_CERT_HOME}"
-      return
-    fi
-
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
     directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
     for i in "${directoryArray[@]}"; do
