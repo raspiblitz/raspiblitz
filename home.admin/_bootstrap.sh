@@ -136,6 +136,9 @@ fi
 afterSetupScriptExists=$(ls /home/admin/setup.sh 2>/dev/null | grep -c setup.sh)
 if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "*** SETUP SCRIPT DETECTED ***"
+  # LCD info
+  sudo sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+  sudo sed -i "s/^message=.*/message='After Boot Setup (takes time)'/g" ${infoFile}
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
