@@ -229,7 +229,7 @@ EOF
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    echo "# Creating Tor Hidden Service"
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
@@ -261,6 +261,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh off btc-rpc-explorer
     fi
 

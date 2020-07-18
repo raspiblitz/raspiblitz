@@ -274,6 +274,7 @@ EOF
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
   exit 0

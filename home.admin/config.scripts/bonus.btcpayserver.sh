@@ -213,8 +213,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # Hidden Service for BTCPay if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # tunr off first to make sure to remove old config
-    /home/admin/config.scripts/internet.hiddenservice.sh off btcpay
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
   fi
 
