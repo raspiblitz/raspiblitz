@@ -412,6 +412,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         bridge = apiGetBridgeStatus(session, shopUrl, bridge_id)
         if bridge['status'] == "A":
             break
+        if bridge['status'] == "R":
+            break
         if loopCount > 120:
             raise BlitzError("timeout bridge not getting ready", bridge)
 
@@ -431,6 +433,13 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     if (secondsDelivered + 600) < int(duration):
         contract_breached = True
         warning_text = "delivered duration shorter than advertised"
+    if bridge['status'] == "R":
+        contract_breached = True
+        try:
+            warningTXT = "rejected: {0}".format(bridge['message'])
+        except Exception as e:
+            warningTXT = "rejected: n/a"
+        break
 
     # create subscription data for storage
     subscription = dict()
@@ -438,7 +447,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
     subscription['id'] = bridge['id']
     subscription['name'] = servicename
     subscription['shop'] = shopUrl
-    subscription['active'] = True
+    subscription['active'] = not contract_breached
     subscription['ip'] = bridge_ip
     subscription['port'] = bridge_port
     subscription['duration'] = int(duration)
@@ -522,6 +531,13 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
         print("## Loop {0}".format(loopCount))
         try:
             bridge = apiGetBridgeStatus(session, shopUrl, bridgeid)
+            if bridge['status'] == "R":
+                contract_breached = True
+                try:
+                    warningTXT = "rejected: {0}".format(bridge['message'])
+                except Exception as e:
+                    warningTXT = "rejected: n/a"
+                break
             if bridge['suspend_after'] != bridge_suspendafter:
                 break
         except Exception as e:
