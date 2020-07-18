@@ -337,7 +337,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
 
-
     # create nbxplorer service
     echo "
 [Unit]
@@ -367,17 +366,17 @@ WantedBy=multi-user.target
     sudo systemctl enable nbxplorer
     sudo systemctl start nbxplorer
 
-    echo "Checking for nbxplorer config"
-    while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
-      do
-        echo "Waiting for nbxplorer to start - CTRL+C to abort"
-        sleep 10
-        hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
-        if [ ${hasFailed} -eq 1 ]; then
-          echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
-          echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-        fi
-    done
+    #echo "Checking for nbxplorer config"
+    #while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
+    #  do
+    #    echo "Waiting for nbxplorer to start - CTRL+C to abort"
+    #    sleep 10
+    #    hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
+    #    if [ ${hasFailed} -eq 1 ]; then
+    #      echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
+    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+    #    fi
+    #done
 
     echo ""
     echo "***"
@@ -437,17 +436,17 @@ WantedBy=multi-user.target
     sudo systemctl enable btcpayserver
     sudo systemctl start btcpayserver
 
-    echo "Checking for btcpayserver config"
-    while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
-      do
-        echo "Waiting for btcpayserver to start - CTRL+C to abort"
-        sleep 10
-        hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
-        if [ ${hasFailed} -eq 1 ]; then
-          echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
-          echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-        fi
-    done
+    #echo "Checking for btcpayserver config"
+    #while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
+    #  do
+    #    echo "Waiting for btcpayserver to start - CTRL+C to abort"
+    #    sleep 10
+    #    hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
+    #    if [ ${hasFailed} -eq 1 ]; then
+    #      echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+    #    fi
+    #done
 
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 
