@@ -364,7 +364,7 @@ WantedBy=multi-user.target
     sudo systemctl daemon-reload
     # start to create settings.config
     sudo systemctl enable nbxplorer
-    sudo systemctl start nbxplorer
+    #sudo systemctl start nbxplorer
 
     #echo "Checking for nbxplorer config"
     #while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
@@ -383,7 +383,7 @@ WantedBy=multi-user.target
     echo "getting RPC credentials from the bitcoin.conf"
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-    sudo mv /home/btcpay/.nbxplorer/Main/settings.config /home/btcpay/.nbxplorer/Main/settings.config.backup
+    #sudo mv /home/btcpay/.nbxplorer/Main/settings.config /home/btcpay/.nbxplorer/Main/settings.config.backup
     touch /home/admin/settings.config
     sudo chmod 600 /home/admin/settings.config || exit 1
     cat >> /home/admin/settings.config <<EOF
@@ -393,7 +393,14 @@ EOF
 
     sudo mv /home/admin/settings.config /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
-    sudo systemctl restart nbxplorer
+    #sudo systemctl restart nbxplorer
+
+    if [ "${state}" == "ready" ]; then
+      echo "Starting nbxplorer"
+      sudo systemctl start nbxplorer
+    else
+      echo "Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
+    fi
 
     # BTCPayServer
     echo ""
@@ -434,8 +441,14 @@ WantedBy=multi-user.target
 
     sudo systemctl daemon-reload
     sudo systemctl enable btcpayserver
-    sudo systemctl start btcpayserver
 
+   if [ "${state}" == "ready" ]; then
+      echo "Starting btcpayserver"
+      sudo systemctl start btcpayserver
+    else
+      echo "Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
+    fi
+    
     #echo "Checking for btcpayserver config"
     #while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
     #  do
@@ -452,10 +465,14 @@ WantedBy=multi-user.target
 
   else
     echo "BTCPay Server is already installed."
-    # start service
-    echo "start service"
-    sudo systemctl start nbxplorer 2>/dev/null
-    sudo systemctl start btcpayserver 2>/dev/null
+
+    if [ "${state}" == "ready" ]; then
+      # start service
+      echo "start service"
+      sudo systemctl start nbxplorer 2>/dev/null
+      sudo systemctl start btcpayserver 2>/dev/null
+    fi
+
   fi
 
   # setting value in raspi blitz config
