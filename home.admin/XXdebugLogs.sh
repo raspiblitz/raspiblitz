@@ -161,6 +161,10 @@ else
   echo "- SPECTER is OFF by config"
 fi
 
+echo "*** MOUNTED DRIVES ***"
+df -T
+echo ""
+
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
 if [ ${#undervoltageReports} -gt 0 ]; then
