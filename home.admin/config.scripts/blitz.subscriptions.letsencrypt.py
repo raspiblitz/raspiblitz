@@ -128,19 +128,6 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     if dnsservice == "duckdns":
         duckDNSupdate(getsubdomain(id), token, realip)
 
-    # run the ACME script
-    print("# Running letsencrypt ACME script ...")
-    acmeResult = subprocess.Popen(
-        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target],
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
-    out, err = acmeResult.communicate()
-    eprint(str(out))
-    eprint(str(err))
-    if out.find("error=") > -1:
-        time.sleep(6)
-        raise BlitzError("letsancrypt acme failed", out)
-
-
     # create subscription data for storage
     subscription = dict()
     subscription['type'] = "letsencrypt-v1"
@@ -174,6 +161,18 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     except Exception as e:
         eprint(e)
         raise BlitzError("fail on subscription storage", str(subscription), e)
+
+    # run the ACME script
+    print("# Running letsencrypt ACME script ...")
+    acmeResult = subprocess.Popen(
+        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
+    out, err = acmeResult.communicate()
+    eprint(str(out))
+    eprint(str(err))
+    if out.find("error=") > -1:
+        time.sleep(6)
+        raise BlitzError("letsancrypt acme failed", out)
 
     print("# OK - LETSENCRYPT DOMAIN IS READY")
     return subscription
