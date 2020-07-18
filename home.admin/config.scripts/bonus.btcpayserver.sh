@@ -213,8 +213,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # Hidden Service for BTCPay if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 80 127.0.0.1:23000/HiddenServicePort 80 127.0.0.1:23002/g" /etc/tor/torrc
+    # tunr off first to make sure to remove old config
+    /home/admin/config.scripts/internet.hiddenservice.sh off btcpay
     /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
   fi
 
