@@ -14,8 +14,12 @@ source /mnt/hdd/raspiblitz.conf
 source /home/admin/raspiblitz.info
 
 if [ "$1" = "status" ]; then
+
   if [ "${BTCPayServer}" = "on" ]; then
-    echo "installed=1"
+
+    echo "switchedon=1"
+    isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
+    echo "installed=${isInstalled}"
 
     localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
@@ -61,6 +65,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
+    echo "switchedon=0"
     echo "installed=0"
   fi
   exit 0
@@ -72,6 +77,17 @@ if [ "$1" = "menu" ]; then
   # get LNbits status info
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.btcpayserver.sh status)
+
+  if [ ${switchedon} -eq 0 ]; then
+      whiptail --title " BTCPay Server " --msgbox "BTCPay Server is not activated." 7 36
+      exit 0
+  fi
+
+  if [ ${installed} -eq 0 ]; then
+      whiptail --title " BTCPay Server " --msgbox "BTCPay Server needs to be re-installed.\nPress OK to start process." 8 45
+      /home/admin/config.scripts/bonus.btcpayserver.sh on
+      exit 0
+  fi
 
   text="Local Webrowser: https://${localIP}:${httpsPort}"
 

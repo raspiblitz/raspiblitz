@@ -293,6 +293,8 @@ if [ "${BTCPayServer}" = "on" ]; then
 
   # because BTCPAY server freezes during recovery .. it will get installed after reboot
   echo "sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on" >> /home/admin/setup.sh
+  sudo chmod +x /home/admin/setup.sh >> ${logFile}
+  sudo ls -la /home/admin/setup.sh >> ${logFile}
 
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}

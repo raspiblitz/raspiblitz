@@ -142,9 +142,11 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  sudo /home/admin/setup.sh
+  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
+  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
   # delete the after boot script
-  sudo rm /home/admin/setup.sh
+  sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
   sudo shutdown -r now
