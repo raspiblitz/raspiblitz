@@ -387,6 +387,7 @@ WantedBy=multi-user.target
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     #sudo mv /home/btcpay/.nbxplorer/Main/settings.config /home/btcpay/.nbxplorer/Main/settings.config.backup
+    sudo -u btcpay mkdir -p /home/btcpay/.nbxplorer/Main
     touch /home/admin/settings.config
     sudo chmod 600 /home/admin/settings.config || exit 1
     cat >> /home/admin/settings.config <<EOF
