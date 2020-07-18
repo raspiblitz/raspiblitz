@@ -178,7 +178,10 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
     s="BTC.lightning=type=lnd-rest\;server=https\://127.0.0.1:8080/\;macaroonfilepath=/home/btcpay/admin.macaroon\;"
     sudo -u btcpay sed -i "s|^${s}certthumbprint=.*|${s}certthumbprint=$FINGERPRINT|g" /home/btcpay/.btcpayserver/Main/settings.config
   fi
-  sudo systemctl restart btcpayserver
+  
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl restart btcpayserver
+  fi
   exit 0
 fi
 
