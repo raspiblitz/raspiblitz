@@ -59,38 +59,36 @@ if [ ${#toPort2} -gt 0 ]; then
 fi
 
 if [ "${runBehindTor}" = "on" ]; then
-  #check if the service is already present
-  isHiddenService=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c $service)
-  if [ ${isHiddenService} -eq 0 ]; then
-    #check if the port is already forwarded
-    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort\b")
-    if [ ${alreadyThere} -gt 0 ]; then
-      echo "The port $fromPort is already forwarded. Check /etc/tor/torrc for the details."
-      exit 1
-    fi
+
+  # delete any old entry for that servive
+  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+
+  # make new entry for that service
     echo "
 # Hidden Service for $service
 HiddenServiceDir /mnt/hdd/tor/$service
 HiddenServiceVersion 3
 HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
+  # remove double lines  
+  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > .tmp && sudo mv .tmp /etc/tor/torrc
 
-    # check and insert second port pair
-    if [ ${#toPort2} -gt 0 ]; then
-      alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
-      if [ ${alreadyThere} -gt 0 ]; then
-        echo "The port $fromPort2 is already forwarded. Check the /etc/tor/torrc for the details."
-      else
-        echo "HiddenServicePort $toPort2 127.0.0.1:$fromPort2" | sudo tee -a /etc/tor/torrc
-      fi
+  # check and insert second port pair
+  if [ ${#toPort2} -gt 0 ]; then
+    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
+    if [ ${alreadyThere} -gt 0 ]; then
+      echo "The port $fromPort2 is already forwarded. Check the /etc/tor/torrc for the details."
+    else
+      echo "HiddenServicePort $toPort2 127.0.0.1:$fromPort2" | sudo tee -a /etc/tor/torrc
     fi
-    # restart tor
-    echo ""
-    echo "Restarting Tor to activate the Hidden Service..."
-    sudo systemctl restart tor
-    sleep 10
-  else
-    echo "The Hidden Service for $service is already installed."
   fi
+
+  # restart tor
+  echo ""
+  echo "Restarting Tor to activate the Hidden Service..."
+  sudo chmod 644 /etc/tor/torrc
+  sudo systemctl restart tor
+  sleep 10
+
   # show the Hidden Service address
   TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/$service/hostname)
   if [ -z "$TOR_ADDRESS" ]; then
