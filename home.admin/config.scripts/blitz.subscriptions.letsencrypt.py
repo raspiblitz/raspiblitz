@@ -134,8 +134,8 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
         ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
     out, err = acmeResult.communicate()
-    >&2 echo "${out}"
-    >&2 echo "${err}"
+    echo "${out}" 1>&2
+    echo "${err}" 1>&2
     if out.find("error=") > -1:
         time.sleep(6)
         raise BlitzError("letsancrypt acme failed", out)
