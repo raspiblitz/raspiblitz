@@ -161,6 +161,7 @@ else
   echo "- SPECTER is OFF by config"
 fi
 
+echo ""
 echo "*** MOUNTED DRIVES ***"
 df -T
 echo ""
