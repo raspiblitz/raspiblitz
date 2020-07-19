@@ -10,7 +10,7 @@ from pathlib import Path
 
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig
+from blitzpy import RaspiBlitzConfig,BlitzError
 
 #####################
 # SCRIPT INFO
@@ -29,6 +29,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.ip2tor.py domain-by-ip <ip>")
     print("# blitz.subscriptions.ip2tor.py subscription-cancel <id>")
     sys.exit(1)
+
+# constants for standard services
+SERVICE_LND_REST_API = "LND-REST-API"
+SERVICE_LND_GRPC_API = "LND-GRPC-API"
+SERVICE_LNBITS = "LNBITS"
+SERVICE_BTCPAY = "BTCPAY"
 
 #####################
 # BASIC SETTINGS
@@ -49,6 +55,7 @@ if cfg.run_behind_tor:
 # HELPER CLASSES
 #####################
 
+# ToDo(frennkie) replace this with updated BlitzError from blitzpy
 class BlitzError(Exception):
     def __init__(self, errorShort, errorLong="", errorException=None):
         self.errorShort = str(errorShort)
@@ -75,19 +82,19 @@ def handleException(e):
     sys.exit(1)
 
 
-def getsubdomain(fulldomainstring):
-    return fulldomainstring.split('.')[0]
+def get_subdomain(fulldomain_str):
+    return fulldomain_str.split('.')[0]
 
 
 ############################
-# API Calls to DNS Servcies
+# API Calls to DNS Services
 ############################
 
-def duckDNSupdate(domain, token, ip):
+def duckdns_update(domain, token, ip):
     print("# duckDNS update IP API call for {0}".format(domain))
 
     # make HTTP request
-    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(getsubdomain(domain), token, ip)
+    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(get_subdomain(domain), token, ip)
     try:
         response = session.get(url)
         if response.status_code != 200:
@@ -102,31 +109,33 @@ def duckDNSupdate(domain, token, ip):
 # PROCESS FUNCTIONS
 #####################
 
-def subscriptionsNew(ip, dnsservice, id, token, target):
-    # id needs to the full domain name
+def subscriptions_new(ip, dnsservice, id, token, target):
+    # id needs to be the full domain name
     if id.find(".") == -1:
-        raise BlitzError("not a fully qualified domainname", dnsservice_id)
+        # ToDo(frennkie) dnsservice_id doesn't exit
+        raise BlitzError("not a fully qualified domain name", dnsservice_id)
 
     # check if id already exists
-    if len(getSubscription(id)) > 0:
+    if len(get_subscription(id)) > 0:
         raise BlitzError("id already exists", id)
 
     # make sure lets encrypt client is installed
     os.system("/home/admin/config.scripts/bonus.letsencrypt.sh on")
 
     # dyndns
-    realip = ip
+    real_ip = ip
     if ip == "dyndns":
-        updateURL = ""
+        update_url = ""
         if dnsservice == "duckdns":
-            updateURL = "https://www.duckdns.org/update?domains={0}&token={1}".format(getsubdomain(domain), token, ip)
-        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', id, updateURL],
+            # ToDo(frennkie) domain doesn't exit
+            update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(get_subdomain(domain), token, ip)
+        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', id, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-        realip = cfg.public_ip
+        real_ip = cfg.public_ip
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        duckDNSupdate(getsubdomain(id), token, realip)
+        duckdns_update(get_subdomain(id), token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -164,10 +173,10 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
 
     # run the ACME script
     print("# Running letsencrypt ACME script ...")
-    acmeResult = subprocess.Popen(
+    acme_result = subprocess.Popen(
         ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
-    out, err = acmeResult.communicate()
+    out, err = acme_result.communicate()
     eprint(str(out))
     eprint(str(err))
     if out.find("error=") > -1:
@@ -178,26 +187,24 @@ def subscriptionsNew(ip, dnsservice, id, token, target):
     return subscription
 
 
-def subscriptionsCancel(id):
-    # ToDo(frennkie) id is not used..
-
+def subscriptions_cancel(s_id):
     os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
     subs = toml.load(SUBSCRIPTIONS_FILE)
-    newList = []
-    removedCert = None
+    new_list = []
+    removed_cert = None
     for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
-        if sub['id'] != subscriptionID:
-            newList.append(sub)
+        if sub['id'] != s_id:
+            new_list.append(sub)
         else:
-            removedCert = sub
-    subs['subscriptions_letsencrypt'] = newList
+            removed_cert = sub
+    subs['subscriptions_letsencrypt'] = new_list
 
     # run the ACME script to remove cert
-    if removedCert:
-        acmeResult = subprocess.Popen(
-            ["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removedCert['id'],
-             removedCert['target']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
-        out, err = acmeResult.communicate()
+    if removed_cert:
+        acme_result = subprocess.Popen(
+            ["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removed_cert['id'],
+             removed_cert['target']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
+        out, err = acme_result.communicate()
         if out.find("error=") > -1:
             time.sleep(6)
             raise BlitzError("letsencrypt acme failed", out)
@@ -212,7 +219,7 @@ def subscriptionsCancel(id):
     # todo: deinstall letsencrypt if this was last subscription
 
 
-def getSubscription(subscriptionID):
+def get_subscription(subscription_id):
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
@@ -223,7 +230,7 @@ def getSubscription(subscriptionID):
         if "subscriptions_letsencrypt" not in subs:
             return []
         for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
-            if sub['id'] == subscriptionID:
+            if sub['id'] == subscription_id:
                 return sub
         return []
 
@@ -231,7 +238,7 @@ def getSubscription(subscriptionID):
         return []
 
 
-def getDomainByIP(ip):
+def get_domain_by_ip(ip):
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
         os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
@@ -253,7 +260,7 @@ def getDomainByIP(ip):
     raise BlitzError("no match")
 
 
-def menuMakeSubscription():
+def menu_make_subscription():
     # late imports - so that rest of script can run also if dependency is not available
     from dialog import Dialog
 
@@ -299,7 +306,7 @@ If you havent already go to https://duckdns.org
             title="DuckDNS Domain")
         subdomain = text.strip()
         subdomain = subdomain.split(' ')[0]
-        subdomain = getsubdomain(subdomain)
+        subdomain = get_subdomain(subdomain)
         domain = "{0}.duckdns.org".format(subdomain)
         os.system("clear")
 
@@ -326,7 +333,7 @@ This looks not like a valid subdomain.
         if len(token) < 20:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like a valid token.
-        ''', title="Unvalid Input")
+        ''', title="Invalid Input")
             sys.exit(0)
 
     else:
@@ -350,7 +357,7 @@ This looks not like a valid token.
         "\nChoose the kind of IP you want to use:",
         choices=choices, width=60, height=10, title="Select Service")
 
-    # if user chosses CANCEL
+    # if user chooses CANCEL
     os.system("clear")
     if code != d.OK:
         sys.exit(0)
@@ -362,16 +369,16 @@ This looks not like a valid token.
     if tag == "IP2TOR":
 
         # get all active IP2TOR subscriptions (just in case)
-        ip2torSubs = []
+        ip2tor_subs = []
         if Path(SUBSCRIPTIONS_FILE).is_file():
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active']:
-                    ip2torSubs.append(sub)
+                    ip2tor_subs.append(sub)
 
         # when user has no IP2TOR subs yet
-        if len(ip2torSubs) == 0:
+        if len(ip2tor_subs) == 0:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 You have no active IP2TOR subscriptions.
 Create one first and try again.
@@ -380,7 +387,7 @@ Create one first and try again.
 
             # let user select a IP2TOR subscription
         choices = []
-        for idx, sub in enumerate(ip2torSubs):
+        for idx, sub in enumerate(ip2tor_subs):
             choices.append(("{0}".format(idx), "IP2TOR {0} {1}:{2}".format(sub['name'], sub['ip'], sub['port'])))
 
         d = Dialog(dialog="dialog", autowidgetsize=True)
@@ -394,8 +401,8 @@ Create one first and try again.
             sys.exit(0)
 
         # get the slected IP2TOR bridge
-        ip2torSelect = ip2torSubs[int(tag)]
-        ip = ip2torSelect["ip"]
+        ip2tor_select = ip2tor_subs[int(tag)]
+        ip = ip2tor_select["ip"]
         target = "tor"
 
     elif tag == "DYNDNS":
@@ -421,13 +428,13 @@ Create one first and try again.
         if len(ip) == 0:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like a valid IP.
-        ''', title="Unvalid Input")
+        ''', title="Invalid Input")
             sys.exit(0)
 
     # create the letsencrypt subscription
     try:
         os.system("clear")
-        subscription = subscriptionsNew(ip, dnsservice, domain, token, target)
+        subscription = subscriptions_new(ip, dnsservice, domain, token, target)
 
         # success dialog
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -455,19 +462,15 @@ Unknown Error happened - please report to developers:
 # CREATE SSH DIALOG
 # use for ssh shell menu
 ###############
+def create_ssh_dialog():
+    menu_make_subscription()
 
-if sys.argv[1] == "create-ssh-dialog":
-    menuMakeSubscription()
-
-    sys.exit()
 
 ##########################
 # SUBSCRIPTIONS NEW
 # call from web interface
 ##########################
-
-if sys.argv[1] == "subscription-new":
-
+def subscription_new():
     # check parameters
     try:
         if len(sys.argv) <= 5:
@@ -486,7 +489,7 @@ if sys.argv[1] == "subscription-new":
 
     # create the subscription
     try:
-        subscription = subscriptionsNew(ip, dnsservice_type, dnsservice_id, dnsservice_token, target)
+        subscription = subscriptions_new(ip, dnsservice_type, dnsservice_id, dnsservice_token, target)
 
         # output json ordered bridge
         print(json.dumps(subscription, indent=2))
@@ -495,12 +498,11 @@ if sys.argv[1] == "subscription-new":
     except Exception as e:
         handleException(e)
 
+
 #######################
 # SUBSCRIPTIONS LIST
 #######################
-
-if sys.argv[1] == "subscriptions-list":
-
+def subscriptions_list():
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
@@ -515,13 +517,11 @@ if sys.argv[1] == "subscriptions-list":
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
 #######################
 # SUBSCRIPTION DETAIL
 #######################
-if sys.argv[1] == "subscription-detail":
-
+def subscription_detail():
     # check parameters
     try:
         if len(sys.argv) <= 2:
@@ -529,22 +529,20 @@ if sys.argv[1] == "subscription-detail":
     except Exception as e:
         handleException(e)
 
-    subscriptionID = sys.argv[2]
+    subscription_id = sys.argv[2]
     try:
-        sub = getSubscription(subscriptionID)
+        sub = get_subscription(subscription_id)
         print(json.dumps(sub, indent=2))
 
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
 #######################
 # DOMAIN BY IP
 # to check if an ip has a domain mapping
 #######################
-if sys.argv[1] == "domain-by-ip":
-
+def domain_by_ip():
     # check parameters
     try:
         if len(sys.argv) <= 2:
@@ -556,19 +554,17 @@ if sys.argv[1] == "domain-by-ip":
     ip = sys.argv[2]
     try:
 
-        domain = getDomainByIP(ip)
+        domain = get_domain_by_ip(ip)
         print("domain='{0}'".format(domain))
 
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
 #######################
 # SUBSCRIPTION CANCEL
 #######################
-if sys.argv[1] == "subscription-cancel":
-
+def subscription_cancel():
     # check parameters
     try:
         if len(sys.argv) <= 2:
@@ -576,13 +572,36 @@ if sys.argv[1] == "subscription-cancel":
     except Exception as e:
         handleException(e)
 
-    subscriptionID = sys.argv[2]
+    subscription_id = sys.argv[2]
     try:
-        subscriptionsCancel(subscriptionID)
+        subscriptions_cancel(subscription_id)
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
-# unknown command
-print("# unknown command")
+def main():
+    if sys.argv[1] == "create-ssh-dialog":
+        create_ssh_dialog()
+
+    elif sys.argv[1] == "domain-by-ip":
+        domain_by_ip()
+
+    elif sys.argv[1] == "subscriptions-list":
+        subscriptions_list()
+
+    elif sys.argv[1] == "subscription-cancel":
+        subscription_cancel()
+
+    elif sys.argv[1] == "subscription-detail":
+        subscription_detail()
+
+    elif sys.argv[1] == "subscription-new":
+        subscription_new()
+
+    else:
+        # unknown command
+        print("# unknown command")
+
+
+if __name__ == '__main__':
+    main()

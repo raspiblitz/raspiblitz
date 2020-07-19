@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import ast
 import codecs
 import json
 import math
@@ -13,7 +12,7 @@ from pathlib import Path
 import grpc
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig
+from blitzpy import RaspiBlitzConfig, BlitzError
 from lndlibs import rpc_pb2 as lnrpc
 from lndlibs import rpc_pb2_grpc as rpcstub
 
@@ -34,6 +33,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.ip2tor.py subscription-by-service servicename")
     print("# blitz.subscriptions.ip2tor.py ip-by-tor onionaddress")
     sys.exit(1)
+
+# constants for standard services
+SERVICE_LND_REST_API = "LND-REST-API"
+SERVICE_LND_GRPC_API = "LND-GRPC-API"
+SERVICE_LNBITS = "LNBITS"
+SERVICE_BTCPAY = "BTCPAY"
 
 #####################
 # BASIC SETTINGS
@@ -71,17 +76,6 @@ else:
 
 
 #####################
-# HELPER CLASSES
-#####################
-
-class BlitzError(Exception):
-    def __init__(self, errorShort, errorLong="", errorException=None):
-        self.errorShort = str(errorShort)
-        self.errorLong = str(errorLong)
-        self.errorException = errorException
-
-
-#####################
 # HELPER FUNCTIONS
 #####################
 
@@ -91,9 +85,9 @@ def eprint(*args, **kwargs):
 
 def handleException(e):
     if isinstance(e, BlitzError):
-        eprint(e.errorLong)
-        eprint(e.errorException)
-        print("error='{0}'".format(e.errorShort))
+        eprint(e.details)
+        eprint(e.org)
+        print("error='{0}'".format(e.short))
     else:
         eprint(e)
         print("error='{0}'".format(str(e)))
@@ -150,17 +144,17 @@ def apiGetHosts(session, shopurl):
     try:
         response = session.get(url)
     except Exception as e:
-        raise BlitzError("failed HTTP request", url, e)
+        raise BlitzError("failed HTTP request", {'url': url}, e)
     if response.status_code != 200:
-        raise BlitzError("failed HTTP code", response.status_code, )
+        raise BlitzError("failed HTTP code", {'status_code': response.status_code})
 
     # parse & validate data
     try:
         jData = json.loads(response.content)
     except Exception as e:
-        raise BlitzError("failed JSON parsing", response.content, e)
+        raise BlitzError("failed JSON parsing", {'content': response.content}, e)
     if not isinstance(jData, list):
-        raise BlitzError("hosts not list", response.content)
+        raise BlitzError("hosts not list", {'content': response.content})
     for idx, hostEntry in enumerate(jData):
         try:
             # ignore if not offering tor bridge
@@ -188,7 +182,7 @@ def apiGetHosts(session, shopurl):
             # shorten names to 20 chars max
             hostEntry['name'] = hostEntry['name'][:20]
         except Exception as e:
-            raise BlitzError("failed host entry pasring", str(hostEntry), e)
+            raise BlitzError("failed host entry pasring", hostEntry, e)
 
         hosts.append(hostEntry)
 
@@ -211,11 +205,11 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
     try:
         response = session.post(url, data=postData)
     except Exception as e:
-        raise BlitzError("failed HTTP request", url, e)
+        raise BlitzError("failed HTTP request", {'url': url}, e)
     if response.status_code == 420:
-        raise BlitzError("forwarding this address was rejected", response.status_code)
+        raise BlitzError("forwarding this address was rejected", {'status_code': response.status_code})
     if response.status_code != 201:
-        raise BlitzError("failed HTTP code", response.status_code)
+        raise BlitzError("failed HTTP code", {'status_code': response.status_code})
 
     # parse & validate data
     try:
@@ -224,7 +218,7 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
             print("error='MISSING ID'")
             return
     except Exception as e:
-        raise BlitzError("failed JSON parsing", response.status_code, e)
+        raise BlitzError("failed JSON parsing", {'status_code': response.status_code}, e)
 
     return jData['id']
 
@@ -236,11 +230,11 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
     try:
         response = session.post(url)
     except Exception as e:
-        raise BlitzError("failed HTTP request", url, e)
+        raise BlitzError("failed HTTP request", {'url': url}, e)
     if response.status_code == 420:
-        raise BlitzError("forwarding this address was rejected", response.status_code)
+        raise BlitzError("forwarding this address was rejected", {'status_code': response.status_code})
     if response.status_code != 200 and response.status_code != 201:
-        raise BlitzError("failed HTTP code", response.status_code)
+        raise BlitzError("failed HTTP code", {'status_code': response.status_code})
 
     # parse & validate data
     print("# parse")
@@ -250,12 +244,12 @@ def apiPlaceOrderExtension(session, shopurl, bridgeid):
             print("error='MISSING ID'")
             return
     except Exception as e:
-        raise BlitzError("failed JSON parsing", response.content, e)
+        raise BlitzError("failed JSON parsing", {'content': response.content}, e)
 
     return jData['po_id']
 
 
-def apiGetOrder(session, shopurl, orderid):
+def apiGetOrder(session, shopurl, orderid) -> dict:
     print("# apiGetOrder")
 
     # make HTTP request
@@ -263,19 +257,19 @@ def apiGetOrder(session, shopurl, orderid):
     try:
         response = session.get(url)
     except Exception as e:
-        raise BlitzError("failed HTTP request", url, e)
+        raise BlitzError("failed HTTP request", {'url': url}, e)
     if response.status_code != 200:
-        raise BlitzError("failed HTTP code", response.status_code)
+        raise BlitzError("failed HTTP code", {'status_code': response.status_code})
 
     # parse & validate data
     try:
         jData = json.loads(response.content)
         if len(jData['item_details']) == 0:
-            raise BlitzError("missing item", response.content)
+            raise BlitzError("missing item", {'content': response.content})
         if len(jData['ln_invoices']) > 1:
-            raise BlitzError("more than one invoice", response.content)
+            raise BlitzError("more than one invoice", {'content': response.content})
     except Exception as e:
-        raise BlitzError("failed JSON parsing", response.content, e)
+        raise BlitzError("failed JSON parsing", {'content': response.content}, e)
 
     return jData
 
@@ -288,16 +282,16 @@ def apiGetBridgeStatus(session, shopurl, bridgeid):
     try:
         response = session.get(url)
     except Exception as e:
-        raise BlitzError("failed HTTP request", url, e)
+        raise BlitzError("failed HTTP request", {'url': url}, e)
     if response.status_code != 200:
-        raise BlitzError("failed HTTP code", response.status_code)
+        raise BlitzError("failed HTTP code", {'status_code': response.status_code})
     # parse & validate data
     try:
         jData = json.loads(response.content)
         if len(jData['id']) == 0:
-            raise BlitzError("missing id", response.content)
+            raise BlitzError("missing id", {'content': response.content})
     except Exception as e:
-        raise BlitzError("failed JSON parsing", response.content, e)
+        raise BlitzError("failed JSON parsing", {'content': response.content}, e)
 
     return jData
 
@@ -322,10 +316,10 @@ def lndDecodeInvoice(lnInvoiceString):
 
         # validate results
         if response.num_msat <= 0:
-            raise BlitzError("zero invoice not allowed", lnInvoiceString)
+            raise BlitzError("zero invoice not allowed", {'invoice': lnInvoiceString})
 
     except Exception as e:
-        raise BlitzError("failed LND invoice decoding", lnInvoiceString, e)
+        raise BlitzError("failed LND invoice decoding", {'invoice': lnInvoiceString}, e)
 
     return response
 
@@ -346,10 +340,10 @@ def lndPayInvoice(lnInvoiceString):
 
         # validate results
         if len(response.payment_error) > 0:
-            raise BlitzError(response.payment_error, lnInvoiceString)
+            raise BlitzError(response.payment_error, {'invoice': lnInvoiceString})
 
     except Exception as e:
-        raise BlitzError("payment failed", lnInvoiceString, e)
+        raise BlitzError("payment failed", {'invoice': lnInvoiceString}, e)
 
     return response
 
@@ -480,7 +474,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
 
     except Exception as e:
         eprint(e)
-        raise BlitzError("fail on subscription storage", str(subscription), e)
+        raise BlitzError("fail on subscription storage", subscription, e)
 
     print("# OK - BRIDGE READY: {0}:{1} -> {2}".format(bridge_ip, bridge_port, torTarget))
     return subscription
@@ -578,7 +572,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
 
     except Exception as e:
         eprint(e)
-        raise BlitzError("fail on subscription storage", "", e)
+        raise BlitzError("fail on subscription storage", org=e)
 
     print("# BRIDGE GOT EXTENDED: {0} -> {1}".format(bridge_suspendafter, bridge['suspend_after']))
 
@@ -664,7 +658,8 @@ Try again later, enter another address or cancel.
             choices=choices, title="Available Subscriptions")
 
         # if user cancels
-        if code != d.OK: sys.exit(0)
+        if code != d.OK:
+            sys.exit(0)
 
         # get data of selected
         seletedIndex = int(tag)
@@ -712,7 +707,8 @@ More information on the service you can find under:
                         height=30)
 
         # if user AGREED break loop and continue with selected host
-        if code == "extra": break
+        if code == "extra":
+            break
 
     ############################
     # PHASE 3: Make Subscription
@@ -729,16 +725,15 @@ More information on the service you can find under:
 
         exitcode = 0
 
-        order = ast.literal_eval(be.errorLong)
-        try :
-            message = order['message']
-        except Exception as e:
-            message = "n/a"
+        try:
+            message = be.details['message']
+        except KeyError:
+            message = ""
 
-        if (be.errorShort == "timeout on waiting for extending bridge" or
-                be.errorShort == "fail on subscription storage" or
-                be.errorShort == "invalid port" or
-                be.errorShort == "timeout bridge not getting ready"):
+        if (be.short == "timeout on waiting for extending bridge" or
+                be.short == "fail on subscription storage" or
+                be.short == "invalid port" or
+                be.short == "timeout bridge not getting ready"):
 
             # error happened after payment
             exitcode = Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -748,7 +743,7 @@ Subscription will be ignored.
 
 Error: {0}
 Message: {1}
-            '''.format(be.errorShort, message), title="Error on Subscription", extra_button=True, extra_label="Details")
+            '''.format(be.short, message), title="Error on Subscription", extra_button=True, extra_label="Details")
         else:
 
             # error happened before payment
@@ -759,7 +754,7 @@ Subscription will be ignored.
 
 Error: {0}
 Message: {1}
-            '''.format(be.errorShort, message), title="Error on Subscription", extra_button=True, extra_label="Details")
+            '''.format(be.short, message), title="Error on Subscription", extra_button=True, extra_label="Details")
 
         # show more details (when user used extra button)
         if exitcode == Dialog.EXTRA:
@@ -767,13 +762,13 @@ Message: {1}
             print('###### ERROR DETAIL FOR DEBUG #######')
             print("")
             print("Error Short:")
-            print(be.errorShort)
+            print(be.short)
             print('Shop:')
             print(shopurl)
             print('Bridge:')
             print(str(host))
             print("Error Detail:")
-            print(be.errorLong)
+            print(be.details)
             print("")
             input("Press Enter to continue ...")
 
@@ -796,7 +791,7 @@ Message: {1}
         sys.exit(1)
 
     # if LND REST or LND GRPC service ... add bridge IP to TLS
-    if servicename == "LND-REST-API" or servicename == "LND-GRPC-API":
+    if blitzServiceName == SERVICE_LND_REST_API or blitzServiceName == SERVICE_LND_GRPC_API:
         os.system("sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add {0}".format(subscription['ip']))
         os.system("sudo /home/admin/config.scripts/lnd.credentials.sh reset tls")
         os.system("sudo /home/admin/config.scripts/lnd.credentials.sh sync")
@@ -811,7 +806,7 @@ You may want to consider to cancel the subscription later.
 
     # decide if https:// address
     protocol = ""
-    if blitzServiceName == "LNBITS":
+    if blitzServiceName == SERVICE_LNBITS:
         protocol = "https://"
 
     # Give final result feedback to user
@@ -847,13 +842,11 @@ MAIN MENU > Manage Subscriptions > My Subscriptions
 # CREATE SSH DIALOG
 # use for ssh shell menu
 ###############
-
-if sys.argv[1] == "create-ssh-dialog":
-
+def create_ssh_dialog():
     # check parameters
     try:
         if len(sys.argv) <= 4:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
@@ -865,17 +858,16 @@ if sys.argv[1] == "create-ssh-dialog":
 
     sys.exit()
 
+
 ###############
 # SHOP LIST
 # call from web interface
 ###############
-
-if sys.argv[1] == "shop-list":
-
+def shop_list():
     # check parameters
     try:
         if len(sys.argv) <= 2:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
@@ -891,17 +883,16 @@ if sys.argv[1] == "shop-list":
 
     sys.exit(0)
 
+
 ##########################
 # SHOP ORDER
 # call from web interface
 ##########################
-
-if sys.argv[1] == "shop-order":
-
+def shop_order():
     # check parameters
     try:
         if len(sys.argv) <= 8:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
@@ -926,13 +917,12 @@ if sys.argv[1] == "shop-order":
     except Exception as e:
         handleException(e)
 
+
 #######################
 # SUBSCRIPTIONS LIST
 # call in intervals from background process
 #######################
-
-if sys.argv[1] == "subscriptions-list":
-
+def subscriptions_list():
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
@@ -947,15 +937,12 @@ if sys.argv[1] == "subscriptions-list":
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
 #######################
 # SUBSCRIPTIONS RENEW
 # call in intervals from background process
 #######################
-
-if sys.argv[1] == "subscriptions-renew":
-
+def subscriptions_renew():
     print("# RUNNING subscriptions-renew")
 
     # check parameters
@@ -1002,16 +989,16 @@ if sys.argv[1] == "subscriptions-renew":
                 subs = toml.load(SUBSCRIPTIONS_FILE)
                 for sub in subs['subscriptions_ip2tor']:
                     if sub['id'] == subscription['id']:
-                        sub['warning'] = "Exception on Renew: {0}".format(be.errorShort)
-                        if be.errorShort == "invoice bigger amount than advertised":
+                        sub['warning'] = "Exception on Renew: {0}".format(be.short)
+                        if be.short == "invoice bigger amount than advertised":
                             sub['contract_breached'] = True
                             sub['active'] = False
                         with open(SUBSCRIPTIONS_FILE, 'w') as writer:
                             writer.write(toml.dumps(subs))
                             writer.close()
                         break
-                print("# BLITZERROR on subscriptions-renew of subscription index {0}: {1}".format(idx, be.errorShort))
-                print("# {0}".format(be.errorShort))
+                print("# BLITZERROR on subscriptions-renew of subscription index {0}: {1}".format(idx, be.short))
+                print("# {0}".format(be.short))
 
             except Exception as e:
                 print("# EXCEPTION on subscriptions-renew of subscription index {0}".format(idx))
@@ -1022,18 +1009,17 @@ if sys.argv[1] == "subscriptions-renew":
 
     # output - not needed only for debug logs
     print("# DONE subscriptions-renew")
-    sys.exit(1)
+
 
 #######################
 # SUBSCRIPTION CANCEL
-# call in intervalls from background process
+# call in intervals from background process
 #######################
-if sys.argv[1] == "subscription-cancel":
-
+def subscription_cancel():
     # check parameters
     try:
         if len(sys.argv) <= 2:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
@@ -1058,30 +1044,28 @@ if sys.argv[1] == "subscription-cancel":
     except Exception as e:
         handleException(e)
 
-    sys.exit(0)
 
 #######################
-# GET ADDRESS BY SERVICENAME
+# GET ADDRESS BY SERVICE NAME
 # gets called by other scripts to check if service has a ip2tor bridge address
 # output is bash key/value style so that it can be imported with source
 #######################
-if sys.argv[1] == "subscription-by-service":
-
+def subscription_by_service():
     # check parameters
     try:
         if len(sys.argv) <= 2:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
-    servicename = sys.argv[2]
+    service_name = sys.argv[2]
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
             os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
-                if sub['active'] and sub['name'] == servicename:
+                if sub['active'] and sub['name'] == service_name:
                     print("type='{0}'".format(sub['type']))
                     print("ip='{0}'".format(sub['ip']))
                     print("port='{0}'".format(sub['port']))
@@ -1089,24 +1073,22 @@ if sys.argv[1] == "subscription-by-service":
                     sys.exit(0)
 
         print("error='not found'")
-        sys.exit(0)
 
     except Exception as e:
         handleException(e)
+        sys.exit(1)
 
-    sys.exit(1)
 
 #######################
-# GET IP BY ONIONADDRESS
+# GET IP BY ONION ADDRESS
 # gets called by other scripts to check if a onion address as a IP2TOR bridge
 # output is bash key/value style so that it can be imported with source
 #######################
-if sys.argv[1] == "ip-by-tor":
-
+def ip_by_tor():
     # check parameters
     try:
         if len(sys.argv) <= 2:
-            raise BlitzError("incorrect parameters", "")
+            raise BlitzError("incorrect parameters")
     except Exception as e:
         handleException(e)
 
@@ -1126,12 +1108,41 @@ if sys.argv[1] == "ip-by-tor":
                     sys.exit(0)
 
         print("error='not found'")
-        sys.exit(0)
 
     except Exception as e:
         handleException(e)
+        sys.exit(1)
 
-    sys.exit(1)
 
-# unknown command
-print("# unknown command")
+def main():
+    if sys.argv[1] == "create-ssh-dialog":
+        create_ssh_dialog()
+
+    elif sys.argv[1] == "shop-list":
+        shop_list()
+
+    elif sys.argv[1] == "shop-order":
+        shop_order()
+
+    elif sys.argv[1] == "subscriptions-list":
+        subscriptions_list()
+
+    elif sys.argv[1] == "subscriptions-renew":
+        subscriptions_renew()
+
+    elif sys.argv[1] == "subscription-cancel":
+        subscription_cancel()
+
+    elif sys.argv[1] == "subscription-by-service":
+        subscription_by_service()
+
+    elif sys.argv[1] == "ip-by-tor":
+        ip_by_tor()
+
+    else:
+        # unknown command
+        print("# unknown command")
+
+
+if __name__ == '__main__':
+    main()
