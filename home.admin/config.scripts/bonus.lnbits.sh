@@ -184,7 +184,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits
     sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
     cd /home/lnbits/lnbits
-    if [ "$2" == "latest" ]; then
+    if [ "$2" == "master" ]; then
       echo "# checking out master branch"
       sudo -u lnbits git checkout
     else
