@@ -184,7 +184,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits
     sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
     cd /home/lnbits/lnbits
-    sudo -u lnbits git checkout tags/raspiblitz
+    if [ "$2" == "latest" ]; then
+      echo "# checking out master branch"
+      sudo -u lnbits git checkout
+    else
+      echo "# checking out tag 'raspiblitz'"
+      sudo -u lnbits git checkout tags/raspiblitz
+    fi
 
     # prepare .env file
     echo "# preparing env file"
