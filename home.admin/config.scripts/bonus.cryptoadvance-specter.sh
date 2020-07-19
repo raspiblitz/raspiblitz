@@ -239,10 +239,8 @@ EOF
   # Hidden Service for SERVICE if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    echo "#    --> correct old Hidden Service with port"
-    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:25441/HiddenServicePort 80 127.0.0.1:25441/g" /etc/tor/torrc
-    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:80/HiddenServicePort 443 127.0.0.1:25441/g" /etc/tor/torrc
-    # port 25441 is HTTPS with self-signed cert
+    # make sure to keep in sync with internet.tor.sh script
+    # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
   exit 0

@@ -365,16 +365,23 @@ EOF
     /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3002
   fi
   if [ "${rtlWebinterface}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
+    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   if [ "${BTCPayServer}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23000
+    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
   fi
   if [ "${ElectRS}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
   if [ "${LNBits}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5000
+    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
+  fi
+  if [ "${thunderhub}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
+  fi
+  if [ "${specter}" = "on" ]; then
+    # specter makes only sense to be served over https
+    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
 
   echo "OK - TOR is now ON"

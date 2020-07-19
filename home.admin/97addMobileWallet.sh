@@ -273,12 +273,12 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
   	  exit 1;
   	;;
   FULLY_NODED)
-      appstoreLink="https://testflight.apple.com/join/PuFnSqgi"
+      appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "continue" \
 		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+		--yesno "Download the app from the AppStore:\n\n${appstoreLink}\n\nWhen installed and started -> continue" 8 60
 	  if [ $? -eq 1 ]; then
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi

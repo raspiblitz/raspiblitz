@@ -184,7 +184,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits
     sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
     cd /home/lnbits/lnbits
-    sudo -u lnbits git checkout tags/raspiblitz
+    if [ "$2" == "master" ]; then
+      echo "# checking out master branch"
+      sudo -u lnbits git checkout
+    else
+      echo "# checking out tag 'raspiblitz'"
+      sudo -u lnbits git checkout tags/raspiblitz
+    fi
 
     # prepare .env file
     echo "# preparing env file"
@@ -246,7 +252,14 @@ WantedBy=multi-user.target
 EOF
 
     sudo systemctl enable lnbits
-    echo "# OK - service needs starting: sudo systemctl start lnbits"
+
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
+      sudo systemctl start lnbits
+    else
+      echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
+    fi
 
   else
     echo "LNbits already installed."
@@ -274,6 +287,7 @@ EOF
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
   exit 0
