@@ -285,7 +285,7 @@ case $CHOICE in
             ;;
         REBOOT)
 	    clear
-	    confirmation "Reboot" true 9 40
+	    confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
 	    confirmationReboot=$?
 	    if [ $confirmationReboot -eq 0 ]; then
                clear
@@ -296,7 +296,7 @@ case $CHOICE in
             ;;
         OFF)
 	    clear
-	    confirmation "PowerOff" true 9 40
+	    confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
 	    confirmationShutdown=$?
 	    if [ $confirmationShutdown -eq 0 ]; then
                clear

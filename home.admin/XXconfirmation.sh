@@ -3,20 +3,22 @@
 confirmation()
 {
   local text=$1
-  local defaultno=$2
-  local height=$3
-  local width=$4
+  local yesButtonText=$2
+  local noButtonText=$3
+  local defaultno=$4
+  local height=$5
+  local width=$6
+  local answer=-100
 
   if [ $defaultno ]; then
-     whiptail --title " Confirmation " --defaultno --yes-button "Yes" --no-button "No" --yesno " $1 
+     whiptail --title " Confirmation " --defaultno --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
 
- Are you sure?
   " $height $width
   else
-    whiptail --title " Confirmation " --yes-button "Yes" --no-button "No" --yesno " $1 
+    whiptail --title " Confirmation " --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
 
- Are you sure?
   " $height $width
   fi
-  return $?
+  answer=$?
+  return $answer
 }
