@@ -255,6 +255,7 @@ EOF
 
     source /home/admin/raspiblitz.info
     if [ "${state}" == "ready" ]; then
+      echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
       sudo systemctl start lnbits
     else
       echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
