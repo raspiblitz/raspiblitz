@@ -77,7 +77,7 @@ HiddenServiceDir /mnt/hdd/tor/$service
 HiddenServiceVersion 3
 HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   # remove double lines  
-  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > .tmp && sudo mv .tmp /etc/tor/torrc
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /etc/tor/torrc
 
   # check and insert second port pair
   if [ ${#toPort2} -gt 0 ]; then
