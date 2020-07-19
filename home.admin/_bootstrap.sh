@@ -58,6 +58,46 @@ if [ "${setupStep}" != "100" ]; then
 fi
 sudo chmod 777 ${infoFile}
 
+################################
+# IDENTIFY CPU ARCHITECTURE
+################################
+
+cpu="?"
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -gt 0 ]; then
+  cpu="arm"
+elif [ ${isAARCH64} -gt 0 ]; then
+  cpu="aarch64"
+elif [ ${isX86_64} -gt 0 ]; then
+  cpu="x86_64"
+fi
+echo "cpu=${cpu}" >> $infoFile
+
+################################
+# IDENTIFY BASEIMAGE
+################################
+
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+echo "baseimage=${baseImage}" >> $infoFile
+
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
@@ -142,9 +182,11 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  sudo /home/admin/setup.sh
+  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
+  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
   # delete the after boot script
-  sudo rm /home/admin/setup.sh
+  sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
   sudo shutdown -r now
@@ -535,46 +577,6 @@ else
   sudo mkdir /mnt/hdd/app-data/subscriptions
   sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 fi
-
-################################
-# IDENTIFY CPU ARCHITECTURE
-################################
-
-cpu="?"
-isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -gt 0 ]; then
-  cpu="arm"
-elif [ ${isAARCH64} -gt 0 ]; then
-  cpu="aarch64"
-elif [ ${isX86_64} -gt 0 ]; then
-  cpu="x86_64"
-fi
-echo "cpu=${cpu}" >> $infoFile
-
-################################
-# IDENTIFY BASEIMAGE
-################################
-
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-echo "baseimage=${baseImage}" >> $infoFile
 
 ################################
 # STRESSTEST RASPBERRY PI

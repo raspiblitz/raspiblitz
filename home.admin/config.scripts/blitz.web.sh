@@ -128,6 +128,9 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl enable nginx 
   sudo systemctl start nginx
 
+  # create nginx app-data dir
+  sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
+
   # general nginx settings
   if ! grep -Eq '^\s*server_names_hash_bucket_size.*$' /etc/nginx/nginx.conf; then
     # ToDo(frennkie) verify this
@@ -135,10 +138,22 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
-    #can take 5-10+ minutes on a Raspberry Pi 3
-    echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
-    echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
-    sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+    # check if there is a user generated dhparam.pem on the HDD to use
+    userFileExists=$(sudo ls /mnt/hdd/app-data/nginx/dhparam.pem 2>/dev/null | grep -c dhparam.pem)
+    if [ ${userFileExists} -eq 0 ]; then
+      # generate dhparam.pem - can take +10 minutes on a Raspberry Pi
+      echo "Generating a complete new dhparam.pem"
+      echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
+      echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
+      sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+      sudo cp /etc/ssl/certs/dhparam.pem /mnt/hdd/app-data/nginx/dhparam.pem
+    else
+      # just copy the already user generated dhparam.pem into nginx
+      echo "Copying the user generetad /mnt/hdd/app-data/nginx/dhparam.pem"
+      sudo cp /mnt/hdd/app-data/nginx/dhparam.pem /etc/ssl/certs/dhparam.pem
+    fi
+
   fi
 
   sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
@@ -178,8 +193,7 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get install -y python3-jinja2
   sudo -H python3 -m pip install j2cli
 
-  # create nginx app-data dir and use LND cert by default
-  sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
+  # use LND cert by default
   sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
   sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
   sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert

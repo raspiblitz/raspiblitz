@@ -453,6 +453,7 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 

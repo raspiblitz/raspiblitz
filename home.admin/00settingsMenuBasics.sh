@@ -14,7 +14,6 @@ if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
-if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 
 echo "map dropboxbackup to on/off"
@@ -78,7 +77,6 @@ OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
 OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
 OPTIONS+=(n 'Testnet' ${chainValue})    
-OPTIONS+=(c 'Let`s Encrypt Client' ${letsencrypt})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
 OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
@@ -288,36 +286,6 @@ Please keep in mind that thru your LND node id & your previous IP history with y
 
 else
   echo "TOR Setting unchanged."
-fi
-
-# Let's Encrypt process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${letsencrypt}" != "${choice}" ]; then
-  echo "Let's Encrypt Client Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bonus.letsencrypt.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      msg="Successfully installed."
-    else
-      msg="Failed to install!"
-    fi
-  else
-    if [ ${errorOnInstall} -eq 0 ]; then
-      msg="Successfully removed."
-    else
-      msg="Failed to remove!"
-    fi
-  fi
-
-  dialog --backtitle "Additional Services" \
-      --title "Let's Encrypt Client" \
-      --infobox "\n${msg}" 5 40 ; sleep 3
-
-else
-  echo "Let's Encrypt Client Setting unchanged."
 fi
 
 # LND Auto-Unlock
