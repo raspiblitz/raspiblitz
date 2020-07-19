@@ -252,7 +252,13 @@ WantedBy=multi-user.target
 EOF
 
     sudo systemctl enable lnbits
-    echo "# OK - service needs starting: sudo systemctl start lnbits"
+
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl start lnbits
+    else
+      echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
+    fi
 
   else
     echo "LNbits already installed."
