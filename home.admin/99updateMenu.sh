@@ -192,9 +192,9 @@ lnd()
   source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
 
   # LND Update Options
-  OPTIONS=(VERIFIED "Optional LND update to ${lndUpdateVersion}" \
-           RECKLESS "Experimental LND update to ${lndLatestVersion}"
-	)
+  OPTIONS=()
+  # OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  OPTIONS+=(RECKLESS "Experimental LND update to ${lndLatestVersion}")
 
   CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 

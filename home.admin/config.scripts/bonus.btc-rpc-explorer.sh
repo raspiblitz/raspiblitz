@@ -31,7 +31,7 @@ This can take multiple hours.
   fi
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -39,7 +39,7 @@ This can take multiple hours.
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
@@ -51,7 +51,7 @@ ${toraddress}
   else
 
     # IP + Domain
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
@@ -229,7 +229,7 @@ EOF
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    echo "# Creating Tor Hidden Service"
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
@@ -258,6 +258,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/nginx/sites-available/btcrpcexplorer_tor_ssl.conf
     sudo nginx -t
     sudo systemctl reload nginx
+
+    # Hidden Service if Tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with internet.tor.sh script
+      /home/admin/config.scripts/internet.hiddenservice.sh off btc-rpc-explorer
+    fi
 
     echo "# OK BTC-RPC-explorer removed."
   

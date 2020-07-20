@@ -5,26 +5,31 @@
 - Update: Raspberry Pi OS Base Image (May 2020)
 - Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
 - Update: litecoin version 0.18.1-beta [details](https://blog.litecoin.org/litecoin-core-v0-18-1-release-233cabc26440)
-- Update: LND version 0.10.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.1-beta)
-- Update: Specter Desktop 0.4.1 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Loop 0.6.4 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
+- Update: LND version 0.10.4-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.4-beta)
+- Update: Specter Desktop 0.5.5 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Loop 0.6.5 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
 - Update: BTCPayServer v1.0.5.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.2)
-- Update: RTL 0.7.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
+- Update: RTL 0.8.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
 - Update: ElectRS 0.8.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#085-1-july-2020)
 - Update: JoinMarket v0.6.3.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.6.3.1)
 - New: Nginx Web Server
 - New: Subscriptions Management 
 - New: IP2Tor Bridge (optional subscription service)
-- New: Balance of Satoshis v5.39.4 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Balance of Satoshis v5.41.0 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
 - New: Faraday [details](https://github.com/lightninglabs/faraday)
 - New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
-- New: ThunderHub v0.8.4 (with update option) [details](https://www.thunderhub.io)
+- New: ThunderHub v0.8.12 (with update option) [details](https://www.thunderhub.io)
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - New: ZeroTier [details](https://zerotier.com/manual/)
 - New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 - New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
+
+## Whats new in Version 1.5.1 of RaspiBlitz?
+
+- Bugfix: DropBox Backup of Static-Channel-Backup
+- Bugfix: Torrentfiles with active tracker 
 
 ## Whats new in Version 1.5 of RaspiBlitz?
 
@@ -813,8 +818,8 @@ If you want to use the HDMI output you can place a file called `hdmi` on the `bo
 
 If you are already logged in you can use on the console the commands:
 
-- `hdmi` --> to witch to HDMI
-- `lcd` --> to witch to LCD
+- `hdmi` --> switch to HDMI
+- `lcd` --> switch to LCD
 
 ## How do I set up VNC?
 
@@ -1077,3 +1082,10 @@ It is currently considered completely fine to leave this field empty and not pro
 
 The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
 external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
+
+### How can I customize my RaspiBlitz or add other software?
+
+The RaspiBlitz is your computer to experiment with. Feel free to add your own scripts, edit the system or install further software from the command line. Just keep in mind that after an update/recovery the RaspiBlitz starts with a fresh and clean operating system again. So all your editings and installs might be gone. To prevent this you should do the following:
+
+- place own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
+- put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` that will be started automatically on a recovery/update.

@@ -7,10 +7,11 @@ SERVER_PORT=3030
 APP_DATA_DIR=/mnt/hdd/app-data/kindle-display
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
+RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.2.3
+APP_VERSION=0.4.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,7 +29,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c 'kindle-display')
   if [ ${isInstalled} -eq 0 ]; then
     # install dependencies
-    sudo apt install -y firefox-esr pngcrush jo
+    sudo apt install -y firefox-esr pngcrush jo jq
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
@@ -59,12 +60,29 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       cat > $configFile <<EOF
 # Server port
 DISPLAY_SERVER_PORT=$SERVER_PORT
+
+# Require Tor for outside API calls
+DISPLAY_FORCE_TOR=true
+
+# Bitcoin RPC credentials for getting the blockcount.
+# Omit these setting to use blockchain.info as a fallback.
 DISPLAY_BITCOIN_RPC_USER="$RPC_USER"
 DISPLAY_BITCOIN_RPC_PASS="$RPC_PASS"
-# BTCPay Settings for rate fetching – omit these setting to use Bitstamp as a fallback
+
+# Exchange rates to show.
+# Use identifiers supported by BTCPay/Kraken, e.g. EUR, CHF
+DISPLAY_RATE1="USD"
+DISPLAY_RATE2="EUR"
+
+# BTCPay Settings for rate fetching.
 # Generate API via Store > Access Tokens > Legacy API Keys
+# Omit these setting to use Kraken as a fallback.
 # BTCPAY_HOST="https://my.btcpayserver.com"
 # BTCPAY_API_TOKEN="myBtcPayLegacyApiKey"
+
+# Shall the fallbacks be used?
+DISPLAY_FALLBACK_BLOCK=false
+DISPLAY_FALLBACK_RATES=true
 EOF
       sudo mv $configFile $CONFIG_FILE
     fi
@@ -114,7 +132,7 @@ EOF
     echo "Switch to the '$USERNAME' user and adapt the settings in $CONFIG_FILE"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" /mnt/hdd/raspiblitz.conf
+    grep -q '^kindleDisplay' $RASPIBLITZ_FILE && sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" $RASPIBLITZ_FILE || echo 'kindleDisplay=on' >> $RASPIBLITZ_FILE
   else
     echo "KINDLE-DISPLAY already installed."
   fi
@@ -129,7 +147,7 @@ EOF
     echo ""
     echo "SHELL=/bin/bash"
     echo "PATH=/bin:/usr/bin:/usr/local/bin"
-    echo "*/5 * * * * $CRON_FILE 2>&1 > /dev/null"
+    echo "*/5 * * * * $CRON_FILE > /dev/null 2>&1"
   fi
 
   exit 0
@@ -144,7 +162,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** REMOVING KINDLE-DISPLAY ***"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" $RASPIBLITZ_FILE
 
     # uninstall service
     sudo systemctl stop kindle-display

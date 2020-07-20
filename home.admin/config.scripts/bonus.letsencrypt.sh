@@ -4,6 +4,9 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "config script to install or remove the Let's Encrypt Client (ACME.SH)"
   echo "bonus.letsencrypt.sh [on|off]"
+  echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
+  echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
+  echo "bonus.letsencrypt.sh refresh-ngnix-certs"
   exit 1
 fi
 
@@ -100,6 +103,68 @@ function acme_install() {
 
 }
 
+function refresh_certs_with_nginx() {
+
+    # FIRST: SET ALL TO DEFAULT SELF SIGNED
+
+    echo "# default IP certs"
+    sudo rm /mnt/hdd/app-data/nginx/tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+
+    echo "# default TOR certs"
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+
+    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
+
+    if [ "${letsencrypt}" != "on" ]; then
+      echo "# lets encrypt is off - so no certs replacements"
+      return
+    fi
+
+    certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
+    for i in "${directoryArray[@]}"; do
+      FQDN=$(echo "${i}" | cut -d "_" -f1)
+      # check if there is a LetsEncrypt Subscription for this domain
+      details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
+      if [ ${#details} -gt 10 ]; then
+
+        # get target for that domain
+        options=$(echo "${details}" | jq -r ".target")
+        
+        # replace certs for clearnet
+        if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
+          echo "# replacing IP certs for ${FQDN}"
+          sudo rm /mnt/hdd/app-data/nginx/tls.cert
+          sudo rm /mnt/hdd/app-data/nginx/tls.key 
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
+        fi
+
+        # repleace certs for tor
+        if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
+          echo "# replacing TOR certs for ${FQDN}"
+          sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
+          sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert
+          sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tor_tls.key
+        fi
+
+        # todo maybe allow certs for single services later (dont forget that these also need to be replaced in 'on' then)
+        if [ "${options}" != "tor" ] && [ "${options}" != "ip" ] && [ "${options}" != "ip&tor" ]; then
+          echo "# FAIL target '${options}' not supported yet'"
+        fi
+
+      fi
+    done
+
+}
+
 
 ###################
 # running as admin
@@ -132,15 +197,160 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # setting value in RaspiBlitz config
     sudo sed -i "s/^letsencrypt=.*/letsencrypt=on/g" /mnt/hdd/raspiblitz.conf
 
-    address=$(menu_enter_email)
-    echo ""
+    address="$2"
+    if [ "$2" == "enter-email" ]; then
+      address=$(menu_enter_email)
+      echo ""
+    fi
 
+    # make sure storage directory exist
+    sudo mkdir -p /mnt/hdd/app-data/letsencrypt/certs 2>/dev/null
+    sudo chown -R admin:admin /mnt/hdd/app-data/letsencrypt
+    sudo chmod -R 733 /mnt/hdd/app-data/letsencrypt
+
+    # install the acme script
     acme_install "${address}"
     echo ""
 
+    # make sure already existing certs get refreshed in to nginx
+    refresh_certs_with_nginx
+    echo "# restarting nginx"
+    sudo systemctl restart nginx 2>&1
+
+    exit 0
+
   else
-    echo "*** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
+    echo "# *** Let's Encrypt Client 'acme.sh' appears to be installed already ***"
+    exit 1
   fi
+
+###################
+# ISSUE-CERT
+###################
+
+elif [ "$1" = "issue-cert" ]; then
+
+  # check if letsencrypt is on
+  if [ "${letsencrypt}" != "on" ]; then
+    echo "error='letsenscrypt is not on'"
+    exit 1
+  fi
+
+  # get and check parameters
+  dnsservice=$2
+  FQDN=$3
+  apitoken=$4
+  options=$5
+  if [ ${#dnsservice} -eq 0 ] || [ ${#FQDN} -eq 0 ] || [ ${#apitoken} -eq 0 ]; then
+    echo "error='invalid parameters'"
+    exit 1
+  fi
+  if [ ${#options} -eq 0 ]; then
+    options="ip&tor"
+  fi
+
+  # prepare values and exports based on dnsservice
+  if [ "${dnsservice}" == "duckdns" ]; then
+      echo "# preparing DUCKDNS"
+      dnsservice="dns_duckdns"
+      export DuckDNS_Token=${apitoken}
+  else
+    echo "error='not supported dnsservice'"
+    exit 1
+  fi
+
+  # create certicicates
+  echo "# creating certs for ${FQDN}"
+  $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
+  success1=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
+  success2=$(sudo ls ${ACME_CERT_HOME}/${FQDN}_ecc//fullchain.cer | grep -c "/fullchain.cer")
+  if [ ${success1} -eq 0 ] || [ ${success2} -eq 0 ]; then
+    sleep 6
+    echo "error='acme failed'"
+    exit 1
+  fi
+
+  # test nginx config
+  refresh_certs_with_nginx
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  # restart nginx
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
+
+  exit 0
+
+###################
+# REMOVE-CERT
+###################
+
+elif [ "$1" = "remove-cert" ]; then
+
+  # check if letsencrypt is on
+  if [ "${letsencrypt}" != "on" ]; then
+    echo "error='letsenscrypt is not on'"
+    exit 1
+  fi
+
+  # get and check parameters
+  FQDN=$2
+  options=$3
+  if [ ${#FQDN} -eq 0 ]; then
+    echo "error='invalid parameters'"
+    exit 1
+  fi
+  if [ ${#options} -eq 0 ]; then
+    options="ip&tor"
+  fi
+
+  # remove cert from renewal
+  $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
+
+  # delete cert files
+  sudo rm -r  ${ACME_CERT_HOME}/${FQDN}_ecc
+
+  # test nginx config
+  refresh_certs_with_nginx
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  # restart nginx
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
+
+  exit 0
+
+
+###################
+# REMOVE-CERT
+###################
+
+elif [ "$1" = "refresh-ngnix-certs" ]; then
+
+  # refresh nginx
+  refresh_certs_with_nginx
+  syntaxOK=$(sudo nginx -t 2>&1 | grep -c "syntax is ok")
+  testOK=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+  if [ ${syntaxOK} -eq 0 ] || [ ${testOK} -eq 0 ]; then
+    echo "# to check details on nginx config use: sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
+
+  echo "# restarting nginx"
+  sudo systemctl restart nginx 2>&1
+  
 
 ###################
 # OFF
@@ -157,8 +367,20 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
+    # refresh nginx
+    refresh_certs_with_nginx
+    echo "# restarting nginx"
+    sudo systemctl restart nginx 2>&1
+
+    # remove old script install
+    sudo rm -r ${ACME_INSTALL_HOME}
+    sudo rm -r ${ACME_CONFIG_HOME}
+
+    exit 0
+
   else
-    echo "*** Let's Encrypt Client 'acme.sh' not installed ***"
+    echo "# *** Let's Encrypt Client 'acme.sh' not installed ***"
+    exit 1
   fi
 
 else

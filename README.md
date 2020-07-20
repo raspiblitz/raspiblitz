@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6 with lnd 0.10.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6 with lnd 0.10.4 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -123,11 +123,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 THIS IS A RELEASE CANDIDATE - NOT THE FINAL VERSION - DONT USE FOR A PRODUCTION NODE!
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6rc2-2020-07-06.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6rc3-2020-07-20.img.gz
 
 Torrent: [TODO]
 
-SHA-256: 2b578caa14fcff28e490366a4ad97c6095e12be8e357fcd0ed95db1bd9342afb or [SIGNATURE](https://todo)
+SHA-256: 13de2dbfd5d92e8daab8e814dc8c4a575da962a505ea5014904d89df042236ce or [SIGNATURE](https://todo)
 
 * [Whats new in Version 1.6 of RaspiBlitz?](FAQ.md#whats-new-in-version-16-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
@@ -272,7 +272,7 @@ This is also the best option if you don't like to run your RaspberryPi 3 with a 
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-#### 3. Torrent Fallback
+#### 3. Torrent Fallback (NOTE: to-be-deprecated in 1.6)
 
 *This is recommended for old RaspberryPi 3s - for the newer RaspberryPi 4 you might consider the `SYNC` option.*
 
@@ -423,7 +423,7 @@ This is the screen that gets displayed on the LCD/display. It's useful to call i
 
 Before you can open channels with other nodes you need to put some coins onto your LND on-chain wallet. Use this option to generate an address to send funds to.
 
-*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of loosing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/#privacy) before sending them to any Lightning Network wallet.*
+*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of losing funds. So just play with small amounts - something in then area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/#privacy) before sending them to any Lightning Network wallet.*
 
 You can make multiple fundings - so you can start with small amounts first to test. LND will generate always a different address, but all funds you send will get into the same LND on-chain wallet.
 

@@ -58,6 +58,46 @@ if [ "${setupStep}" != "100" ]; then
 fi
 sudo chmod 777 ${infoFile}
 
+################################
+# IDENTIFY CPU ARCHITECTURE
+################################
+
+cpu="?"
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -gt 0 ]; then
+  cpu="arm"
+elif [ ${isAARCH64} -gt 0 ]; then
+  cpu="aarch64"
+elif [ ${isX86_64} -gt 0 ]; then
+  cpu="x86_64"
+fi
+echo "cpu=${cpu}" >> $infoFile
+
+################################
+# IDENTIFY BASEIMAGE
+################################
+
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+echo "baseimage=${baseImage}" >> $infoFile
+
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
@@ -136,12 +176,17 @@ fi
 afterSetupScriptExists=$(ls /home/admin/setup.sh 2>/dev/null | grep -c setup.sh)
 if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "*** SETUP SCRIPT DETECTED ***"
+  # LCD info
+  sudo sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+  sudo sed -i "s/^message=.*/message='After Boot Setup (takes time)'/g" ${infoFile}
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  sudo /home/admin/setup.sh
+  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
+  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
   # delete the after boot script
-  sudo rm /home/admin/setup.sh
+  sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
   sudo shutdown -r now
@@ -194,7 +239,7 @@ fi
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#localip} -eq 0 ]; then
     # display user to connect LAN
     sed -i "s/^state=.*/state=noIP/g" ${infoFile}
@@ -395,7 +440,7 @@ if [ ${configExists} -eq 1 ]; then
       # prevent having no publicIP set at all and LND getting stuck
       # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
       if [ ${#publicIP} -eq 0 ]; then
-        localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+        localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
         freshPublicIP="${localIP}"
       fi
@@ -452,7 +497,7 @@ fi
 ################################
 source ${configFile}
 echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
-if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ];; then
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
   echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
   sudo /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
 else
@@ -532,46 +577,6 @@ else
   sudo mkdir /mnt/hdd/app-data/subscriptions
   sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 fi
-
-################################
-# IDENTIFY CPU ARCHITECTURE
-################################
-
-cpu="?"
-isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -gt 0 ]; then
-  cpu="arm"
-elif [ ${isAARCH64} -gt 0 ]; then
-  cpu="aarch64"
-elif [ ${isX86_64} -gt 0 ]; then
-  cpu="x86_64"
-fi
-echo "cpu=${cpu}" >> $infoFile
-
-################################
-# IDENTIFY BASEIMAGE
-################################
-
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-echo "baseimage=${baseImage}" >> $infoFile
 
 ################################
 # STRESSTEST RASPBERRY PI

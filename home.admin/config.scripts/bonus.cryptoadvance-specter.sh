@@ -21,7 +21,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.cryptoadvance-specter.sh status)
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
@@ -29,7 +29,7 @@ if [ "$1" = "menu" ]; then
 
     # TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:
@@ -44,7 +44,7 @@ https://${toraddress}\n
   else
 
     # IP + Domain
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open the following URL in your local web browser:
+    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:
@@ -112,7 +112,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.5.5
     
     
     # Mandatory as the camera doesn't work without https
@@ -227,7 +227,6 @@ EOF
 
     sudo mv /home/admin/cryptoadvance-specter.service /etc/systemd/system/cryptoadvance-specter.service
     sudo systemctl enable cryptoadvance-specter
-    sudo systemctl start cryptoadvance-specter
 
     echo "#    --> OK - the cryptoadvance-specter service is now enabled and started"
   else 
@@ -240,10 +239,8 @@ EOF
   # Hidden Service for SERVICE if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    echo "#    --> correct old Hidden Service with port"
-    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:25441/HiddenServicePort 80 127.0.0.1:25441/g" /etc/tor/torrc
-    sudo sed -i "s/^HiddenServicePort 25441 127.0.0.1:80/HiddenServicePort 443 127.0.0.1:25441/g" /etc/tor/torrc
-    # port 25441 is HTTPS with self-signed cert
+    # make sure to keep in sync with internet.tor.sh script
+    # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
   exit 0
@@ -255,12 +252,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^specter=.*/specter=off/g" /mnt/hdd/raspiblitz.conf
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off cryptoadvance-specter
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
   if [ ${isInstalled} -eq 1 ]; then
+
     echo "#    --> REMOVING Cryptoadvance Specter"
     sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
 
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
       echo "#    --> Removing wallets in core"

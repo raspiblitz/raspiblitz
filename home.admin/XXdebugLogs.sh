@@ -71,6 +71,13 @@ echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
+echo "*** LAST NGINX LOGS ***"
+echo "sudo journalctl -u nginx -b --no-pager -n20"
+sudo journalctl -u nginx -b --no-pager -n20
+echo "--> CHECK CONFIG: sudo nginx -t"
+sudo nginx -t
+echo ""
+
 if [ "${touchscreen}" = "1" ]; then
   echo ""
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
@@ -153,6 +160,11 @@ if [ "${specter}" = "on" ]; then
 else
   echo "- SPECTER is OFF by config"
 fi
+
+echo ""
+echo "*** MOUNTED DRIVES ***"
+df -T
+echo ""
 
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0

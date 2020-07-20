@@ -212,7 +212,6 @@ class RaspiBlitzConfig(BaseConfig):
         self.version = StrSetting('raspiBlitzVersion')
         self.lnbits = BoolSetting('LNBits', aliases=['LNbits', 'lnbits'], default=False)
 
-
 class RaspiBlitzInfo(BaseConfig):
     def __init__(self, abs_path="/home/admin/raspiblitz.info"):
         super().__init__()
