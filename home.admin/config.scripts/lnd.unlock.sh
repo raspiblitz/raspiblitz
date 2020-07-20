@@ -107,7 +107,7 @@ while [ ${fallback} -eq 0 ]
 
   done
 
-# FALBACK LND CLI UNLOCK
+# FALLBACK LND CLI UNLOCK
 walletLocked=1
 while [ ${walletLocked} -gt 0 ]
 do
