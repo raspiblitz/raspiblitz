@@ -42,8 +42,43 @@ rootPartitionLength=${#rootPartition}
 rootDisk=${rootPartition:5:rootPartitionLength-6}
 rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
 
-# TODO: Insert if statements
-
+if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
+  if [ ${isRaspbian} -gt 0 ]; then
+    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+  elif [ ${isArmbian} -gt 0 ]; then
+    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
+  fi
+  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
+  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
+  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
+  if [ ${byteSizeSdCard} -lt 8192000 ]; then
+    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
+    if [ ${fsexpanded} -eq 1 ]; then
+      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
+      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
+      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+      exit 1
+    else
+      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+      if [ ${isRaspbian} -gt 0 ]; then
+        sudo raspi-config --expand-rootfs
+      elif [ ${isArmbian} -gt 0 ]; then
+        sudo /usr/lib/armbian/armbian-resize-filesystem start
+      fi
+      sleep 6
+      sudo shutdown -r now
+      exit 0
+    fi
+   else
+      echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
+   fi
+else
+   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
+fi
 
 # import config values
 sudo chmod 777 ${configFile}
