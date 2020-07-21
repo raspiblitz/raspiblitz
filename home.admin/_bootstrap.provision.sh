@@ -42,40 +42,42 @@ rootPartitionLength=${#rootPartition}
 rootDisk=${rootPartition:5:rootPartitionLength-6}
 rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
 
-if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
-  if [ ${isRaspbian} -gt 0 ]; then
-    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  elif [ ${isArmbian} -gt 0 ]; then
-    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  fi
-  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
-  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
-  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
-  if [ ${byteSizeSdCard} -lt 8192000 ]; then
-    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
-    if [ ${fsexpanded} -eq 1 ]; then
-      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
-      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-      exit 1
-    else
-      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-      if [ ${isRaspbian} -gt 0 ]; then
-        sudo raspi-config --expand-rootfs
-      elif [ ${isArmbian} -gt 0 ]; then
-        sudo /usr/lib/armbian/armbian-resize-filesystem start
+if [ ${#rootDisk} -gt 0 ]; then
+   echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
+   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
+   echo "Size in Bytes is: ${rootDiskSize} ($rootDisk)" >> ${logFile}
+   if [ $rootDiskSize -lt $minimumSize ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeGB}GB." >> ${logFile}
+      if [ ${fsexpanded} -eq 1 ]; then
+         echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
+         echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+         exit 1
+      else
+         echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+         sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+         if [ "${cpu}" == "x86_64"  ]; then
+            echo "Please expand disk size." >> ${logFile}
+	    # TODO: Expand disk size on x86_64
+         elif [ ${isRaspbian} -gt 0 ]; then
+              if [ -x ${resizeRaspbian} ]; then
+		      $(sudo $resizeRaspbian --expand-rootfs)
+	      fi
+         elif [ ${isArmbian} -gt 0 ]; then
+              if [ -x ${resizeArmbian} ]; then
+                 $(sudo $resizeArmbian start)
+	      fi
+         fi
+         sleep 6
+         sudo shutdown -r now
+	 exit 0
       fi
-      sleep 6
-      sudo shutdown -r now
-      exit 0
-    fi
-  else
+   else
       echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
-  fi
+   fi
 else
    echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
 fi
