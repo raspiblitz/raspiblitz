@@ -73,11 +73,11 @@ if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
       sudo shutdown -r now
       exit 0
     fi
-  else
-    echo "Size looks good. Bigger than 8GB card is used." >> ${logFile}
-  fi
+   else
+      echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
+   fi
 else
-  echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
+   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
