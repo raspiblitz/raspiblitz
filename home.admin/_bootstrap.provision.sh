@@ -26,10 +26,22 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
-# check if file system was expanded to full capacity and sd card is bigger then 8GB
+# check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+source ${infoFile}
+isRaspbian=$(echo $baseimage | grep -c 'raspbian')
+isArmbian=$(echo $baseimage | grep -c 'armbian')
+resizeRaspbian="/usr/bin/raspi-config"
+resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
+
+minimumSize=8192000
+minimumSizeGB=$((minimumSize/1000/1000))
+
+rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
+rootPartitionLength=${#rootPartition}
+rootDisk=${rootPartition:5:rootPartitionLength-6}
+rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
+
 if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
   if [ ${isRaspbian} -gt 0 ]; then
     echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
