@@ -88,7 +88,7 @@ fi
 network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
 
 # get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info 
+# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
   network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
@@ -268,7 +268,10 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "Filtering block" | tail -n1 | awk '{print $7}')
+      if [ ${#item} -eq 0 ]; then
+          item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+      fi
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
@@ -358,7 +361,7 @@ else
   if [ ${#appInfoLine} -gt 0 ]; then
     echo "${appInfoLine}"
   fi
-  
+
 fi
 
 uptime=$(uptime --pretty)
