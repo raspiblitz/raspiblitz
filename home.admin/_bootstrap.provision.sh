@@ -73,9 +73,9 @@ if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
       sudo shutdown -r now
       exit 0
     fi
-   else
+  else
       echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
-   fi
+  fi
 else
    echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
 fi
