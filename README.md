@@ -122,11 +122,11 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 THIS IS A RELEASE CANDIDATE - NOT THE FINAL VERSION - DONT USE FOR A PRODUCTION NODE!
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6rc2-2020-07-06.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6rc3-2020-07-20.img.gz
 
 Torrent: [TODO]
 
-SHA-256: 2b578caa14fcff28e490366a4ad97c6095e12be8e357fcd0ed95db1bd9342afb or [SIGNATURE](https://todo)
+SHA-256: 13de2dbfd5d92e8daab8e814dc8c4a575da962a505ea5014904d89df042236ce or [SIGNATURE](https://todo)
 
 * [Whats new in Version 1.6 of RaspiBlitz?](FAQ.md#whats-new-in-version-16-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)

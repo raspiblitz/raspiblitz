@@ -109,15 +109,14 @@ def duckdns_update(domain, token, ip):
 # PROCESS FUNCTIONS
 #####################
 
-def subscriptions_new(ip, dnsservice, id, token, target):
-    # id needs to be the full domain name
-    if id.find(".") == -1:
-        # ToDo(frennkie) dnsservice_id doesn't exit
-        raise BlitzError("not a fully qualified domain name", dnsservice_id)
+def subscriptions_new(ip, dnsservice, domain, token, target):
+    # domain needs to be the full domain name
+    if domain.find(".") == -1:
+        raise BlitzError("not a fully qualified domain name", domain)
 
-    # check if id already exists
-    if len(get_subscription(id)) > 0:
-        raise BlitzError("id already exists", id)
+    # check if domain already exists
+    if len(get_subscription(domain)) > 0:
+        raise BlitzError("domain already exists", domain)
 
     # make sure lets encrypt client is installed
     os.system("/home/admin/config.scripts/bonus.letsencrypt.sh on")
@@ -127,9 +126,8 @@ def subscriptions_new(ip, dnsservice, id, token, target):
     if ip == "dyndns":
         update_url = ""
         if dnsservice == "duckdns":
-            # ToDo(frennkie) domain doesn't exit
             update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(get_subdomain(domain), token, ip)
-        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', id, update_url],
+        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
 
@@ -140,9 +138,9 @@ def subscriptions_new(ip, dnsservice, id, token, target):
     # create subscription data for storage
     subscription = dict()
     subscription['type'] = "letsencrypt-v1"
-    subscription['id'] = id
+    subscription['id'] = domain
     subscription['active'] = True
-    subscription['name'] = "{0} for {1}".format(dnsservice, id)
+    subscription['name'] = "{0} for {1}".format(dnsservice, domain)
     subscription['dnsservice_type'] = dnsservice
     subscription['dnsservice_token'] = token
     subscription['ip'] = ip
@@ -174,7 +172,7 @@ def subscriptions_new(ip, dnsservice, id, token, target):
     # run the ACME script
     print("# Running letsencrypt ACME script ...")
     acme_result = subprocess.Popen(
-        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, id, token, target],
+        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
     out, err = acme_result.communicate()
     eprint(str(out))

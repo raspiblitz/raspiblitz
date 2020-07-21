@@ -62,7 +62,7 @@ if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
       exit 0
     fi
   else
-    echo "Size looks good. Bigger then 8GB card is used." >> ${logFile}
+    echo "Size looks good. Bigger than 8GB card is used." >> ${logFile}
   fi
 else
   echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
