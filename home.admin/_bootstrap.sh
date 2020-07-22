@@ -239,7 +239,7 @@ fi
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(eth|ens|enp|eno|wlan|wlp)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#localip} -eq 0 ]; then
     # display user to connect LAN
     sed -i "s/^state=.*/state=noIP/g" ${infoFile}
