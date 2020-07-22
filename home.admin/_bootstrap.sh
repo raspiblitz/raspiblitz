@@ -35,7 +35,7 @@ function wait_for_local_network() {
   gotLocalIP=0
   until [ ${gotLocalIP} -eq 1 ]
   do
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     if [ ${#localip} -eq 0 ]; then
       configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
       if [ ${configWifiExists} -eq 0 ]; then
