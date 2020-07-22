@@ -25,6 +25,8 @@
 - New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
 - New: Keep WIFI config over wpa_supplicant.conf for next update
 - Fix: DropBox StaticChannelBackup
+- Removed: Shango from the list of Mobile Wallets
+- Removed: Torrent Download of Blockchain (Copy over LAN now default for RP3)
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
 ## Whats new in Version 1.5.1 of RaspiBlitz?
