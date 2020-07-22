@@ -349,7 +349,7 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Restoring WIFI setting & rebooting .." >> $logFile
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
     sudo chmod 755 /boot/wpa_supplicant.conf
-    sudo restart now
+    sudo reboot now
     exit 0
   fi
 
