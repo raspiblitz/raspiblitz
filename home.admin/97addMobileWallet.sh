@@ -121,19 +121,17 @@ checkIP2TOR()
 # Options
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
-        SHANGO_IOS "Shango Wallet (iOS)" \
-        SHANGO_ANDROID "Shango Wallet (Android)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
+
+# add SEND MANY APP
+OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
 
 # Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
-
-# add SEND MANY APP
-OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
