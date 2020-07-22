@@ -217,7 +217,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits/lnbits
     sudo -u lnbits pipenv install
     sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
-    # to the install
+
+    # update databases (if needed)
     echo "# updating databases"
     sudo -u lnbits /usr/bin/pipenv run flask migrate
 
