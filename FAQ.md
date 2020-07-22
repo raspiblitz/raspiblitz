@@ -23,6 +23,7 @@
 - New: ZeroTier [details](https://zerotier.com/manual/)
 - New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 - New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
+- New: Keep WIFI config over wpa_supplicant.conf for next update
 - Fix: DropBox StaticChannelBackup
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
