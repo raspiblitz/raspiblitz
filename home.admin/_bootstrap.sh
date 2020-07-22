@@ -37,8 +37,8 @@ function wait_for_local_network() {
   do
     localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     if [ ${#localip} -eq 0 ]; then
-      doesWIFIconfigExists=$(ls /boot/wpa_supplicant.conf 2>/dev/null| grep -c "wpa_supplicant.conf")
-      if [ ${doesWIFIconfigExists} -eq 0 ]; then
+      configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+      if [ ${configWifiExists} -eq 0 ]; then
         # display user to connect LAN
         sed -i "s/^state=.*/state=noIP/g" ${infoFile}
         sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
@@ -343,9 +343,9 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if there is a WIFI configuration to restore
-  configWifiBoot=$(sudo ls /boot/wpa_supplicant.conf 2>/dev/null| grep -c "wpa_supplicant.conf")
+  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
   configWifiHDD=$(sudo ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "wpa_supplicant.conf")
-  if [ ${configWifiBoot} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
+  if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
     echo "Restoring WIFI setting & rebooting .." >> $logFile
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
     sudo chmod 755 /boot/wpa_supplicant.conf
@@ -426,10 +426,10 @@ fi # END - no automount - after this HDD is mounted
 wait_for_local_network
 
 # if a WIFI config exists backup to HDD
-configWifiBoot=$(sudo ls /boot/wpa_supplicant.conf 2>/dev/null| grep -c "wpa_supplicant.conf")
-if [ ${configWifiBoot} -eq 1 ]; then
+configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+if [ ${configWifiExists} -eq 1 ]; then
   echo "Making Backup Copy of WIFI config to HDD" >> $logFile
-  sudo cp /boot/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
+  sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
 fi
 
 # config should exist now
