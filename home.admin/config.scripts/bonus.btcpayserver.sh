@@ -367,19 +367,24 @@ WantedBy=multi-user.target
     sudo systemctl daemon-reload
     # start to create settings.config
     sudo systemctl enable nbxplorer
-    #sudo systemctl start nbxplorer
 
-    #echo "Checking for nbxplorer config"
-    #while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
-    #  do
-    #    echo "Waiting for nbxplorer to start - CTRL+C to abort"
-    #    sleep 10
-    #    hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
-    #    if [ ${hasFailed} -eq 1 ]; then
-    #      echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
-    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-    #    fi
-    #done
+    if [ "${state}" == "ready" ]; then
+      echo "Starting nbxplorer"
+      sudo systemctl start nbxplorer
+      echo "Checking for nbxplorer config"
+      while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
+       do
+         echo "Waiting for nbxplorer to start - CTRL+C to abort"
+         sleep 10
+         hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
+         if [ ${hasFailed} -eq 1 ]; then
+           echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
+           echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+         fi
+      done
+    else
+      echo "Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
+    fi
 
     echo ""
     echo "***"
@@ -397,14 +402,10 @@ EOF
 
     sudo mv /home/admin/settings.config /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
-    #sudo systemctl restart nbxplorer
 
     if [ "${state}" == "ready" ]; then
-      echo "Starting nbxplorer"
-      sudo systemctl start nbxplorer
-    else
-      echo "Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
-    fi
+      sudo systemctl restart nbxplorer
+    fi  
 
     # BTCPayServer
     echo ""
@@ -449,21 +450,21 @@ WantedBy=multi-user.target
    if [ "${state}" == "ready" ]; then
       echo "Starting btcpayserver"
       sudo systemctl start btcpayserver
+      echo "Checking for btcpayserver config"
+      while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
+       do
+          echo "Waiting for btcpayserver to start - CTRL+C to abort"
+          sleep 10
+          hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
+          if [ ${hasFailed} -eq 1 ]; then
+            echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+            echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+          fi
+      done
     else
       echo "Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
     fi
     
-    #echo "Checking for btcpayserver config"
-    #while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
-    #  do
-    #    echo "Waiting for btcpayserver to start - CTRL+C to abort"
-    #    sleep 10
-    #    hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
-    #    if [ ${hasFailed} -eq 1 ]; then
-    #      echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
-    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-    #    fi
-    #done
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
 
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
