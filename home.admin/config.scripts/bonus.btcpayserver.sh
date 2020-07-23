@@ -502,9 +502,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       deleteData=0
     fi
   fi
-
-  echo "deleteData(${deleteData})"
-  exit 1
+  echo "# deleteData(${deleteData})"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
