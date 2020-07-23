@@ -38,7 +38,14 @@ elif [ "$1" == "on" ]; then
     exit 1
   fi
 
-  wifiConfig="country=US\nctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\nnetwork={\n ssid='${ssid}'\n scan_ssid=1\n psk='${password}'\n key_mgmt=WPA-PSK\n}"
+  wifiConfig="country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+network={
+  ssid='${ssid}'
+  scan_ssid=1\n psk='${password}'
+  key_mgmt=WPA-PSK
+}"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
   sudo chown root:root /home/admin/wpa_supplicant.conf
   sudo mv /home/admin/wpa_supplicant.conf /boot/wpa_supplicant.conf
