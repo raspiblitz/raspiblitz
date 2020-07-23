@@ -6,6 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+source <(sudo /home/admin/config.scripts/internet.sh status)
 
 # when admin and no other error found run LND setup check 
 if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
@@ -13,7 +14,7 @@ if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
 fi
 
 # set follow up info different for LCD and ADMIN
-adminStr="ssh admin@${localIP} ->Password A"
+adminStr="ssh admin@${localip} ->Password A"
 if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
@@ -188,7 +189,7 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
-       infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
+       infoStr="${infoStr} Browser: http://${localip}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
     fi
