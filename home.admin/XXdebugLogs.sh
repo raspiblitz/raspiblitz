@@ -166,6 +166,11 @@ echo "*** MOUNTED DRIVES ***"
 df -T
 echo ""
 
+echo ""
+echo "*** WIFI Info ***"
+sudo /home/admin/config.scripts/internet.wifi.sh status
+echo ""
+
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
 if [ ${#undervoltageReports} -gt 0 ]; then
