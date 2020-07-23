@@ -64,7 +64,8 @@ update_config=1"
   sudo chown root:root /home/admin/wpa_supplicant.conf
   sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
   sudo chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
-  sudo rm /boot/wpa_supplicant.conf
+  sudo rm /boot/wpa_supplicant.conf 2>/dev/null
+  sudo rm /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null
 
   echo "# OK - reboot needed to turn WIFI off - use command: restart"
   exit 0
