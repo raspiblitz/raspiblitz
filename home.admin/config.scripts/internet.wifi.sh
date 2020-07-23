@@ -55,7 +55,7 @@ network={
   echo "# OK - reboot needed to activate new WIFI settings"
   exit 0
 
-elif [ "$2" == "off" ]; then
+elif [ "$1" == "off" ]; then
 
   wifiConfig="country=US
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
