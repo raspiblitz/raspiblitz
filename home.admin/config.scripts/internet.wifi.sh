@@ -19,11 +19,11 @@ fi
 if [ "$1" == "status" ]; then
 
   echo "activated=${wifiIsSet}"
-  echo "connected='${connected}'"
+  echo "connected=${connected}"
   echo "localip='${wifiLocalIP}'"
   exit 0
 
-elif [ "$2" == "on" ]; then
+elif [ "$1" == "on" ]; then
 
   ssid="$2"
   password="$3"
