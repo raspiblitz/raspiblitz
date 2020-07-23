@@ -57,10 +57,10 @@ to deactivate the Auto-Unlock feature.
 " 10 52
   echo "Activating Auto-Unlock (please wait) .."
   sudo /home/admin/config.scripts/lnd.autounlock.sh on
-  dialog --backtitle "RaspiBlitz" --msgbox "FINAL REBOOT IS NEEDED." 6 52
+  dialog --backtitle "RaspiBlitz" --pause "  FINAL REBOOT IS NEEDED." 8 52 5
 
 else
-  dialog --backtitle "RaspiBlitz" --msgbox "OK - SSH password A set.\nFINAL REBOOT IS NEEDED." 6 52
+  dialog --backtitle "RaspiBlitz" --pause "  OK - SSH password A set.\n  FINAL REBOOT IS NEEDED." 9 52 5
 fi
 
 sudo /home/admin/XXshutdown.sh reboot
