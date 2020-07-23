@@ -13,10 +13,10 @@ source /mnt/hdd/raspiblitz.conf
 # get local IP
 localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 localip_LAN=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-localip="${localIP_ALL}"
-if [ ${#localIP_LAN} -gt 0 ]; then
+localip="${localip_ALL}"
+if [ ${#localip_LAN} -gt 0 ]; then
   # prefer local IP over LAN over all other if available
-  localip="${localIP_LAN}"
+  localip="${localip_LAN}"
 fi
 
 # check for internet connection
