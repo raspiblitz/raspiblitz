@@ -43,7 +43,8 @@ ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
   ssid='${ssid}'
-  scan_ssid=1\n psk='${password}'
+  scan_ssid=1
+  psk='${password}'
   key_mgmt=WPA-PSK
 }"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
@@ -56,7 +57,9 @@ network={
 
 elif [ "$2" == "off" ]; then
 
-  wifiConfig="country=US\nctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1"
+  wifiConfig="country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
   sudo chown root:root /home/admin/wpa_supplicant.conf
   sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
