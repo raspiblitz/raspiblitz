@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Starting the main menu ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -7,9 +8,13 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
+# CONFIRMATIONFILE - confirmation dialog
+confirmationFile="/home/admin/XXconfirmation.sh"
+
 # MAIN MENU AFTER SETUP
 source ${infoFile}
 source ${configFile}
+source ${confirmationFile}
 
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -279,16 +284,26 @@ case $CHOICE in
             /home/admin/99updateMenu.sh
             ;;
         REBOOT)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh reboot
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
+	    confirmationReboot=$?
+	    if [ $confirmationReboot -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh reboot
+               exit 0
+	    fi
             ;;
         OFF)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
+	    confirmationShutdown=$?
+	    if [ $confirmationShutdown -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh
+               exit 0
+	    fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh
