@@ -100,7 +100,7 @@ while :
       l1="Waiting for Internet ...\n"
       l2="Local Network seems OK but no Internet.\n"
       l3="Is router still online?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 45
       sleep 3
       continue
     fi
