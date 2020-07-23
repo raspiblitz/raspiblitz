@@ -122,7 +122,11 @@ WantedBy=multi-user.target
 EOF
     sudo mv /home/admin/kindle-display.service /etc/systemd/system/kindle-display.service
     sudo systemctl enable kindle-display
-    sudo systemctl start kindle-display
+
+    # https://github.com/rootzoll/raspiblitz/issues/1375
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl start kindle-display
+    fi
 
     # generate initial screenshot
     sudo -u $USERNAME $CRON_FILE

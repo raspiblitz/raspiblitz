@@ -344,7 +344,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # check if there is a WIFI configuration to restore
   configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-  configWifiHDD=$(sudo ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "wpa_supplicant.conf")
+  configWifiHDD=$(sudo cat /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
   if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
     echo "Restoring WIFI setting & rebooting .." >> $logFile
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
