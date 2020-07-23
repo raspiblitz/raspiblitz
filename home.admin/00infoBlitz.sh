@@ -411,7 +411,7 @@ if [ "${EUID}" = "$(id -u pi)" ]; then
 EOF
 
   # use Jinja2 and apply json data to template to produce static html file
-  templateExists=$(sudo ls /var/cache/raspiblitz/info.html 2>/dev/null | grep -c 'info.html')
+  templateExists=$(sudo ls /var/www/blitzweb/info/info.j2 2>/dev/null | grep -c 'info.j2')
   if [ ${templateExists} -gt 0 ]; then
     res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
     if ! [ $? -eq 0 ]; then
