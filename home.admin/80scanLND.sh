@@ -6,6 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+source <(sudo /home/admin/config.scripts/internet.sh status)
 
 # when admin and no other error found run LND setup check 
 if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
@@ -13,7 +14,7 @@ if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
 fi
 
 # set follow up info different for LCD and ADMIN
-adminStr="ssh admin@${localIP} ->Password A"
+adminStr="ssh admin@${localip} ->Password A"
 if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
@@ -49,8 +50,12 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
   if [ "$USER" != "admin" ]; then
 
-    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
-      infoStr=" The ${network}d service is NOT RUNNING!\n\n Login for more details & options:"
+    if [ ${uptime} -gt 600 ]; then
+      if [ ${uptime} -gt 800 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+        infoStr=" The ${network}d service is NOT RUNNING!\n ${bitcoinErrorShort}\n Login for more details & options:"
+      else
+        infoStr=" The ${network}d service is running:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+      fi
     else
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
     fi
@@ -188,7 +193,7 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
-       infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
+       infoStr="${infoStr} Browser: http://${localip}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
     fi
