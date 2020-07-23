@@ -52,7 +52,7 @@ network={
   sudo mv /home/admin/wpa_supplicant.conf /boot/wpa_supplicant.conf
   sudo chmod 755 /boot/wpa_supplicant.conf
 
-  echo "# OK - reboot needed to activate new WIFI settings"
+  echo "# OK - reboot needed to activate new WIFI settings - use command: restart"
   exit 0
 
 elif [ "$1" == "off" ]; then
@@ -65,8 +65,7 @@ update_config=1"
   sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
   sudo chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
 
-  sudo service networking restart
-  echo "# OK - WIFI should now be off"
+  echo "# OK - reboot needed to turn WIFI off - use command: restart"
   exit 0
 
 else
