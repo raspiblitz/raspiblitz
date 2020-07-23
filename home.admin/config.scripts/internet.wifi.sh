@@ -42,9 +42,9 @@ elif [ "$1" == "on" ]; then
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-  ssid='${ssid}'
+  ssid=\"${ssid}\"
   scan_ssid=1
-  psk='${password}'
+  psk=\"${password}\"
   key_mgmt=WPA-PSK
 }"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
