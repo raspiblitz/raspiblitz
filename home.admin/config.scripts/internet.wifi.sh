@@ -30,10 +30,12 @@ elif [ "$1" == "on" ]; then
 
   if [ ${#ssid} -eq 0 ]; then
     echo "err='no ssid given'"
+    exit 1
   fi
 
   if [ ${#password} -eq 0 ]; then
     echo "err='no password given'"
+    exit 1
   fi
 
   wifiConfig='country=US\nctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\nnetwork={\n ssid="${ssid}"\n scan_ssid=1\n psk="${password}"\n key_mgmt=WPA-PSK\n}'
