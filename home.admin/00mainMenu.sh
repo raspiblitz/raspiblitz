@@ -8,13 +8,34 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
-# CONFIRMATIONFILE - confirmation dialog
-confirmationFile="/home/admin/XXconfirmation.sh"
-
 # MAIN MENU AFTER SETUP
 source ${infoFile}
 source ${configFile}
-source ${confirmationFile}
+
+# FUNCTIONS
+
+confirmation()
+{
+  local text=$1
+  local yesButtonText=$2
+  local noButtonText=$3
+  local defaultno=$4
+  local height=$5
+  local width=$6
+  local answer=-100
+
+  if [ $defaultno ]; then
+     whiptail --title " Confirmation " --defaultno --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  else
+    whiptail --title " Confirmation " --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  fi
+  answer=$?
+  return $answer
+}
 
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
