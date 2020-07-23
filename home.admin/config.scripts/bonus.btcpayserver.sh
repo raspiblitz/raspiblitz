@@ -488,6 +488,24 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
+  # check for second parameter: should data be deleted?
+
+  deleteData=0
+  if [ "$2" = "--delete-data" ]; then
+    deleteData=1
+  elif [ "$2" = "--keep-data" ]; then
+    deleteData=0
+  else
+    if (whiptail --title " DELETE DATA? " --yesno "Do you want want to delete\nthe BTCPay Server Data?" 8 30); then
+      deleteData=1
+   else
+      deleteData=0
+    fi
+  fi
+
+  echo "deleteData(${deleteData})"
+  exit 1
+
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
 
@@ -498,7 +516,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
+    echo "# *** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
     # removing services
     # btcpay
     sudo systemctl stop btcpayserver
@@ -530,9 +548,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl reload nginx
     # nuke user
     sudo userdel -rf btcpay 2>/dev/null
-    echo "OK BTCPayServer removed."
+    if [ ${deleteData} -eq 1 ]; then
+      echo "# deleting data"
+      sudo rm -R /mnt/hdd/app-data/.btcpayserver/
+    else
+      echo "# keeping data"
+    fi
+    echo "# OK BTCPayServer removed."
   else
-    echo "BTCPayServer is not installed."
+    echo "# BTCPayServer is not installed."
   fi
   exit 0
 fi
