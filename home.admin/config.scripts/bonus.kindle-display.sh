@@ -20,7 +20,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /home/admin/raspiblitz.info
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -134,10 +134,11 @@ EOF
     if [ "${state}" == "ready" ]; then
       echo "# starting kindle-display service"
       sudo systemctl start kindle-display
-    fi
 
-    # generate initial screenshot
-    sudo -u $USERNAME $CRON_FILE
+      # generate initial screenshot
+      echo "# run cronfile"
+      sudo -u $USERNAME $CRON_FILE
+    fi
 
     echo "OK - the KINDLE-DISPLAY script is now installed."
     echo ""
