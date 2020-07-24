@@ -95,7 +95,7 @@ EOF
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
 
     # generate initial data
-    echo "# run data.sh
+    echo "# run data.sh"
     sudo -u $USERNAME $APP_SERVER_DIR/data.sh
 
     # open firewall
