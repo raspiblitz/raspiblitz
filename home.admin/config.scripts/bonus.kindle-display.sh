@@ -38,6 +38,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo adduser --disabled-password --gecos "" $USERNAME
 
     # install kindle-display
+    echo "# install .."
     cd $HOME_DIR
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
@@ -53,6 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p $APP_DATA_DIR
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
+    echo "# create config file"
     if [[ ! -f "$CONFIG_FILE" ]]; then
       configFile=/home/admin/kindle-display.env
       touch $configFile
@@ -93,12 +95,15 @@ EOF
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
 
     # generate initial data
+    echo "# run data.sh
     sudo -u $USERNAME $APP_SERVER_DIR/data.sh
 
     # open firewall
+    echo "# firewall kindle-display service"
     sudo ufw allow $SERVER_PORT comment 'kindle-display HTTP'
 
     # install service
+    echo "# prepare kindle-display service"
     cat > /home/admin/kindle-display.service <<EOF
 # systemd unit for kindle-display
 
@@ -121,10 +126,13 @@ StartLimitBurst=2
 WantedBy=multi-user.target
 EOF
     sudo mv /home/admin/kindle-display.service /etc/systemd/system/kindle-display.service
+
+    echo "# enable kindle-display service"
     sudo systemctl enable kindle-display
 
     # https://github.com/rootzoll/raspiblitz/issues/1375
     if [ "${state}" == "ready" ]; then
+      echo "# starting kindle-display service"
       sudo systemctl start kindle-display
     fi
 
