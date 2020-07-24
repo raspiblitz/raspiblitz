@@ -27,7 +27,7 @@ fi
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ $(sudo ls /home/bos 2>/dev/null | grep -c "/home/bos") -gt 0 ]; then
+  if [ $(sudo ls /home/bos/.npmrc 2>/dev/null | grep -c ".npmrc") -gt 0 ]; then
     echo "# FAIL - bos already installed"
     sleep 3
     exit 1
