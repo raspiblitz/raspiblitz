@@ -490,7 +490,6 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # check for second parameter: should data be deleted?
-
   deleteData=0
   if [ "$2" = "--delete-data" ]; then
     deleteData=1
