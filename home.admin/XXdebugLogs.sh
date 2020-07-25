@@ -71,37 +71,45 @@ echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
+echo "*** LAST NGINX LOGS ***"
+echo "sudo journalctl -u nginx -b --no-pager -n20"
+sudo journalctl -u nginx -b --no-pager -n20
+echo "--> CHECK CONFIG: sudo nginx -t"
+sudo nginx -t
+echo ""
+
 if [ "${touchscreen}" = "1" ]; then
+  echo ""
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
   echo "sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log"
   sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log
   echo ""
 else
   echo "- TOUCHSCREEN is OFF by config"
-  echo ""
 fi
 
 if [ "${loop}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 LOOP LOGS ***"
   echo "sudo journalctl -u loopd -b --no-pager -n20"
   sudo journalctl -u loopd -b --no-pager -n20
   echo ""
 else
   echo "- Loop is OFF by config"
-  echo ""
 fi
 
 if [ "${rtlWebinterface}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 RTL LOGS ***"
   echo "sudo journalctl -u RTL -b --no-pager -n20"
   sudo journalctl -u RTL -b --no-pager -n20
   echo ""
 else
   echo "- RTL is OFF by config"
-  echo ""
 fi
 
 if [ "${ElectRS}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 ElectRS LOGS ***"
   echo "sudo journalctl -u electrs -b --no-pager -n20"
   sudo journalctl -u electrs -b --no-pager -n20
@@ -111,38 +119,57 @@ if [ "${ElectRS}" = "on" ]; then
   echo ""
 else
   echo "- Electrum Rust Server is OFF by config"
-  echo ""
 fi
 
 if [ "${BTCPayServer}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 BTCPayServer LOGS ***"
   echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
   sudo journalctl -u btcpayserver -b --no-pager -n20
   echo ""
 else
   echo "- BTCPayServer is OFF by config"
-  echo ""
 fi
 
 if [ "${LNBits}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 LNbits LOGS ***"
   echo "sudo journalctl -u lnbits -b --no-pager -n20"
   sudo journalctl -u lnbits -b --no-pager -n20
   echo ""
 else
   echo "- LNbits is OFF by config"
+fi
+
+if [ "${thunderhub}" = "on" ]; then
   echo ""
+  echo "*** LAST 20 Thunderhub LOGS ***"
+  echo "sudo journalctl -u thunderhub -b --no-pager -n20"
+  sudo journalctl -u thunderhub -b --no-pager -n20
+  echo ""
+else
+  echo "- Thunderhub is OFF by config"
 fi
 
 if [ "${specter}" = "on" ]; then
+  echo ""
   echo "*** LAST 20 SPECTER LOGS ***"
   echo "sudo journalctl -u cryptoadvance-specter -b --no-pager -n20"
   sudo journalctl -u cryptoadvance-specter -b --no-pager -n20
   echo ""
 else
   echo "- SPECTER is OFF by config"
-  echo ""
 fi
+
+echo ""
+echo "*** MOUNTED DRIVES ***"
+df -T
+echo ""
+
+echo ""
+echo "*** WIFI Info ***"
+sudo /home/admin/config.scripts/internet.wifi.sh status
+echo ""
 
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0

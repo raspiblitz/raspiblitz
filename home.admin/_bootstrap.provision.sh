@@ -62,7 +62,7 @@ if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
       exit 0
     fi
   else
-    echo "Size looks good. Bigger then 8GB card is used." >> ${logFile}
+    echo "Size looks good. Bigger than 8GB card is used." >> ${logFile}
   fi
 else
   echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
@@ -167,6 +167,10 @@ sudo sed -i "s/^message=.*/message='Setup System ..'/g" ${infoFile}
 sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
 
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
+
+# BLITZ WEB SERVICE
+echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
+/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
 
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
@@ -280,19 +284,19 @@ else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
 
-# BTCPAYSERVER - not restored due to need for domain name and port forwarding
+# BTCPAYSERVER 
 if [ "${BTCPayServer}" = "on" ]; then
-  # --> TODO: BTCPay Server install does not run clean during provision
-  # --> needs install when everything is already 'running'
-  #if [ "${runBehindTor}" = "on" ] && [ "${BTCPayDomain}" = "localhost" ]; then
-  #  echo "Provisioning BTCPAYSERVER on TOR - run config script" >> ${logFile}
-  #  sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
-  #  sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on tor >> ${logFile} 2>&1
-  #else
-    # provisioning non-TOR BTCPayServer is not supported yet - needs manual reinstall
-    echo "Setting BTCPayServer to be off - will need to be reinstalled from the menu again" >> ${logFile}
-    sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
-  #fi
+
+  echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
+
+  #echo "Provisioning BTCPAYSERVER on TOR - run on after bootup script" >> ${logFile}
+  # because BTCPAY server freezes during recovery .. it will get installed after reboot
+  #echo "sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on" >> /home/admin/setup.sh
+  #sudo chmod +x /home/admin/setup.sh >> ${logFile}
+  #sudo ls -la /home/admin/setup.sh >> ${logFile}
+
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
@@ -331,7 +335,7 @@ else
 fi
 
 # ROOT SSH KEYS
-# check if a backup on HDD exists and when retsore back
+# check if a backup on HDD exists – if so, restore it
 backupRootSSH=$(sudo ls /mnt/hdd/ssh/root_backup 2>/dev/null | grep -c "id_rsa")
 if [ ${backupRootSSH} -gt 0 ]; then
     echo "Provisioning Root SSH Keys - RESTORING from HDD" >> ${logFile}
@@ -348,6 +352,15 @@ if [ "${#sshtunnel}" -gt 0 ]; then
     sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
 else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
+fi
+
+# ZEROTIER
+if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
+    echo "Provisioning ZeroTier - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup ZeroTier'/g" ${infoFile}
+    sudo /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+else
+    echo "Provisioning ZeroTier - not active" >> ${logFile}
 fi
 
 # LCD ROTATE
@@ -402,6 +415,68 @@ if [ "${specter}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.cryptoadvance-specter.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Specter - keep default" >> ${logFile}
+fi
+
+# Faraday
+if [ "${faraday}" = "on" ]; then
+  echo "Provisioning Faraday - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Faraday'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Faraday - keep default" >> ${logFile}
+fi
+
+# BOS
+if [ "${bos}" = "on" ]; then
+  echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Balance of Satoshis'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.bos.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
+fi
+
+# thunderhub
+if [ "${thunderhub}" = "on" ]; then
+  echo "Provisioning ThunderHub - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup ThunderHub'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning ThunderHub - keep default" >> ${logFile}
+fi
+
+# letsencrypt
+if [ "${letsencrypt}" = "on" ]; then
+  echo "Provisioning letsencrypt - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup letsencrypt'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.letsencrypt.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning letsencrypt - keep default" >> ${logFile}
+fi
+
+# kindle-display
+if [ "${kindleDisplay}" = "on" ]; then
+  echo "Provisioning kindle-display - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup kindle-display'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.kindle-display.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning kindle-display - keep default" >> ${logFile}
+fi
+
+# custom install script from user
+customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
+if [ ${customInstallAvailable} -gt 0 ]; then
+  echo "Running the custom install script .." >> ${logFile}
+  # copy script over to admin (in case HDD is not allowing exec)
+  sudo cp -av /mnt/hdd/app-data/custom-installs.sh /home/admin/custom-install.sh >> ${logFile}
+  # make sure script is executable
+  sudo chmod +x /home/admin/custom-install.sh >> ${logFile}
+  # run it & delete it again
+  sudo /home/admin/custom-install.sh >> ${logFile}
+  sudo rm /home/admin/custom-install.sh >> ${logFile}
+  echo "Done" >> ${logFile}
+else
+  echo "No custom install script ... adding the placeholder." >> ${logFile}
+  sudo cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
 fi
 
 # replay backup LND conf & tlscerts

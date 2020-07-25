@@ -18,8 +18,8 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 
-lndUpdateVersion="0.10.0-beta"
-lndUpdateComment="Some optional apps might not work with this update. You will not be able to downgrade after LND database migration."
+lndUpdateVersion="0.10.4-beta"
+lndUpdateComment="There is no optional update at the moment."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
@@ -143,7 +143,7 @@ if [ "${mode}" = "verified" ]; then
   echo
   echo "# check binary was not manipulated (checksum test)"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt.sig
-  sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
+  sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
     echo "error='checksum not matching'"

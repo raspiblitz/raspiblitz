@@ -13,7 +13,14 @@ OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
          PATCH "Patch RaspiBlitz v${codeVersion}"
 	)
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "Update ThunderHub")
+fi
+
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 12 55 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
@@ -122,7 +129,7 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/XXsyncScripts.sh
+      sudo -u admin /home/admin/XXsyncScripts.sh -run
       sleep 4
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
@@ -185,9 +192,9 @@ lnd()
   source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
 
   # LND Update Options
-  OPTIONS=(VERIFIED "Optional LND update to ${lndUpdateVersion}" \
-           RECKLESS "Experimental LND update to ${lndLatestVersion}"
-	)
+  OPTIONS=()
+  # OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  OPTIONS+=(RECKLESS "Experimental LND update to ${lndLatestVersion}")
 
   CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -264,5 +271,11 @@ case $CHOICE in
     ;;
   LND)
     lnd
+    ;;
+  BOS)
+    /home/admin/config.scripts/bonus.bos.sh update
+    ;;
+  THUB)
+    /home/admin/config.scripts/bonus.thunderhub.sh update
     ;;
 esac

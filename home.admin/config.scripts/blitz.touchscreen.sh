@@ -141,7 +141,7 @@ fi
 
 if [ "$1" = "update" ]; then
   echo "updating BlitzTUI (including python dependencies) ..."
-  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/
+  sudo /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/
   exit 0
 fi
 

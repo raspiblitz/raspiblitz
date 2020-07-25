@@ -20,25 +20,30 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3000
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3001\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QR see LCD):\n${toraddress}
-" 12 67
+Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
+" 16 67
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open the following URL in your local web browser:
-http://${localip}:3000
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:3001\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 12 57
+" 15 57
   fi
   echo "please wait ..."
   exit 0
@@ -63,17 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   else
     # check and install NodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh
-
-    # check for Python2 (install if missing)
-    # TODO remove Python2 ASAP!
-    echo "*** Check for Python2 ***"
-    /usr/bin/which python2 &>/dev/null
-    if ! [ $? -eq 0 ]; then
-      echo "*** Install Python2 ***"
-      sudo apt-get update
-      sudo apt-get install -y python2
-    fi
+    /home/admin/config.scripts/bonus.nodejs.sh on
 
     # create rtl user
     sudo adduser --disabled-password --gecos "" rtl
@@ -93,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.7.0
+    sudo -u rtl git reset --hard v0.8.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -104,11 +99,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-    
+
     # install
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
+
     cd ..
     # check if node_modules exist now
     if [ -d "/home/rtl/RTL/node_modules" ]; then
@@ -119,11 +115,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     echo ""
-
-    # now remove Python2 again
-    echo "*** Now remove Python2 again ***"
-    sudo apt-get purge -y python2
-    sudo apt-get autoremove -y
 
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"
@@ -151,10 +142,26 @@ EOF
     sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
     echo ""
 
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/rtl_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/rtl_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/rtl_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/rtl_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/rtl_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/rtl_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     # open firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3000 comment 'RTL'
-    sudo ufw --force enable
+    sudo ufw allow 3000 comment 'RTL HTTP'
+    sudo ufw allow 3001 comment 'RTL HTTPS'
     echo ""
 
     # install service
@@ -181,21 +188,20 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service 
+    sudo mv /home/admin/RTL.service /etc/systemd/system/RTL.service
     sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${chain}net|" /etc/systemd/system/RTL.service
     sudo chown root:root /etc/systemd/system/RTL.service
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi
-  
+
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # correct old Hidden Service with port
-    sudo sed -i "s/^HiddenServicePort 3000 127.0.0.1:3000/HiddenServicePort 80 127.0.0.1:3000/g" /etc/tor/torrc
-    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3000
+    # make sure to keep in sync with internet.tor.sh script
+    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
   fi
   exit 0
 fi
@@ -206,17 +212,36 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
 
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/rtl_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-available/rtl_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off RTL
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING RTL ***"
-    sudo systemctl stop RTL
     sudo systemctl disable RTL
     sudo rm /etc/systemd/system/RTL.service
-    sudo rm -rf /home/rtl/RTL
+    # delete user and home directory
+    sudo userdel -rf rtl
     echo "OK RTL removed."
-  else 
+  else
     echo "RTL is not installed."
   fi
+
+  # close ports on firewall
+  sudo ufw deny 3000
+  sudo ufw deny 3001
 
   echo "needs reboot to activate new setting"
   exit 0

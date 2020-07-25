@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [on|off|status|menu]"
+ echo "bonus.electrs.sh [on|off|status[showAddress]|menu]"
  exit 1
 fi
 
@@ -30,10 +30,6 @@ if [ "$1" = "status" ]; then
 
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
-  if [ ${serviceRunning} -eq 0 ]; then
-    echo "infoSync='Not running - check: sudo journalctl -u electrs'"
-  fi
-
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
@@ -41,16 +37,38 @@ if [ "$1" = "status" ]; then
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "isSynced=1"
+      echo "tipSynced=1"
     else
-      echo "isSynced=0"
-      echo "infoSync='Syncing / Building Index (please wait)'"
+      echo "tipSynced=0"
+    fi
+
+    # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
+    electrumResponding=$(echo exit | telnet 127.0.0.1 50001 2>/dev/null | grep -c "Connected to")
+    if [ ${electrumResponding} -gt 1 ]; then
+      electrumResponding=1
+    fi
+    echo "electrumResponding=${electrumResponding}"
+
+    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
+      # set file flag for the future
+      sudo touch /mnt/hdd/app-storage/electrs/initial-sync.done
+      sudo chmod 544 /mnt/hdd/app-storage/electrs/initial-sync.done
+      fileFlagExists=1
+    fi
+    if [ ${fileFlagExists} -eq 0 ]; then
+      echo "initialSynced=0"
+      echo "infoSync='Building Index (please wait)'"
+    else
+      echo "initialSynced=1"
     fi
 
     # check local IPv4 port
-    localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
-    echo "publicIP='${publicIP}'"
+    if [ "$2" = "showAddress" ]; then
+      echo "publicIP='${publicIP}'"
+    fi
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
@@ -76,8 +94,10 @@ if [ "$1" = "status" ]; then
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
       echo "TORrunning=1"
-      TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-      echo "TORaddress='${TORaddress}'"
+      if [ "$2" = "showAddress" ]; then
+        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        echo "TORaddress='${TORaddress}'"
+      fi
     else
       echo "TORrunning=0"
     fi
@@ -86,7 +106,10 @@ if [ "$1" = "status" ]; then
     echo "nginxTest=$nginxTest"
 
   else
-    echo "isSynced=0"
+    echo "tipSynced=0"
+    echo "initialSynced=0"
+    echo "electrumResponding=0"
+    echo "infoSync='Not running - check: sudo journalctl -u electrs'"
   fi
 
   exit 0
@@ -96,7 +119,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -114,7 +137,7 @@ Please check the following debug info.
     exit 0
   fi
 
-  if [ ${isSynced} -eq 0 ]; then
+  if [ ${initialSynced} -eq 0 ]; then
     dialog --title "Electrum Index Not Ready" --msgbox "
 Electrum server is still building its index.
 Please wait and try again later.
@@ -134,7 +157,7 @@ Check 'sudo nginx -t' for a detailed error message.
       sudo mkdir /var/log/nginx
       sudo systemctl restart nginx
     fi
-    /home/admin/config.scripts/internet.selfsignedcert.sh
+    /home/admin/config.scripts/blitz.web.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -193,6 +216,7 @@ Check 'sudo nginx -t' for a detailed error message.
     sudo systemctl stop electrs
     echo "# deleting index"
     sudo rm -r /mnt/hdd/app-storage/electrs/db
+    sudo rm /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null
     echo "# starting service"
     sudo systemctl start electrs
     echo "# ok"
@@ -254,7 +278,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
-    sudo -u electrs git reset --hard v0.8.0
+    sudo -u electrs git reset --hard v0.8.5
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
     echo ""
@@ -308,13 +332,6 @@ EOF
 
     echo ""
     echo "***"
-    echo "Open port 50001 on UFW "
-    echo "***"
-    echo ""
-    sudo ufw allow 50001 comment 'electrs TCP'
-
-    echo ""
-    echo "***"
     echo "Checking for config.toml"
     echo "***"
     echo ""
@@ -325,9 +342,6 @@ EOF
         else
             echo "OK"
     fi
-
-    # create a self-signed ssl certificate
-    /home/admin/config.scripts/internet.selfsignedcert.sh
 
     echo ""
     echo "***"
@@ -352,11 +366,11 @@ stream {
         server {
                 listen 50002 ssl;
                 proxy_pass electrs;
-                ssl_certificate /etc/ssl/certs/localhost.crt;
-                ssl_certificate_key /etc/ssl/private/localhost.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-electrs:1m;
                 ssl_session_timeout 4h;
-                ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
                 ssl_prefer_server_ciphers on;
         }
 }" | sudo tee -a /etc/nginx/nginx.conf
@@ -370,11 +384,11 @@ stream {
         server {
                 listen 50002 ssl;
                 proxy_pass electrs;
-                ssl_certificate /etc/ssl/certs/localhost.crt;
-                ssl_certificate_key /etc/ssl/private/localhost.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-electrs:1m;
                 ssl_session_timeout 4h;
-                ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
                 ssl_prefer_server_ciphers on;
         }
 }" | sudo tee -a /etc/nginx/nginx.conf
@@ -385,11 +399,15 @@ stream {
             fi
     fi
 
-    echo "allow port 50002 on ufw"
-    sudo ufw allow 50002 comment 'electrs-nginx SSL'
-
-    sudo systemctl enable nginx
     sudo systemctl restart nginx
+
+    echo ""
+    echo "***"
+    echo "Open ports 50001 and 5002 on UFW "
+    echo "***"
+    echo ""
+    sudo ufw allow 50001 comment 'electrs TCP'
+    sudo ufw allow 50002 comment 'electrs SSL'
 
     echo ""
     echo "***"
@@ -401,7 +419,7 @@ stream {
     echo "
 [Unit]
 Description=Electrs
-After=bitcoind.service
+After=lnd.service
 
 [Service]
 WorkingDirectory=/home/electrs/electrs
@@ -435,6 +453,7 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
@@ -461,21 +480,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /mnt/hdd/app-storage/electrs/
   fi
 
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh off electrs
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "#*** REMOVING ELECTRS ***"
-
-    sudo systemctl stop electrs
     sudo systemctl disable electrs
-
     sudo rm /etc/systemd/system/electrs.service
-
-    sudo rm -rf /home/electrs/electrs
-    sudo rm -rf /home/electrs/.cargo
-    sudo rm -rf /home/electrs/.rustup
-    sudo rm -rf /home/electrs/.profile
-
+    # delete user and home directory
+    sudo userdel -rf electrs 
+    # close ports on firewall
+    sudo ufw deny 50001
+    sudo ufw deny 50002 
     echo "# OK ElectRS removed."
     
     ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active

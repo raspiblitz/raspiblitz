@@ -6,6 +6,15 @@
 # IF YOU WANT TO UPDATE YOUR RASPIBLITZ:
 # https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-to-update-my-raspiblitz-after-version-098
 
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+  echo "FOR DEVELOPMENT USE ONLY!"
+  echo "RaspiBlitz Sync Scripts"
+  echo "XXsyncScripts.sh info"
+  echo "XXsyncScripts.sh [-run|-clean|-install|-justinstall] branch [repo]"
+  exit 1
+fi
+
 cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
@@ -13,7 +22,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
 activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
 
-# if parameter is "info" just give back basic info about sync 
+# if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
@@ -22,12 +31,28 @@ fi
 
 # change branch if set as parameter
 clean=0
+install=0
 wantedBranch="$1"
 wantedGitHubUser="$2"
+if [ "${wantedBranch}" = "-run" ]; then
+  wantedBranch="${activeBranch}"
+  wantedGitHubUser="${activeGitHubUser}"
+fi
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
   wantedBranch="$2"
   wantedGitHubUser="$3"
+fi
+if [ "${wantedBranch}" = "-install" ]; then
+  install=1
+  wantedBranch="$2"
+  wantedGitHubUser="$3"
+fi
+if [ "${wantedBranch}" = "-justinstall" ]; then
+  clean=1
+  install=1
+  wantedBranch=""
+  wantedGitHubUser=""
 fi
 
 # set to another GutHub repo as origin
@@ -77,12 +102,10 @@ if [ ${#wantedBranch} -gt 0 ]; then
 
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
   fi
-else
-  echo ""
-  echo "USAGE-INFO: ./XXsyncScripts.sh '[BRANCHNAME]'"
 fi
 
 origin=$(git remote -v | grep 'origin' | tail -n1)
+checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
 echo "# *** SYNCING SHELL SCRIPTS WITH GITHUB ***"
@@ -96,10 +119,10 @@ git pull 1>&2
 cd ..
 if [ ${clean} -eq 1 ]; then
   echo "# Cleaning scripts & assets/config.scripts"
-  rm *.sh
-  rm -r assets
+  sudo rm -f *.sh
+  sudo rm -rf assets
   mkdir assets
-  rm -r config.scripts
+  sudo rm -rf config.scripts
   mkdir config.scripts
 else
   echo "# ******************************************"
@@ -111,7 +134,7 @@ fi
 echo "# COPYING from GIT-Directory to /home/admin/"
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
 echo "# .."
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets/*.* /home/admin/assets
+sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets /home/admin
 echo "# .."
 sudo -u admin chmod +x /home/admin/*.sh
 echo "# .."
@@ -121,18 +144,32 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "# ******************************************"
+
+echo "# Checking if the content of BlitzPy changed .."
+checkSumBlitzPyAfter=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
+echo "# checkSumBlitzPyBefore = ${checkSumBlitzPyBefore}"
+echo "# checkSumBlitzPyAfter  = ${checkSumBlitzPyAfter}"
+if [ "${checkSumBlitzPyBefore}" = "${checkSumBlitzPyAfter}" ] && [ ${install} -eq 0 ]; then
+  echo "# BlitzPy did not changed."
+else
+  blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
+  blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
+  echo "# BlitzPy changed --> UPDATING to Version ${blitzpy_version}"
+  sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
+fi
+
 if [ "${touchscreen}" = "1" ]; then
   echo "# Checking if the content of BlitzTUI changed .."
   checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
   echo "# checkSumBlitzTUIBefore = ${checkSumBlitzTUIBefore}"
   echo "# checkSumBlitzTUIAfter  = ${checkSumBlitzTUIAfter}"
-  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ]; then
+  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ ${install} -eq 0 ]; then
     echo "# BlitzTUI did not changed."
   else
     echo "# BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."
-    sudo ./config.scripts/blitz.touchscreen.sh update
+    sudo /home/admin/config.scripts/blitz.touchscreen.sh update
   fi
 fi
 echo "# ******************************************"
-echo "# OK - shell scripts and assests are synced"
+echo "# OK - shell scripts and assets are synced"
 echo "# Reboot recommended"

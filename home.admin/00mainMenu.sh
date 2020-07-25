@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Starting the main menu ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -11,8 +12,33 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 source ${configFile}
 
+# FUNCTIONS
+
+confirmation()
+{
+  local text=$1
+  local yesButtonText=$2
+  local noButtonText=$3
+  local defaultno=$4
+  local height=$5
+  local width=$6
+  local answer=-100
+
+  if [ $defaultno ]; then
+     whiptail --title " Confirmation " --defaultno --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  else
+    whiptail --title " Confirmation " --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  fi
+  answer=$?
+  return $answer
+}
+
 # get the local network IP to be displayed on the lCD
-localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # BASIC MENU INFO
 HEIGHT=17
@@ -37,31 +63,43 @@ fi
 
 # Put Activated Apps on top
 if [ "${rtlWebinterface}" == "on" ]; then
-  OPTIONS+=(RTL "RTL Web Node Manager")  
+  OPTIONS+=(RTL "RTL Web Node Manager")
 fi
 if [ "${BTCPayServer}" == "on" ]; then
-  OPTIONS+=(BTCPAY "BTCPay Server Info")  
+  OPTIONS+=(BTCPAY "BTCPay Server Info")
 fi
 if [ "${ElectRS}" == "on" ]; then
-  OPTIONS+=(ELECTRS "Electrum Rust Server")  
+  OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
-  OPTIONS+=(EXPLORE "BTC RPC Explorer")  
+  OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
 if [ "${LNBits}" == "on" ]; then
   OPTIONS+=(LNBITS "LNbits Server")
 fi
 if [ "${lndmanage}" == "on" ]; then
-  OPTIONS+=(LNDMANAGE "LND Manage Script")  
+  OPTIONS+=(LNDMANAGE "LND Manage Script")
 fi
 if [ "${loop}" == "on" ]; then
-  OPTIONS+=(LOOP "Loop In/Out Service")  
+  OPTIONS+=(LOOP "Loop In/Out Service")
 fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JMARKET "JoinMarket")
+fi
+if [ "${faraday}" == "on" ]; then
+  OPTIONS+=(FARADAY "Faraday Channel Management")
+fi
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "ThunderHub")
+fi
+if [ "${zerotier}" == "on" ]; then
+  OPTIONS+=(ZEROTIER "ZeroTier")
 fi
 
 # Basic Options
@@ -74,7 +112,7 @@ OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
 
 openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-  OPTIONS+=(CLOSEALL "Close all open Channels")  
+  OPTIONS+=(CLOSEALL "Close all open Channels")
 fi
 
 OPTIONS+=(CASHOUT "Remove Funds from LND")
@@ -82,21 +120,23 @@ OPTIONS+=(CASHOUT "Remove Funds from LND")
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
   OPTIONS+=(lnchannels "Lightning Channel List")
-  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")  
+  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")
 fi
 
-OPTIONS+=(SERVICES "Activate/Deactivate Services")
+OPTIONS+=(SETTINGS "Node Settings & Options")
+OPTIONS+=(SERVICES "Additional Apps & Services")
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 OPTIONS+=(LNDCREDS "Manage LND Credentials")
 OPTIONS+=(NAME "Change Name/Alias of Node")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Monitor TOR Service")  
+  OPTIONS+=(TOR "Monitor TOR Service")
 fi
 
 if [ "${touchscreen}" == "1" ]; then
-  OPTIONS+=(SCREEN "Touchscreen Calibration")  
+  OPTIONS+=(SCREEN "Touchscreen Calibration")
 fi
 
 # final Options
@@ -161,6 +201,21 @@ case $CHOICE in
         JMARKET)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
+        FARADAY)
+            sudo /home/admin/config.scripts/bonus.faraday.sh menu
+            ;;
+        BOS)
+            sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+        THUB)
+            sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
+            ;;
+        ZEROTIER)
+            sudo /home/admin/config.scripts/bonus.zerotier.sh menu
+            ;;
+        SUBSCRIBE)
+            /home/admin/config.scripts/blitz.subscriptions.py
+            ;;
         lnbalance)
             clear
             echo "*** YOUR SATOSHI BALANCES ***"
@@ -176,7 +231,7 @@ case $CHOICE in
             read key
             ;;
         lnfwdreport)
-            ./XXlnfwdreport.sh 
+            ./XXlnfwdreport.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
@@ -201,6 +256,9 @@ case $CHOICE in
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
+            ;;
+        SETTINGS)
+            /home/admin/00settingsMenuBasics.sh
             ;;
         CLOSEALL)
             /home/admin/BBcloseAllChannels.sh
@@ -245,18 +303,28 @@ case $CHOICE in
             ;;
         UPDATE)
             /home/admin/99updateMenu.sh
-            ;; 
+            ;;
         REBOOT)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh reboot
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
+	    confirmationReboot=$?
+	    if [ $confirmationReboot -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh reboot
+               exit 0
+	    fi
             ;;
         OFF)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
+	    confirmationShutdown=$?
+	    if [ $confirmationShutdown -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh
+               exit 0
+	    fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh

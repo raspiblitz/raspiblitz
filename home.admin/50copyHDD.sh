@@ -4,33 +4,48 @@
 source /home/admin/raspiblitz.info
 
 # get local ip
-localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # Basic Options
-OPTIONS=(UNIX "MacOS or Linux" \
-        WINDOWS "Windows"
+OPTIONS=(WINDOWS "Windows" \
+         MACOS "Apple MacOSX" \
+         LINUX "Linux" \
+         BLITZ "RaspiBlitz"
         )
 
-CHOICE=$(dialog --clear --title "Which System is running on the other computer?" --menu "" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --title " Copy Blockchain from another laptop/node over LAN " --menu "\nWhich system is running on the other laptop/node you want to copy the blockchain from?\n " 14 60 9 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
-        UNIX) echo "Linus";;
+        MACOS) echo "Steve";;
+        LINUX) echo "Linus";;
         WINDOWS) echo "Bill";;
+        BLITZ) echo "Satoshi";;
         *) exit 1;;
 esac
 
 # additional prep if this is used to replace corrupted blockchain
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
-  echo "stopping servcies ..."
+  echo "stopping services ..."
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
 fi
 
-if [ -d "/mnt/hdd/bitcoin" ] && [ "$1" != "stop-after-script" ]; then
-  dialog --title "Fresh or Repair" --yesno "Do you want to delete the old/local blockchain data now?" 8 60
+# check if old blockchain data exists
+hasOldBlockchainData=0
+sizeBlocks=$(sudo du -s /mnt/hdd/bitcoin/blocks 2>/dev/null | tr -dc '[0-9]')
+if [ ${#sizeBlocks} -gt 0 ] && [ ${sizeBlocks} -gt 0 ]; then
+  hasOldBlockchainData=1
+fi
+sizeChainstate=$(sudo du -s /mnt/hdd/bitcoin/chainstate 2>/dev/null | tr -dc '[0-9]')
+if [ ${#sizeChainstate} -gt 0 ] && [ ${sizeChainstate} -gt 0 ]; then
+  hasOldBlockchainData=1
+fi
+
+if [ ${hasOldBlockchainData} -eq 1 ] && [ "$1" != "stop-after-script" ]; then
+  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the old/local blockchain data now?" 7 60
   response=$?
   echo "response(${response})"
   if [ "${response}" = "1" ]; then
@@ -38,12 +53,8 @@ if [ -d "/mnt/hdd/bitcoin" ] && [ "$1" != "stop-after-script" ]; then
     sleep 3
   else
     echo "OK - delete old blockchain"
-    # delete all IN bitcoin directory but not itself if it exists
-    # so that possibel link to /home/bitcoin/.bitcoin nicht beschädigt wird
-    # also keep debug logs for repair script
-    sudo mv /mnt/hdd/bitcoin/debug.log /home/admin/debug.log 2>/dev/null
-    sudo rm -rfv /mnt/hdd/bitcoin/* 2>/dev/null
-    sudo mv /home/admin/debug.log /mnt/hdd/bitcoin/debug.log 2>/dev/null
+    sudo rm -rfv /mnt/hdd/bitcoin/blocks/* 2>/dev/null
+    sudo rm -rfv /mnt/hdd/bitcoin/chainstate/* 2>/dev/null
     sleep 3
   fi
 fi
@@ -56,36 +67,85 @@ sudo chmod 777 /mnt/hdd/bitcoin
 
 echo 
 clear
-echo "************************************************************************************"
-echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another computer"
-echo "************************************************************************************"
-echo ""
-echo "You can use the blockchain from another bitcoin-core client with version"
-echo "greater or equal to 0.17.1."
-echo ""
-echo "Both computers (your RaspberryPi and the other computer with the full blockchain on) need"
-echo "to be connected to the same local network."
-echo ""
-echo "If you use a RaspiBlitz (>=v1.5) as Blockchain source go: MENU > REPAIR > COPY-SOURCE"
-echo "Otherwiese open a terminal on the source computer and change into the directory that"
-echo "contains the blockchain data. You should see directories 'blocks' & 'chainstate'".
-echo "Make sure the bitcoin client on that computer is stopped."
-echo ""
-echo "COPY, PASTE & EXECUTE the following command on the blockchain source computer:"
 if [ "${CHOICE}" = "WINDOWS" ]; then
-  echo "sudo scp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
-else
+  echo "****************************************************************************"
+  echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a WINDOWS computer"
+  echo "****************************************************************************"
+  echo ""
+  echo "ON YOUR WINDOWS COMPUTER download and validate the blockchain with the Bitcoin"
+  echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
+  echo "If the Bitcoin Blockchain is synced up - make sure that your Windows computer &"
+  echo "your RaspiBlitz are in the same local network."
+  echo ""
+  echo "Open a fresh terminal on your Windows computer & change into the directory that"
+  echo "contains the blockchain data - should see folders named 'blocks' & 'chainstate'"
+  echo "there. Normally on Windows thats: C:\Users\YourUserName\Appdata\Roaming\Bitcoin"
+  echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
+  echo ""
+  echo "COPY, PASTE & EXECUTE the following command on your Windows computer terminal:"
+  echo "scp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo ""
+  echo "If asked for a password use PASSWORD A (or 'raspiblitz')."
+fi
+if [ "${CHOICE}" = "MACOS" ]; then
+  echo "****************************************************************************"
+  echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a MacOSX computer"
+  echo "****************************************************************************"
+  echo ""
+  echo "ON YOUR MacOSX COMPUTER download and validate the blockchain with the Bitcoin"
+  echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
+  echo "If the Bitcoin Blockchain is synced up - make sure that your MacOSX computer &"
+  echo "your RaspiBlitz are in the same local network."
+  echo ""
+  echo "Open a fresh terminal on your MacOSX computer and change into the directory that"
+  echo "contains the blockchain data - should see folders named 'blocks' & 'chainstate'"
+  echo "there. Normally on MacOSX thats: cd ~/Library/Application Support/Bitcoin/"
+  echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
+  echo ""
+  echo "COPY, PASTE & EXECUTE the following command on your MacOSX terminal:"
   echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo ""
+  echo "You will be asked for passwords. First can be the user password of your MacOSX"
+  echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
+fi
+if [ "${CHOICE}" = "LINUX" ]; then
+  echo "****************************************************************************"
+  echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from a LINUX computer"
+  echo "****************************************************************************"
+  echo ""
+  echo "ON YOUR LINUX COMPUTER download and validate the blockchain with the Bitcoin"
+  echo "Core wallet software (>=0.17.1) from: bitcoincore.org/en/download"
+  echo "If the Bitcoin Blockchain is synced up - make sure that your Linux computer &"
+  echo "your RaspiBlitz are in the same local network."
+  echo ""
+  echo "Open a fresh terminal on your Linux computer and change into the directory that"
+  echo "contains the blockchain data - should see folders named 'blocks' & 'chainstate'"
+  echo "there. Normally on Linux thats: cd ~/.bitcoin/"
+  echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
+  echo ""
+  echo "COPY, PASTE & EXECUTE the following command on your Linux terminal:"
+  echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+  echo ""
+  echo "You will be asked for passwords. First can be the user password of your Linux"
+  echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
+fi
+if [ "${CHOICE}" = "BLITZ" ]; then
+  echo "****************************************************************************"
+  echo "Instructions to COPY/TRANSFER SYNCED BLOCKCHAIN from another RaspiBlitz"
+  echo "****************************************************************************"
+  echo ""
+  echo "The other RaspiBlitz needs a minimum version of 1.6 (if lower, update first)."
+  echo "Make sure that the other RaspiBlitz is on the same local network."
+  echo ""
+  echo "Open a fresh terminal and login per SSH into that other RaspiBlitz."
+  echo "Once in the main menu go: MAINMENU > REPAIR > COPY-SOURCE"
+  echo "Follow the given instructions ..."
+  echo ""
+  echo "The LOCAL IP of this target RaspiBlitz is: ${localip}"
 fi
 echo "" 
-echo "This command may ask you first about the admin password of the other computer (because sudo)."
-if [ "$1" == "stop-after-script" ]; then
-  echo "Then it will ask for the default RaspiBlitz SSH password --> raspiblitz."
-else
-  echo "Then it will ask for your SSH PASSWORD A from this RaspiBlitz."
-fi
 echo "It can take multiple hours until transfer is complete - be patient."
-echo "************************************************************************************"
+echo "****************************************************************************"
 echo "PRESS ENTER if transfers is done OR if you want to choose another option."
 sleep 2
 read key
@@ -171,7 +231,7 @@ if [ ${quickCheckOK} -eq 0 ]; then
 
   echo "Wait 5 secs ..."
   sleep 5
-  dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 60
+  dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data?" 8 60
   response=$?
   echo "response(${response})"
   case $response in

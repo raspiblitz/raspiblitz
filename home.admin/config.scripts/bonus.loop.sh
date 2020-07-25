@@ -33,7 +33,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 0 ]; then
-    /home/admin/config.scripts/bonus.go.sh
+    /home/admin/config.scripts/bonus.go.sh on
     
     # get Go vars
     source /etc/profile
@@ -46,7 +46,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ ${lndInstalledVersionMain} -lt 10 ]; then
       sudo -u bitcoin git reset --hard v0.5.1-beta
     else
-      sudo -u bitcoin git reset --hard v0.6.0-beta
+      sudo -u bitcoin git reset --hard v0.6.5-beta
     fi
     cd /home/bitcoin/loop/cmd
     go install ./...

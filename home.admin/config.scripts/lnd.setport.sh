@@ -4,7 +4,7 @@
 # based on: https://github.com/rootzoll/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
- echo "small config script set the port LND is running on"
+ echo "script set the port LND is running on"
  echo "lnd.setport.sh [portnumber]"
  exit 1
 fi
@@ -79,6 +79,5 @@ sudo systemctl enable lnd
 
 # make sure port is open on firewall
 sudo ufw allow ${portnumber} comment 'LND Port'
-sudo ufw --force enable
 
 echo "needs reboot to activate new setting -> sudo shutdown -r now"

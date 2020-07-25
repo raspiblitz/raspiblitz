@@ -14,7 +14,7 @@ fi
 # 1. parameter MODE
 MODE="$1"
 
-# root as default user 
+# root as default user
 # its used for all ssh tunnel/back action
 
 # make sure the ssh keys for that user are initialized
@@ -37,7 +37,5 @@ elif [ "${MODE}" == "transfer" ]; then
   sudo ssh-copy-id $2
 
 else
-  echo "err='paremeter not known - run with -help'"
+  echo "err='parameter not known - run with -help'"
 fi
-
-

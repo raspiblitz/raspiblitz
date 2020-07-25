@@ -88,7 +88,7 @@ fi
 network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
 
 # get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info 
+# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
   network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
@@ -148,7 +148,8 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+source <(sudo /home/admin/config.scripts/internet.sh status)
+local_ip="${localip}"
 public_ip="${publicIP}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
@@ -163,7 +164,7 @@ fi
 webinterfaceInfo=""
 runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
 if [ ${runningRTL} -eq 1 ]; then
-  webinterfaceInfo="web admin --> ${color_green}http://${local_ip}:3000"
+  webinterfaceInfo="Web admin --> ${color_green}http://${local_ip}:3000"
 fi
 
 # CHAIN NETWORK
@@ -185,7 +186,7 @@ if [ "${runBehindTor}" = "on" ]; then
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
-  torInfo="+ TOR"
+  torInfo="+ Tor"
 
 else
 
@@ -268,7 +269,10 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "Filtering block" | tail -n1 | awk '{print $7}')
+      if [ ${#item} -eq 0 ]; then
+          item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+      fi
       total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
       ln_baseInfo="${color_red} waiting for chain sync"
       if [ ${#item} -gt 0 ]; then
@@ -304,11 +308,11 @@ ${color_yellow}
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
-${color_yellow}               ${color_gray}${network} Fullnode + Lightning Network ${torInfo}
+${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow}  ,'  /_____,  ${color_gray}ssh admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow}  ,'  /_____,  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
 ${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
 ${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
 ${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
@@ -340,7 +344,7 @@ else
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
     source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
-    if [ "${isSynced}" = "0" ]; then
+    if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
   fi
@@ -358,5 +362,63 @@ else
   if [ ${#appInfoLine} -gt 0 ]; then
     echo "${appInfoLine}"
   fi
-  
+
 fi
+
+uptime=$(uptime --pretty)
+datetime=$(date)
+
+# if running as user "pi":
+#  - write results to a JSON file on RAM disk
+#  - update info.html file
+if [ "${EUID}" = "$(id -u pi)" ]; then
+
+    json_ln_baseInfo=$(echo "${ln_baseInfo}" | cut -c 11-)
+
+    cat <<EOF > /var/cache/raspiblitz/info.json
+{
+    "uptime": "${uptime}",
+    "datetime": "${datetime}",
+    "codeVersion": "${codeVersion}",
+    "hostname": "${hostname}",
+    "network": "${network}",
+    "torInfo": "${torInfo}",
+    "load": "${load}",
+    "tempC": "${tempC}",
+    "tempF": "${tempF}",
+    "ram": "${ram}",
+    "hddUsedInfo": "${hddUsedInfo}",
+    "local_ip": "${local_ip}",
+    "network_rx": "${network_rx}",
+    "network_tx": "${network_tx}",
+    "runningRTL": "${runningRTL}",
+    "networkVersion": "${networkVersion}",
+    "chain": "${chain}",
+    "progress": "${progress}",
+    "sync_percentage": "${sync_percentage}",
+    "public_addr_pre": "${public_addr_pre}",
+    "public_addr": "${public_addr}",
+    "public": "${public}",
+    "networkConnections": "${networkConnections}",
+    "mempool": "${mempool}",
+    "ln_sync": "${ln_sync}",
+    "ln_version": "${ln_version}",
+    "ln_baseInfo": "${json_ln_baseInfo}",
+    "ln_peers": "${ln_peers}",
+    "ln_channelInfo": "${ln_channelInfo}",
+    "ln_external": "${ln_external}"
+}
+EOF
+
+  # use Jinja2 and apply json data to template to produce static html file
+  templateExists=$(sudo ls /var/cache/raspiblitz/info.json 2>/dev/null | grep -c 'info.json')
+  if [ ${templateExists} -gt 0 ]; then
+    res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
+    if ! [ $? -eq 0 ]; then
+      echo "an error occured.. maybe JSON syntax is wrong..!"
+      echo "${res}"
+    fi
+  fi
+
+fi
+# EOF

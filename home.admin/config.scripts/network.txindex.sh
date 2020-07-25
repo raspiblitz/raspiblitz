@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch txindex on or off"
- echo "network.txindex.sh [status|on|off]"
+ echo "network.txindex.sh [status|on|off|delete]"
  exit 1
 fi
 
@@ -22,7 +22,6 @@ pathAdd=""
 if [ "${chain}" = "test" ]; then
 	  pathAdd="/testnet3"
 fi
-
 
 ###################
 # STATUS
@@ -48,7 +47,7 @@ if [ "$1" = "status" ]; then
     indexInfo="OK"
   else
     echo "isIndexed=0"
-    if [ ${#indexedToBlock} -gt 0 ]; then
+    if [ ${#indexedToBlock} -gt 0 ] && [ ${#blockchainHeight} -gt 0 ]; then
       progressPercent=$(printf %.2f $(echo "${indexedToBlock}/${blockchainHeight}*100" | bc -l))
       indexInfo="Indexing is at ${progressPercent}% (please wait)"
     else
@@ -65,6 +64,8 @@ fi
 # switch on
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # check txindex (parsed and sourced from bitcoin network config above)
   if [ ${txindex} == 0 ]; then
     sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/${network}/${network}.conf
     echo "switching txindex=1 and restarting ${network}d"

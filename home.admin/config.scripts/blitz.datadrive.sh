@@ -70,7 +70,7 @@ if [ "$1" = "status" ]; then
   echo "# BASICS"
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
-  echo "isSSD=${isBTRFS}"
+  echo "isSSD=${isSSD}"
 
   # if HDD is not mounted system is in the pre-setup phase
   # deliver all the detailes needed about the data drive
@@ -344,12 +344,14 @@ if [ "$1" = "format" ]; then
   fi
 
   # wipe all partitions and write fresh GPT
-  >&2 echo "# Wiping all partitions"
-  for v_partition in $(parted -s /dev/${hdd} print|awk '/^ / {print $1}')
-  do
-   sudo parted -s /dev/${hdd} rm ${v_partition}
-   sleep 2
-  done
+  >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+  sudo sfdisk --delete /dev/${hdd}
+  sudo wipefs -a /dev/${hdd}
+  partitions=$(lsblk | grep -c "─${hdd}")
+  if [ ${partitions} -gt 0 ]; then
+    >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
+    sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+  fi
   partitions=$(lsblk | grep -c "─${hdd}")
   if [ ${partitions} -gt 0 ]; then
     echo "error='partition cleaning failed'"
@@ -373,14 +375,14 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
   sleep 6
   sync
   # loop until the partion gets available
-  done=0
+  loopdone=0
   loopcount=0
-  while [ ${done} -eq 0 ]
+  while [ ${loopdone} -eq 0 ]
   do
     >&2 echo "# waiting until the partion gets available"
     sleep 2
     sync
-    done=$(lsblk -o NAME | grep -c ${hdd}1)
+    loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 10 ]; then
       echo "error='partition failed'"
@@ -398,14 +400,14 @@ if [ "$1" = "format" ] && [ "$2" = "ext4" ]; then
 
   >&2 echo "# Formatting"
   sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
-  done=0
+  loopdone=0
   loopcount=0
-  while [ ${done} -eq 0 ]
+  while [ ${loopdone} -eq 0 ]
   do
     >&2 echo "# waiting until formatted drives gets available"
     sleep 2
     sync
-    done=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
+    loopdone=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 10 ]; then
       echo "error='formatting ext4 failed'"
@@ -559,7 +561,7 @@ if [ "$1" = "fstab" ]; then
 
     # write new /etc/fstab & mount
     >&2 echo "# updating /etc/fstab & mount"
-    sudo mkdir -p /mnt/hdd 1>2&
+    sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo sed "3 a UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
     sync
     sudo mount -a 1>/dev/null

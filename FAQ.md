@@ -1,5 +1,34 @@
 # FAQ - Frequently Asked Questions
 
+## Whats new in Version 1.6 of RaspiBlitz?
+
+- Update: Raspberry Pi OS Base Image (May 2020)
+- Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
+- Update: litecoin version 0.18.1-beta [details](https://blog.litecoin.org/litecoin-core-v0-18-1-release-233cabc26440)
+- Update: LND version 0.10.4-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.10.4-beta)
+- Update: Specter Desktop 0.5.5 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Loop 0.6.5 [details](https://lightning.engineering/posts/2020-05-13-loop-mpp/)
+- Update: BTCPayServer v1.0.5.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.2)
+- Update: RTL 0.8.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.7.1)
+- Update: ElectRS 0.8.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#085-1-july-2020)
+- Update: JoinMarket v0.6.3.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.6.3.1)
+- New: Nginx Web Server
+- New: Subscriptions Management 
+- New: IP2Tor Bridge (optional subscription service)
+- New: Balance of Satoshis v5.41.0 (with update option) [details](https://github.com/alexbosworth/balanceofsatoshis)
+- New: Faraday [details](https://github.com/lightninglabs/faraday)
+- New: Let's Encrypt client [details](FAQ.md#how-to-use-the-lets-encrypt-client)
+- New: ThunderHub v0.8.12 (with update option) [details](https://www.thunderhub.io)
+- New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
+- New: ZeroTier [details](https://zerotier.com/manual/)
+- New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
+- New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
+- New: Keep WIFI config over wpa_supplicant.conf for next update
+- Fix: DropBox StaticChannelBackup
+- Removed: Shango from the list of Mobile Wallets
+- Removed: Torrent Download of Blockchain (Copy over LAN now default for RP3)
+- Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
+
 ## Whats new in Version 1.5.1 of RaspiBlitz?
 
 - Bugfix: DropBox Backup of Static-Channel-Backup
@@ -54,7 +83,7 @@ Beside many small improvements and changes, these are most important changes:
 - New: Loop (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
 - New: LNbits (Lightning wallet/accounts System) [details](https://github.com/arcbtc/lnbits)
 - New: Fully Noded (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
-- New: TOR Support to connect mobile Apps
+- New: Tor Support to connect mobile Apps
 - New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
 - New: Start without LCD (switch to HDMI) [details](FAQ.md#can-i-run-the-raspiblitz-without-a-displaylcd)
 - New: Recovery Sheet (PDF) [details](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
@@ -76,12 +105,12 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 - Update: New Torrent files
 - New: Logo (see folder raspiblitz/logos)
 - New: Sync/Validate Blockchain as default for RP4
-- New: Switch on TOR during setup
+- New: Switch on Tor during setup
 - New: Support Zap Mobile for Android
 - New: Repair Options in main menu
 - New: UPNP (AutoNAT) support in services menu
 - New: LCD rotate 180 degrees in services menu
-- Fix: TOR switch on/off
+- Fix: Tor switch on/off
 - Fix: Zap iOS Mobile Wallet connect
 - Fix: Shango Mobile Wallet connect
 - Experimental: LCD Touchscreen Support
@@ -547,6 +576,26 @@ Like the way above you can build a new feature or test a change. Once you have s
 
 See more info: https://yangsu.github.io/pull-request-tutorial/
 
+## How can I help testing a Pull Request?
+
+Make sure to have the correct base image.
+Then go to the command line and create a branch for the PR:
+
+```
+cd /home/admin/raspiblitz
+git fetch origin pull/[PRNUMBER]/head:pr[PRNUMBER]
+git checkout pr[PRNUMBER]
+cd /home/admin
+./XXsyncScripts.sh -justinstall
+```
+
+Now you have the code of the PR active - depending on what scripts are changes you might need to reboot.
+
+To change back to the code:
+```
+./XXsyncScripts.sh master
+```
+
 ## How to attach the RaspberryPi to the HDD?
 
 Try some rubber band.
@@ -976,3 +1025,70 @@ If you cannot login per SSH into your RaspiBlitz your SSH RaspiBlitz certs might
 - then try again to SSH login
 
 If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login thats what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor. 
+
+## How to use the Let's Encrypt client
+
+The [Let's Encrypt](https://letsencrypt.org/) client software [acme.sh](https://github.com/acmesh-official/acme.sh) is 
+included (since v1.6) and can be used to create TLS certificates that are signed by the Certificate Authority (*Root 
+CA*) **Let's Encrypt** and which are therefore trusted on all modern platforms.
+
+In order to successfully get a signed certificate you need to **verify ownership** over a **DNS domain** or a **full 
+qualified domain name** (**FQDN**). Currently Let's Encrypt **doesn't** issue certificates for IP addresses. The two 
+most common standards for verification of control are `HTTP-01` and `DNS-01`.
+
+The **acme.sh** client supports both modes and has a large number of DNS services (more than 50) it can interact with. 
+More details can be found on the [acme.sh wiki](https://github.com/acmesh-official/acme.sh/wiki).
+
+### Let's Encrypt - HTTP-01
+
+To use `HTTP-01` your RaspiBlitz needs to be accessible directly from the Internet on a **public IP address** on **port 
+80**. If you don't have a public IPv4/IPv6 IP on either `eth0` or `wlan0` then it might be possible to use **NAT port 
+forwarding** or an **autossh-tunnel** to fulfill this requirement.
+
+If everything (this includes creating a `DNS A` or `DNS CNAME` record that points to a static or dynamic IP address) is 
+set up so that the Let's Encrypt servers can reach your RaspiBlitz on port 80 then the following command will perform 
+the initial creation of a signed certificate and will also store the configuration data needed to regularly refresh it. 
+Just run this once and then lean back and forget about it. :-D
+
+```
+~/.acme.sh/acme.sh --keylength ec-256 --issue -d hostname.example.com -w /var/www/letsencrypt/ 
+```
+
+### Let's Encrypt - DNS-01
+
+The `DNS-01` standard **proves ownership** by creating `DNS TXT` records on the domain or subdomain you want to use.
+This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates` 
+can be issued. 
+
+It is beyond the scope of this FAQ entry to explain all details of this - please refer to the official documentation. 
+Assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS service then the following command will
+get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous 
+renewals. 
+
+```
+export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
+~/.acme.sh/acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
+```
+
+As mentioned more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
+
+### Let's Encrypt - eMail Address
+
+The installation process of the `acme.sh` client includes a prompt for an eMail address. The data entered there is 
+stored in the `accounts.conf` file as `ACCOUNT_EMAIL`. This address is used by Let's Encrypt to notify you about 
+the expiry of certificates (which is not really needed as renewals are automated) and also about changes to their 
+**Terms of Service**. For more details please check their [privacy policy](https://letsencrypt.org/privacy/).
+
+It is currently considered completely fine to leave this field empty and not provide an eMail address.  
+
+### Let's Encrypt - Installation details
+
+The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
+external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
+
+### How can I customize my RaspiBlitz or add other software?
+
+The RaspiBlitz is your computer to experiment with. Feel free to add your own scripts, edit the system or install further software from the command line. Just keep in mind that after an update/recovery the RaspiBlitz starts with a fresh and clean operating system again. So all your editings and installs might be gone. To prevent this you should do the following:
+
+- place own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
+- put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` that will be started automatically on a recovery/update.

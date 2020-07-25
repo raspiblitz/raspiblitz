@@ -197,7 +197,6 @@ if [ ${walletExists} -eq 0 ]; then
     # generate wallet with seed and set passwordC
     clear
     echo "Generating new Wallet ...."
-    source /home/admin/python3-env-lnd/bin/activate
     python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
     sudo shred -u /home/admin/.pass.tmp 2>/dev/null
@@ -259,30 +258,10 @@ if [ ${walletExists} -eq 0 ]; then
       exit 1
     fi
 
-    # recovering from an old wallet while node is not synced is not possible at the moment
-    # because LND will forget the recovery window on restart and not be able to recover funds
-    # TODO: https://github.com/rootzoll/raspiblitz/issues/1126 
-    if [ ${setupStep} -lt 100 ]; then
-      if [ "${CHOICE}" == "ONLYSEED" ] || [ "${CHOICE}" == "SEED+SCB" ]; then
-        whiptail --title "UNDER CONSTRUCTION" --msgbox "
-To recover an old wallet from SEED or SEED+SCB please
-create an empty NEW WALLET first and setup everything
-else until you get to the main menu.
-
-Then once your in the MAIN MENU go to REPAIR > RESET-LND
-skip all the backups and recover your old wallet.
-
-Sorry, this process will be optimized soon.
-      " 15 63
-        /home/admin/70initLND.sh
-        exit 1
-      fi
-    fi
-
     # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
 
-      # ket people know about the difference between SEED & SEED+SCB
+      # let people know about the difference between SEED & SEED+SCB
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
 To also try to recover the open channel funds you need the
@@ -375,7 +354,7 @@ to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp empty-allowed
         passwordD=`sudo cat /home/admin/.pass.tmp`
         sudo shred -u /home/admin/.pass.tmp 2>/dev/null
       fi
@@ -403,8 +382,8 @@ to protect the seed words. Most users did not set this.
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
 
-IMPORTANT: Please dont reboot the RaspiBlitz until
-the LND was able to rescan the Blockchain again.
+IMPORTANT: LND needs now to scan the blockchain
+for your funds - this can take some extra time.
       " 10 60
       clear
 
@@ -446,7 +425,7 @@ echo "*** Copy LND Macaroons to user admin ***"
 # check if macaroon exists and if not try to unlock LND wallet first
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
   sleep 3
 fi
 
@@ -472,7 +451,7 @@ echo "*** Check Wallet Lock ***"
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
 else
   echo "OK - Wallet is already unlocked"
 fi

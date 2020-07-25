@@ -6,8 +6,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # Basic Options
-OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
-         COPY "Copy from another Computer (SKILLED)" \
+OPTIONS=(COPY "Copy from laptop/node over LAN (SKILLED)" \
          RESYNC "Resync thru Peer2Peer Network (TRUSTLESS)" \
          BACKUP "Run Backup LND data first (optional)"
 )
@@ -15,13 +14,7 @@ OPTIONS=(TORRENT "Redownload Prepared Torrent (DEFAULT)" \
 CHOICE=$(dialog --backtitle "RaspiBlitz - Repair Script" --clear --title "Repair Blockchain Data" --menu "Choose a repair/recovery option:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
-if [ "${CHOICE}" = "TORRENT" ]; then
-    echo "Starting TORRENT ..."
-    sudo sed -i "s/^state=.*/state=retorrent/g" /home/admin/raspiblitz.info
-    /home/admin/50torrentHDD.sh
-    sudo sed -i "s/^state=.*/state=na/g" /home/admin/raspiblitz.info
-
-elif [ "${CHOICE}" = "COPY" ]; then
+if [ "${CHOICE}" = "COPY" ]; then
     echo "Starting COPY ..."
     sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
     /home/admin/50copyHDD.sh

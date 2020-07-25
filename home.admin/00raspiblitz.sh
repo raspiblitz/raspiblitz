@@ -58,15 +58,6 @@ if [ "${state}" = "reindex" ]; then
   exit 1
 fi
 
-# singal that torrent is in re-download
-if [ "${state}" = "retorrent" ]; then
-  echo "Re-Index in progress ... start monitoring:"
-  /home/admin/50torrentHDD.sh
-  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
-  /home/admin/00raspiblitz.sh
-  exit
-fi
-
 # singal that copstation is running
 if [ "${state}" = "copystation" ]; then
   echo "Copy Station is Runnning ..."
@@ -206,7 +197,7 @@ How do you want to continue?
             # check how many times LND was restarted
             source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
             if [ ${startcountLightning} -lt 4 ]; then
-              /home/admin/AAunlockLND.sh
+              /home/admin/config.scripts/lnd.unlock.sh
               echo "Starting up Wallet ... (10sec)"
               sleep 5
               sleep 5
@@ -337,10 +328,7 @@ else
 LND accepted the channel.backup file you uploaded. 
 It will now take around a hour until you can see,
 if LND was able to recover funds from your channels.
-
-IMPORTANT: Please dont reboot the RaspiBlitz until
-the LND was able to rescan the Blockchain again.
-     " 12 56
+     " 9 56
     fi
   
   fi

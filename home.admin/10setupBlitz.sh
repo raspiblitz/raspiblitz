@@ -55,16 +55,16 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # check if LND wallet exists and if locked
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
-  locked=0
+  walletLocked=0
   # only when a wallet exists - it can be locked
   if [ ${walletExists} -eq 1 ];then
     echo "lnd wallet exists ... checking if locked"
     sleep 2
-    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
   fi
-  if [ ${locked} -gt 0 ]; then
+  if [ ${walletLocked} -gt 0 ]; then
     # LND wallet is locked
-    /home/admin/AAunlockLND.sh
+    /home/admin/config.scripts/lnd.unlock.sh
     /home/admin/10setupBlitz.sh
     exit 0
   fi
@@ -176,18 +176,6 @@ if [ ${isMounted} -eq 1 ]; then
     fi
   fi
 
-  # check if there is torrent data to continue
-  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
-  if [ ${torrentProgressExists} -eq 1 ]; then
-    # check if there is a running screen session to return to
-    noScreenSession=$(screen -ls | grep -c "No Sockets found")
-    if [ ${noScreenSession} -eq 0 ]; then 
-      echo "found torrent data .. resuming"
-      /home/admin/50torrentHDD.sh
-      exit 1
-    fi
-  fi
-
   # HDD is empty - get Blockchain
 
   # detect hardware version of RaspberryPi
@@ -202,8 +190,7 @@ if [ ${isMounted} -eq 1 ]; then
     echo "Bitcoin-RP3 Options"
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
-    T "TORRENT --> Download thru Torrent (TRUSTED DEFAULT ±1day)" \
-    C "COPY    --> Copy from laptop/node (OVER LAN ±6hours)" \
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" \
     S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
 
   # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
@@ -212,8 +199,7 @@ if [ ${isMounted} -eq 1 ]; then
     menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
     --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
     S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
-    C "COPY    --> Copy from laptop/node (OVER LAN ±4hours)" \
-    T "TORRENT --> Download thru Torrent (TRUSTED FALLBACK ±1day)" 2>&1 >/dev/tty)
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
@@ -233,9 +219,6 @@ if [ ${isMounted} -eq 1 ]; then
 
   clear
   case $menuitem in
-          T)
-              /home/admin/50torrentHDD.sh
-              ;;
           C)
               /home/admin/50copyHDD.sh
               ;;      
