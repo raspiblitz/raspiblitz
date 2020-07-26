@@ -68,15 +68,17 @@ copyHost()
     whiptail --msgbox "Was not able to contact/ping: ${targetIP}\n\n- check if IP of target RaspiBlitz is correct.\n- check to be on the same local network.\n- try again ..." 11 58 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
     return
   fi
-
-  echo "# install dependencies ..."
-  sudo apt-get install -y sshpass
   
   echo "# get Password of RaspiBlitz to copy to ..."
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   if [ ${#targetPassword} -eq 0 ]; then
     return
   fi
+
+  echo "# install dependencies ..."
+  sudo apt-get install -y sshpass
+
+  sudo rm /root/.ssh/known_hosts
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then
     whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
