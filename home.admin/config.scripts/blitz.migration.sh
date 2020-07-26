@@ -287,7 +287,7 @@ if [ "$1" = "import-gui" ]; then
     OPTIONS+=(CLEAN "Just clean HDD & use Blockchain")
   fi
 
-  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
     EXT4)
