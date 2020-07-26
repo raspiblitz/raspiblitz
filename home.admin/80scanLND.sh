@@ -85,7 +85,6 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       fi
 
       echo "POSSIBLE OPTIONS:"
-      # check if maybe problems with txindex
       source <(/home/admin/config.scripts/network.txindex.sh status)
       if [ "${txindex}" == "1" ]; then
         echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
@@ -95,8 +94,6 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       echo "-> Use command 'menu' to open main menu."
       echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
-      echo "Use CTRL+c to EXIT to Terminal"
-      sleep 10
       exit 1
 
     else
