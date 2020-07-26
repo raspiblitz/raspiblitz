@@ -1374,9 +1374,6 @@ if [ "$1" = "clean" ]; then
 
     >&2 echo "# Deleting the temp folder/drive (keeping SWAP file) .."  
     tempPath="/mnt/hdd/temp"
-
-    # better do secure delete, because temp is used for backups
-    # secure-delete works because - also in BTRFS setup, temp is EXT4
         
     for entry in $(ls -A1 ${tempPath} 2>/dev/null)
     do
@@ -1390,10 +1387,10 @@ if [ "$1" = "clean" ]; then
 
         if [ -d "${tempPath}/$entry" ]; then
           >&2 echo "# shredding DIR  : ${entry}"
-          sudo srm -r ${tempPath}/$entry
+          sudo rm -r ${tempPath}/$entry
         else
           >&2 echo "# shredding FILE : ${entry}"
-          sudo srm ${tempPath}/$entry
+          sudo rm ${tempPath}/$entry
         fi
 
       else
