@@ -286,6 +286,7 @@ if [ "$1" = "import-gui" ]; then
   OPTIONS+=(EXT4 "Ext4 & 1 Partition (default)")
   OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
 
+  useBlockchain=0
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
@@ -307,6 +308,7 @@ if [ "$1" = "import-gui" ]; then
       ;;
     KEEP)
       echo "Keep HDD & Blockchain"
+      useBlockchain=1
       ;;
     *)
       echo "CANCEL"
@@ -380,7 +382,7 @@ if [ "$1" = "import-gui" ]; then
   echo "OK: Migration data was imported"
 
   # Copy from other computer is only option for Bitcoin
-  if [ "${network}" == "bitcoin" ]; then
+  if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then
     OPTIONS=(SYNC "Re-Sync & Validate Blockchain" \
              COPY "Copy over LAN from other Computer"
 	  )
