@@ -278,14 +278,13 @@ if [ "$1" = "import-gui" ]; then
 
 
   # ask format for new HDD/SSD
-  OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
-           BTRFS "BTRFS & 3 Partitions (experimental)"
-	)
-
+  OPTIONS=()
   # check if HDD/SSD contains Bitcoin Blockchain
   if [ "${hddBlocksBitcoin}" == "1" ]; then 
-    OPTIONS+=(CLEAN "Just clean HDD & use Blockchain")
+    OPTIONS+=(KEEP "Dont format & use Blockchain")
   fi
+  OPTIONS+=(EXT4 "Ext4 & 1 Partition (default)")
+  OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
 
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
@@ -306,9 +305,8 @@ if [ "$1" = "import-gui" ]; then
         exit 1
       fi
       ;;
-    CLEAN)
-      echo "CLEAN HDD & Keep Blockchain"
-      sudo /home/admin/XXcleanHDD.sh
+    KEEP)
+      echo "Keep HDD & Blockchain"
       ;;
     *)
       echo "CANCEL"
