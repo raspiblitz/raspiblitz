@@ -151,6 +151,8 @@ if [ "$1" = "export-gui" ]; then
   echo "To complete the data migration follow then instructions on the github FAQ."
   echo
   read key
+  echo "Shutting down ...."
+  sleep 4
   /home/admin/XXshutdown.sh
   exit 0
 fi
@@ -257,7 +259,7 @@ if [ "$1" = "import-gui" ]; then
   # make sure HDD/SSD is not mounted
   # because importing migration just works during early setup
   if [ ${isMounted} -eq 1 ]; then
-    echo "FAIL --> cannot import migration data when HDD(SDD is mounted"
+    echo "FAIL --> cannot import migration data when HDD/SSD is mounted"
     exit 1
   fi
 
@@ -273,10 +275,18 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
+
+
   # ask format for new HDD/SSD
   OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
            BTRFS "BTRFS & 3 Partitions (experimental)"
 	)
+
+  # check if HDD/SSD contains Bitcoin Blockchain
+  if [ "${hddBlocksBitcoin}" == "1" ]; then 
+    OPTIONS+=(CLEAN "Just clean HDD & use Blockchain")
+  fi
+
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
@@ -295,6 +305,10 @@ if [ "$1" = "import-gui" ]; then
         echo "FAIL --> ${error}"
         exit 1
       fi
+      ;;
+    CLEAN)
+      echo "CLEAN HDD & Keep Blockchain"
+      sudo /home/admin/XXcleanHDD.sh
       ;;
     *)
       echo "CANCEL"

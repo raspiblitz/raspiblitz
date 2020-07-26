@@ -84,24 +84,12 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
         echo
       fi
 
+      echo "POSSIBLE OPTIONS:"
       # check if maybe problems with txindex
       source <(/home/admin/config.scripts/network.txindex.sh status)
       if [ "${txindex}" == "1" ]; then
-        if [ "${indexFinished}" == "0" ]; then
-          # bitcoind is not starting while still building index - recommend turning off index and restart
-	        whiptail --title "Problems with Bitcoin Index" --yes-button "TurnOff TxIndex" --no-button "Do Nothing" --yesno "It looks like ${network}d has problems building the txindex. Turning Off the txindex and restart is recommended." 10 60
-	        if [ $? -eq 0 ]; then
-            # delete txindex, turn off and deactivate apps needed index
-	          sudo /home/admin/config.scripts/network.txindex.sh delete
-            whiptail --msgbox "OK txindex was turned off.\n\nTo be able to build a valid txindex in the future you might need to reset/redownload the blockchain." 10 56 "" --title " TXINDEX OFF "
-            /home/admin/XXshutdown.sh reboot
-	        fi
-        else
-          # bitcoind is not starting but index was build in the past - recommend repair with turning off index
-          echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
-        fi
+        echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
       fi
-
       echo "-> Use command 'repair' and then choose 'RESET-CHAIN' to try downloading new blockchain."
       echo "-> Use command 'debug' for more log output you can use for getting support."
       echo "-> Use command 'menu' to open main menu."

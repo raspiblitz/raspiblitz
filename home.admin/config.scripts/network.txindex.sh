@@ -102,6 +102,7 @@ if [ "$1" = "delete" ]; then
   sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
   echo "# deleting tx index ..."
   sudo rm -r /mnt/hdd/${network}/indexes/txindex
+  echo "# restarting bitcoind ..."
   sudo systemctl restart ${network}d
   exit 0
 fi
