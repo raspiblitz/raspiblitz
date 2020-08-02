@@ -87,8 +87,8 @@ def ext(cmd=None, message=None, debug=False):
 
 
 # e-Mail
-def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
-         from_name=None, from_address=None, debug=False):
+def mail(recipient: str = None, message: str = None, subject: str = None, cert: str = None,
+         encrypt: bool = False, from_name: str = None, from_address: str = None, debug: bool = False):
     if debug:
         print("send mail")
         print("msg: {}".format(message))
@@ -107,7 +107,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
             'From: {} <{}>'.format(from_name, from_address),
             "Subject: {}".format(subject),
             "",
-            "{}".format(message.encode('utf8'))
+            "{}".format(message)
         ]
 
         with open(cert, 'rb') as pem:
@@ -122,7 +122,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
         msg['From'] = '{} <{}>'.format(from_name, from_address),
         msg['To'] = recipient
 
-        msg.set_payload(message.encode('utf8'))
+        msg.set_payload(message)
         msg_to_send = msg.as_bytes()
 
     # send message via e-Mail
@@ -139,7 +139,7 @@ def mail(recipient=None, message=None, subject=None, cert=None, encrypt=False,
         raise Exception(err)
 
 
-def slack(message=None, debug=False):
+def slack(message: str = None, debug: bool = False):
     if debug:
         print("send slack")
         print("msg: {}".format(message))
@@ -148,4 +148,3 @@ def slack(message=None, debug=False):
 
 if __name__ == "__main__":
     main()
-
