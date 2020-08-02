@@ -89,10 +89,6 @@ else
   echo "hostname=${hostname}" >> /home/admin/raspiblitz.conf
   echo "lcd2hdmi=${lcd2hdmi}" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
-  sudo mv /home/admin/raspiblitz.conf $configFile
-  sudo chown root:root ${configFile}
-  sudo chmod 777 ${configFile}
-  sleep 3
 
   # try to determine publicIP and if not possible use localIP as placeholder 
   # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
@@ -114,7 +110,12 @@ else
     echo "# WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
     freshPublicIP="${localIP}"
   fi
-  echo "publicIP='${freshPublicIP}'" >> $configFile
+  echo "publicIP='${freshPublicIP}'" >> /home/admin/raspiblitz.conf
+
+  sudo mv /home/admin/raspiblitz.conf $configFile
+  sudo chown root:root ${configFile}
+  sudo chmod 777 ${configFile}
+  sleep 3
 fi
 
 # link ssh directory from SD catd to HDD
