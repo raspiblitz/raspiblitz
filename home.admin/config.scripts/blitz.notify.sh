@@ -80,11 +80,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the NOTIFY ON"
 
   # install sstmp if not already present
-  /usr/bin/which ssmtp &>/dev/null
-  [ $? -eq 0 ] || sudo apt-get install -y ssmtp
+  if ! command -v ssmtp >/dev/null; then
+    sudo apt-get install -y ssmtp
+  fi
 
   # install python lib for smime into virtual env
-  /usr/bin/python3 -m pip install smime
+  sudo -H /usr/bin/python3 -m pip install smime
 
   # write ssmtp config
   cat << EOF | sudo tee /etc/ssmtp/ssmtp.conf >/dev/null
@@ -135,12 +136,11 @@ if [ "$1" = "send" ]; then
     exit 1
   fi
 
-  /usr/bin/which ssmtp &>/dev/null
-  if ! [ $? -eq 0 ]; then
+  # ensure socat
+  if ! command -v ssmtp >/dev/null; then
     echo "please run \"on\" first"
     exit 1
   fi
-
 
   # now parse settings from config and use to send the message
   if [ "${notifyMethod}" = "ext" ]; then
