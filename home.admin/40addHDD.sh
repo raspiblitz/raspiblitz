@@ -82,15 +82,17 @@ else
   # create file and use init values from raspiblitz.info
   echo "# CREATING new ${configFile}"
   source /home/admin/_version.info
-  sudo touch $configFile
+  echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
+  echo "raspiBlitzVersion='${codeVersion}'" >> /home/admin/raspiblitz.conf
+  echo "network=${network}" >> /home/admin/raspiblitz.conf
+  echo "chain=${chain}" >> /home/admin/raspiblitz.conf
+  echo "hostname=${hostname}" >> /home/admin/raspiblitz.conf
+  echo "lcd2hdmi=${lcd2hdmi}" >> /home/admin/raspiblitz.conf
+  echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
+  sudo mv /home/admin/raspiblitz.conf $configFile
+  sudo chown root:root ${configFile}
   sudo chmod 777 ${configFile}
-  echo "# RASPIBLITZ CONFIG FILE" > $configFile
-  echo "raspiBlitzVersion='${codeVersion}'" >> $configFile
-  echo "network=${network}" >> $configFile
-  echo "chain=${chain}" >> $configFile
-  echo "hostname=${hostname}" >> $configFile
-  echo "lcd2hdmi=${lcd2hdmi}" >> $configFile
-  echo "lcdrotate=1" >> $configFile
+  sleep 3
 
   # try to determine publicIP and if not possible use localIP as placeholder 
   # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
