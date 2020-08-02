@@ -416,7 +416,7 @@ Create one first and try again.
             height=10, width=40, init="",
             title="Static IP")
         ip = text.strip()
-        ip = token.split(' ')[0]
+        ip = ip.split(' ')[0]
 
         # check for valid input
         try:
