@@ -127,7 +127,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
         update_url = ""
         if dnsservice == "duckdns":
             update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(get_subdomain(domain), token, ip)
-        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', domain, update_url],
+        subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
 
