@@ -136,7 +136,7 @@ if [ "$1" = "send" ]; then
     exit 1
   fi
 
-  # ensure socat
+  # ensure ssmtp
   if ! command -v ssmtp >/dev/null; then
     echo "please run \"on\" first"
     exit 1
