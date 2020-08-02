@@ -76,7 +76,7 @@ if [ ${hddGotBlockchain}  -eq 0 ]; then
 
   # test feature: if there is a USB stick as a raid connected, then format in BTRFS an not in EXT4
   format="ext4"
-  if [ ${raidCandidates} -eq 1 ]; then
+  if [ ${raidCandidates} -eq 1 ] && [ ${raidSizeGB} -gt 14 ]; then
 
     echo
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
