@@ -83,8 +83,10 @@ def handleException(e):
 
 
 def get_subdomain(fulldomain_str):
-    return fulldomain_str.split('.')[0]
-
+    try:
+        return fulldomain_str.split('.')[0]
+    except Exception as e:
+        return fulldomain_str
 
 ############################
 # API Calls to DNS Services
