@@ -49,7 +49,7 @@ Also much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS 
 
 ## DeepDive Video (July 2020)
 
-![Watch the RaspiBlitz DeepDive](pictures/raspiblitz-deepdive.png =400x)
+<img src="pictures/raspiblitz-deepdive.png" alt="DeepDive Video" width="400">
 --watch--> [https://www.youtube.com/watch?v=QXUGg45CWLo](https://www.youtube.com/watch?v=QXUGg45CWLo)
 
 ## Time Estimate to Setup a RaspiBlitz
