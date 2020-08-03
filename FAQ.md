@@ -60,24 +60,6 @@ gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
 
 As a result you should see a "correct signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the sd card image you downloaded is a original release RaspiBlitz.
 
-## Can I still get version 1.2 of RaspiBlitz?
-
-HTTP: http://wiki.fulmo.org/downloads/raspiblitz-v1.2-2019-05-02.img.gz
-
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.2/raspiblitz-v1.2-2019-05-02.torrent
-
-SHA-256: ae9910bb99b7a992d14e920696183b6e494cc9b52db7b9c03dd02fd739d47659
-
-Code: https://github.com/rootzoll/raspiblitz/tree/v1.2
-
-## Can I still get version 1.1 of RaspiBlitz?
-
-Torrent: https://github.com/rootzoll/raspiblitz/raw/v1.1/raspiblitz-v1.1-2019-03-18.torrent
-
-SHA-256: b7a449ce6444f9e7e9fd05156ff09c70a6e200be0b5e580d3317049eefc4f3b7
-
-Code: https://github.com/rootzoll/raspiblitz/tree/v1.1
-
 ## How to update a old RaspiBlitz BEFORE v1.0? (LEGACY)
 
 If your old RaspiBlitz if version 0.98 or higher, just follow the update instructions in the README.
@@ -107,12 +89,6 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 2. Make your changes so that they survive an SD card update easily - put all your scripts and extra data onto the HDD AND document for yourself how to activate them again after an update .. maybe even write a small shell script (stored on your HDD) that installs & configures all your additional packages, software and scripts.
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
-
-## How can I avoid using a prepared blockchain and validate myself?
-
-Since v1.3 if you use a RaspberryPi 4 syncing and validation the full blockchain yourself is the new default.
-
-The torrent download use a prepared blockchain to kick start the RaspiBlitz. If you want to self validate you could do this on another more powerful computer and then transfer your own validated blockchain over to the RaspiBlitz. Check the options `Copying from another Computer` & `Cloning from a 2nd HDD` described in the [README](README.md) for more details.
 
 ## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
 
@@ -223,11 +199,6 @@ With the 24 word list given you by LND on wallet creation you can recover your p
 
 For more background on the LND mnemonic seed [read this article](https://github.com/lightningnetwork/lnd/blob/master/docs/recovery.md#recovering-funds-from-lnd-funds-are-safu).
 
-## How does PASSWORD D effects the word seed?
-
-On wallet creation you get asked if you want to protect your word seed list with an additional password. If you choose so, RaspiBlitz recommends you to use your PASSWORD D at this point.
-
-To use a an additional password for your seed words is optional. If you choose so, you will need the password to recover your private key from your your seed words later on. Without this password your private key cannot be recovered from your seed words. So the password adds an additional layer of security, if someone finds your written down word list.
 
 ## How to move funds & channels from RaspiBlitz to LND Lightning Desktop App?
 
@@ -458,110 +429,12 @@ https://diynodes.com (delivery from UK)
 
 When your USB power adapter for the RaspiBlitz delivers too low power those messages with "Under-Voltage detected" (under-voltage) are shortly seen on the display. This can lead to data loss/corruption on the HDD. If you see those just one or two times that's not OK, but can be in a tolerant window. Nevertheless it make sure your USB power adapter can deliver at least 3A (big and stable is good). If you still see those warnings maybe get a second USB Power adapter just for the HDD and power the HDD through a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB or put a USB Hub with extra power between the raspberry and the HDD.
 
-## Why do we need to download the blockchain and not syncing it?
-
-*For RaspberryPi 3:* The RaspiBlitz is powered by the RaspberryPi. The processing power of this SingleBoardComputer is too low to make a fast sync of the blockchain from the bitcoin peer to peer network during setup process (validation). To sync and index the complete blockchain could take weeks or even longer. That's why the RaspiBlitz needs to download a prepared blockchain from another source.
-
-*For RaspberryPi 4 and above:* The RaspberryPi is now fast enough and with 2GB RAM and a SSD self syncing and validation is the new default.
-
 ## Is using the prepared SD card image secure?
 
 Using pre-built software almost always shifts trust to the one who made the binary. But at least you can check with the SHA checksum after download if the image downloaded is really the one offered by the GitHub Repo. To do so make a quick check if your browser is really in the correct GiutHub page and that your HTTPS of the GitHub page is signed by 'DigiCert'. Then compare the SHA-256 string (always next to the download link of the image on the README) with the result of the command `shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]` (Mac/Linux). Still this is not optimal and if at least some people from the community request it, I will consider signing the download as an author for the future.
 
 The best way would be to build the sd card yourself. You use the script `build_sdcard.sh` for it. Take some minutes to check if you see anything suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
 
-## Is downloading the blockchain from a third party secure?
-
-To download a blockchain from a third party (torrent) is not optimal and for the future with more cheap & powerfull SingleBoardComputers we could get rid of this 'patch'.
-
-The downloaded blockchain is pre-indexed and pre-validated. That should be practically secure enough, because if the user gets a "manipulated" blockchain it would not work after setup. The beginning of the downloaded blockchain needs to fit the genesis block (in bitcoind software) and the end of the downloaded blockchain needs not match with the rest of the bitcoin network state - hashes of new block distributed within the peer-2-peer network need to match the downloaded blockchain head. So if you downloaded a manipulated blockchain it simply wouldn't work in practice. As long as you are not in a totally hostile environment where someone would be able to fake a whole network of peers and miners around you - this is secure enough for running a small funded full node to try out the lightning network.
-
-If you don't trust the download or you want to run the RaspiBlitz in a more production like setup (on your own risk) then don't use the torrent download and choose the option to COPY the blockchain data from a more powerful computer (laptop or desktop) where you synced, verified and indexed the blockchain all by your yourself - see [README](README.md#4-copying-from-another-computer) for more details.
-
-## Why is taking my torrent download of the blockchain so long?
-
-Other users reported that opening up and forwarding the following port from their router to the RaspiBlitz helped speed up and getting started the torrent download: 49200-49250
-
-On details how to set port forwarding on your router model see: https://portforward.com
-
-## What is the "Base Torrent File"?
-
-Inspired by the website getbitcoinblockchain.com we use one of their base torrent files to have a basic set of blocks - those blocks will not change for the future. This torrent contains most of the data (the big file) and we dont need to change the torrent for a long time. This way the torrent can get establish a wide spread seeding and the torrent network can take the heavy load.
-
-At the moment (Baseiteration=2) this is just the bitcoin blk and rev files up to the number:
-blockchain/blocks/blk00000.dat - blk01357.dat
-blockchain/blocks/rev00000.dat - rev01357.dat
-(no testnet data)
-
-For litecoin (Baseiteration=2) it's blk and rev files up to the number:
-blockchain/blocks/blk00000.dat - blk00150.dat
-blockchain/blocks/rev00000.dat - rev00150.dat
-
-The base torrent file should always have the following naming scheme:
-
-`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-base.torrent`
-
-So for example the second version of the base torrent for litecoin created on 2018-10-31 would have this name: raspiblitz-litecoin2-2018-10-31-base.torrent
-
-## What is the "Update Torrent File" and how to create it?
-
-All the rest of the blocks and needed files get packaged into a second torrent file. This file will be updated much more often. The seeding is expected to be not that good and download may be slower, but that's OK because it's a much smaller file.
-
-This way a good balance between good seeding and up-to-date blockchain can be reached.
-
-To create the Update Torrent file, follow the following step ...
-
-Have a almost 100% synced bitcoind MAINNET on a RaspiBlitz
-(if you have funds in there, make a backup first and calculate for about 1 day of off-time to repair the blockchain after this)
-
-Stop bitcoind with:
-```
-sudo systemctl stop bitcoind
-```
-
-Delete base torrent files:
-```
-sudo rm /mnt/hdd/bitcoin/blocks/blk00*.dat
-sudo rm /mnt/hdd/bitcoin/blocks/blk0{1000..1357}.dat
-sudo rm /mnt/hdd/bitcoin/blocks/rev00*.dat
-sudo rm /mnt/hdd/bitcoin/blocks/rev0{1000..1357}.dat
-```
-
-Now change to your computer where you package the torrent files and transfer the two directories into your torrent base directory (should be your current working directory):
-```
-mkdir ./blockchain
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/blocks ./blockchain/blocks
-scp -r bitcoin@[RaspiBlitzIP]:/mnt/hdd/bitcoin/chainstate ./blockchain/chainstate
-```
-
-(Re-)name the "torrent base directory" to the same name as the torrent UPDATE file itself later (without the .torrent ending). The updated torrent file should always have the following naming schema:
-
-`raspiblitz-[CHAINNETWORK][BASEITERATIONNUMBER]-[YEAR]-[MONTH]-[DAY]-update.torrent`
-
-*So for example an update torrent created on 2018-12-24 for litecoin that is an update to the second base torrent version would have this name: raspiblitz-litecoin2-2018-12-24-update.torrent*
-
-Now open your torrent client (e.g. qTorrent for OSX) and create a new torrent-file with the freshly renamed "torrent base directory" as source directory.
-
-Add this list of trackers to your torrent and start seeding (keep a free/empty line between the three single trackers):
-```
-udp://tracker.justseed.it:1337
-
-udp://tracker.coppersurfer.tk:6969/announce
-
-udp://open.demonii.si:1337/announce
-
-udp://denis.stalker.upeer.me:6969/announce
-```
-
-After successful creation of the torrent file - edit the RaspiBlitz code:
-* copy to torrent file to `/home.admin/assets`
-* push to git
-* change in `50torrentHDD.sh script`
-* add to Torrent-[RSS](https://github.com/rootzoll/raspiblitz/blob/master/home.admin/assets/raspiblitz-torrents-rss.xml)
-* seed at home and at services like justseed.it
-* update [issue](https://github.com/rootzoll/raspiblitz/issues/285#issuecomment-457796120) and ask on twitter for help on seeding
-
-Now to repair your RaspiBlitz Blockchain start mainmenu `./00mainMenu.sh` and choose `REPAIR` > `RESET-CHAIN`.
 
 ## What is the process of creating a new sd card image release?
 
@@ -626,7 +499,7 @@ There is an experimental section in this GitHub that tries to build for other Si
 
 ## Can I flip the screen?
 
-There is now an option under `SERVICES to rotate the screen.
+There is now an option under `SETTINGS` to rotate the screen.
 
 To do it manually: For the default 3.5" LCD you need to edit the /boot/config.txt. Run `sudo nano /boot/config.txt`
 look for the line `dtoverlay=tft35a:rotate=270` towards the end. To flip the screen with 180 degrees change the line to `dtoverlay=tft35a:rotate=90` and reboot with `sudo reboot`. Reference: https://github.com/goodtft/LCD-show/issues/34
