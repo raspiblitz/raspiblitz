@@ -1,5 +1,9 @@
 # FAQ - Frequently Asked Questions
 
+## What changed on the single RaspiBlitz updates?
+
+See the [CHANGES.md](CHANGES.md) file for detailes.
+
 ## How to update my RaspiBlitz (since 1.2)?
 
 The update should be quite simple - you don't need to close any channels:
