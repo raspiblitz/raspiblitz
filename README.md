@@ -130,7 +130,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 Browser: https://raspiblitz.org/raspiblitz-v1.6-20200802.img.gz
 
-Torrent: [TODO]
+Torrent: [assets/raspiblitz-v1.6-20200802.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6-20200802.img.gz.torrent)
 
 SHA-256: 7b130b34a660b72aba12b304c371a13977ce2e6294a60873561fa0e71fd08d02 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6-20200802.img.gz.sig)
 
