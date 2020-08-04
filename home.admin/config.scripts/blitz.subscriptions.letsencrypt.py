@@ -81,13 +81,6 @@ def handleException(e):
         print("error='{0}'".format(str(e)))
     sys.exit(1)
 
-
-def get_subdomain(fulldomain_str):
-    try:
-        return fulldomain_str.split('.')[0]
-    except Exception as e:
-        return fulldomain_str
-
 ############################
 # API Calls to DNS Services
 ############################
@@ -96,7 +89,7 @@ def duckdns_update(domain, token, ip):
     print("# duckDNS update IP API call for {0}".format(domain))
 
     # make HTTP request
-    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(get_subdomain(domain), token, ip)
+    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(domain.split('.')[0], token, ip)
     print("# calling URL: {0}".format(url))
     try:
         response = session.get(url)
@@ -130,14 +123,14 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     if ip == "dyndns":
         update_url = ""
         if dnsservice == "duckdns":
-            update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(get_subdomain(domain), token, ip)
+            update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(domain, token, ip)
         subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        duckdns_update(get_subdomain(id), token, real_ip)
+        duckdns_update(domain.split('.')[0], token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -308,7 +301,7 @@ If you havent already go to https://duckdns.org
             title="DuckDNS Domain")
         subdomain = text.strip()
         subdomain = subdomain.split(' ')[0]
-        subdomain = get_subdomain(subdomain)
+        subdomain = subdomain.split('.')[0]
         domain = "{0}.duckdns.org".format(subdomain)
         os.system("clear")
 
