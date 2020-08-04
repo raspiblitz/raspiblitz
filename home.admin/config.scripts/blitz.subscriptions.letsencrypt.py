@@ -102,6 +102,7 @@ def duckdns_update(domain, token, ip):
         response = session.get(url)
         if response.status_code != 200:
             raise BlitzError("failed HTTP code", str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         raise BlitzError("failed HTTP request", url, e)
 
