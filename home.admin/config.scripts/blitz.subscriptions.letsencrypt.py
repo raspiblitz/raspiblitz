@@ -130,7 +130,8 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        duckdns_update(domain.split('.')[0], token, real_ip)
+        print("# dnsservice=dnsservice --> update {0}".format(domain))
+        duckdns_update(domain, token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
