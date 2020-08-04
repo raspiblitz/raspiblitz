@@ -97,6 +97,7 @@ def duckdns_update(domain, token, ip):
 
     # make HTTP request
     url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(get_subdomain(domain), token, ip)
+    print("# calling URL: {0}".format(url))
     try:
         response = session.get(url)
         if response.status_code != 200:
