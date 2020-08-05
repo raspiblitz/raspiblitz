@@ -124,3 +124,49 @@ function jmarket() {
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
   fi
 }
+
+# command: getthistx
+# retrieve transaction from mempool or blockchain and print as JSON
+# $ getthistx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
+function getthistx() {
+    tx_hash="${1:-f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16}"
+    if result=$(bitcoin-cli getrawtransaction "${tx_hash}" 1 2>/dev/null); then
+        echo "${result}"
+    else
+        echo "{\"error\": \"unable to find TX\", \"tx_hash\": \"${tx_hash}\"}"
+        return 1
+    fi
+}
+
+# command: watchthistx
+# try to retrieve transaction from mempool or blockchain until certain confirmation target
+# is reached and then exit cleanly.
+# $ watchthistx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
+function watchthistx() {
+    tx_hash="${1}"
+    wait_n_confirmations="${2:-2}"
+    sleep_time="${3:-60}"
+
+    echo "Waiting for ${wait_n_confirmations} confirmations"
+
+    while true; do
+
+      if result=$(bitcoin-cli getrawtransaction "${tx_hash}" 1 2>/dev/null); then
+        confirmations=$(echo "${result}" | jq .confirmations)
+
+        if [[ "${confirmations}" -ge "${wait_n_confirmations}" ]]; then
+          printf "confirmations: ${confirmations} -target reached!\n"
+          return 0
+        else
+          printf "confirmations: ${confirmations} - "
+        fi
+
+      else
+        printf "unable to find TX - "
+      fi
+
+      printf "sleeping for ${sleep_time} seconds...\n"
+      sleep ${sleep_time}
+
+    done
+}
