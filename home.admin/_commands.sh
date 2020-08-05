@@ -155,7 +155,7 @@ function watchthistx() {
         confirmations=$(echo "${result}" | jq .confirmations)
 
         if [[ "${confirmations}" -ge "${wait_n_confirmations}" ]]; then
-          printf "confirmations: ${confirmations} -target reached!\n"
+          printf "confirmations: ${confirmations} - target reached!\n"
           return 0
         else
           printf "confirmations: ${confirmations} - "
