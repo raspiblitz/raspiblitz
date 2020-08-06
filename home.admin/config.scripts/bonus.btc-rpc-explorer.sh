@@ -119,6 +119,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd btc-rpc-explorer
     sudo -u btcrpcexplorer git reset --hard v2.0.0
     sudo -u btcrpcexplorer npm install
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
 
     # prepare .env file
     echo "# getting RPC credentials from the ${network}.conf"

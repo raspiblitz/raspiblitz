@@ -38,6 +38,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME rm v$SCRIPT_VERSION.tar.gz
     cd stacking-sats-kraken
     sudo -u $USERNAME npm install
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
 
     # setup stacking config
     sudo mkdir -p $APP_DATA_DIR
