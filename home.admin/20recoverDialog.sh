@@ -31,6 +31,15 @@ sudo systemctl enable ${network}d.service
 if [ "${rtlWebinterface}" = "on" ]; then
   sudo systemctl enable RTL
 fi
+if [ "${loop}" = "on" ]; then
+  sudo systemctl enable loopd
+fi
+if [ "${BTCRPCexplorer}" = "on" ]; then
+  sudo systemctl enable btc-rpc-explorer
+fi
+if [ "${ElectRS}" = "on" ]; then
+  sudo systemctl enable electrs
+fi
 
 # remove flag that freshly recovered
 sudo rm /home/admin/raspiblitz.recover.info
@@ -48,10 +57,10 @@ to deactivate the Auto-Unlock feature.
 " 10 52
   echo "Activating Auto-Unlock (please wait) .."
   sudo /home/admin/config.scripts/lnd.autounlock.sh on
-  dialog --backtitle "RaspiBlitz" --msgbox "FINAL REBOOT IS NEEDED." 6 52
+  dialog --backtitle "RaspiBlitz" --pause "  FINAL REBOOT IS NEEDED." 8 52 5
 
 else
-  dialog --backtitle "RaspiBlitz" --msgbox "OK - SSH password A set.\nFINAL REBOOT IS NEEDED." 6 52
+  dialog --backtitle "RaspiBlitz" --pause "  OK - SSH password A set.\n  FINAL REBOOT IS NEEDED." 9 52 5
 fi
 
-sudo shutdown -r now
+sudo /home/admin/XXshutdown.sh reboot

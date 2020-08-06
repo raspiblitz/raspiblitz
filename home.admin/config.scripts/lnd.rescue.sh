@@ -16,7 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 mode="$1"
 if [ ${mode} = "backup" ]; then
@@ -25,29 +25,45 @@ if [ ${mode} = "backup" ]; then
   # BACKUP
   ################################
 
-  echo "*** LND.RESCUE --> BACKUP"
+  echo "# *** LND.RESCUE --> BACKUP"
 
   # stop LND
-  echo "Stopping lnd..."
+  echo "# Stopping lnd..."
   sudo systemctl stop lnd
   sleep 5
-  echo "OK"
+  echo "# OK"
   echo 
 
   # zip it
-  sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd
-  sudo chown admin:admin /home/admin/lnd-rescue.tar.gz
+  sudo tar -zcvf /home/admin/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
+  sudo chown admin:admin /home/admin/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm /home/admin/lnd-rescue-*.tar.gz 2>/dev/null
+  rm /home/admin/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum /home/admin/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
-  mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz
+  mv /home/admin/lnd-rescue.tar.gz /home/admin/lnd-rescue-${md5checksum}.tar.gz 1>&2
+  echo "file='lnd-rescue-${md5checksum}.tar.gz'"
+  echo "path='/home/admin/'"
+
+  byteSize=$(ls -l /home/admin/lnd-rescue-${md5checksum}.tar.gz | awk '{print $5}')
+  echo "size=${byteSize}"
+
+  if [ ${byteSize} -lt 100 ]; then
+    echo "error='backup is empty'"
+    echo
+    echo "# *****************************"
+    echo "# * BACKUP ERROR              *"
+    echo "# *****************************"
+    echo "# The byte size of the created rescue-file is too small (${byteSize}) - might be empty!"
+    echo "# If you plan any update or recovery please stop and report this error to dev team. Thx."
+    exit 0
+  fi
 
   # stop here in case of 'no-download' option
   if [ "${2}" == "no-download" ]; then
-    echo "No download of LND data requested."
+    echo "# No download of LND data requested."
     exit 0
   fi
 
@@ -55,18 +71,19 @@ if [ ${mode} = "backup" ]; then
   clear
   echo
   echo "****************************"
-  echo "* DOWNLOAD THE BACKUP FILE *"
+  echo "* DOWNLOAD THE RESCUE FILE *"
   echo "****************************"
   echo 
-  echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
-  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
+  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
+  echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
+  echo "Check for correct file size after transfer: ${byteSize} byte"
   echo
-  echo "BEWARE: Your Lightning node is now stopped. So its safe to backup the data and restore it"
-  echo "later on - for example on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again by 'sudo systemctl start lnd' or a reboot its not adviced to restore the backup file"
-  echo "anymore because it cointains outdated channel data and can lead to loss of channel funds."
+  echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
+  echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again or rebooted its not adviced to restore the backup file anymore because"
+  echo "it cointains then outdated channel data & can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 
@@ -86,7 +103,7 @@ elif [ ${mode} = "restore" ]; then
       countZips=$(sudo ls /home/admin/lnd-rescue-*.tar.gz 2>/dev/null | grep -c 'lnd-rescue')
       if [ ${countZips} -lt 1 ]; then
         echo "**************************"
-        echo "* UPLOAD THE BACKUP FILE *"
+        echo "* UPLOAD THE RESCUE FILE *"
         echo "**************************"
         echo "If you have a lnd-rescue backup file on your laptop you can now"
         echo "upload it and restore the your latest LND state."
@@ -98,8 +115,8 @@ elif [ ${mode} = "restore" ]; then
         echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
         echo "scp -r ./lnd-rescue-*.tar.gz admin@${localip}:/home/admin/"
         echo ""
-        echo "Use password A to authenticate file transfere."
-        echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
+        echo "Use password A to authenticate file transfer."
+        echo "PRESS ENTER when upload is done."
       fi
       if [ ${countZips} -gt 1 ]; then
         echo "!! WARNING !!"
@@ -122,16 +139,18 @@ elif [ ${mode} = "restore" ]; then
         filename=$(sudo ls /home/admin/lnd-rescue-*.tar.gz)
         echo "OK -> found file to restore: ${filename}"
 
+        # checksum test
         md5checksum=$(md5sum ${filename} | head -n1 | cut -d " " -f1)
         isCorrect=$(echo ${filename} | grep -c ${md5checksum})
         if [ ${isCorrect} -eq 1 ]; then
           echo "OK -> checksum looks good: ${md5checksum}"
         else
           echo "!!! FAIL -> Checksum not correct."
-          echo "Maybe transfere failed? Continue on your own risk!"
-          echo "Recommend to abort and upload again!"
+          echo "Maybe transfer failed? Continue at your own risk!"
+          echo "It is recommended to abort and upload again!"
         fi
 
+        # overrride test
         oldWalletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c "wallet.db")
         if [ ${oldWalletExists} -gt 0 ]; then
           echo
@@ -166,6 +185,19 @@ elif [ ${mode} = "restore" ]; then
   echo "OK"
   echo
 
+  # check if LND needs update
+  # (if RaspiBlitz has an optional LND version update, then install it
+  # the newer LND version can always handle older data)
+  echo "Checking LND version ..."
+  source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh info)
+  if [ ${lndUpdateInstalled} -eq 0 ]; then
+    echo "Installing available LND update ... (newer version can handle more wallet formats)"
+    sudo -u admin /home/admin/config.scripts/lnd.update.sh verified
+  else
+    echo "OK"
+  fi
+  echo
+
   # start LND
   echo "Starting lnd..."
   sudo systemctl start lnd
@@ -186,7 +218,7 @@ elif [ ${mode} = "scb-down" ]; then
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
   echo "scp -r admin@${localip}:/home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup ./"
   echo ""
-  echo "Use password A to authenticate file transfere."
+  echo "Use password A to authenticate file transfer."
   echo
   echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing" 
   echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file" 
@@ -218,7 +250,7 @@ elif [ ${mode} = "scb-up" ]; then
     echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
     echo "scp ./channel.backup admin@${localip}:/home/admin/"
     echo ""
-    echo "Use password A to authenticate file transfere."
+    echo "Use password A to authenticate file transfer."
     echo "PRESS ENTER when upload is done. Enter x & ENTER to cancel."
 
     # wait user interaction
@@ -236,7 +268,9 @@ elif [ ${mode} = "scb-up" ]; then
   done
 
   # EXIT with CODE 1 --> FILE UPLOADED
+  echo
   echo "# OK channel.backup uploaded"
+  sleep 2
   exit 0
 
 else

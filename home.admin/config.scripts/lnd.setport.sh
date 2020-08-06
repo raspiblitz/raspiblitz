@@ -4,7 +4,7 @@
 # based on: https://github.com/rootzoll/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
- echo "small config script set the port LND is running on"
+ echo "script set the port LND is running on"
  echo "lnd.setport.sh [portnumber]"
  exit 1
 fi
@@ -73,16 +73,11 @@ else
   sudo sed -i "s/^lndPort=.*/lndPort=${portnumber}/g" /mnt/hdd/raspiblitz.conf
 fi
 
-# editing service file
-echo "editing /etc/systemd/system/lnd.service"
-sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort}/g" /etc/systemd/system/lnd.service
-
 # enable service again
 echo "enable service again"
 sudo systemctl enable lnd
 
 # make sure port is open on firewall
 sudo ufw allow ${portnumber} comment 'LND Port'
-sudo ufw --force enable
 
 echo "needs reboot to activate new setting -> sudo shutdown -r now"

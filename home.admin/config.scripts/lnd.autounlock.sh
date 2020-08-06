@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# requests missing in dietpi
-sudo pip install requests
-
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small config script to autounlock lnd after restart"
@@ -28,12 +25,19 @@ https://github.com/rootzoll/raspiblitz
 
 Password C will be stored on the device.
 " 13 52 2>./.tmp
+ 
+  wasCancel=$( echo $? )
   passwordC=$( cat ./.tmp )
   
-  # test if empty
+  if [ ${wasCancel} -eq 1 ]; then
+    echo "# CANCEL LND Auto-Unlock"
+    sleep 2
+    exit 1
+  fi
   if [ ${#passwordC} -eq 0 ]; then
-    echo "# CANCEL input cannot be empty"
+    echo "# input cannot be empty - repeat"
     sleep 3
+    sudo /home/admin/config.scripts/lnd.autounlock.sh on
     exit 1
   fi
 
@@ -42,15 +46,15 @@ Password C will be stored on the device.
   echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
-  result=$(sudo python /home/admin/config.scripts/lnd.unlock.py ${passwordC})
-  invalid=$(echo "${result}" | grep -c 'invalid')
-  if [ ${invalid} -gt 0 ];then
+  error=""
+  source <(sudo /home/admin/config.scripts/lnd.unlock.sh "$passwordC")
+  if [ "${error}" != "" ];then
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
     exit 1
   fi
-  shred ./.tmp
+  shred -u ./.tmp
 fi
 
 # config file
@@ -74,36 +78,6 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
-  # get hash of lnd.conf before edit (to detect if changed later)
-  md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-
-  # make sure config values are uncommented
-  sudo sed -i "s/^#restlisten=.*/restlisten=/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^#tlsextraip=.*/tlsextraip=/g" /mnt/hdd/lnd/lnd.conf
-
-  # make sure config values exits
-  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'restlisten=')
-  if [ ${exists} -eq 0 ]; then
-    sudo sed -n -i 'p;4a restlisten=' /mnt/hdd/lnd/lnd.conf
-  fi
-  exists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tlsextraip')
-  if [ ${exists} -eq 0 ]; then
-    sudo sed -n -i 'p;5a tlsextraip=' /mnt/hdd/lnd/lnd.conf
-  fi
-
-  # set needed config values
-  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^tlsextraip=.*/tlsextraip=0.0.0.0/g" /mnt/hdd/lnd/lnd.conf
-
-  # refresh TLS cert (if lnd.conf was changed)
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
-  if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
-    echo "# lnd.conf changed - TLS certs need refreshing"
-    sudo /home/admin/config.scripts/lnd.newtlscert.sh
-  else
-    echo "# lnd.conf NOT changed - keep TLS certs"
-  fi
 
   echo "# switching the Auto-Unlock ON"
 

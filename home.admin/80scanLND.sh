@@ -6,6 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+source <(sudo /home/admin/config.scripts/internet.sh status)
 
 # when admin and no other error found run LND setup check 
 if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
@@ -13,7 +14,7 @@ if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
 fi
 
 # set follow up info different for LCD and ADMIN
-adminStr="ssh admin@${localIP} ->Password A"
+adminStr="ssh admin@${localip} ->Password A"
 if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
@@ -22,15 +23,49 @@ fi
 if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
 
   ####################
+  # Copy Blockchain Source Mode
+  # https://github.com/rootzoll/raspiblitz/issues/1081
+  ####################
+
+  if [ "${state}" = "copysource" ]; then
+    l1="Copy Blockchain Source Modus\n"
+    l2="May needs restart node when done.\n"
+    l3="Restart from Terminal: restart"
+    dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${localIP}" --infobox "$l1$l2$l3" 5 45
+    sleep 3
+    exit 1
+  fi
+
+  ####################
   # On Bitcoin Error
   ####################
 
-  height=5
+  height=6
   width=43
   title="Blockchain Info"
-  if [ ${uptime} -gt 600 ] || [ "${1}" == "blockchain-error" ]; then
-    infoStr=" The ${network}d service is not running.\n Login for more details:"
-    if [ "$USER" == "admin" ]; then
+
+  if [ ${#bitcoinErrorShort} -eq 0 ]; then
+    bitcoinErrorShort="Initial Startup - Please Wait"
+  fi
+
+  if [ "$USER" != "admin" ]; then
+
+    if [ ${uptime} -gt 600 ]; then
+      if [ ${uptime} -gt 800 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+        infoStr=" The ${network}d service is NOT RUNNING!\n ${bitcoinErrorShort}\n Login for more details & options:"
+      else
+        infoStr=" The ${network}d service is running:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+      fi
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+    fi
+
+  else
+
+    # output when user login in as admin and bitcoind is not running
+
+    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
+
       clear
       echo ""
       echo "*****************************************"
@@ -48,20 +83,23 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
         echo ${bitcoinErrorFull}
         echo
       fi
-      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: sudo shutdown -r now"
+
+      echo "POSSIBLE OPTIONS:"
+      source <(/home/admin/config.scripts/network.txindex.sh status)
+      if [ "${txindex}" == "1" ]; then
+        echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
+      fi
+      echo "-> Use command 'repair' and then choose 'RESET-CHAIN' to try downloading new blockchain."
+      echo "-> Use command 'debug' for more log output you can use for getting support."
+      echo "-> Use command 'menu' to open main menu."
+      echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
+      exit 1
+
+    else
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 10min ..."
     fi
-  else
-    height=6
-    if [ ${#bitcoinErrorShort} -eq 0 ]; then
-      bitcoinErrorShort="Initial Startup - Please Wait"
-    fi
-    infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
-    if [ "$USER" == "admin" ]; then
-      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 5min ..."
-    fi
+
   fi
 
 # LND errors second
@@ -71,7 +109,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
   # On LND Error
   ####################
 
-  height=5
+  height=6
   width=43
   title="Lightning Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
@@ -107,9 +145,10 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
         echo ${lndErrorFull}
       fi
       echo
-      echo "-> Use following command to debug: /home/admin/XXdebugLogs.sh"
-      echo "-> To force Main Menu run: /home/admin/00mainMenu.sh"
-      echo "-> To try restart: sudo shutdown -r now"
+      echo "-> Use command 'repair' and then choose 'BACKUP-LND' to make a just in case backup."
+      echo "-> Use command 'debug' for more log output you can use for getting support."
+      echo "-> Use command 'menu' to open main menu."
+      echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
       exit 1
     else
@@ -139,7 +178,7 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
-       infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
+       infoStr="${infoStr} Browser: http://${localip}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
     fi

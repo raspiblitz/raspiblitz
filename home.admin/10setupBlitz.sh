@@ -55,16 +55,16 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # check if LND wallet exists and if locked
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep wallet.db -c)
-  locked=0
+  walletLocked=0
   # only when a wallet exists - it can be locked
   if [ ${walletExists} -eq 1 ];then
     echo "lnd wallet exists ... checking if locked"
     sleep 2
-    locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
+    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
   fi
-  if [ ${locked} -gt 0 ]; then
+  if [ ${walletLocked} -gt 0 ]; then
     # LND wallet is locked
-    /home/admin/AAunlockLND.sh
+    /home/admin/config.scripts/lnd.unlock.sh
     /home/admin/10setupBlitz.sh
     exit 0
   fi
@@ -116,7 +116,8 @@ if [ ${bitcoinRunning} -eq 0 ]; then
     seconds=10
   fi
   dialog --pause "  Double checking for ${network}d - please wait .." 8 58 ${seconds}
-  bitcoinRunning=$(${network}-cli getblockchaininfo | grep "initialblockdownload" -c)
+  clear
+  bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
 else
   echo "${network} is running"  
 fi
@@ -129,9 +130,18 @@ else
  echo "${network} still not running"  
 fi #end - when bitcoin is running
 
+# --- so neither bitcoin or lnd or running yet --> find the earlier step in the setup process:
+
+# use blitz.datadrive.sh to analyse HDD situation
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status ${network})
+if [ ${#error} -gt 0 ]; then
+  echo "# FAIL blitz.datadrive.sh status --> ${error}"
+  echo "# Please report issue to the raspiblitz github."
+  exit 1
+fi
+
 # check if HDD is auto-mounted
-mountOK=$( sudo cat /etc/fstab | grep -c '/mnt/hdd' )
-if [ ${mountOK} -eq 1 ]; then
+if [ ${isMounted} -eq 1 ]; then
   
   # FAILSAFE: check if raspiblitz.conf is available
   configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c '.conf')
@@ -148,10 +158,10 @@ if [ ${mountOK} -eq 1 ]; then
 
   # are there any signs of blockchain data and activity
   # setup running with admin user, but has no permission to read /mnt/hdd/bitcoin/blocks/, sudo needed
-  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+  blockchainDataExists=$(sudo ls /mnt/hdd/${network}/blocks 2>/dev/null | grep -c '.dat')
   configExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c '.conf')
 
-  if [ ${blockchainDataExists} -eq 1 ]; then
+  if [ ${blockchainDataExists} -gt 0 ]; then
     if [ ${configExists} -eq 1 ]; then
       /home/admin/XXdebugLogs.sh
       echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
@@ -166,18 +176,6 @@ if [ ${mountOK} -eq 1 ]; then
     fi
   fi
 
-  # check if there is torrent data to continue
-  torrentProgressExists=$(sudo ls /mnt/hdd/ 2>/dev/null | grep "torrent" -c)
-  if [ ${torrentProgressExists} -eq 1 ]; then
-    # check if there is a running screen session to return to
-    noScreenSession=$(screen -ls | grep -c "No Sockets found")
-    if [ ${noScreenSession} -eq 0 ]; then 
-      echo "found torrent data .. resuming"
-      /home/admin/50torrentHDD.sh
-      exit 1
-    fi
-  fi
-
   # HDD is empty - get Blockchain
 
   # detect hardware version of RaspberryPi
@@ -186,28 +184,29 @@ if [ ${mountOK} -eq 1 ]; then
   if [ ${#raspberryPi} -eq 0 ]; then
     raspberryPi=0
   fi
-  syncComment="ULTRA SLOW"
-  if [ ${raspberryPi} -gt 3 ]; then
-    syncComment="BEST+SLOW"
-  fi
 
-  #Bitcoin
-  if [ ${network} = "bitcoin" ]; then
-    echo "Bitcoin Options"
-    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Bitcoin Blockchain - you have 4 options:" 13 75 5 \
-    T "TORRENT  --> MAINNET + TESTNET thru Torrent (DEFAULT)" \
-    C "COPY     --> BLOCKCHAINDATA from another node with SCP" \
-    N "CLONE    --> BLOCKCHAINDATA from 2nd HDD (extra cable)"\
-    S "SYNC     --> MAINNET thru Bitcoin Network (${syncComment})" 2>&1 >/dev/tty)
+  # Bitcoin on older/weak RaspberryPi3 (LEGACY)
+  if [ ${network} = "bitcoin" ] && [ ${raspberryPi} -eq 3 ]; then
+    echo "Bitcoin-RP3 Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" \
+    S "SYNC    --> Selfvalidate all Blocks (VERY SLOW ±2month)" 2>&1 >/dev/tty)
+
+  # Bitcoin on stronger RaspberryPi4 (new DEFAULT)
+  elif [ ${network} = "bitcoin" ]; then
+    echo "Bitcoin-RP4 Options"
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Bitcoin Blockchain - choose method:" 13 75 5 \
+    S "SYNC    --> Selfvalidate all Blocks (DEFAULT ±2days)" \
+    C "COPY    --> Copy from laptop/node over LAN (±6hours)" 2>&1 >/dev/tty)
 
   # Litecoin
   elif [ ${network} = "litecoin" ]; then
     echo "Litecoin Options"
-    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title "Getting the Blockchain" \
-    --menu "You need a copy of the Litecoin Blockchain - you have 2 options:" 13 75 4 \
-    T "TORRENT  --> MAINNET thru Torrent (DEFAULT)" \
-    S "SYNC     --> MAINNET thru Litecoin Network (FALLBACK+SLOW)" 2>&1 >/dev/tty)
+    menuitem=$(dialog --clear --beep --backtitle "RaspiBlitz" --title " Getting the Blockchain " \
+    --menu "You need a copy of the Litecoin Blockchain:" 13 75 4 \
+    S "SYNC    --> Selfvalidate all Blocks (±1day)" 2>&1 >/dev/tty)
 
   # error
   else
@@ -220,18 +219,15 @@ if [ ${mountOK} -eq 1 ]; then
 
   clear
   case $menuitem in
-          T)
-              /home/admin/50torrentHDD.sh
-              ;;
           C)
               /home/admin/50copyHDD.sh
-              ;;
-          N)
-              /home/admin/50cloneHDD.sh
-              ;;              
+              ;;      
           S)
               /home/admin/50syncHDD.sh
               /home/admin/10setupBlitz.sh
+              ;;
+          *)
+              echo "Use 'raspiblitz' command to return to setup ..."
               ;;
   esac
   exit 1
@@ -239,26 +235,29 @@ if [ ${mountOK} -eq 1 ]; then
 fi # end HDD is already auto-mountes
 
 
-# the HDD is not auto-mounted --> very early stage of setup
+# --- the HDD is not auto-mounted --> very early stage of setup
 
 # if the script is called for the first time
 if [ ${setupStep} -eq 0 ]; then
-
   # run initial user dialog
   /home/admin/20setupDialog.sh
-
-  # set SetupState
-  sudo sed -i "s/^setupStep=.*/setupStep=20/g" ${infoFile}
-
 fi
 
-# the HDD is already ext4 formated and called blockchain
-formatExt4OK=$(lsblk -o UUID,NAME,FSTYPE,SIZE,LABEL,MODEL | grep BLOCKCHAIN | grep -c ext4)
-if [ ${formatExt4OK} -eq 1 ]; then
-  echo "HDD was already initialized/prepared"
-  echo "Now needs to be mounted"
-  /home/admin/40addHDD.sh
+# if the script is called for the first time
+if [ ${setupStep} -eq 20 ]; then
+  # run initial user dialog
+  /home/admin/30initHDD.sh
   exit 1
+fi
+
+# the HDD is already ext4 formated and cointains blockchain data
+if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
+  if [ ${hddGotBlockchain} -eq 1 ]; then
+    echo "HDD was already initialized/prepared"
+    echo "Now needs to be mounted"
+    /home/admin/40addHDD.sh
+    exit 1
+  fi
 fi
 
 # the HDD had no init yet

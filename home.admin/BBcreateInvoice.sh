@@ -1,7 +1,8 @@
 #!/bin/bash
+clear
 _temp="./download/dialog.$$"
 _error="./.error.out"
-sudo chmod 7777 ${_error}
+sudo chmod 7777 ${_error} 2>/dev/null
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
@@ -25,9 +26,12 @@ l2="1 ${network} = 100 000 000 SAT"
 dialog --title "Pay thru Lightning Network" \
 --inputbox "$l1\n$l2" 9 50 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
-shred $_temp
+shred -u $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  clear
+  echo
+  echo "no amount entered - returning to menu ..."
+  sleep 2
   exit 1
 fi
 
@@ -50,7 +54,7 @@ sleep 2
 
 # execute command
 result=$($command 2>$_error)
-error=`cat ${_error}`
+error=`cat ${_error} 2>/dev/null`
 
 #echo "result(${result})"
 #echo "error(${error})"
@@ -61,23 +65,21 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-#  echo "******************************"
-#  echo "WIN"
-#  echo "******************************"
-#  echo "${result}"
 
   rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
-  payReq=$(echo "$result" | grep pay_req | cut -d '"' -f4)
-  echo -e "${payReq}" > qr.txt
-  ./XXdisplayQRlcd.sh
+  payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
+  /home/admin/config.scripts/blitz.lcd.sh qr "${payReq}"
+
+  if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+   sudo apt-get install qrencode -y > /dev/null
+  fi
 
   echo
   echo "********************"
   echo "Here is your invoice"
   echo "********************"
   echo
-  ./XXaptInstall.sh qrencode
-  qrencode -t ANSI256 < /home/admin/qr.txt
+  qrencode -t ANSI256 "${payReq}"
   echo
   echo "Give this Invoice/PaymentRequest to someone to pay it:"
   echo
@@ -97,8 +99,8 @@ else
       echo $result
       echo
       echo "Returning to menu - OK Invoice payed."
-      /home/admin/XXdisplayQRlcd_hide.sh
-      /home/admin/XXdisplayLCD.sh /home/admin/raspiblitz/pictures/ok.png
+      /home/admin/config.scripts/blitz.lcd.sh hide
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/ok.png
       sleep 2
       break
     fi
@@ -117,8 +119,8 @@ else
 
   done
 
-  /home/admin/XXdisplayQRlcd_hide.sh
-  shred qr.txt
-  rm -f qr.txt
+  /home/admin/config.scripts/blitz.lcd.sh hide
 
 fi
+echo "Press ENTER to return to main menu."
+read key

@@ -4,43 +4,18 @@ echo ""
 # add bonus scripts (auto install deactivated to reduce third party repos)
 /home/admin/91addBonus.sh
 
-###### SWAP & FS
-echo ""
-echo "*** SWAP file ***"
-swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
-if [ ${swapExists} -eq 1 ]; then
-  echo "SWAP on HDD already exists"
-else
-  echo "No SWAP found ... creating 2GB SWAP on HDD"
-  sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
-  # comment or delete the CONF_SWAPSIZE line. It will then be created dynamically 
-  sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
-  echo "OK - edited /etc/dphys-swapfile"
-  echo "Creating file ... this can take some seconds .."
-  sudo dd if=/dev/zero of=/mnt/hdd/swapfile count=2048 bs=1MiB
-  sudo chmod 0600 /mnt/hdd/swapfile
-  sudo mkswap /mnt/hdd/swapfile
-  sudo dphys-swapfile setup
-  sudo dphys-swapfile swapon
+###### SWAP File
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${isSwapExternal} -eq 0 ]; then
 
-  # expand FS of SD
-  echo "*** Expand RootFS ***"
-  sudo raspi-config --expand-rootfs
-  echo ""
+  echo "No external SWAP found - creating ... "
+  sudo /home/admin/config.scripts/blitz.datadrive.sh swap on
+
+else
+  echo "SWAP already OK"
 fi
 
-swapExists=$(swapon -s | grep -c /mnt/hdd/swapfile)
-if [ ${swapExists} -eq 1 ]; then
-  echo "OK - SWAP is working"
-else
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "WARNING - Not able to to build SWAP on HDD"
-  echo "This is not critical ... but try to fix later."
-  echo "--> will continue in 60 seconds <--"
-  sleep 60
-fi
-
-# firewall - just install (not configure)
+####### FIREWALL - just install (not configure)
 echo ""
 echo "*** Setting and Activating Firewall ***"
 sudo apt-get install -y ufw
@@ -66,9 +41,15 @@ echo "allow: lightning REST API"
 sudo ufw allow 8080 comment 'lightning REST API'
 echo "allow: transmission"
 sudo ufw allow 49200:49250/tcp comment 'rtorrent'
-echo "allow: local web admin"
-sudo ufw allow from 192.168.0.0/16 to any port 80 comment 'allow local LAN web'
-echo "open firewall for  auto nat discover (see issue #129)"
+echo "allow: public web HTTP"
+sudo ufw allow from any to any port 80 comment 'allow public web HTTP'
+echo "allow: local web admin HTTPS"
+sudo ufw allow from 10.0.0.0/8 to any port 443 comment 'allow local LAN HTTPS'
+sudo ufw allow from 172.16.0.0/12 to any port 443 comment 'allow local LAN HTTPS'
+sudo ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN HTTPS'
+echo "open firewall for auto nat discover (see issue #129)"
+sudo ufw allow proto udp from 10.0.0.0/8 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+sudo ufw allow proto udp from 172.16.0.0/12 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 sudo ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 echo "enable lazy firewall"
 sudo ufw --force enable

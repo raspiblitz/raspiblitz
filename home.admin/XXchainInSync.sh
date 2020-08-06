@@ -10,7 +10,7 @@ chain=$2
 # check if chain is in sync
 cmdChainInSync="lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c"
 chainInSync=${cmdChainInSync}
-while [ $chainInSync -eq 0 ]; do
+while [ "${chainInSync}" == "0" ]; do
   dialog --title "Fail: not in sync" \
 	 --ok-label "Try now" \
 	 --cancel-label "Give up" \

@@ -7,29 +7,20 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
-# check if HDD is connected
-hddExists=$(lsblk | grep -c sda1)
-if [ ${hddExists} -eq 0 ]; then
+# use blitz.datadrive.sh to analyse HDD situation
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${#error} -gt 0 ]; then
+  echo "# FAIL blitz.datadrive.sh status --> ${error}"
+  echo "# Please report issue to the raspiblitz github."
+  exit 1
+fi
 
-  # check if there is maybe a HDD but woth no partitions
-  noPartition=$(lsblk | grep -c sda)
-  if [ ${noPartition} -eq 1 ]; then
-    echo "***********************************************************"
-    echo "WARNING: HDD HAS NO PARTITIONS"
-    echo "***********************************************************"
-    echo "Press ENTER to create a Partition - or CTRL+C to abort"
-    read key
-    echo "Creating Partition ..."
-    sudo parted -s /dev/sda mklabel msdos
-    sudo parted -s /dev/sda unit s mkpart primary `sudo parted /dev/sda unit s print free | grep 'Free Space' | tail -n 1`
-    echo "DONE."
-    sleep 3
-  else 
+# check if HDD is connected
+if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     echo "***********************************************************"
     echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
     echo "***********************************************************"
     exit
-  fi
 fi
 
 # check data from _bootstrap.sh that was running on device setup
@@ -67,62 +58,12 @@ if [ "${state}" = "reindex" ]; then
   exit 1
 fi
 
-# singal that torrent is in re-download
-if [ "${state}" = "retorrent" ]; then
-  echo "Re-Index in progress ... start monitoring:"
-  /home/admin/50torrentHDD.sh
-  sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
-  /home/admin/00raspiblitz.sh
-  exit
-fi
-
 # singal that copstation is running
 if [ "${state}" = "copystation" ]; then
   echo "Copy Station is Runnning ..."
   echo "reboot to return to normal"
   sudo /home/admin/XXcopyStation.sh
   exit
-fi
-
-# if pre-sync is running - stop it - before continue
-if [ "${state}" = "presync" ]; then
-  # stopping the pre-sync
-  echo ""
-  # analyse if blockchain was detected broken by pre-sync
-  blockchainBroken=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep -c "Please restart with -reindex or -reindex-chainstate to recover.")
-  if [ ${blockchainBroken} -eq 1 ]; then  
-    # dismiss if its just a date thing
-    futureBlock=$(sudo tail /mnt/hdd/bitcoin/debug.log 2>/dev/null | grep "Please restart with -reindex or -reindex-chainstate to recover." | grep -c "block database contains a block which appears to be from the future")
-    if [ ${futureBlock} -gt 0 ]; then
-      blockchainBroken=0
-      echo "-> Ignore reindex - its just a future block"
-    fi
-  fi
-  if [ ${blockchainBroken} -eq 1 ]; then
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "Detected corrupted blockchain on pre-sync !"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "Deleting blockchain data ..."
-    echo "(needs to get downloaded fresh during setup)"
-    sudo rm -f -r /mnt/hdd/bitcoin
-  else
-    echo "************************************"
-    echo "Preparing ... pls wait (up to 1min) "
-    echo "************************************"
-    sudo -u root bitcoin-cli -conf=/home/admin/assets/bitcoin.conf stop 2>/dev/null
-    echo "Calling presync to finish up .."
-    sleep 50
-  fi
-
-  # unmount the temporary mount
-  echo "Unmount HDD .."
-  sudo umount -l /mnt/hdd
-  sleep 3
-
-  # update info file
-  state=waitsetup
-  sudo sed -i "s/^state=.*/state=waitsetup/g" $infoFile
-  sudo sed -i "s/^message=.*/message='Pre-Sync Stopped'/g" $infoFile
 fi
 
 # if state=ready -> setup is done or started
@@ -164,12 +105,23 @@ waitUntilChainNetworkIsReady()
       rm error.tmp
 
       # check for missing blockchain data
-      minSize=210000000000
-      if [ "${network}" = "litecoin" ]; then
-        minSize=20000000000
+      if [ "${network}" = "bitcoin" ]; then
+        if [ "${chain}" = "main" ]; then
+          minSize=210000000000
+        else
+          minSize=27000000000
+        fi
+      elif [ "${network}" = "litecoin" ]; then
+        if [ "${chain}" = "main" ]; then
+          minSize=20000000000
+        else
+          minSize=27000000000
+        fi
+      else
+        minSize=210000000000000
       fi
       isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
-      blockchainsize=$(sudo du -shbc /mnt/hdd/${network} 2>/dev/null | head -n1 | awk '{print $1;}')
+      blockchainsize=$(sudo du -shbc /mnt/hdd/${network}/ 2>/dev/null | head -n1 | awk '{print $1;}')
       if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
           if [ ${isSyncing} -eq 0 ]; then
@@ -205,7 +157,7 @@ waitUntilChainNetworkIsReady()
 
           whiptail --title "RaspiBlitz - Repair Script" --yes-button "DELETE+REPAIR" --no-button "Ignore" --yesno "Your blockchain data needs to be repaired.
 This can be due to power problems or a failing HDD.
-For more info see: https://raspiblitz.com -> FAQ
+For more info see: https://raspiblitz.org -> FAQ
 
 Before RaspiBlitz can offer you repair options the old
 corrupted blockchain needs to be deleted while your LND
@@ -245,7 +197,7 @@ How do you want to continue?
             # check how many times LND was restarted
             source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
             if [ ${startcountLightning} -lt 4 ]; then
-              /home/admin/AAunlockLND.sh
+              /home/admin/config.scripts/lnd.unlock.sh
               echo "Starting up Wallet ... (10sec)"
               sleep 5
               sleep 5
@@ -286,8 +238,7 @@ if [ ${setupStep} -eq 0 ]; then
     BACKTITLE="RaspiBlitz - Manual Update"
     TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
     MENU="\n         ATTENTION: OLD DATA COULD CONTAIN FUNDS\n"
-    OPTIONS+=(MANUAL "read how to recover your old funds" \
-              DELETE "erase old data, keep blockchain, reboot" )
+    OPTIONS+=(MANUAL "read how to recover your old funds")
     HEIGHT=11
 
   else
@@ -301,15 +252,17 @@ if [ ${setupStep} -eq 0 ]; then
       TITLE="⚡ Welcome to your RaspiBlitz ⚡"
       MENU="\nChoose how you want to setup your RaspiBlitz: \n "
       OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" )
-      HEIGHT=11
+                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" \
+                MIGRATION "Upload a Migration File from old RaspiBlitz" )
+      HEIGHT=12
     else
       # start setup
       BACKTITLE="RaspiBlitz - Setup"
       TITLE="⚡ Welcome to your RaspiBlitz ⚡"
       MENU="\nStart to setup your RaspiBlitz: \n "
-      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning")
-      HEIGHT=10
+      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning" \
+                MIGRATION "Upload a Migration File from old RaspiBlitz")
+      HEIGHT=11
     fi
   fi
 
@@ -326,7 +279,7 @@ else
 
   # check if LND needs re-setup
   source <(sudo /home/admin/config.scripts/lnd.check.sh basic-setup)
-  if [ ${wallet} -eq 0 ] || [ ${macaroon} -eq 0 ] || [ ${config} -eq 0 ] || [ ${tls} -eq 0 ]; then
+  if [ "${wallet}" == "0" ] || [ "${macaroon}" == "0" ] || [ "${config}" == "0" ] || [ "${tls}" == "0" ]; then
       echo "WARN: LND needs re-setup"
       /home/admin/70initLND.sh
       exit 0
@@ -414,40 +367,9 @@ case $CHOICE in
             exit 1;
             ;;
         LITECOIN)
-            # set network info
-            sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
-            sed -i "s/^chain=.*/chain=main/g" ${infoFile}
-            ###### OPTIMIZE IF RAM >1GB
-            kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
-            if [ ${kbSizeRAM} -gt 1500000 ]; then
-              echo "Detected RAM >1GB --> optimizing ${network}.conf"
-              sudo sed -i "s/^dbcache=.*/dbcache=512/g" /home/admin/assets/litecoin.conf
-              sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /home/admin/assets/litecoin.conf
-            fi
+            /home/admin/config.scripts/blitz.litecoin.sh on
             /home/admin/10setupBlitz.sh
             exit 1;
-            ;;
-        CONTINUE)
-            /home/admin/10setupBlitz.sh
-            exit 1;
-            ;;
-        OFF)
-            echo ""
-            echo "LCD turns white when shutdown complete."
-            echo "Then wait 5 seconds and disconnect power."
-            echo "-----------------------------------------------"
-            echo "stop lnd - please wait .."
-            sudo systemctl stop lnd
-            echo "stop ${network}d (1) - please wait .."
-            sudo -u bitcoin ${network}-cli stop
-            sleep 10
-            echo "stop ${network}d (2) - please wait .."
-            sudo systemctl stop ${network}d
-            sleep 3
-            sync
-            echo "starting shutdown ..."
-            sudo shutdown now
-            exit 0
             ;;
         MANUAL)
             echo "************************************************************************************"
@@ -456,23 +378,13 @@ case $CHOICE in
             echo "And check: How can I recover my coins from a failing RaspiBlitz?"
             echo "************************************************************************************"
             exit 0
-            ;;
-        DELETE)
-            sudo /home/admin/XXcleanHDD.sh
-            sudo shutdown -r now
+            ;; 
+        MIGRATION)
+            sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
             exit 0
-            ;;   
-        X)
-            lncli -h
-            echo "OK you now on the command line."
-            echo "You can return to the main menu with the command:"
-            echo "raspiblitz"
             ;;
-        R)
-            /home/admin/00raspiblitz.sh
-            ;;
-        U) # unlock
-            /home/admin/AAunlockLND.sh
-            /home/admin/00raspiblitz.sh
+        CONTINUE)
+            /home/admin/10setupBlitz.sh
+            exit 1;
             ;;
 esac

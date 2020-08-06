@@ -1,9 +1,10 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
- echo "# script to check LND states"
- echo "# lnd.check.sh basic-setup"
- exit 1
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+  echo "# script to check LND states"
+  echo "# lnd.check.sh basic-setup"
+  exit 1
 fi
 
 # load raspiblitz conf
@@ -12,7 +13,7 @@ source /mnt/hdd/raspiblitz.conf
 # check basic LND setup
 if [ "$1" == "basic-setup" ]; then
 
-   # check TLS exits
+  # check TLS exits
   tlsExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
   if [ ${tlsExists} -gt 0 ]; then
     echo "tls=1"
@@ -20,7 +21,7 @@ if [ "$1" == "basic-setup" ]; then
     echo "tls=0"
     echo "err='tls.cert is missing in /mnt/hdd/lnd'"
   fi
-   # check TLS exits (on SD card for admin)
+  # check TLS exits (on SD card for admin)
   tlsExists=$(sudo ls /home/admin/.lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
   if [ ${tlsExists} -gt 0 ]; then
     echo "tlsCopy=1"
@@ -65,7 +66,7 @@ if [ "$1" == "basic-setup" ]; then
     echo "configMismatch=0"
     echo "err='lnd.conf is missing for user admin'"
   fi
-  
+
   # get network from config (BLOCKCHAIN)
   lndNetwork=""
   source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'bitcoin.active' | sed 's/^[a-z]*\./bitcoin_/g')
@@ -174,5 +175,6 @@ if [ "$1" == "basic-setup" ]; then
   echo "rpcpasscorrect=${rpcpasscorrect}"
 
 else
-  echo "# FAIL: parameter not known"
+  echo "# FAIL: parameter not known - run with -h for help"
+  exit 1
 fi

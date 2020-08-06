@@ -22,7 +22,7 @@ Download LND Data Backup now?
       sleep 2
       /home/admin/config.scripts/lnd.rescue.sh backup
       echo
-      echo "PRESS ENTER to continue once your done downloading."
+      echo "PRESS ENTER to continue once you are done downloading."
       read key
     else
       clear
@@ -46,17 +46,85 @@ RaspiBlitz image to your SD card.
 " 12 40
 }
 
+copyHost()
+{
+  clear
+  echo
+  echo "# *** Copy Blockchain Source Modus ***"
+
+  echo "# get IP of RaspiBlitz to copy to ..."
+  targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
+  targetIP=$(echo "${targetIP[0]}")
+  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  if [ ${#targetIP} -eq 0 ]; then
+    return
+  fi
+  if [ "${localIP}" == "${targetIP}" ]; then
+    whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
+  canPingIP=$(ping ${targetIP} -c 1 | grep -c "1 received")
+  if [ ${canPingIP} -eq 0 ]; then
+    whiptail --msgbox "Was not able to contact/ping: ${targetIP}\n\n- check if IP of target RaspiBlitz is correct.\n- check to be on the same local network.\n- try again ..." 11 58 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
+  
+  echo "# get Password of RaspiBlitz to copy to ..."
+  targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
+  if [ ${#targetPassword} -eq 0 ]; then
+    return
+  fi
+
+  echo "# install dependencies ..."
+  sudo apt-get install -y sshpass
+
+  sudo rm /root/.ssh/known_hosts
+  canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
+  if [ ${canLogin} -eq 0 ]; then
+    whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
+    return
+  fi
+
+  echo "# stopping services ..."
+  sudo systemctl stop lnd
+  sudo systemctl stop ${network}d
+  sudo systemctl disable ${network}d
+  sleep 5
+  sudo systemctl stop bitcoind 2>/dev/null
+  
+  clear
+  echo
+  echo "# Starting copy over LAN (around 4-6 hours) ..."
+  sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
+  cd /mnt/hdd/${network}
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
+
+  echo "# start services again ..."
+  sudo systemctl enable ${network}d
+  sudo systemctl start ${network}d
+  sudo systemctl start lnd
+
+  echo "# show final message"
+  whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
+
+}
+
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
-         BACKUP "Backup your LND data (Rescue-File)" \
+         BACKUP-LND "Backup your LND data (Rescue-File)" \
+         MIGRATION "Migrate Blitz Data to new Hardware" \
+         COPY-SOURCE "Copy Blockchain Source Modus" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
-         RESET-ALL "Delete HDD completly to start fresh"
+         RESET-ALL "Delete HDD completly to start fresh" \
+         DELETE-ELEC "Delete Electrum Index" \
+         DELETE-INDEX "Delete Bitcoin Transaction-Index"
 	)
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 12 62 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
@@ -70,8 +138,15 @@ case $CHOICE in
     read key
     /home/admin/00mainMenu.sh
     ;;
-  BACKUP)
+  BACKUP-LND)
     sudo /home/admin/config.scripts/lnd.rescue.sh backup
+    echo
+    echo "Press ENTER when your backup download is done to shutdown."
+    read key
+    /home/admin/XXshutdown.sh
+    ;;
+  MIGRATION)
+    sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
     echo "Press ENTER to return to main menu."
     read key
     /home/admin/00mainMenu.sh
@@ -94,18 +169,23 @@ case $CHOICE in
         l3="one word, keep characters basic & not too long"
         dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2$l3" 13 52 2>$_temp
         result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-        shred $_temp
+        shred -u $_temp
         echo "processing ..."
         sleep 3
     done
-    # prepare new name
-    sudo sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
+
+    # make sure host is named like in the raspiblitz config
+    echo "Setting the Name/Alias/Hostname .."
+    sudo /home/admin/config.scripts/lnd.setname.sh ${result}
     sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
 
+    echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
     /home/admin/70initLND.sh
 
+    # go back to main menu (and show)
+    /home/admin/00raspiblitz.sh
     exit 1;
     ;;
   RESET-HDD)
@@ -121,5 +201,17 @@ case $CHOICE in
     infoResetSDCard
     sudo shutdown now
     exit 1;
+    ;;
+  DELETE-ELEC)
+    /home/admin/config.scripts/bonus.electrs.sh off deleteindex
+    exit 1;
+    ;;
+  DELETE-INDEX)
+    /home/admin/config.scripts/network.txindex.sh delete
+    exit 1;
+    ;;
+  COPY-SOURCE)
+    copyHost
+    /home/admin/config.scripts/lnd.unlock.sh
     ;;
 esac

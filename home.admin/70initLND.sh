@@ -4,6 +4,9 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
+echo ""
+echo "*** 70initLND.sh ***"
+
 # CHECK #########
 
 echo "*** Check Basic Config ***"
@@ -99,6 +102,7 @@ echo "*** Init LND Service & Start ***"
 lndRunning=$(sudo systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 0 ]; then
 
+  echo "stopping lnd .."
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
@@ -115,8 +119,10 @@ if [ ${lndRunning} -eq 0 ]; then
     echo "TOR was not selected"
   fi
 
+  echo "Starting LND Service ..."
   sudo systemctl enable lnd
   sudo systemctl start lnd
+
   echo ""
   echo "waiting ."
   sleep 10
@@ -166,7 +172,7 @@ if [ ${walletExists} -eq 0 ]; then
 
   # UI: Ask if user wants NEW wallet or RECOVER a wallet
   OPTIONS=(NEW "Setup a brand new Lightning Node (DEFAULT)" \
-           OLD "I had a old Node I want to recover/restore")
+           OLD "I had an old Node I want to recover/restore")
   CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   echo "choice($CHOICE)"
 
@@ -177,10 +183,10 @@ if [ ${walletExists} -eq 0 ]; then
 ############################
 
     # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
     passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # make sure passwordC is set
     if [ ${#passwordC} -eq 0 ]; then
@@ -191,10 +197,9 @@ if [ ${walletExists} -eq 0 ]; then
     # generate wallet with seed and set passwordC
     clear
     echo "Generating new Wallet ...."
-    source /home/admin/python3-env-lnd/bin/activate
-    python /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
+    python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
     source /home/admin/.seed.tmp
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # in case of error - retry
     if [ ${#err} -gt 0 ]; then
@@ -229,6 +234,9 @@ if [ ${walletExists} -eq 0 ]; then
       sudo sed -i "s/^setupStep=.*/setupStep=65/g" /home/admin/raspiblitz.info
     fi
 
+    echo "waiting ."
+    sleep 10
+
   else
 
 ############################
@@ -252,6 +260,8 @@ if [ ${walletExists} -eq 0 ]; then
 
     # WARNING ON ONLY SEED
     if [ "${CHOICE}" == "ONLYSEED" ]; then
+
+      # let people know about the difference between SEED & SEED+SCB
       whiptail --title "IMPORTANT INFO" --yes-button "Continue" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
 To also try to recover the open channel funds you need the
@@ -279,17 +289,20 @@ or having a complete LND rescue-backup from your old node.
         exit 1
       else
         clear
-        echo "FILE UPLOADED --> will get checked/activated after blockchain/lightning is synced"
+        echo "channel.backup will get checked/activated after blockchain/lightning is synced"
+        sleep 2
+        echo "NEXT --> Set password for new LND wallet"
+        sleep 3
       fi
     fi
 
     clear
 
     # let user enter password c
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
     passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
 
     # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
@@ -300,7 +313,7 @@ or having a complete LND rescue-backup from your old node.
         # dialog to enter
         dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
         wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
-        shred /home/admin/.seed.tmp
+        shred -u /home/admin/.seed.tmp
         echo "processing ... ${wordstring}"
 
         # check correct number of words
@@ -340,10 +353,10 @@ During wallet creation LND offers to set an extra password
 to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp
+        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp empty-allowed
         passwordD=`sudo cat /home/admin/.pass.tmp`
-        sudo shred /home/admin/.pass.tmp 2>/dev/null
+        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
       fi
 
     fi
@@ -354,7 +367,7 @@ to protect the seed words. Most users did not set this.
 
       # trigger wallet recovery
       source /home/admin/python3-env-lnd/bin/activate
-      source <(python /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD})
+      source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD} 2>/dev/null)
 
       # check if wallet was created for real
       if [ ${#err} -eq 0 ]; then
@@ -368,7 +381,12 @@ to protect the seed words. Most users did not set this.
       if [ ${#err} -eq 0 ]; then
         dialog --title " SUCCESS " --msgbox "
 Looks good :) LND was able to recover the wallet.
-      " 7 53
+
+IMPORTANT: LND needs now to scan the blockchain
+for your funds - this can take some extra time.
+      " 10 60
+      clear
+
       else
         whiptail --title " FAIL " --msgbox "
 Something went wrong - see info below:
@@ -376,40 +394,14 @@ Something went wrong - see info below:
 ${err}
 ${errMore}
       " 13 72
-          sleep 3
+          clear
+          echo "Restarting LND Wallet Setup .." 
+          sleep 2
+          echo
           /home/admin/70initLND.sh
           exit 1
       fi
     fi
-
-##### FALLBACK UNTIL config.scripts/lnd.initwallet.py WORKS
-#    echo "****************************************************************************"
-#    echo "* RECOVER LND WALLET BY SEED WORDS"
-#    echo "****************************************************************************"
-#    echo "A) For 'Wallet Password' use your old PASSWORD C"
-#    echo "B) For 'cipher seed mnemonic' answere 'y' and then enter your seed words" 
-#    echo "C) On 'cipher seed passphrase' ONLY enter PASSWORD D if u used it on create"
-#    echo "D) On 'address look-ahead' only enter more than 2500 had lots of channels"
-#    echo "****************************************************************************"
-#    echo ""
-#    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>/home/admin/.error.tmp
-#    error=`cat /home/admin/.error.tmp`
-#    rm /home/admin/.error.tmp 2>/dev/null
-#
-#    if [ ${#error} -gt 0 ]; then
-#      echo ""
-#      echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-#      echo "${error}"
-#      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-#      echo ""
-#      echo "Press ENTER to retry ..."
-#      read key
-#      echo "Starting RETRY ..."
-#      /home/admin/70initLND.sh
-#      exit 1
-#    fi
-
-    /home/admin/70initLND.sh
 
   fi # END OLD WALLET
 
@@ -417,25 +409,27 @@ else
   echo "OK - LND wallet already exists."
 fi
 
-echo "waiting ."
-sleep 10
+
 echo "waiting .."
 sleep 10
-echo "waiting ..."
-sleep 10
-dialog --pause "  Waiting for LND - please wait .." 8 58 30
+dialog --pause "  Waiting for LND - please wait .." 8 58 45
 
 ############################
 # Copy LND macaroons to admin
 ############################
 
+clear
 echo ""
 echo "*** Copy LND Macaroons to user admin ***"
+
+# check if macaroon exists and if not try to unlock LND wallet first
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
   sleep 3
 fi
+
+# check if macaroon exists now - if not fail
 macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
 if [ ${macaroonExists} -eq 0 ]; then
   sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon
@@ -446,30 +440,18 @@ if [ ${macaroonExists} -eq 0 ]; then
   echo "You may want try again with starting ./70initLND.sh"
   exit 1
 fi
-macaroonExists=$(sudo ls -la /home/admin/.lnd/data/chain/${network}/${chain}net/ | grep -c admin.macaroon)
-if [ ${macaroonExists} -eq 0 ]; then
-  sudo mkdir /home/admin/.lnd
-  sudo mkdir /home/admin/.lnd/data
-  sudo mkdir /home/admin/.lnd/data/chain
-  sudo mkdir /home/admin/.lnd/data/chain/${network}
-  sudo mkdir /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo cp /home/bitcoin/.lnd/tls.cert /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/lnd.conf /home/admin/.lnd
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net
-  sudo chown -R admin:admin /home/admin/.lnd/
-  echo "OK - LND Macaroons created"
-  echo ""
-else
-  echo "OK - Macaroons are already copied"
-  echo ""
-fi
+
+# copy macaroons to all needed users
+sudo /home/admin/config.scripts/lnd.credentials.sh sync
+echo "OK - LND Macaroons created and copied"
+echo ""
 
 ###### Unlock Wallet (if needed)
 echo "*** Check Wallet Lock ***"
 locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
 if [ ${locked} -gt 0 ]; then
   echo "OK - Wallet is locked ... starting unlocking dialog"
-  /home/admin/AAunlockLND.sh
+  /home/admin/config.scripts/lnd.unlock.sh
 else
   echo "OK - Wallet is already unlocked"
 fi
@@ -486,15 +468,12 @@ if [ ${setupStep} -lt 100 ]; then
 
 else
 
+  # its important that RaspiBlitz dont get rebooted
+  # before LND rescan is finished
   whiptail --title "RESET DONE" --msgbox "
 OK LND Reset is done.
-System will restart now.
-" 10 35
-
-  # make sure host is named like in the raspiblitz config
-  echo "Setting the Name/Alias/Hostname .."
-  sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
-
-  sudo shutdown -r now
+You may now give it
+extra time to rescan.
+" 10 25
 
 fi

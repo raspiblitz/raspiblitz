@@ -1,2 +1,2 @@
-# RaspiBlitz Version - always [main].[sub]
-codeVersion="1.3"
+# RaspiBlitz Version - always [major].[main].[sub]
+codeVersion="1.6.0"

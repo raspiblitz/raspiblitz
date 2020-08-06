@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http|reset]"
+ echo "lnd.export.sh [hexstring|scp|http]"
  exit 1
 fi
 
@@ -16,7 +16,6 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS+=(HEX "Hex-String (Copy+Paste)")
     OPTIONS+=(SCP "SSH Download (Commands)")
     OPTIONS+=(HTTP "Browserdownload (bit risky)")
-    OPTIONS+=(RESET "RENEW MACAROONS & TLS")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Export Macaroons & TLS.cert" \
@@ -34,9 +33,6 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
           ;;
         HTTP)
           exportType='http';
-          ;;
-        RESET)
-          exportType='reset';
           ;;
     esac
 fi
@@ -79,22 +75,16 @@ elif [ "${exportType}" = "hexstring" ]; then
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
   echo "The password needed during download is your Password A."
   echo ""
-  echo "admin.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./"
+  echo "Macaroons:"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/\*.macaroon ./"
   echo ""
-  echo "invoice.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/invoice.macaroon ./"
-  echo ""
-  echo "readonly.macaroon:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/readonly.macaroon ./"
-  echo ""
-  echo "tls.cert:"
+  echo "TLS Certificate:"
   echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
   echo ""
 
@@ -103,7 +93,7 @@ elif [ "${exportType}" = "scp" ]; then
 ###########################
 elif [ "${exportType}" = "http" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear
@@ -125,41 +115,17 @@ elif [ "${exportType}" = "http" ]; then
   sudo cp /home/bitcoin/.lnd/tls.cert ./${randomFolderName}/tls.cert
   cd ${randomFolderName}
   sudo chmod 444 *.*
-  python -m SimpleHTTPServer ${randomPortNumber} 2>/dev/null
+  python3 -m http.server ${randomPortNumber} 2>/dev/null
   sudo ufw delete allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   cd ..
   sudo rm -r ${randomFolderName}
   echo "OK - temp HTTP server is stopped."
 
-###########################
-# RESET Macaroons and TLS
-###########################
-elif [ "${exportType}" = "reset" ]; then
-
-  clear
-  echo "###### RESET MACAROONS AND TLS.cert ######"
-  echo ""
-  echo "All your macaroons and the tls.cert get deleted and recreated."
-  echo "Use this to invalidate former EXPORTS for example if you loose a device."
-  echo ""
-  cd
-  echo "- deleting old macaroons"
-  sudo rm /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  sudo rm /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  sudo rm /home/bitcoin/.lnd/data/chain/${network}/${chain}net/macaroons.db
-  echo "- resetting TLS cert"
-  sudo /home/admin/config.scripts/lnd.newtlscert.sh
-  echo "- restarting LND ... wait 10 secs"
-  sudo systemctl start lnd
-  sleep 10
-  sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock
-  echo "- creating new macaroons ... wait 10 secs"
-  sleep 10
-  echo "- copy new macaroons to admin user"
-  sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/*.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/
-  sudo chown admin:admin -R /home/admin/.lnd/data/chain/${network}/${chain}net/*.macaroon
-  echo "OK DONE"
-
 else
-  echo "FAIL: unknown '${exportType}' -run-> ./lnd.export.sh -h"
+  echo "FAIL: unknown '${exportType}' - run with -h for help"
+fi
+
+if [ "$1" = "" ] || [ $# -eq 0 ]; then
+  echo "Press ENTER to return to main menu."
+  read key
 fi

@@ -17,7 +17,7 @@ sudo mkdir /mnt/hdd/temp 2>/dev/null
 sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 
 # localIP
-localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
 
 # temp - no measurement in a VM
@@ -221,7 +221,7 @@ if [ ${lndRunning} -eq 1 ]; then
     # lnd scan progress
     scanTimestamp=$(echo ${lndinfo} | jq -r '.best_header_timestamp')
     nowTimestamp=$(date +%s)
-    if [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
+    if [ ${#scanTimestamp} -gt 0 ] && [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
       scanTimestamp=${nowTimestamp}
     fi
     if [ ${#scanTimestamp} -gt 0 ]; then
@@ -247,6 +247,20 @@ if [ ${lndRunning} -eq 1 ]; then
   echo "lndRPCReady=${lndRPCReady}"
 
 fi
+
+# touchscreen statistics
+if [ "${touchscreen}" == "1" ]; then
+  echo "blitzTUIActive=1"
+  if [ ${#blitzTUIRestarts} -gt 0 ]; then
+    echo "blitzTUIRestarts=${blitzTUIRestarts}"
+  else
+    echo "blitzTUIRestarts=0"
+  fi
+else
+  echo "blitzTUIActive=0"
+  echo "blitzTUIRestarts=0"
+fi
+
 
 # check if online if problem with other stuff 
 

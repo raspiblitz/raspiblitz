@@ -23,7 +23,7 @@ fi
 
 # execute command
 echo "calling lncli ... please wait"
-command="lncli --chain=${network} --network=${chain}net newaddress np2wkh"
+command="lncli --chain=${network} --network=${chain}net newaddress p2wkh"
 echo "${command}"
 result=$($command)
 echo "$result"
@@ -49,31 +49,28 @@ if [ "$chain" = "test" ]; then
   coininfo="TESTNET Bitcoin"
 fi
 
-msg="Send ${coininfo} to address --> ${address}\n\nScan the QR code on the LCD with your mobile wallet or copy paste the address.\nThe wallet you sending from needs to support Segwit addresses."
+msg="Send ${coininfo} to address --> ${address}\n\nScan the QR code on the LCD with your mobile wallet or copy paste the address.\nThe wallet you sending from needs to support bech32 addresses.\nThis screen will not update - press DONE when send."
 if [ "$chain" = "test" ]; then
   msg="${msg} \n\n Get some testnet coins from https://testnet-faucet.mempool.co"
 fi
 
 echo "generating QR code ... please wait"
-echo -e "$network:${address}" > qr.txt
-/home/admin/XXdisplayQRlcd.sh
+/home/admin/config.scripts/blitz.lcd.sh qr "$network:${address}"
 
 # dialog with instructions while QR code is shown on LCD
 whiptail --backtitle "Fund your on chain wallet" \
 	 --title "Send ${coininfo}" \
 	 --yes-button "DONE" \
-	 --no-button "Show QR Code" \
+	 --no-button "Console QRcode" \
 	 --yesno "${msg}" 0 0
 
 # display QR code
 if [ $? -eq 1 ]; then
-    /home/admin/XXdisplayQR.sh
+  /home/admin/config.scripts/blitz.lcd.sh qr-console "$network:${address}"
 fi
 
 # clean up
-shred qr.txt
-rm -f qr.txt
-/home/admin/XXdisplayQRlcd_hide.sh
+/home/admin/config.scripts/blitz.lcd.sh hide
 
 # follow up info
 whiptail --backtitle "Fund your on chain wallet" \

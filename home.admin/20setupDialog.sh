@@ -5,6 +5,12 @@ _temp="./download/dialog.$$"
 source /home/admin/raspiblitz.info 2>/dev/null
 
 ###################
+# CHECK IF DNS NEEDS SETTING DURING SETUP
+# https://github.com/rootzoll/raspiblitz/issues/787
+###################
+sudo /home/admin/config.scripts/internet.dns.sh test
+
+###################
 # ENTER NAME
 ###################
 
@@ -16,7 +22,7 @@ while [ ${#result} -eq 0 ]
     l2="one word, keep characters basic & not too long"
     dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-    shred $_temp
+    shred -u $_temp
     echo "processing ..."
     sleep 3
   done
@@ -76,5 +82,8 @@ You can better protect your privacy with running your lightning node as a TOR Hi
 if [ $? -eq 1 ]; then
   echo "runBehindTor=on" >> /home/admin/raspiblitz.info
 fi
+
+# set SetupState
+sudo sed -i "s/^setupStep=.*/setupStep=20/g" /home/admin/raspiblitz.info
 
 clear

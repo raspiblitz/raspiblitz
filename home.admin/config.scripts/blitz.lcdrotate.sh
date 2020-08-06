@@ -21,7 +21,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # add default 'lcdrotate' raspiblitz.conf if needed
   if [ ${#lcdrotate} -eq 0 ]; then
-    echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
+    echo "lcdrotate=1" >> /mnt/hdd/raspiblitz.conf
   fi
   
   sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
@@ -41,6 +41,11 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "Turn OFF: LCD ROTATE"
+
+  # add default 'lcdrotate' raspiblitz.conf if needed
+  if [ ${#lcdrotate} -eq 0 ]; then
+    echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
+  fi
 
   sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
   sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf

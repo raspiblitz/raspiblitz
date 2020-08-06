@@ -5,16 +5,12 @@
 # default values or as in the config.
 # For more details see background_raspiblitzSettings.md
 
-# use to detect multiple starts of service
-#uid=$(date +%s)
-#echo "started" > /home/admin/${uid}.boot
+################################
+# BASIC SETTINGS
+################################
 
 # load codeVersion
 source /home/admin/_version.info
-
-################################
-# FILES TO WORK WITH
-################################
 
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
@@ -31,6 +27,60 @@ logFile="/home/admin/raspiblitz.log"
 # used by display and later setup steps
 infoFile="/home/admin/raspiblitz.info"
 
+
+# FUNCTIONS to be used later on in the script
+
+# wait until raspberry pi gets a local IP
+function wait_for_local_network() {
+  gotLocalIP=0
+  until [ ${gotLocalIP} -eq 1 ]
+  do
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    if [ ${#localip} -eq 0 ]; then
+      configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+      if [ ${configWifiExists} -eq 0 ]; then
+        # display user to connect LAN
+        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+        sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
+      else
+        # display user that wifi settings are not working
+        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+        sed -i "s/^message=.*/message='WIFI Settings not working'/g" ${infoFile}
+      fi
+    elif [ "${localip:0:4}" = "169." ]; then
+      # display user waiting for DHCP
+      sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
+      sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
+    else
+      gotLocalIP=1
+    fi
+    sleep 1
+  done
+}
+
+# wait until raspberry pi gets a local IP
+function wait_for_internet() {
+  online=0
+  until [ ${online} -eq 1 ]
+  do
+    # check for internet connection
+    online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+    if [ ${online} -eq 0 ]; then
+      # re-test with other server
+      online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+    fi
+    if [ ${online} -eq 0 ]; then
+      # re-test with other server
+      online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+    fi
+    if [ ${online} -eq 0 ]; then
+      sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
+      sed -i "s/^message=.*/message='Network OK but NO Internet'/g" ${infoFile}
+    fi
+    sleep 1
+  done
+}
+
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 echo "***********************************************" >> $logFile
@@ -38,19 +88,12 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
-# display 3 secs logo - try to kickstart LCD
-# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-# see https://github.com/rootzoll/raspiblitz/issues/647
-randnum=$(shuf -i 0-7 -n 1)
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-sleep 5
-sudo killall -3 fbi
-
 # set default values for raspiblitz.info
 network=""
 chain=""
 setupStep=0
 fsexpanded=0
+lcd2hdmi="off"
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
@@ -62,11 +105,52 @@ echo "message=" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
+echo "lcd2hdmi=${lcd2hdmi}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
 sudo chmod 777 ${infoFile}
+
+################################
+# IDENTIFY CPU ARCHITECTURE
+################################
+
+cpu="?"
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -gt 0 ]; then
+  cpu="arm"
+elif [ ${isAARCH64} -gt 0 ]; then
+  cpu="aarch64"
+elif [ ${isX86_64} -gt 0 ]; then
+  cpu="x86_64"
+fi
+echo "cpu=${cpu}" >> $infoFile
+
+################################
+# IDENTIFY BASEIMAGE
+################################
+
+baseImage="?"
+isDietPi=$(uname -n | grep -c 'DietPi')
+isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+if [ ${isRaspbian} -gt 0 ]; then
+  baseImage="raspbian"
+fi
+if [ ${isArmbian} -gt 0 ]; then
+  baseImage="armbian"
+fi 
+if [ ${isUbuntu} -gt 0 ]; then
+baseImage="ubuntu"
+fi
+if [ ${isDietPi} -gt 0 ]; then
+  baseImage="dietpi"
+fi
+echo "baseimage=${baseImage}" >> $infoFile
 
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
@@ -81,7 +165,15 @@ logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
   echo "WARN !! Logs /var/log in are bigger then 1GB"
   echo "ACTION --> DELETED ALL LOGS"
+  if [ -d "/var/log/nginx" ]; then
+    nginxLog=1
+    echo "/var/log/nginx is present"
+  fi
   sudo rm -r /var/log/*
+  if [ $nginxLog == 1 ]; then
+    sudo mkdir /var/log/nginx
+    echo "Recreated /var/log/nginx"
+  fi
   sleep 3
   echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
@@ -89,6 +181,30 @@ else
   echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
 fi
 echo ""
+
+###############################
+# RAID data check (BRTFS)
+###############################
+# see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
+
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+if [ ${isRaid} -eq 1 ]; then
+  echo "TRIGGERING BTRFS RAID DATA CHECK ..."
+  echo "Check status with: sudo btrfs scrub status /mnt/hdd/"
+  sudo btrfs scrub start /mnt/hdd/
+fi
+
+################################
+# BOOT LOGO
+################################
+
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+# see https://github.com/rootzoll/raspiblitz/issues/647
+randnum=$(shuf -i 0-7 -n 1)
+sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+sleep 5
+sudo killall -3 fbi
 
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
@@ -114,12 +230,17 @@ fi
 afterSetupScriptExists=$(ls /home/admin/setup.sh 2>/dev/null | grep -c setup.sh)
 if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "*** SETUP SCRIPT DETECTED ***"
+  # LCD info
+  sudo sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+  sudo sed -i "s/^message=.*/message='After Boot Setup (takes time)'/g" ${infoFile}
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  sudo /home/admin/setup.sh
+  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
+  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
   # delete the after boot script
-  sudo rm /home/admin/setup.sh
+  sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
   sudo shutdown -r now
@@ -127,84 +248,120 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
 fi
 
 ################################
+# FORCED SWITCH TO HDMI
+# if a file called 'hdmi' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
+if [ ${forceHDMIoutput} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/hdmi*
+  # switch to HDMI what will trigger reboot
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  exit 0
+fi
+
+################################
+# SSH SERVER CERTS RESET
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
+if [ ${sshReset} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/ssh.reset*
+  # show info ssh reset
+  sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
+  sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
+  # delete ssh certs
+  sudo systemctl stop sshd
+  sudo rm /mnt/hdd/ssh/ssh_host*
+  sudo ssh-keygen -A
+  sudo /home/admin/XXshutdown.sh reboot
+  exit 0
+fi
+
+################################
 # HDD CHECK & PRE-INIT
 ################################
  
-# waiting for HDD to connect
-hddExists=$(lsblk | grep -c sda1)
-while [ ${hddExists} -eq 0 ]
-  do
-    # display will ask user to connect a HDD
-    sed -i "s/^state=.*/state=nohdd/g" ${infoFile}
+# wait loop until HDD is connected
+until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
+do
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
+    sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
     sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
-    sleep 5
-    # retry to find HDD
-    hddExists=$(lsblk | grep -c sda1)
-  done
+  fi
+  sleep 2
+done
+
+# write info for LCD
+sed -i "s/^state=.*/state=booting/g" ${infoFile}
+sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
+
+# get fresh info about data drive to continue
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
-hddIsAutoMounted=$(sudo cat /etc/fstab | grep -c '/mnt/hdd')
-if [ ${hddIsAutoMounted} -eq 0 ]; then
+if [ ${isMounted} -eq 0 ]; then
 
-  echo "HDD is there but not AutoMounted yet." >> $logFile
-  echo "Analysing the situation ..." >> $logFile
+  echo "HDD is there but not AutoMounted yet - checking Setup" >> $logFile
 
-  # detect for correct device name (the biggest partition)
-  hddDeviceName="sda1"
-  hddSecondPartitionExists=$(lsblk | grep -c sda2)
-  hddSecondDriveExists=$(lsblk | grep -c sdb)
-  if [ ${hddSecondPartitionExists} -eq 1 ] || [ ${hddSecondDriveExists} -eq 1 ] ; then
-    echo "HDD has a second partition - choosing the bigger one ..." >> $logFile
-    # get both with size
-    size1=$(lsblk -o NAME,SIZE -b | grep "sda1" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
-    echo "sda1(${size1})" >> $logFile
-    size2=$(lsblk -o NAME,SIZE -b | grep "sda2" | awk '{ print substr( $0, 12, length($0)-2 ) }' | xargs)
-    echo "sda2(${size2})" >> $logFile
-    size3=$(lsblk -o NAME,SIZE -b | grep "sdb" | awk '{ print substr( $0, 8, length($0)-2 ) }' | xargs)
-    echo "sdb(${size3})" >> $logFile
-    # choose to run with the bigger one
-    if [ ${size2} -gt ${size1} ]; then
-      echo "sda2 is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sda2"
-    elif [ ${size3} -gt ${size1} ]; then
-      echo "sdb is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sdb"      
-    else
-      echo "sda1 is BIGGER - run with this one" >> $logFile
-      hddDeviceName="sda1"
-    fi
-  fi
-
-  # check if HDD is formatted EXT4
-  hddExt4=$(lsblk -o NAME,FSTYPE -b /dev/${hddDeviceName} | grep -c "ext4")
-  if [ ${hddExt4} -eq 0 ]; then
-    echo "HDD is NOT formatted in ext4." >> $logFile
-    # stop the bootstrap here ...
-    # display will ask user to run setup
+  # when format is not EXT4 or BTRFS - stop bootstrap and await user setup
+  if [ "${hddFormat}" != "ext4" ] && [ "${hddFormat}" != "btrfs" ]; then
+    echo "HDD is NOT formatted in ${hddFormat} .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
     sed -i "s/^message=.*/message='HDD needs SetUp (1)'/g" ${infoFile}
     exit 0
   fi
 
-  # temp-mount the HDD
-  echo "temp-mounting the HDD .." >> $logFile
-  sudo mkdir /mnt/hdd
-  sudo mount -t ext4 /dev/${hddDeviceName} /mnt/hdd
-  mountOK=$(lsblk | grep -c '/mnt/hdd')
-  if [ ${mountOK} -eq 0 ]; then
-    echo "FAIL - not able to temp-mount HDD" >> $logFile
+  # when error on analysing HDD - stop bootstrap and await user setup
+  if [ ${#hddError} -gt 0 ]; then
+    echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='HDD failed Mounting'/g" ${infoFile}
-    # no need to unmount the HDD, it failed mounting
+    sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
     exit 0
-  else 
-     echo "OK - HDD available under /mnt/hdd" >> $logFile
   fi
 
-  # UPDATE MIGRATION & CONFIG PROVISIONING 
+  # temp mount the HDD
+  echo "Temp mounting data drive" >> $logFile
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  if [ ${#error} -gt 0 ]; then
+    echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
+    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+    sed -i "s/^message=.*/message='${error}'/g" ${infoFile}
+    exit 0
+  fi
+
+  # make sure all links between directories/drives are correct
+  echo "Refreshing links between directories/drives .." >> $logFile
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
+
+  # check if there is a WIFI configuration to restore
+  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+  configWifiHDD=$(sudo cat /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+  if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
+    echo "Restoring WIFI setting & rebooting .." >> $logFile
+    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
+    sudo chmod 755 /boot/wpa_supplicant.conf
+    sudo reboot now
+    exit 0
+  fi
+
+  # make sure at this point local network is connected
+  wait_for_local_network
+
+  # make sure before update/recovery that a internet connection is working
+  wait_for_local_internet
+
   # check if HDD contains already a configuration
-  echo "Check if HDD contains already a configuration .." >> $logFile
   configExists=$(ls ${configFile} | grep -c '.conf')
+  echo "HDD contains already a configuration: ${configExists}" >> $logFile
   if [ ${configExists} -eq 1 ]; then
     echo "Found existing configuration" >> $logFile
     source ${configFile}
@@ -225,19 +382,22 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     fi
     if [ ${configExists} -eq 0 ]; then
       echo "Moving invalid config to raspiblitz.invalid.conf" >> ${logFile}
-      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf
+      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf 2>/dev/null
     fi
   fi
-  # if config is still valid ...
+  
+  # UPDATE MIGRATION & CONFIG PROVISIONING 
   if [ ${configExists} -eq 1 ]; then
     echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
     sed -i "s/^message=.*/message='Starting Recover'/g" ${infoFile}
+    sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+    sed -i "s/^network=.*/network=${network}/g" ${infoFile}
     echo "Calling Data Migration .." >> $logFile
     sudo /home/admin/_bootstrap.migration.sh
     echo "Calling Provisioning .." >> $logFile
     sudo /home/admin/_bootstrap.provision.sh
-    sed -i "s/^state=.*/state=recovered/g" ${infoFile}
+    sed -i "s/^state=.*/state=reboot/g" ${infoFile}
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
@@ -252,54 +412,6 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
-  # check if HDD contains existing LND data (old RaspiBlitz Version)
-  echo "Check if HDD contains existing LND data .." >> $logFile
-  lndDataExists=$(ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
-  if [ ${lndDataExists} -eq 1 ]; then
-    echo "Found existing LND data - old RaspiBlitz?" >> $logFile
-    sed -i "s/^state=.*/state=olddata/g" ${infoFile}
-    sed -i "s/^message=.*/message='No Auto-Update possible'/g" ${infoFile}
-    # keep HDD mounted if user wants to copy data
-    exit 0
-  else 
-    echo "OK - No LND data found" >> $logFile
-  fi
-
-  # check if HDD contains pre-loaded blockchain data
-  echo "Check if HDD contains pre-loaded blockchain data .." >> $logFile
-  litecoinDataExists=$(ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-  bitcoinDataExists=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-
-  # check if node can go into presync (only for bitcoin)
-  if [ ${bitcoinDataExists} -eq 1 ]; then
-
-    # update info file
-    sed -i "s/^state=.*/state=presync/g" ${infoFile}
-    sed -i "s/^message=.*/message='starting presync'/g" ${infoFile}
-
-    # activating presync
-    # so that on a hackathon you can just connect a RaspiBlitz
-    # to the network and have it up-to-date for setting up
-    echo "Found pre-loaded blockchain" >> $logFile
-
-    # check if pre-sync was already activated on last power-on
-    #presyncActive=$(systemctl status bitcoind | grep -c 'could not be found')
-    echo "starting pre-sync in background" >> $logFile
-    # make sure that debug file is clean, so just pre-sync gets analysed on stop
-    sudo rm /mnt/hdd/bitcoin/debug.log 2>/dev/null
-    # starting in background, because this scripts is part of systemd
-    # so to change systemd needs to happen after delay in seperate process
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin 2>> $logFile
-    sudo -u bitcoin /usr/local/bin/bitcoind -daemon -conf=/home/admin/assets/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid 2>> $logFile
-    echo "OK Started bitcoind for presync" >> $logFile
-    sudo sed -i "s/^message=.*/message='running presync'/g" ${infoFile}
-    # after admin login, presync will be stopped and HDD unmounted
-    exit 0
-  
-  else
-    echo "OK - No bitcoin blockchain data found" >> $logFile
-  fi
-
   # if it got until here: HDD is empty ext4
   echo "Waiting for SetUp." >> $logFile
   sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
@@ -308,7 +420,25 @@ if [ ${hddIsAutoMounted} -eq 0 ]; then
   sudo umount -l /mnt/hdd
   exit 0
 
-fi # END - no automount
+fi # END - no automount - after this HDD is mounted
+
+# make sure at this point local network is connected
+wait_for_local_network
+
+# if a WIFI config exists backup to HDD
+configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+if [ ${configWifiExists} -eq 1 ]; then
+  echo "Making Backup Copy of WIFI config to HDD" >> $logFile
+  sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
+fi
+
+# config should exist now
+configExists=$(ls ${configFile} | grep -c '.conf')
+if [ ${configExists} -eq 0 ]; then
+  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+  sed -i "s/^message=.*/message='no config'/g" ${infoFile}
+  exit 0
+fi
 
 #####################################
 # UPDATE HDD CONFIG FILE (if exists)
@@ -368,7 +498,7 @@ if [ ${configExists} -eq 1 ]; then
       # prevent having no publicIP set at all and LND getting stuck
       # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
       if [ ${#publicIP} -eq 0 ]; then
-        localIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+        localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
         echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
         freshPublicIP="${localIP}"
       fi
@@ -404,30 +534,32 @@ fi
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
+
 #################################
-# MAKE SURE ADMIN USER HAS LATEST LND DATA
+# MAKE SURE USERS HAVE LATEST LND CREDENTIALS
 #################################
 source ${configFile}
 if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
 
-  echo "making sure LND blockchain RPC password is set correct in lnd.conf" >> $logFile
-  source <(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#rpcpassword} -gt 0 ]; then
-    sudo sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${rpcpassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
-  else
-    echo "WARN: could not get value 'rpcuser' from blockchain conf" >> $logFile
-  fi
-
-  echo "updating admin user LND data" >> $logFile
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf 2>> $logFile
-  sudo chown admin:admin /home/admin/.lnd/lnd.conf 2>> $logFile
-  sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo chown admin:admin /home/admin/.lnd/tls.cert 2>> $logFile
-  sudo cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null
-  sudo chown admin:admin /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>> $logFile
+  echo "running LND users credentials update" >> $logFile
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
 
 else 
-  echo "skipping admin user LND data update" >> $logFile
+  echo "skipping LND credientials sync" >> $logFile
+fi
+
+################################
+# MOUNT BACKUP DRIVE
+# if "localBackupDeviceUUID" is set in
+# raspiblitz.conf mount it on boot
+################################
+source ${configFile}
+echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+  echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
+  sudo /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
+else
+  echo "No additional backup device was configured." >> $logFile
 fi
 
 ################################
@@ -480,28 +612,29 @@ sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
 
-################################
-# RECORD BASEIMAGE
-################################
+#####################################
+# CLEAN HDD TEMP
+#####################################
 
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
+echo "CLEANING TEMP DRIVE/FOLDER" >> $logFile
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh clean temp)
+if [ ${#error} -gt 0 ]; then
+  echo "FAIL: ${error}" >> $logFile
+else
+  echo "OK: Temp cleaned" >> $logFile
 fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
+
+######################################
+# PREPARE SUBSCRIPTIONS DATA DIRECTORY
+######################################
+
+if [ -d "/mnt/hdd/app-data/subscrptions" ]; then
+  echo "OK: subscription data directory exists"
+else
+  echo "CREATE: subscription data directory"
+  sudo mkdir /mnt/hdd/app-data/subscriptions
+  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-echo "baseimage=${baseImage}" >> $infoFile
 
 ################################
 # STRESSTEST RASPBERRY PI
@@ -518,6 +651,13 @@ if [ "${baseImage}" = "raspbian" ] ; then
     echo "" > /var/log/syslog
   fi
 fi
+
+# mark that node is ready now
+sed -i "s/^state=.*/state=ready/g" ${infoFile}
+sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
+
+# make sure that bitcoin service is active
+sudo systemctl enable ${network}d
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

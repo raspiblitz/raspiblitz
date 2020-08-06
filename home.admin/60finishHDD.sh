@@ -1,81 +1,89 @@
 #!/bin/bash
-echo ""
 
 ## get basic info
 source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
-echo "*** Checking HDD ***"
-mountOK=$(df | grep -c /mnt/hdd)
-if [ ${mountOK} -eq 1 ]; then
-  # HDD is mounted
-  if [ -d "/mnt/hdd/${network}" ]; then
-    # HDD has content - continue 
-    echo "OK - HDD is ready."
+echo ""
+echo "*** 60finishHDD.sh ***"
 
-   ###### LINK HDD
-   echo ""
-   echo "*** Prepare ${network} ***"
-   sudo killall -u bitcoin
-   sleep 5
-   sudo rm -r /home/bitcoin/.${network} 2>/dev/null
-   sleep 2
-   if [ -d /home/bitcoin/.${network} ]; then
-     echo "FAIL - /home/bitcoin/.${network} exists and cannot be removed!"
-     exit 1
-   fi
-   sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-   sudo mkdir /home/admin/.${network} 2>/dev/null
-   sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
-   sudo ln -s /mnt/hdd/${network} /home/bitcoin/.${network}
-   sudo mkdir /mnt/hdd/lnd
-   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
-   sudo chown -R bitcoin:bitcoin /mnt/hdd/${network}
-   sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
-   sudo chown -R bitcoin:bitcoin /home/bitcoin/.${network}
-   sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
-   echo "OK - ${network} setup ready"
-
-   ###### ACTIVATE TOR IF SET DURING SETUP
-   if [ "${runBehindTor}" = "on" ]; then
-     
-     echo "runBehindTor --> ON"
-     sudo /home/admin/config.scripts/internet.tor.sh on
-
-     # but if IBD is allowed to be public switch off TOR just fro bitcoin 
-     # until IBD is done. background service will after that switch TOR on
-     if [ "${ibdBehindTor}" = "off" ]; then
-       echo "ibdBehindTor --> OFF"
-       sudo /home/admin/config.scripts/internet.tor.sh btcconf-off
-     else
-       echo "ibdBehindTor --> ON"
-     fi
-
-   else
-     echo "runBehindTor --> OFF"
-   fi
-
-   ###### START NETWORK SERVICE
-   echo ""
-   echo "*** Start ${network} ***"
-   echo "This can take a while .."
-   sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-   #sudo chmod +x /etc/systemd/system/${network}d.service
-   sudo systemctl daemon-reload
-   sudo systemctl enable ${network}d.service
-   sudo systemctl start ${network}d.service
-   echo "Started ... wait 10 secs"	
-   sleep 10
-
-   # set SetupState
-   sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info
-
-   ./10setupBlitz.sh
-
-  else
-    # HDD is empty - download HDD content
-    echo "FAIL - HDD is empty."
-  fi
-else
-  # HDD is not available yet
-  echo "FAIL - HDD is not mounted."
+# use blitz.datadrive.sh to analyse HDD situation
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status ${network})
+if [ ${#error} -gt 0 ]; then
+  echo "# FAIL blitz.datadrive.sh status --> ${error}"
+  echo "# Please report issue to the raspiblitz github."
+  exit 1
 fi
+
+# check that data drive is mounted
+if [ ${isMounted} -eq 0 ]; then
+  echo "# FAIL - HDD is not mounted."
+  exit 1
+fi
+
+###### COPY BASIC NETWORK CONFIG
+
+echo ""
+echo "*** Prepare ${network} ***"
+sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+sudo mkdir /home/admin/.${network} 2>/dev/null
+sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
+
+# make sure all files are linked correct
+sudo /home/admin/config.scripts/blitz.datadrive.sh link
+
+# BLITZ WEB SERVICE
+/home/admin/config.scripts/blitz.web.sh on
+
+###### ACTIVATE TOR IF SET DURING SETUP
+if [ "${runBehindTor}" = "on" ]; then
+     
+  echo "runBehindTor --> ON"
+  sudo /home/admin/config.scripts/internet.tor.sh on
+
+  # but if IBD is allowed to be public switch off TOR just fro bitcoin 
+  # until IBD is done. background service will after that switch TOR on
+  if [ "${ibdBehindTor}" = "off" ]; then
+    echo "ibdBehindTor --> OFF"
+    sudo /home/admin/config.scripts/internet.tor.sh btcconf-off
+  else
+    echo "ibdBehindTor --> ON"
+  fi
+
+else
+  echo "runBehindTor --> OFF"
+fi
+
+###### START NETWORK SERVICE
+echo ""
+echo "*** Start ${network} ***"
+echo "- This can take a while .."
+sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+#sudo chmod +x /etc/systemd/system/${network}d.service
+sudo systemctl daemon-reload
+sudo systemctl enable ${network}d.service
+sudo systemctl start ${network}d.service
+
+# check if bitcoin has started
+bitcoinRunning=0
+loopcount=0
+while [ ${bitcoinRunning} -eq 0 ]
+do
+  >&2 echo "# (${loopcount}/200) checking if ${network}d is running ... "
+  bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
+  sleep 2
+  sync
+  loopcount=$(($loopcount +1))
+  if [ ${loopcount} -gt 200 ]; then
+    /home/admin/XXdebugLogs.sh
+    echo "***********************************"
+    echo "FAIL: ${network} failed to start :("
+    echo "Get support or try again the command: raspiblitz"
+    exit 1
+  fi
+done
+
+# set SetupState
+sudo sed -i "s/^setupStep=.*/setupStep=60/g" /home/admin/raspiblitz.info
+
+./10setupBlitz.sh

@@ -83,33 +83,57 @@ while :
     ###########################   
 
     # get the local network IP to be displayed on the lCD
-    localip=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    source <(sudo /home/admin/config.scripts/internet.sh status)
 
     # waiting for IP in general
     if [ ${#localip} -eq 0 ]; then
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
-      l3="Is LAN cable connected?\n"
+      l3="LAN cable connected? WIFI lost?\n"
       dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
       sleep 3
       continue
     fi
 
-    # waiting for DHCP in general
-    if [ "${localip:0:4}" = "169." ]; then
-      l1="Waiting for DHCP ...\n"
-      l2="Not able to get local IP.\n"
-      l3="Will try reboot every 5min.\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+    # waiting for Internet connection
+    if [ ${online} -eq 0 ]; then
+      l1="Waiting for Internet ...\n"
+      l2="Local Network seems OK but no Internet.\n"
+      l3="Is router still online?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 5 45
       sleep 3
       continue
     fi
 
-    # get config info if already available
+    # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
+    fi
+
+    # reboot info
+    if [ "${state}" = "reboot" ]; then
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Reboot ..." 3 30
+      sleep 20
+      continue
+    fi
+
+    # shutdown info
+    if [ "${state}" = "shutdown" ]; then
+      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Shutdown ..." 3 30
+      sleep 20
+      continue
+    fi
+
+    # waiting for DHCP in general
+    if [ "${state}" = "noDHCP" ]; then
+      l1="Waiting for DHCP ...\n"
+      l2="Not able to get local IP.\n"
+      l3="Check you router if constant.\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
     fi
 
     # if no information available from files - set default
@@ -152,7 +176,7 @@ while :
           message="login for manual migration"
 
       # when no HDD - improve message
-      elif [ "${state}" = "nohdd" ]; then
+      elif [ "${state}" = "noHDD" ]; then
           message="Connect external HDD/SSD"
       fi
       
@@ -160,6 +184,11 @@ while :
       l1="Login to your RaspiBlitz with:\n"
       l2="ssh admin@${localip}\n"
       l3="Use password: raspiblitz\n"
+
+      if [ "${state}" = "recovering" ]; then
+        l1="Recovering please wait ..\n"
+      fi
+
       boxwidth=$((${#localip} + 24))
       sleep 3
       dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
@@ -276,14 +305,25 @@ while :
       continue
     fi
 
-    # no special case - show status display
-	  /home/admin/00infoBlitz.sh
-    if [ ${#touchscreen} -gt 0 ] && [ ${touchscreen} -gt 0 ]; then
-      echo ""
-      echo ""
+    # perform config check
+    configCheck=$(/home/admin/config.scripts/blitz.configcheck.py)
+    if [ $? -eq 0 ]; then
+      configValid=1
+      # echo "Config Valid!"
+    else
+      configValid=0
+      # echo "Config Not Valid!"
+      l1="POTENTIAL CONFIG ERROR FOUND\n"
+      l2="ssh admin@${localip}\n"
+      l3="use Password A\n"
+      l4="Run on Terminal command: check"
+      dialog --backtitle "RaspiBlitz ${codeVersion} cfg-err ${localip}" --infobox "$l1$l2$l3$l4" 6 50
+      sleep 20
+      continue
     fi
-	  sleep 5
 
-  done
+    # no special case - show status display
+    /home/admin/00infoBlitz.sh
+    sleep 5
 
-fi
+done

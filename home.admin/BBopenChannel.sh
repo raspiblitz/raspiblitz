@@ -21,6 +21,8 @@ if [ ${chainInSync} -eq 0 ]; then
   echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
   echo "Wait until chain is sync with LND and try again."
   echo ""
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
@@ -30,6 +32,8 @@ if [ ${confirmedBalance} -eq 0 ]; then
   echo "FAIL - You have 0 SATOSHI in your confirmed LND On-Chain Wallet."
   echo "Please fund your on-chain wallet first and wait until confirmed."
   echo ""
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
@@ -40,6 +44,8 @@ if [ ${numConnectedPeers} -eq 0 ]; then
   echo "You can only open channels to peer nodes to connected to first."
   echo "Use CONNECT peer option in main menu first."
   echo ""
+  echo "Press ENTER to return to main menu."
+  read key
   exit 1
 fi
 
@@ -62,8 +68,10 @@ pubKey=$(dialog --clear \
 
 clear
 if [ ${#pubKey} -eq 0 ]; then
- echo "Selected CANCEL"
- echo ""
+ clear
+ echo 
+ echo "no channel selected - returning to menu ..."
+ sleep 4
  exit 1
 fi
 
@@ -88,14 +96,16 @@ l3="max available : ${confirmedBalance}"
 dialog --title "Funding of Channel" \
 --inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
-shred $_temp
+shred -u $_temp
 if [ ${#amount} -eq 0 ]; then
-  echo "FAIL - not a valid input (${amount})"
+  echo
+  echo "no valid amount entered - returning to menu ..."
+  sleep 4
   exit 1
 fi
 
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel ${pubKey} ${amount} 0"
+command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=1 ${pubKey} ${amount} 0"
 
 # info output
 clear
@@ -126,7 +136,7 @@ else
   echo "******************************"
   echo "${result}"
   echo ""
-  echo "Whats next? --> You need to wait 6 confirmations, for the channel to be ready."
+  echo "Whats next? --> You need to wait 3 confirmations, for the channel to be ready."
   fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
   if [ "${network}" = "bitcoin" ]; then
     if [ "${chain}" = "main" ]; then
@@ -140,3 +150,5 @@ else
   fi
 fi
 echo ""
+echo "Press ENTER to return to main menu."
+read key

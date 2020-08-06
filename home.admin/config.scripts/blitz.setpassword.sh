@@ -5,7 +5,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
- echo "blitz.setpassword.sh [x] [text] [result-file]"
+ echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  echo "exits on 0 = needs reboot"
  exit 1
 fi
@@ -63,6 +63,9 @@ if [ ${#abcd} -eq 0 ]; then
         D)
           abcd='d';
           ;;
+        *)
+          exit 1
+          ;;
     esac
 fi
 
@@ -75,22 +78,13 @@ if [ "${abcd}" = "a" ]; then
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
+    clear
 
     # ask user for new password A (first time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Set new Master/Admin Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
-
-    # get user input
-    password1=$( cat $_temp )
-    shred $_temp
+    password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter Password A:\n(This is new password to login per SSH)" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred $_temp
+    password2=$(whiptail --passwordbox "\nRe-Enter Password A:\n(This is new password to login per SSH)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -143,21 +137,13 @@ elif [ "${abcd}" = "b" ]; then
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
-    # ask user for new password A (first time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Please enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
+    clear
 
-    # get user input
-    password1=$( cat $_temp )
-    shred $_temp
+    # ask user for new password B (first time)
+    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
-    # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter Password B:\n" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred $_temp
+    # ask user for new password B (second time)
+    password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -202,8 +188,76 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
   sed -i "s/^${network}d.rpcpass=.*/${network}d.rpcpass=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
 
-  echo "OK -> RPC Password B changed"
-  echo "if services are running - reboot is needed to activate new settings"
+  # blitzweb
+  if ! [ -f /etc/nginx/.htpasswd ]; then
+    echo "${newPassword}" | sudo htpasswd -ci /etc/nginx/.htpasswd admin
+  else
+    echo "${newPassword}" | sudo htpasswd -i /etc/nginx/.htpasswd admin
+  fi
+
+  # RTL - keep settings from current RTL-Config.json
+  if [ "${rtlWebinterface}" == "on" ]; then
+    echo "# changing RTL password"
+    cp /home/rtl/RTL/RTL-Config.json /home/rtl/RTL/backup-RTL-Config.json
+    # remove hashed old password
+    #sed -i "/\b\(multiPassHashed\)\b/d" ./RTL-Config.json
+    # set new password
+    cp /home/rtl/RTL/RTL-Config.json /home/admin/RTL-Config.json
+    chown admin:admin /home/admin/RTL-Config.json
+    chmod 600 /home/admin/RTL-Config.json || exit 1
+    node > /home/admin/RTL-Config.json <<EOF
+//Read data
+var data = require('/home/rtl/RTL/backup-RTL-Config.json');
+//Manipulate data
+data.multiPassHashed = null;
+data.multiPass = '$newPassword';
+//Output data
+console.log(JSON.stringify(data, null, 2));
+EOF
+    rm -f /home/rtl/RTL/backup-RTL-Config.json
+    rm -f /home/rtl/RTL/RTL-Config.json
+    mv /home/admin/RTL-Config.json /home/rtl/RTL/
+    chown rtl:rtl /home/rtl/RTL/RTL-Config.json
+  fi
+  
+  # electrs
+  if [ "${ElectRS}" == "on" ]; then
+    echo "# changing the RPC password for ELECTRS"
+    RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+    sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
+  fi
+
+  # BTC-RPC-Explorer
+  if [ "${BTCRPCexplorer}" = "on" ]; then
+    echo "# changing the RPC password for BTCRPCEXPLORER"
+    sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
+    sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
+  fi
+
+  # BTCPayServer
+  if [ "${BTCPayServer}" == "on" ]; then
+    echo "# changing the RPC password for BTCPAYSERVER"
+    sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
+  fi
+
+  # JoinMarket
+  if [ "${joinmarket}" == "on" ]; then
+    echo "# changing the RPC password for JOINMARKET"
+    sed -i "s/^rpc_password =.*/rpc_password = ${newPassword}/g" /home/joinmarket/.joinmarket/joinmarket.cfg 2>/dev/null
+    echo "# changing the password for the 'joinmarket' user"
+    echo "joinmarket:${newPassword}" | sudo chpasswd
+  fi
+
+  # ThunderHub
+  if [ "${thunderhub}" = "on" ]; then
+    echo "# changing the password for ThunderHub"
+    sed -i "s/^masterPassword: '.*' # Default password unless defined in account/\
+masterPassword: '${newPassword}' # Default password unless defined in account/g" \
+/mnt/hdd/app-data/thunderhub/thubConfig.yaml 2>/dev/null
+  fi
+
+  echo "# OK -> RPC Password B changed"
+  echo "# Reboot is needed"
   exit 0
 
 ############################
@@ -257,51 +311,48 @@ elif [ "${abcd}" = "x" ]; then
     # second parameter is the flexible text
     text=$2
     resultFile=$3
-    shred $3 2>/dev/null
+    shred -u $3 2>/dev/null
 
     # ask user for new password (first time)
-    dialog --backtitle "RaspiBlitz"\
-       --insecure --passwordbox "${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 2>$_temp
-
-    # get user input
-    password1=$( cat $_temp )
-    shred $_temp
+    password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 
     # ask user for new password A (second time)
-    dialog --backtitle "RaspiBlitz - Setup"\
-       --insecure --passwordbox "Re-Enter the Password:\n(to test if typed in correctly)" 10 52 2>$_temp
-
-    # get user input
-    password2=$( cat $_temp )
-    shred $_temp
+    password2=""
+    if [ ${#password1} -gt 0 ]; then
+      password2=$(whiptail --passwordbox "\nRe-Enter the Password:\n(to test if typed in correctly)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
+    fi
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
+      dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
       exit 1
     fi
 
-    # password zero
-    if [ ${#password1} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
-    fi
+    if [ "$4" != "empty-allowed" ]; then
 
-    # check that password does not contain bad characters
-    clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-    if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
-    fi
+      # password zero
+      if [ ${#password1} -eq 0 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
 
-    # password longer than 8
-    if [ ${#password1} -lt 8 ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3"
-      exit 1
+      # check that password does not contain bad characters
+      clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+      if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 62
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
+
+      # password longer than 8
+      if [ ${#password1} -lt 8 ]; then
+        dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        exit 1
+      fi
+
     fi
 
     # store result is file
