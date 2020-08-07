@@ -125,25 +125,25 @@ function jmarket() {
   fi
 }
 
-# command: getthistx
+# command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
-# $ getthistx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
-function getthistx() {
-    tx_hash="${1:-f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16}"
-    if result=$(bitcoin-cli getrawtransaction "${tx_hash}" 1 2>/dev/null); then
+# $ gettx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
+function gettx() {
+    tx_id="${1:-f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16}"
+    if result=$(bitcoin-cli getrawtransaction "${tx_id}" 1 2>/dev/null); then
         echo "${result}"
     else
-        echo "{\"error\": \"unable to find TX\", \"tx_hash\": \"${tx_hash}\"}"
+        echo "{\"error\": \"unable to find TX\", \"tx_hash\": \"${tx_id}\"}"
         return 1
     fi
 }
 
-# command: watchthistx
+# command: watchtx
 # try to retrieve transaction from mempool or blockchain until certain confirmation target
-# is reached and then exit cleanly.
-# $ watchthistx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
-function watchthistx() {
-    tx_hash="${1}"
+# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs. 
+# $ watchtx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
+function watchtx() {
+    tx_id="${1}"
     wait_n_confirmations="${2:-2}"
     sleep_time="${3:-60}"
 
@@ -151,7 +151,7 @@ function watchthistx() {
 
     while true; do
 
-      if result=$(bitcoin-cli getrawtransaction "${tx_hash}" 1 2>/dev/null); then
+      if result=$(bitcoin-cli getrawtransaction "${tx_id}" 1 2>/dev/null); then
         confirmations=$(echo "${result}" | jq .confirmations)
 
         if [[ "${confirmations}" -ge "${wait_n_confirmations}" ]]; then
