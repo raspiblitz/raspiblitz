@@ -170,3 +170,15 @@ function watchtx() {
 
     done
 }
+
+# command: notifyme
+# A wrapper for blitz.notify.sh that will send a notification using the configured 
+# method and settings. 
+# This makes sense when waiting for commands to finish and then sending a notification.
+# $ notifyme "Hello there..!"
+# $ ./run_job_which_takes_long.sh && notifyme "I'm done."
+# $ ./run_job_which_takes_long.sh && notifyme "success" || notifyme "fail"
+function notifyme() {
+    content="${1:-Notified}"
+    /home/admin/config.scripts/blitz.notify.sh send "${content}"
+}
