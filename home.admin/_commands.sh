@@ -133,7 +133,7 @@ function gettx() {
     if result=$(bitcoin-cli getrawtransaction "${tx_id}" 1 2>/dev/null); then
         echo "${result}"
     else
-        echo "{\"error\": \"unable to find TX\", \"tx_hash\": \"${tx_id}\"}"
+        echo "{\"error\": \"unable to find TX\", \"tx_id\": \"${tx_id}\"}"
         return 1
     fi
 }
