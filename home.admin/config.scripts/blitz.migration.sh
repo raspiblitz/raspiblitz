@@ -76,7 +76,7 @@ if [ "$1" = "export" ]; then
   fi
 
   # clean old backups from temp
-  rm /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
+  rm -f /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
 
   # get date stamp
   datestamp=$(date "+%y-%m-%d-%H-%M")
