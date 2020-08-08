@@ -100,7 +100,8 @@ function torthistx() {
 # command: status
 # start the status screen in the terminal
 function status() {
-  sudo -u pi /home/admin/00infoLCD.sh
+  echo "Gathering data - please wait a moment..."
+  sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
 # command: balance
