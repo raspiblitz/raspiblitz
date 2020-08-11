@@ -8,13 +8,15 @@ which conveniently has 4 buttons on one side.
 ### Usage/Examples
 Will attempt to keep these examples updated to reflect the current state of the library.
 
-Printing a message to the screen.
-* `sudo python3 epapersay.py "Reckless Raspiblitz!!"` 
+* Printing a message to the screen: `sudo python3 epapersay.py "Reckless Raspiblitz!!"`
+* Reacting to button press: `sudo python3 paperblitz.py` (blocks)
 
 ### Next Development Goal
-* Print a message when one of the 4 buttons is pressed.
+* A command like `paperblitz.py <str0> <str1> <str2> <str3> <str4>` should display `<str0>` on the blitz
+  and replace it with `<strN>` when button `N` is pressed.
 
 ### Achieved Development Goals
+* Done - Print a message when one of the 4 buttons is pressed.
 * Done - able to print a message to the epaper-display (`epapersay.py`)
 
 ### Backlog

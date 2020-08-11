@@ -4,18 +4,18 @@ sys.path.insert(1, "./drivers")
 
 # there are two drivers, the epd2in7 and epd2in7b
 # this script uses the monochrome epd2in7
+# the other driver can be obtained from waveshare
 # perhaps future developments will enable the 
 # multi-color (black,white,red) epd2in7b display
 import epd2in7
 from PIL import Image, ImageDraw, ImageFont
 
-epd = epd2in7.EPD() # get the display
-epd.init()           # initialize the display
-print("Clearing e-paper display...")    # prints to console, not the display, for debugging
-epd.Clear(0xFF)      # clear the display
-print("Done.")
-def printToDisplay(string):
-    print("epaper-displaying: "+ string)
+def printToEPaperDisplay(string):
+
+    epd = epd2in7.EPD()  # get the display
+    epd.init()           # initialize the display
+    epd.Clear(0xFF)      # clear the display
+    print("epapersay.py: "+ string) # for debug purposes
     HBlackImage = Image.new('1', (epd2in7.EPD_HEIGHT, epd2in7.EPD_WIDTH), 255)
     # if we were using epd2in7b, we could also have HRedImage = Image.new('1', (epd2in7b.EPD_HEIGHT, epd2in7b.EPD_WIDTH), 255)
     
@@ -25,5 +25,12 @@ def printToDisplay(string):
     draw.text((25, 65), string, fill = 0)
     
     epd.display(epd.getbuffer(HBlackImage)) # for epd2in7b, would need to include HRedImage as additional argument
-    
-printToDisplay(sys.argv[1])
+
+
+# below lines allow us to use this file as either a module or a standalone script
+def main():
+    printToEPaperDisplay(sys.argv[1])
+
+
+if __name__ == '__main__':
+    main()
