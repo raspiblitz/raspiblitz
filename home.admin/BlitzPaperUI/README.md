@@ -31,8 +31,7 @@ state of the library.
 * Refactor button code
 
 ### Achieved Development Goals
-* Done -  A command like `paperblitz.py <str0> <str1> <str2> <str3> <str4>` should display `<str0>` on the blitz
-  and replace it with `<strN>` when button `N` is pressed.
+* Done -  A command like `paperblitz.py <str1> <str2> <str3> <str4>` should do something when buttons 1-4 are pressed.
 * Done - Print a message when one of the 4 buttons is pressed.
 * Done - able to print a message to the epaper-display (`epapersay.py`)
 
