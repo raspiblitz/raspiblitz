@@ -45,6 +45,19 @@ else
   echo "# lndconnect is already installed" 
 fi
 
+# recheck if install worked
+isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
+if [ $isInstalled -eq 0 ]; then
+  echo ""
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "FAIL: Was not able to install/build lndconnect"
+  echo "Retry later or report to developers with logs above."
+  lndconnect -h
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  read key
+  exit 1
+fi
+
 #### CHECK IF IP2TOR BRIDGES ARE AVAILABLE
 ip2torREST_IP=""
 ip2torREST_PORT=""
