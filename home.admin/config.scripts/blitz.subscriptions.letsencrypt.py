@@ -47,7 +47,7 @@ cfg.reload()
 
 # todo: make sure that also ACME script uses TOR if activated
 session = requests.session()
-if cfg.run_behind_tor:
+if cfg.run_behind_tor.value:
     session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
 
 
