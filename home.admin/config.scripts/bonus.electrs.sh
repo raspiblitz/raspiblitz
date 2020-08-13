@@ -43,7 +43,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
-    electrumResponding=$(echo exit | telnet 127.0.0.1 50001 2>/dev/null | grep -c "Connected to")
+    electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
     if [ ${electrumResponding} -gt 1 ]; then
       electrumResponding=1
     fi
