@@ -825,7 +825,7 @@ This stops your RaspiBlitz and creates a Migration ZIP file you can download/exp
 
 Basically you can connect another RaspiBlitz and copy over your blockchain to it for quicker setup. Your RaspiBlitz will be `offline` during that process that can take between 4 to 6 hours.
 
-Make sure both RaspiBlitzes are connected to the same local network. During setup the new RaspiBlitz should choose the `COPY` option to get the blockchain and then choose as source computer `RASPIBLITZ`. Now you activate the `COPY-SOURCE` option and enter the given IP of the new RaspiBlitz and that one's Password A (not yours) .. then the process should start.
+Make sure both RaspiBlitzes are connected to the same local network. During setup the new RaspiBlitz should choose the `COPY` option to get the blockchain and then choose as source computer `RASPIBLITZ`. Now you activate the `COPY-SOURCE` option and enter the given IP of the new RaspiBlitz and that ones Password A (not yours) .. then the process should start.
 
 ##### RESET-CHAIN: Delete Blockchain and Re-Download
 
