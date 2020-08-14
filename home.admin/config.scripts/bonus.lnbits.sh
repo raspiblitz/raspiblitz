@@ -215,12 +215,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # to the install
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
-    sudo -u lnbits pipenv install
-    sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
+    # do install like this
+    sudo -u lnbits pipenv run pip install python-dotenv
+    sudo -u lnbits pipenv run pip install -r requirements.txt
+    # instead of this
+    #sudo -u lnbits pipenv install
+    #sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
 
     # update databases (if needed)
     echo "# updating databases"
-    sudo -u lnbits /usr/bin/pipenv run flask migrate
+    sudo -u lnbits pipenv run flask migrate
 
     # open firewall
     echo
