@@ -883,7 +883,7 @@ if [ "${lcdInstalled}" == "true" ]; then
      echo "*** LCD DRIVER ***"
      echo "--> Downloading LCD Driver from Github"
      cd /home/admin/
-     sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+     sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
      sudo -u admin chmod -R 755 LCD-show
      sudo -u admin chown -R admin:admin LCD-show
      cd LCD-show/
