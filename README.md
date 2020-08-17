@@ -476,7 +476,7 @@ Here you find basic settings for your RaspiBlitz:
 
 ![MainMenu-Settings](pictures/settings.png)
 
-Activate/Deactivate settings with the space bar and then select OK to activate changes. Here you find more details about those options (top to down):
+Activate/Deactivate settings with the spacebar and then select OK to activate changes. Here you find more details about those options (top to down):
 
 ##### Run behind Tor
 
