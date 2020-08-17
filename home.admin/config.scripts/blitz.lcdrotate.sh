@@ -24,7 +24,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "lcdrotate=1" >> /mnt/hdd/raspiblitz.conf
   fi
   
-  sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
+  sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
   sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
 
   # delete possible touchscreen rotate
@@ -47,7 +47,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
   fi
 
-  sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
+  sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
   sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
 
   # if touchscreen is on
