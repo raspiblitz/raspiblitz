@@ -60,7 +60,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70
-  sudo -u bos npm install -g balanceofsatoshis@5.41.0
+  sudo -u bos npm install -g balanceofsatoshis@5.43.1
 
   # setting value in raspi blitz config
   sudo sed -i "s/^bos=.*/bos=on/g" /mnt/hdd/raspiblitz.conf
