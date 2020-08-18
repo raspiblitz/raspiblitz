@@ -46,7 +46,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ ${lndInstalledVersionMain} -lt 10 ]; then
       sudo -u bitcoin git reset --hard v0.5.1-beta
     else
-      sudo -u bitcoin git reset --hard v0.6.5-beta
+      sudo -u bitcoin git reset --hard v0.8.0-beta
     fi
     cd /home/bitcoin/loop/cmd
     go install ./...
