@@ -54,7 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/bos/.lnd"
   
-  # make sure rtl is member of lndadmin
+  # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin bos
   
   # install bos
