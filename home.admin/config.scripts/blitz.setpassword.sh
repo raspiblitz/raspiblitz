@@ -224,36 +224,34 @@ EOF
   if [ "${ElectRS}" == "on" ]; then
     echo "# changing the RPC password for ELECTRS"
     RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-    sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml 2>/dev/null
+    sudo sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
   fi
 
   # BTC-RPC-Explorer
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "# changing the RPC password for BTCRPCEXPLORER"
-    sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
-    sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null
+    sudo sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sudo sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   fi
 
   # BTCPayServer
   if [ "${BTCPayServer}" == "on" ]; then
     echo "# changing the RPC password for BTCPAYSERVER"
-    sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config 2>/dev/null
+    sudo sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config
   fi
 
   # JoinMarket
   if [ "${joinmarket}" == "on" ]; then
     echo "# changing the RPC password for JOINMARKET"
-    sed -i "s/^rpc_password =.*/rpc_password = ${newPassword}/g" /home/joinmarket/.joinmarket/joinmarket.cfg 2>/dev/null
+    sudo sed -i "s/^rpc_password =.*/rpc_password = ${newPassword}/g" /home/joinmarket/.joinmarket/joinmarket.cfg
     echo "# changing the password for the 'joinmarket' user"
     echo "joinmarket:${newPassword}" | sudo chpasswd
   fi
 
   # ThunderHub
-  if [ "${thunderhub}" = "on" ]; then
+  if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"
-    sed -i "s/^masterPassword: '.*' # Default password unless defined in account/\
-masterPassword: '${newPassword}' # Default password unless defined in account/g" \
-/mnt/hdd/app-data/thunderhub/thubConfig.yaml 2>/dev/null
+    sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
   fi
 
   echo "# OK -> RPC Password B changed"
