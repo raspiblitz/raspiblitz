@@ -86,7 +86,7 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 1. Contribute your changes back to the main project as pull requests so that they become part of the next update - the next SD card release.
 
-2. Make your changes so that they survive an SD card update easily - put all your scripts and extra data onto the HDD AND document for yourself how to activate them again after an update .. maybe even write a small shell script (stored on your HDD) that installs & configures all your additional packages, software and scripts.
+2. Make your changes so that they survive an SD card update easily - put all your scripts and extra data onto the HDD AND document for yourself how to activate them again after an update. The file `/mnt/hdd/app-data/custom-installs.sh` runs with sudo rights after an update/recovery from a fresh sd card. This is the place to put all the install commands, cronjobs or editing of system configs for your personal modifications of RaspiBlitz.
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
