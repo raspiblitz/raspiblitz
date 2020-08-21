@@ -40,7 +40,7 @@ if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
   litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
-  
+
   if [ ${litecoinActive} -eq 1 ]; then
     network="litecoin"
   else
@@ -89,6 +89,10 @@ fi
 
 # get name of active interface with route to internet
 network_active_if=$(ip route get 8.8.8.8 | awk  -- '{print $5}')
+if [ ${network_active_if} != "tun0" ]; then
+  # fallback check if google is unreachable
+  network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
+fi
 
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
