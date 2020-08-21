@@ -193,7 +193,7 @@ Check 'sudo nginx -t' for a detailed error message.
       echo "${TORaddress}"
       echo
       echo "To connect through TOR open the Tor Browser and start with the options:" 
-      echo "electrum --oneserver --server${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
+      echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
     fi
     echo
