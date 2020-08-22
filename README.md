@@ -6,7 +6,7 @@
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and a nice display for easy setup & monitoring.**
+**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with an HDD/SSD and a nice display for easy setup & monitoring.**
 
 RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
