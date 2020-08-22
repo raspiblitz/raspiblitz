@@ -870,7 +870,7 @@ The options are explained in detail:
 
 #### RELEASE: Update RaspiBlitz to a new Version
 
-This is the standard way to update your RaspiBlitz. Choose this option to prepeare your raspiBlitz for a new sd card image, containing the new version release.
+This is the standard way to update your RaspiBlitz. Choose this option to prepeare your raspiBlitz for a new SD card image, containing the new version release.
 
 #### LND: Interim LND Update
 
