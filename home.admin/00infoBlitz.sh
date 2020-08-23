@@ -89,7 +89,7 @@ fi
 
 public_vpn_state="False"
 # get name of active interface with route to internet
-network_active_if=$(ip route get 8.8.8.8 | awk  -- '{print $5}')
+network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $5}')
 if [ "${network_active_if}" != "tun0" ]; then
   # fallback check if google is unreachable, maybe ip route is the best check
   network_active_if=$(ip addr | grep -v 'lo:\|tun0' | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
