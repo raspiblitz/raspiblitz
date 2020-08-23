@@ -85,7 +85,7 @@ else
 fi
 
 # get name of active interface (eth0 or wlan0)
-network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
+network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $5}')
 
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
