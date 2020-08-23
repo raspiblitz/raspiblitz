@@ -128,7 +128,17 @@ elif [ "$1" = "sync" ]; then
 
   echo "# copy macaroons to central app-data directory and ensure unix ownerships and permissions"
   copy_mac_set_perms admin.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms invoice.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms invoices.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms readonly.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms chainnotifier.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms signer.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms walletkit.macaroon lndadmin "${network}" "${chain}"
+  copy_mac_set_perms router.macaroon lndadmin "${network}" "${chain}"
+
   copy_mac_set_perms invoice.macaroon lndinvoice "${network}" "${chain}"
+  copy_mac_set_perms invoices.macaroon lndinvoice "${network}" "${chain}"
+  
   copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
 
   echo "# make sure admin has a symlink at ~/.lnd to /mnt/hdd/app-data/lnd/"
