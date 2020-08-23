@@ -10,6 +10,7 @@ color_amber='\033[0;33m'
 color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
 color_purple='\033[0;35m'
+color_cyan='\e[0;36m'
 
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
@@ -39,11 +40,13 @@ if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
   litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
+
   if [ ${litecoinActive} -eq 1 ]; then
     network="litecoin"
   else
     network=`sudo cat /home/admin/.network 2>/dev/null`
   fi
+
   if [ ${#network} -eq 0 ]; then
     network="bitcoin"
   fi
@@ -84,8 +87,17 @@ else
   color_ram=${color_green}
 fi
 
-# get name of active interface (eth0 or wlan0)
+public_vpn_state="False"
+# get name of active interface with route to internet
 network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $5}')
+if [ "${network_active_if}" != "tun0" ]; then
+  # fallback check if google is unreachable, maybe ip route is the best check
+  network_active_if=$(ip addr | grep -v 'lo:\|tun0' | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
+else
+  # tun0 should be a tunneled VPN setup
+  public_vpn_state="True"
+fi
+echo "INFO: active interface found: ${network_active_if}"
 
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
@@ -159,6 +171,7 @@ if [ "${public_port}" = "null" ]; then
     public_port="8333"
   fi
 fi
+echo "INFO: public port: ${public_port}"
 
 # check if RTL web interface is installed
 webinterfaceInfo=""
@@ -177,9 +190,10 @@ networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | c
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+# remember bad states later
+public_ip_match="True"
 
 if [ "${runBehindTor}" = "on" ]; then
-
   # TOR address
   onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
@@ -187,28 +201,32 @@ if [ "${runBehindTor}" = "on" ]; then
   public=""
   public_color="${color_green}"
   torInfo="+ Tor"
-
 else
-
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
   public_addr="${public_ip}:${public_port}"
-  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
-    public=""
-    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    public_color="${color_amber}"
+  # skip netcat public check for tunneled setups (i.e. OpenVPN Gateway)
+  if [ ${public_vpn_state} = "False" ]; then
+    public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
+    if [ $public_check = "0" ]; then
+      public=""
+      # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+      public_color="${color_amber}"
+    else
+      public=""
+      public_color="${color_red}"
+    fi
   else
-    public=""
-    public_color="${color_red}"
+    public_color="${color_cyan}"
+    echo "INFO: VPN Setup was found"
   fi
 
   # DynDNS
   if [ ${#dynDomain} -gt 0 ]; then
-
     #check if dyndns resolves to correct IP
     ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
+      public_ip_match="False"
       public_color="${color_red}"
     else
       public_color="${color_amber}"
@@ -231,8 +249,9 @@ else
 
 fi
 
+###################
 # LIGHTNING NETWORK
-
+###################
 ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external="\n"
@@ -245,60 +264,77 @@ fi
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
- alias_color="${color_red}"
- ln_alias="Wallet Locked"
+  alias_color="${color_red}"
+  ln_alias="Wallet Locked"
 else
- ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
- ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
- ln_tor=$(echo "${ln_external}" | grep -c ".onion")
- if [ ${ln_tor} -eq 1 ]; then
-   ln_publicColor="${color_green}"
- else
-   public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
-    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    ln_publicColor="${color_amber}"
+  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
+  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+  if [ ${ln_tor} -eq 1 ]; then
+    ln_publicColor="${color_green}"
   else
-    ln_publicColor="${color_red}"
-  fi
- fi
- alias_color="${color_grey}"
- ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
- ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
- if [ ${ln_sync} -eq 0 ]; then
-    if [ ${#ln_getInfo} -eq 0 ]; then
-      ln_baseInfo="${color_red} Not Started | Not Ready Yet"
-    else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "Filtering block" | tail -n1 | awk '{print $7}')
-      if [ ${#item} -eq 0 ]; then
-          item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+    # OpenVPN Tunnel without permissions for netcat
+    if [ ${public_vpn_state} = "True" ]; then
+      echo "INFO: check VPN setup for lightning network..." 
+      # only colorize if no critical error occured
+      if [ ${public_ip_match} = "True" ]; then
+        public=""
+        public_color="${color_cyan}"
+        ln_publicColor="${color_cyan}"
+        echo "INFO: ... succeeded"
+      else
+        echo "DEBUG: public ip does not match"
+        ln_publicColor="${color_red}"
       fi
-      total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
-      ln_baseInfo="${color_red} waiting for chain sync"
-      if [ ${#item} -gt 0 ]; then
-        ln_channelInfo="scanning ${item}/${total}"
+    else
+      public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
+      if [ $public_check = "0" ]; then
+        # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+        ln_publicColor="${color_amber}"
+      else
+        ln_publicColor="${color_red}"
       fi
     fi
-  else
-    ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-    ln_walletbalance_wait="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
-    if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
-    if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
-    ln_channelbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
-    ln_channelbalance_pending="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
-    if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
-    if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
-    ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-    ln_channels_total="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-    ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
-    ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
-    ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
-    ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
-    ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
-    ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
-    ln_feeReport="Fee Report: ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat (D-W-M)"
   fi
+fi
+alias_color="${color_grey}"
+ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
+ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
+if [ ${ln_sync} -eq 0 ]; then
+  if [ ${#ln_getInfo} -eq 0 ]; then
+     ln_baseInfo="${color_red} Not Started | Not Ready Yet"
+  else
+    # parse lnd log
+    item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "Filtering block" | tail -n1 | awk '{print $7}')
+    if [ ${#item} -eq 0 ]; then
+      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
+    fi
+    # display blockchain sync state
+    total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
+    ln_baseInfo="${color_red} waiting for chain sync"
+    if [ ${#item} -gt 0 ]; then
+      ln_channelInfo="scanning ${item}/${total}"
+    fi
+  fi
+else
+  ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+  ln_walletbalance_wait="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
+  if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
+  if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
+  ln_channelbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+  ln_channelbalance_pending="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
+  if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
+  if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
+  ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+  ln_channels_total="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+  ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
+  ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
+  ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
+  ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
+  ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
+  ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
+  ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
+  ln_feeReport="Fee Report: ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat (D-W-M)"
 fi
 
 sleep 5
@@ -422,3 +458,4 @@ EOF
 
 fi
 # EOF
+
