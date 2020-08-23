@@ -55,7 +55,7 @@ Do you want to download LND Data Backup now?
     sleep 2
     /home/admin/config.scripts/lnd.rescue.sh backup
     echo
-    echo "PRESS ENTER to continue once your done downloading."
+    echo "PRESS ENTER to continue once you're done downloading."
     read key
   else
     clear
