@@ -47,13 +47,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/loop/.lnd  # not a symlink.. delete it silently
     # create symlink
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/loop/.lnd"
-  
+
+    # sync all macaroons and unix groups for access
+    /home/admin/config.scripts/lnd.credentials.sh sync
+    # macaroons will be checked after install
+
     # add user to group with admin access to lnd
     sudo /usr/sbin/usermod --append --groups lndadmin loop
     # add user to group with readonly access on lnd
     sudo /usr/sbin/usermod --append --groups lndreadonly loop
     # add user to group with invoice access on lnd
     sudo /usr/sbin/usermod --append --groups lndinvoice loop
+    # add user to groups with all macaroons
+    sudo /usr/sbin/usermod --append --groups lndinvoices loop
+    sudo /usr/sbin/usermod --append --groups lndchainnotifier loop
+    sudo /usr/sbin/usermod --append --groups lndsigner loop
+    sudo /usr/sbin/usermod --append --groups lndwalletkit loop
+    sudo /usr/sbin/usermod --append --groups lndrouter loop
 
     # install from source
     cd /home/loop
