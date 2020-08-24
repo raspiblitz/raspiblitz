@@ -253,7 +253,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
+      appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "continue" \
