@@ -70,7 +70,7 @@ echo "Sweep all possible Funds"
 echo "******************************"
 
 # execute command
-command="lncli --chain=${network} --network=${chain}net sendcoins --sweepall --addr=${address} --conf_target=6"
+command="lncli --chain=${network} --network=${chain}net sendcoins --sweepall --addr=${address} --conf_target=36"
 echo "$command"
 result=$($command 2>$_error)
 error=`cat ${_error}`

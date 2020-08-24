@@ -231,7 +231,7 @@ if [ ${quickCheckOK} -eq 0 ]; then
 
   echo "Wait 5 secs ..."
   sleep 5
-  dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data data?" 8 60
+  dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data?" 8 60
   response=$?
   echo "response(${response})"
   case $response in

@@ -15,6 +15,12 @@ echo "deleting local DNS confs ..."
 sudo rm /etc/resolv.conf
 echo "OK"
 
+# https://github.com/rootzoll/raspiblitz/issues/1371
+echo ""
+echo "deleting local WIFI conf ..."
+sudo rm /boot/wpa_supplicant.conf 2>/dev/null
+echo "OK"
+
 echo " "
 echo "Will shutdown now."
 echo "Wait until Raspberry LEDs show no activity anymore."

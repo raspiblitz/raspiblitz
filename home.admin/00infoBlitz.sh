@@ -148,7 +148,8 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+source <(sudo /home/admin/config.scripts/internet.sh status)
+local_ip="${localip}"
 public_ip="${publicIP}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
@@ -268,15 +269,7 @@ else
     if [ ${#ln_getInfo} -eq 0 ]; then
       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
     else
-      item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "Filtering block" | tail -n1 | awk '{print $7}')
-      if [ ${#item} -eq 0 ]; then
-          item=$(sudo -u bitcoin tail -n 100 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep "(height" | tail -n1 | awk '{print $10} {print $11} {print $12}' | tr -dc '0-9')
-      fi
-      total=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>/dev/null | jq -r '.blocks')
-      ln_baseInfo="${color_red} waiting for chain sync"
-      if [ ${#item} -gt 0 ]; then
-        ln_channelInfo="scanning ${item}/${total}"
-      fi
+      ln_baseInfo="${color_amber} Waiting for Chain Sync"
     fi
   else
     ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
@@ -410,7 +403,7 @@ if [ "${EUID}" = "$(id -u pi)" ]; then
 EOF
 
   # use Jinja2 and apply json data to template to produce static html file
-  templateExists=$(sudo ls /var/cache/raspiblitz/info.html 2>/dev/null | grep -c 'info.html')
+  templateExists=$(sudo ls /var/cache/raspiblitz/info.json 2>/dev/null | grep -c 'info.json')
   if [ ${templateExists} -gt 0 ]; then
     res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
     if ! [ $? -eq 0 ]; then

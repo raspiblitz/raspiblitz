@@ -443,6 +443,11 @@ echo "*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 sudo /usr/sbin/groupadd --force --gid 9700 lndadmin
 sudo /usr/sbin/groupadd --force --gid 9701 lndinvoice
 sudo /usr/sbin/groupadd --force --gid 9702 lndreadonly
+sudo /usr/sbin/groupadd --force --gid 9703 lndinvoices
+sudo /usr/sbin/groupadd --force --gid 9704 lndchainnotifier
+sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
+sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
+sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 
 echo ""
 echo "*** SWAP FILE ***"

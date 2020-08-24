@@ -118,7 +118,7 @@ SHA1 ${sslFingerprintTOR}
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
-To enable easy reachablity with normal brower from the outside
+To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
@@ -367,19 +367,24 @@ WantedBy=multi-user.target
     sudo systemctl daemon-reload
     # start to create settings.config
     sudo systemctl enable nbxplorer
-    #sudo systemctl start nbxplorer
 
-    #echo "Checking for nbxplorer config"
-    #while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
-    #  do
-    #    echo "Waiting for nbxplorer to start - CTRL+C to abort"
-    #    sleep 10
-    #    hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
-    #    if [ ${hasFailed} -eq 1 ]; then
-    #      echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
-    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-    #    fi
-    #done
+    if [ "${state}" == "ready" ]; then
+      echo "Starting nbxplorer"
+      sudo systemctl start nbxplorer
+      echo "Checking for nbxplorer config"
+      while [ ! -f "/home/btcpay/.nbxplorer/Main/settings.config" ]
+       do
+         echo "Waiting for nbxplorer to start - CTRL+C to abort"
+         sleep 10
+         hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
+         if [ ${hasFailed} -eq 1 ]; then
+           echo "seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
+           echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+         fi
+      done
+    else
+      echo "Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
+    fi
 
     echo ""
     echo "***"
@@ -397,14 +402,10 @@ EOF
 
     sudo mv /home/admin/settings.config /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
-    #sudo systemctl restart nbxplorer
 
     if [ "${state}" == "ready" ]; then
-      echo "Starting nbxplorer"
-      sudo systemctl start nbxplorer
-    else
-      echo "Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
-    fi
+      sudo systemctl restart nbxplorer
+    fi  
 
     # BTCPayServer
     echo ""
@@ -449,21 +450,21 @@ WantedBy=multi-user.target
    if [ "${state}" == "ready" ]; then
       echo "Starting btcpayserver"
       sudo systemctl start btcpayserver
+      echo "Checking for btcpayserver config"
+      while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
+       do
+          echo "Waiting for btcpayserver to start - CTRL+C to abort"
+          sleep 10
+          hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
+          if [ ${hasFailed} -eq 1 ]; then
+            echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+            echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+          fi
+      done
     else
       echo "Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
     fi
     
-    #echo "Checking for btcpayserver config"
-    #while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
-    #  do
-    #    echo "Waiting for btcpayserver to start - CTRL+C to abort"
-    #    sleep 10
-    #    hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
-    #    if [ ${hasFailed} -eq 1 ]; then
-    #      echo "seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
-    #      echo "maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-    #    fi
-    #done
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
 
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
@@ -488,6 +489,21 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
+  # check for second parameter: should data be deleted?
+  deleteData=0
+  if [ "$2" = "--delete-data" ]; then
+    deleteData=1
+  elif [ "$2" = "--keep-data" ]; then
+    deleteData=0
+  else
+    if (whiptail --title " DELETE DATA? " --yesno "Do you want want to delete\nthe BTCPay Server Data?" 8 30); then
+      deleteData=1
+   else
+      deleteData=0
+    fi
+  fi
+  echo "# deleteData(${deleteData})"
+
   # setting value in raspi blitz config
   sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
 
@@ -498,7 +514,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
+    echo "# *** REMOVING BTCPAYSERVER, NBXPLORER and .NET ***"
     # removing services
     # btcpay
     sudo systemctl stop btcpayserver
@@ -530,9 +546,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl reload nginx
     # nuke user
     sudo userdel -rf btcpay 2>/dev/null
-    echo "OK BTCPayServer removed."
+    if [ ${deleteData} -eq 1 ]; then
+      echo "# deleting data"
+      sudo rm -R /mnt/hdd/app-data/.btcpayserver/
+    else
+      echo "# keeping data"
+    fi
+    echo "# OK BTCPayServer removed."
   else
-    echo "BTCPayServer is not installed."
+    echo "# BTCPayServer is not installed."
   fi
   exit 0
 fi

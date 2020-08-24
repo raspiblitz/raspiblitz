@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Starting the main menu ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -10,6 +11,31 @@ infoFile="/home/admin/raspiblitz.info"
 # MAIN MENU AFTER SETUP
 source ${infoFile}
 source ${configFile}
+
+# FUNCTIONS
+
+confirmation()
+{
+  local text=$1
+  local yesButtonText=$2
+  local noButtonText=$3
+  local defaultno=$4
+  local height=$5
+  local width=$6
+  local answer=-100
+
+  if [ $defaultno ]; then
+     whiptail --title " Confirmation " --defaultno --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  else
+    whiptail --title " Confirmation " --yes-button "$yesButtonText" --no-button "$noButtonText" --yesno " $text
+
+  " $height $width
+  fi
+  answer=$?
+  return $answer
+}
 
 # get the local network IP to be displayed on the lCD
 localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -279,16 +305,26 @@ case $CHOICE in
             /home/admin/99updateMenu.sh
             ;;
         REBOOT)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh reboot
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
+	    confirmationReboot=$?
+	    if [ $confirmationReboot -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh reboot
+               exit 0
+	    fi
             ;;
         OFF)
-            clear
-            echo ""
-            sudo /home/admin/XXshutdown.sh
-            exit 0
+	    clear
+	    confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
+	    confirmationShutdown=$?
+	    if [ $confirmationShutdown -eq 0 ]; then
+               clear
+               echo ""
+               sudo /home/admin/XXshutdown.sh
+               exit 0
+	    fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh

@@ -102,6 +102,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^golang=.*/golang=off/g" /mnt/hdd/raspiblitz.conf
   echo "*** REMOVING GO ***"
   sudo rm -rf /usr/local/go
+  sudo rm -rf /usr/local/gocode
   echo "OK Go removed."
   exit 0
 fi

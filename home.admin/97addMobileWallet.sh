@@ -121,19 +121,17 @@ checkIP2TOR()
 # Options
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
-        SHANGO_IOS "Shango Wallet (iOS)" \
-        SHANGO_ANDROID "Shango Wallet (Android)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)"
 	)
+
+# add SEND MANY APP
+OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
 
 # Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
 fi
-
-# add SEND MANY APP
-OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -255,7 +253,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
   	  exit 1;
   	;;
   ZEUS_ANDROID)
-      appstoreLink="https://play.google.com/store/apps/details?id=com.zeusln.zeus"
+      appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
       /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "continue" \

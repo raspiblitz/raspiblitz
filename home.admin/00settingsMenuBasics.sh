@@ -342,7 +342,7 @@ if [ "${DropboxBackup}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     # doing initial upload so that user can see result
     source /mnt/hdd/raspiblitz.conf
-    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /home/admin/.lnd/data/chain/${network}/${chain}net/channel.backup
+    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else
   echo "Dropbox backup setting unchanged."

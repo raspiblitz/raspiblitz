@@ -40,6 +40,14 @@ if ! grep -Eq "^notifyMailHostname=.*" /mnt/hdd/raspiblitz.conf; then
     echo "notifyMailHostname=$(hostname)" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
 fi
 
+if ! grep -Eq "^notifyMailFromAddress=.*" /mnt/hdd/raspiblitz.conf; then
+    echo "notifyMailFromAddress=rb@example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+fi
+
+if ! grep -Eq "^notifyMailFromName=.*" /mnt/hdd/raspiblitz.conf; then
+    echo "notifyMailFromName=\"RB User\"" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+fi
+
 if ! grep -Eq "^notifyMailUser=.*" /mnt/hdd/raspiblitz.conf; then
     echo "notifyMailUser=username" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
 fi
@@ -72,11 +80,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the NOTIFY ON"
 
   # install sstmp if not already present
-  /usr/bin/which ssmtp &>/dev/null
-  [ $? -eq 0 ] || sudo apt-get install -y ssmtp
+  if ! command -v ssmtp >/dev/null; then
+    sudo apt-get install -y ssmtp
+  fi
 
   # install python lib for smime into virtual env
-  /home/admin/python3-env-lnd/bin/python -m pip install smime
+  sudo -H /usr/bin/python3 -m pip install smime
 
   # write ssmtp config
   cat << EOF | sudo tee /etc/ssmtp/ssmtp.conf >/dev/null
@@ -127,24 +136,22 @@ if [ "$1" = "send" ]; then
     exit 1
   fi
 
-  /usr/bin/which ssmtp &>/dev/null
-  if ! [ $? -eq 0 ]; then
+  if ! command -v ssmtp >/dev/null; then
     echo "please run \"on\" first"
     exit 1
   fi
 
-
   # now parse settings from config and use to send the message
   if [ "${notifyMethod}" = "ext" ]; then
-    /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
+    /usr/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
   elif [ "${notifyMethod}" = "mail" ]; then
     if [ "${notifyMailEncrypt}" = "on" ]; then
-      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" --cert ${notifyMailToCert} --encrypt ${notifyMailTo} "$2"
+      /usr/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" --cert "${notifyMailToCert}" --encrypt ${notifyMailTo} "$2"
     else
-      /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" ${notifyMailTo} "$2"
+      /usr/bin/python3 /home/admin/XXsendNotification.py mail "${@:3}" --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" "${notifyMailTo}" "$2"
     fi
   elif [ "${notifyMethod}" = "slack" ]; then
-    /home/admin/python3-env-lnd/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
+    /usr/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
   else
     echo "unknown notification method - check /mnt/hdd/raspiblitz.conf"
   fi

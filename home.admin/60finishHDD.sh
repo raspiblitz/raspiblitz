@@ -69,12 +69,12 @@ bitcoinRunning=0
 loopcount=0
 while [ ${bitcoinRunning} -eq 0 ]
 do
-  >&2 echo "# (${loopcount}/100) checking if ${network}d is running ... "
+  >&2 echo "# (${loopcount}/200) checking if ${network}d is running ... "
   bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
   sleep 2
   sync
   loopcount=$(($loopcount +1))
-  if [ ${loopcount} -gt 100 ]; then
+  if [ ${loopcount} -gt 200 ]; then
     /home/admin/XXdebugLogs.sh
     echo "***********************************"
     echo "FAIL: ${network} failed to start :("

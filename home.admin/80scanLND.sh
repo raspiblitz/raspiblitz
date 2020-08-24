@@ -6,6 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # all system/service info gets detected by blitz.statusscan.sh
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+source <(sudo /home/admin/config.scripts/internet.sh status)
 
 # when admin and no other error found run LND setup check 
 if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
@@ -13,7 +14,7 @@ if [ "$USER" == "admin" ] && [ ${#lndErrorFull} -eq 0 ]; then
 fi
 
 # set follow up info different for LCD and ADMIN
-adminStr="ssh admin@${localIP} ->Password A"
+adminStr="ssh admin@${localip} ->Password A"
 if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
@@ -49,8 +50,12 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
 
   if [ "$USER" != "admin" ]; then
 
-    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
-      infoStr=" The ${network}d service is NOT RUNNING!\n\n Login for more details & options:"
+    if [ ${uptime} -gt 600 ]; then
+      if [ ${uptime} -gt 800 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+        infoStr=" The ${network}d service is NOT RUNNING!\n ${bitcoinErrorShort}\n Login for more details & options:"
+      else
+        infoStr=" The ${network}d service is running:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
+      fi
     else
       infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
     fi
@@ -79,31 +84,16 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
         echo
       fi
 
-      # check if maybe problems with txindex
+      echo "POSSIBLE OPTIONS:"
       source <(/home/admin/config.scripts/network.txindex.sh status)
       if [ "${txindex}" == "1" ]; then
-        if [ "${indexFinished}" == "0" ]; then
-          # bitcoind is not starting while still building index - recommend turning off index and restart
-	        whiptail --title "Problems with Bitcoin Index" --yes-button "TurnOff TxIndex" --no-button "Do Nothing" --yesno "It looks like ${network}d has problems building the txindex. Turning Off the txindex and restart is recommended." 10 60
-	        if [ $? -eq 0 ]; then
-            # delete txindex, turn off and deactivate apps needed index
-	          sudo /home/admin/config.scripts/network.txindex.sh delete
-            whiptail --msgbox "OK txindex was turned off.\n\nTo be able to build a valid txindex in the future you might need to reset/redownload the blockchain." 10 56 "" --title " TXINDEX OFF "
-            /home/admin/XXshutdown.sh reboot
-	        fi
-        else
-          # bitcoind is not starting but index was build in the past - recommend repair with turning off index
-          echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
-        fi
+        echo "-> Use command 'repair' and then choose 'DELETE-INDEX' to try rebuilding transaction index."
       fi
-
       echo "-> Use command 'repair' and then choose 'RESET-CHAIN' to try downloading new blockchain."
       echo "-> Use command 'debug' for more log output you can use for getting support."
       echo "-> Use command 'menu' to open main menu."
       echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
-      echo "Use CTRL+c to EXIT to Terminal"
-      sleep 10
       exit 1
 
     else
@@ -188,7 +178,7 @@ elif [ ${walletLocked} -gt 0 ]; then
     infoStr=" LND WALLET IS LOCKED !!!\n"
     if [ "${rtlWebinterface}" = "on" ]; then
        height=6
-       infoStr="${infoStr} Browser: http://${localIP}:3000\n PasswordB=login / PasswordC=unlock"
+       infoStr="${infoStr} Browser: http://${localip}:3000\n PasswordB=login / PasswordC=unlock"
     else
        infoStr="${infoStr} Please use SSH to unlock:"
     fi

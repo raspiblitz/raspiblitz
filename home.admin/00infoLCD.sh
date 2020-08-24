@@ -83,14 +83,24 @@ while :
     ###########################   
 
     # get the local network IP to be displayed on the lCD
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    source <(sudo /home/admin/config.scripts/internet.sh status)
 
     # waiting for IP in general
     if [ ${#localip} -eq 0 ]; then
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
-      l3="Is LAN cable connected?\n"
+      l3="LAN cable connected? WIFI lost?\n"
       dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
+      sleep 3
+      continue
+    fi
+
+    # waiting for Internet connection
+    if [ ${online} -eq 0 ]; then
+      l1="Waiting for Internet ...\n"
+      l2="Local Network seems OK but no Internet.\n"
+      l3="Is router still online?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 5 45
       sleep 3
       continue
     fi

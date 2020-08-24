@@ -104,17 +104,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    else
+        echo "OK - RTL install looks good"
+        echo ""
+    fi
 
     cd ..
-    # check if node_modules exist now
-    if [ -d "/home/rtl/RTL/node_modules" ]; then
-     echo "OK - RTL install looks good"
-    else
-      echo "FAIL - npm install did not run correctly"
-      echo "ABORT - RTL install"
-      exit 1
-    fi
-    echo ""
 
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"

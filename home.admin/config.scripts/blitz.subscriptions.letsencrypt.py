@@ -47,7 +47,7 @@ cfg.reload()
 
 # todo: make sure that also ACME script uses TOR if activated
 session = requests.session()
-if cfg.run_behind_tor:
+if cfg.run_behind_tor.value:
     session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
 
 
@@ -81,11 +81,6 @@ def handleException(e):
         print("error='{0}'".format(str(e)))
     sys.exit(1)
 
-
-def get_subdomain(fulldomain_str):
-    return fulldomain_str.split('.')[0]
-
-
 ############################
 # API Calls to DNS Services
 ############################
@@ -94,11 +89,13 @@ def duckdns_update(domain, token, ip):
     print("# duckDNS update IP API call for {0}".format(domain))
 
     # make HTTP request
-    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(get_subdomain(domain), token, ip)
+    url = "https://www.duckdns.org/update?domains={0}&token={1}&ip={2}".format(domain.split('.')[0], token, ip)
+    print("# calling URL: {0}".format(url))
     try:
         response = session.get(url)
         if response.status_code != 200:
             raise BlitzError("failed HTTP code", str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         raise BlitzError("failed HTTP request", url, e)
 
@@ -126,14 +123,15 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     if ip == "dyndns":
         update_url = ""
         if dnsservice == "duckdns":
-            update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(get_subdomain(domain), token, ip)
-        subprocess.run(['/home/admin/config.scriprs/internet.dyndomain.sh', 'on', domain, update_url],
+            update_url = "https://www.duckdns.org/update?domains={0}&token={1}".format(domain, token, ip)
+        subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        duckdns_update(get_subdomain(id), token, real_ip)
+        print("# dnsservice=dnsservice --> update {0}".format(domain))
+        duckdns_update(domain, token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -304,7 +302,7 @@ If you havent already go to https://duckdns.org
             title="DuckDNS Domain")
         subdomain = text.strip()
         subdomain = subdomain.split(' ')[0]
-        subdomain = get_subdomain(subdomain)
+        subdomain = subdomain.split('.')[0]
         domain = "{0}.duckdns.org".format(subdomain)
         os.system("clear")
 
@@ -416,7 +414,7 @@ Create one first and try again.
             height=10, width=40, init="",
             title="Static IP")
         ip = text.strip()
-        ip = token.split(' ')[0]
+        ip = ip.split(' ')[0]
 
         # check for valid input
         try:

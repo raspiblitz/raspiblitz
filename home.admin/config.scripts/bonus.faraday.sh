@@ -16,6 +16,7 @@ PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
 mode="$1" 
 
 # GATHER DATA
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # setting download directory
@@ -70,6 +71,12 @@ fi
 
 # INSTALL
 if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
+
+  if [ $(sudo ls /home/faraday/.bashrc 2>/dev/null | grep -c ".bashrc") -gt 0 ]; then
+    echo "# FAIL - already installed"
+    sleep 3
+    exit 1
+  fi
 
   echo "# INSTALL bonus.faraday.sh"
 
@@ -162,6 +169,11 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
  
   # install service
   echo "*** Install systemd ***"
+  sudo mkdir -p /mnt/hdd/temp/ 2>/dev/null
+  sudo chmod 777 /mnt/hdd/temp/
+  sudo chown bitcoin:bitcoin /mnt/hdd/temp/
+  sudo touch /mnt/hdd/temp/faraday.service
+  sudo chmod 777 /mnt/hdd/temp/faraday.service
   cat > /mnt/hdd/temp/faraday.service <<EOF
 [Unit]
 Description=faraday
@@ -185,7 +197,9 @@ EOF
   sudo mv /mnt/hdd/temp/faraday.service /etc/systemd/system/faraday.service
   sudo chown root:root /etc/systemd/system/faraday.service
   sudo systemctl enable faraday
-  sudo systemctl start faraday
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start faraday
+  fi
 
   echo "# flag in raspiblitz config"
   if [ ${#faraday} -eq 0 ]; then

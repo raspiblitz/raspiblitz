@@ -27,6 +27,60 @@ logFile="/home/admin/raspiblitz.log"
 # used by display and later setup steps
 infoFile="/home/admin/raspiblitz.info"
 
+
+# FUNCTIONS to be used later on in the script
+
+# wait until raspberry pi gets a local IP
+function wait_for_local_network() {
+  gotLocalIP=0
+  until [ ${gotLocalIP} -eq 1 ]
+  do
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    if [ ${#localip} -eq 0 ]; then
+      configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+      if [ ${configWifiExists} -eq 0 ]; then
+        # display user to connect LAN
+        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+        sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
+      else
+        # display user that wifi settings are not working
+        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+        sed -i "s/^message=.*/message='WIFI Settings not working'/g" ${infoFile}
+      fi
+    elif [ "${localip:0:4}" = "169." ]; then
+      # display user waiting for DHCP
+      sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
+      sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
+    else
+      gotLocalIP=1
+    fi
+    sleep 1
+  done
+}
+
+# wait until raspberry pi gets a local IP
+function wait_for_internet() {
+  online=0
+  until [ ${online} -eq 1 ]
+  do
+    # check for internet connection
+    online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+    if [ ${online} -eq 0 ]; then
+      # re-test with other server
+      online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+    fi
+    if [ ${online} -eq 0 ]; then
+      # re-test with other server
+      online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+    fi
+    if [ ${online} -eq 0 ]; then
+      sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
+      sed -i "s/^message=.*/message='Network OK but NO Internet'/g" ${infoFile}
+    fi
+    sleep 1
+  done
+}
+
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 echo "***********************************************" >> $logFile
@@ -232,29 +286,6 @@ if [ ${sshReset} -eq 1 ]; then
 fi
 
 ################################
-# WAIT FOR LOCAL NETWORK
-################################
-
-# wait until raspberry pi gets a local IP
-gotLocalIP=0
-until [ ${gotLocalIP} -eq 1 ]
-do
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  if [ ${#localip} -eq 0 ]; then
-    # display user to connect LAN
-    sed -i "s/^state=.*/state=noIP/g" ${infoFile}
-    sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
-  elif [ "${localip:0:4}" = "169." ]; then
-    # display user waiting for DHCP
-    sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
-    sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
-  else
-    gotLocalIP=1
-  fi
-  sleep 1
-done
-
-################################
 # HDD CHECK & PRE-INIT
 ################################
  
@@ -310,6 +341,23 @@ if [ ${isMounted} -eq 0 ]; then
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
+
+  # check if there is a WIFI configuration to restore
+  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+  configWifiHDD=$(sudo cat /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+  if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
+    echo "Restoring WIFI setting & rebooting .." >> $logFile
+    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
+    sudo chmod 755 /boot/wpa_supplicant.conf
+    sudo reboot now
+    exit 0
+  fi
+
+  # make sure at this point local network is connected
+  wait_for_local_network
+
+  # make sure before update/recovery that a internet connection is working
+  wait_for_local_internet
 
   # check if HDD contains already a configuration
   configExists=$(ls ${configFile} | grep -c '.conf')
@@ -373,6 +421,16 @@ if [ ${isMounted} -eq 0 ]; then
   exit 0
 
 fi # END - no automount - after this HDD is mounted
+
+# make sure at this point local network is connected
+wait_for_local_network
+
+# if a WIFI config exists backup to HDD
+configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+if [ ${configWifiExists} -eq 1 ]; then
+  echo "Making Backup Copy of WIFI config to HDD" >> $logFile
+  sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
+fi
 
 # config should exist now
 configExists=$(ls ${configFile} | grep -c '.conf')

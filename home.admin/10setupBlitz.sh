@@ -250,12 +250,14 @@ if [ ${setupStep} -eq 20 ]; then
   exit 1
 fi
 
-# the HDD is already ext4 formated and called blockchain
+# the HDD is already ext4 formated and cointains blockchain data
 if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
-  echo "HDD was already initialized/prepared"
-  echo "Now needs to be mounted"
-  /home/admin/40addHDD.sh
-  exit 1
+  if [ ${hddGotBlockchain} -eq 1 ]; then
+    echo "HDD was already initialized/prepared"
+    echo "Now needs to be mounted"
+    /home/admin/40addHDD.sh
+    exit 1
+  fi
 fi
 
 # the HDD had no init yet

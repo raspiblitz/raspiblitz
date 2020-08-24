@@ -48,7 +48,7 @@ Password C will be stored on the device.
   sleep 4
   error=""
   source <(sudo /home/admin/config.scripts/lnd.unlock.sh "$passwordC")
-  if [ ${error} -gt 0 ];then
+  if [ "${error}" != "" ];then
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on

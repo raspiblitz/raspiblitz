@@ -76,7 +76,7 @@ if [ "$1" = "export" ]; then
   fi
 
   # clean old backups from temp
-  rm /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
+  rm -f /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
 
   # get date stamp
   datestamp=$(date "+%y-%m-%d-%H-%M")
@@ -151,6 +151,8 @@ if [ "$1" = "export-gui" ]; then
   echo "To complete the data migration follow then instructions on the github FAQ."
   echo
   read key
+  echo "Shutting down ...."
+  sleep 4
   /home/admin/XXshutdown.sh
   exit 0
 fi
@@ -257,7 +259,7 @@ if [ "$1" = "import-gui" ]; then
   # make sure HDD/SSD is not mounted
   # because importing migration just works during early setup
   if [ ${isMounted} -eq 1 ]; then
-    echo "FAIL --> cannot import migration data when HDD(SDD is mounted"
+    echo "FAIL --> cannot import migration data when HDD/SSD is mounted"
     exit 1
   fi
 
@@ -273,11 +275,19 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
+
+
   # ask format for new HDD/SSD
-  OPTIONS=(EXT4 "Ext4 & 1 Partition (default)" \
-           BTRFS "BTRFS & 3 Partitions (experimental)"
-	)
-  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  OPTIONS=()
+  # check if HDD/SSD contains Bitcoin Blockchain
+  if [ "${hddBlocksBitcoin}" == "1" ]; then 
+    OPTIONS+=(KEEP "Dont format & use Blockchain")
+  fi
+  OPTIONS+=(EXT4 "Ext4 & 1 Partition (default)")
+  OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
+
+  useBlockchain=0
+  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
     EXT4)
@@ -295,6 +305,10 @@ if [ "$1" = "import-gui" ]; then
         echo "FAIL --> ${error}"
         exit 1
       fi
+      ;;
+    KEEP)
+      echo "Keep HDD & Blockchain"
+      useBlockchain=1
       ;;
     *)
       echo "CANCEL"
@@ -368,7 +382,7 @@ if [ "$1" = "import-gui" ]; then
   echo "OK: Migration data was imported"
 
   # Copy from other computer is only option for Bitcoin
-  if [ "${network}" == "bitcoin" ]; then
+  if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then
     OPTIONS=(SYNC "Re-Sync & Validate Blockchain" \
              COPY "Copy over LAN from other Computer"
 	  )
