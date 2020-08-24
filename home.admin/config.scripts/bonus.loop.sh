@@ -74,9 +74,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u loop git reset --hard v0.8.0-beta
     cd /home/loop/loop/cmd
     go install ./...
-    
-    # make systemd service
 
+    # make systemd service
     if [ "${runBehindTor}" = "on" ]; then
       echo "Will connect to Loop server through Tor"
       proxy="--server.proxy=127.0.0.1:9050"
