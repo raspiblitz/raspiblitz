@@ -214,7 +214,7 @@ do
     if [ ${scbExists} -eq 1 ]; then
       # timestamp backup filename
       timestampedFileName=channel-$(date "+%Y%m%d-%H%M%S").backup
-      localBackupDir=/home/admin/backups/scb/
+      localBackupDir=/home/admin/backups/scb
       localBackupPath=${localBackupDir}/channel.backup
       localTimestampedPath=${localBackupDir}/${timestampedFileName}
 

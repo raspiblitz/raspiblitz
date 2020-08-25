@@ -66,6 +66,8 @@ if [ "${loop}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
+      # check macaroons and fix missing
+      /home/admin/config.scripts/lnd.credential.sh check
       sudo systemctl start loopd
       /home/admin/config.scripts/bonus.loop.sh menu
     else

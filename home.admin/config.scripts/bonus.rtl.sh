@@ -88,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.8.1
+    sudo -u rtl git reset --hard v0.8.4
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -104,17 +104,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Run: npm install ***"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    else
+        echo "OK - RTL install looks good"
+        echo ""
+    fi
 
     cd ..
-    # check if node_modules exist now
-    if [ -d "/home/rtl/RTL/node_modules" ]; then
-     echo "OK - RTL install looks good"
-    else
-      echo "FAIL - npm install did not run correctly"
-      echo "ABORT - RTL install"
-      exit 1
-    fi
-    echo ""
 
     # prepare RTL-Config.json file
     echo "*** RTL.conf ***"

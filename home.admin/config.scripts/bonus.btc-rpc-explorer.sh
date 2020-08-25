@@ -23,7 +23,7 @@ if [ "$1" = "menu" ]; then
   # check if index is ready
   if [ "${isIndexed}" == "0" ]; then
     dialog --title " Blockchain Index Not Ready " --msgbox "
-The Blockchain Index is still getting build.
+The Blockchain Index is still getting built.
 ${indexInfo}
 This can take multiple hours.
       " 9 48
@@ -119,6 +119,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd btc-rpc-explorer
     sudo -u btcrpcexplorer git reset --hard v2.0.0
     sudo -u btcrpcexplorer npm install
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
 
     # prepare .env file
     echo "# getting RPC credentials from the ${network}.conf"
