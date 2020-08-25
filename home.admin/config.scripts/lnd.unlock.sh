@@ -15,11 +15,11 @@ passwordC="$1"
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
 walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-if [ ${walletLocked} -eq 0 ]; then
+macaroonsMissing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
+if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
     echo "# OK LND wallet was already unlocked"
     exit 0
 fi
-
 
 # check if LND is below 0.10 (has no STDIN password option)
 fallback=0

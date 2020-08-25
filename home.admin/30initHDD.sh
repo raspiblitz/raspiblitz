@@ -34,7 +34,7 @@ fi
 # check if there is a HDD connectecd to use as data drive
 echo "hddCandidate=${hddCandidate}"
 if [ ${#hddCandidate} -eq 0 ]; then
-  echo "# FAIL please cnnect a HDD and call ./30initHDD.sh again"
+  echo "# FAIL please connect a HDD and call ./30initHDD.sh again"
   exit 1
 fi
 echo "OK"
@@ -72,11 +72,12 @@ echo "# hddGotBlockchain=${hddGotBlockchain}"
 raidSizeGB=$(echo "${raidCandidate[0]}" | cut -d " " -f 2) 
 echo "# raidCandidates=${raidCandidates}"
 echo "# raidSizeGB=${raidSizeGB}"
-if [ ${hddGotBlockchain}  -eq 0 ]; then
+if [ "${hddGotBlockchain}" == "" ] || [ ${hddGotBlockchain}  -eq 0 ]; then
+
+  format="ext4"
 
   # test feature: if there is a USB stick as a raid connected, then format in BTRFS an not in EXT4
-  format="ext4"
-  if [ ${raidCandidates} -eq 1 ]; then
+  if [ ${raidCandidates} -eq 1 ] && [ ${raidSizeGB} -gt 14 ]; then
 
     echo
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"

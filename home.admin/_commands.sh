@@ -100,7 +100,8 @@ function torthistx() {
 # command: status
 # start the status screen in the terminal
 function status() {
-  sudo -u pi /home/admin/00infoLCD.sh
+  echo "Gathering data - please wait a moment..."
+  sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
 # command: balance
@@ -123,4 +124,62 @@ function jmarket() {
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
   fi
+}
+
+# command: gettx
+# retrieve transaction from mempool or blockchain and print as JSON
+# $ gettx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
+function gettx() {
+    tx_id="${1:-f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16}"
+    if result=$(bitcoin-cli getrawtransaction "${tx_id}" 1 2>/dev/null); then
+        echo "${result}"
+    else
+        echo "{\"error\": \"unable to find TX\", \"tx_id\": \"${tx_id}\"}"
+        return 1
+    fi
+}
+
+# command: watchtx
+# try to retrieve transaction from mempool or blockchain until certain confirmation target
+# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs. 
+# $ watchtx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
+function watchtx() {
+    tx_id="${1}"
+    wait_n_confirmations="${2:-2}"
+    sleep_time="${3:-60}"
+
+    echo "Waiting for ${wait_n_confirmations} confirmations"
+
+    while true; do
+
+      if result=$(bitcoin-cli getrawtransaction "${tx_id}" 1 2>/dev/null); then
+        confirmations=$(echo "${result}" | jq .confirmations)
+
+        if [[ "${confirmations}" -ge "${wait_n_confirmations}" ]]; then
+          printf "confirmations: ${confirmations} - target reached!\n"
+          return 0
+        else
+          printf "confirmations: ${confirmations} - "
+        fi
+
+      else
+        printf "unable to find TX - "
+      fi
+
+      printf "sleeping for ${sleep_time} seconds...\n"
+      sleep ${sleep_time}
+
+    done
+}
+
+# command: notifyme
+# A wrapper for blitz.notify.sh that will send a notification using the configured 
+# method and settings. 
+# This makes sense when waiting for commands to finish and then sending a notification.
+# $ notifyme "Hello there..!"
+# $ ./run_job_which_takes_long.sh && notifyme "I'm done."
+# $ ./run_job_which_takes_long.sh && notifyme "success" || notifyme "fail"
+function notifyme() {
+    content="${1:-Notified}"
+    /home/admin/config.scripts/blitz.notify.sh send "${content}"
 }

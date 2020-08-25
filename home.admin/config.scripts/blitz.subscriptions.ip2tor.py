@@ -199,7 +199,7 @@ def apiPlaceOrderNew(session, shopurl, hostid, toraddressWithPort):
         'product': "tor_bridge",
         'host_id': hostid,
         'tos_accepted': True,
-        'comment': 'test',
+        'comment': 'RaspiBlitz',
         'target': toraddressWithPort,
         'public_key': ''
     }

@@ -13,6 +13,15 @@
     <link>https://raspiblitz.com/raspiblitz-torrents-rss.xml</link>
 
     <item>
+      <guid>https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6-2020-08-04.img.gz.torrent</guid>
+      <title>raspiblitz-v1.6-2020-08-04.img.gz.torrent</title>
+      <enclosure 
+        url="https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6-2020-08-04.img.gz.torrent" 
+        type="application/x-bittorrent" 
+      />
+    </item>
+
+    <item>
       <guid>https://github.com/rootzoll/raspiblitz/raw/v1.3/raspiblitz-v1.3-2019-09-05.torrent</guid>
       <title>raspiblitz-v1.3-2019-09-05.torrent</title>
       <enclosure 

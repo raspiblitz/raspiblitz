@@ -81,9 +81,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.8.12
+    sudo -u thunderhub git reset --hard v0.9.4
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
+
     sudo -u thunderhub npm run build
 
     ###############
@@ -293,6 +298,10 @@ if [ "$1" = "update" ]; then
     # install deps
     echo "Installing dependencies..."
     sudo -u thunderhub npm install --quiet
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
 
     # build nextjs
     echo "Building application..."
