@@ -81,7 +81,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # copy old JoinMarket data to app-data
     cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
-
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
     chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
@@ -93,22 +92,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install joinmarket
     cd /home/joinmarket
-    echo "# installing ARM specific dependencies to run the QT GUI on ARM"
     # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
+    echo "# installing ARM specific dependencies to run the QT GUI on ARM"
     sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev
-    # from https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/INSTALL.md 
-    # sudo apt install -y python3-dev python3-pip git build-essential automake pkg-config libtool libffi-dev libssl-dev libgmp-dev libsodium-dev
-
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
     git reset --hard v0.7.0
-
     # make install.sh set up jmvenv with -- system-site-packages
     sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
     virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#g" \
     install.sh
-
     ./install.sh --with-qt
     
     echo "# installing python requirements to run the QT GUI on ARM"    
