@@ -103,17 +103,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
     git reset --hard v0.7.0
-    ./install.sh --with-qt
 
-    #echo "# setting up the virtual environment jmvenv"
-    #sudo apt install -y virtualenv
+    # make install.sh set up jmvenv with -- system-site-packages
+    sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
+    virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#g" \
+    install.sh
+
+    ./install.sh --with-qt
     
     echo "# installing python requirements to run the QT GUI on ARM"    
-    # use the PySide2 armf package from the system
-    sudo -u joinmarket virtualenv --system-site-packages -p /usr/bin/python3.7 jmvenv
     source jmvenv/bin/activate || exit 1
-    #pip install -r requirements/base.txt
-    # https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/requirements/gui.txt
+    # use the PySide2 armf package from the system
     /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'
     pip install qrcode[pil]
     pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
