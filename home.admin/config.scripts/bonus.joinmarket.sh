@@ -98,12 +98,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    git reset --hard v0.7.0
+    sudo -u joinmarket git reset --hard v0.7.0
     # make install.sh set up jmvenv with -- system-site-packages
     sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
     virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#g" \
     install.sh
-    ./install.sh --with-qt
+    sudo -u joinmarket ./install.sh --with-qt
     
     echo "# installing python requirements to run the QT GUI on ARM"    
     source jmvenv/bin/activate || exit 1
