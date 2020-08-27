@@ -6,7 +6,7 @@
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with a HDD/SSD and a nice display for easy setup & monitoring.**
+**The RaspiBlitz is a do-it-yourself Lightning Node based on LND running together with a Bitcoin-Fullnode on a RaspberryPi 3/4 - with an HDD/SSD and a nice display for easy setup & monitoring.**
 
 RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
@@ -45,18 +45,18 @@ You can connect the following Wallet-Apps to your RaspiBlitz:
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 
-Also much more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
+Also many more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## DeepDive Video (July 2020)
 
 <img src="pictures/raspiblitz-deepdive.png" alt="DeepDive Video" width="400">
 --watch--> https://www.youtube.com/watch?v=QXUGg45CWLo
 
-## Time Estimate to Setup a RaspiBlitz
+## Time Estimate to Set Up a RaspiBlitz
 
-The RaspiBlitz is optimized for being setup during a workshop at a hackday or conference (see [detailed workshop tutorial](WORKSHOP.md)). When it comes ready assembled together with an up-to-date synced blockchain it's possible to have it ready in about 2 to 3 hours - most is waiting time.
+The RaspiBlitz is optimized for being setup during a workshop at a hackday or conference (see [detailed workshop tutorial](WORKSHOP.md)). When it comes fully assembled with an up-to-date synced blockchain, it's possible to have it ready in about 2 to 3 hours - most of it is waiting time.
 
-If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of download and syncing time where you can do other stuff while checking on the progress from time to time.
+If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
 ## Hardware Needed
 
