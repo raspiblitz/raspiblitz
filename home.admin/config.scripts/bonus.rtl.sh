@@ -92,9 +92,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl git reset --hard v0.9.0
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
-
-if [ -d "/home/rtl/RTL" ]; then
-     echo "OK - RTL code copy looks good"
+    if [ -d "/home/rtl/RTL" ]; then
+      echo "OK - RTL code copy looks good"
     else
       echo "FAIL - code copy did not run correctly"
       echo "ABORT - RTL install"
