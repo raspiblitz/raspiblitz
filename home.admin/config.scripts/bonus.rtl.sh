@@ -88,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
-    sudo -u rtl git reset --hard v0.8.1
+    sudo -u rtl git reset --hard v0.9.0
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
