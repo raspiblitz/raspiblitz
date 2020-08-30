@@ -1,9 +1,15 @@
 #!/bin/bash
 
+####################################################################################################
+# filename:     bonus.telegraf.sh
+# synopsis:     This script will install / remove the "telegraf metrics collection service"
+#               It will install an individualized configuration file according the settings found in
+#               the raspiblitz configuration at "/mnt/hdd/raspiblitz.conf"
+####################################################################################################
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the Electrum Rust Server on or off"
+ echo "config script to switch the telegraf metrics collection on or off"
  echo "bonus.telegraf.sh [on|off|status]"
  exit 1
 fi

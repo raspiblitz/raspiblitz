@@ -4,16 +4,17 @@ It is opensource and works fine with [influxDB](https://www.influxdata.com/produ
 You may take a look [here](https://github.com/gcgarner/IOTstack) for a nice dockerized installation of influxDB and Grafana on a raspberry pi.
 
 Make sure to have a telegraf section in your `/mnt/hdd/raspiblitz.conf`
-you have to manually edit them into `/mnt/hdd/raspiblitz.conf`  before calling
+you have to manually edit them into `/mnt/hdd/raspiblitz.conf` before calling
 ```
-/home/admin/config.scripts/bonus.telegraf.sh on
+sudo /home/admin/config.scripts/bonus.telegraf.sh on
 ```
 
-You have to provide a running influxDB / Grafana infrastructure elsewhere (reachable for the RaspiBlitz)
+You have to provide a running influxDB / Grafana infrastructure elsewhere (reachable for your RaspiBlitz)
+
+# telegraf section for raspiblitz.conf
+All telegraf switches and configuration variables. You may copy & paste them into your RaspiBlitz configuration at `/mnt/hdd/raspiblitz.conf`, after editing and provide the proper values matching your environment
 
 ```
-# all telegraf switches and configuration variables
-#
 # switch telegraf service and metrics capturing on/off
 telegrafMonitoring=on
 #
@@ -26,5 +27,6 @@ telegrafInfluxDatabase='raspiblitz'
 # credentials for this database
 telegrafInfluxUsername='telegraf'
 telegrafInfluxPassword='metricsmetricsmetricsmetrics'
-
 ```
+
+# Grafana dashboard for RaspiBlitz
