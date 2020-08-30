@@ -30,3 +30,4 @@ telegrafInfluxPassword='metricsmetricsmetricsmetrics'
 ```
 
 # Grafana dashboard for RaspiBlitz
+use the attached JSON file `/home/admin/assets/telegraf/raspiblitz-grafana-dashboard.json` to import a prebuild Grafana dashboard suitable for monitoring a RaspiBlitz node with ElectRS and BTC-RPC-Explorer services enabled.
