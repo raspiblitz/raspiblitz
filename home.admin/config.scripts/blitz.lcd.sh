@@ -46,6 +46,7 @@ if [ "${command}" == "check-repair" ]; then
     echo "# --> new kernel detected - checking if LCD driver needs update ..."
     if [ ${oldDrivers} -eq 1 ]; then
       echo "# --> old LCD driver detected - starting update ..."
+      sudo rm -rf /home/admin/LCD-show
       cd /home/admin
       sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
       sudo -u admin chmod -R 755 LCD-show
