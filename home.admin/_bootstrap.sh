@@ -268,7 +268,7 @@ fi
 ################################
 
 if [ "${lcd2hdmi}" != "on" ]; then
-  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair
+  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
 fi
 
 ################################
