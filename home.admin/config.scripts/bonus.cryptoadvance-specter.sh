@@ -97,7 +97,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/network.wallet.sh on
 
     echo "#    --> Installing prerequisites"
-    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv
+    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
 
     # activating Authentication here ...
     echo "#    --> creating App-config"

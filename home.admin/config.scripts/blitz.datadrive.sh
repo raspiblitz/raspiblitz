@@ -1117,10 +1117,10 @@ if [ "$1" = "link" ]; then
   echo "The /mnt/hdd/temp directory is for short time data and will get cleaned up on very start. Dont work with data here thats bigger then 25GB - because on BTRFS hdd layout this is a own partition with limited space. Also on BTRFS hdd layout the temp partition is an FAT format - so it can be easily mounted on Windows and OSx laptops by just connecting it to such laptops. Use this for easy export data. To import data make sure to work with the data before bootstrap is deleting the directory on startup." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/temp/README.txt 2>/dev/null
 
-  echo "The /mnt/hdd/app-data directory should be used by additional/optinal apps and services installed to the RaspiBlitz for their data that should survive an import/export/backup. Data that can be reproduced (indexes, etc.) should be stored in app-storage." > ./README.txt
+  echo "The /mnt/hdd/app-data directory should be used by additional/optional apps and services installed to the RaspiBlitz for their data that should survive an import/export/backup. Data that can be reproduced (indexes, etc.) should be stored in app-storage." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/app-data/README.txt 2>/dev/null
 
-  echo "The /mnt/hdd/app-storage directrory should be used by additional/optinal apps and services installed to the RaspiBlitz for their non-critical and reproducable data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
+  echo "The /mnt/hdd/app-storage directrory should be used by additional/optional apps and services installed to the RaspiBlitz for their non-critical and reproducable data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/app-storage/README.txt 2>/dev/null
 
   >&2 echo "# OK - all symbolic links build"

@@ -54,17 +54,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/bos/.lnd"
   
-  # make sure rtl is member of lndadmin
+  # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin bos
   
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70
-  sudo -u bos npm install -g balanceofsatoshis@5.41.0
+  sudo -u bos npm install -g balanceofsatoshis@5.43.1
   if ! [ $? -eq 0 ]; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
   fi
+
 
   # setting value in raspi blitz config
   sudo sed -i "s/^bos=.*/bos=on/g" /mnt/hdd/raspiblitz.conf
