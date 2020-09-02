@@ -268,8 +268,7 @@ fi
 ################################
 
 if [ "${lcd2hdmi}" != "on" ]; then
-  echo "TODO: UPDATE LCD DRIVERS IF NEEEDED" >> $logFile
-  #sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
+  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
 fi
 
 ################################

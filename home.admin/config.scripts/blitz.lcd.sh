@@ -56,13 +56,13 @@ if [ "${command}" == "check-repair" ]; then
 
       echo "# --> correcting rotate setting"
       if [ "${lcdrotate}" == "on" ]; then
-        sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+        sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
       else
         sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
       fi
       echo "# --> restart to acrivate new driver"
       chmod +x ./LCD35-show
-      ./LCD35-show
+      sudo ./LCD35-show
       sudo shutdown -r now
     else
       echo "# --> new LCD driver detected - no need to update LCD drivers."
@@ -89,7 +89,6 @@ elif [ "${command}" == "rotate" ]; then
 
     if [ ${oldDrivers} -eq 1 ]; then
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
-
       # delete possible touchscreen rotate
       sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
     else
