@@ -888,13 +888,11 @@ if [ "${lcdInstalled}" == "true" ]; then
      echo "*** LCD DRIVER ***"
      echo "--> Downloading LCD Driver from Github"
      cd /home/admin/
-     sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+     sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
      sudo -u admin chmod -R 755 LCD-show
      sudo -u admin chown -R admin:admin LCD-show
      cd LCD-show/
-     # set comit hard to old version - that seemed to run better
-     #
-     sudo -u admin git reset --hard ce52014
+     sudo -u admin git reset --hard 53dd0bf
 
      # install xinput calibrator package
      echo "--> install xinput calibrator package"
