@@ -19,6 +19,9 @@ fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 12 55 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -277,5 +280,8 @@ case $CHOICE in
     ;;
   THUB)
     /home/admin/config.scripts/bonus.thunderhub.sh update
+    ;;
+  SPECTER)
+    /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
     ;;
 esac

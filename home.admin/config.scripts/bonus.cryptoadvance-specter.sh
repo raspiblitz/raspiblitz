@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 # https://github.com/cryptoadvance/specter-desktop  
-# ~/.config/btc-rpc-explorer.env
-# https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -84,6 +82,10 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+# stop services
+echo "#    --> making sure the service is not running"
+sudo systemctl stop cryptoadvance-specter  2>/dev/null
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "#    --> INSTALL Cryptoadvance Specter ***"
@@ -112,8 +114,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.5.5
-    
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.7.2
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
@@ -261,7 +262,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "#    --> REMOVING Cryptoadvance Specter"
-    sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
@@ -284,6 +284,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else 
     echo "#    --> Cryptoadvance Specter is not installed."
   fi
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "#    --> UPDATING Cryptoadvance Specter"
+  sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
+  echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
+  echo "#    --> Starting the cryptoadvance-specter.service"
+  sudo systemctl start cryptoadvance-specter
   exit 0
 fi
 
