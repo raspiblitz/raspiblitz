@@ -264,6 +264,14 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
 fi
 
 ################################
+# UPDATE LCD DRIVERS IF NEEEDED
+################################
+
+if [ "${lcd2hdmi}" != "on" ]; then
+  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair
+fi
+
+################################
 # SSH SERVER CERTS RESET
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of

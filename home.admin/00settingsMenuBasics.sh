@@ -326,7 +326,7 @@ if [ ${check} -eq 1 ]; then choice="1"; fi
 if [ "${lcdrotate}" != "${choice}" ]; then
   echo "LCD Rotate Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${choice}
   needsReboot=1
 else
   echo "LCD Rotate Setting unchanged."

@@ -2,13 +2,14 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "flip/rotate the LCD screen"
-  echo "blitz.lcd.sh rotate [on|off]"
-  echo "blitz.lcd.sh image [path]"
-  echo "blitz.lcd.sh qr [datastring]"
-  echo "blitz.lcd.sh qr-console [datastring]"
-  echo "blitz.lcd.sh hide"
-  echo "blitz.lcd.sh hdmi [on|off]"
+  echo "# make changes to the LCD screen"
+  echo "# blitz.lcd.sh check-repair"
+  echo "# blitz.lcd.sh rotate [on|off]"
+  echo "# blitz.lcd.sh image [path]"
+  echo "# blitz.lcd.sh qr [datastring]"
+  echo "# blitz.lcd.sh qr-console [datastring]"
+  echo "# blitz.lcd.sh hide"
+  echo "# blitz.lcd.sh hdmi [on|off]"
   exit 1
 fi
 
@@ -27,12 +28,52 @@ fi
 # 1. Parameter: lcd command
 command=$1
 
+# check if its updated kernel version of v1.6 base image
+oldKernel = $(uname -srm | cut -d ' ' -f2 | cut -d '-' -f1 | grep -c '4.19.118')
+oldDrivers = $(sudo cat /home/admin/LCD-show/.git/config | grep -c 'github.com/goodtft/LCD')
+
+###################
+# CHECK-REPAIR
+# make sure that LCD drivers match linux kernel
+# see issue: https://github.com/rootzoll/raspiblitz/pull/1490
+###################
+
+if [ "${command}" == "check-repair" ]; then
+  echo "# blitz.lcd.sh check-repair"
+  if [ ${oldKernel} -eq 1 ]; then
+    echo "# --> old kernel detected - no need to update LCD drivers."
+  else
+    echo "# --> new kernel detected - checking if LCD driver needs update ..."
+    if [ ${oldDrivers} -eq 1 ]; then
+      echo "# --> old LCD driver detected - starting update ..."
+      cd /home/admin
+      sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
+      sudo -u admin chmod -R 755 LCD-show
+      sudo -u admin chown -R admin:admin LCD-show
+      cd LCD-show/
+      sudo -u admin git reset --hard 53dd0bf
+
+      echo "# --> correcting rotate setting"
+      if [ "${lcdrotate}" == "on" ]; then
+        sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+      else
+        sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
+      fi
+      echo "# --> restart to acrivate new driver"
+      ./LCD35-show
+      sudo shutdown -r now
+      exit
+    else
+      echo "# --> new LCD driver detected - no need to update LCD drivers."
+    fi
+  fi
+
 ###################
 # ROTATE
 # see issue: https://github.com/rootzoll/raspiblitz/issues/681
 ###################
 
-if [ "${command}" == "rotate" ]; then
+elif [ "${command}" == "rotate" ]; then
 
   # TURN ROTATE ON (the new default)
   if [ "$2" = "1" ] || [ "$2" = "on" ]; then
@@ -43,8 +84,12 @@ if [ "${command}" == "rotate" ]; then
     if [ ${#lcdrotate} -eq 0 ]; then
       echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
     fi
-  
-    sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
+
+    if [ ${oldDrivers} -eq 1 ]; then
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
+    else
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+    fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
 
     # delete possible touchscreen rotate
@@ -57,7 +102,11 @@ if [ "${command}" == "rotate" ]; then
 
     echo "#Turn OFF: LCD ROTATE"
 
-    sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
+    if [ ${oldDrivers} -eq 1 ]; then
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
+    else
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
+    fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
 
     # if touchscreen is on
