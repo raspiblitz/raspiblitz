@@ -89,11 +89,6 @@ elif [ "${command}" == "rotate" ]; then
 
     if [ ${oldDrivers} -eq 1 ]; then
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
-      # delete possible touchscreen rotate
-      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
-    else
-      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
-
       # if touchscreen is on
     if [ "${touchscreen}" = "1" ]; then
       echo "Also rotate touchscreen ..."
@@ -107,6 +102,10 @@ Section "InputClass"
 EndSection
 EOF
      fi
+    else
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+      # delete possible touchscreen rotate
+      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
     fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
 
@@ -120,6 +119,12 @@ EOF
     if [ ${oldDrivers} -eq 1 ]; then
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
 
+      # delete possible touchscreen rotate
+      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+
+    else
+      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
+
       # if touchscreen is on
     if [ "${touchscreen}" = "1" ]; then
       echo "Also rotate touchscreen ..."
@@ -133,11 +138,7 @@ Section "InputClass"
 EndSection
 EOF
      fi
-    else
-      sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
 
-      # delete possible touchscreen rotate
-      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
     fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
 
