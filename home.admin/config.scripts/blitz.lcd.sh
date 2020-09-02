@@ -92,8 +92,19 @@ elif [ "${command}" == "rotate" ]; then
     fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
 
-    # delete possible touchscreen rotate
-    sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+    # if touchscreen is on
+    if [ "${touchscreen}" = "1" ]; then
+      echo "Also rotate touchscreen ..."
+      cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+Section "InputClass"
+        Identifier "libinput touchscreen catchall"
+        MatchIsTouchscreen "on"
+        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+EndSection
+EOF
+     fi
 
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
@@ -109,21 +120,10 @@ elif [ "${command}" == "rotate" ]; then
     fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
 
-    # if touchscreen is on
-    if [ "${touchscreen}" = "1" ]; then
-      echo "Also rotate touchscreen ..."
-      cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
-Section "InputClass"
-        Identifier "libinput touchscreen catchall"
-        MatchIsTouchscreen "on"
-        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
-        MatchDevicePath "/dev/input/event*"
-        Driver "libinput"
-EndSection
-EOF
-     fi
+    # delete possible touchscreen rotate
+    sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
-  echo "OK - a restart is needed: sudo shutdown -r now"
+    echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
     echo "error='missing second parameter - see help'"
