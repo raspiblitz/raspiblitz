@@ -51,8 +51,8 @@ if [ "${command}" == "check-repair" ]; then
       sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
       sudo -u admin chmod -R 755 LCD-show
       sudo -u admin chown -R admin:admin LCD-show
-      cd LCD-show/
-      sudo -u admin git reset --hard 53dd0bf
+      cd /home/admin/LCD-show
+      sudo -u admin git reset --hard b012c487669afd3e997fc63fcc097d45a5a6a34e
 
       echo "# --> correcting rotate setting"
       if [ "${lcdrotate}" == "on" ]; then
@@ -61,6 +61,7 @@ if [ "${command}" == "check-repair" ]; then
         sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
       fi
       echo "# --> restart to acrivate new driver"
+      chmod +x ./LCD35-show
       ./LCD35-show
       sudo shutdown -r now
     else
