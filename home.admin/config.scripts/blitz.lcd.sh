@@ -62,10 +62,10 @@ if [ "${command}" == "check-repair" ]; then
       echo "# --> restart to acrivate new driver"
       ./LCD35-show
       sudo shutdown -r now
-      exit
     else
       echo "# --> new LCD driver detected - no need to update LCD drivers."
     fi
+    exit
   fi
 
 ###################
