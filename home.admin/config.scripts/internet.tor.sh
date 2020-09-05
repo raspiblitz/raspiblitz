@@ -341,7 +341,8 @@ EOF
     sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
     echo ""
 
-    echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
+    sudo mkdir -p /etc/systemd/system/tor@default.service.d
+    echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
