@@ -268,7 +268,7 @@ With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. 
 
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
-First you need to download & validate the blockchain on your own computer/laptop. Todo so install bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 350 GB).
+First you need to download & validate the blockchain on your own computer/laptop. Todo so install bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 300 GB).
 
 Then you can use the COPY option to copy the blockchain over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfer) - follow the instructions given during the dialog.
 
@@ -308,7 +308,7 @@ The RaspiBlitz calling the LND wallet creation command for you:
 
 ##### LNDRESCUE LND tar.gz-Backupfile (BEST)
 
-Choose this option if you have made a complete backup of the LND data and have a tar.gz file starting with the word 'lnd-rescue' available. It will recover all your on-chain funds and open channels you had. But you have to be sure, that the LND backup you have is really the latest version - otherwise you might loose channel funds.
+Choose this option if you have made a complete backup of the LND data and have a tar.gz file starting with the word 'lnd-rescue' available. It will recover all your on-chain funds and open channels you had. But you have to make sure that the LND backup you have is really the latest version - otherwise you might lose channel funds.
 
 *If you have tar.gz file that starts with 'raspiblitz', that's a migration file. That also includes your old LND wallet, but you import it earlier in the setup process .. see further below for details.*
 
@@ -466,7 +466,7 @@ Use if you want to remove all funds from the RaspiBlitz.
 
 #### lnfwdreport: Report on your earned fees for Forwarding Payments
 
-If you connected your node well within the Lightning Network you can become a "Routing Node" other users might select your Node as part of a Lightnig Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
+If you connected your node well within the Lightning Network you can become a "Routing Node". Other users might select your Node as part of a Lightning Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
 
 Beware - earning fees as a routing node does not come automatic. It's a bit of hard work of building the right channels to be attractive for other people to route thru. Check the internet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
 
@@ -713,7 +713,7 @@ At the moment, the following subscription services are available:
 
 ##### IP2TOR (paid)
 
-IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP thru which you can make services of your RaspiBlitz easy reachable for everybody on the internet. You dont need to care about your local router or firewall settings. You can pay this service also directly thru Lightning from your RaspiBlitz as subscription.
+IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP thru which you can make services of your RaspiBlitz easy reachable for everybody on the internet. You don't need to care about your local router or firewall settings. You can pay this service also directly thru Lightning from your RaspiBlitz as subscription.
 
 At first you select what service of your RaspiBlitz you like to tunnel thru a IP2TOR bridge. 
 
@@ -878,11 +878,11 @@ This is common way to update your RaspiBlitz. Choose this option to prepare your
 
 Sometimes there is a new LND release that has some breaking changes that once you updated the LND database cannot be reversed (like the update from 0.9.2 to 0.10.0). Then RaspiBlitz offers you an optional update ... this is where you then can update LND.
 
-If you choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the RaspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further garantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps.
+If you choose this you get the option to do this `VERIFIED` that means it offers you the optional LND update we tested the RaspiBlitz with or `RECKLESS` which will just grab the latest LND release from the GitHub releases page (also Release Candidates) and install it with no further guarantees and verification checks - this is for people that run nodes to test new releases and how they work with existing RaspiBlitz apps.
 
 #### PATCH: Patch RaspiBlitz code
 
-With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHUb Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people who want to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
+With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHub Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people who want to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
 
 #### REBOOT: Reboot RaspiBlitz
 
@@ -1008,6 +1008,8 @@ To activate this feature, go to `MAINMENU` > `SETTINGS` > `StaticChannelBackup o
 To test it, try opening or closing a channel, and then check if you can find a copy of `channel.backup` in the specified location. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
 ## Updating RaspiBlitz to new Version
+
+If you have a RaspiBlitz older than version v1.0, please [see here](FAQ.md).
 
 If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions.
 
