@@ -203,10 +203,9 @@ After=${network}d.service
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
 User=btcrpcexplorer
-# Restart on failure but no more than 2 time every 10 minutes (600 seconds). Otherwise stop
+# Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
-StartLimitIntervalSec=600
-StartLimitBurst=2
+RestartSec=600
 
 [Install]
 WantedBy=multi-user.target
