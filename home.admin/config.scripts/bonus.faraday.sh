@@ -195,6 +195,7 @@ WantedBy=multi-user.target
 EOF
 
   sudo install -m 0644 -o root -g root -t /etc/systemd/system /mnt/hdd/temp/faraday.service  
+  sudo rm -rf /mnt/hdd/temp/faraday.service
   sudo systemctl enable faraday
   if [ "${state}" == "ready" ]; then
     sudo systemctl start faraday
