@@ -595,7 +595,7 @@ sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
 if [ ${loaded} -gt 0 ]; then
   sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
-  source /mnt/hdd/bitcoin/bitcoin.conf
+  source /mnt/hdd/bitcoin/bitcoin.conf >/dev/null 2>&1
   if [ ${testnet} -gt 0 ]; then
     sed -i "s/^chain=.*/chain=test/g" ${infoFile}
   else
