@@ -10,7 +10,7 @@ The update should be quite simple - you don't need to close any channels:
 
 - Best is to get a second 16GB or 32GB sd card - but you can also reuse your old one
 - In SSH main menu of you RaspiBlitz choose `UPDATE` & follow the dialogs until shutdown
-- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/master/README.md#installing-the-software)
+- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/dev/README.md#installing-the-software)
 - Write the new image to the (new) sd card with a tool like [balena etcher](https://www.balena.io/etcher/)
 - RaspiBlitz with new sd card image - it now goes through a recover/update phase - this may take some time.
 - Once that's done, login once per SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
