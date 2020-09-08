@@ -384,6 +384,28 @@ EOF
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
 
+  echo "Setup logrotate"
+  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
+    # add logrotate config for modified Tor dir on ext. disk
+    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+/mnt/hdd/tor/*log {
+        daily
+        rotate 5
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 0640 bitcoin bitcoin
+        sharedscripts
+        postrotate
+                if invoke-rc.d tor status > /dev/null; then
+                        invoke-rc.d tor reload > /dev/null
+                fi
+        endscript
+}
+EOF
+  fi
+
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
   exit 0
