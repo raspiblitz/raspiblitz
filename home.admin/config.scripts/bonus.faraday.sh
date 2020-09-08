@@ -194,8 +194,8 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-  sudo mv /mnt/hdd/temp/faraday.service /etc/systemd/system/faraday.service
-  sudo chown root:root /etc/systemd/system/faraday.service
+  sudo install -m 0644 -o root -g root -t /etc/systemd/system /mnt/hdd/temp/faraday.service  
+  sudo rm -rf /mnt/hdd/temp/faraday.service
   sudo systemctl enable faraday
   if [ "${state}" == "ready" ]; then
     sudo systemctl start faraday
