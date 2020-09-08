@@ -159,7 +159,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packages that are not needed
-sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2 vlc
 sudo apt clean
 sudo apt -y autoremove
 
@@ -480,7 +480,7 @@ echo "*** PREPARING BITCOIN & Co ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.20.1"
+bitcoinVersion="0.20.0"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"

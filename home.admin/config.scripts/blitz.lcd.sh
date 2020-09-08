@@ -46,21 +46,23 @@ if [ "${command}" == "check-repair" ]; then
     echo "# --> new kernel detected - checking if LCD driver needs update ..."
     if [ ${oldDrivers} -eq 1 ]; then
       echo "# --> old LCD driver detected - starting update ..."
+      sudo rm -rf /home/admin/LCD-show
       cd /home/admin
       sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
       sudo -u admin chmod -R 755 LCD-show
       sudo -u admin chown -R admin:admin LCD-show
-      cd LCD-show/
-      sudo -u admin git reset --hard 53dd0bf
+      cd /home/admin/LCD-show
+      sudo -u admin git reset --hard b012c487669afd3e997fc63fcc097d45a5a6a34e
 
       echo "# --> correcting rotate setting"
       if [ "${lcdrotate}" == "on" ]; then
-        sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+        sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
       else
         sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
       fi
       echo "# --> restart to acrivate new driver"
-      ./LCD35-show
+      chmod +x ./LCD35-show
+      sudo ./LCD35-show
       sudo shutdown -r now
     else
       echo "# --> new LCD driver detected - no need to update LCD drivers."
@@ -87,13 +89,25 @@ elif [ "${command}" == "rotate" ]; then
 
     if [ ${oldDrivers} -eq 1 ]; then
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=90/g" /boot/config.txt
+      # if touchscreen is on
+    if [ "${touchscreen}" = "1" ]; then
+      echo "Also rotate touchscreen ..."
+      cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+Section "InputClass"
+        Identifier "libinput touchscreen catchall"
+        MatchIsTouchscreen "on"
+        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+EndSection
+EOF
+     fi
     else
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+      # delete possible touchscreen rotate
+      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
     fi
     sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
-
-    # delete possible touchscreen rotate
-    sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
@@ -104,12 +118,14 @@ elif [ "${command}" == "rotate" ]; then
 
     if [ ${oldDrivers} -eq 1 ]; then
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=tft35a:rotate=270/g" /boot/config.txt
+
+      # delete possible touchscreen rotate
+      sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+
     else
       sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
-    fi
-    sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
 
-    # if touchscreen is on
+      # if touchscreen is on
     if [ "${touchscreen}" = "1" ]; then
       echo "Also rotate touchscreen ..."
       cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
@@ -123,7 +139,11 @@ EndSection
 EOF
      fi
 
-  echo "OK - a restart is needed: sudo shutdown -r now"
+    fi
+    sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
+
+
+    echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
     echo "error='missing second parameter - see help'"
