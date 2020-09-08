@@ -17,8 +17,8 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info lndmanage " --msgbox "\n\
-Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md
-Have at least one channel active to run it without error.\n
+Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md or
+lndmanage --help.\n
 To start type: 'manage' in the command line.
 " 9 75
   exit 0
@@ -42,10 +42,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
 
-  # get dependencies
-  sudo apt install -y python3-dev libatlas-base-dev
-  python3 -m pip install wheel
-  python3 -m pip install lndmanage==0.10.0
+  # get build dependencies
+  python3 -m pip install --upgrade pip wheel setuptools
+
+  # install lndmanage
+  python3 -m pip install lndmanage==0.11.0
 
   # check if install was successfull
   if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
@@ -60,8 +61,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
 
   echo "# usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
+  echo "# usage: lndmanage --help"
   echo "# To start type: 'manage' in the command line."
-  echo "# Needs at least one channel to start without error."
   echo "# To exit the venv - type 'deactivate' and press ENTER"
 
   exit 0
