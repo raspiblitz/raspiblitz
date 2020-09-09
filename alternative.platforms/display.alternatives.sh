@@ -1,5 +1,5 @@
 # To run this script on your RaspiBlitz, copy the following line to the ssh terminal (after the #):
-# wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/display.alternatives.sh && sudo bash display.alternatives.sh
+# wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/display.alternatives.sh && sudo bash display.alternatives.sh
 
 echo "Detect Base Image ..." 
 baseImage="?"

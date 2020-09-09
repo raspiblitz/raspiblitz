@@ -4,7 +4,7 @@
 # THIS IS NOT THE REGULAR UPDATE MECHANISM
 # and can lead to dirty state of your scripts.
 # IF YOU WANT TO UPDATE YOUR RASPIBLITZ:
-# https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-to-update-my-raspiblitz-after-version-098
+# https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.md#how-to-update-my-raspiblitz-after-version-098
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
