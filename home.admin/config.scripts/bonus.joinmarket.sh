@@ -91,26 +91,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # install joinmarket
+    version="v0.7.0"
     cd /home/joinmarket
     # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
-    echo "# installing ARM specific dependencies to run the QT GUI on ARM"
+    echo "# installing ARM specific dependencies to run the QT GUI"
     sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    sudo -u joinmarket git reset --hard v0.7.0
+    sudo -u joinmarket git reset --hard $version
     # make install.sh set up jmvenv with -- system-site-packages
-    sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
-    virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#g" \
-    install.sh
+    # and import the PySide2 armf package from the system
+    sudo -u joinmarket sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
+    virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1 ;\
+    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \'import PySide2\'\
+    #g" install.sh
+    # don't install PySide2 - using the system-site-package instead 
+    sudo -u joinmarket sed -i "s#^PySide2##g" requirements/gui.txt 
     sudo -u joinmarket ./install.sh --with-qt
-    
-    echo "# installing python requirements to run the QT GUI on ARM"    
-    source jmvenv/bin/activate || exit 1
-    # use the PySide2 armf package from the system
-    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'
-    pip install qrcode[pil]
-    pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
+    echo "# installed JoinMarket $version"
 
     echo "# adding the joininbox menu"
     sudo rm -rf /home/joinmarket/joininbox
