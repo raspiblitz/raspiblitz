@@ -3,7 +3,6 @@
 # This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
-# For more details see background_raspiblitzSettings.md
 
 ################################
 # BASIC SETTINGS
