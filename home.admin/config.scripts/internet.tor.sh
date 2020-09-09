@@ -342,7 +342,7 @@ EOF
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
-    echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf
+    echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
