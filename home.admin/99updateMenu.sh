@@ -194,6 +194,7 @@ patch()
       if [ $exitstatus = 0 ]; then
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
         echo "--> " $pullRequestID
+        cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:${pullRequestID}pr
         error=""
         source <(sudo -u admin /home/admin/XXsyncScripts.sh ${pullRequestID}pr)
