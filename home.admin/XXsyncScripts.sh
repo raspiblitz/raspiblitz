@@ -94,6 +94,7 @@ if [ ${#wantedBranch} -gt 0 ]; then
     localBranch=$(git branch | grep -c "${wantedBranch}")
     if [ ${localBranch} -eq 0 ]; then
       echo "# checkout/changing branch .."
+      git fetch
       git checkout -b ${wantedBranch} origin/${wantedBranch}
     else
       echo "# changing branch .."
