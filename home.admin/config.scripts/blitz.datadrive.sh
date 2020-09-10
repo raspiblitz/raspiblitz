@@ -78,7 +78,7 @@ if [ "$1" = "status" ]; then
     echo
     echo "# SETUP INFO"
 
-    # find the HDD (biggest single device)
+    # find the HDD (biggest single partition)
     sizeDataPartition=0
     lsblk -o NAME,SIZE -b | grep "[^|*][s|v]d[a-z][0-9]" > .lsblk.tmp
     while read line; do
@@ -195,7 +195,8 @@ if [ "$1" = "status" ]; then
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
     echo "isSSD=${isSSD}"
-    echo "datadisk='${hddDataPartition}'"
+    echo "datadisk='${hdd}'"
+    echo "datapartition='${hddDataPartition}'"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
