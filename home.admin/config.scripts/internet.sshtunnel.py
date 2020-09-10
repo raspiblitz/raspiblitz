@@ -11,7 +11,7 @@ import sys
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("forward ports from another server to raspiblitz with reverse SSH tunnel")
-    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER:PORT] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
+    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER:PORT] [?--m:MONITORINGPORT] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
     print("note that [INTERNAL-PORT]<[EXTERNAL-PORT] can one or multiple forwardings")
     sys.exit(1)
 
@@ -77,11 +77,22 @@ def on(restore_on_update=False):
 
     # generate additional parameter for autossh (forwarding ports)
     if len(sys.argv) < 4:
-        print("[INTERNAL-PORT]<[EXTERNAL-PORT] missing")
+        print("missing parameters")
         sys.exit(1)
+
+    # check for optional monitoring port parameter
+    i = 3
+    if sys.argv[3].count("--m:") > 0:
+         # get monitoring port number
+         monitoringPort=sys.argv[3][4:]
+         print("# found optional monitoring port: {}".format(monitoringPort))
+         # replacing monitoring port in template
+         SERVICE_TEMPLATE = SERVICE_TEMPLATE.replace("-M 0", "-M {}".format(monitoringPort))
+         # port forwadings start one parameter later
+         i = 4
+
     ssh_ports = ""
     additional_parameters = ""
-    i = 3
     while i < len(sys.argv):
 
         # check forwarding format
