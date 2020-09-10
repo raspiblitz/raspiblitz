@@ -10,6 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /mnt/hdd/raspiblitz.conf
+echo "# bonus.cryptoadvance-specter.sh $1"
 
 # show info menu
 if [ "$1" = "menu" ]; then
