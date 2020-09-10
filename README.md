@@ -268,7 +268,7 @@ With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. 
 
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
-First you need to download & validate the blockchain on your own computer/laptop. Todo so install bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 300 GB).
+First you need to download & validate the blockchain on your own computer/laptop. Todo so install bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 320 GB).
 
 Then you can use the COPY option to copy the blockchain over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfer) - follow the instructions given during the dialog.
 
