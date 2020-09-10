@@ -129,7 +129,7 @@ patch()
            PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 11 55 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -189,7 +189,7 @@ patch()
     PR)
       clear
       echo "..."
-      pullRequestID=$(whiptail --inputbox "\nPlease enter the NUMBER of the PullRequest on RaspiBlitz Repo '${activeGitHubUser}'?" 10 38 --title "Checkout PullRequest ID" 3>&1 1>&2 2>&3)
+      pullRequestID=$(whiptail --inputbox "\nPlease enter the NUMBER of the PullRequest on RaspiBlitz Repo '${activeGitHubUser}'?" 10 46 --title "Checkout PullRequest ID" 3>&1 1>&2 2>&3)
       exitstatus=$?
       if [ $exitstatus = 0 ]; then
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
