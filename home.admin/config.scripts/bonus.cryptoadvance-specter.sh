@@ -83,11 +83,6 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
-# stop services
-echo "#    --> making sure the service is not running .."
-sudo systemctl stop cryptoadvance-specter
-echo "after systemd"
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "#    --> INSTALL Cryptoadvance Specter ***"
@@ -250,7 +245,6 @@ EOF
 fi
 
 # switch off
-echo "checking off"
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
@@ -265,6 +259,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "#    --> REMOVING Cryptoadvance Specter"
+    sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
