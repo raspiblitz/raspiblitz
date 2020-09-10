@@ -84,8 +84,8 @@ if [ "$1" = "status" ]; then
 fi
 
 # stop services
-echo "#    --> making sure the service is not running"
-sudo systemctl stop cryptoadvance-specter  2>/dev/null
+echo "#    --> making sure the service is not running .."
+sudo systemctl stop cryptoadvance-specter 2>/dev/null
 echo "after systemd"
 
 # switch on
