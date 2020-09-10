@@ -85,7 +85,7 @@ fi
 
 # stop services
 echo "#    --> making sure the service is not running .."
-sudo systemctl stop cryptoadvance-specter 2>/dev/null
+sudo systemctl stop cryptoadvance-specter
 echo "after systemd"
 
 # switch on
