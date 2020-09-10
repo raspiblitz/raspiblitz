@@ -86,6 +86,7 @@ fi
 # stop services
 echo "#    --> making sure the service is not running"
 sudo systemctl stop cryptoadvance-specter  2>/dev/null
+echo "after systemd"
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -249,6 +250,7 @@ EOF
 fi
 
 # switch off
+echo "checking off"
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
