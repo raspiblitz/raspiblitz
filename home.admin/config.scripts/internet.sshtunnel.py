@@ -171,7 +171,7 @@ def on(restore_on_update=False):
         file_content = f.read()
     if file_content.count("sshtunnel=") == 0:
         file_content = file_content + "\nsshtunnel=''"
-    file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s %s'" % (ssh_server, optionalParameter, ssh_ports), file_content)
+    file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s%s'" % (ssh_server, optionalParameter, ssh_ports), file_content)
 
     if not restore_on_update:
         server_domain = ssh_server.split("@")[1]
