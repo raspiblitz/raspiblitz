@@ -83,9 +83,11 @@ def on(restore_on_update=False):
     # check for optional monitoring port parameter
     i = 3
     monitoringPort="-M 0"
+    optionalParameter=""
     if sys.argv[3].count("--m:") > 0:
          # get monitoring port number
          monitoringPort = sys.argv[3][4:]
+         optionalParameter= "--m:{} ".format(monitoringPort)
          monitoringPort = "-M {}".format(monitoringPort)
          print("# found optional monitoring port: {}".format(monitoringPort))
          # port forwadings start one parameter later
@@ -169,7 +171,7 @@ def on(restore_on_update=False):
         file_content = f.read()
     if file_content.count("sshtunnel=") == 0:
         file_content = file_content + "\nsshtunnel=''"
-    file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s'" % (ssh_server, ssh_ports), file_content)
+    file_content = re.sub("sshtunnel=.*", "sshtunnel='%s %s %s'" % (ssh_server, optionalParameter, ssh_ports), file_content)
 
     if not restore_on_update:
         server_domain = ssh_server.split("@")[1]
