@@ -6,7 +6,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a fixed domain or IP for LND"
- echo "internet.setaddress.sh [on|off] [?address]"
+ echo "lnd.setaddress.sh [on|off] [?address]"
  exit 1
 fi
 

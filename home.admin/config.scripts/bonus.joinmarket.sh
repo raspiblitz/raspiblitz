@@ -43,10 +43,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if running Tor
   if [ ${runBehindTor} = on ]; then
-    echo "OK, running behind Tor."
+    echo "# OK, running behind Tor"
   else
-    echo "Not running Tor"
-    echo "Activate Tor from the SERVICES menu before installing JoinMarket."
+    echo "# Not running Tor"
+    echo "# Activate Tor from the SERVICES menu before installing JoinMarket."
     exit 1
   fi
 
@@ -55,13 +55,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
 
-    echo "*** Cleaning before install ***"
+    echo "# cleaning before install"
     sudo userdel -rf joinmarket 2>/dev/null
 
-    echo "*** Add the 'joinmarket' user ***"
+    echo "# add the 'joinmarket' user"
     adduser --disabled-password --gecos "" joinmarket
 
-    echo "*** setting PASSWORD_B as the password for the 'joinmarket' user ***"
+    echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "joinmarket:$PASSWORD_B" | sudo chpasswd
     # add to sudo group (required for installation)
@@ -81,44 +81,45 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # copy old JoinMarket data to app-data
     cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
-
     chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
     ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
     chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
     # specify wallet.dat in old config for multiwallet for multiwallet support
     if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
       sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-      echo "Specified to use wallet.dat in the recovered joinmarket.cfg"
+      echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
     fi
 
     # install joinmarket
+    version="v0.7.0"
     cd /home/joinmarket
     # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
+    echo "# installing ARM specific dependencies to run the QT GUI"
     sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev
-    # from https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/docs/INSTALL.md 
-    sudo apt install -y python3-dev python3-pip git build-essential automake pkg-config libtool libffi-dev libssl-dev libgmp-dev libsodium-dev
-
+    echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    git reset --hard v0.6.3.1
+    sudo -u joinmarket git reset --hard $version
+    # make install.sh set up jmvenv with -- system-site-packages
+    # and import the PySide2 armf package from the system
+    sudo -u joinmarket sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
+    virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1 ;\
+    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \'import PySide2\'\
+    #g" install.sh
+    # don't install PySide2 - using the system-site-package instead 
+    sudo -u joinmarket sed -i "s#^PySide2##g" requirements/gui.txt
+    # don't install PyQt5 - using the system package instead 
+    sudo -u joinmarket sed -i "s#^PyQt5==5.14.2##g" requirements/gui.txt
+    sudo apt-get install -y python3-pyqt5
+    sudo -u joinmarket ./install.sh --with-qt
+    echo "# installed JoinMarket $version"
 
-    # set up jmvenv 
-    sudo apt install -y virtualenv
-    # use the PySide2 armf package from the system
-    sudo -u joinmarket virtualenv --system-site-packages -p /usr/bin/python3.7 jmvenv
-    source jmvenv/bin/activate || exit 1
-    pip install -r requirements/base.txt
-    # https://github.com/JoinMarket-Org/joinmarket-clientserver/blob/master/requirements/gui.txt
-    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c 'import PySide2'
-    pip install qrcode[pil]
-    pip install https://github.com/sunu/qt5reactor/archive/58410aaead2185e9917ae9cac9c50fe7b70e4a60.zip#egg=qt5reactor
-
-    # add the joininbox menu
+    echo "# adding the joininbox menu"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.2
+    sudo -u joinmarket git reset --hard v0.1.4
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
@@ -142,7 +143,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
 
-    # autostart for joinmarket
+    echo "# setting the autostart script for joinmarket"
     echo "
 # automatically start startup.sh for joinmarket unless
 # when running in a tmux session
@@ -165,14 +166,14 @@ fi
     cat > /home/admin/startup.sh <<EOF
 # check for joinmarket.cfg
 if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-  echo "Generating the joinmarket.cfg"
+  echo "# generating the joinmarket.cfg"
   echo ""
   . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate &&\
   cd /home/joinmarket/joinmarket-clientserver/scripts/
   python wallet-tool.py generate --datadir=/home/joinmarket/.joinmarket
   sudo chmod 600 /home/joinmarket/.joinmarket/joinmarket.cfg || exit 1
   echo ""
-  echo "Editing the joinmarket.cfg"
+  echo "# editing the joinmarket.cfg"
   sed -i "s/^rpc_user =.*/rpc_user = raspibolt/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   PASSWORD_B=\$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
@@ -188,7 +189,7 @@ if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  echo "Edited the joinmarket.cfg to communicate over Tor only."
+  echo "# edited the joinmarket.cfg to communicate over Tor only."
 fi
 EOF
     mv /home/admin/startup.sh /home/joinmarket/startup.sh
@@ -226,7 +227,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     echo "*** REMOVING JOINMARKET ***"
     sudo userdel -rf joinmarket 2>/dev/null
-    echo "OK JoinMarket removed"
+    echo "# OK JoinMarket is removed"
   else 
     echo "JoinMarket is not installed."
   fi

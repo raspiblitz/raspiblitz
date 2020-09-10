@@ -8,10 +8,11 @@ source /home/admin/_version.info
 clear
 
 # Basic Options
-OPTIONS=(RELEASE "RaspiBlitz Release Update/Recovery" \
-         LND "Interim LND Update Options" \
-         PATCH "Patch RaspiBlitz v${codeVersion}"
-	)
+OPTIONS=(
+RELEASE "RaspiBlitz Release Update/Recovery" \
+LND "Interim LND Update Options" \
+PATCH "Patch RaspiBlitz v${codeVersion}"
+)
 
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
@@ -19,8 +20,11 @@ fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+fi
 
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 12 55 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 release()
 {
@@ -277,5 +281,8 @@ case $CHOICE in
     ;;
   THUB)
     /home/admin/config.scripts/bonus.thunderhub.sh update
+    ;;
+  SPECTER)
+    /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
     ;;
 esac

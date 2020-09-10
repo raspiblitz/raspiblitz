@@ -370,7 +370,7 @@ if [ "${#lcdrotate}" -eq 0 ]; then
 fi
 echo "Provisioning LCD rotate - run config script" >> ${logFile}
 sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.lcdrotate.sh ${lcdrotate} >> ${logFile} 2>&1
+sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${lcdrotate} >> ${logFile} 2>&1
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then

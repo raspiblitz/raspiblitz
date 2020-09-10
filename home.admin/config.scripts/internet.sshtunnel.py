@@ -218,7 +218,7 @@ def on(restore_on_update=False):
     print("*** WIN - SSH TUNNEL SERVICE SETUP ***")
     print("**************************************")
     print("See chapter 'How to setup port-forwarding with a SSH tunnel?' in:")
-    print("https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md")
+    print("https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.md")
     print("- Tunnel service needs final reboot to start.")
     print("- After reboot check logs: sudo journalctl -f -u {}".format(SERVICE_NAME))
     print("- Make sure the SSH pub key of this RaspiBlitz is in 'authorized_keys' of {}:".format(ssh_server_host))

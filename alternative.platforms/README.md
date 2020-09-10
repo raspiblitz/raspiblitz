@@ -93,7 +93,7 @@ Detailed instructions for the RaspiBlitz-on-DietPi: [alternative.platforms/dietp
 
 ---
 For the process to build a custom SDcard image release see:
-https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
+https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
 
 Extras for advanced users and powerful hardware:
 https://github.com/openoms/bitcoin-tutorials/

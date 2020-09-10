@@ -8,13 +8,13 @@ https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Stretch.7z
 
 2) Burn it to the SD card with [Etcher](https://www.balena.io/etcher/)
 
-3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh)
+3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh)
 
 4) Copy them to the /boot directory of the DietPi SDcard
 
-    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/master/alternative.platforms/dietpi#excerpts-from-the-customized-dietpitxt))
+    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/dietpi#excerpts-from-the-customized-dietpitxt))
 
-    [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
+    [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
     (Optionally open the file with a text editor and uncomment (remove the `#` from the front of) the line with the branch you want to build the SDcard from.) 
 
 5) Assemble and boot the Raspberry Pi
@@ -33,8 +33,8 @@ https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Stretch.7z
 `ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
 
-    The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
+    The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/dev/README.md#setup-process-detailed-documentation)
 
 ---
 ### To build manually:
-[Follow the generic DietPi install process.](https://github.com/rootzoll/raspiblitz/tree/master/alternative.platforms/dietpi#general-guide-for-the-raspiblitz-on-dietpi)
+[Follow the generic DietPi install process.](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/dietpi#general-guide-for-the-raspiblitz-on-dietpi)

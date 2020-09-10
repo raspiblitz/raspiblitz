@@ -159,7 +159,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
 fi
 
 # remove some (big) packages that are not needed
-sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2
+sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2 vlc
 sudo apt clean
 sudo apt -y autoremove
 
@@ -888,13 +888,11 @@ if [ "${lcdInstalled}" == "true" ]; then
      echo "*** LCD DRIVER ***"
      echo "--> Downloading LCD Driver from Github"
      cd /home/admin/
-     sudo -u admin git clone https://github.com/goodtft/LCD-show.git
+     sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
      sudo -u admin chmod -R 755 LCD-show
      sudo -u admin chown -R admin:admin LCD-show
      cd LCD-show/
-     # set comit hard to old version - that seemed to run better
-     #
-     sudo -u admin git reset --hard ce52014
+     sudo -u admin git reset --hard 53dd0bf
 
      # install xinput calibrator package
      echo "--> install xinput calibrator package"
