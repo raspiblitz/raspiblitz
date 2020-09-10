@@ -83,17 +83,17 @@ if [ ${#wantedBranch} -gt 0 ]; then
     echo "# OK"
   else
 
-    echo "# checking branch exists .."
-    branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c ${wantedBranch})
-    if [ ${branchExists} -eq 0 ]; then
-      echo "error='branch not found'"
-      exit 1
-    fi
-
     echo "# checking if branch is locally available"
     localBranch=$(git branch | grep -c "${wantedBranch}")
     if [ ${localBranch} -eq 0 ]; then
+      echo "# checking branch exists .."
+      branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c ${wantedBranch})
+      if [ ${branchExists} -eq 0 ]; then
+        echo "error='branch not found'"
+        exit 1
+      fi
       echo "# checkout/changing branch .."
+      git fetch
       git checkout -b ${wantedBranch} origin/${wantedBranch}
     else
       echo "# changing branch .."
