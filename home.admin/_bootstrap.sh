@@ -3,7 +3,6 @@
 # This script runs on every start called by boostrap.service
 # It makes sure that the system is configured like the
 # default values or as in the config.
-# For more details see background_raspiblitzSettings.md
 
 ################################
 # BASIC SETTINGS
@@ -262,6 +261,14 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # switch to HDMI what will trigger reboot
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
   exit 0
+fi
+
+################################
+# UPDATE LCD DRIVERS IF NEEEDED
+################################
+
+if [ "${lcd2hdmi}" != "on" ]; then
+  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
 fi
 
 ################################
@@ -596,7 +603,7 @@ sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
 loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
 if [ ${loaded} -gt 0 ]; then
   sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
-  source /mnt/hdd/bitcoin/bitcoin.conf
+  source /mnt/hdd/bitcoin/bitcoin.conf >/dev/null 2>&1
   if [ ${testnet} -gt 0 ]; then
     sed -i "s/^chain=.*/chain=test/g" ${infoFile}
   else

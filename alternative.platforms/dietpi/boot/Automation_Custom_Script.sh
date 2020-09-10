@@ -4,8 +4,8 @@
 
 # Uncomment the line with the branch you want to build the SDcard from:
 
-# @rootzoll master branch:
-wget https://raw.githubusercontent.com/rootzoll/raspiblitz/master/build_sdcard.sh && sudo bash build_sdcard.sh
+# @rootzoll v1.6 release branch:
+wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.6/build_sdcard.sh && sudo bash build_sdcard.sh
 
 # @rootzoll dev branch:
 # wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh dev

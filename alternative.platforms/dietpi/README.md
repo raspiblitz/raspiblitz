@@ -72,7 +72,7 @@ If you are working from a forked repo be aware of that the fork needs to be call
 `ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
 
-* From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/master/README.md#setup-process-detailed-documentation)
+* From here he setup continues with the [RaspiBlitz Setup Process](https://github.com/rootzoll/raspiblitz/blob/dev/README.md#setup-process-detailed-documentation)
 
 ---
 ### Useful commands for debugging:

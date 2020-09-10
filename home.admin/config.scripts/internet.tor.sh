@@ -341,7 +341,10 @@ EOF
     sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
     echo ""
 
-    echo "ReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /lib/systemd/system/tor@default.service
+    sudo mkdir -p /etc/systemd/system/tor@default.service.d
+    if ! grep -Eq "^ReadWriteDirectories=" /etc/systemd/system/tor@default.service.d/raspiblitz.conf; then
+      echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
+    fi
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
@@ -382,6 +385,28 @@ EOF
   if [ "${specter}" = "on" ]; then
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
+  fi
+
+  echo "Setup logrotate"
+  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
+    # add logrotate config for modified Tor dir on ext. disk
+    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+/mnt/hdd/tor/*log {
+        daily
+        rotate 5
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 0640 bitcoin bitcoin
+        sharedscripts
+        postrotate
+                if invoke-rc.d tor status > /dev/null; then
+                        invoke-rc.d tor reload > /dev/null
+                fi
+        endscript
+}
+EOF
   fi
 
   echo "OK - TOR is now ON"

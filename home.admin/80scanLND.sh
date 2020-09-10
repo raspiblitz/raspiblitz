@@ -51,7 +51,7 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   if [ "$USER" != "admin" ]; then
 
     if [ ${uptime} -gt 600 ]; then
-      if [ ${uptime} -gt 800 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
+      if [ ${uptime} -gt 1000 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
         infoStr=" The ${network}d service is NOT RUNNING!\n ${bitcoinErrorShort}\n Login for more details & options:"
       else
         infoStr=" The ${network}d service is running:\n ${bitcoinErrorShort}\n Login with SSH for more details:"
@@ -63,9 +63,11 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
   else
 
     # output when user login in as admin and bitcoind is not running
-
-    if [ ${uptime} -gt 600 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
-
+    if [ ${uptime} -lt 600 ]; then
+      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait at least 10min ..."
+    elif [[ "${bitcoinErrorFull}" == *"error code: -28"* ]]; then
+      infoStr=" The ${network}d service is warming up:\n ${bitcoinErrorShort}\n Please wait ..."
+    elif [ ${#bitcoinErrorFull} -gt 0 ] || [ "${bitcoinErrorShort}" == "Error found in Logs" ] || [ "${1}" == "blockchain-error" ]; then
       clear
       echo ""
       echo "*****************************************"
@@ -95,9 +97,6 @@ if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "
       echo "-> Have you tried to turn it off and on again? Use command 'restart'"
       echo ""
       exit 1
-
-    else
-      infoStr=" The ${network}d service is starting:\n ${bitcoinErrorShort}\n Please wait up to 10min ..."
     fi
 
   fi
@@ -114,7 +113,7 @@ elif [ ${lndActive} -eq 0 ] || [ ${#lndErrorFull} -gt 0 ] || [ "${1}" == "lightn
   title="Lightning Info"
   if [ ${uptime} -gt 600 ] || [ "${1}" == "lightning-error" ]; then
     if [ ${#lndErrorShort} -gt 0 ]; then
-       height=6
+      height=6
       lndErrorShort=" ${lndErrorShort}\n"
     fi
     if [ ${lndActive} -eq 0 ]; then
@@ -215,7 +214,6 @@ else
   else
     syncProgress="${syncProgress} %"
   fi
-
 
   # formatting LIGHTNING SCAN PROGRESS  
   if [ ${#scanProgress} -eq 0 ]; then
