@@ -11,8 +11,8 @@ import sys
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("forward ports from another server to raspiblitz with reverse SSH tunnel")
-    print("internet.sshtunnel.py [on|off|restore] [USER]@[SERVER:PORT] [?--m:MONITORINGPORT] \"[INTERNAL-PORT]<[EXTERNAL-PORT]\"")
-    print("note that [INTERNAL-PORT]<[EXTERNAL-PORT] can one or multiple forwardings")
+    print("internet.sshtunnel.py on|off|restore USER@SERVER:PORT [--m:MONITORINGPORT] \"INTERNAL-PORT<EXTERNAL-PORT\"")
+    print("note that INTERNAL-PORT<EXTERNAL-PORT can one or multiple forwardings")
     sys.exit(1)
 
 #
@@ -31,7 +31,7 @@ After=network.target
 User=root
 Group=root
 Environment="AUTOSSH_GATETIME=0"
-ExecStart=/usr/bin/autossh -M 0 -N -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=2 [PLACEHOLDER]
+ExecStart=/usr/bin/autossh [MONITORING-PORT] -N -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=2 [PLACEHOLDER]
 StandardOutput=journal
 
 [Install]
@@ -82,12 +82,12 @@ def on(restore_on_update=False):
 
     # check for optional monitoring port parameter
     i = 3
+    monitoringPort="-M 0"
     if sys.argv[3].count("--m:") > 0:
          # get monitoring port number
-         monitoringPort=sys.argv[3][4:]
+         monitoringPort = sys.argv[3][4:]
+         monitoringPort = "-M {}".format(monitoringPort)
          print("# found optional monitoring port: {}".format(monitoringPort))
-         # replacing monitoring port in template
-         SERVICE_TEMPLATE = SERVICE_TEMPLATE.replace("-M 0", "-M {}".format(monitoringPort))
          # port forwadings start one parameter later
          i = 4
 
@@ -133,7 +133,8 @@ def on(restore_on_update=False):
 
     # generate custom service config
     service_data = SERVICE_TEMPLATE.replace("[PLACEHOLDER]", additional_parameters)
-
+    service_data = service_data.replace("[MONITORING-PORT]", monitoringPort)
+    
     # debug print out service
     print()
     print("*** New systemd service: {}".format(SERVICE_NAME))
