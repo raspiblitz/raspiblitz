@@ -35,6 +35,7 @@ install=0
 wantedBranch="$1"
 wantedGitHubUser="$2"
 if [ "${wantedBranch}" = "-run" ]; then
+  # "-run" ist just used by "patch" command and will ignore all further parameter
   wantedBranch="${activeBranch}"
   wantedGitHubUser="${activeGitHubUser}"
 fi

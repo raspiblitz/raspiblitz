@@ -192,27 +192,9 @@ patch()
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
         echo "--> " $pullRequestID
         cd /home/admin/raspiblitz
-        git fetch origin pull/${pullRequestID}/head:${pullRequestID}pr
-        error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${pullRequestID}pr)
-        if [ ${#error} -gt 0 ]; then
-          whiptail --title "ERROR" --msgbox "${error}" 8 30
-        fi
-      fi
-      exit 1
-      ;;
-    PR)
-      clear
-      echo "..."
-      pullRequestID=$(whiptail --inputbox "\nPlease enter the NUMBER of the PullRequest on RaspiBlitz Repo '${activeGitHubUser}'?" 10 46 --title "Checkout PullRequest ID" 3>&1 1>&2 2>&3)
-      exitstatus=$?
-      if [ $exitstatus = 0 ]; then
-        pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
-        echo "--> " $pullRequestID
-        cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh -run pr${pullRequestID})
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
