@@ -544,15 +544,6 @@ def subscription_detail():
             if sub['dns_response']!=sub['ip'] and len(sub['warning'])==0:
                 sub['warning'] = "Domain resolves not to target IP yet."
 
-        # check ping ip target
-        response = os.system("ping -c 1 " + subscription_id)
-        if response == 0:
-            sub['ping'] = 1
-        else:
-            sub['ping'] = 0
-            if len(sub['warning'])==0:
-                sub['warning'] = "Ping on IP is not working."
-
         # when https testport is set - check if you we get a https response
         sub['https_response'] = -1
         if len(httpsTestport) > 0:
