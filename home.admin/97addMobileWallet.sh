@@ -217,8 +217,8 @@ case $CHOICE in
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
-Or scan the qr code on the LCD with yur mobile phone.
-" 11 65
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
@@ -257,12 +257,21 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
     ;;
   ZEUS_IOS)
       appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+      #/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+	  #whiptail --title "Install Testflight and Zeus on your iOS device" \
+	  #  --yes-button "continue" \
+	  #	--no-button "link as QR code" \
+	  #	--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+	  #if [ $? -eq 1 ]; then
+	  #	/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  #fi
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Testflight and Zeus on your iOS device" \
-	    --yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
+		--yes-button "Continue" \
+		--no-button "Link as QR Code" \
+		--yesno "At the moment this app is in public beta testing.\nFirst open Apple Apstore, search & install 'TestFlight' app.\n\nThen open the following link on your mobile and choose 'Open In TestFlight'\nWhen Zeus is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
+		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
@@ -282,8 +291,8 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
-Or scan the qr code on the LCD with yur mobile phone.
-" 11 65
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-REST-API
