@@ -177,7 +177,7 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
-        sudo -u admin /home/admin/XXsyncScripts.sh -run ${newGitHubBranch}
+        sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch}
         sleep 4
       fi
       patch
