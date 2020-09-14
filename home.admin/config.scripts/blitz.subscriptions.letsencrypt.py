@@ -527,6 +527,9 @@ def subscription_detail():
         handleException(e)
 
     subscription_id = sys.argv[2]
+    httpsTestport = ""
+    if len(sys.argv) >= 3:
+        httpsTestport = sys.argv[3]
     try:
         sub = get_subscription(subscription_id)
 
@@ -539,8 +542,35 @@ def subscription_detail():
         if subscription_id in out:        
             sub['dns_response'] = out.split(" ")[0]
             if sub['dns_response']!=sub['ip'] and len(sub['warning'])==0:
-                sub['warning'] = "DNS resolves not to target IP yet."
+                sub['warning'] = "Domain resolves not to target IP yet."
 
+        # check ping ip target
+        response = os.system("ping -c 1 " + subscription_id)
+        if response == 0:
+            sub['ping'] = 1
+        else:
+            sub['ping'] = 0
+            if len(sub['warning'])==0:
+                sub['warning'] = "Ping on IP is not working."
+
+        # when https testport is set - check if you we get a https response
+        sub['https_response'] = -1
+        if len(httpsTestport) > 0:
+            url = "https://{0}:{1}".format(subscription_id, httpsTestport)
+            print("# calling URL: {0}".format(url))
+            try:
+                response = session.get(url)
+                print("# response-code: {0}".format(response.status_code))
+                if response.status_code == 200:
+                    sub['https_response'] = 1
+                else:
+                    sub['https_response'] = 0
+            except Exception as e:
+                sub['https_response'] = 0
+                print("Error on HTTPS")
+            if sub['https_response']==0 and len(sub['warning'])==0:
+                sub['warning'] = "Not able to get HTTPS response."
+                
         print(json.dumps(sub, indent=2))
 
     except Exception as e:
