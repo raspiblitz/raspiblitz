@@ -528,7 +528,7 @@ def subscription_detail():
 
     subscription_id = sys.argv[2]
     httpsTestport = ""
-    if len(sys.argv) >= 3:
+    if len(sys.argv) > 3:
         httpsTestport = sys.argv[3]
     try:
         sub = get_subscription(subscription_id)
