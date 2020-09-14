@@ -242,12 +242,12 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  fi
 
       appstoreLink="https://github.com/fusion44/sendmany/releases"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install SendMany APK from GithubReleases (open assets) on your device" \
-	    --yes-button "continue" \
-		--no-button "link as QR code" \
+	  whiptail --title "Install SendMany APK from GithubReleases" \
+	    --yes-button "Continue" \
+		--no-button "Link as QR code" \
 		--yesno "Download & install the SendMany APK (armeabi-v7) from GitHub:\n\n${appstoreLink}\n\nEasiest way to scan QR code on LCD and download/install.\n\nWhen installed and started -> continue." 13 65
 	  if [ $? -eq 1 ]; then
+	  	/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
@@ -296,13 +296,18 @@ Or scan the qr code on the LCD with your mobile phone.
   	;;
   FULLY_NODED)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
-		--yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "Download the app from the AppStore:\n\n${appstoreLink}\n\nWhen installed and started -> continue" 8 60
+		--yes-button "Continue" \
+		--no-button "StoreLink" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'FullyNoded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+		whiptail --title " App Store Link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
   	  /home/admin/config.scripts/bonus.fullynoded.sh
