@@ -257,19 +257,11 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
     ;;
   ZEUS_IOS)
       appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
-      #/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  #whiptail --title "Install Testflight and Zeus on your iOS device" \
-	  #  --yes-button "continue" \
-	  #	--no-button "link as QR code" \
-	  #	--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
-	  #if [ $? -eq 1 ]; then
-	  #	/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
-	  #fi
       /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Testflight and Zeus on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "Link as QR Code" \
-		--yesno "At the moment this app is in public beta testing.\nFirst open Apple Apstore, search & install 'TestFlight' app.\n\nThen open the following link on your mobile:\n${appstoreLink}\nUse 'Open In TestFlight' option of your mobile browser.\n\nWhen Zeus is installed and started --> Continue." 14 65
+		--yesno "At the moment this app is in public beta testing.\nFirst open Apple Apstore, search & install 'TestFlight' app.\n\nThen open the following link on your mobile:\n${appstoreLink}\n\nUse 'Open In TestFlight' option of your mobile browser.\nWhen Zeus is installed and started --> Continue." 14 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
