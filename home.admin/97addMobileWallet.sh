@@ -271,7 +271,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "continue" \
 		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone:\n\nAnd search for 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\n\nWhen installed and started -> continue." 10 65
+		--yesno "Open the Android Play Store on your mobile phone and\n search for --> 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\n\nWhen installed and started -> continue." 14 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
