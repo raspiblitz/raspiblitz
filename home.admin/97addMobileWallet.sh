@@ -31,6 +31,10 @@ if [ ${isForwarded} -gt 0 ]; then
   aks4IP2TOR=0
 fi
 
+echo "# justLocal(${justLocal})"
+echo "# aks4IP2TOR(${aks4IP2TOR})"
+read key
+
 # check if dynamic domain is set
 if [ ${justLocal} -eq 1 ]; then
   whiptail --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
@@ -85,6 +89,10 @@ checkIP2TOR()
   if [ ${#error} -eq 0 ]; then
     ip2tor="$1"
   fi
+
+  echo "# ip2tor(${ip2tor})"
+  echo "# aks4IP2TOR(${aks4IP2TOR})"
+  read key
   
   # if IP2TOR is not already available:
   # and the checks from avove showed there is SSH forwarding / dynDNS
