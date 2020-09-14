@@ -277,8 +277,8 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
-Or scan the qr code on the LCD with yur mobile phone.\n
-" 12 60
+Or scan the qr code on the LCD with yur mobile phone.
+" 12 65
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-REST-API
