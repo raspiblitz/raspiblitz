@@ -552,7 +552,7 @@ def subscription_check():
         sub = get_subscription(subscription_id)
         print(sub)
 
-        //print(json.dumps(sub, indent=2))
+        #print(json.dumps(sub, indent=2))
 
     except Exception as e:
         handleException(e)
