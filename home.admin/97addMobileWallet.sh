@@ -9,12 +9,14 @@ aks4IP2TOR=0
 
 # if TOR is activated then outside reach is possible (no notice)
 if [ "${runBehindTor}" = "on" ]; then
+  echo "# runBehindTor ON"
   justLocal=0
   aks4IP2TOR=1
 fi
 
 # if dynDomain is set connect from outside is possible (no notice)
 if [ ${#dynDomain} -gt 0 ]; then
+  echo "# dynDomain ON"
   justLocal=0
   aks4IP2TOR=0
 fi
@@ -22,11 +24,13 @@ fi
 # if sshtunnel to 10009/8080 then outside reach is possible (no notice)
 isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
 if [ ${isForwarded} -gt 0 ]; then
+  echo "# forward 10009 ON"
   justLocal=0
   aks4IP2TOR=0
 fi
 isForwarded=$(echo ${sshtunnel} | grep -c "8080<")
 if [ ${isForwarded} -gt 0 ]; then
+  echo "# forward 8080 ON"
   justLocal=0
   aks4IP2TOR=0
 fi
