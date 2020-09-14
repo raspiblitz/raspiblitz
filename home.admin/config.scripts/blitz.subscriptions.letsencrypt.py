@@ -26,8 +26,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.letsencrypt.py subscriptions-list")
     print("# blitz.subscriptions.letsencrypt.py subscription-new <dyndns|ip> <duckdns> <id> <token> [ip|tor|ip&tor]")
     print("# blitz.subscriptions.letsencrypt.py subscription-detail <id>")
-    print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
+    print("# blitz.subscriptions.letsencrypt.py subscription-check <id>")
     print("# blitz.subscriptions.letsencrypt.py subscription-cancel <id>")
+    print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
     sys.exit(1)
 
 # constants for standard services
@@ -517,6 +518,7 @@ def subscriptions_list():
 #######################
 # SUBSCRIPTION DETAIL
 #######################
+
 def subscription_detail():
     # check parameters
     try:
@@ -529,6 +531,28 @@ def subscription_detail():
     try:
         sub = get_subscription(subscription_id)
         print(json.dumps(sub, indent=2))
+
+    except Exception as e:
+        handleException(e)
+
+#######################
+# SUBSCRIPTION CHECK
+#######################
+
+def subscription_check():
+    # check parameters
+    try:
+        if len(sys.argv) <= 2:
+            raise BlitzError("incorrect parameters", "")
+    except Exception as e:
+        handleException(e)
+
+    subscription_id = sys.argv[2]
+    try:
+        sub = get_subscription(subscription_id)
+        print(sub)
+
+        //print(json.dumps(sub, indent=2))
 
     except Exception as e:
         handleException(e)
@@ -590,6 +614,9 @@ def main():
 
     elif sys.argv[1] == "subscription-detail":
         subscription_detail()
+
+    elif sys.argv[1] == "subscription-check":
+        subscription_check()
 
     elif sys.argv[1] == "subscription-new":
         subscription_new()
