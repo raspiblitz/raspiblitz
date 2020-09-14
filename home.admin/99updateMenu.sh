@@ -125,10 +125,11 @@ patch()
   # Patch Options
   OPTIONS=(PATCH "Patch/Sync RaspiBlitz with GitHub Repo" \
            REPO "Change GitHub Repo to sync with" \
-           BRANCH "Change GitHub Branch to sync with"
+           BRANCH "Change GitHub Branch to sync with" \
+           PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 10 55 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 11 55 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -176,13 +177,28 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
+        sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch}
+        sleep 4
+      fi
+      patch
+      exit 1
+      ;;
+    PR)
+      clear
+      echo "..."
+      pullRequestID=$(whiptail --inputbox "\nPlease enter the NUMBER of the PullRequest on RaspiBlitz Repo '${activeGitHubUser}'?" 10 46 --title "Checkout PullRequest ID" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus = 0 ]; then
+        pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
+        echo "--> " $pullRequestID
+        cd /home/admin/raspiblitz
+        git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      patch
       exit 1
       ;;
   esac
