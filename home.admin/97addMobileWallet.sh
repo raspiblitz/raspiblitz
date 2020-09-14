@@ -267,13 +267,18 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
   	;;
   ZEUS_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "Find and install the Zeus Wallet on the Android Play Store:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue." 10 65
+		--no-button "StoreLink" \
+		--yesno "Open the Android Play Store on your mobile phone:\n\nAnd search for 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\n\nWhen installed and started -> continue." 10 65
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+		whiptail --title " App Store Link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the qr code on the LCD with yur mobile phone.\n
+" 12 60
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-REST-API
