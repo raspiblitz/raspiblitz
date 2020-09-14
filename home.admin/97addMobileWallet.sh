@@ -188,13 +188,27 @@ case $CHOICE in
       ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
-      /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install Testflight and Zap on your iOS device" \
-		--yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
+      #/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+	  #whiptail --title "Install Testflight and Zap on your iOS device" \
+	#	--yes-button "continue" \
+	#	--no-button "link as QR code" \
+	#	--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
+	 # if [ $? -eq 1 ]; then
+	  #  /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+	  #fi
+
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zap.png
+	  whiptail --title "Install Fully Noded on your iOS device" \
+		--yes-button "Continue" \
+		--no-button "StoreLink" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'Zap Bitcoin'\n\nCheck that logo is like on LCD & author: Zap Technologies LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
+		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
+		whiptail --title " App Store Link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
 	  checkIP2TOR LND-GRPC-API
@@ -300,7 +314,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
-		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'FullyNoded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
