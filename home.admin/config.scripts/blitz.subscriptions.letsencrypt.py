@@ -548,18 +548,12 @@ def subscription_detail():
         sub['https_response'] = -1
         if len(httpsTestport) > 0:
             url = "https://{0}:{1}".format(subscription_id, httpsTestport)
-            print("# calling URL: {0}".format(url))
             try:
                 response = session.get(url)
-                print("# response-code: {0}".format(response.status_code))
-                if response.status_code == 200:
-                    sub['https_response'] = 1
-                else:
-                    sub['https_response'] = 0
+                sub['https_response'] = response.status_code
             except Exception as e:
                 sub['https_response'] = 0
-                print("Error on HTTPS")
-            if sub['https_response']==0 and len(sub['warning'])==0:
+            if sub['https_response']!=200 and len(sub['warning'])==0:
                 sub['warning'] = "Not able to get HTTPS response."
                 
         print(json.dumps(sub, indent=2))
