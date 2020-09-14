@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## Whats new in Version 1.6.1 of RaspiBlitz?
+
+- Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/rootzoll/raspiblitz/issues/1412)
+
 ## Whats new in Version 1.6 of RaspiBlitz?
 
 - Update: Raspberry Pi OS Base Image (May 2020)
