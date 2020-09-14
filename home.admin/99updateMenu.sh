@@ -178,7 +178,7 @@ patch()
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh -run ${newGitHubBranch})
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
@@ -197,7 +197,7 @@ patch()
         cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh -run pr${pullRequestID})
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
