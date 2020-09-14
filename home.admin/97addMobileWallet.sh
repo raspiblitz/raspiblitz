@@ -211,7 +211,7 @@ case $CHOICE in
 	  whiptail --title "Install Zap on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zap bitcoin app'\n\nCheck that logo is like on LCD and author is: Zap\n\nWhen app is installed and started --> Continue." 14 65
+		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zap bitcoin app'\n\nCheck that logo is like on LCD and author is: Zap\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
@@ -276,7 +276,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\n\nWhen app is installed and started --> Continue." 14 65
+		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
