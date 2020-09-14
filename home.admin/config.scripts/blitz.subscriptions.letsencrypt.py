@@ -23,11 +23,11 @@ from blitzpy import RaspiBlitzConfig,BlitzError
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
-    print("# blitz.subscriptions.ip2tor.py subscriptions-list")
-    print("# blitz.subscriptions.ip2tor.py subscription-new <dyndns|ip> <duckdns> <id> <token> [ip|tor|ip&tor]")
-    print("# blitz.subscriptions.ip2tor.py subscription-detail <id>")
-    print("# blitz.subscriptions.ip2tor.py domain-by-ip <ip>")
-    print("# blitz.subscriptions.ip2tor.py subscription-cancel <id>")
+    print("# blitz.subscriptions.letsencrypt.py subscriptions-list")
+    print("# blitz.subscriptions.letsencrypt.py subscription-new <dyndns|ip> <duckdns> <id> <token> [ip|tor|ip&tor]")
+    print("# blitz.subscriptions.letsencrypt.py subscription-detail <id>")
+    print("# blitz.subscriptions.letsencrypt.py subscription-cancel <id>")
+    print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
     sys.exit(1)
 
 # constants for standard services
@@ -517,6 +517,7 @@ def subscriptions_list():
 #######################
 # SUBSCRIPTION DETAIL
 #######################
+
 def subscription_detail():
     # check parameters
     try:
@@ -526,8 +527,35 @@ def subscription_detail():
         handleException(e)
 
     subscription_id = sys.argv[2]
+    httpsTestport = ""
+    if len(sys.argv) > 3:
+        httpsTestport = sys.argv[3]
     try:
         sub = get_subscription(subscription_id)
+
+        # use unix 'getent' to resolve DNS to IP
+        dns_result = subprocess.Popen(
+        ["getent", "hosts", subscription_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
+        out, err = dns_result.communicate()
+        sub['dns_response'] = "unknown"
+        if subscription_id in out:        
+            sub['dns_response'] = out.split(" ")[0]
+            if sub['dns_response']!=sub['ip'] and len(sub['warning'])==0:
+                sub['warning'] = "Domain resolves not to target IP yet."
+
+        # when https testport is set - check if you we get a https response
+        sub['https_response'] = -1
+        if len(httpsTestport) > 0:
+            url = "https://{0}:{1}".format(subscription_id, httpsTestport)
+            try:
+                response = session.get(url)
+                sub['https_response'] = response.status_code
+            except Exception as e:
+                sub['https_response'] = 0
+            if sub['https_response']!=200 and len(sub['warning'])==0:
+                sub['warning'] = "Not able to get HTTPS response."
+                
         print(json.dumps(sub, indent=2))
 
     except Exception as e:
