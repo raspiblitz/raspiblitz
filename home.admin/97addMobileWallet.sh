@@ -80,6 +80,7 @@ checkIP2TOR()
 
   # check if IP2TOR service is already available
   error=""
+  ip2tor=""
   source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
   if [ ${#error} -eq 0 ]; then
     ip2tor="$1"
