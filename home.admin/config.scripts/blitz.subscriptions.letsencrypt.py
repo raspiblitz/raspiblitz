@@ -556,11 +556,11 @@ def subscription_check():
         ["getent", "hosts", subscription_id],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
         out, err = dns_result.communicate()
-
-        # parse result
         sub['dns-result'] = "unknown"
         if subscription_id in out:        
             sub['dns-result'] = out.split(" ")[0]
+        if sub['dns-result']!=sub['ip'] and len(sub['warning'])==0:
+            sub['warning'] = "DNS resolves not to target IP yet."
 
         print(json.dumps(sub, indent=2))
 
