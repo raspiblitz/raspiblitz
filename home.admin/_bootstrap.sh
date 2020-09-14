@@ -345,7 +345,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   if [ ${#error} -gt 0 ]; then
     echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}

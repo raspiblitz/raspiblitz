@@ -93,7 +93,8 @@ if [ "$1" = "status" ]; then
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
-    echo "hddCandidate='${hddDataPartition}'"
+    echo "hddCandidate='${hdd}'"
+    echo "hddPartitionCandidate='${hddDataPartition}'"
     echo "isSSD=${isSSD}"
 
     if [ ${#hddDataPartition} -gt 0 ]; then
