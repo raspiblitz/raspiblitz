@@ -10,6 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /mnt/hdd/raspiblitz.conf
+echo "# bonus.cryptoadvance-specter.sh $1"
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -81,10 +82,6 @@ if [ "$1" = "status" ]; then
   fi
   exit 0
 fi
-
-# stop services
-echo "#    --> making sure the service is not running"
-sudo systemctl stop cryptoadvance-specter  2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -262,6 +259,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
 
     echo "#    --> REMOVING Cryptoadvance Specter"
+    sudo systemctl stop cryptoadvance-specter
     sudo systemctl disable cryptoadvance-specter
     sudo rm /etc/systemd/system/cryptoadvance-specter.service
     sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter

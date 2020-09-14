@@ -55,6 +55,10 @@ if [ "$1" = "status" ]; then
       source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
         echo "ip2torDomain='${domain}'"
+        domainWarning=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".warning")
+        if [ ${#domainWarning} -gt 0 ]; then
+          echo "ip2torWarn='${domainWarning}'"
+        fi
       fi
     fi
 
@@ -87,6 +91,10 @@ if [ "$1" = "menu" ]; then
       whiptail --title " BTCPay Server " --msgbox "BTCPay Server needs to be re-installed.\nPress OK to start process." 8 45
       /home/admin/config.scripts/bonus.btcpayserver.sh on
       exit 0
+  fi
+
+  if [ ${#ip2torWarn} -gt 0 ]; then
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
   fi
 
   text="Local Webrowser: https://${localIP}:${httpsPort}"
