@@ -341,7 +341,7 @@ EOF
     sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
     echo ""
 
-    sudo mkdir -p /etc/systemd/system/tor@default.service.d 
+    sudo mkdir -p /etc/systemd/system/tor@default.service.d
     if ! grep -Eq "^ReadWriteDirectories=" /etc/systemd/system/tor@default.service.d/raspiblitz.conf; then
       echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
     fi
