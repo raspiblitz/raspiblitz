@@ -597,10 +597,8 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         print("# using default shop url")
 
     # remove https:// from shop url (to keep it short)
-    if "http://" in shopurl:
-        shopurl = shopurl[7:]
-    if "https://" in shopurl:
-        shopurl = shopurl[8:]
+    if shopurl.find("://") > 0:
+        shopurl = shopurl[shopurl.find("://") + 3:]
 
     while True:
 
