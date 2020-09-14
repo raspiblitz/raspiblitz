@@ -551,18 +551,18 @@ def subscription_check():
     try:
         sub = get_subscription(subscription_id)
 
-        print("THE IP IT SHOULD BE:")
-        print(sub['ip'])
-
+        # use unix 'getent' to resolve DNS to IP
         dns_result = subprocess.Popen(
         ["getent", "hosts", subscription_id],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
         out, err = dns_result.communicate()
-        eprint(str(out))
-        eprint(str(err))
 
-        #getent hosts testbits.duckdns.org | grep 'testbits.duckdns.org' | cut -d " " -f1
-        #print(json.dumps(sub, indent=2))
+        # parse result
+        sub['dns-result'] = "unknown"
+        if subscription_id in out:        
+            sub['dns-result'] = out.split(" ")[0]
+
+        print(json.dumps(sub, indent=2))
 
     except Exception as e:
         handleException(e)
