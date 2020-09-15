@@ -17,9 +17,9 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-
+# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
 lndUpdateVersion="0.11.0-beta"
-lndUpdateComment="LND update available with database migration."
+lndUpdateComment="This is a main LND update with a database migration. You might not be able to downgrade again. Also not all additional apps are fully tested with the this update."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
