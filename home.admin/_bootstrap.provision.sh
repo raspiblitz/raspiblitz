@@ -307,7 +307,7 @@ if [ "${lndmanage}" = "on" ]; then
   sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
 else
-  echo "Provisioning ElectRS - keep default" >> ${logFile}
+  echo "Provisioning lndmanage - not active" >> ${logFile}
 fi
 
 # CUSTOM PORT
