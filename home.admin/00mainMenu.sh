@@ -296,9 +296,6 @@ case $CHOICE in
               read key
               sudo /home/admin/XXshutdown.sh reboot
               exit 0
-            else
-              echo "Press ENTER to return to main menu .."
-              read key
             fi
             ;;
         UPDATE)
