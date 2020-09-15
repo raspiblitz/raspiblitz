@@ -38,7 +38,7 @@ Password C will be stored on the device.
     echo "# input cannot be empty - repeat"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
-    exit 1
+    exit $?
   fi
 
   # test if correct
@@ -52,7 +52,7 @@ Password C will be stored on the device.
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
     sudo /home/admin/config.scripts/lnd.autounlock.sh on
-    exit 1
+    exit $?
   fi
   shred -u ./.tmp
 fi
@@ -90,6 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Auto-Unlock is now ON"
   echo "# NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
+  exit 0
 fi
 
 # switch off
@@ -104,4 +105,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 
   echo "# Auto-Unlock is now OFF"
+  exit 0
 fi
