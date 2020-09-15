@@ -216,7 +216,9 @@ lnd()
 
   # LND Update Options
   OPTIONS=()
-  # OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  if [ ${lndUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  fi
   OPTIONS+=(RECKLESS "Experimental LND update to ${lndLatestVersion}")
 
   CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
