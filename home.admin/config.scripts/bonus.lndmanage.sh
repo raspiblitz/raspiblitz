@@ -27,7 +27,8 @@ fi
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "${lndmanage}" == "on" ]; then
+  directoryExists=$(sudo ls /home/admin/lndmanage 2>/dev/null | wc -l)
+  if [ ${directoryExists} -gt 0 ]; then
     echo "# FAIL - LNDMANAGE already installed"
     sleep 3
     exit 1
