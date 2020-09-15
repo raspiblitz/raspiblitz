@@ -183,8 +183,8 @@ if [ ${#lndInterimsUpdate} -gt 0 ]; then
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard LND version is most more up to date
-    echo "Provisioning LND secure interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.update.sh secure ${lndInterimsUpdate} >> ${logFile}
+    echo "Provisioning LND verified interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.update.sh verified ${lndInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
