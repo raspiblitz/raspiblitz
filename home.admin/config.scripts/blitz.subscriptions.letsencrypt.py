@@ -177,7 +177,9 @@ def dynu_update(domain, token, ip):
     print("# headers: {0}".format(headers))
     data = {
         "name": domain,
-        "ipv4Address": ip
+        "ipv4Address": ip,
+        "ipv4": True,
+        "ipv6": False
     }
     data = json.dumps(data)
     print("# post data: {0}".format(data))
