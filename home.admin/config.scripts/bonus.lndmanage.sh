@@ -7,6 +7,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# set version of LND manage to install
+# https://github.com/bitromortac/lndmanage/releases
+lndmanageVersion="0.11.0"
+
 source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
@@ -35,19 +39,31 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   
   echo "*** INSTALL LNDMANAGE ***"
+
+  # prepare directory
   mkdir /home/admin/lndmanage 2>/dev/null
   sudo chown admin:admin /home/admin/lndmanage
+
+  # download files
   cd /home/admin/lndmanage
+  sudo -u admin wget -N https://github.com/bitromortac/lndmanage/releases/download/v${lndmanageVersion}/lndmanage-${lndmanageVersion}-py3-none-any.whl
+  sudo -u admin wget -N https://github.com/bitromortac/lndmanage/releases/download/v${lndmanageVersion}/lndmanage-${lndmanageVersion}-py3-none-any.whl.asc
+  sudo -u admin wget -N https://github.com/bitromortac.gpg
+
+  # verify
+  gpg --import bitromortac.gpg
+  gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc
 
   # activate virtual environment
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
 
   # get build dependencies
-  python3 -m pip install --upgrade pip wheel setuptools
-
+  # python3 -m pip install --upgrade pip wheel setuptools
   # install lndmanage
-  python3 -m pip install lndmanage==0.11.0
+  # python3 -m pip install lndmanage==0.11.0
+
+  python3 -m pip install lndmanage-0.11.0-py3-none-any.whl
 
   # check if install was successfull
   if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
