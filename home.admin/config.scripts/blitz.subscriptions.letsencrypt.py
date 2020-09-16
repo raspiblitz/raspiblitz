@@ -435,8 +435,8 @@ If you havent already go to https://dynu.com
             "Enter the complete DDNS name:",
             height=10, width=40, init="",
             title="dynu.com DDNS Domain")
-        subdomain = text.strip()
-        if len(subdomain) < 6:
+            domain = text.strip()
+        if len(domain) < 6:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like a valid DDNS.
         ''', title="Invalid Input")
@@ -478,8 +478,6 @@ This looks not like valid.
             sys.exit(0)
 
         token = "{}:{}".format(clientid, secret)
-        print(token)
-        time.sleep(2)
 
     else:
         os.system("clear")
