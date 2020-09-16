@@ -187,7 +187,7 @@ def dynu_update(domain, token, ip):
         'dnssec': false
     }""".format(domain, ip)
     print("# post data: {0}".format(data))
-    time.sleep(800)
+    time.sleep(8)
     try:
         response = session.post(url, headers=headers, data=data)
         if response.status_code != 200:
