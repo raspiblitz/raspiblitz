@@ -138,14 +138,12 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if len(apitoken) == 0:
         raise BlitzError("access_token not found", response.content)
-    time.sleep(8)
 
     # get id for domain
     url = "https://api.dynu.com/v2/dns"
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# calling URL: {0}".format(url))
     print("# headers: {0}".format(headers))
-    time.sleep(8)
     try:
         response = session.get(url, headers=headers)
         if response.status_code != 200:
@@ -158,9 +156,11 @@ def dynu_update(domain, token, ip):
     id_for_domain=""
     try:
         print(response.content)
+        time.sleep(4)
         data = json.loads(response.content)
         for entry in data["domains"]:   
             print(entry)
+            time.sleep(4)
             if entry['name'] is domain:
                 id_for_domain = entry["id"]
                 break
