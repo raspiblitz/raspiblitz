@@ -219,9 +219,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
         if dnsservice == "dynu":
-            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-Sorry .. dynu.com cannot be used for updating dyndns yet with RaspiBlitz.
-        ''', title="Not implemented yet.")
+            raise BlitzError("not implemented", "dynamic ip updating for dynu.com not implemented yet ", e)
             sys.exit(0)
 
     # update DNS with actual IP
