@@ -458,9 +458,9 @@ Continue in your dynu.com account:
             title="dynu.com OAuth2 ClientID")
         clientid = text.strip()
         clientid = clientid.split(' ')[0]
-        if len(clientid) < 20:
+        if len(clientid) < 20 or len(clientid.split('-'))<2: 
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like valid.
+This looks not like valid ClientID.
         ''', title="Invalid Input")
             sys.exit(0)
 
@@ -471,7 +471,7 @@ This looks not like valid.
             title="dynu.com OAuth2 SECRET")
         secret = text.strip()
         secret = secret.split(' ')[0]
-        if len(secret) < 20:
+        if len(secret) < 10:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like valid.
         ''', title="Invalid Input")
