@@ -165,10 +165,9 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if id_for_domain == 0:
         raise BlitzError("domain not found", response.content)
-    time.sleep(8)
 
     # update ip address
-    url = "https://api.dynu.com/v2/dns/{1}".format(id_for_domain)
+    url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
     print("# calling URL: {0}".format(url))
