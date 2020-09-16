@@ -10,6 +10,8 @@ fi
 # set version of LND manage to install
 # https://github.com/bitromortac/lndmanage/releases
 lndmanageVersion="0.11.0"
+pgpKeyDownload="https://github.com/bitromortac.gpg"
+gpgFingerprint="0453B9F5071261A40FDB34181965063FC13BEBE2"
 
 source /mnt/hdd/raspiblitz.conf
 
@@ -44,39 +46,48 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   mkdir /home/admin/lndmanage 2>/dev/null
   sudo chown admin:admin /home/admin/lndmanage
 
-  # download files
+  echo "# downloading files ..."
   cd /home/admin/lndmanage
   sudo -u admin wget -N https://github.com/bitromortac/lndmanage/releases/download/v${lndmanageVersion}/lndmanage-${lndmanageVersion}-py3-none-any.whl
   sudo -u admin wget -N https://github.com/bitromortac/lndmanage/releases/download/v${lndmanageVersion}/lndmanage-${lndmanageVersion}-py3-none-any.whl.asc
-  sudo -u admin wget -N https://github.com/bitromortac.gpg
+  sudo -u admin wget -N ${pgpKeyDownload} -O sigingkey.gpg
 
-  # verify
-  gpg --import bitromortac.gpg
-  gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc
+  echo "# checking signing keys ..."
+  gpg --import sigingkey.gpg
+  gpgCheck=$(gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc | grep -c "${gpgFingerprint}")
+  echo "# gpgCheck(${gpgCheck})"
+  if [ ${gpgCheck} -gt 0 ]; then
+    echo "# OK signature is valid"
+    sleep 5
+  else
+    echo "error='unvalid signature'"
+    exit 1
+  fi
 
-  # activate virtual environment
+  echo "# installing ..."
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
+  python3 -m pip install lndmanage-0.11.0-py3-none-any.whl
 
   # get build dependencies
   # python3 -m pip install --upgrade pip wheel setuptools
   # install lndmanage
   # python3 -m pip install lndmanage==0.11.0
 
-  python3 -m pip install lndmanage-0.11.0-py3-none-any.whl
-
   # check if install was successfull
   if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
     echo
     echo "#!! FAIL --> Was not able to install LNDMANAGE"
     echo "#!! Maybe because of internet network issues - try again later."
-    sleep 9
+    sleep 5
     exit 1
   fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
-
+  echo "#######################################################################"
+  echo "# OK install done"
+  echo "#######################################################################"
   echo "# usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
   echo "# usage: lndmanage --help"
   echo "# To start type: 'manage' in the command line."
