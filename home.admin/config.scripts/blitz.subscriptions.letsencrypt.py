@@ -186,7 +186,6 @@ def dynu_update(domain, token, ip):
         'allowZoneTransfer': false,
         'dnssec': false
     }""".format(domain, ip)
-    data = json.load(data)
     print("# post data: {0}".format(data))
     time.sleep(800)
     try:
