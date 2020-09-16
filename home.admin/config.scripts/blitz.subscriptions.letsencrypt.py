@@ -435,7 +435,7 @@ If you havent already go to https://dynu.com
             "Enter the complete DDNS name:",
             height=10, width=40, init="",
             title="dynu.com DDNS Domain")
-            domain = text.strip()
+        domain = text.strip()
         if len(domain) < 6:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like a valid DDNS.
