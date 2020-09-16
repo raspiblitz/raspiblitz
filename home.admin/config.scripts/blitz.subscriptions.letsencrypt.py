@@ -173,7 +173,19 @@ def dynu_update(domain, token, ip):
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# headers: {0}".format(headers))
     time.sleep(4)
-    data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
+    data = {
+        "name": domain,
+        "group": "office",
+        "ipv4Address": ip,
+        "ipv6Address": "",
+        "ttl": 90,
+        "ipv4": True,
+        "ipv6": False,
+        "ipv4WildcardAlias": False,
+        "ipv6WildcardAlias": False,
+        "allowZoneTransfer": False,
+        "dnssec": False
+    }
     print("# post data: {0}".format(data))
     time.sleep(8)
     try:
