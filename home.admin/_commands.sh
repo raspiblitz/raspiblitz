@@ -60,6 +60,13 @@ function off() {
   ./XXshutdown.sh
 }
 
+# command: github
+# jumpng directly into the options to change branch/repo/pr
+function github() {
+  cd /home/admin
+  ./99updateMenu.sh github
+}
+
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
