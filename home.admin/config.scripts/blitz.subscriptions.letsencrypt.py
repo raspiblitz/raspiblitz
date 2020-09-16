@@ -142,7 +142,7 @@ def dynu_update(domain, token, ip):
 
     # get id for domain
     url = "https://api.dynu.com/v2/dns"
-    headers = {'accept': 'application/json', 'API-Key': apitoken}
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# calling URL: {0}".format(url))
     print("# headers: {0}".format(headers))
     time.sleep(8)
@@ -172,7 +172,7 @@ def dynu_update(domain, token, ip):
 
     # update ip address
     url = "https://api.dynu.com/v2/dns/{1}".format(id_for_domain)
-    headers = {'accept': 'application/json', 'API-Key': apitoken}
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
     print("# calling URL: {0}".format(url))
     print("# headers: {0}".format(headers))
