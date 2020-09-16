@@ -105,9 +105,42 @@ def dynu_update(domain, token, ip):
 
     print("# dynu update IP API call for {0}".format(domain))
 
+    # split token to oAuth username and password
+    try:
+        print("Splitting oAuth user & pass:")
+        username = token.split(":")[0]
+        password = token.split(":")[1]
+        print(username)
+        print(password)
+    except Exception as e:
+        raise BlitzError("failed to split token", token, e)
+
+    # get API token from oAuth data
+    url="https://api.dynu.com/v2/oauth2/token"
+    headers = {'accept': 'application/json'}
+    print("# calling URL: {0}".format(url))
+    try:
+        response = session.get(url, headers=headers, auth=(username, password))
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        raise BlitzError("failed HTTP request", url, e)
+    
+    # parse data
+    apitoken=""
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        apitoken = data["access_token"];
+    except Exception as e:
+        raise BlitzError("failed parsing data", response.content, e)
+    if len(apitoken) == 0:
+        raise BlitzError("access_token not found", response.content)
+
     # get id for domain
     url = "https://api.dynu.com/v2/dns"
-    headers = {'accept': 'application/json', 'API-Key': token}
+    headers = {'accept': 'application/json', 'API-Key': apitoken}
     print("# calling URL: {0}".format(url))
     try:
         response = session.get(url, headers=headers)
@@ -132,9 +165,9 @@ def dynu_update(domain, token, ip):
     if len(id_for_domain) == 0:
         raise BlitzError("domain not found", response.content)
 
-    # make HTTP requets
+    # update ip address
     url = "https://api.dynu.com/v2/dns/{1}".format(id_for_domain)
-    headers = {'accept': 'application/json', 'API-Key': token}
+    headers = {'accept': 'application/json', 'API-Key': apitoken}
     data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
     print("# calling URL: {0}".format(url))
     print("# post data: {0}".format(data))
@@ -147,7 +180,6 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed HTTP request", url, e)
 
     return response.content    
-
 
 #####################
 # PROCESS FUNCTIONS
@@ -174,6 +206,11 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
         subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
+        if dnsservice == "dynu":
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+Sorry .. dynu.com cannot be used for updating dyndns yet with RaspiBlitz.
+        ''', title="Not implemented yet.")
+            sys.exit(0)
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
@@ -409,27 +446,38 @@ This looks not like a valid DDNS.
         # show basic info on duck dns
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 Continue in your dynu.com account: 
-- open 'API Credentials'
-- see listed 'API Key' (not oAuth)
-- click glasses icon to view API Key
+- open 'Control Panel' > 'API Credentials'
+- see listed 'OAuth2' ClientID & Secret
+- click glasses icon to view values
         ''', title="dynu.com API Key needed")
 
-        # enter the token
+        # enter the CLIENTID
         code, text = d.inputbox(
-            "Enter the dynu.com API Key:",
+            "Enter the OAuth2 CLIENTID:",
             height=10, width=50, init="",
-            title="dynu.com API Key")
-        token = text.strip()
-        token = token.split(' ')[0]
-        if len(token) < 20:
+            title="dynu.com OAuth2 ClientID")
+        clientid = text.strip()
+        clientid = clientid.split(' ')[0]
+        if len(clientid) < 20:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like a valid API Key.
+This looks not like valid.
         ''', title="Invalid Input")
             sys.exit(0)
 
-        print("TODO: {0}".format(dnsservice))
-        time.sleep(4)
-        sys.exit(0)
+        # enter the SECRET
+        code, text = d.inputbox(
+            "Enter the OAuth2 SECRET:",
+            height=10, width=50, init="",
+            title="dynu.com OAuth2 SECRET")
+        secret = text.strip()
+        secret = secret.split(' ')[0]
+        if len(secret) < 20:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like valid.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        token = "{}:{}".format(clientid, secret)
 
     else:
         os.system("clear")

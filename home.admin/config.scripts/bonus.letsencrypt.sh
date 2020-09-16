@@ -254,6 +254,13 @@ elif [ "$1" = "issue-cert" ]; then
       echo "# preparing DUCKDNS"
       dnsservice="dns_duckdns"
       export DuckDNS_Token=${apitoken}
+  elif [ "${dnsservice}" == "dynu" ]; then
+      echo "# preparing DYNYU"
+      dnsservice="dns_dynu"
+      clientid=$(echo "${apitoken}" | cut -d ':' -f 1)
+      secret=$(echo "${apitoken}" | cut -d ':' -f 2)
+      export Dynu_ClientId="${clientid}"
+      export Dynu_Secret="${secret}"
   else
     echo "error='not supported dnsservice'"
     exit 1
@@ -333,7 +340,7 @@ elif [ "$1" = "remove-cert" ]; then
 
 
 ###################
-# REMOVE-CERT
+# REFRESH NGINX CERTS
 ###################
 
 elif [ "$1" = "refresh-ngnix-certs" ]; then
