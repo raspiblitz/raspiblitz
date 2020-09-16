@@ -177,7 +177,7 @@ def dynu_update(domain, token, ip):
         "name": domain,
         "ipv4Address": ip
     }
-    data = json.dump(data)
+    data = json.dumps(data)
     print("# post data: {0}".format(data))
     time.sleep(8)
     try:
