@@ -174,17 +174,17 @@ def dynu_update(domain, token, ip):
     print("# headers: {0}".format(headers))
     time.sleep(4)
     data = """{
-        "name": "{0}",
-        "group": "",
-        "ipv4Address": "{1}",
-        "ipv6Address": "",
-        "ttl": 90,
-        "ipv4": true,
-        "ipv6": false,
-        "ipv4WildcardAlias": false,
-        "ipv6WildcardAlias": false,
-        "allowZoneTransfer": false,
-        "dnssec": false
+        'name': '{0}',
+        'group": '',
+        'ipv4Address': '{1}',
+        'ipv6Address': '',
+        'ttl': 90,
+        'ipv4': true,
+        'ipv6': false,
+        'ipv4WildcardAlias': false,
+        'ipv6WildcardAlias': false,
+        'allowZoneTransfer': false,
+        'dnssec': false
     }""".format(domain, ip)
     data = json.load(data)
     print("# post data: {0}".format(data))
