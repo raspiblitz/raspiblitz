@@ -5,26 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 source /home/admin/_version.info
 
-clear
-
-# Basic Options
-OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery" \
-LND "Interim LND Update Options" \
-PATCH "Patch RaspiBlitz v${codeVersion}"
-)
-
-if [ "${bos}" == "on" ]; then
-  OPTIONS+=(BOS "Update Balance of Satoshis")
-fi
-if [ "${thunderhub}" == "on" ]; then
-  OPTIONS+=(THUB "Update ThunderHub")
-fi
-if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
-fi
-
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+## PROCEDURES
 
 release()
 {
@@ -177,8 +158,11 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
-        sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch}
-        sleep 4
+        error=""
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        if [ ${#error} -gt 0 ]; then
+          whiptail --title "ERROR" --msgbox "${error}" 8 30
+        fi
       fi
       patch
       exit 1
@@ -281,6 +265,31 @@ Do you really want to update LND now?
       ;;
   esac
 }
+
+# quick call by parameter
+if [ "$1" == "github" ]; then
+  patch
+  exit 0
+fi
+
+# Basic Options Menu
+OPTIONS=(
+RELEASE "RaspiBlitz Release Update/Recovery" \
+LND "Interim LND Update Options" \
+PATCH "Patch RaspiBlitz v${codeVersion}"
+)
+
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "Update ThunderHub")
+fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+fi
+
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
