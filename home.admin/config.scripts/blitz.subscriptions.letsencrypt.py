@@ -160,9 +160,12 @@ def dynu_update(domain, token, ip):
         data = json.loads(response.content)
         for entry in data["domains"]:   
             print(entry)
+            print(entry['name'])
+            print(domain)
+            print(entry['id'])
             time.sleep(4)
-            if entry['name'] is domain:
-                id_for_domain = entry["id"]
+            if entry['name'] == domain:
+                id_for_domain = entry['id']
                 break
     except Exception as e:
         raise BlitzError("failed parsing data", response.content, e)
