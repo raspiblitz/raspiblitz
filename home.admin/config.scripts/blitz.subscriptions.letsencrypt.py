@@ -168,10 +168,12 @@ def dynu_update(domain, token, ip):
 
     # update ip address
     url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
-    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
-    data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
     print("# calling URL: {0}".format(url))
+    time.sleep(4)
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# headers: {0}".format(headers))
+    time.sleep(4)
+    data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
     print("# post data: {0}".format(data))
     time.sleep(8)
     try:
@@ -180,6 +182,8 @@ def dynu_update(domain, token, ip):
             raise BlitzError("failed HTTP request", url + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
+        print(e)
+        time.sleep(8)
         raise BlitzError("failed HTTP request", url, e)
 
     return response.content    
