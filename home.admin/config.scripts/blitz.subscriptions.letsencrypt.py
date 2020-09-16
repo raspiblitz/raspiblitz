@@ -173,21 +173,22 @@ def dynu_update(domain, token, ip):
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# headers: {0}".format(headers))
     time.sleep(4)
-    data = {
-        "name": domain,
+    data = """{
+        "name": "{0}",
         "group": "",
-        "ipv4Address": ip,
+        "ipv4Address": "{1}",
         "ipv6Address": "",
         "ttl": 90,
-        "ipv4": "true",
-        "ipv6": "false",
-        "ipv4WildcardAlias": "false",
-        "ipv6WildcardAlias": "false",
-        "allowZoneTransfer": "false",
-        "dnssec": "false"
-    }
+        "ipv4": true,
+        "ipv6": false,
+        "ipv4WildcardAlias": false,
+        "ipv6WildcardAlias": false,
+        "allowZoneTransfer": false,
+        "dnssec": false
+    }""".format(domain, ip)
+    data = json.load(data)
     print("# post data: {0}".format(data))
-    time.sleep(8)
+    time.sleep(800)
     try:
         response = session.post(url, headers=headers, data=data)
         if response.status_code != 200:
