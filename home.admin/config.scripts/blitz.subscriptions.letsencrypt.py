@@ -101,6 +101,99 @@ def duckdns_update(domain, token, ip):
 
     return response.content
 
+def dynu_update(domain, token, ip):
+
+    print("# dynu update IP API call for {0}".format(domain))
+
+    # split token to oAuth username and password
+    try:
+        print("Splitting oAuth user & pass:")
+        username = token.split(":")[0]
+        password = token.split(":")[1]
+        print(username)
+        print(password)
+    except Exception as e:
+        raise BlitzError("failed to split token", token, e)
+
+    # get API token from oAuth data
+    url="https://api.dynu.com/v2/oauth2/token"
+    headers = {'accept': 'application/json'}
+    print("# calling URL: {0}".format(url))
+    print("# headers: {0}".format(headers))
+    try:
+        response = session.get(url, headers=headers, auth=(username, password))
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        raise BlitzError("failed HTTP request", url, e)
+    
+    # parse data
+    apitoken=""
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        apitoken = data["access_token"];
+    except Exception as e:
+        raise BlitzError("failed parsing data", response.content, e)
+    if len(apitoken) == 0:
+        raise BlitzError("access_token not found", response.content)
+
+    # get id for domain
+    url = "https://api.dynu.com/v2/dns"
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
+    print("# calling URL: {0}".format(url))
+    print("# headers: {0}".format(headers))
+    try:
+        response = session.get(url, headers=headers)
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed HTTP request", url, e)
+
+    # parse data
+    id_for_domain=0
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        for entry in data["domains"]:   
+            if entry['name'] == domain:
+                id_for_domain = entry['id']
+                break
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed parsing data", response.content, e)
+    if id_for_domain == 0:
+        raise BlitzError("domain not found", response.content)
+
+    # update ip address
+    url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
+    print("# calling URL: {0}".format(url))
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
+    print("# headers: {0}".format(headers))
+    data = {
+        "name": domain,
+        "ipv4Address": ip,
+        "ipv4": True,
+        "ipv6": False
+    }
+    data = json.dumps(data)
+    print("# post data: {0}".format(data))
+    try:
+        response = session.post(url, headers=headers, data=data)
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed HTTP request", url, e)
+
+    return response.content    
 
 #####################
 # PROCESS FUNCTIONS
@@ -127,11 +220,17 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
         subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
+        if dnsservice == "dynu":
+            raise BlitzError("not implemented", "dynamic ip updating for dynu.com not implemented yet ", e)
+            sys.exit(0)
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        print("# dnsservice=dnsservice --> update {0}".format(domain))
+        print("# dnsservice=duckdns --> update {0}".format(domain))
         duckdns_update(domain, token, real_ip)
+    if dnsservice == "dynu":
+        print("# dnsservice=dynu --> update {0}".format(domain))
+        dynu_update(domain, token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -268,6 +367,7 @@ def menu_make_subscription():
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append(("DUCKDNS", "Use duckdns.org"))
+    choices.append(("DYNU", "Use dynu.com"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")
@@ -297,7 +397,7 @@ If you havent already go to https://duckdns.org
 
         # enter the subdomain
         code, text = d.inputbox(
-            "Enter yor duckDNS subdomain:",
+            "Enter your duckDNS subdomain:",
             height=10, width=40, init="",
             title="DuckDNS Domain")
         subdomain = text.strip()
@@ -332,13 +432,72 @@ This looks not like a valid token.
         ''', title="Invalid Input")
             sys.exit(0)
 
+    if dnsservice == "dynu":
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+If you havent already go to https://dynu.com
+- consider using the TOR browser
+- create an account or login
+- DDNS Services -> create new
+        ''', title="dynu.com Account needed")
+        
+        # enter the subdomain
+        code, text = d.inputbox(
+            "Enter the complete DDNS name:",
+            height=10, width=40, init="",
+            title="dynu.com DDNS Domain")
+        domain = text.strip()
+        if len(domain) < 6:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like a valid DDNS.
+        ''', title="Invalid Input")
+            sys.exit(0)
+        os.system("clear")
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+Continue in your dynu.com account: 
+- open 'Control Panel' > 'API Credentials'
+- see listed 'OAuth2' ClientID & Secret
+- click glasses icon to view values
+        ''', title="dynu.com API Key needed")
+
+        # enter the CLIENTID
+        code, text = d.inputbox(
+            "Enter the OAuth2 CLIENTID:",
+            height=10, width=50, init="",
+            title="dynu.com OAuth2 ClientID")
+        clientid = text.strip()
+        clientid = clientid.split(' ')[0]
+        if len(clientid) < 20 or len(clientid.split('-'))<2: 
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like valid ClientID.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        # enter the SECRET
+        code, text = d.inputbox(
+            "Enter the OAuth2 SECRET:",
+            height=10, width=50, init="",
+            title="dynu.com OAuth2 SECRET")
+        secret = text.strip()
+        secret = secret.split(' ')[0]
+        if len(secret) < 10:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like valid.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        token = "{}:{}".format(clientid, secret)
+
     else:
         os.system("clear")
         print("Not supported yet: {0}".format(dnsservice))
         time.sleep(4)
         sys.exit(0)
 
-        ############################
+    ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
     # ask user for which RaspiBlitz service the bridge should be used
