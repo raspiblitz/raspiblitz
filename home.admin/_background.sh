@@ -431,7 +431,9 @@ do
   # check every 10 minutes
   electrsExplorer=$((($counter % 600)+1))
   if [ ${electrsExplorer} -eq 1 ]; then
-    /home/admin/config.scripts/bonus.electrsexplorer.sh
+    if [ "${BTCRPCexplorer}" = "on" ]; then
+      /home/admin/config.scripts/bonus.electrsexplorer.sh
+    fi
   fi
 
   ###############################
