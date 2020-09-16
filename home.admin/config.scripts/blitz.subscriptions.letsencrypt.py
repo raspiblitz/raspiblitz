@@ -153,23 +153,17 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed HTTP request", url, e)
 
     # parse data
-    id_for_domain=""
+    id_for_domain=0
     try:
         print(response.content)
-        time.sleep(4)
         data = json.loads(response.content)
         for entry in data["domains"]:   
-            print(entry)
-            print(entry['name'])
-            print(domain)
-            print(entry['id'])
-            time.sleep(4)
             if entry['name'] == domain:
                 id_for_domain = entry['id']
                 break
     except Exception as e:
         raise BlitzError("failed parsing data", response.content, e)
-    if len(id_for_domain) == 0:
+    if id_for_domain == 0:
         raise BlitzError("domain not found", response.content)
     time.sleep(8)
 
