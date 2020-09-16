@@ -150,6 +150,8 @@ def dynu_update(domain, token, ip):
             raise BlitzError("failed HTTP request", url + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
+        print(e)
+        time.sleep(4)
         raise BlitzError("failed HTTP request", url, e)
 
     # parse data
@@ -162,6 +164,8 @@ def dynu_update(domain, token, ip):
                 id_for_domain = entry['id']
                 break
     except Exception as e:
+        print(e)
+        time.sleep(4)
         raise BlitzError("failed parsing data", response.content, e)
     if id_for_domain == 0:
         raise BlitzError("domain not found", response.content)
@@ -169,17 +173,14 @@ def dynu_update(domain, token, ip):
     # update ip address
     url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
     print("# calling URL: {0}".format(url))
-    time.sleep(4)
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# headers: {0}".format(headers))
-    time.sleep(4)
     data = {
         "name": domain,
         "ipv4Address": ip
     }
     data = json.dumps(data)
     print("# post data: {0}".format(data))
-    time.sleep(8)
     try:
         response = session.post(url, headers=headers, data=data)
         if response.status_code != 200:
@@ -187,7 +188,7 @@ def dynu_update(domain, token, ip):
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         print(e)
-        time.sleep(8)
+        time.sleep(4)
         raise BlitzError("failed HTTP request", url, e)
 
     return response.content    
@@ -496,7 +497,7 @@ This looks not like valid.
         time.sleep(4)
         sys.exit(0)
 
-        ############################
+    ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
     # ask user for which RaspiBlitz service the bridge should be used
