@@ -93,11 +93,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "#######################################################################"
   echo "# OK install done"
   echo "#######################################################################"
-  echo "# usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
-  echo "# usage: lndmanage --help"
   echo "# To start type: 'manage' in the command line."
   echo "# To exit the venv - type 'deactivate' and press ENTER"
-
+  echo "# usage: https://github.com/bitromortac/lndmanage/blob/master/README.md"
+  echo "# usage: lndmanage --help"
   exit 0
 fi
 
