@@ -158,8 +158,11 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
-        sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch}
-        sleep 4
+        error=""
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        if [ ${#error} -gt 0 ]; then
+          whiptail --title "ERROR" --msgbox "${error}" 8 30
+        fi
       fi
       patch
       exit 1
