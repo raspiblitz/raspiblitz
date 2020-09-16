@@ -54,13 +54,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# checking signing keys ..."
   gpg --import sigingkey.gpg
-  gpgCheck=$(gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc | grep -c "${gpgFingerprint}")
-  echo "# gpgCheck(${gpgCheck})"
-  if [ ${gpgCheck} -gt 0 ]; then
+  verifyResult=$(gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc 2>&1)
+  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${gpgFingerprint}" -c)
+  echo "goodSignature='${goodSignature}'"
+  echo "correctKey='${correctKey}'"
+  if [ ${goodSignature} -gt 0 ] && [ ${correctKey} -gt 0 ]; then
     echo "# OK signature is valid"
-    sleep 5
   else
     echo "error='unvalid signature'"
+    sleep 5
     exit 1
   fi
 
