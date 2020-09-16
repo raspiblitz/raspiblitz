@@ -478,6 +478,8 @@ This looks not like valid.
             sys.exit(0)
 
         token = "{}:{}".format(clientid, secret)
+        print(token)
+        time.sleep(2)
 
     else:
         os.system("clear")
