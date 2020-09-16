@@ -63,6 +63,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# OK signature is valid"
   else
     echo "error='unvalid signature'"
+    sudo rm -rf /home/admin/lndmanage
     sleep 5
     exit 1
   fi
@@ -82,6 +83,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "#!! FAIL --> Was not able to install LNDMANAGE"
     echo "#!! Maybe because of internet network issues - try again later."
+    sudo rm -rf /home/admin/lndmanage
     sleep 5
     exit 1
   fi
