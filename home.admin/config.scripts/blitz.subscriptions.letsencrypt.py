@@ -101,6 +101,53 @@ def duckdns_update(domain, token, ip):
 
     return response.content
 
+def dynu_update(domain, token, ip):
+
+    print("# dynu update IP API call for {0}".format(domain))
+
+    # get id for domain
+    url = "https://api.dynu.com/v2/dns"
+    headers = {'accept': 'application/json', 'API-Key': token}
+    print("# calling URL: {0}".format(url))
+    try:
+        response = session.get(url, headers=headers)
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        raise BlitzError("failed HTTP request", url, e)
+
+    # parse data
+    id_for_domain=""
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        for entry in data["domains"]:   
+            print(entry)
+            if entry['name'] is domain:
+                id_for_domain = entry["id"]
+                break
+    except Exception as e:
+        raise BlitzError("failed parsing data", response.content, e)
+    if len(id_for_domain) == 0:
+        raise BlitzError("domain not found", response.content)
+
+    # make HTTP requets
+    url = "https://api.dynu.com/v2/dns/{1}".format(id_for_domain)
+    headers = {'accept': 'application/json', 'API-Key': token}
+    data = {"name": domain, "ipv4Address": ip, "ttl": 90 }
+    print("# calling URL: {0}".format(url))
+    print("# post data: {0}".format(data))
+    try:
+        response = session.post(url, headers=headers, data=data)
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        raise BlitzError("failed HTTP request", url, e)
+
+    return response.content    
+
 
 #####################
 # PROCESS FUNCTIONS
@@ -130,8 +177,11 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        print("# dnsservice=dnsservice --> update {0}".format(domain))
+        print("# dnsservice=duckdns --> update {0}".format(domain))
         duckdns_update(domain, token, real_ip)
+    if dnsservice == "dynu":
+        print("# dnsservice=dynu --> update {0}".format(domain))
+        dynu_update(domain, token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -268,6 +318,7 @@ def menu_make_subscription():
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append(("DUCKDNS", "Use duckdns.org"))
+    choices.append(("DYNU", "Use dynu.com"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")
@@ -297,7 +348,7 @@ If you havent already go to https://duckdns.org
 
         # enter the subdomain
         code, text = d.inputbox(
-            "Enter yor duckDNS subdomain:",
+            "Enter your duckDNS subdomain:",
             height=10, width=40, init="",
             title="DuckDNS Domain")
         subdomain = text.strip()
@@ -331,6 +382,54 @@ This looks not like a valid subdomain.
 This looks not like a valid token.
         ''', title="Invalid Input")
             sys.exit(0)
+
+    if dnsservice == "dynu":
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+If you havent already go to https://dynu.com
+- consider using the TOR browser
+- create an account or login
+- DDNS Services -> create new
+        ''', title="dynu.com Account needed")
+        
+        # enter the subdomain
+        code, text = d.inputbox(
+            "Enter the complete DDNS name:",
+            height=10, width=40, init="",
+            title="dynu.com DDNS Domain")
+        subdomain = text.strip()
+        if len(subdomain) < 6:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like a valid DDNS.
+        ''', title="Invalid Input")
+            sys.exit(0)
+        os.system("clear")
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+Continue in your dynu.com account: 
+- open 'API Credentials'
+- see listed 'API Key' (not oAuth)
+- click glasses icon to view API Key
+        ''', title="dynu.com API Key needed")
+
+        # enter the token
+        code, text = d.inputbox(
+            "Enter the dynu.com API Key:",
+            height=10, width=50, init="",
+            title="dynu.com API Key")
+        token = text.strip()
+        token = token.split(' ')[0]
+        if len(token) < 20:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like a valid API Key.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        print("TODO: {0}".format(dnsservice))
+        time.sleep(4)
+        sys.exit(0)
 
     else:
         os.system("clear")
