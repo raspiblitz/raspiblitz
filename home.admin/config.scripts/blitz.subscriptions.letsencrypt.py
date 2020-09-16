@@ -175,16 +175,16 @@ def dynu_update(domain, token, ip):
     time.sleep(4)
     data = {
         "name": domain,
-        "group": "office",
+        "group": "",
         "ipv4Address": ip,
         "ipv6Address": "",
         "ttl": 90,
-        "ipv4": True,
-        "ipv6": False,
-        "ipv4WildcardAlias": False,
-        "ipv6WildcardAlias": False,
-        "allowZoneTransfer": False,
-        "dnssec": False
+        "ipv4": "true",
+        "ipv6": "false",
+        "ipv4WildcardAlias": "false",
+        "ipv6WildcardAlias": "false",
+        "allowZoneTransfer": "false",
+        "dnssec": "false"
     }
     print("# post data: {0}".format(data))
     time.sleep(8)
