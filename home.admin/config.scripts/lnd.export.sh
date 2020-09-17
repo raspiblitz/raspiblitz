@@ -113,6 +113,7 @@ elif [ "${exportType}" = "btcpay" ]; then
   else
     echo "IMPORTANT: You can only use this connection string for a BTCPay server running on this RaspiBlitz. If you want to connect with an external BTCPay server activate a IP2TOR tunnel for LND-REST:\nMAIN MENU > SUBSCRIBE > IP2TOR > LND REST API"
   fi
+  echo ""
 
 ###########################
 # SHH / SCP File Download
