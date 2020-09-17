@@ -130,7 +130,11 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  whiptail --title " BTCPay Server " --msgbox "${text}" 15 69
+text="${text}\n
+To get the 'Connection String' to activate Lightning Payments:
+MAINMENU > LNDCREDS > EXPORT > BTCPay Server"
+
+  whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
   
   /home/admin/config.scripts/blitz.lcd.sh hide
   echo "please wait ..."
