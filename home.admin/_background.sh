@@ -108,46 +108,24 @@ do
     # execute only after setup when config exists
     if [ ${configExists} -eq 1 ]; then
 
-      # get actual public IP
-      # get the IPv6 address, this will help in case of Carrier-grade NAT (CGN or CGNAT) / Dual Stack Lite (DS-Lite / DSlite)
-      freshPublicIP=$(curl -s http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
-
-      # sanity check on IP data
-      # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-      echo "-> sanity check of new IP data"
-      if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-        # the IPv6 address needs brackets "[...]" as it is often used with a port
-        freshPublicIP='['${freshPublicIP}']'
-        echo "OK IPv6 = ${freshPublicIP}"
-      elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-        echo "OK IPv4 = ${freshPublicIP}"
-      else
-        echo "FAIL - not an IPv4 or IPv6 address"
-        freshPublicIP=""
-      fi
-
-      if [ ${#freshPublicIP} -eq 0 ]; then 
-
-        echo "freshPublicIP is ZERO - ignoring"
-
+      publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
+      
       # check if changed
-      elif [ "${freshPublicIP}" != "${publicIP}" ]; then
+      elif [ ${publicIPChanged} -get 0 ]; then
 
-        # 1) update config file
-        echo "update config value, reason: ${freshPublicIP} != ${publicIP}"
-        sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
-        publicIP='${freshPublicIP}'
+        # refresh data
+        source /mnt/hdd/raspiblitz.conf
 
-        # 2) only restart LND if dynDNS is activated
-        # because this signals that user wants "public node"
-        if [ ${#dynDomain} -gt 0 ]; then
-          echo "restart LND with new environment config"
-          # restart and let to auto-unlock (if activated) do the rest
+        # only restart LND if auto-unlock is activated
+        if [ "${autoUnlock}" = "on" ]; then
+          echo "restart LND with to pickup up new publiIP"
           sudo systemctl stop lnd
           sudo systemctl start lnd
+        else
+          echo "new publicIP but no LND restart because no auto-unlock"
         fi
 
-        # 2) trigger update if dnyamic domain (if set)
+        # trigger update if dnyamic domain (if set)
         updateDynDomain=1
 
       else
