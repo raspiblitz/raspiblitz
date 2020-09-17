@@ -474,64 +474,10 @@ if [ ${configExists} -eq 1 ]; then
   # load values
   echo "load and update publicIP" >> $logFile
   source ${configFile}
-  freshPublicIP=""
   
-  # determine the publicIP/domain that LND should announce
-  if [ ${#lndAddress} -gt 3 ]; then
-
-    # use domain as PUBLICIP 
-    freshPublicIP="${lndAddress}"
-
-  else
-
-    # update public IP on boot
-    # wait otherwise looking for publicIP fails
-    sleep 5
-    freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-
-    # sanity check on IP data
-    # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-    echo "-> sanity check of IP data:"
-    if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-      echo "OK IPv6"
-    elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-      echo "OK IPv4"
-    else
-      echo "FAIL - not an IPv4 or IPv6 address"
-      freshPublicIP=""
-    fi
-
-    if [ ${#freshPublicIP} -eq 0 ]; then
-      # prevent having no publicIP set at all and LND getting stuck
-      # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
-      if [ ${#publicIP} -eq 0 ]; then
-        localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-        echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
-        freshPublicIP="${localIP}"
-      fi
-    fi
-
-  fi
-
-  # set publicip value in raspiblitz.conf
-  if [ ${#freshPublicIP} -eq 0 ]; then
-    echo "WARNING: Was not able to determine external IP/domain on startup." >> $logFile
-  else
-    publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
-    if [ ${publicIPValueExists} -gt 1 ]; then
-      # remove one 
-      echo "more then one publiIp entry - removing one" >> $logFile
-      sed -i "s/^publicIP=.*//g" ${configFile}
-      publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
-    fi
-    if [ ${publicIPValueExists} -eq 0 ]; then
-      echo "create value (${freshPublicIP})" >> $logFile
-      echo "publicIP='${freshPublicIP}'" >> $configFile
-    else
-      echo "update value (${freshPublicIP})" >> $logFile
-      sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
-    fi
-  fi
+  # update public IP on boot - set to domain is available
+  sleep 3  
+  /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
 
 fi
 
