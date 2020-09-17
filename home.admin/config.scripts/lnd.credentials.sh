@@ -87,7 +87,8 @@ if [ "$1" = "reset" ]; then
   # default reset both
   resetTLS=1
   resetMacaroons=1
-
+  keepOldMacaroons=0
+  
   # optional second paramter to just reset one on them
   if [ "$2" == "tls" ]; then
     echo "# just resetting TLS"
