@@ -180,7 +180,7 @@ else
 
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="${publicip}:${public_port}"
+  public_addr="TEST${publicip}:${public_port}"
   public_check=$(nc -z -w6 ${publicip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""
