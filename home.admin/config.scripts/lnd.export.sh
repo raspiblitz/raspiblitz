@@ -39,6 +39,7 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
           exportType='http';
           ;;
     esac
+
 fi
 
 # load data from config
@@ -85,6 +86,11 @@ elif [ "${exportType}" = "btcpay" ]; then
   ip="127.0.0.1"
   port="8080"
 
+  # will overwrite ip & port if IP2TOR tunnel is available
+  source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
+
+  # check if there is a IP2TOR for LND REST
+
   # get macaroon
   # TODO: best would be not to use admin macaroon here in the future
   macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
@@ -93,7 +99,6 @@ elif [ "${exportType}" = "btcpay" ]; then
   certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)
 
   # construct connection string
-  #connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};allowinsecure=true"
   connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"
 
   clear
@@ -101,6 +106,13 @@ elif [ "${exportType}" = "btcpay" ]; then
   echo ""
   echo "${connectionString}"
   echo ""
+
+  # add info about outside reachability (type would have a value if IP2TOR tunnel was found)
+  if [ ${#type} -gt 0 ]; then
+    echo "NOTE: You have a IP2TOR connection for LND REST API .. so you can use this connection string also with a external BTCPay server."
+  else
+    echo "IMPORTANT: You can only use this connection string for a BTCPay server running on this RaspiBlitz. If you want to connect with an external BTCPay server activate a IP2TOR tunnel for LND-REST:\nMAIN MENU > SUBSCRIBE > IP2TOR > LND REST API"
+  fi
 
 ###########################
 # SHH / SCP File Download
