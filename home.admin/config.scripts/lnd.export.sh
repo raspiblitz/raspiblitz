@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http]"
+ echo "lnd.export.sh [hexstring|scp|http|btcpay]"
  exit 1
 fi
 
@@ -13,9 +13,10 @@ exportType=$1
 # interactive choose type of export if not set
 if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
-    OPTIONS+=(HEX "Hex-String (Copy+Paste)")
     OPTIONS+=(SCP "SSH Download (Commands)")
     OPTIONS+=(HTTP "Browserdownload (bit risky)")
+    OPTIONS+=(HEX "Hex-String (Copy+Paste)")   
+    OPTIONS+=(STR "BTCPay Connection String") 
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Export Macaroons & TLS.cert" \
@@ -27,6 +28,9 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
     case $CHOICE in
         HEX)
           exportType='hexstring';
+          ;;
+        STR)
+          exportType='btcpay';
           ;;
         SCP)
           exportType='scp';
@@ -69,6 +73,32 @@ elif [ "${exportType}" = "hexstring" ]; then
   echo "tls.cert:"
   sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert
   echo ""
+
+########################
+# BTCPAY Connection String
+########################
+elif [ "${exportType}" = "btcpay" ]; then
+
+  # take public IP as default
+  # TODO: IP2TOR --> check if there is a forwarding for LND REST oe ask user to set one up
+  #ip="${publicIP}"
+  ip="127.0.0.1"
+  port="8080"
+
+  # get macaroon
+  # TODO: best would be not to use admin macaroon here in the future
+  macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+
+  # get certificate thumb
+  certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)
+
+  # construct connection string
+  connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};allowinsecure=true"
+
+  clear
+  echo "###### BTCPAY CONNECTION STRING ######"
+  echo ""
+  echo "${connectionString}"
 
 ###########################
 # SHH / SCP File Download
