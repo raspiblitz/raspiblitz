@@ -11,6 +11,9 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+# get local and global internet info
+source <(/home/admin/config.scripts/internet.sh status global)
+
 # give status
 if [ "$1" = "status" ]; then
 
@@ -62,9 +65,6 @@ if [ "$1" = "status" ]; then
     else
       echo "initialSynced=1"
     fi
-
-    # get local and global internet info
-    source <(/home/admin/config.scripts/internet.sh status global)
 
     # check local IPv4 port
     echo "localIP='${localip}'"
