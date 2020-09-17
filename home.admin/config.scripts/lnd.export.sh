@@ -93,12 +93,14 @@ elif [ "${exportType}" = "btcpay" ]; then
   certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)
 
   # construct connection string
-  connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};allowinsecure=true"
+  #connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};allowinsecure=true"
+  connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"
 
   clear
   echo "###### BTCPAY CONNECTION STRING ######"
   echo ""
   echo "${connectionString}"
+  echo ""
 
 ###########################
 # SHH / SCP File Download
