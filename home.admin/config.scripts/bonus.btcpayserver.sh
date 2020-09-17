@@ -127,7 +127,7 @@ go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
 To enable easy reachability with normal browser from the outside
-consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+consider adding a IP2TOR Bridge: MAINMENU > SUBSCRIBE > IP2TOR"
   fi
 
 text="${text}\n
