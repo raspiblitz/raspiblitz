@@ -180,9 +180,9 @@ else
 
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="${public_ip}:${public_port}"
-  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  public_addr="${publicip}:${public_port}"
+  public_check=$(nc -z -w6 ${publicip} ${public_port} 2>/dev/null; echo $?)
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     public_color="${color_amber}"
@@ -243,7 +243,7 @@ else
    ln_publicColor="${color_green}"
  else
    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     ln_publicColor="${color_amber}"
   else

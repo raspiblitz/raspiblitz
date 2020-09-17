@@ -5,7 +5,8 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [on|off|status[showAddress]|menu]"
+ echo "bonus.electrs.sh status [?showAddress]"
+ echo "bonus.electrs.sh [on|off|menu]"
  exit 1
 fi
 
