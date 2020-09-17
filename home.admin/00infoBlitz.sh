@@ -20,7 +20,7 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
 ## get internet info
-source <(sudo /home/admin/config.scripts/internet.sh status)
+source <(sudo /home/admin/config.scripts/internet.sh status global)
 
 ## get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
@@ -180,8 +180,8 @@ else
 
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="TEST${publicip}:${public_port}"
-  public_check=$(nc -z -w6 ${publicip} ${public_port} 2>/dev/null; echo $?)
+  public_addr="${publicip}:${public_port}"
+  public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
