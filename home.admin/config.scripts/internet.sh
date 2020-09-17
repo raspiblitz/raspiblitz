@@ -94,7 +94,7 @@ if [ "${2}" == "global" ]; then
   ###########################################
   # Global IP
   # the public IP that can be detected from outside
-  if [ "${ipv6}" == "on"]; then
+  if [ "${ipv6}" == "on" ]; then
     globalIP=$(curl -s http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
   else
     globalIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
@@ -105,7 +105,7 @@ if [ "${2}" == "global" ]; then
   # the public that is maybe set by raspibitz config file (overriding aut-detection)
   if [ "${publicIP}" == "" ]; then
     # if publicIP is not set by config ... use detected global IP
-    if [ "${ipv6}" == "on"]; then
+    if [ "${ipv6}" == "on" ]; then
       # use ipv6 with brackes so that it can be used in http addresses like a IPv4
       publicIP="[${globalIP}]"
     else
