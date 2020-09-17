@@ -109,15 +109,18 @@ do
     if [ ${configExists} -eq 1 ]; then
 
       # get actual public IP
-      freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+      # get the IPv6 address, this will help in case of Carrier-grade NAT (CGN or CGNAT) / Dual Stack Lite (DS-Lite / DSlite)
+      freshPublicIP=$(curl -s http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
 
       # sanity check on IP data
       # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
       echo "-> sanity check of new IP data"
       if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-        echo "OK IPv6"
+        # the IPv6 address needs brackets "[...]" as it is often used with a port
+        freshPublicIP='['${freshPublicIP}']'
+        echo "OK IPv6 = ${freshPublicIP}"
       elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-        echo "OK IPv4"
+        echo "OK IPv4 = ${freshPublicIP}"
       else
         echo "FAIL - not an IPv4 or IPv6 address"
         freshPublicIP=""
@@ -131,7 +134,7 @@ do
       elif [ "${freshPublicIP}" != "${publicIP}" ]; then
 
         # 1) update config file
-        echo "update config value"
+        echo "update config value, reason: ${freshPublicIP} != ${publicIP}"
         sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
         publicIP='${freshPublicIP}'
 
@@ -372,7 +375,7 @@ do
       # calling the update url
       echo "calling: ${dynUpdateUrl}"
       echo "to update domain: ${dynDomain}"
-      curl --connect-timeout 6 ${dynUpdateUrl}
+      curl -s --connect-timeout 6 ${dynUpdateUrl} 2>/dev/null
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
     fi

@@ -85,7 +85,7 @@ else
 fi
 
 # get name of active interface (eth0 or wlan0)
-network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $4}' | head -n 1)
+network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
 
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
@@ -150,7 +150,15 @@ fi
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
 source <(sudo /home/admin/config.scripts/internet.sh status)
 local_ip="${localip}"
-public_ip="${publicIP}"
+
+# as the Variable "publicIP" may hold the IPv6 address *with square brackets* it is necessary to distinguish the cases
+has_brackets="$(echo "${publicIP}" | grep -c '\[')"
+if [ ${has_brackets} -eq 0 ]; then
+  public_ip="${publicIP}"
+else
+  public_ip="$(echo "${publicIP}" | cut -d'[' -f2 | cut -d']' -f1)"
+fi
+
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
@@ -221,12 +229,14 @@ else
 
   if [ ${#public_addr} -gt 25 ]; then
     # if a IPv6 address dont show peers to save space
-    networkConnectionsInfo=""
+    #networkConnectionsInfo=""
+    dmy=''
   fi
 
   if [ ${#public_addr} -gt 35 ]; then
     # if a LONG IPv6 address dont show "Public" in front to save space
-    public_addr_pre=""
+    #public_addr_pre=""
+    dmy=''
   fi
 
 fi

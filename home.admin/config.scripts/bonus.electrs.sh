@@ -72,7 +72,16 @@ if [ "$1" = "status" ]; then
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
-    publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
+
+    # as the Variable "publicIP" may hold the IPv6 address *with square brackets* it is necessary to distinguish the cases
+    has_brackets="$(echo "${publicIP}" | grep -c '\[')"
+    if [ ${has_brackets} -eq 0 ]; then
+      public_ip="${publicIP}"
+    else
+      public_ip="$(echo "${publicIP}" | cut -d'[' -f2 | cut -d']' -f1)"
+    fi
+
+    publicPortRunning=$(nc -z -w6 ${public_ip} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that something is answering on that port
       echo "publicTCPPortAnswering=1"
@@ -83,7 +92,7 @@ if [ "$1" = "status" ]; then
     echo "portHTTP='50002'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
     echo "localHTTPPortActive=${localPortRunning}"
-    publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
+    publicPortRunning=$(nc -z -w6 ${public_ip} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that something is answering on that port
       echo "publicHTTPPortAnswering=1"
