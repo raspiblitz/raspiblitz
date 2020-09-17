@@ -200,15 +200,15 @@ elif [ "$1" == "update-publicip" ]; then
   fi
 
   # store to raspiblitz.conf new publiciP
-  publicIPValueExists=$( sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=' )
+  publicIPValueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=')
   if [ ${publicIPValueExists} -gt 1 ]; then 
     # more then one publiIp entry - removing one
-    sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
   fi
   if [ ${publicIPValueExists} -eq 0 ]; then
     echo "publicIP='${publicIP}'" >> /mnt/hdd/raspiblitz.conf
   else
-    sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
+    sudo sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
   fi
   exit 0
 
