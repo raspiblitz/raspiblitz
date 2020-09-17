@@ -146,7 +146,7 @@ if [ "$1" == "status" ]; then
 #############################################
 elif [ "$1" == "ipv6" ]; then
 
-  if [ "$1" == "on" ]; then
+  if [ "$2" == "on" ]; then
 
     echo "# Switching IPv6 ON"
 
@@ -158,7 +158,7 @@ elif [ "$1" == "ipv6" ]; then
     fi
     exit 0
 
-  elif [ "$1" == "on" ]; then
+  elif [ "$2" == "off" ]; then
 
     echo "# Switching IPv6 OFF"
 
