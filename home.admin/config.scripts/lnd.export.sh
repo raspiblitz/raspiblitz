@@ -111,7 +111,10 @@ elif [ "${exportType}" = "btcpay" ]; then
   if [ ${#type} -gt 0 ]; then
     echo "NOTE: You have a IP2TOR connection for LND REST API .. so you can use this connection string also with a external BTCPay server."
   else
-    echo "IMPORTANT: You can only use this connection string for a BTCPay server running on this RaspiBlitz. If you want to connect with an external BTCPay server activate a IP2TOR tunnel for LND-REST:\nMAIN MENU > SUBSCRIBE > IP2TOR > LND REST API"
+    echo "IMPORTANT: You can only use this connection string for a BTCPay server running on this RaspiBlitz."
+    echo "If you want to connect from a external BTCPay server activate a IP2TOR tunnel for LND-REST first:"
+    echo "MAIN MENU > SUBSCRIBE > IP2TOR > LND REST API"
+    echo "Then get a new connection string ..."
   fi
   echo ""
 
