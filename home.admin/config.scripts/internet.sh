@@ -33,6 +33,20 @@ if [ "${ipv6}" = "" ]; then
 fi
 
 #############################################
+# get active network device (eth0 or wlan0) & trafiic
+networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
+# get network traffic
+# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
+isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
+  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+else
+  network_rx=$(ifconfig ${networkDevice} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig ${networkDevice} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+fi
+
+#############################################
 # get local IP (from different sources)
 localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 if [ $(isValidIP ${localip_ALL}) -eq 0 ]; then
@@ -131,13 +145,16 @@ if [ "$1" == "status" ]; then
   echo "### LOCAL INTERNET ###"
   echo "localip=${localip}"
   echo "dhcp=${dhcp}"
+  echo "network_device=${networkDevice}"
+  echo "network_rx='${network_rx}'"
+  echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
   echo "online=${online}"
   if [ "${2}" == "global" ]; then
     echo "ipv6=${ipv6}"
-    echo "globalIP=${globalIP}"
-    echo "publicIP=${publicIP}"
-    echo "cleanIP=${cleanIP}"
+    echo "globalip=${globalIP}"
+    echo "publicip=${publicIP}"
+    echo "cleanip=${cleanIP}"
   else
     echo "# for more global internet info use 'status global'"
   fi

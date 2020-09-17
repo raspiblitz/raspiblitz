@@ -19,7 +19,10 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
-# get UPS info
+## get internet info
+source <(sudo /home/admin/config.scripts/internet.sh status)
+
+## get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
 upsInfo=""
 if [ "${upsStatus}" = "ONLINE" ]; then
@@ -84,20 +87,6 @@ else
   color_ram=${color_green}
 fi
 
-# get name of active interface (eth0 or wlan0)
-network_active_if=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
-
-# get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-else
-  network_rx=$(ifconfig ${network_active_if} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${network_active_if} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-fi
-
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
@@ -148,17 +137,8 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-source <(sudo /home/admin/config.scripts/internet.sh status)
-local_ip="${localip}"
-
-# as the Variable "publicIP" may hold the IPv6 address *with square brackets* it is necessary to distinguish the cases
-has_brackets="$(echo "${publicIP}" | grep -c '\[')"
-if [ ${has_brackets} -eq 0 ]; then
-  public_ip="${publicIP}"
-else
-  public_ip="$(echo "${publicIP}" | cut -d'[' -f2 | cut -d']' -f1)"
-fi
-
+local_ip="${localip}" # from internet.sh
+public_ip="${cleanip}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
@@ -229,14 +209,12 @@ else
 
   if [ ${#public_addr} -gt 25 ]; then
     # if a IPv6 address dont show peers to save space
-    #networkConnectionsInfo=""
-    dmy=''
+    networkConnectionsInfo=""
   fi
 
   if [ ${#public_addr} -gt 35 ]; then
     # if a LONG IPv6 address dont show "Public" in front to save space
-    #public_addr_pre=""
-    dmy=''
+    public_addr_pre=""
   fi
 
 fi
