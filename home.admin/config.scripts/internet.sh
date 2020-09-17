@@ -89,7 +89,7 @@ fi
 
 #############################################
 # check for internet connection
-if [ "$2" == "gobal" ]; then
+if [ "${2}" == "global" ]; then
 
   ###########################################
   # Global IP
@@ -128,11 +128,10 @@ fi
 #############################################
 if [ "$1" == "status" ]; then
 
-  echo "# LOCAL INTERNET"
+  echo "### LOCAL INTERNET ###"
   echo "localip=${localip}"
   echo "dhcp=${dhcp}"
-  echo 
-  echo "# GLOBAL INTERNET"
+  echo "### GLOBAL INTERNET ###"
   echo "online=${online}"
   if [ "${2}" == "global" ]; then
     echo "ipv6=${ipv6}"
