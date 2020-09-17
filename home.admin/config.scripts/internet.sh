@@ -5,7 +5,17 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# handle the internet connection"
  echo "# internet.sh status [local|global]"
  echo "# internet.sh ipv6 [on|off]"
+ echo "# internet.sh update-publicip [?domain]"
  exit 1
+fi
+
+# check when to global check
+runGlobal=0
+if [ "$2" == "global" ]; then
+  runGlobal=1
+fi
+if [ "$1" == "update-publicip" ]; then
+  runGlobal=1
 fi
 
 # load local config (but should also work if not available)
@@ -103,7 +113,7 @@ fi
 
 #############################################
 # check for internet connection
-if [ "${2}" == "global" ]; then
+if [ ${runGlobal} -eq 1 ]; then
 
   ###########################################
   # Global IP
@@ -112,6 +122,15 @@ if [ "${2}" == "global" ]; then
     globalIP=$(curl -s http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
   else
     globalIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+  fi
+  # prevent having no publicIP set at all and LND getting stuck
+  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+  if [ ${#globalIP} -eq 0 ]; then
+    if [ "${ipv6}" == "on" ]; then
+      globalIP="::1"
+    else
+      globalIP="127.0.0.1"
+    fi
   fi
 
   ##########################################
@@ -150,13 +169,46 @@ if [ "$1" == "status" ]; then
   echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
   echo "online=${online}"
-  if [ "${2}" == "global" ]; then
+  if [ ${runGlobal} -eq 1 ]; then
     echo "ipv6=${ipv6}"
     echo "globalip=${globalIP}"
     echo "publicip=${publicIP}"
     echo "cleanip=${cleanIP}"
   else
     echo "# for more global internet info use 'status global'"
+  fi
+  exit 0
+
+#############################################
+elif [ "$1" == "update-publicip" ]; then
+
+  if [ "$2" != "" ]; then
+    echo "ip_changed=0"
+    publicIP="$2"
+  elif  [ "${globalIP}" == "${cleanIP}" ]; then
+    echo "ip_changed=0"
+    exit 0
+  else
+    echo "ip_changed=1"
+    if [ "${ipv6}" == "on" ]; then
+      # use ipv6 with brackes so that it can be used in http addresses like a IPv4
+      publicIP="[${globalIP}]"
+    else
+      publicIP="${globalIP}"
+    fi
+    echo "publicip=${publicIP}"
+  fi
+
+  # store to raspiblitz.conf new publiciP
+  publicIPValueExists=$( sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=' )
+  if [ ${publicIPValueExists} -gt 1 ]; then 
+    # more then one publiIp entry - removing one
+    sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
+  fi
+  if [ ${publicIPValueExists} -eq 0 ]; then
+    echo "publicIP='${publicIP}'" >> /mnt/hdd/raspiblitz.conf
+  else
+    sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
   fi
   exit 0
 
