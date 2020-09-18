@@ -4,10 +4,10 @@
 source /mnt/hdd/raspiblitz.conf
 
 # check if "^BTCEXP_ADDRESS_API=electrumx"
-btcaddrapiEnabled=$(grep -c "^BTCEXP_ADDRESS_API=electrumx" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null)
+btcaddrapiEnabled=$(sudo grep -c "^BTCEXP_ADDRESS_API=electrumx" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null)
 
 # check if service starts the shell script "/home/admin/btc-rpc-explorer.run.sh"
-serviceStartsScript=$(grep -c "^ExecStart=/home/admin/btc-rpc-explorer.run.sh" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
+serviceStartsScript=$(sudo grep -c "^ExecStart=/home/admin/btc-rpc-explorer.run.sh" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
 
 # optional return status
 if [ "$1" = "status" ]; then
@@ -19,9 +19,9 @@ if [ "$1" = "status" ]; then
   fi
   echo "BTCRPCexplorer=${BTCRPCexplorer}"  
   echo "ElectRS=${ElectRS}"
-  echo "# btcaddrapiEnabled -> if electrum is set as address api in btc-prc-explorer"
+  echo "# if electrum is set as address api in btc-prc-explorer"
   echo "btcaddrapiEnabled=${btcaddrapiEnabled}"
-  echo "# serviceStartsScript -> if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh that waits for electrum to become responsive"
+  echo "# if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh that waits for electrum to become responsive"
   echo "serviceStartsScript=${serviceStartsScript}"
   exit 0
 fi
