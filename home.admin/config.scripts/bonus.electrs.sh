@@ -5,11 +5,15 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh [on|off|status[showAddress]|menu]"
+ echo "bonus.electrs.sh status [?showAddress]"
+ echo "bonus.electrs.sh [on|off|menu]"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
+
+# get local and global internet info
+source <(/home/admin/config.scripts/internet.sh status global)
 
 # give status
 if [ "$1" = "status" ]; then
@@ -64,15 +68,15 @@ if [ "$1" = "status" ]; then
     fi
 
     # check local IPv4 port
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    echo "localIP='${localIP}'"
+    echo "localIP='${localip}'"
     if [ "$2" = "showAddress" ]; then
-      echo "publicIP='${publicIP}'"
+      echo "publicIP='${cleanip}'"
     fi
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
-    publicPortRunning=$(nc -z -w6 ${publicIP} 50001 2>/dev/null; echo $?)
+
+    publicPortRunning=$(nc -z -w6 ${publicip} 50001 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that something is answering on that port
       echo "publicTCPPortAnswering=1"
@@ -83,7 +87,7 @@ if [ "$1" = "status" ]; then
     echo "portHTTP='50002'"
     localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
     echo "localHTTPPortActive=${localPortRunning}"
-    publicPortRunning=$(nc -z -w6 ${publicIP} 50002 2>/dev/null; echo $?)
+    publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that something is answering on that port
       echo "publicHTTPPortAnswering=1"
@@ -182,11 +186,11 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localIP}' & '${portHTTP}'"
+    echo "- as manual server set '${localip}' & '${portHTTP}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo 
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localIP}:${portHTTP}:s"
+    echo "electrum --oneserver --server ${localip}:${portHTTP}:s"
     if [ ${TORrunning} -eq 1 ]; then
       echo ""
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
