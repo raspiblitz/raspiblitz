@@ -9,10 +9,10 @@ explorerStartScript="${explorerStartDir}/btc-rpc-explorer.run.sh"
 explorerStartScriptEscaped=$(echo "${explorerStartScript}" | sed 's/\//\\\//g')
 
 # check if "^BTCEXP_ADDRESS_API=electrumx"
-btcaddrapiEnabled=$(sudo grep -c "^BTCEXP_ADDRESS_API=electrumx" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null)
+btcaddrapiEnabled=$(sudo cat /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null | grep -c "^BTCEXP_ADDRESS_API=electrumx")
 
 # check if service starts the shell script "btc-rpc-explorer.run.sh"
-serviceStartsScript=$(sudo grep -c "^ExecStart=${explorerStartScript}" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
+serviceStartsScript=$(sudo cat /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c "^ExecStart=${explorerStartScript}")
 
 # optional return status
 if [ "$1" = "status" ]; then
