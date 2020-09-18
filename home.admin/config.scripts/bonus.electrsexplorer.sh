@@ -3,37 +3,53 @@
 
 source /mnt/hdd/raspiblitz.conf
 
-# make sure that "/home/admin/btc-rpc-explorer.run.sh" exists...
-# if it does not exist, create it and make it executable
-# it is fine to create the script, even the BTC-RPC-Explorer might be started directly
-if [ ! -f /home/admin/btc-rpc-explorer.run.sh ]; then
-  echo "script \"/home/admin/btc-rpc-explorer.run.sh\" does not exist, create it and make it executable"
-  cat > /home/admin/btc-rpc-explorer.run.sh <<EOF
-#!/bin/bash
-echo "Waiting Electrs on port 50001..."
-while [ \$(sudo -u electrs lsof -i | grep -c 50001) -eq 0 ]; do
-  sleep 1
-done
-echo "Electrs started, launching BTC-RPC-Explorer..."
-cd /home/btcrpcexplorer/btc-rpc-explorer
-sudo -u btcrpcexplorer /usr/bin/npm start
-EOF
-  sudo chmod +x /home/admin/btc-rpc-explorer.run.sh
-fi
-
-
 # check if "^BTCEXP_ADDRESS_API=electrumx"
 btcaddrapiEnabled=$(grep -c "^BTCEXP_ADDRESS_API=electrumx" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null)
 
 # check if service starts the shell script "/home/admin/btc-rpc-explorer.run.sh"
 serviceStartsScript=$(grep -c "^ExecStart=/home/admin/btc-rpc-explorer.run.sh" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
 
+# optional return status
+if [ "$1" = "status" ]; then
+  if [ "${BTCRPCexplorer}" = "" ]; then
+    BTCRPCexplorer="off"
+  fi
+  if [ "${ElectRS}" = "" ]; then
+    ElectRS="off"
+  fi
+  echo "BTCRPCexplorer=${BTCRPCexplorer}"  
+  echo "ElectRS=${ElectRS}"
+  echo "# btcaddrapiEnabled -> if electrum is set as address api in btc-prc-explorer"
+  echo "btcaddrapiEnabled=${btcaddrapiEnabled}"
+  echo "# serviceStartsScript -> if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh that waits for electrum to become responsive"
+  echo "serviceStartsScript=${serviceStartsScript}"
+  exit 0
+fi
+
 # variable to track if service restart is needed
 serviceNeedsRestart=0
 
 # both services are "switched on" in raspiblitz.conf
 if [ "${BTCRPCexplorer}" = "on" ] & [ "${ElectRS}" = "on" ]; then
-  
+
+  # make sure that "/home/admin/btc-rpc-explorer.run.sh" exists...
+  # if it does not exist, create it and make it executable
+  # it is fine to create the script, even the BTC-RPC-Explorer might be started directly
+  if [ ! -f /home/admin/btc-rpc-explorer.run.sh ]; then
+    echo "script \"/home/admin/btc-rpc-explorer.run.sh\" does not exist, create it and make it executable"
+    cat > /home/admin/btc-rpc-explorer.run.sh <<EOF
+#!/bin/bash
+echo "Waiting Electrs on port 50001..."
+while [ \$(sudo -u electrs lsof -i | grep -c 50001) -eq 0 ]; do
+sleep 1
+done
+echo "Electrs started, launching BTC-RPC-Explorer..."
+cd /home/btcrpcexplorer/btc-rpc-explorer
+sudo -u btcrpcexplorer /usr/bin/npm start
+EOF
+  sudo chmod +x /home/admin/btc-rpc-explorer.run.sh
+  fi
+
   # electrs service is online
   if [ $(sudo -u electrs lsof -i | grep -c 50001) -gt 0 ]; then
     echo "electrs is online"
