@@ -28,7 +28,8 @@ if [ "$1" = "status" ]; then
   echo "explorerStartScriptEscaped='${explorerStartScriptEscaped}'"
   echo "# if electrum is set as address api in btc-prc-explorer"
   echo "btcaddrapiEnabled=${btcaddrapiEnabled}"
-  echo "# if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh that waits for electrum to become responsive"
+  echo "# if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh"
+  echo "# that waits for electrum to become responsive"
   echo "serviceStartsScript=${serviceStartsScript}"
   exit 0
 fi
