@@ -3,11 +3,16 @@
 
 source /mnt/hdd/raspiblitz.conf
 
+# explorer start script (waits to start btc-rpc-explorer until eletrs is responsive)
+explorerStartDir="/home/admin/system"
+explorerStartScript="${explorerStartDir}/btc-rpc-explorer.run.sh"
+explorerStartScriptEscaped=$(echo "${explorerStartScript}" | sed 's/\//\\\//g')
+
 # check if "^BTCEXP_ADDRESS_API=electrumx"
 btcaddrapiEnabled=$(sudo grep -c "^BTCEXP_ADDRESS_API=electrumx" /home/btcrpcexplorer/.config/btc-rpc-explorer.env 2>/dev/null)
 
-# check if service starts the shell script "/home/admin/btc-rpc-explorer.run.sh"
-serviceStartsScript=$(sudo grep -c "^ExecStart=/home/admin/btc-rpc-explorer.run.sh" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
+# check if service starts the shell script "btc-rpc-explorer.run.sh"
+serviceStartsScript=$(sudo grep -c "^ExecStart=${explorerStartScript}" /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null)
 
 # optional return status
 if [ "$1" = "status" ]; then
@@ -19,6 +24,8 @@ if [ "$1" = "status" ]; then
   fi
   echo "BTCRPCexplorer=${BTCRPCexplorer}"  
   echo "ElectRS=${ElectRS}"
+  echo "explorerStartScript='${explorerStartScript}'"
+  echo "explorerStartScriptEscaped='${explorerStartScriptEscaped}'"
   echo "# if electrum is set as address api in btc-prc-explorer"
   echo "btcaddrapiEnabled=${btcaddrapiEnabled}"
   echo "# if btc-prc-explorer is started by systemd with btc-rpc-explorer.run.sh that waits for electrum to become responsive"
@@ -32,22 +39,23 @@ serviceNeedsRestart=0
 # both services are "switched on" in raspiblitz.conf
 if [ "${BTCRPCexplorer}" = "on" ] & [ "${ElectRS}" = "on" ]; then
 
-  # make sure that "/home/admin/btc-rpc-explorer.run.sh" exists...
+  # make sure that "btc-rpc-explorer.run.sh" exists...
   # if it does not exist, create it and make it executable
   # it is fine to create the script, even the BTC-RPC-Explorer might be started directly
-  if [ ! -f /home/admin/btc-rpc-explorer.run.sh ]; then
-    echo "script \"/home/admin/btc-rpc-explorer.run.sh\" does not exist, create it and make it executable"
-    cat > /home/admin/btc-rpc-explorer.run.sh <<EOF
+  if [ ! -f ${explorerStartScript} ]; then
+    echo "script \"${explorerStartScript}\" does not exist, create it and make it executable"
+    sudo -u admin mkdir -p ${explorerStartDir}
+    cat > ${explorerStartScript} <<EOF
 #!/bin/bash
 echo "Waiting Electrs on port 50001..."
 while [ \$(sudo -u electrs lsof -i | grep -c 50001) -eq 0 ]; do
-sleep 1
+  sleep 1
 done
 echo "Electrs started, launching BTC-RPC-Explorer..."
 cd /home/btcrpcexplorer/btc-rpc-explorer
 sudo -u btcrpcexplorer /usr/bin/npm start
 EOF
-  sudo chmod +x /home/admin/btc-rpc-explorer.run.sh
+  sudo chmod +x ${explorerStartScript}
   fi
 
   # electrs service is online
@@ -66,8 +74,8 @@ EOF
 
     # make sure that explorer is started thru script
     if [ ${serviceStartsScript} -ne 1 ]; then
-      echo "btc-rpc-explorer.service change to start via script: /home/admin/btc-rpc-explorer.run.sh"
-      sudo sed -i "s/^ExecStart=\/usr\/bin\/npm start/ExecStart=\/home\/admin\/btc-rpc-explorer.run.sh/g" /etc/systemd/system/btc-rpc-explorer.service
+      echo "btc-rpc-explorer.service change to start via script: ${explorerStartScript}"
+      sudo sed -i "s/^ExecStart=\/usr\/bin\/npm start/ExecStart=${explorerStartScriptEscaped}/g" /etc/systemd/system/btc-rpc-explorer.service
       sudo sed -i "s/^User=.*/User=admin/g" /etc/systemd/system/btc-rpc-explorer.service
       # make sure to restart the service
       serviceNeedsRestart=1
@@ -94,13 +102,12 @@ EOF
       echo "electrs is not active - service direct start is already enabled, nothing to do here"
     else
       echo "btc-rpc-explorer.service change to start directly"
-      sudo sed -i "s/^ExecStart=\/home\/admin\/btc-rpc-explorer.run.sh/ExecStart=\/usr\/bin\/npm start/g" /etc/systemd/system/btc-rpc-explorer.service
+      sudo sed -i "s/^ExecStart=${explorerStartScriptEscaped}/ExecStart=\/usr\/bin\/npm start/g" /etc/systemd/system/btc-rpc-explorer.service
       sudo sed -i "s/^User=.*/User=btcrpcexplorer/g" /etc/systemd/system/btc-rpc-explorer.service
       # make sure to restart the service
       serviceNeedsRestart=1
     fi
   fi
-
 
 # both services are NOT "switched on" in raspiblitz.conf
 else
@@ -124,7 +131,7 @@ else
       echo "electrs is not active - service direct start is already enabled, nothing to do here"
     else
       echo "btc-rpc-explorer.service change to start directly"
-      sudo sed -i "s/^ExecStart=\/home\/admin\/btc-rpc-explorer.run.sh/ExecStart=\/usr\/bin\/npm start/g" /etc/systemd/system/btc-rpc-explorer.service
+      sudo sed -i "s/^ExecStart=${explorerStartScriptEscaped}/ExecStart=\/usr\/bin\/npm start/g" /etc/systemd/system/btc-rpc-explorer.service
       sudo sed -i "s/^User=.*/User=btcrpcexplorer/g" /etc/systemd/system/btc-rpc-explorer.service
       # make sure to restart the service
       serviceNeedsRestart=1
