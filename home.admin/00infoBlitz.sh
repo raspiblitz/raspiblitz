@@ -282,6 +282,11 @@ else
 fi
 
 sleep 5
+
+## get uptime and current date & time
+uptime=$(uptime --pretty)
+datetime=$(date)
+
 clear
 printf "
 ${color_yellow}
@@ -289,7 +294,8 @@ ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
-${color_yellow}        ,/     ${color_yellow}%s
+${color_yellow}               ${color_yellow}%s
+${color_yellow}        ,/     ${color_gray}%s
 ${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow}  ,'  /_____,  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
@@ -306,6 +312,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
+"Last refresh: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
@@ -344,9 +351,6 @@ else
   fi
 
 fi
-
-uptime=$(uptime --pretty)
-datetime=$(date)
 
 # if running as user "pi":
 #  - write results to a JSON file on RAM disk
