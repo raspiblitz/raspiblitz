@@ -285,7 +285,7 @@ sleep 5
 
 ## get uptime and current date & time
 uptime=$(uptime --pretty)
-datetime=$(date)
+datetime=$(date -R)
 
 clear
 printf "
@@ -312,7 +312,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
-"Last refresh: ${datetime}" \
+"Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
