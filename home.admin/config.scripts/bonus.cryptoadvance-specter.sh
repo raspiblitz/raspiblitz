@@ -111,7 +111,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.7.2
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.0
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
@@ -128,6 +128,8 @@ EOF
     echo ""
 
     echo "#    --> Installing udev-rules for hardware-wallets"
+    
+    # Ledger
     cat > /home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl"
@@ -142,6 +144,8 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0003|3000|3001|30
 # Nano X
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|4002|4003|4004|4005|4006|4007|4008|4009|400a|400b|400c|400d|400e|400f|4010|4011|4012|4013|4014|4015|4016|4017|4018|4019|401a|401b|401c|401d|401e|401f", TAG+="uaccess", TAG+="udev-acl"
 EOF
+    
+    # ColdCard
     cat > /home/admin/51-coinkite.rules <<EOF
 # Linux udev support file.
 #
@@ -159,6 +163,8 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plu
 # from <https://github.com/signal11/hidapi/blob/master/udev/99-hid.rules>
 KERNEL=="hidraw*", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plugdev", MODE="0666"
 EOF
+    
+    # Trezor
     cat > /home/admin/51-trezor.rules <<EOF
 # Trezor: The Original Hardware Wallet
 # https://trezor.io/
@@ -178,6 +184,8 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c0", MODE="0660", 
 SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl", SYMLINK+="trezor%n"
 KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl"
 EOF
+    
+    # KeepKey
     cat > /home/admin/51-usb-keepkey.rules <<EOF
 # KeepKey: Your Private Bitcoin Vault
 # http://www.keepkey.com/
