@@ -308,7 +308,6 @@ ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}
-
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
