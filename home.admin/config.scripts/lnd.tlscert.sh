@@ -64,11 +64,11 @@ if [ "$1" = "ip-remove" ]; then
 
   if [ "${ip}" == "*" ]; then
     echo "# removing all tlsextraip entries"
-    sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
+    sudo sed -i "/tlsextraip=*/d" ${LNDCONF}
     ip=""
   else
     echo "# removing tlsextraip=${ip}"
-    sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
+    sudo sed -i "/tlsextraip=${ip}/d" ${LNDCONF}
   fi
 
   # check if line is removed
