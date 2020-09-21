@@ -108,7 +108,6 @@ if [ "$1" = "reset" ]; then
     keepOldMacaroons=1
   fi
 
-
   if [ ${resetMacaroons} -eq 1 ]; then
     echo "## Resetting Macaroons"
     echo "# all your macaroons get deleted and recreated"

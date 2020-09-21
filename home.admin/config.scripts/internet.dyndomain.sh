@@ -94,12 +94,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # setting dynUpdateUrl is a bit complicated because value can contain chars that break sed replacement
   # so first remove dynUpdateUrl from config and then add fresh as new line at the end
-  grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > ./raspiblitz.conf.new
-  echo "dynUpdateUrl='${dynUpdateUrl}'" >> ./raspiblitz.conf.new
-  sudo rm /mnt/hdd/raspiblitz.conf
-  sudo mv ./raspiblitz.conf.new /mnt/hdd/raspiblitz.conf
-  sudo chmod 777 /mnt/hdd/raspiblitz.conf
-  #sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl='${dynUpdateUrl}'/g" /mnt/hdd/raspiblitz.conf
+  #grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > ./raspiblitz.conf.new
+  #echo "dynUpdateUrl='${dynUpdateUrl}'" >> ./raspiblitz.conf.new
+  #sudo rm /mnt/hdd/raspiblitz.conf
+  #sudo mv ./raspiblitz.conf.new /mnt/hdd/raspiblitz.conf
+  #sudo chmod 777 /mnt/hdd/raspiblitz.conf
+  # make dynUpdateUrl to empty line
+  sudo sed -i "s/^dynUpdateUrl=.*//g" /mnt/hdd/raspiblitz.conf
+  # remove empty lines
+  sudo sed -i '/^$/d' /mnt/hdd/raspiblitz.conf
+  # write fresh value
+  echo "dynUpdateUrl='${dynUpdateUrl}'" >> /mnt/hdd/raspiblitz.conf
 
   echo "# changing lnd.conf"
 
