@@ -176,6 +176,7 @@ case $CHOICE in
                 if [ "${keyPressed}" = "x" ]; then
                   echo ""
                   echo "Returning to menu ....."
+                  slepp 4
                   break
                 fi
               done
