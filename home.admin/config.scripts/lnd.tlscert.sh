@@ -49,11 +49,11 @@ if [ "$1" = "ip-add" ]; then
   exit
 fi
 
-### RESET IP
+### REMOVE IP
 
 if [ "$1" = "ip-remove" ]; then 
 
-  echo "# lnd.tlscert.sh domain ip"
+  echo "# lnd.tlscert.sh $1"
 
   # 2. parameter: ip
   ip=$2
@@ -63,11 +63,13 @@ if [ "$1" = "ip-remove" ]; then
   fi
   # if jocker -> delete all entries
   if [ "${ip}" == "*" ]; then
+    echo "# removing all tlsextraip entries"
+    sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
     ip=""
+  else
+    echo "# removing tlsextraip=${ip}"
+    sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
   fi
-
-  # remove the line to the LND conf
-  sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
 
   # check if line is removed
   found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
