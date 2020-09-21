@@ -15,7 +15,7 @@ if [ ${#error} -gt 0 ]; then
 fi
 
 # temp mount
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh tempmount --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -26,7 +26,8 @@ fi
 echo
 echo "# --> Linking drives/directories"
 echo "# hddCandidate='${hddCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link ${hddCandidate})
+echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh link --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -37,7 +38,8 @@ fi
 echo
 echo "# --> Adding the data drive to OS ..."
 echo "# hddCandidate='${hddCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddCandidate})
+echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddPartitionCandidate})
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh fstab --> ${error}"
   echo "Please report issue to the raspiblitz github."
