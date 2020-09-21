@@ -282,6 +282,11 @@ else
 fi
 
 sleep 5
+
+## get uptime and current date & time
+uptime=$(uptime --pretty)
+datetime=$(date -R)
+
 clear
 printf "
 ${color_yellow}
@@ -290,22 +295,23 @@ ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow}  ,'  /_____,  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
-${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}      ,'/      ${color_gray}%s
+${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
+${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
+${color_yellow}    /,'        ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}   /'          ${color_gray}
+${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}
-
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
+"Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
@@ -344,9 +350,6 @@ else
   fi
 
 fi
-
-uptime=$(uptime --pretty)
-datetime=$(date)
 
 # if running as user "pi":
 #  - write results to a JSON file on RAM disk
