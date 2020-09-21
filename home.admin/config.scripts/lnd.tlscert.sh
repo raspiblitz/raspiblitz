@@ -8,7 +8,7 @@ if [ $# -eq 0 ]; then
  echo "script to set and config TLS Cert for LND"
  echo "lnd.tlscert.sh refresh"
  echo "lnd.tlscert.sh ip-add [ip]"
- echo "lnd.tlscert.sh ip-remove [ip|*]"
+ echo "lnd.tlscert.sh ip-remove [ip|ALL]"
  echo "lnd.tlscert.sh domain-add [domain]"
  echo "lnd.tlscert.sh domain-reset"
  exit 1
@@ -62,7 +62,7 @@ if [ "$1" = "ip-remove" ]; then
     exit
   fi
 
-  if [ "${ip}" == "*" ]; then
+  if [ "${ip}" == "ALL" ]; then
     echo "# removing all tlsextraip entries"
     sudo sed -i "/tlsextraip=*/d" ${LNDCONF}
     ip=""
