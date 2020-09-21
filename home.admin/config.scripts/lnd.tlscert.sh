@@ -8,7 +8,7 @@ if [ $# -eq 0 ]; then
  echo "script to set and config TLS Cert for LND"
  echo "lnd.tlscert.sh refresh"
  echo "lnd.tlscert.sh ip-add [ip]"
- echo "lnd.tlscert.sh ip-reset" 
+ echo "lnd.tlscert.sh ip-remove [ip|*]"
  echo "lnd.tlscert.sh domain-add [domain]"
  echo "lnd.tlscert.sh domain-reset"
  exit 1
@@ -51,15 +51,26 @@ fi
 
 ### RESET IP
 
-if [ "$1" = "ip-reset" ]; then 
+if [ "$1" = "ip-remove" ]; then 
 
   echo "# lnd.tlscert.sh domain ip"
 
+  # 2. parameter: ip
+  ip=$2
+  if [ ${#ip} -eq 0 ]; then
+    echo "error='missing parameter'"
+    exit
+  fi
+  # if jocker -> delete all entries
+  if [ "${ip}" == "*" ]; then
+    ip=""
+  fi
+
   # remove the line to the LND conf
-  sudo sed -i "/tlsextraip=*/d" ${LNDCONF}
+  sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
 
   # check if line is removed
-  found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=")
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
   if [ ${found} -gt 0 ]; then
     echo "error='failed removing tlsextraip'"
     exit
