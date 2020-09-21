@@ -152,10 +152,10 @@ fi
 if [ "$1" = "refresh" ]; then 
 
   echo "# checking if LND is running"
-  lndInactive=$(sudo systemctl is-active lnd | grep -c "inactive")
-  if [ ${lndInactive} -eq 1 ]; then
+  lndEnabled=$(sudo systemctl status lnd | grep -c 'enabled')
+  if [ ${lndEnabled} -eq 0 ]; then
     echo "# FAIL: lnd.tlscert.sh refresh"
-    echo "error='LND systemd service not activated'"
+    echo "error='LND systemd service not enabled'"
     exit 1
   fi
 
