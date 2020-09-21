@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# ToDo(frennkie) why doesn't this start lnd again? - I assume as _background will start it anyway?!
-# ToDo(frennkie) the way LND generates the x509 certificate is not ideal -
-#   it may be better to simply run openssl and create a cert with our settings...
-
 if [ $# -eq 0 ]; then
  echo "script to set and config TLS Cert for LND"
  echo "lnd.tlscert.sh refresh"
  echo "lnd.tlscert.sh ip-add [ip]"
  echo "lnd.tlscert.sh ip-remove [ip|ALL]"
  echo "lnd.tlscert.sh domain-add [domain]"
- echo "lnd.tlscert.sh domain-reset"
+ echo "lnd.tlscert.sh domain-remove [domain|ALL]"
  exit 1
 fi
 
