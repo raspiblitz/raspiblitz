@@ -115,11 +115,6 @@ activateBitcoinOverTOR()
       fi
       sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
-      sudo -u bitcoin mkdir -p /home/bitcoin/.nyx
-      sudo -u bitcoin touch /home/bitcoin/.nyx/config
-      sudo -u bitcoin sed -i "s/^password .*//g" /home/bitcoin/.nyx/config
-      echo "password $PASSWORD_B" | sudo -u bitcoin tee -a /home/bitcoin/.nyx/config >/dev/null
-
       # copy new bitcoin.conf to admin user for cli access
       sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
       sudo chown admin:admin /home/admin/.${network}/${network}.conf
@@ -287,13 +282,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
     sudo mkdir -p /mnt/hdd/tor
     sudo mkdir -p /mnt/hdd/tor/sys
-    sudo mkdir -p /mnt/hdd/tor/web80
-    sudo mkdir -p /mnt/hdd/tor/lnd9735
-    sudo mkdir -p /mnt/hdd/tor/lndrpc9735
-    sudo mkdir -p /mnt/hdd/tor/lndrest8080
-    sudo mkdir -p /mnt/hdd/tor/lndrpc9735fallback
-    sudo mkdir -p /mnt/hdd/tor/lndrest8080fallback
-    sudo mkdir -p /mnt/hdd/tor/bitcoin8332
     sudo chmod -R 700 /mnt/hdd/tor
     sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
@@ -366,6 +354,11 @@ EOF
 [Service]
 ReadWriteDirectories=-/mnt/hdd/tor
 EOF
+
+    sudo -u bitcoin mkdir -p /home/bitcoin/.nyx
+    sudo -u bitcoin touch /home/bitcoin/.nyx/config
+    sudo -u bitcoin sed -i "s/^password .*//g" /home/bitcoin/.nyx/config
+    echo "password $PASSWORD_B" | sudo -u bitcoin tee -a /home/bitcoin/.nyx/config >/dev/null
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
