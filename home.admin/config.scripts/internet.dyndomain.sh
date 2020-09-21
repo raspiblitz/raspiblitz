@@ -89,30 +89,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# dynDomain(${dynDomain})"
   echo "# dynUpdateUrl(${dynUpdateUrl})"
 
-  # setting value in raspi blitz config
-  sudo sed -i "s/^dynDomain=.*/dynDomain='${dynDomain}'/g" /mnt/hdd/raspiblitz.conf
-
   # setting dynUpdateUrl is a bit complicated because value can contain chars that break sed replacement
   # so first remove dynUpdateUrl from config and then add fresh as new line at the end
-  #grep -v "dynUpdateUrl" /mnt/hdd/raspiblitz.conf > ./raspiblitz.conf.new
-  #echo "dynUpdateUrl='${dynUpdateUrl}'" >> ./raspiblitz.conf.new
-  #sudo rm /mnt/hdd/raspiblitz.conf
-  #sudo mv ./raspiblitz.conf.new /mnt/hdd/raspiblitz.conf
-  #sudo chmod 777 /mnt/hdd/raspiblitz.conf
-  # make dynUpdateUrl to empty line
-  sudo sed -i "s/^dynUpdateUrl=.*//g" /mnt/hdd/raspiblitz.conf
-  # remove empty lines
-  sudo sed -i '/^$/d' /mnt/hdd/raspiblitz.conf
-  # write fresh value
+
+  # remove line & write fresh
+  sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
+  echo "dynDomain='${dynDomain}'" >> /mnt/hdd/raspiblitz.conf
+
+  # remove line & write fresh
+  sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
   echo "dynUpdateUrl='${dynUpdateUrl}'" >> /mnt/hdd/raspiblitz.conf
 
-  echo "# changing lnd.conf"
-
-  # lnd.conf: uncomment tlsextradomain (just if it is still uncommented)
-  sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
-
-  # lnd.conf: domain value
-  sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${dynDomain}/g" /mnt/hdd/lnd/lnd.conf
+  # lnd.conf: domain value &
+  sudo /home/admin/config.scripts/lnd.tlscert.sh domain-add ${dynDomain}
 
   echo "# DynamicDNS is now ON"
 fi
@@ -122,13 +111,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# switching DynamicDNS OFF"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^dynDomain=.*/dynDomain=/g" /mnt/hdd/raspiblitz.conf
-  sudo sed -i "s/^dynUpdateUrl=.*/dynUpdateUrl=/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
 
-  echo "# changing lnd.conf"
-
-  # lnd.conf: comment tlsextradomain out
-  sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
+  # lnd.conf: remove domain tls entries
+  sudo /home/admin/config.scripts/lnd.tlscert.sh domain-remove ALL
 
   echo "# DynamicDNS is now OFF"
 fi
