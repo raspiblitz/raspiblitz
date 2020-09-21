@@ -362,6 +362,7 @@ EOF
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
     sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null <<EOF
+    # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
 [Service]
 ReadWriteDirectories=-/mnt/hdd/tor
 EOF
