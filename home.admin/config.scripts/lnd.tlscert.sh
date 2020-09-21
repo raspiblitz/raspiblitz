@@ -21,6 +21,8 @@ LNDCONF="/mnt/hdd/lnd/lnd.conf"
 
 if [ "$1" = "ip-add" ]; then 
 
+  echo "# lnd.tlscert.sh $1"
+  
   # 2. parameter: ip
   ip=$2
   if [ ${#ip} -eq 0 ]; then
@@ -86,6 +88,8 @@ fi
 
 if [ "$1" = "domain-add" ]; then 
 
+  echo "# lnd.tlscert.sh $1"
+
   # 2. parameter: domain
   domain=$2
   if [ ${#domain} -eq 0 ]; then
@@ -114,17 +118,30 @@ if [ "$1" = "domain-add" ]; then
   exit
 fi
 
-### RESET DOMAIN
+### REMOVE DOMAIN
 
-if [ "$1" = "domain-reset" ]; then 
+if [ "$1" = "domain-remove" ]; then 
 
-  echo "# lnd.tlscert.sh domain reset"
+  echo "# lnd.tlscert.sh $1"
 
-  # remove the line to the LND conf
-  sudo sed -i "/tlsextradomain=*/d" ${LNDCONF}
+  # 2. parameter: domain
+  domain=$2
+  if [ ${#domain} -eq 0 ]; then
+    echo "error='missing parameter'"
+    exit
+  fi
+
+  if [ "${domain}" == "ALL" ]; then
+    echo "# removing all tlsextradomain entries"
+    sudo sed -i "/tlsextradomain=*/d" ${LNDCONF}
+    ip=""
+  else
+    echo "# removing tlsextradomain=${domain}"
+    sudo sed -i "/tlsextradomain=${domain}/d" ${LNDCONF}
+  fi
 
   # check if line is removed
-  found=$(sudo cat ${LNDCONF} | grep -c "tlsextradomain=")
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextradomain=${domain}")
   if [ ${found} -gt 0 ]; then
     echo "error='failed removing tlsextradomain'"
     exit
