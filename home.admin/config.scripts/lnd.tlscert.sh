@@ -61,7 +61,7 @@ if [ "$1" = "ip-remove" ]; then
     echo "error='missing parameter'"
     exit
   fi
-  # if jocker -> delete all entries
+
   if [ "${ip}" == "*" ]; then
     echo "# removing all tlsextraip entries"
     sudo sed -i "/tlsextraip=${ip}*/d" ${LNDCONF}
