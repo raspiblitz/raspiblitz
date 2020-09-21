@@ -8,7 +8,9 @@ if [ $# -eq 0 ]; then
  echo "script to set and config TLS Cert for LND"
  echo "lnd.tlscert.sh refresh"
  echo "lnd.tlscert.sh ip-add [ip]"
- echo "lnd.tlscert.sh ip-remove [ip]"
+ echo "lnd.tlscert.sh ip-reset" 
+ echo "lnd.tlscert.sh domain-add [domain]"
+ echo "lnd.tlscert.sh domain-reset"
  exit 1
 fi
 
@@ -21,9 +23,8 @@ if [ "$1" = "ip-add" ]; then
 
   # 2. parameter: ip
   ip=$2
-  countDots=$(echo "$ip" | grep -c '.')
-  if [ ${countDots} -eq 0 ]; then
-    echo "error='missing or invalid IP'"
+  if [ ${#ip} -eq 0 ]; then
+    echo "error='missing parameter'"
     exit
   fi
 
@@ -40,37 +41,83 @@ if [ "$1" = "ip-add" ]; then
   # check if line is added
   found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
   if [ ${found} -eq 0 ]; then
-    echo "error='failed adding IP'"
+    echo "error='failed adding tlsextraip'"
     exit
   fi
 
-  echo "# OK added IP to lnd.conf - refresh of TLS cert is needed"
+  echo "# OK added tlsextraip to lnd.conf - refresh of TLS cert is needed"
   exit
 fi
 
-### REMOVE IP
+### RESET IP
 
-if [ "$1" = "ip-remove" ]; then 
+if [ "$1" = "ip-reset" ]; then 
 
-  # 2. parameter: ip
-  ip=$2
-  countDots=$(echo "$ip" | grep -c '.')
-  if [ ${countDots} -eq 0 ]; then
-    echo "error='missing or invalid IP'"
-    exit
-  fi
+  echo "# lnd.tlscert.sh domain ip"
 
   # remove the line to the LND conf
-  sudo sed -i "/tlsextraip=${ip}/d" ${LNDCONF}
+  sudo sed -i "/tlsextraip=*/d" ${LNDCONF}
 
   # check if line is removed
-  found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=${ip}")
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextraip=")
   if [ ${found} -gt 0 ]; then
-    echo "error='failed removing IP'"
+    echo "error='failed removing tlsextraip'"
     exit
   fi
 
-  echo "# OK removed IP from lnd.conf - refresh of TLS cert is needed"
+  echo "# OK removed tlsextraip from lnd.conf - refresh of TLS cert is needed"
+  exit
+fi
+
+### ADD DOMAIN
+
+if [ "$1" = "domain-add" ]; then 
+
+  # 2. parameter: domain
+  domain=$2
+  if [ ${#domain} -eq 0 ]; then
+    echo "error='missing parameter'"
+    exit
+  fi
+
+  # check if IP is already added
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextradomain=${domain}")
+  if [ ${found} -gt 0 ]; then
+    echo "# OK the domain was already added lnd.conf"
+    exit
+  fi
+
+  # simply add the line to the LND conf
+  sudo sed -i "10itlsextradomain=${domain}" ${LNDCONF}
+
+  # check if line is added
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextradomain=${domain}")
+  if [ ${found} -eq 0 ]; then
+    echo "error='failed adding tlsextradomain'"
+    exit
+  fi
+
+  echo "# OK added tlsextradomain to lnd.conf - refresh of TLS cert is needed"
+  exit
+fi
+
+### RESET DOMAIN
+
+if [ "$1" = "domain-reset" ]; then 
+
+  echo "# lnd.tlscert.sh domain reset"
+
+  # remove the line to the LND conf
+  sudo sed -i "/tlsextradomain=*/d" ${LNDCONF}
+
+  # check if line is removed
+  found=$(sudo cat ${LNDCONF} | grep -c "tlsextradomain=")
+  if [ ${found} -gt 0 ]; then
+    echo "error='failed removing tlsextradomain'"
+    exit
+  fi
+
+  echo "# OK removed tlsextradomain from lnd.conf - refresh of TLS cert is needed"
   exit
 fi
 
