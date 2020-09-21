@@ -242,6 +242,7 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
+
   sudo shutdown -r now
   sleep 100
 fi
@@ -296,13 +297,19 @@ fi
 # HDD CHECK & PRE-INIT
 ################################
  
+# Without LCD message needs to be printed
 # wait loop until HDD is connected
+echo ""
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  echo "isMounted: $isMounted" >> $logFile
+  echo "hddCandidate: $hddCandidate" >> $logFile
+  message="Connect the Hard Drive"
+  echo $message
   if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
-    sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
+    sed -i "s/^message=.*/message='$message'/g" ${infoFile}
   fi
   sleep 2
 done
@@ -313,6 +320,7 @@ sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+echo "isMounted: $isMounted" >> $logFile
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 if [ ${isMounted} -eq 0 ]; then
@@ -336,8 +344,8 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   # temp mount the HDD
-  echo "Temp mounting data drive" >> $logFile
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  echo "Temp mounting data drive ($hddCandidate)" >> $logFile
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   if [ ${#error} -gt 0 ]; then
     echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
@@ -413,6 +421,7 @@ if [ ${isMounted} -eq 0 ]; then
     cp $logFile /home/admin/raspiblitz.recover.log
     echo "shutdown in 1min" >> $logFile
     sync
+
     sudo shutdown -r -F +1
     exit 0
   else 
