@@ -164,19 +164,16 @@ case $CHOICE in
 
                 # show the same info as on LCD screen
                 /home/admin/00infoBlitz.sh
-              
-                #echo "Screen is not refreshing itself ... press ENTER to continue."
-                #read key
 
                 # wait 2 seconds for key input
-                echo "Screen is updating .... keep 'x' pressed to exit to menu."
+                echo "Screen is updating in loop .... keep 'x' pressed to exit to menu."
                 read -n 1 -t 2 keyPressed
 
                 # check if user wants to abort session
                 if [ "${keyPressed}" = "x" ]; then
                   echo ""
                   echo "Returning to menu ....."
-                  slepp 4
+                  sleep 4
                   break
                 fi
               done
