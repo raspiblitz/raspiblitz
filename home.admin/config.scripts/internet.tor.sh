@@ -402,9 +402,8 @@ EOF
   fi
 
   echo "Setup logrotate"
-  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
-    # add logrotate config for modified Tor dir on ext. disk
-    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+  # add logrotate config for modified Tor dir on ext. disk
+  sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
 /mnt/hdd/tor/*log {
         daily
         rotate 5
@@ -412,7 +411,7 @@ EOF
         delaycompress
         missingok
         notifempty
-        create 0640 bitcoin bitcoin
+        create 0640 debian-tor debian-tor
         sharedscripts
         postrotate
                 if invoke-rc.d tor status > /dev/null; then
@@ -421,7 +420,8 @@ EOF
         endscript
 }
 EOF
-  fi
+
+  sudo systemctl restart tor@default
 
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
@@ -451,6 +451,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl enable lnd
   echo "OK"
+  echo ""
+
+  echo "*** Stop TOR service ***"
+  sudo systemctl stop tor@default
   echo ""
 
   echo "needs reboot to activate new setting"
