@@ -317,7 +317,7 @@ if [ "$1" = "import-gui" ]; then
   esac
 
   # now temp mount the HDD/SSD
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   if [ ${#error} -gt 0 ]; then
     echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
     exit 1

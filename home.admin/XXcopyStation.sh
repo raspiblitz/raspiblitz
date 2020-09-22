@@ -213,7 +213,7 @@ do
 
   sleep 4
   echo "" > ./.syncinfo.tmp
-  lsblk -o NAME | grep "^sd" | while read -r detectedDrive ; do
+  lsblk -o NAME | grep "^[s|v]d" | while read -r detectedDrive ; do
     isSystemDrive=$(echo "${datadisk}" | grep -c "${detectedDrive}")
     if [ ${isSystemDrive} -eq 0 ]; then
 
