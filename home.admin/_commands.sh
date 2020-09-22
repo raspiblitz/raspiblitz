@@ -114,7 +114,7 @@ function status() {
 # command: balance
 # switch to the bos user for Balance of Satoshis
 function balance() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "bos=on") -eq 1 ]; then
+  if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - bos
   else
     echo "Balance of Satoshis is not installed - to install run:"
@@ -125,11 +125,22 @@ function balance() {
 # command: jmarket
 # switch to the joinmarket user for the JoininBox menu
 function jmarket() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - joinmarket
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: loop
+# switch to the loop user for the Lightning Loop Service
+function loop() {
+  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - loop
+  else
+    echo "Lightning Loop is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.loop.sh on"
   fi
 }
 
