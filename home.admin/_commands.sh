@@ -133,6 +133,15 @@ function jmarket() {
   fi
 }
 
+# command: faraday
+# switch to the faraday user for the Faraday Service
+function faraday() {
+  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - faraday
+  else
+    echo "Faraday is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.faraday.sh on"
+
 # command: loop
 # switch to the loop user for the Lightning Loop Service
 function loop() {
