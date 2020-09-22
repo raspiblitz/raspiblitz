@@ -18,7 +18,8 @@ fi
 if [ "$1" = "menu" ]; then
   dialog --title " Info Loop Service " --msgbox "\n\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Use the command 'loop' on the terminal to see the options.
+Use the shortcut 'loop' in the terminal to switch to the dedicated user.\n
+Type 'loop' again to see the available options.
 " 10 56
   exit 0
 fi
