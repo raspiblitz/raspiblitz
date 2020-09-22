@@ -74,7 +74,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u loop git clone https://github.com/lightninglabs/loop.git
     cd /home/loop/loop
     # https://github.com/lightninglabs/loop/releases
-    sudo -u loop git reset --hard v0.9.0-beta
+    sudo -u loop git reset --hard v0.8.1-beta
     cd /home/loop/loop/cmd
     sudo -u loop /usr/local/go/bin/go install ./... || exit 1
 
