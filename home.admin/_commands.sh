@@ -133,6 +133,29 @@ function jmarket() {
   fi
 }
 
+
+# command: jmarket
+# switch to the joinmarket user for the JoininBox menu
+function jmarket() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+    sudo su - joinmarket
+  else
+    echo "JoinMarket is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: faraday
+# switch to the faraday user for the Faraday Service
+function faraday() {
+  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - faraday
+  else
+    echo "Faraday is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.faraday.sh on"
+  fi
+}
+
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
 # $ gettx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
