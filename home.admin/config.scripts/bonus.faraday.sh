@@ -8,7 +8,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # version and trusted release signer
-version="0.1.0-alpha"
+version="0.2.1-alpha"
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
 
@@ -39,7 +39,7 @@ fi
 
 # check if already installed
 installed=0
-installedVersion=$(sudo -u admin frcli --version)
+installedVersion=$(sudo -u faraday frcli --version)
 if [ ${#installedVersion} -gt 0 ]; then
   installed=1
 fi
@@ -61,18 +61,19 @@ if [ "${mode}" = "menu" ]; then
     whiptail --title " ERROR " --msgbox "Faraday is not installed" 7 30
     exit 1
   fi
-  whiptail --title " Faraday " --msgbox "Faraday is a command line tool. On terminal call:
-frcli --help
-
-For more background read the following article:
-https://lightning.engineering/posts/2020-04-02-faraday" 11 60
+  whiptail --title " Faraday " --msgbox "
+Faraday is a command line tool. Usage:
+https://github.com/lightninglabs/faraday
+In terminal use the shortcut: 'faraday' to switch to the dedicated user.
+Type: 'frcli --help' for the available options.
+" 12 60
   exit 1
 fi
 
 # INSTALL
 if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
-  if [ $(sudo ls /home/faraday/.bashrc 2>/dev/null | grep -c ".bashrc") -gt 0 ]; then
+  if [ -f /etc/systemd/system/faraday.service ]; then
     echo "# FAIL - already installed"
     sleep 3
     exit 1
@@ -145,14 +146,23 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     exit 1
   fi
 
+  # create dedicated user
+  echo "# Add the 'faraday' user"
+  sudo adduser --disabled-password --gecos "" faraday
+
+  # set PATH for the user
+  sudo bash -c "echo 'PATH=\$PATH:/home/faraday/bin/' >> /home/faraday/.profile"
+
   # install
   echo
   echo "# unzip binary"
+
   sudo -u admin tar -xzf ${binaryName}
   # removing the tar.gz ending from the binary
   directoryName="${binaryName%.*.*}"
   echo "# install binary directory '${directoryName}'"
-  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
+  sudo -u faraday mkdir -p /home/faraday/bin
+  sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${directoryName}/*
   sleep 3
   installed=$(sudo -u admin frcli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -160,21 +170,29 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     exit 1
   fi
 
-  # make sure faraday user exists (this will run the farday server)
-  echo "# Add the 'faraday' user"
-  sudo adduser --disabled-password --gecos "" faraday
-
+  # make sure symlink to central app-data directory exists ***"
+  sudo rm -rf /home/faraday/.lnd  # not a symlink.. delete it silently
+  # create symlink
+  sudo ln -s /mnt/hdd/app-data/lnd/ /home/faraday/.lnd
+  # sync all macaroons and unix groups for access
+  /home/admin/config.scripts/lnd.credentials.sh sync
+  # macaroons will be checked after install
+  # add user to group with admin access to lnd
+  sudo /usr/sbin/usermod --append --groups lndadmin faraday
   # add user to group with readonly access on lnd
   sudo /usr/sbin/usermod --append --groups lndreadonly faraday
+  # add user to group with invoice access on lnd
+  sudo /usr/sbin/usermod --append --groups lndinvoice faraday
+  # add user to groups with all macaroons
+  sudo /usr/sbin/usermod --append --groups lndinvoices faraday
+  sudo /usr/sbin/usermod --append --groups lndchainnotifier faraday
+  sudo /usr/sbin/usermod --append --groups lndsigner faraday
+  sudo /usr/sbin/usermod --append --groups lndwalletkit faraday
+  sudo /usr/sbin/usermod --append --groups lndrouter faraday
  
   # install service
   echo "*** Install systemd ***"
-  sudo mkdir -p /mnt/hdd/temp/ 2>/dev/null
-  sudo chmod 777 /mnt/hdd/temp/
-  sudo chown bitcoin:bitcoin /mnt/hdd/temp/
-  sudo touch /mnt/hdd/temp/faraday.service
-  sudo chmod 777 /mnt/hdd/temp/faraday.service
-  cat > /mnt/hdd/temp/faraday.service <<EOF
+  echo "
 [Unit]
 Description=faraday
 Wants=lnd.service
@@ -182,8 +200,13 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/faraday/
-ExecStart=faraday --macaroondir=/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net --macaroonfile=readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert --rpcserver=127.0.0.1:10009
-User=faraday
+ExecStart=faraday
+User=faraday \
+--network=${chain}net
+#--connect_bitcoin \
+#--bitcoin.host=127.0.0.1:8332 \
+#--bitcoin.user=raspibolt \
+#--bitcoin.password=PASSWORD_B
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -192,11 +215,9 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-EOF
-
-  sudo install -m 0644 -o root -g root -t /etc/systemd/system /mnt/hdd/temp/faraday.service  
-  sudo rm -rf /mnt/hdd/temp/faraday.service
-  sudo systemctl enable faraday
+" | sudo tee -a /etc/systemd/system/faraday.service
+    sudo systemctl enable faraday
+    echo "# OK - the Faraday service is now enabled"
   if [ "${state}" == "ready" ]; then
     sudo systemctl start faraday
   fi
@@ -207,7 +228,7 @@ EOF
   fi
   sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
 
-  echo "# OK faraday Installed"
+  echo "# OK Faraday  is installed"
   exit 1
 
 fi
