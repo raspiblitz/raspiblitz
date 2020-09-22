@@ -27,7 +27,7 @@ echo
 echo "# --> Linking drives/directories"
 echo "# hddCandidate='${hddCandidate}'"
 echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link)
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh link --> ${error}"
   echo "Please report issue to the raspiblitz github."
