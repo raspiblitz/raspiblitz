@@ -43,10 +43,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     sudo adduser --disabled-password --gecos "" loop
 
+    # set PATH for the user
+    sudo bash -c "echo 'PATH=\$PATH:/home/loop/go/bin/' >> /home/loop/.profile"
+
     # make sure symlink to central app-data directory exists ***"
     sudo rm -rf /home/loop/.lnd  # not a symlink.. delete it silently
     # create symlink
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/loop/.lnd"
+    sudo ln -s /mnt/hdd/app-data/lnd/ /home/loop/.lnd
 
     # sync all macaroons and unix groups for access
     /home/admin/config.scripts/lnd.credentials.sh sync
@@ -69,11 +72,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/loop
     sudo -u loop git clone https://github.com/lightninglabs/loop.git
     cd /home/loop/loop
-
     # https://github.com/lightninglabs/loop/releases
-    sudo -u loop git reset --hard v0.8.0-beta
+    sudo -u loop git reset --hard v0.9.0-beta
     cd /home/loop/loop/cmd
-    go install ./...
+    sudo -u loop /usr/local/go/bin/go install ./... || exit 1
 
     # make systemd service
     if [ "${runBehindTor}" = "on" ]; then
@@ -92,7 +94,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/loop/loop
-ExecStart=/usr/local/gocode/bin/loopd --network=${chain}net ${proxy}
+ExecStart=/home/loop/go/bin/loopd --network=${chain}net ${proxy}
 User=loop
 Group=loop
 Type=simple
@@ -114,7 +116,7 @@ WantedBy=multi-user.target
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
   
-  isInstalled=$(loop | grep -c loop)
+  isInstalled=$(sudo -u loop /home/loop/go/bin/loop | grep -c loop)
   if [ ${isInstalled} -gt 0 ] ; then
     echo "Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
   else
@@ -138,11 +140,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop loopd
     sudo systemctl disable loopd
     sudo rm /etc/systemd/system/loopd.service
-    # delete user 
+    # delete user and it's home directory
     sudo userdel -rf loop
-    # delete Go packages
-    sudo rm  /usr/local/gocode/bin/loop
-    sudo rm  /usr/local/gocode/bin/loopd
     echo "OK, the Loop Service is removed."
   else 
     echo "Loop is not installed."
