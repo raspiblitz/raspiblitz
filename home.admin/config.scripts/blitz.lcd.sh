@@ -172,7 +172,11 @@ if [ "${command}" == "image" ]; then
     fi
   fi
 
-  sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
+  if [ -f /dev/fb1 ] ; then
+    sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
+  else
+    sudo fbi -a -T 1 -d /dev/fb0 --noverbose ${imagePath} 2> /dev/null
+  fi
   exit 0
 fi
 
@@ -190,7 +194,11 @@ if [ "${command}" == "qr" ]; then
   fi
 
   qrencode -l L -o /home/admin/qr.png "${datastring}" > /dev/null
-  sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+  if [ -f /dev/fb1 ] ; then
+    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+  else
+    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/qr.png 2> /dev/null
+  fi
   exit 0
 fi
 
