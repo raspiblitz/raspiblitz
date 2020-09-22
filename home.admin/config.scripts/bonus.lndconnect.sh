@@ -312,6 +312,7 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
   if [ "${connector}" == "lndconnect" ]; then
+    echo "lndconnect --host=${hostscreen} --port=${port} ${extraparameter}"
     lndconnect --host=${hostscreen} --port=${port} ${extraparameter}
     echo "Press ENTER when finished."
     read key
