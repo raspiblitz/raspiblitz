@@ -99,7 +99,9 @@ elif [ "$1" == "backup-restore" ]; then
   elif [ -f /mnt/hdd/app-data/wpa_supplicant.conf ]; then
     # RESTORE backuped wifi settings from HDD to RaspiBlitz
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+    echo "# restoring old wifi settings ... wait 4 secounds to connect"
     sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+    sleep 4
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
