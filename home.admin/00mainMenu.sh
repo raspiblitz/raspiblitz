@@ -165,9 +165,10 @@ case $CHOICE in
                 # show the same info as on LCD screen
                 /home/admin/00infoBlitz.sh
 
-                # wait 2 seconds for key input
+                # wait 6 seconds for user exiting loop
+                echo ""
                 echo -en "Screen is updating in loop .... press 'x' now to get back to menu."
-                read -n 1 -t 4 keyPressed
+                read -n 1 -t 6 keyPressed
                 echo -en "\rScreen is updating in loop .... gathering information for update."  
 
                 # check if user wants to abort session
