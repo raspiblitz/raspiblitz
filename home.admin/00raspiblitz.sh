@@ -333,6 +333,9 @@ if LND was able to recover funds from your channels.
   
   fi
 
+  # check if DNS is working (if not it will trigger dialog)
+  sudo /home/admin/config.scripts/internet.dns.sh test
+
   #forward to main menu
   /home/admin/00mainMenu.sh
   exit 0
