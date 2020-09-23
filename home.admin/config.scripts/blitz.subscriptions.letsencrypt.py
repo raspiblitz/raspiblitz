@@ -269,7 +269,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     # run the ACME script
     print("# Running letsencrypt ACME script ...")
     acme_result = subprocess.Popen(
-        ["sudo","-u","bitcoin","/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
+        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
     out, err = acme_result.communicate()
     eprint(str(out))
