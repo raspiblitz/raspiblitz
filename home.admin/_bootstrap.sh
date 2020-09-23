@@ -357,16 +357,8 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
-  # check if there is a WIFI configuration to restore
-  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-  configWifiHDD=$(sudo cat /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-  if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
-    echo "Restoring WIFI setting & rebooting .." >> $logFile
-    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
-    sudo chmod 755 /boot/wpa_supplicant.conf
-    sudo reboot now
-    exit 0
-  fi
+  # check if there is a WIFI configuration to backup or restore
+  sudo /home/admin/config.scripts/internet.wifi.sh backup-restore
 
   # make sure at this point local network is connected
   wait_for_local_network
