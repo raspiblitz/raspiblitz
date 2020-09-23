@@ -5,7 +5,8 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh [on|off|status|menu|write-macaroons]"
+  echo "bonus.lnbits.sh on [?master]"
+  echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
   exit 1
 fi
 
