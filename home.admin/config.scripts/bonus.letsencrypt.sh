@@ -66,10 +66,10 @@ function acme_install() {
     sudo apt-get install -y socat >/dev/null 2>&1
   fi
 
-  if ! [ -d "/mnt/hdd/app-data/letsencrypt" ]; then
-    sudo mkdir -p "/mnt/hdd/app-data/letsencrypt"
+  if ! [ -d $ACME_CONFIG_HOME ]; then
+    sudo mkdir -p $ACME_CONFIG_HOME
   fi
-  sudo chown admin:admin "/mnt/hdd/app-data/letsencrypt"
+  sudo chown admin:admin $ACME_CONFIG_HOME
 
   rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
   if ! curl --silent --fail -o "/tmp/acme.sh_${ACME_VERSION}.tar.gz" "${ACME_LOAD_BASE_URL}/${ACME_VERSION}" 2>&1; then
@@ -204,9 +204,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # make sure storage directory exist
-    sudo mkdir -p /mnt/hdd/app-data/letsencrypt/certs 2>/dev/null
-    sudo chown -R admin:admin /mnt/hdd/app-data/letsencrypt
-    sudo chmod -R 733 /mnt/hdd/app-data/letsencrypt
+    sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+    sudo chown -R admin:admin $ACME_CONFIG_HOME
+    sudo chmod -R 733 $ACME_CONFIG_HOME
 
     # install the acme script
     acme_install "${address}"
@@ -235,6 +235,11 @@ elif [ "$1" = "issue-cert" ]; then
     echo "error='letsenscrypt is not on'"
     exit 1
   fi
+
+  # make sure storage directory exist
+  sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+  sudo chown -R admin:admin $ACME_CONFIG_HOME
+  sudo chmod -R 733 $ACME_CONFIG_HOME
 
   # get and check parameters
   dnsservice=$2
@@ -304,6 +309,11 @@ elif [ "$1" = "remove-cert" ]; then
     echo "error='letsenscrypt is not on'"
     exit 1
   fi
+
+  # make sure storage directory exist
+  sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+  sudo chown -R admin:admin $ACME_CONFIG_HOME
+  sudo chmod -R 733 $ACME_CONFIG_HOME
 
   # get and check parameters
   FQDN=$2
