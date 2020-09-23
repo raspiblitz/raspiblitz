@@ -166,8 +166,9 @@ case $CHOICE in
                 /home/admin/00infoBlitz.sh
 
                 # wait 2 seconds for key input
-                echo "Screen is updating in loop .... keep 'x' pressed to exit to menu."
-                read -n 1 -t 2 keyPressed
+                echo -en "Screen is updating in loop .... press 'x' now to get back to menu."
+                read -n 1 -t 4 keyPressed
+                echo -en "\rScreen is updating in loop .... gathering information for update."  
 
                 # check if user wants to abort session
                 if [ "${keyPressed}" = "x" ]; then
