@@ -383,7 +383,7 @@ if [ "$1" = "format" ]; then
     echo "error='partition cleaning failed'"
     exit 1
   fi
-  sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null
+  sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
   sleep 2
   sync
 
@@ -395,7 +395,7 @@ if [ "$1" = "format" ]; then
 
      # write new EXT4 partition
      >&2 echo "# Creating the one big partition"
-     sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>/dev/null 2>/dev/null
+     sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
      sleep 6
      sync
      # loop until the partion gets available
@@ -409,7 +409,7 @@ if [ "$1" = "format" ]; then
        loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 10 ]; then
-        >&2 echo "# partion failed"
+         >&2 echo "# partion failed"
          echo "error='partition failed'"
          exit 1
        fi
@@ -420,6 +420,7 @@ if [ "$1" = "format" ]; then
      sudo umount -f /tmp/ext4 2>/dev/null
      unmounted=$(df | grep -c "/tmp/ext4")
      if [ ${unmounted} -gt 0 ]; then
+       >&2 echo "# ERROR: failed to unmount /tmp/ext4"
        echo "error='failed to unmount /tmp/ext4'"
        exit 1
      fi
@@ -436,6 +437,7 @@ if [ "$1" = "format" ]; then
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLOCKCHAIN)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 10 ]; then
+         >&2 echo "# ERROR: formatting ext4 failed"
          echo "error='formatting ext4 failed'"
          exit 1
        fi
