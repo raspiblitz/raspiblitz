@@ -50,11 +50,11 @@ network={
 }"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
   sudo chown root:root /home/admin/wpa_supplicant.conf
-  sudo mv /home/admin/wpa_supplicant.conf /boot/wpa_supplicant.conf
-  sudo chmod 755 /boot/wpa_supplicant.conf
+  sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+  sudo chmod 755 /etc/wpa_supplicant/wpa_supplicant.conf
 
   # activate new wifi settings
-  sudo wpa_cli -i wlan0 reconfigure
+  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
   echo "# OK - changes should be actrive now - maybe reboot needed"
   exit 0
 
@@ -72,7 +72,7 @@ update_config=1"
 
 
   # activate new wifi settings
-  sudo wpa_cli -i wlan0 reconfigure
+  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
   echo "# OK - changes should be actrive now - maybe reboot needed"
   exit 0
 
@@ -99,7 +99,7 @@ elif [ "$1" == "backup-restore" ]; then
   elif [ -f /mnt/hdd/app-data/wpa_supplicant.conf ]; then
     # RESTORE backuped wifi settings from HDD to RaspiBlitz
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-    sudo wpa_cli -i wlan0 reconfigure
+    sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
