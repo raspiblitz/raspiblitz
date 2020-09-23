@@ -211,7 +211,11 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   cd /home/lnbits/lnbits
   sudo git remote -v
   sudo git branch -v
+  # pull latest code
   sudo git pull
+  # restart lnbits service
+  sudo systemctl restart lnbits
+  echo "# server is restarting ... maybe takes some seconds until available"
   exit 0
 fi
 
