@@ -7,6 +7,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
   echo "bonus.lnbits.sh on [?master]"
   echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
+  echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
+  echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh github sync"
   exit 1
 fi
 
@@ -304,6 +307,49 @@ EOF
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
+  exit 0
+fi
+
+if [ "$1" = "repo" ]; then
+
+  # get github parameters
+  githubUser="$2"
+  if [ ${#githubUser} -eq 0 ]; then
+    echo "echo='missing parameter'"
+    exit 1
+  fi
+  githubBranch="$3"
+  if [ ${#githubBranch} -eq 0 ]; then
+    githubBranch="master"
+  fi
+
+  # check if repo exists
+  githubRepo="https://github.com/${githubUser}/lnbits"
+  httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
+  if [ "${httpcode}" != "200" ]; then
+    echo "# tested github repo: ${githubRepo}"
+    echo "error='repo for user does not exist'"
+    exit 1
+  fi
+
+  # change origin repo of lnbits code
+  echo "# changing LNbits github repo(${githubUser}) branch(${githubBranch})"
+  cd /home/lnbits/lnbits
+  sudo git remote remove origin
+  sudo git remote add origin ${githubRepo}
+  sudo git fetch
+  sudo git checkout ${githubBranch}
+
+  # after sucessfull repo set -> also sync
+  $1 = "sync"
+fi
+
+if [ "$1" = "sync" ]; then
+  echo "# pull all changes from github repo"
+  # output basic info
+  sudo git remote -v
+  sudo git branch -v
+  sudo git pull
   exit 0
 fi
 
