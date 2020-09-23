@@ -203,11 +203,9 @@ if [ "$1" = "repo" ]; then
   sudo git checkout ${githubBranch}
   sudo git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
 
-  # after sucessfull repo set -> also sync
-  $1 = "sync"
 fi
 
-if [ "$1" = "sync" ]; then
+if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   echo "# pull all changes from github repo"
   # output basic info
   cd /home/lnbits/lnbits
