@@ -167,9 +167,9 @@ case $CHOICE in
 
                 # wait 6 seconds for user exiting loop
                 echo ""
-                echo -en "Screen is updating in loop .... press 'x' now to get back to menu."
+                echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
                 read -n 1 -t 6 keyPressed
-                echo -en "\rScreen is updating in loop .... gathering information for update."  
+                echo -en "\rGathering information to update info ..."  
 
                 # check if user wants to abort session
                 if [ "${keyPressed}" = "x" ]; then
