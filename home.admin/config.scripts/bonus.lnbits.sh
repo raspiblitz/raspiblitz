@@ -201,6 +201,7 @@ if [ "$1" = "repo" ]; then
   sudo git remote add origin ${githubRepo}
   sudo git fetch
   sudo git checkout ${githubBranch}
+  sudo git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
 
   # after sucessfull repo set -> also sync
   $1 = "sync"
