@@ -347,6 +347,7 @@ fi
 if [ "$1" = "sync" ]; then
   echo "# pull all changes from github repo"
   # output basic info
+  cd /home/lnbits/lnbits
   sudo git remote -v
   sudo git branch -v
   sudo git pull
