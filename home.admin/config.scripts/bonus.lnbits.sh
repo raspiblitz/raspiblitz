@@ -279,7 +279,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
     # do install like this
-    sudo -u lnbits python3 -m venv .venv
     sudo -u lnbits pipenv run pip install -r requirements.txt
     sudo -u lnbits pipenv run pip install lnd-grpc
 
