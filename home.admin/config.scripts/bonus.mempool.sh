@@ -168,7 +168,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   "DB_USER": "mempool",
   "DB_PASSWORD": "mempool",
   "DB_DATABASE": "mempool",
-  "HTTP_PORT": 4080,
+  "HTTP_PORT": 8999,
   "API_ENDPOINT": "/api/v1/",
   "CHAT_SSL_ENABLED": false,
   "CHAT_SSL_PRIVKEY": "",
@@ -217,7 +217,6 @@ EOF
 
     # open firewall
     echo "# *** Updating Firewall ***"
-    sudo ufw allow 4080 comment 'mempool HTTP'
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
 
@@ -328,7 +327,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # close ports on firewall
-  sudo ufw deny 4080
   sudo ufw deny 4081
   exit 0
 fi
