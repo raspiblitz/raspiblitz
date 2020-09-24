@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh on [?master]"
+  echo "bonus.lnbits.sh on [?GITHUBUSER] [?BRANCH]"
   echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
@@ -237,19 +237,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing needed packages"
     sudo apt-get install -y pipenv  2>/dev/null
 
+    # get optional github parameter
+    githubUser="lnbits"
+    if [ "$2" != "" ]; then
+      githubUser="$2"
+    fi
+    githubBranch="tags/raspiblitz"
+    if [ "$3" != "" ]; then
+      githubBranch="$3"
+    fi
+
     # install from GitHub
-    echo "# get the github code"
+    echo "# get the github code user(${githubUser}) branch(${githubBranch})"
     sudo rm -r /home/lnbits/lnbits 2>/dev/null
     cd /home/lnbits
-    sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
+    sudo -u lnbits git clone https://github.com/${githubUser}/lnbits.git
     cd /home/lnbits/lnbits
-    if [ "$2" == "master" ]; then
-      echo "# checking out master branch"
-      sudo -u lnbits git checkout
-    else
-      echo "# checking out tag 'raspiblitz'"
-      sudo -u lnbits git checkout tags/raspiblitz
-    fi
+    sudo -u lnbits git checkout ${githubBranch}
 
     # prepare .env file
     echo "# preparing env file"
