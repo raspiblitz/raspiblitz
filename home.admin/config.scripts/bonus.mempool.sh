@@ -27,14 +27,6 @@ This can take multiple hours.
       " 9 48
     exit 0
   fi
-  electrsRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
-  if [ ${electrsRunning} -eq 0 ]; then
-      dialog --title " Electrs service Not Running " --msgbox "
-The electrs server is not running!
-check: sudo journalctl -u electrs
-      " 9 48
-    exit 0
-  fi
 
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -115,12 +107,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
-
-    # make sure that electr is activated
-    isElectrsInstalled=$(/home/admin/config.scripts/bonus.electrs.sh status | grep -c 'serviceInstalled')
-    if [ ${isElectrsInstalled} -eq 0 ]; then
-        /home/admin/config.scripts/bonus.electrs.sh on
-    fi
 
     # make sure needed os dependencies are installed
     sudo apt-get install -y mariadb-server mariadb-client

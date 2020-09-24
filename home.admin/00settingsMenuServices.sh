@@ -372,7 +372,6 @@ if [ "${Mempool}" != "${choice}" ]; then
       sudo sytemctl start mempool
       whiptail --title " Installed Mempool Space " --msgbox "\
 The txindex may need to be created before Mempool can be active.\n
-An active electrs server needs to be running which may take also some time to be finished.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
 When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
 " 14 50
