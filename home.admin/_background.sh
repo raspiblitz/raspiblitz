@@ -110,30 +110,26 @@ do
 
       publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
       
-      # check if changed
-      elif [ ${publicIPChanged} -get 0 ]; then
+    # check if changed
+    elif [ ${publicIPChanged} -get 0 ]; then
 
-        # refresh data
-        source /mnt/hdd/raspiblitz.conf
+      # refresh data
+      source /mnt/hdd/raspiblitz.conf
 
-        # only restart LND if auto-unlock is activated
-        if [ "${autoUnlock}" = "on" ]; then
-          echo "restart LND with to pickup up new publiIP"
-          sudo systemctl stop lnd
-          sudo systemctl start lnd
-        else
-          echo "new publicIP but no LND restart because no auto-unlock"
-        fi
-
-        # trigger update if dnyamic domain (if set)
-        updateDynDomain=1
-
+      # only restart LND if auto-unlock is activated
+      if [ "${autoUnlock}" = "on" ]; then
+        echo "restart LND with to pickup up new publiIP"
+        sudo systemctl stop lnd
+        sudo systemctl start lnd
       else
-        echo "public IP has not changed"
+        echo "new publicIP but no LND restart because no auto-unlock"
       fi
 
+      # trigger update if dnyamic domain (if set)
+      updateDynDomain=1
+
     else
-      echo "skip - because setup is still running"
+        echo "public IP has not changed"
     fi
 
   fi
