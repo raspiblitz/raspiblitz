@@ -139,7 +139,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "FLUSH PRIVILEGES;"
     mariadb -umempool -pmempool mempool < mariadb-structure.sql
 
-    # sudo -u mempool git reset --hard v1.0.0
+    sudo -u mempool git reset --hard v1.0.0
     cd frontend
     sudo -u mempool npm install
     sudo -u mempool npm run build
@@ -162,54 +162,52 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chmod 600 /home/admin/mempool-config.json || exit 1 
     cat > /home/admin/mempool-config.json <<EOF
 {
-  "HTTP_PORT": 4080,
-  "BITCOIN_NODE_HOST": "127.0.0.1",
-  "BITCOIN_NODE_PORT": "8332",
-  "BITCOIN_NODE_USER": "$RPC_USER",
-  "BITCOIN_NODE_PASS": "$PASSWORD_B",
+  "ENV": "dev",
   "DB_HOST": "localhost",
   "DB_PORT": 3306,
   "DB_USER": "mempool",
   "DB_PASSWORD": "mempool",
   "DB_DATABASE": "mempool",
-  "DB_DISABLED": false,
+  "HTTP_PORT": 4080,
   "API_ENDPOINT": "/api/v1/",
-  "ELECTRS_POLL_RATE_MS": 2000,
-  "MEMPOOL_REFRESH_RATE_MS": 2000,
-  "DEFAULT_PROJECTED_BLOCKS_AMOUNT": 8,
-  "KEEP_BLOCK_AMOUNT": 24,
+  "CHAT_SSL_ENABLED": false,
+  "CHAT_SSL_PRIVKEY": "",
+  "CHAT_SSL_CERT": "",
+  "CHAT_SSL_CHAIN": "",
+  "MEMPOOL_REFRESH_RATE_MS": 500,
   "INITIAL_BLOCK_AMOUNT": 8,
-  "TX_PER_SECOND_SPAN_SECONDS": 150,
+  "DEFAULT_PROJECTED_BLOCKS_AMOUNT": 3,
+  "KEEP_BLOCK_AMOUNT": 24,
+  "BITCOIN_NODE_HOST": "127.0.0.1",
+  "BITCOIN_NODE_PORT": 8332,
+  "BITCOIN_NODE_USER": "$RPC_USER",
+  "BITCOIN_NODE_PASS": "$PASSWORD_B",
+  "BACKEND_API": "bitcoind",
   "ELECTRS_API_URL": "http://localhost:50001",
-  "CLUSTER_NUM_CORES": 1,
-  "BISQ_ENABLED": false,
-  "BISQ_BLOCKS_DATA_PATH": "/bisq/seednode-data/btc_mainnet/db/json",
-  "BISQ_MARKET_ENABLED": false,
-  "BISQ_MARKETS_DATA_PATH": "/bisq/seednode-data/btc_mainnet/db",
-  "SSL": false,
-  "SSL_CERT_FILE_PATH": "/etc/letsencrypt/live/mysite/fullchain.pem",
-  "SSL_KEY_FILE_PATH": "/etc/letsencrypt/live/mysite/privkey.pem"
+  "TX_PER_SECOND_SPAN_SECONDS": 150
 }
 EOF
     sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
 
-    touch /home/admin/mempool-frontend-config.json
-    sudo chmod 600 /home/admin/mempool-frontend-config.json || exit 1 
-    cat > /home/admin/mempool-frontend-config.json <<EOF
-
+    touch /home/admin/proxy.conf.json
+    sudo chmod 600 /home/admin/proxy.conf.json || exit 1 
+    cat > /home/admin/proxy.conf.json <<EOF
 {
-  "TESTNET_ENABLED": false,
-  "LIQUID_ENABLED": false,
-  "BISQ_ENABLED": false,
-  "BISQ_SEPARATE_BACKEND": false,
-  "ELCTRS_ITEMS_PER_PAGE": 25,
-  "KEEP_BLOCKS_AMOUNT": 8
+  "/api": {
+    "target": "http://localhost:8999/",
+    "secure": false
+  },
+  "/ws": {
+    "target": "http://localhost:8999/",
+    "secure": false,
+    "ws": true
+  }
 }
 EOF
-    sudo mv /home/admin/mempool-frontend-config.json /home/mempool/mempool/frontend/mempool-frontend-config.json
-    sudo chown mempool:mempool /home/mempool/mempool/frontend/mempool-frontend-config.json
+    sudo mv /home/admin/proxy.conf.json /home/mempool/mempool/frontend/proxy.conf.json
+    sudo chown mempool:mempool /home/mempool/mempool/frontend/proxy.conf.json
     cd /home/mempool/mempool/frontend
     sudo -u mempool npm run build
 
