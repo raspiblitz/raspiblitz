@@ -279,15 +279,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
     # do install like this
-    sudo -i lnbits python3 -m venv .venv
+    sudo -u lnbits python3 -m venv .venv
     sudo -u lnbits pipenv run pip install -r requirements.txt
     sudo -u lnbits pipenv run pip install lnd-grpc
-
-    #sudo -u lnbits pipenv run pip install python-dotenv
-    #sudo -u lnbits pipenv run pip install -r requirements.txt
-    # instead of this
-    #sudo -u lnbits pipenv install
-    #sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
 
     # update databases (if needed)
     # echo "# updating databases"
@@ -297,7 +291,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "*** Updating Firewall ***"
     sudo ufw allow 5001 comment 'lnbits'
-    sudo ufw allow 5000 comment 'lnbits'
     echo ""
 
     # install service
