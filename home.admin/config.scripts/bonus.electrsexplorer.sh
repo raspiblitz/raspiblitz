@@ -4,7 +4,7 @@
 source /mnt/hdd/raspiblitz.conf
 
 # explorer start script (waits to start btc-rpc-explorer until eletrs is responsive)
-explorerStartDir="/home/admin/system"
+explorerStartDir="/home/admin"
 explorerStartScript="${explorerStartDir}/btc-rpc-explorer.run.sh"
 explorerStartScriptEscaped=$(echo "${explorerStartScript}" | sed 's/\//\\\//g')
 
@@ -22,7 +22,7 @@ if [ "$1" = "status" ]; then
   if [ "${ElectRS}" = "" ]; then
     ElectRS="off"
   fi
-  echo "BTCRPCexplorer=${BTCRPCexplorer}"  
+  echo "BTCRPCexplorer=${BTCRPCexplorer}"
   echo "ElectRS=${ElectRS}"
   echo "explorerStartScript='${explorerStartScript}'"
   echo "explorerStartScriptEscaped='${explorerStartScriptEscaped}'"
