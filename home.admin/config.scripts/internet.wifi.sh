@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 wifiIsSet=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-wifiLocalIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '([wlan][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+wifiLocalIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '([wlan][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 connected=0
 if [ ${#wifiLocalIP} -gt 0 ]; then
   connected=1
