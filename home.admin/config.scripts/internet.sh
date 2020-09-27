@@ -190,6 +190,7 @@ elif [ "$1" == "update-publicip" ]; then
     exit 0
   else
     echo "ip_changed=1"
+    echo "oldip=${publicIP}"
     if [ "${ipv6}" == "on" ]; then
       # use ipv6 with brackes so that it can be used in http addresses like a IPv4
       publicIP="[${globalIP}]"
@@ -201,7 +202,7 @@ elif [ "$1" == "update-publicip" ]; then
 
   # store to raspiblitz.conf new publiciP
   publicIPValueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=')
-  if [ ${publicIPValueExists} -gt 1 ]; then 
+  if [ ${publicIPValueExists} -gt 1 ]; then
     # more then one publiIp entry - removing one
     sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
   fi
