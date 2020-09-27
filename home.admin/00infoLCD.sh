@@ -78,9 +78,18 @@ chain=""
 while :
     do
 
+    # save some CPU / log clutter on a "headless" installation (no LCD attached)
+    # by cutting out all the LCD stuff that otherwise will be run every 5 seconds
+    # which will spamm the DNS requests as well
+    isHeadless=$(cat ${configFile} | grep -Ec "headless=1|headless=on")
+    if [ ${isHeadless} -gt 0 ]; then
+      sleep 20
+      continue
+    fi
+
     ###########################
     # CHECK BASIC DATA
-    ###########################   
+    ###########################
 
     # get the local network IP to be displayed on the lCD
     source <(sudo /home/admin/config.scripts/internet.sh status)
@@ -179,7 +188,7 @@ while :
       elif [ "${state}" = "noHDD" ]; then
           message="Connect external HDD/SSD"
       fi
-      
+
       # setup process has not started yet
       l1="Login to your RaspiBlitz with:\n"
       l2="ssh admin@${localip}\n"
@@ -209,8 +218,8 @@ while :
       sleep 3
       continue
     fi
-    
-    # if freshly recovered 
+
+    # if freshly recovered
     recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
     if [ ${recoveredInfoExists} -gt 0 ]; then
       l1="FINAL RECOVER LOGIN NEEDED:\n"
@@ -222,7 +231,7 @@ while :
       continue
     fi
 
-    # if re-indexing 
+    # if re-indexing
     if [ "${state}" = "reindex" ]; then
       l1="REINDEXING BLOCKCHAIN\n"
       l2="To monitor & detect finish:\n"
