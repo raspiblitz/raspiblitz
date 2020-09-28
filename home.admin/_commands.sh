@@ -111,9 +111,9 @@ function status() {
   sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
-# command: balance
+# command: bos
 # switch to the bos user for Balance of Satoshis
-function balance() {
+function bos() {
   if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - bos
   else
@@ -122,9 +122,9 @@ function balance() {
   fi
 }
 
-# command: jmarket
+# command: jm
 # switch to the joinmarket user for the JoininBox menu
-function jmarket() {
+function jm() {
   if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - joinmarket
   else
