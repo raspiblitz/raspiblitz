@@ -27,13 +27,13 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " JoinMarket info " --msgbox "Usage:
-https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md\n
-Start to use by logging in to the 'joinmarket' user with:
-sudo su joinmarket\n
+  whiptail --title " JoinMarket info " --msgbox "
+Type: 'jm' in the command line to swith to the dedicated user and start the JoininBox menu.
+Notes on usage:
+https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
-" 14 81
+" 13 81
   exit 0
 fi
 
