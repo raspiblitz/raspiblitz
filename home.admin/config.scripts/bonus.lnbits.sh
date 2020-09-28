@@ -260,7 +260,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'FLASK_ENV=development' >>  /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
