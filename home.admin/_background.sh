@@ -107,11 +107,11 @@ do
 
     # execute only after setup when config exists
     if [ ${configExists} -eq 1 ]; then
-
       publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
-      
+    fi
+
     # check if changed
-    elif [ ${publicIPChanged} -get 0 ]; then
+    if [ ${publicIPChanged} -gt 0 ]; then
 
       # refresh data
       source /mnt/hdd/raspiblitz.conf
