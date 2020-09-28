@@ -297,9 +297,8 @@ EOF
   if [ "${runBehindTor}" == "on" ]; then
       echo "# changing the password for Tor"
 
-      hashedPassword=$(tor --hash-password "${newPassword}")
+      hashedPassword=$(sudo -u debian-tor tor --hash-password "${newPassword}")
       sed -i "s/^HashedControlPassword .*/HashedControlPassword ${hashedPassword}/g" /etc/tor/torrc 2>/dev/null
-      sed -i "s/^password .*/password ${newPassword}/g" /home/bitcoin/.nyx/config 2>/dev/null
 
       sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
       sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null

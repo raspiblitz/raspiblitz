@@ -285,7 +285,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chmod -R 700 /mnt/hdd/tor
     sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    HASHED_PASSWORD=$(tor --hash-password "$PASSWORD_B")
+    HASHED_PASSWORD=$(sudo -u debian-tor tor --hash-password "$PASSWORD_B")
 
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
@@ -354,11 +354,6 @@ EOF
 [Service]
 ReadWriteDirectories=-/mnt/hdd/tor
 EOF
-
-    sudo -u bitcoin mkdir -p /home/bitcoin/.nyx
-    sudo -u bitcoin touch /home/bitcoin/.nyx/config
-    sudo -u bitcoin sed -i "s/^password .*//g" /home/bitcoin/.nyx/config
-    echo "password $PASSWORD_B" | sudo -u bitcoin tee -a /home/bitcoin/.nyx/config >/dev/null
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
