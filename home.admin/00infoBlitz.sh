@@ -19,7 +19,10 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
-# get UPS info
+## get internet info
+source <(sudo /home/admin/config.scripts/internet.sh status global)
+
+## get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
 upsInfo=""
 if [ "${upsStatus}" = "ONLINE" ]; then
@@ -84,20 +87,6 @@ else
   color_ram=${color_green}
 fi
 
-# get name of active interface (eth0 or wlan0)
-network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $4}' | head -n 1)
-
-# get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-else
-  network_rx=$(ifconfig ${network_active_if} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${network_active_if} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-fi
-
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
 if [ -n ${btc_path} ]; then
@@ -148,9 +137,8 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-source <(sudo /home/admin/config.scripts/internet.sh status)
-local_ip="${localip}"
-public_ip="${publicIP}"
+local_ip="${localip}" # from internet.sh
+public_ip="${cleanip}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
@@ -192,9 +180,9 @@ else
 
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="${public_ip}:${public_port}"
-  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  public_addr="${publicip}:${public_port}"
+  public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     public_color="${color_amber}"
@@ -203,10 +191,10 @@ else
     public_color="${color_red}"
   fi
 
-  # DynDNS
+  # DynDomain
   if [ ${#dynDomain} -gt 0 ]; then
 
-    #check if dyndns resolves to correct IP
+    #check if dynamic domain resolves to correct IP
     ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
       public_color="${color_red}"
@@ -214,8 +202,8 @@ else
       public_color="${color_amber}"
     fi
 
-    # replace IP display with dynDNS
-    public_addr_pre="DynDNS "
+    # replace IP display with dynDN
+    public_addr_pre="DynDN "
     public_addr="${dynDomain}"
   fi
 
@@ -255,7 +243,7 @@ else
    ln_publicColor="${color_green}"
  else
    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     ln_publicColor="${color_amber}"
   else
@@ -294,6 +282,11 @@ else
 fi
 
 sleep 5
+
+## get uptime and current date & time
+uptime=$(uptime --pretty)
+datetime=$(date -R)
+
 clear
 printf "
 ${color_yellow}
@@ -302,22 +295,23 @@ ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow}  ,'  /_____,  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
-${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}      ,'/      ${color_gray}%s
+${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
+${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
+${color_yellow}    /,'        ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}   /'          ${color_gray}
+${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}
-
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
+"Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
@@ -356,9 +350,6 @@ else
   fi
 
 fi
-
-uptime=$(uptime --pretty)
-datetime=$(date)
 
 # if running as user "pi":
 #  - write results to a JSON file on RAM disk

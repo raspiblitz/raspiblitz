@@ -26,46 +26,60 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
-# check if file system was expanded to full capacity and sd card is bigger then 8GB
+# check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
-  if [ ${isRaspbian} -gt 0 ]; then
-    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  elif [ ${isArmbian} -gt 0 ]; then
-    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  fi
-  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
-  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
-  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
-  if [ ${byteSizeSdCard} -lt 8192000 ]; then
-    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
-    if [ ${fsexpanded} -eq 1 ]; then
-      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
-      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-      exit 1
-    else
-      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-      if [ ${isRaspbian} -gt 0 ]; then
-        sudo raspi-config --expand-rootfs
-      elif [ ${isArmbian} -gt 0 ]; then
-        sudo /usr/lib/armbian/armbian-resize-filesystem start
+source ${infoFile}
+isRaspbian=$(echo $baseimage | grep -c 'raspbian')
+isArmbian=$(echo $baseimage | grep -c 'armbian')
+resizeRaspbian="/usr/bin/raspi-config"
+resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
+
+minimumSize=8192000
+minimumSizeGB=$((minimumSize/1000/1000))
+
+rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
+rootPartitionLength=${#rootPartition}
+rootDisk=${rootPartition:5:rootPartitionLength-6}
+rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
+
+if [ ${#rootDisk} -gt 0 ]; then
+   echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
+   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
+   echo "Size in Bytes is: ${rootDiskSize} ($rootDisk)" >> ${logFile}
+   if [ $rootDiskSize -lt $minimumSize ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeGB}GB." >> ${logFile}
+      if [ ${fsexpanded} -eq 1 ]; then
+         echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
+         echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+         exit 1
+      else
+         echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+         sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+         if [ "${cpu}" == "x86_64"  ]; then
+            echo "Please expand disk size." >> ${logFile}
+	    # TODO: Expand disk size on x86_64
+         elif [ ${isRaspbian} -gt 0 ]; then
+              if [ -x ${resizeRaspbian} ]; then
+		      $(sudo $resizeRaspbian --expand-rootfs)
+	      fi
+         elif [ ${isArmbian} -gt 0 ]; then
+              if [ -x ${resizeArmbian} ]; then
+                 $(sudo $resizeArmbian start)
+	      fi
+         fi
+         sleep 6
+         sudo shutdown -r now
+	 exit 0
       fi
-      sleep 6
-      sudo shutdown -r now
-      exit 0
-    fi
-  else
-    echo "Size looks good. Bigger than 8GB card is used." >> ${logFile}
-  fi
+   else
+      echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
+   fi
 else
-  echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
+   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
@@ -235,13 +249,13 @@ else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
-# DYNAMIC DNS
+# DYNAMIC DOMAIN
 if [ "${#dynDomain}" -gt 0 ]; then
-    echo "Provisioning DYNAMIC DNS - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup DynamicDNS'/g" ${infoFile}
+    echo "Provisioning DYNAMIC DOMAIN - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup DynamicDomain'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
-    echo "Provisioning DYNAMIC DNS - keep default" >> ${logFile}
+    echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
 fi
 
 # RTL
@@ -552,7 +566,8 @@ echo "Prepare fstab for permanent data drive mounting .." >> ${logFile}
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 # update /etc/fstab
 echo "datadisk --> ${datadisk}" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+echo "datapartition --> ${datapartition}" >> ${logFile}
+sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5

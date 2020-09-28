@@ -108,51 +108,28 @@ do
     # execute only after setup when config exists
     if [ ${configExists} -eq 1 ]; then
 
-      # get actual public IP
-      freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+      publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
+      
+    # check if changed
+    elif [ ${publicIPChanged} -get 0 ]; then
 
-      # sanity check on IP data
-      # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-      echo "-> sanity check of new IP data"
-      if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-        echo "OK IPv6"
-      elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-        echo "OK IPv4"
+      # refresh data
+      source /mnt/hdd/raspiblitz.conf
+
+      # only restart LND if auto-unlock is activated
+      if [ "${autoUnlock}" = "on" ]; then
+        echo "restart LND with to pickup up new publiIP"
+        sudo systemctl stop lnd
+        sudo systemctl start lnd
       else
-        echo "FAIL - not an IPv4 or IPv6 address"
-        freshPublicIP=""
+        echo "new publicIP but no LND restart because no auto-unlock"
       fi
 
-      if [ ${#freshPublicIP} -eq 0 ]; then 
-
-        echo "freshPublicIP is ZERO - ignoring"
-
-      # check if changed
-      elif [ "${freshPublicIP}" != "${publicIP}" ]; then
-
-        # 1) update config file
-        echo "update config value"
-        sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
-        publicIP='${freshPublicIP}'
-
-        # 2) only restart LND if dynDNS is activated
-        # because this signals that user wants "public node"
-        if [ ${#dynDomain} -gt 0 ]; then
-          echo "restart LND with new environment config"
-          # restart and let to auto-unlock (if activated) do the rest
-          sudo systemctl stop lnd
-          sudo systemctl start lnd
-        fi
-
-        # 2) trigger update if dnyamic domain (if set)
-        updateDynDomain=1
-
-      else
-        echo "public IP has not changed"
-      fi
+      # trigger update if dnyamic domain (if set)
+      updateDynDomain=1
 
     else
-      echo "skip - because setup is still running"
+        echo "public IP has not changed"
     fi
 
   fi
@@ -372,7 +349,7 @@ do
       # calling the update url
       echo "calling: ${dynUpdateUrl}"
       echo "to update domain: ${dynDomain}"
-      curl --connect-timeout 6 ${dynUpdateUrl}
+      curl -s --connect-timeout 6 ${dynUpdateUrl} 2>/dev/null
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
     fi
@@ -431,7 +408,7 @@ do
   # check every 10 minutes
   electrsExplorer=$((($counter % 600)+1))
   if [ ${electrsExplorer} -eq 1 ]; then
-    if [ "${BTCRPCexplorer}" = "on" ] & [ "${ElectRS}" = "on" ]; then
+    if [ "${BTCRPCexplorer}" = "on" ]; then
       /home/admin/config.scripts/bonus.electrsexplorer.sh
     fi
   fi

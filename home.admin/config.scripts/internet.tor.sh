@@ -93,15 +93,17 @@ activateBitcoinOverTOR()
       # clean all previous added nodes
       sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
       sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-    
+
       echo "Addding TOR config ..."
       sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
       echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
       echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
       echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
       echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf 
-      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf 
+      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
+      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
+      PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+      echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
       if [ "${network}" = "bitcoin" ]; then
         # adding some bitcoin onion nodes to connect to to make connection easier
         echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
@@ -130,6 +132,7 @@ deactivateBitcoinOverTOR()
 {
   echo "*** Changing ${network} Config ***"
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -155,7 +158,19 @@ activateLndOverTOR()
 
     echo "editing /etc/systemd/system/lnd.service"
     sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735 \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
-  
+
+    # check if "tor.password" exists
+    valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tor.password=')
+    if [ ${valueExists} -eq 0 ]; then
+        echo "Adding tor config defaults to /mnt/hdd/lnd/lnd.conf"
+        PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+        sudo -u bitcoin tee -a /mnt/hdd/lnd/lnd.conf >/dev/null <<EOF
+
+[Tor]
+tor.password=$PASSWORD_B
+EOF
+    fi
+
     echo "Enable LND again"
     sudo systemctl enable lnd
     echo "OK"
@@ -265,17 +280,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     echo "*** Tor Config ***"
     #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/sys 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/bitcoin8332 2>/dev/null
+    sudo mkdir -p /mnt/hdd/tor
+    sudo mkdir -p /mnt/hdd/tor/sys
     sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+    sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    HASHED_PASSWORD=$(sudo -u debian-tor tor --hash-password "$PASSWORD_B")
+
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
@@ -288,15 +299,11 @@ Log notice file /mnt/hdd/tor/notice.log
 Log info file /mnt/hdd/tor/info.log
 
 RunAsDaemon 1
-User bitcoin
-PortForwarding 1
 ControlPort 9051
 SocksPort 9050
 ExitRelay 0
 
-CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
-CookieAuthentication 1
-CookieAuthFileGroupReadable 1
+HashedControlPassword $HASHED_PASSWORD
 
 # Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
@@ -338,13 +345,15 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
+    sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
-    if ! grep -Eq "^ReadWriteDirectories=" /etc/systemd/system/tor@default.service.d/raspiblitz.conf; then
-      echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
-    fi
+    sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null <<EOF
+    # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
+[Service]
+ReadWriteDirectories=-/mnt/hdd/tor
+EOF
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
@@ -388,9 +397,8 @@ EOF
   fi
 
   echo "Setup logrotate"
-  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
-    # add logrotate config for modified Tor dir on ext. disk
-    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+  # add logrotate config for modified Tor dir on ext. disk
+  sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
 /mnt/hdd/tor/*log {
         daily
         rotate 5
@@ -398,7 +406,7 @@ EOF
         delaycompress
         missingok
         notifempty
-        create 0640 bitcoin bitcoin
+        create 0640 debian-tor debian-tor
         sharedscripts
         postrotate
                 if invoke-rc.d tor status > /dev/null; then
@@ -407,7 +415,8 @@ EOF
         endscript
 }
 EOF
-  fi
+
+  sudo systemctl restart tor@default
 
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
@@ -437,6 +446,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl enable lnd
   echo "OK"
+  echo ""
+
+  echo "*** Stop TOR service ***"
+  sudo systemctl stop tor@default
   echo ""
 
   echo "needs reboot to activate new setting"

@@ -114,7 +114,7 @@ function status() {
 # command: bos
 # switch to the bos user for Balance of Satoshis
 function bos() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "bos=on") -eq 1 ]; then
+  if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - bos
   else
     echo "Balance of Satoshis is not installed - to install run:"
@@ -125,11 +125,33 @@ function bos() {
 # command: jm
 # switch to the joinmarket user for the JoininBox menu
 function jm() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - joinmarket
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: faraday
+# switch to the faraday user for the Faraday Service
+function faraday() {
+  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - faraday
+  else
+    echo "Faraday is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.faraday.sh on"
+  fi
+}
+
+# command: loop
+# switch to the loop user for the Lightning Loop Service
+function loop() {
+  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - loop
+  else
+    echo "Lightning Loop is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.loop.sh on"
   fi
 }
 

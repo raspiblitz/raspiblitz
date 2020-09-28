@@ -80,7 +80,7 @@ patchNotice()
 {
   whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Patch Menu" --yesno "This is the possibility to patch your RaspiBlitz:
 It means it will sync the program code with the
-the GitHub repo for your version branch v${codeVersion}.
+GitHub repo for your version branch v${codeVersion}.
 
 This can be usefull if there are important updates 
 inbetween releases to fix severe bugs. It can also
