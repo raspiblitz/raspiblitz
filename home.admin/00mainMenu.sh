@@ -184,7 +184,7 @@ case $CHOICE in
             fi
             ;;
         TOR)
-            sudo -u bitcoin nyx
+            sudo -u debian-tor nyx
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
