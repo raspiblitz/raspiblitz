@@ -260,7 +260,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'FLASK_ENV=development' >>  /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
@@ -279,12 +279,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
     # do install like this
+    sudo -u lnbits pipenv run pip install hypercorn
     sudo -u lnbits pipenv run pip install -r requirements.txt
     sudo -u lnbits pipenv run pip install lnd-grpc
 
     # update databases (if needed)
     # echo "# updating databases"
-    # sudo -u lnbits pipenv run flask migrate
+    sudo -u lnbits pipenv run quart migrate
+
+    # process assets
+    echo "# processing assets"
+    sudo -u lnbits pipenv run quart assets
 
     # open firewall
     echo
@@ -304,7 +309,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run python -m lnbits'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run hypercorn --bind 127.0.0.1:5000 lnbits:app'
 User=lnbits
 Restart=always
 TimeoutSec=120
