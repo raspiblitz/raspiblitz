@@ -141,6 +141,8 @@ function faraday() {
   else
     echo "Faraday is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.faraday.sh on"
+  fi
+}
 
 # command: loop
 # switch to the loop user for the Lightning Loop Service
