@@ -110,6 +110,13 @@ copyHost()
 
 }
 
+# when called with parameter "sourcemode"
+if [ "$1" == "sourcemode" ]; then
+  copyHost
+  raspiblitz
+  exit 0
+fi
+
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
          SOFTWARE "Run Softwaretest (DebugReport)" \
