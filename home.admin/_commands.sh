@@ -30,6 +30,12 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: sourcemode
+function sourcemode() {
+  cd /home/admin
+  ./98repairMenu.sh sourcemode
+}
+
 # command: check
 function check() {
   /home/admin/config.scripts/blitz.configcheck.py
