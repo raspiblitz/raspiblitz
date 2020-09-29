@@ -308,7 +308,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run hypercorn --bind 0.0.0.0:5000 "lnbits.app::create_app()"'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run hypercorn --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
 User=lnbits
 Restart=always
 TimeoutSec=120
