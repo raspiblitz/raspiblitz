@@ -279,6 +279,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits/lnbits
     # do install like this
     sudo -u lnbits pipenv run pip install hypercorn
+    sudo -u lnbits pipenv run pip install httpx
     sudo -u lnbits pipenv run pip install -r requirements.txt
     sudo -u lnbits pipenv run pip install lnd-grpc
 
