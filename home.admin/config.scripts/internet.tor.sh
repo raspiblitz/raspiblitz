@@ -12,6 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+torrc="/etc/tor/torrc"
+
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -243,7 +245,6 @@ fi
 # location of TOR config
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
-torrc="/etc/tor/torrc"
 
 # stop services (if running)
 echo "making sure services are not running"
