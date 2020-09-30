@@ -80,7 +80,7 @@ if [ "$1" = "status" ]; then
 
     # find the HDD (biggest single partition)
     sizeDataPartition=0
-    lsblk -o NAME,SIZE -b | grep "[^|*][s|v]d[a-z][0-9]" > .lsblk.tmp
+    lsblk -o NAME,SIZE -b | grep "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
       testdevice=$(echo $line | cut -d " " -f 1)
       testsize=$(echo $line | cut -d " " -f 2)
