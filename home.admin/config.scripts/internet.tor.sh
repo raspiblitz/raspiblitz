@@ -454,6 +454,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable lnd
   echo "editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
+  sudo sed -i '/\[Tor\]*/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^tor.password=*/d' /mnt/hdd/lnd/lnd.conf
 
   sudo systemctl enable lnd
   echo "OK"
