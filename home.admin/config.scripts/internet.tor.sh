@@ -208,10 +208,11 @@ fi
 if [ "$1" = "status" ]; then
   # is Tor activated
   if [ "${runBehindTor}" == "on" ]; then
-    echo "config=1"
+    echo "activated=1"
   else
-    echo "config=0"
+    echo "activated=0"
   fi
+  echo "config='${torrc}'"
   exit 0
 fi
 
