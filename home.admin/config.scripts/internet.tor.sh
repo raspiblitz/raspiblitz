@@ -36,7 +36,7 @@ if [ "${baseImage}" = "?" ]; then
   echo "error='unknown os'"
   exit 1
 else
-  echo "# running ${baseImage}"
+  echo "os='${baseImage}'"
 fi
 
 # function: install keys & sources
