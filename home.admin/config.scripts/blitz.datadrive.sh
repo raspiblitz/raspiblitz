@@ -79,18 +79,33 @@ if [ "$1" = "status" ]; then
     echo "# SETUP INFO"
 
     # find the HDD (biggest single partition)
+    hdd=""
     sizeDataPartition=0
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
-      testdevice=$(echo $line | cut -d " " -f 1)
-      testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2)
-      if [ ${testsize} -gt ${sizeDataPartition} ]; then
+      # cut line info into different informations
+      testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
+      testdevice=$(echo $testname | sed 's/[^a-z]*//g')
+      testpartition=$(echo $testname | sed 's/[^a-z]*[^0-9]//g')
+      testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
+      echo "# line($line)"
+      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      # if no matching device found yet - take first for the beginning (just in case no partions at all)
+      if [ ${#hdd} -eq 0 ]; then
+        hdd="${testdevice}"
+      fi
+      # if a partition was found - make sure to use the biggest
+      if [ ${#testpartition} -gt 0 ] && [ ${testsize} -gt ${sizeDataPartition} ]; then
         sizeDataPartition=${testsize}
-        hddDataPartition="${testdevice:2:4}"
-        hdd="${hddDataPartition:0:3}"
+        hddDataPartition="${testpartition}"
+        hdd="${testdevice}"
       fi
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
+    if [ ${#hddDataPartition} -lt 4 ]; then
+      echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
+      hddDataPartition=""
+    fi
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
     echo "hddCandidate='${hdd}'"
