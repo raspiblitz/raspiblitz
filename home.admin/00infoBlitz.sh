@@ -281,6 +281,22 @@ else
   fi
 fi
 
+if [ $JMstatsLCD = on ]; then
+  JMstats=$(mktemp 2>/dev/null)
+  sudo -u joinmarket /home/joinmarket/info.stats.sh > $JMstats
+  JMstatsL1=$(sed -n 1p < "$JMstats")
+  JMstatsL2=$(sed -n 2p < "$JMstats")
+  JMstatsL3=$(sed -n 3p < "$JMstats")
+  JMstatsL4=$(sed -n 4p < "$JMstats")
+  lastLine="\
+${color_gray}               ${color_gray}$JMstatsL1
+${color_gray}               ${color_gray}$JMstatsL2
+${color_gray}               ${color_gray}$JMstatsL3
+${color_gray}               ${color_gray}$JMstatsL4"
+else
+  lastLine="${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+fi
+
 sleep 5
 
 ## get uptime and current date & time
@@ -307,7 +323,7 @@ ${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 ${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}${color_gray}
+$lastLine
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
