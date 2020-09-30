@@ -89,41 +89,35 @@ activateBitcoinOverTOR()
 
   btcExists=$(sudo ls /home/bitcoin/.${network}/${network}.conf | grep -c "${network}.conf")
   if [ ${btcExists} -gt 0 ]; then
-    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-    if [ ${networkIsTor} -eq 0 ]; then
-    
-      # clean all previous added nodes
-      sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-      sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
 
-      echo "Addding TOR config ..."
-      sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
-      echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
-      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
-      PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-      echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
-      if [ "${network}" = "bitcoin" ]; then
-        # adding some bitcoin onion nodes to connect to to make connection easier
-        echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
-      fi
-      sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+    # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
+    deactivateBitcoinOverTOR
 
-      # copy new bitcoin.conf to admin user for cli access
-      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-      sudo chown admin:admin /home/admin/.${network}/${network}.conf
+    echo "Addding TOR config ..."
+    sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+    echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
+    echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
+    echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
+    if [ "${network}" = "bitcoin" ]; then
+      # adding some bitcoin onion nodes to connect to to make connection easier
+      echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
+    fi
+    sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
-  else
-    echo "Chain network already configured for TOR"
-  fi
+    # copy new bitcoin.conf to admin user for cli access
+    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
   else
     echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf-on' again later" 
   fi
@@ -132,7 +126,7 @@ activateBitcoinOverTOR()
 
 deactivateBitcoinOverTOR()
 {
-  echo "*** Changing ${network} Config ***"
+  # always make sure also to remove old settings
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -167,7 +161,6 @@ activateLndOverTOR()
         echo "Adding tor config defaults to /mnt/hdd/lnd/lnd.conf"
         PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
         sudo -u bitcoin tee -a /mnt/hdd/lnd/lnd.conf >/dev/null <<EOF
-
 [Tor]
 tor.password=$PASSWORD_B
 EOF
@@ -284,10 +277,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get update -y
     echo ""
 
-    echo "*** Install Tor ***"
-    echo "*** Installing NYX - TOR monitoring Tool ***"
-    # NYX - Tor monitor tool
-    #  https://nyx.torproject.org/#home
+    echo "*** Install Tor & NYX ***"
     sudo apt install tor tor-arm -y
 
     echo ""

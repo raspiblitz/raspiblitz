@@ -509,7 +509,6 @@ echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/mnt/hdd/backup_lnd" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  sudo cp /mnt/hdd/backup_lnd/lnd.conf /mnt/hdd/lnd/lnd.conf >> ${logFile} 2>&1
   sudo cp /mnt/hdd/backup_lnd/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
   sudo cp /mnt/hdd/backup_lnd/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
