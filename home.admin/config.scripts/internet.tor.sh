@@ -12,7 +12,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-echo "Detect Base Image ..." 
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -32,11 +31,12 @@ if [ ${isDietPi} -gt 0 ]; then
 fi
 if [ "${baseImage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
-  echo "!!! FAIL !!!"
-  echo "Base Image cannot be detected or is not supported."
+  echo "# !!! FAIL !!!"
+  echo "# Base Image cannot be detected or is not supported."
+  echo "error='unknown os'"
   exit 1
 else
-  echo "OK running ${baseImage}"
+  echo "# running ${baseImage}"
 fi
 
 # function: install keys & sources
