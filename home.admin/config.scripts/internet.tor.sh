@@ -292,7 +292,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo ""
     echo "*** Tor Config ***"
-    #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
     sudo mkdir -p /mnt/hdd/tor
     sudo mkdir -p /mnt/hdd/tor/sys
     sudo chmod -R 700 /mnt/hdd/tor
