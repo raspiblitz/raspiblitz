@@ -8,7 +8,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
  exit 1
 fi
 
@@ -202,6 +202,17 @@ fi
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
  exit 1
+fi
+
+# if started with status
+if [ "$1" = "status" ]; then
+  # is Tor activated
+  if [ "${runBehindTor}" == "on" ]; then
+    echo "config=1"
+  else
+    echo "config=0"
+  fi
+  exit 0
 fi
 
 # if started with btcconf-on 
