@@ -83,7 +83,7 @@ if [ "$1" = "status" ]; then
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
       testdevice=$(echo $line | cut -d " " -f 1)
-      testsize=$(echo $line | cut -d " " -f 2)
+      testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2)
       if [ ${testsize} -gt ${sizeDataPartition} ]; then
         sizeDataPartition=${testsize}
         hddDataPartition="${testdevice:2:4}"
