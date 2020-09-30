@@ -144,7 +144,7 @@ if [ "$1" = "status" ]; then
         mountError=""
         sudo mkdir -p /mnt/hdd
         if [ "${hddFormat}" = "ext4" ]; then
-	  hddDataPartitionExt4=$hddDataPartition
+	        hddDataPartitionExt4=$hddDataPartition
           mountError=$(sudo mount /dev/${hddDataPartitionExt4} /mnt/hdd 2>&1)
           isTempMounted=$(df | grep /mnt/hdd | grep -c ${hddDataPartitionExt4})
         fi
