@@ -86,7 +86,7 @@ if [ "$1" = "status" ]; then
       # cut line info into different informations
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
       testdevice=$(echo $testname | sed 's/[^a-z]*//g')
-      testpartition=$(echo $testname | sed 's/[^a-z]*[^0-9]//g')
+      testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
       testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
       echo "# line($line)"
       echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
