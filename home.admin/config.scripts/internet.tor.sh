@@ -466,6 +466,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop tor@default
   echo ""
 
+  if [ "$2" == "clear" ]; then
+      echo "*** Deinstall Tor & Delete Data ***"
+       sudo apt remove tor tor-arm -y
+       sudo rm -r /mnt/hdd/tor 2>/dev/null
+  fi
+
   echo "needs reboot to activate new setting"
   exit 0
 fi
