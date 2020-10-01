@@ -291,12 +291,15 @@ if [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wal
   JMstatsL3=$(sed -n 3p < "$JMstats")
   JMstatsL4=$(sed -n 4p < "$JMstats")
   lastLine="\
-${color_gray}               ${color_gray}$JMstatsL1
-${color_gray}               ${color_gray}$JMstatsL2
-${color_gray}               ${color_gray}$JMstatsL3
-${color_gray}               ${color_gray}$JMstatsL4"
+${color_gray}  _   __   _    
+${color_gray}   \_/  \_/    ${color_gray}$JMstatsL1
+${color_gray}  \ | /\ | /   ${color_gray}$JMstatsL2
+${color_gray}  / | \/ | \   ${color_gray}$JMstatsL3
+${color_gray}  _/^\__/^\_   ${color_gray}$JMstatsL4"
 else
-  lastLine="${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+  lastLine="\
+${color_yellow}
+${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 fi
 
 sleep 5
@@ -324,7 +327,6 @@ ${color_yellow}   /'          ${color_gray}
 ${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
-${color_yellow}
 $lastLine
 " \
 "RaspiBlitz v${codeVersion}" \
