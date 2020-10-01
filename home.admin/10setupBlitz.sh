@@ -167,7 +167,8 @@ if [ ${isMounted} -eq 1 ]; then
       echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
       echo "It seems that something went wrong during sync/download/copy of the blockchain."
       echo "Or something with the config is not correct."
-      echo "Sometimes a reboot helps --> sudo shutdown -r now"
+      echo "Sometimes a reboot helps - use command: restart"
+      echo "Or try to repair blockchain - use command: repair"
       exit 1
     else 
       echo "Got mounted blockchain, but no config and running service yet --> finish HDD"
