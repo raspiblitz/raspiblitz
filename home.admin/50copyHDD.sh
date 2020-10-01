@@ -45,7 +45,7 @@ if [ ${#sizeChainstate} -gt 0 ] && [ ${sizeChainstate} -gt 0 ]; then
 fi
 
 if [ ${hasOldBlockchainData} -eq 1 ] && [ "$1" != "stop-after-script" ]; then
-  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the old/local blockchain data now?" 7 60
+  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
   response=$?
   echo "response(${response})"
   if [ "${response}" = "1" ]; then
