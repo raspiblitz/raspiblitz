@@ -27,13 +27,13 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " JoinMarket info " --msgbox "Usage:
-https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md\n
-Start to use by logging in to the 'joinmarket' user with:
-sudo su joinmarket\n
+  whiptail --title " JoinMarket info " --msgbox "
+Type: 'jm' in the command line to swith to the dedicated user and start the JoininBox menu.
+Notes on usage:
+https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
-" 14 81
+" 13 81
   exit 0
 fi
 
@@ -86,7 +86,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
     # specify wallet.dat in old config for multiwallet for multiwallet support
     if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
+      /home/joinmarket/.joinmarket/joinmarket.cfg
       echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
     fi
 
@@ -95,22 +96,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/joinmarket
     # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
     echo "# installing ARM specific dependencies to run the QT GUI"
-    sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev
+    sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui \
+    python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev python3-pyqt5
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
     sudo -u joinmarket git reset --hard $version
     # make install.sh set up jmvenv with -- system-site-packages
     # and import the PySide2 armf package from the system
-    sudo -u joinmarket sed -i "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
+    sudo -u joinmarket sed -i \
+    "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
     virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1 ;\
     /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \'import PySide2\'\
     #g" install.sh
+    # do not stop at installing debian dependencies
+    sudo -u joinmarket sed -i \
+    "s#^        if ! sudo apt-get install \${deb_deps\[@\]}; then#\
+        if ! sudo apt-get install -y \${deb_deps\[@\]}; then#g" install.sh
     # don't install PySide2 - using the system-site-package instead 
     sudo -u joinmarket sed -i "s#^PySide2##g" requirements/gui.txt
     # don't install PyQt5 - using the system package instead 
     sudo -u joinmarket sed -i "s#^PyQt5==5.14.2##g" requirements/gui.txt
-    sudo apt-get install -y python3-pyqt5
     sudo -u joinmarket ./install.sh --with-qt
     echo "# installed JoinMarket $version"
 
@@ -119,7 +125,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.5
+    sudo -u joinmarket git reset --hard v0.1.8
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
@@ -236,5 +242,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 echo "FAIL - Unknown Parameter $1"
-echo "may need reboot to run
+echo "may need reboot to run"
 exit 1

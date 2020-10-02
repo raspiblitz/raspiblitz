@@ -5,26 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 source /home/admin/_version.info
 
-clear
-
-# Basic Options
-OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery" \
-LND "Interim LND Update Options" \
-PATCH "Patch RaspiBlitz v${codeVersion}"
-)
-
-if [ "${bos}" == "on" ]; then
-  OPTIONS+=(BOS "Update Balance of Satoshis")
-fi
-if [ "${thunderhub}" == "on" ]; then
-  OPTIONS+=(THUB "Update ThunderHub")
-fi
-if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
-fi
-
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+## PROCEDURES
 
 release()
 {
@@ -99,7 +80,7 @@ patchNotice()
 {
   whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Patch Menu" --yesno "This is the possibility to patch your RaspiBlitz:
 It means it will sync the program code with the
-the GitHub repo for your version branch v${codeVersion}.
+GitHub repo for your version branch v${codeVersion}.
 
 This can be usefull if there are important updates 
 inbetween releases to fix severe bugs. It can also
@@ -177,8 +158,11 @@ patch()
       if [ $exitstatus = 0 ]; then
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
-        sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch}
-        sleep 4
+        error=""
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        if [ ${#error} -gt 0 ]; then
+          whiptail --title "ERROR" --msgbox "${error}" 8 30
+        fi
       fi
       patch
       exit 1
@@ -213,7 +197,9 @@ lnd()
 
   # LND Update Options
   OPTIONS=()
-  # OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  if [ ${lndUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  fi
   OPTIONS+=(RECKLESS "Experimental LND update to ${lndLatestVersion}")
 
   CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -279,6 +265,31 @@ Do you really want to update LND now?
       ;;
   esac
 }
+
+# quick call by parameter
+if [ "$1" == "github" ]; then
+  patch
+  exit 0
+fi
+
+# Basic Options Menu
+OPTIONS=(
+RELEASE "RaspiBlitz Release Update/Recovery" \
+LND "Interim LND Update Options" \
+PATCH "Patch RaspiBlitz v${codeVersion}"
+)
+
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "Update ThunderHub")
+fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+fi
+
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in

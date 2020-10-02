@@ -17,9 +17,9 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-
-lndUpdateVersion="0.10.4-beta"
-lndUpdateComment="There is no optional update at the moment."
+# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+lndUpdateVersion="0.11.0-beta"
+lndUpdateComment="This is a main LND update with a database migration. You will not be able to downgrade again. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
@@ -161,7 +161,7 @@ if [ "${mode}" = "verified" ]; then
   echo "fingerprint='${fingerprint}'"
 
   echo 
-  echo "# chacking gpg finger print"
+  echo "# checking gpg finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-v${lndUpdateVersion}.txt.sig 2>&1)

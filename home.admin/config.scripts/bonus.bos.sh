@@ -16,11 +16,12 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Info Balance of Satoshis " --msgbox "\n\
+  dialog --title " Info Balance of Satoshis " --msgbox "
+Balance of Satoshis is a command line tool.
+Type: 'bos' in the command line to switch to the dedicated user.
+Then see 'bos help' for the options.
 Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
-To start type: 'sudo su bos' in the command line.\n
-Then see 'bos help' for options.
-" 9 75
+" 10 75
   exit 0
 fi
 
@@ -60,7 +61,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70
-  sudo -u bos npm install -g balanceofsatoshis@5.43.1
+  sudo -u bos npm install -g balanceofsatoshis@6.1.0
   if ! [ $? -eq 0 ]; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1

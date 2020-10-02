@@ -159,16 +159,32 @@ case $CHOICE in
             echo "Gathering Information (please wait) ..."
             walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
             if [ ${walletLocked} -eq 0 ]; then
-              /home/admin/00infoBlitz.sh
-              echo "Screen is not refreshing itself ... press ENTER to continue."
-              read key
+              while :
+                do
+
+                # show the same info as on LCD screen
+                /home/admin/00infoBlitz.sh
+
+                # wait 2 seconds for key input
+                echo "Screen is updating in loop .... keep 'x' pressed to exit to menu."
+                read -n 1 -t 2 keyPressed
+
+                # check if user wants to abort session
+                if [ "${keyPressed}" = "x" ]; then
+                  echo ""
+                  echo "Returning to menu ....."
+                  sleep 4
+                  break
+                fi
+              done
+
             else
               /home/admin/00raspiblitz.sh
               exit 0
             fi
             ;;
         TOR)
-            sudo -u bitcoin nyx
+            sudo -u debian-tor nyx
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
@@ -296,9 +312,6 @@ case $CHOICE in
               read key
               sudo /home/admin/XXshutdown.sh reboot
               exit 0
-            else
-              echo "Press ENTER to return to main menu .."
-              read key
             fi
             ;;
         UPDATE)

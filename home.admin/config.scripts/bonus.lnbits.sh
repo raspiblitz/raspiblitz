@@ -225,6 +225,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits/lnbits
     # do install like this
     sudo -u lnbits pipenv run pip install python-dotenv
+    sudo -u lnbits pipenv install - - dev
     sudo -u lnbits pipenv run pip install -r requirements.txt
     # instead of this
     #sudo -u lnbits pipenv install

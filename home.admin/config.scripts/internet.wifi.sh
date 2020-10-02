@@ -6,6 +6,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# internet.wifi.sh status"
  echo "# internet.wifi.sh on SSID PASSWORD"
  echo "# internet.wifi.sh off"
+ echo "# internet.wifi.sh backup-restore"
  exit 1
 fi
 
@@ -49,10 +50,12 @@ network={
 }"
   echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
   sudo chown root:root /home/admin/wpa_supplicant.conf
-  sudo mv /home/admin/wpa_supplicant.conf /boot/wpa_supplicant.conf
-  sudo chmod 755 /boot/wpa_supplicant.conf
+  sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+  sudo chmod 755 /etc/wpa_supplicant/wpa_supplicant.conf
 
-  echo "# OK - reboot needed to activate new WIFI settings - use command: restart"
+  # activate new wifi settings
+  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+  echo "# OK - changes should be actrive now - maybe reboot needed"
   exit 0
 
 elif [ "$1" == "off" ]; then
@@ -67,8 +70,47 @@ update_config=1"
   sudo rm /boot/wpa_supplicant.conf 2>/dev/null
   sudo rm /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null
 
-  echo "# OK - reboot needed to turn WIFI off - use command: restart"
+
+  # activate new wifi settings
+  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+  echo "# OK - changes should be actrive now - maybe reboot needed"
   exit 0
+
+# https://github.com/rootzoll/raspiblitz/issues/560
+# when calling this it will backup wpa_supplicant.conf to HDD (if WIFI is active)
+# or when WIFI is inactive but a wpa_supplicant.conf exists restore this
+elif [ "$1" == "backup-restore" ]; then
+
+  # check if HDD already exists
+  if [ -d /mnt/hdd/app-data ]; then
+    echo "# running backup/restore wifi settings"
+  else
+    echo "error='no hdd'"
+    exit 1
+  fi
+
+  wifiBackUpExists=$()
+  if [ ${wifiIsSet} -eq 1 ]; then
+    # BACKUP latest wifi settings to HDD
+    sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf 
+    echo "wifiRestore=0"
+    echo "wifiBackup=1"
+    exit 0
+  elif [ -f /mnt/hdd/app-data/wpa_supplicant.conf ]; then
+    # RESTORE backuped wifi settings from HDD to RaspiBlitz
+    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+    echo "# restoring old wifi settings ... wait 4 secounds to connect"
+    sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+    sleep 4
+    echo "wifiRestore=1"
+    echo "wifiBackup=0"
+    exit 0
+  else
+    # noting to backup or restore
+    echo "wifiRestore=0"
+    echo "wifiBackup=0"
+    exit 0
+  fi
 
 else
   echo "err='parameter not known - run with -help'"

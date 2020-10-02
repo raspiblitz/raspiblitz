@@ -596,14 +596,18 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     except Exception as e:
         print("# using default shop url")
 
+    # remove https:// from shop url (to keep it short)
+    if shopurl.find("://") > 0:
+        shopurl = shopurl[shopurl.find("://") + 3:]
+
     while True:
 
         # input shop url
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
         code, text = d.inputbox(
-            "Enter Address of a IP2TOR Shop (OR USE DEFAULT):",
-            height=10, width=60, init=shopurl,
+            "Enter Address of a IP2TOR Shop (OR JUST USE DEFAULT):",
+            height=10, width=72, init=shopurl,
             title="Shop Address")
 
         # if user canceled

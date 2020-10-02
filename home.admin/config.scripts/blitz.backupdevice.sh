@@ -127,7 +127,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
     if [ ${isDeviceName} -eq 1 ]; then
       hdd="${uuid}"
       # check if mounted
-      checkIfAlreadyMounted=$(lsblk | grep "${hdd}" | grep -c '/mnt/')
+      checkIfAlreadyMounted=$(lsblk -o NAME,UUID,MOUNTPOINT | grep "${hdd}" | grep -c '/mnt/')
       if [ ${checkIfAlreadyMounted} -gt 0 ]; then
         echo "# cannot format a device that is mounted"
         echo "error='device is in use'"
@@ -136,7 +136,9 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       echo "# OK found device name ${hdd} that will now be formatted ..."
       echo "# Wiping all partitions (sfdisk/wipefs)"
       sudo sfdisk --delete /dev/${hdd} 1>&2
+      sleep 4
       sudo wipefs -a /dev/${hdd} 1>&2
+      sleep 4
       partitions=$(lsblk | grep -c "─${hdd}")
       if [ ${partitions} -gt 0 ]; then
         echo "# WARNING: partitions are still not clean"

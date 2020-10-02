@@ -107,7 +107,7 @@ def mail(recipient: str = None, message: str = None, subject: str = None, cert: 
             'From: {} <{}>'.format(from_name, from_address),
             "Subject: {}".format(subject),
             "",
-            "{}".format(message)
+            "{}".format(message.encode('utf8'))
         ]
 
         with open(cert, 'rb') as pem:
@@ -122,7 +122,7 @@ def mail(recipient: str = None, message: str = None, subject: str = None, cert: 
         msg['From'] = '{} <{}>'.format(from_name, from_address),
         msg['To'] = recipient
 
-        msg.set_payload(message)
+        msg.set_payload(message.encode('utf8'))
         msg_to_send = msg.as_bytes()
 
     # send message via e-Mail
