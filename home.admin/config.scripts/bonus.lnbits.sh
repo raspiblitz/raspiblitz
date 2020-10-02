@@ -280,11 +280,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # do install like this
 
     python3 -m venv venv
-    pipenv run install -r requirements.txt
-    pipenv run pip install lnd-grpc
+    sudo -u lnbits pipenv run install -r requirements.txt
+    sudo -u lnbits pipenv run pip install lnd-grpc
+    sudo -u lnbits pipenv run pip install hypercorn
     cp .env.example .env
 
-    #sudo -u lnbits pipenv run pip install hypercorn
     #sudo -u lnbits pipenv run pip install httpx
     #sudo -u lnbits pipenv run pip install -r requirements.txt
     #sudo -u lnbits pipenv run pip install lnd-grpc
