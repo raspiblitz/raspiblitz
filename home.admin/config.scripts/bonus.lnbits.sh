@@ -278,18 +278,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
     # do install like this
-    sudo -u lnbits pipenv run pip install hypercorn
-    sudo -u lnbits pipenv run pip install httpx
-    sudo -u lnbits pipenv run pip install -r requirements.txt
-    sudo -u lnbits pipenv run pip install lnd-grpc
 
-    # update databases (if needed)
-    # echo "# updating databases"
-    sudo -u lnbits pipenv run quart migrate
+    python3 -m venv venv
+    pipenv run install -r requirements.txt
+    pipenv run pip install lnd-grpc
+    cp .env.example .env
+
+    #sudo -u lnbits pipenv run pip install hypercorn
+    #sudo -u lnbits pipenv run pip install httpx
+    #sudo -u lnbits pipenv run pip install -r requirements.txt
+    #sudo -u lnbits pipenv run pip install lnd-grpc
 
     # process assets
     echo "# processing assets"
     sudo -u lnbits pipenv run quart assets
+
+    # update databases (if needed)
+    # echo "# updating databases"
+    sudo -u lnbits pipenv run quart migrate
 
     # open firewall
     echo
