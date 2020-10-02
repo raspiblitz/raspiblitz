@@ -30,6 +30,12 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: sourcemode
+function sourcemode() {
+  cd /home/admin
+  ./98repairMenu.sh sourcemode
+}
+
 # command: check
 function check() {
   /home/admin/config.scripts/blitz.configcheck.py
@@ -58,6 +64,13 @@ function restart() {
 function off() {
   cd /home/admin
   ./XXshutdown.sh
+}
+
+# command: github
+# jumpng directly into the options to change branch/repo/pr
+function github() {
+  cd /home/admin
+  ./99updateMenu.sh github
 }
 
 # command: hdmi
@@ -104,10 +117,10 @@ function status() {
   sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
-# command: balance
+# command: bos
 # switch to the bos user for Balance of Satoshis
-function balance() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "bos=on") -eq 1 ]; then
+function bos() {
+  if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - bos
   else
     echo "Balance of Satoshis is not installed - to install run:"
@@ -115,14 +128,36 @@ function balance() {
   fi
 }
 
-# command: jmarket
+# command: jm
 # switch to the joinmarket user for the JoininBox menu
-function jmarket() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+function jm() {
+  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     sudo su - joinmarket
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: faraday
+# switch to the faraday user for the Faraday Service
+function faraday() {
+  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - faraday
+  else
+    echo "Faraday is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.faraday.sh on"
+  fi
+}
+
+# command: loop
+# switch to the loop user for the Lightning Loop Service
+function loop() {
+  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    sudo su - loop
+  else
+    echo "Lightning Loop is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.loop.sh on"
   fi
 }
 

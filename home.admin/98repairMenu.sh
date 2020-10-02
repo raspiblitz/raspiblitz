@@ -97,8 +97,20 @@ copyHost()
   echo "# Starting copy over LAN (around 4-6 hours) ..."
   sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
   cd /mnt/hdd/${network}
+
+  # transfere beginning flag
+  date +%s > ./copy_begin.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' ./copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  rm ./copy_begin.time
+
+  # transfere blockchain data
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
+
+  # transfere end flag
+  date +%s > ./copy_end.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' ./copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  rm ./copy_end.time
 
   echo "# start services again ..."
   sudo systemctl enable ${network}d
@@ -109,6 +121,13 @@ copyHost()
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
 
 }
+
+# when called with parameter "sourcemode"
+if [ "$1" == "sourcemode" ]; then
+  copyHost
+  raspiblitz
+  exit 0
+fi
 
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \

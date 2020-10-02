@@ -1,0 +1,60 @@
+{
+  "variables": {
+      "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.5.0-amd64-netinst.iso",
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "93863e17ac24eeaa347dfb91dddac654f214c189e0379d7c28664a306e0301e7",
+      "branch": "dev",
+      "github_user": "rootzoll"
+    },
+    "builders": [
+      {
+        "type": "virtualbox-iso",
+        "boot_command": [
+          "<esc><wait>",
+          "auto ",
+          "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+          "<enter>"
+        ],
+        "boot_wait": "5s",
+        "disk_size": "16384",
+        "headless": false,
+        "guest_os_type": "Debian_64",
+        "http_directory": "http",
+        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+        "iso_checksum": "{{ user `iso_checksum` }}",
+        "iso_url": "{{ user `iso_url` }}",
+        "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+        "ssh_password": "vagrant",
+        "ssh_port": 22,
+        "ssh_username": "vagrant",
+        "ssh_timeout": "30m",
+        "vm_name": "raspiblitz-amd64",
+        "vboxmanage": [
+          ["modifyvm", "{{.Name}}", "--memory", "1024"],
+          ["modifyvm", "{{.Name}}", "--cpus", "1"]
+        ]
+      }
+  ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "scripts/init.sh",
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "script": "../../../build_sdcard.sh",
+            "execute_command": "echo 'yes' | {{.Vars}} bash '{{.Path}}' {{ user `branch` }} {{ user `github_user` }} /dev/sda1 false false"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/cleanup.sh",
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'"
+        }
+  ],
+  "post-processors": [{
+      "type": "vagrant",
+      "compression_level": "8",
+      "output": "output/raspiblitz.box"
+  }]
+}

@@ -43,6 +43,16 @@ if [ "${state}" = "recovering" ]; then
   exit
 fi
 
+if [ "${state}" = "copysource" ]; then
+  echo "***********************************************************"
+  echo "INFO: You lost connection during copying the blockchain"
+  echo "You have the following options:"
+  echo "a) continue/check progress with command: sourcemode"
+  echo "b) return to normal mode with command: restart"
+  echo "***********************************************************"
+  exit
+fi
+
 # signal that after bootstrap recover user dialog is needed
 recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
 if [ ${recoveredInfoExists} -gt 0 ]; then
@@ -332,6 +342,9 @@ if LND was able to recover funds from your channels.
     fi
   
   fi
+
+  # check if DNS is working (if not it will trigger dialog)
+  sudo /home/admin/config.scripts/internet.dns.sh test
 
   #forward to main menu
   /home/admin/00mainMenu.sh

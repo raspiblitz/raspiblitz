@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.9.4
+    sudo -u thunderhub git reset --hard v0.9.15
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     if ! [ $? -eq 0 ]; then
