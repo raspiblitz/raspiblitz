@@ -212,9 +212,15 @@ if [ "$1" = "status" ]; then
     if [ "${hddFormat}" = "ext4" ]; then
        hddDataPartitionExt4=$hddDataPartition
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    if [ "${hddFormat}" = "btrfs" ]; then
+       subVolumeDir="/WORKINGDIR"
+       hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+    fi
+    echo "hddRaspiData=${hddRaspiData}"
 
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
+
     echo "datadisk='${hdd}'"
     echo "datapartition='${hddDataPartition}'"
 
