@@ -291,6 +291,7 @@ if [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wal
   JMstatsL3=$(sed -n 3p < "$JMstats")
   JMstatsL4=$(sed -n 4p < "$JMstats")
   lastLine="\
+${color_gray}
 ${color_gray}     ╦╔╦╗      ${color_gray}$JMstatsL1
 ${color_gray}     ║║║║      ${color_gray}$JMstatsL2
 ${color_gray}    ╚╝╩ ╩      ${color_gray}$JMstatsL3
