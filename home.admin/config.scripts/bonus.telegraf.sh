@@ -73,7 +73,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "*** telegraf installation: apt-get part"
   # get the repository publy key for apt-get
-  curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+  curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
   DISTRIB_ID=$(lsb_release -c -s)
   # 
   # changed according suggestion from @frennkie in #1501
