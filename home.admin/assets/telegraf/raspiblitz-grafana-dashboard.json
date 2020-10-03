@@ -1,0 +1,6555 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
+        "name": "Annotations & Alerts",
+        "showIn": 0,
+        "type": "dashboard"
+      },
+      {
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "matchAny": true,
+        "name": "Show reboots",
+        "showIn": 0,
+        "tags": [
+          "reboot"
+        ],
+        "type": "tags"
+      },
+      {
+        "datasource": "-- Grafana --",
+        "enable": false,
+        "hide": true,
+        "iconColor": "#5794F2",
+        "limit": 100,
+        "name": "Global Annotations",
+        "showIn": 0,
+        "tags": [
+          "global"
+        ],
+        "type": "tags"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 12,
+  "iteration": 1601744789875,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 69,
+      "panels": [],
+      "title": "Quick Summary - Node",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 1
+      },
+      "hideTimeOverride": true,
+      "id": 70,
+      "interval": "10s",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "system",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "system",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 1
+      },
+      "hideTimeOverride": true,
+      "id": 92,
+      "interval": "10s",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^bitcoind$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_service",
+          "groupBy": [
+            {
+              "params": [
+                "service"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "1",
+          "measurement": "service-uptime",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "service",
+              "operator": "=",
+              "value": "bitcoind"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "bitcoind - service",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 1
+      },
+      "hideTimeOverride": true,
+      "id": 71,
+      "interval": "10s",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^lnd$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_service",
+          "groupBy": [
+            {
+              "params": [
+                "service"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "1",
+          "measurement": "service-uptime",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "service",
+              "operator": "=",
+              "value": "lnd"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "lnd - service",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 1
+      },
+      "hideTimeOverride": true,
+      "id": 72,
+      "interval": "10s",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^electrs$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_service",
+          "groupBy": [
+            {
+              "params": [
+                "service"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "1",
+          "measurement": "service-uptime",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "service",
+              "operator": "=",
+              "value": "electrs"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "electrs - service",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 3
+              },
+              {
+                "color": "#299c46",
+                "value": 6
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 15,
+        "y": 1
+      },
+      "id": 47,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$col",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "bitcoin_nettotals",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "totalbytesrecv"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Recv"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Bitcoin - Recv",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 3
+              },
+              {
+                "color": "#299c46",
+                "value": 6
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 18,
+        "y": 1
+      },
+      "id": 48,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$col",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "bitcoin_nettotals",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "totalbytessent"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Sent"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Bitcoin - Sent",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 1
+      },
+      "id": 51,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "bitcoin_blockchaininfo",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "size_on_disk"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Blockchain Size",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 3
+              },
+              {
+                "color": "#299c46",
+                "value": 6
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 5
+      },
+      "id": 81,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "bitcoin_connectioncount",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Bitcoin peers",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 3
+              },
+              {
+                "color": "#299c46",
+                "value": 6
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 5
+      },
+      "id": 82,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "ln_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "num_peers"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "LN peers",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 97,
+      "panels": [],
+      "title": "Quick Summary - IP Addresses",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 95,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "IPv6"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "eth0 - IPv6 (global)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 3,
+        "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 98,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "bitcoind"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "bitcoind",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 6,
+        "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 99,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "lnd"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "lnd",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 12,
+        "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 100,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "publicIP"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "public IPv6",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 74,
+      "panels": [],
+      "title": "Quick Summary - Blocks",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 16
+      },
+      "hideTimeOverride": true,
+      "id": 75,
+      "interval": "1m",
+      "links": [],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"blocks\") FROM \"bitcoin-blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "n_blocks_total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "10m",
+      "timeShift": null,
+      "title": "Bitcoin Blocks (Web)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 16
+      },
+      "hideTimeOverride": true,
+      "id": 76,
+      "interval": "1m",
+      "links": [],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "bitcoin_blockchaininfo",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"blocks\") FROM \"bitcoin-blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "blocks"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "10m",
+      "timeShift": null,
+      "title": "Bitcoin Blocks",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 16
+      },
+      "hideTimeOverride": true,
+      "id": 77,
+      "interval": "",
+      "links": [],
+      "maxDataPoints": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "ln_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"blocks\") FROM \"bitcoin-blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "block_height"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "10m",
+      "timeShift": null,
+      "title": "LN BlockHeight",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 16
+      },
+      "hideTimeOverride": true,
+      "id": 78,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "electrs_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"blocks\") FROM \"bitcoin-blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "electrs_index_height"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "10m",
+      "timeShift": null,
+      "title": "electrs IndexHeight",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 130
+              },
+              {
+                "color": "semi-dark-purple",
+                "value": 140
+              },
+              {
+                "color": "blue",
+                "value": 150
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 20
+      },
+      "hideTimeOverride": true,
+      "id": 86,
+      "interval": "1m",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Block Beat",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "n_blocks_total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "24h",
+      "timeShift": null,
+      "title": "Block Beat / 24h (Web)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 130
+              },
+              {
+                "color": "semi-dark-purple",
+                "value": 140
+              },
+              {
+                "color": "blue",
+                "value": 150
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 20
+      },
+      "hideTimeOverride": true,
+      "id": 87,
+      "interval": "1m",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Block Beat",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "bitcoin_blockchaininfo",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "blocks"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "24h",
+      "timeShift": null,
+      "title": "Block Beat / 24h",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 90,
+      "panels": [],
+      "title": "Quick Summary - MemPool",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 10000
+              },
+              {
+                "color": "#d44a3a",
+                "value": 20000
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 25
+      },
+      "id": 34,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "electrs_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "electrs_mempool_count"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Pending Tx",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 25
+      },
+      "id": 66,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_fee_rate",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "fee_rate"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "electrs_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "electrs_mempool_vsize"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "fee_rate",
+              "operator": "=",
+              "value": "≤         1"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "1 sat/vbyte",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 25
+      },
+      "id": 67,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_fee_rate",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "fee_rate"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "electrs_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "electrs_mempool_vsize"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "fee_rate",
+              "operator": "=",
+              "value": "≤         2"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "2 sat/vbyte",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 32,
+      "interval": "1m",
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pluginVersion": "7.1.5",
+      "pointradius": 0.5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_fee_rate",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "fee_rate"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "electrs_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"electrs_mempool_vsize\"  / __series.field FROM \"autogen\".\"prometheus\" WHERE $timeFilter GROUP BY \"fee_rate\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "electrs_mempool_vsize"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "6h",
+      "timeRegions": [
+        {
+          "colorMode": "gray",
+          "fill": true,
+          "fillColor": "rgba(234, 112, 112, 0.12)",
+          "fromDayOfWeek": 6,
+          "line": false,
+          "lineColor": "rgba(237, 46, 24, 0.60)",
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "timeShift": null,
+      "title": "fees",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": false,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 57,
+      "panels": [],
+      "title": "api.blockchain.info",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 30
+      },
+      "hideTimeOverride": true,
+      "id": 58,
+      "interval": "1m",
+      "links": [],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "groupBy": [],
+          "limit": "1",
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"blocks\") FROM \"bitcoin-blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "n_blocks_total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "10m",
+      "timeShift": null,
+      "title": "Bitcoin Blocks (Web)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 130
+              },
+              {
+                "color": "semi-dark-purple",
+                "value": 140
+              },
+              {
+                "color": "blue",
+                "value": 150
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 30
+      },
+      "hideTimeOverride": true,
+      "id": 65,
+      "interval": "1m",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Block Beat",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "n_blocks_total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [],
+                "type": "difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "24h",
+      "timeShift": null,
+      "title": "Block Beat / 24h (Web)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 30
+      },
+      "id": 61,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Blocks mined",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "n_blocks_mined"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Blocks Mined / 24h",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 3,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyBTC"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 30
+      },
+      "id": 60,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Fees per 24h",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total_fees_btc"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              },
+              {
+                "params": [
+                  " / 100000000"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Fees / 24h",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 30
+      },
+      "id": 91,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "Marketprice USD",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "limit": "",
+          "measurement": "web_bitcoin_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "market_price_usd"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Marketprice USD",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "id": 25,
+      "panels": [
+        {
+          "cacheTimeout": null,
+          "columns": [],
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fontSize": "100%",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 19
+          },
+          "id": 22,
+          "interval": "10s",
+          "links": [],
+          "pageSize": null,
+          "pluginVersion": "6.3.6",
+          "scroll": true,
+          "showHeader": true,
+          "sort": {
+            "col": null,
+            "desc": false
+          },
+          "styles": [
+            {
+              "alias": "Last seen",
+              "align": "auto",
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "pattern": "Time",
+              "type": "date"
+            },
+            {
+              "alias": "Uptime",
+              "align": "auto",
+              "colorMode": "row",
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "Value",
+              "thresholds": [
+                "36000",
+                "360000"
+              ],
+              "type": "number",
+              "unit": "dtdurations"
+            },
+            {
+              "alias": "service",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "Metric",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "alias": "system",
+              "groupBy": [],
+              "hide": false,
+              "limit": "1",
+              "measurement": "system",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT last(\"uptime\") FROM \"autogen\".\"system\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "uptime"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_service",
+              "groupBy": [
+                {
+                  "params": [
+                    "service"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "limit": "1",
+              "measurement": "service-uptime",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT last(\"uptime\") FROM \"autogen\".\"service-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY \"service\" LIMIT 1",
+              "rawQuery": false,
+              "refId": "C",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "uptime"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Uptime system / services",
+          "transform": "timeseries_to_rows",
+          "transparent": true,
+          "type": "table-old"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "displayMode": "auto"
+              },
+              "decimals": 2,
+              "mappings": [],
+              "noValue": "No Data",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Last seen"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 19
+          },
+          "hideTimeOverride": true,
+          "id": 6,
+          "interval": "1m",
+          "links": [],
+          "options": {
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "Value"
+              }
+            ]
+          },
+          "pluginVersion": "7.1.5",
+          "targets": [
+            {
+              "alias": "$col",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                }
+              ],
+              "limit": "1",
+              "measurement": "bitcoin_nettotals",
+              "orderByTime": "DESC",
+              "policy": "autogen",
+              "query": "SELECT last(\"totalbytesrecv\") AS \"Bytes recv\" FROM \"autogen\".\"bitcoin-nettotals\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY \"host\" LIMIT 1",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "totalbytesrecv"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      "Bytes recv"
+                    ],
+                    "type": "alias"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "totalbytessent"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      "Bytes sent"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "slimit": "",
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$col",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                }
+              ],
+              "limit": "1",
+              "measurement": "bitcoin_blockchaininfo",
+              "orderByTime": "DESC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "size_on_disk"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      "Size on disk"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "timeFrom": "10m",
+          "timeShift": null,
+          "title": "Bitcoin - totals",
+          "transformations": [
+            {
+              "id": "seriesToRows",
+              "options": {}
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "unit": "dateTimeAsIso"
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 29
+          },
+          "hiddenSeries": false,
+          "id": 104,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "current",
+            "sortDesc": false,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/ = ::1/",
+              "legend": false
+            },
+            {
+              "alias": "/^eth0_.+/",
+              "legend": false
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "$tag_origin = $tag_ipaddr",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "origin"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "ipaddr"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "measurement": "raspiblitz_ip_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "created"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      "*1000"
+                    ],
+                    "type": "math"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "IP Address History",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dateTimeAsIso",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "center",
+                "displayMode": "color-background"
+              },
+              "decimals": 1,
+              "mappings": [],
+              "noValue": "No Value transmitted",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 3600
+                  },
+                  {
+                    "color": "green",
+                    "value": 72000
+                  }
+                ]
+              },
+              "unit": "dtdurations"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Last seen"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 29
+          },
+          "id": 94,
+          "interval": "1m",
+          "links": [],
+          "options": {
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "uptime"
+              }
+            ]
+          },
+          "pluginVersion": "7.1.5",
+          "targets": [
+            {
+              "alias": "$tag_origin = $tag_ipaddr",
+              "groupBy": [
+                {
+                  "params": [
+                    "ipaddr"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "origin"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "hide": false,
+              "limit": "",
+              "measurement": "raspiblitz_ip_info",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "query": "SELECT last(\"uptime\") FROM \"autogen\".\"system\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "table",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "uptime"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      "uptime"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "slimit": "",
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ],
+              "tz": ""
+            }
+          ],
+          "timeFrom": "10m",
+          "timeShift": null,
+          "title": "IP addresses from services and network devices",
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 37
+          },
+          "hiddenSeries": false,
+          "id": 102,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": true,
+          "targets": [
+            {
+              "alias": "$tag_origin",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "origin"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "raspiblitz_ip_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "changed"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "max"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "IP Address changes",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 0,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": "5",
+              "min": "-1",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 45
+          },
+          "hiddenSeries": false,
+          "id": 31,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "bootstrap.service",
+              "bars": true,
+              "lines": false
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "$tag_systemd_unit",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "systemd_unit"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "limit": "",
+              "measurement": "procstat",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT last(\"created_at\")  / 1000000 FROM \"procstat\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval), \"systemd_unit\"",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "created_at"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [
+                      " / 1000000"
+                    ],
+                    "type": "math"
+                  }
+                ]
+              ],
+              "slimit": "",
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Services Start History",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dateTimeFromNow",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 55
+          },
+          "hiddenSeries": false,
+          "id": 10,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": true,
+          "targets": [
+            {
+              "alias": "Bitcoin peers",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "bitcoin_connectioncount",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "LN peers",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "ln_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "num_peers"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Peers / Connection Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 0,
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Uptime & Connections",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 27,
+      "panels": [
+        {
+          "aliasColors": {
+            "Block Beat": "purple",
+            "Block Beat (24h)": "dark-purple",
+            "Heartbeat": "dark-purple"
+          },
+          "bars": true,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "decimals": 0,
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          },
+          "hiddenSeries": false,
+          "hideTimeOverride": false,
+          "id": 62,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": true,
+            "values": true
+          },
+          "lines": false,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "Block Beat",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "limit": "",
+              "measurement": "bitcoin_blockchaininfo",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "blocks"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  },
+                  {
+                    "params": [],
+                    "type": "difference"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [
+            {
+              "colorMode": "custom",
+              "fill": false,
+              "fillColor": "rgba(51, 162, 229, 0.2)",
+              "line": true,
+              "lineColor": "rgba(31, 96, 196, 0.6)",
+              "op": "gt",
+              "value": 6,
+              "yaxis": "left"
+            }
+          ],
+          "timeFrom": "24h",
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Block Beat",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": false,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 0,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": false
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "hiddenSeries": false,
+          "id": 12,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "Bitcoin - Verification Progress",
+              "yaxis": 2
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "Bitcoin - Blocks",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "bitcoin_blockchaininfo",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "blocks"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "Bitcoin - Headers",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "bitcoin_blockchaininfo",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "headers"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "Bitcoin - Verification Progress",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "bitcoin_blockchaininfo",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "E",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "verificationprogress"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "LN - Bockheight",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "ln_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "C",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "block_height"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "electrs - Indexheight",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "electrs_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "D",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "electrs_index_height"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Blockchain Info",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 0,
+              "format": "none",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "Pending Tx": "orange"
+          },
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 7,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 24
+          },
+          "hiddenSeries": false,
+          "id": 41,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": true,
+          "targets": [
+            {
+              "alias": "Pending Tx",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "limit": "",
+              "measurement": "electrs_info",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "electrs_mempool_count"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Pending Tx",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 33
+          },
+          "hiddenSeries": false,
+          "id": 93,
+          "interval": "1m",
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 0.5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "$tag_fee_rate",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "fee_rate"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "electrs_info",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "query": "SELECT \"electrs_mempool_vsize\"  / __series.field FROM \"autogen\".\"prometheus\" WHERE $timeFilter GROUP BY \"fee_rate\"",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "electrs_mempool_vsize"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "fees via mempool size",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Blockchain Info & MemPool",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 29,
+      "panels": [
+        {
+          "aliasColors": {
+            "CPU Frequency": "blue",
+            "CPU Temperature": "red"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "decimals": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 18,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "hideEmpty": false,
+            "max": true,
+            "min": true,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "CPU Frequency",
+              "yaxis": 2
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": true,
+          "targets": [
+            {
+              "alias": "CPU Temperature",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "cpu_temperature",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  },
+                  {
+                    "params": [
+                      " / 1000"
+                    ],
+                    "type": "math"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "CPU Frequency",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "cpu_frequency",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      "20"
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "CPU Temperature / Frequence",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "celsius",
+              "label": "CPU Temperature",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "hertz",
+              "label": "CPU Frequency",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "CPU system": "light-green",
+            "CPU user": "dark-green"
+          },
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 20,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "CPU user",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "host"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "cpu",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT mean(\"usage_user\") AS \"user\", mean(\"usage_system\")AS \"system\" FROM \"autogen\".\"cpu\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "usage_user"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      "10"
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "cpu",
+                  "operator": "=",
+                  "value": "cpu-total"
+                },
+                {
+                  "condition": "AND",
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "CPU system",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "host"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "cpu"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "cpu",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "query": "SELECT mean(\"usage_user\") AS \"user\", mean(\"usage_system\")AS \"system\" FROM \"autogen\".\"cpu\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+              "rawQuery": false,
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "usage_system"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "cpu",
+                  "operator": "=",
+                  "value": "cpu-total"
+                },
+                {
+                  "condition": "AND",
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "CPU user/system",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "decimals": 1,
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 24
+          },
+          "hiddenSeries": false,
+          "id": 16,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "avail mem",
+              "yaxis": 2
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": true,
+          "targets": [
+            {
+              "alias": "15min",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "system",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT mean(\"load1\") AS \"load 1min\", mean(\"load5\") AS \"load 5min\", mean(\"load15\") AS \"load 15min\" FROM \"system\" WHERE $timeFilter GROUP BY time(1m), \"host\"\n",
+              "rawQuery": false,
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "load15"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ],
+              "tz": ""
+            },
+            {
+              "alias": "$col",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "mem",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "C",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "available"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      "avail mem"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "SystemLoad / FreeMem",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": true,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "Mem avail %": "yellow",
+            "Mem used %": "dark-orange",
+            "Swap used %": "purple"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "hiddenSeries": false,
+          "id": 44,
+          "interval": "10s",
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/Mem.+/",
+              "yaxis": 2
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "Swap used %",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "swap",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "used_percent"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "max"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$col",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "mem",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "used_percent"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "max"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  },
+                  {
+                    "params": [
+                      "Mem used %"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$col",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "mem",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "C",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "available_percent"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "max"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  },
+                  {
+                    "params": [
+                      "Mem avail %"
+                    ],
+                    "type": "alias"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Mem & Swap",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "percent",
+              "label": null,
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "percent",
+              "label": null,
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": true,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "mmcblk0p1": "dark-purple",
+            "mmcblk0p2": "light-purple",
+            "sda1": "super-light-purple"
+          },
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "hiddenSeries": false,
+          "id": 23,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "$tag_device",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "device"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "disk",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "query": "SELECT mean(\"usage_user\") AS \"user\", mean(\"usage_system\")AS \"system\" FROM \"autogen\".\"cpu\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+              "rawQuery": false,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "used_percent"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Disk used %",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "percent",
+              "label": "",
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            },
+            {
+              "decimals": 0,
+              "format": "bytes",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "mmcblk0p1": "dark-purple",
+            "mmcblk0p2": "light-purple",
+            "sda1": "super-light-purple"
+          },
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 48
+          },
+          "hiddenSeries": false,
+          "id": 42,
+          "interval": "10s",
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.5",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "$tag_device",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "device"
+                  ],
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "disk",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "query": "SELECT mean(\"usage_user\") AS \"user\", mean(\"usage_system\")AS \"system\" FROM \"autogen\".\"cpu\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+              "rawQuery": false,
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "free"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  },
+                  {
+                    "params": [
+                      10
+                    ],
+                    "type": "moving_average"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [
+            {
+              "colorMode": "gray",
+              "fill": true,
+              "fillColor": "rgba(234, 112, 112, 0.12)",
+              "fromDayOfWeek": 6,
+              "line": false,
+              "lineColor": "rgba(237, 46, 24, 0.60)",
+              "op": "time",
+              "toDayOfWeek": 7
+            }
+          ],
+          "timeShift": null,
+          "title": "Disk free space",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "bytes",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "decimals": 0,
+              "format": "bytes",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Computer Metrics",
+      "type": "row"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 26,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": null,
+          "value": null
+        },
+        "datasource": "InfluxDB",
+        "definition": "SHOW TAG VALUES FROM \"ln_info\" WITH KEY=host",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Host",
+        "multi": false,
+        "name": "host",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM \"ln_info\" WITH KEY=host",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "Bitcoin/LN/electrs - Node",
+  "uid": "ImRpu1igk",
+  "version": 75
+}
