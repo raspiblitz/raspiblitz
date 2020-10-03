@@ -137,7 +137,7 @@ class AppWindow(QMainWindow):
         self.file_watcher.signal.connect(self.update_watched_attr)
         self.file_watcher.start()
 
-        # finally start 00infoBlitz.sh in dedicated xterm frame
+        # finally start 00infoBlitz.sh in dedicated uxterm frame
         self.start_info_lcd()
 
         self.show()
@@ -154,7 +154,7 @@ class AppWindow(QMainWindow):
         process.readyReadStandardOutput.connect(
             lambda: log.info(str(process.readAllStandardOutput().data().decode('utf-8'))))
 
-        process.start('xterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
+        process.start('uxterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
                                 '+sb', '-hold', '-e', 'bash -c \"/home/admin/00infoLCD.sh --pause {}\"'.format(pause)])
 
     def check_config(self):
@@ -521,7 +521,7 @@ class AppWindow(QMainWindow):
             return
 
         process = QProcess(self)
-        process.start('xterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
+        process.start('uxterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
                                 '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXshutdown.sh\"'])
 
     def b4_restart(self):
@@ -531,7 +531,7 @@ class AppWindow(QMainWindow):
             return
 
         process = QProcess(self)
-        process.start('xterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
+        process.start('uxterm', ['-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
                                 '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXshutdown.sh reboot\"'])
 
     def create_new_invoice(self, memo="Pay to RaspiBlitz", amt=0):
