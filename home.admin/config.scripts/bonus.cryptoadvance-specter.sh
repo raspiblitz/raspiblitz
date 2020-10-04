@@ -111,7 +111,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.0
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.1
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
