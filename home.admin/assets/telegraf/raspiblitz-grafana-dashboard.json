@@ -45,7 +45,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 12,
-  "iteration": 1601744789875,
+  "iteration": 1601814213178,
   "links": [],
   "panels": [
     {
@@ -109,9 +109,9 @@
       },
       "hideTimeOverride": true,
       "id": 70,
-      "interval": "10s",
+      "interval": "",
       "links": [],
-      "maxDataPoints": 100,
+      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -131,11 +131,11 @@
         {
           "alias": "",
           "groupBy": [],
-          "limit": "1",
+          "limit": "",
           "measurement": "system",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "query": "SELECT last(\"uptime\") FROM \"system\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -163,7 +163,7 @@
           "tz": ""
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "2m",
       "timeShift": null,
       "title": "system",
       "transparent": true,
@@ -216,9 +216,9 @@
       },
       "hideTimeOverride": true,
       "id": 92,
-      "interval": "10s",
+      "interval": "",
       "links": [],
-      "maxDataPoints": 100,
+      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -245,11 +245,11 @@
               "type": "tag"
             }
           ],
-          "limit": "1",
-          "measurement": "service-uptime",
+          "limit": "",
+          "measurement": "service_uptime",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "query": "SELECT last(\"uptime\") FROM \"service_uptime\" WHERE (\"host\" =~ /^$host$/ AND \"service\" = 'bitcoind') AND $timeFilter GROUP BY \"service\"",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -283,7 +283,7 @@
           "tz": ""
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "2m",
       "timeShift": null,
       "title": "bitcoind - service",
       "transparent": true,
@@ -336,9 +336,9 @@
       },
       "hideTimeOverride": true,
       "id": 71,
-      "interval": "10s",
+      "interval": "",
       "links": [],
-      "maxDataPoints": 100,
+      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -365,11 +365,11 @@
               "type": "tag"
             }
           ],
-          "limit": "1",
-          "measurement": "service-uptime",
+          "limit": "",
+          "measurement": "service_uptime",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "query": "SELECT last(\"uptime\") FROM \"service_uptime\" WHERE (\"host\" =~ /^$host$/ AND \"service\" = 'lnd') AND $timeFilter GROUP BY \"service\"",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -403,7 +403,7 @@
           "tz": ""
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "2m",
       "timeShift": null,
       "title": "lnd - service",
       "transparent": true,
@@ -456,9 +456,9 @@
       },
       "hideTimeOverride": true,
       "id": 72,
-      "interval": "10s",
+      "interval": "",
       "links": [],
-      "maxDataPoints": 100,
+      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -485,11 +485,11 @@
               "type": "tag"
             }
           ],
-          "limit": "1",
-          "measurement": "service-uptime",
+          "limit": "",
+          "measurement": "service_uptime",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "query": "SELECT last(\"uptime\") FROM \"service_uptime\" WHERE (\"host\" =~ /^$host$/ AND \"service\" = 'electrs') AND $timeFilter GROUP BY \"service\"",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -523,7 +523,7 @@
           "tz": ""
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "2m",
       "timeShift": null,
       "title": "electrs - service",
       "transparent": true,
@@ -612,7 +612,7 @@
           "measurement": "bitcoin_nettotals",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"totalbytesrecv\") AS \"Recv\" FROM \"bitcoin_nettotals\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -734,7 +734,7 @@
           "measurement": "bitcoin_nettotals",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"totalbytessent\") AS \"Sent\" FROM \"bitcoin_nettotals\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -848,7 +848,7 @@
           "measurement": "bitcoin_blockchaininfo",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"num_peers\") FROM \"ln-info\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"size_on_disk\") FROM \"bitcoin_blockchaininfo\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1240,7 +1240,7 @@
       ],
       "timeFrom": "2m",
       "timeShift": null,
-      "title": "eth0 - IPv6 (global)",
+      "title": "IPv6 (global)",
       "transparent": true,
       "type": "stat"
     },
@@ -1572,7 +1572,7 @@
           "measurement": "raspiblitz_ip_info",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "query": "SELECT last(\"uptime\") FROM \"raspiblitz_ip_info\" WHERE (\"host\" =~ /^$host$/ AND \"origin\" = 'publicIP') AND $timeFilter GROUP BY \"ipaddr\"",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3312,7 +3312,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 19
+            "y": 35
           },
           "id": 22,
           "interval": "10s",
@@ -3415,7 +3415,7 @@
                 }
               ],
               "limit": "1",
-              "measurement": "service-uptime",
+              "measurement": "service_uptime",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "SELECT last(\"uptime\") FROM \"autogen\".\"service-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY \"service\" LIMIT 1",
@@ -3494,7 +3494,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 19
+            "y": 35
           },
           "hideTimeOverride": true,
           "id": 6,
@@ -3653,7 +3653,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 29
+            "y": 45
           },
           "hiddenSeries": false,
           "id": 104,
@@ -3669,7 +3669,7 @@
             "rightSide": true,
             "show": true,
             "sort": "current",
-            "sortDesc": false,
+            "sortDesc": true,
             "total": false,
             "values": true
           },
@@ -3842,7 +3842,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 29
+            "y": 45
           },
           "id": 94,
           "interval": "1m",
@@ -3938,7 +3938,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 53
           },
           "hiddenSeries": false,
           "id": 102,
@@ -4077,7 +4077,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 45
+            "y": 61
           },
           "hiddenSeries": false,
           "id": 31,
@@ -4240,7 +4240,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 55
+            "y": 71
           },
           "hiddenSeries": false,
           "id": 10,
@@ -4448,7 +4448,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 83
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
@@ -4600,7 +4600,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 90
           },
           "hiddenSeries": false,
           "id": 12,
@@ -4929,7 +4929,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 100
           },
           "hiddenSeries": false,
           "id": 41,
@@ -5076,7 +5076,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 109
           },
           "hiddenSeries": false,
           "id": 93,
@@ -6551,5 +6551,5 @@
   "timezone": "",
   "title": "Bitcoin/LN/electrs - Node",
   "uid": "ImRpu1igk",
-  "version": 75
+  "version": 89
 }
