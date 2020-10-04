@@ -235,7 +235,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure needed debian packages are installed
     echo "# installing needed packages"
-    sudo apt-get install -y pipenv  2>/dev/null
 
     # get optional github parameter
     githubUser="lnbits"
@@ -259,7 +258,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# preparing env file"
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
-    #sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
@@ -280,22 +279,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # do install like this
 
     python3 -m venv venv
-    sudo -u lnbits pipenv run pip install -r requirements.txt
-    sudo -u lnbits pipenv run pip install lnd-grpc
-    cp .env.example .env
-
-    #sudo -u lnbits pipenv run pip install hypercorn
-    #sudo -u lnbits pipenv run pip install httpx
-    #sudo -u lnbits pipenv run pip install -r requirements.txt
-    #sudo -u lnbits pipenv run pip install lnd-grpc
+    sudo -u lnbits ./venv/bin/pip install -r requirements.txt
 
     # process assets
     echo "# processing assets"
-    sudo -u lnbits pipenv run quart assets
+    sudo -u lnbits ./venv/bin/quart assets
 
     # update databases (if needed)
     # echo "# updating databases"
-    sudo -u lnbits pipenv run quart migrate
+    sudo -u lnbits ./venv/bin/quart migrate
 
     # open firewall
     echo
@@ -315,7 +307,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run hypercorn --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/hypercorn --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
 User=lnbits
 Restart=always
 TimeoutSec=120
