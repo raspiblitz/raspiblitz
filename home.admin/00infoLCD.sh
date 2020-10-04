@@ -83,8 +83,9 @@ while :
     # 
     # just insert a line "headless=on" into your "/mnt/hdd/raspiblitz.conf" file
     # 
-    isHeadless=$(cat ${configFile} | grep -Ec "headless=1|headless=on")
+    isHeadless=$(cat "${configFile}" 2>/dev/null | grep -Ec "headless=1|headless=on")
     if [ ${isHeadless} -gt 0 ]; then
+      echo "*** headless=on sleeping 600 seconds ***" | systemd-cat
       sleep 600
     fi
 
