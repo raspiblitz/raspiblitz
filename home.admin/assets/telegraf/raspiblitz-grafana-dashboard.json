@@ -1163,7 +1163,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 3,
         "w": 3,
         "x": 0,
         "y": 10
@@ -1185,7 +1185,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "7.1.5",
       "targets": [
@@ -1286,9 +1286,131 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 3,
+        "h": 3,
+        "w": 6,
         "x": 3,
+        "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 105,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "IPv6"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 12,
         "y": 10
       },
       "hideTimeOverride": true,
@@ -1308,7 +1430,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "7.1.5",
       "targets": [
@@ -1409,10 +1531,377 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 6,
+        "h": 3,
+        "w": 6,
+        "x": 15,
         "y": 10
+      },
+      "hideTimeOverride": true,
+      "id": 107,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "bitcoind"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 13
+      },
+      "hideTimeOverride": true,
+      "id": 100,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"uptime\") FROM \"raspiblitz_ip_info\" WHERE (\"host\" =~ /^$host$/ AND \"origin\" = 'publicIP') AND $timeFilter GROUP BY \"ipaddr\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "publicIP"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "public IPv6",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 3,
+        "y": 13
+      },
+      "hideTimeOverride": true,
+      "id": 106,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "alias": "$tag_ipaddr",
+          "groupBy": [
+            {
+              "params": [
+                "ipaddr"
+              ],
+              "type": "tag"
+            }
+          ],
+          "limit": "",
+          "measurement": "raspiblitz_ip_info",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "uptime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "slimit": "",
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "origin",
+              "operator": "=",
+              "value": "publicIP"
+            }
+          ],
+          "tz": ""
+        }
+      ],
+      "timeFrom": "2m",
+      "timeShift": null,
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-background"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 7200
+              },
+              {
+                "color": "#299c46",
+                "value": 36000
+              }
+            ]
+          },
+          "unit": "dtdurations"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 12,
+        "y": 13
       },
       "hideTimeOverride": true,
       "id": 99,
@@ -1431,7 +1920,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "pluginVersion": "7.1.5",
       "targets": [
@@ -1532,13 +2021,13 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 12,
-        "y": 10
+        "h": 3,
+        "w": 6,
+        "x": 15,
+        "y": 13
       },
       "hideTimeOverride": true,
-      "id": 100,
+      "id": 108,
       "interval": "1m",
       "links": [],
       "maxDataPoints": 1,
@@ -1554,7 +2043,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "name"
       },
       "pluginVersion": "7.1.5",
       "targets": [
@@ -1572,7 +2061,7 @@
           "measurement": "raspiblitz_ip_info",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"uptime\") FROM \"raspiblitz_ip_info\" WHERE (\"host\" =~ /^$host$/ AND \"origin\" = 'publicIP') AND $timeFilter GROUP BY \"ipaddr\"",
+          "query": "SELECT last(\"value\") FROM \"bitcoin-uptime\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter LIMIT 1",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1601,7 +2090,7 @@
               "condition": "AND",
               "key": "origin",
               "operator": "=",
-              "value": "publicIP"
+              "value": "lnd"
             }
           ],
           "tz": ""
@@ -1609,8 +2098,7 @@
       ],
       "timeFrom": "2m",
       "timeShift": null,
-      "title": "public IPv6",
-      "transparent": true,
+      "title": "",
       "type": "stat"
     },
     {
@@ -1620,7 +2108,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "id": 74,
       "panels": [],
@@ -1660,7 +2148,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "hideTimeOverride": true,
       "id": 75,
@@ -1754,7 +2242,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 16
+        "y": 17
       },
       "hideTimeOverride": true,
       "id": 76,
@@ -1848,7 +2336,7 @@
         "h": 4,
         "w": 3,
         "x": 9,
-        "y": 16
+        "y": 17
       },
       "hideTimeOverride": true,
       "id": 77,
@@ -1943,7 +2431,7 @@
         "h": 4,
         "w": 3,
         "x": 12,
-        "y": 16
+        "y": 17
       },
       "hideTimeOverride": true,
       "id": 78,
@@ -2040,7 +2528,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "hideTimeOverride": true,
       "id": 86,
@@ -2150,7 +2638,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 20
+        "y": 21
       },
       "hideTimeOverride": true,
       "id": 87,
@@ -2232,7 +2720,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 25
       },
       "id": 90,
       "panels": [],
@@ -2280,7 +2768,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 25
+        "y": 26
       },
       "id": 34,
       "interval": "1m",
@@ -2386,7 +2874,7 @@
         "h": 4,
         "w": 3,
         "x": 3,
-        "y": 25
+        "y": 26
       },
       "id": 66,
       "interval": "1m",
@@ -2505,7 +2993,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 25
+        "y": 26
       },
       "id": 67,
       "interval": "1m",
@@ -2608,7 +3096,7 @@
         "h": 4,
         "w": 3,
         "x": 9,
-        "y": 25
+        "y": 26
       },
       "hiddenSeries": false,
       "id": 32,
@@ -2750,7 +3238,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 30
       },
       "id": 57,
       "panels": [],
@@ -2790,7 +3278,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 30
+        "y": 31
       },
       "hideTimeOverride": true,
       "id": 58,
@@ -2886,7 +3374,7 @@
         "h": 4,
         "w": 3,
         "x": 3,
-        "y": 30
+        "y": 31
       },
       "hideTimeOverride": true,
       "id": 65,
@@ -2994,7 +3482,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 30
+        "y": 31
       },
       "id": 61,
       "interval": "1m",
@@ -3101,7 +3589,7 @@
         "h": 4,
         "w": 3,
         "x": 9,
-        "y": 30
+        "y": 31
       },
       "id": 60,
       "interval": "1m",
@@ -3213,7 +3701,7 @@
         "h": 4,
         "w": 3,
         "x": 12,
-        "y": 30
+        "y": 31
       },
       "id": 91,
       "interval": "1m",
@@ -3293,7 +3781,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 35
       },
       "id": 25,
       "panels": [
@@ -4420,7 +4908,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 36
       },
       "id": 27,
       "panels": [
@@ -5222,7 +5710,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 37
       },
       "id": 29,
       "panels": [
@@ -6531,7 +7019,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-4d",
     "to": "now"
   },
   "timepicker": {
@@ -6551,5 +7039,5 @@
   "timezone": "",
   "title": "Bitcoin/LN/electrs - Node",
   "uid": "ImRpu1igk",
-  "version": 89
+  "version": 90
 }
