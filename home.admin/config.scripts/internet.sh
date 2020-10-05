@@ -149,12 +149,8 @@ if [ ${runGlobal} -eq 1 ]; then
   ##########################################
   # Clean IP
   # really just the IP value - without the default brackets if IPv6
-  has_brackets="$(echo "${publicIP}" | grep -c '\[')"
-  if [ ${has_brackets} -eq 0 ]; then
-    cleanIP="${publicIP}"
-  else
-    cleanIP="$(echo "${publicIP}" | cut -d'[' -f2 | cut -d']' -f1)"
-  fi
+  # for IPV4 case the "tr" will do no harm.
+  cleanIP=$(echo "${publicIP}" | tr -d '[]')
 
 fi
 
