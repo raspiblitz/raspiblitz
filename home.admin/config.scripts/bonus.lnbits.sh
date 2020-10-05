@@ -278,7 +278,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits/lnbits
     # do install like this
 
-    python3 -m venv venv
+    sudo -u lnbits python3 -m venv venv
+    #sudo -u lnbits /home/lnbits/lnbits/venv/bin/pip install hypercorn
     sudo -u lnbits ./venv/bin/pip install -r requirements.txt
 
     # process assets
@@ -286,7 +287,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u lnbits ./venv/bin/quart assets
 
     # update databases (if needed)
-    # echo "# updating databases"
+    echo "# updating databases"
     sudo -u lnbits ./venv/bin/quart migrate
 
     # open firewall
