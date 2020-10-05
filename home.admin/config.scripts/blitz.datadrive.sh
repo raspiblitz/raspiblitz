@@ -211,10 +211,17 @@ if [ "$1" = "status" ]; then
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
        hddDataPartitionExt4=$hddDataPartition
+       subVolumeDir=""
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    if [ "${hddFormat}" = "btrfs" ]; then
+       subVolumeDir="/WORKINGDIR"
+    fi
+    hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+    echo "hddRaspiData=${hddRaspiData}"
 
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
+
     echo "datadisk='${hdd}'"
     echo "datapartition='${hddDataPartition}'"
 
