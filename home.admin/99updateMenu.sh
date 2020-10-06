@@ -174,13 +174,16 @@ patch()
       exitstatus=$?
       if [ $exitstatus = 0 ]; then
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
-        echo "--> " $pullRequestID
+        echo "# --> " $pullRequestID
         cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
         source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
+        else
+          echo "# update installs .."
+          /home/admin/XXsyncScripts.sh -justinstall
         fi
       fi
       exit 1
