@@ -78,6 +78,17 @@ chain=""
 while :
     do
 
+    # save some CPU / log clutter on a "headless" installation (no LCD attached)
+    # by running the LCD stuff each 5 minutes that otherwise will be run every 5 seconds
+    # 
+    # just insert a line "headless=on" into your "/mnt/hdd/raspiblitz.conf" file
+    # 
+    isHeadless=$(cat "${configFile}" 2>/dev/null | grep -Ec "headless=1|headless=on")
+    if [ ${isHeadless} -gt 0 ]; then
+      echo "*** headless=on sleeping 600 seconds ***" | systemd-cat
+      sleep 600
+    fi
+
     ###########################
     # CHECK BASIC DATA
     ###########################   
