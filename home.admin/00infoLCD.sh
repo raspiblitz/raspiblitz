@@ -85,8 +85,8 @@ while :
     # 
     isHeadless=$(cat "${configFile}" 2>/dev/null | grep -Ec "headless=1|headless=on")
     if [ ${isHeadless} -gt 0 ]; then
-      echo "*** headless=on sleeping 600 seconds ***" | systemd-cat
-      sleep 600
+      echo "*** headless=on sleeping 60 seconds ***" | systemd-cat
+      sleep 60
     fi
 
     ###########################
