@@ -137,7 +137,7 @@ if [ "$1" = "status" ]; then
         # BTRFS is working with subvolumnes for snapshots / ext4 has no SubVolumes
         subVolumeDir=""
         if [ "${hddFormat}" = "btrfs" ]; then
-          subVolumeDir="/WORKINGDIR"
+          subVolumeDir="/"
         fi
 
         # temp mount data drive
