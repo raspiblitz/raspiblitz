@@ -458,6 +458,15 @@ else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
 fi
 
+# mempool explorer
+if [ "${mempoolExplorer}" = "on" ]; then
+  echo "Provisioning MempoolExplorer - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Mempool Explorer'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
+fi
+
 # letsencrypt
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}

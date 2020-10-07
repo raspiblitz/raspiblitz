@@ -83,7 +83,7 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
 fi
-if [ "${Mempool}" == "on" ]; then
+if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Mempool Space")
 fi
 if [ "${specter}" == "on" ]; then

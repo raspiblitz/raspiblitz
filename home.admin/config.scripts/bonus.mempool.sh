@@ -61,14 +61,14 @@ Activate TOR to access the web block explorer from outside your local network.
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^Mempool=" /mnt/hdd/raspiblitz.conf; then
-  echo "Mempool=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^mempoolExplorer=" /mnt/hdd/raspiblitz.conf; then
+  echo "mempoolExplorer=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # status
 if [ "$1" = "status" ]; then
 
-  if [ "${Mempool}" = "on" ]; then
+  if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
 
     # check indexing
@@ -259,7 +259,7 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^Mempool=.*/Mempool=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
   
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
@@ -278,7 +278,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^Mempool=.*/Mempool=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=off/g" /mnt/hdd/raspiblitz.conf
 
   isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
   if [ ${isInstalled} -eq 1 ]; then
