@@ -9,9 +9,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# try to suppress angular cli statistics question
-export NG_CLI_ANALYTICS=ci
-
 # add default value to raspi config if needed
 if ! grep -Eq "^angular_cli=" /mnt/hdd/raspiblitz.conf; then
   echo "angular_cli=off" >> /mnt/hdd/raspiblitz.conf
@@ -45,8 +42,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # install
+    echo "# try to suppress question on statistics report"
+    export NG_CLI_ANALYTICS=ci
+    NG_CLI_ANALYTICS=ci
+    echo "# install angular CLI"
     npm install -g @angular/cli
+    echo "# link ng"
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/ng /usr/bin/ng
+    echo "# explicit trun off statistics report"
     ng analytics off
 
     # check if nodeJS was installed
