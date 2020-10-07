@@ -117,6 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # add environment
     echo "# try to suppress question on statistics report .."
     sudo bash -c "echo 'export NG_CLI_ANALYTICS=false' >> /home/mempool/.bashrc"
+    sudo -u mempool export NG_CLI_ANALYTICS=false
     NG_CLI_ANALYTICS=false
 
     # install mempool
