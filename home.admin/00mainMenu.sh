@@ -83,6 +83,9 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
 fi
+if [ "${Mempool}" == "on" ]; then
+  OPTIONS+=(MEMPOOL "Mempool Space")
+fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
@@ -210,6 +213,9 @@ case $CHOICE in
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
+            ;;
+        MEMPOOL)
+            /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
         SPECTER)
             /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
