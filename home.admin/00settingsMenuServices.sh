@@ -24,19 +24,19 @@ if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 echo "run dialog ..."
 
 OPTIONS=()
-OPTIONS+=(l 'Lightning Loop' ${loop})
+OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
 OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
+OPTIONS+=(t 'ThunderHub' ${thunderhub})
+OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
+OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
-OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
-OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
-OPTIONS+=(m 'lndmanage' ${lndmanage})
-OPTIONS+=(f 'Faraday' ${faraday})
-OPTIONS+=(o 'Balance of Satoshis' ${bos})
-OPTIONS+=(t 'ThunderHub' ${thunderhub})
-OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(a 'Mempool Space' ${Mempool})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
+OPTIONS+=(l 'Lightning Loop' ${loop})
+OPTIONS+=(o 'Balance of Satoshis' ${bos})
+OPTIONS+=(f 'Faraday' ${faraday})
+OPTIONS+=(m 'lndmanage' ${lndmanage})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
