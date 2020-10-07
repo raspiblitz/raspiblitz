@@ -136,6 +136,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     cd frontend
     sudo -u mempool npm install
+    echo "build .."
     sudo -u mempool npm run build
 
     echo "# npm install for mempool explorer (backend)"
