@@ -124,12 +124,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
     mariadb -umempool -pmempool mempool < mariadb-structure.sql
+    sudo -u mempool git reset --hard v1.0.0
+
 
     echo "# try to suppress question on statistics report"
     export NG_CLI_ANALYTICS=ci
     NG_CLI_ANALYTICS=ci
-
-    sudo -u mempool git reset --hard v1.0.0
+    # dont install angular-cli ... done already above
+    sudo -u mempool sed -i '/@angular\/cli/d' /home/mempool/mempool/frontend/package.json
 
     echo "# npm install for mempool explorer (frontend)"
 
