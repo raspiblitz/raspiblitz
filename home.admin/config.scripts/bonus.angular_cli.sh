@@ -9,6 +9,9 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+# try to suppress angular cli statistics question
+export NG_CLI_ANALYTICS=ci
+
 # add default value to raspi config if needed
 if ! grep -Eq "^angular_cli=" /mnt/hdd/raspiblitz.conf; then
   echo "angular_cli=off" >> /mnt/hdd/raspiblitz.conf
