@@ -114,23 +114,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # add mempool user
     sudo adduser --disabled-password --gecos "" mempool
 
-    # add environment
-    echo "# try to suppress question on statistics report .."
-    sudo bash -c "echo 'export NG_CLI_ANALYTICS=ci' >> /home/mempool/.bashrc"
-    sudo -u mempool export NG_CLI_ANALYTICS=ci
-    NG_CLI_ANALYTICS=ci
-
     # install mempool
     cd /home/mempool
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
+    sudo -u mempool git reset --hard v1.0.0
+
+    # modify an
+    echo "# try to suppress question on statistics report .."
+    sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
     sudo mariadb -e "DROP DATABASE mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
     mariadb -umempool -pmempool mempool < mariadb-structure.sql
-    sudo -u mempool git reset --hard v1.0.0
 
     echo "# npm install for mempool explorer (frontend)"
 
