@@ -125,10 +125,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "FLUSH PRIVILEGES;"
     mariadb -umempool -pmempool mempool < mariadb-structure.sql
 
+    echo "# try to suppress question on statistics report"
+    export NG_CLI_ANALYTICS=ci
+    NG_CLI_ANALYTICS=ci
+
     sudo -u mempool git reset --hard v1.0.0
+
+    echo "# npm install for mempool explorer (frontend)"
+
     cd frontend
     sudo -u mempool npm install
     sudo -u mempool npm run build
+
+    echo "# npm install for mempool explorer (backend)"
+
     cd ../backend/
     sudo -u mempool npm install
     sudo -u mempool npm run build
