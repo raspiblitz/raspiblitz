@@ -121,8 +121,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u mempool git reset --hard v1.0.0
 
     # modify an
-    echo "# try to suppress question on statistics report .."
-    sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
+    #echo "# try to suppress question on statistics report .."
+    #sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
     sudo mariadb -e "DROP DATABASE mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
@@ -133,8 +133,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (frontend)"
 
     cd frontend
+    sudo -u mempool ng analytics off
     sudo -u mempool npm install
-    echo "build .."
     sudo -u mempool npm run build
 
     echo "# npm install for mempool explorer (backend)"
