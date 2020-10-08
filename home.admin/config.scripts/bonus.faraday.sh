@@ -197,7 +197,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/faraday/
-ExecStart=faraday
+ExecStart=/usr/local/bin/faraday
 User=faraday \
 --network=${chain}net
 #--connect_bitcoin \
@@ -240,7 +240,7 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo systemctl disable faraday
   sudo rm /etc/systemd/system/faraday.service
 
-  echo "# remove faraday user & binaries"
+  echo "# remove faraday user & binary"
   sudo rm /usr/local/bin/frcli
   sudo rm /usr/local/bin/faraday
   sudo userdel -r -f faraday
