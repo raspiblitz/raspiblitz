@@ -17,8 +17,6 @@ if [ ${lndOldVersion} -eq 0 ]; then
 else
   version="0.1.0-alpha"
 fi
-echo "# Able to work with faraday version: ${version}"
-
 # version and trusted release signer
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
@@ -91,7 +89,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     exit 1
   fi
 
-  echo "# INSTALL bonus.faraday.sh"
+  echo "# INSTALL bonus.faraday.sh version: ${version}"
 
   echo 
   echo "# clean & change into download directory"
