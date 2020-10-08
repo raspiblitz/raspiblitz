@@ -196,9 +196,9 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
+User=faraday
 WorkingDirectory=/home/faraday/
-ExecStart=/usr/local/bin/faraday
-User=faraday \
+ExecStart=/usr/local/bin/faraday \
 --network=${chain}net
 #--connect_bitcoin \
 #--bitcoin.host=127.0.0.1:8332 \
