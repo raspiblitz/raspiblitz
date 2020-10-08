@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 # https://github.com/cryptoadvance/specter-desktop  
 
 # command info
@@ -12,17 +11,42 @@ fi
 source /mnt/hdd/raspiblitz.conf
 echo "# bonus.cryptoadvance-specter.sh $1"
 
+# get status key/values
+if [ "$1" = "status" ]; then
+
+  if [ "${specter}" = "on" ]; then
+
+    echo "configured=1"
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+    echo "localip='${localip}'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
+    # check for error
+    serviceFailed=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
+    if [ "${serviceFailed}" = "1" ]; then
+      echo "error='Service Failed'"
+      exit 1
+    fi
+
+  else
+    echo "configured=0"
+  fi
+  
+  exit 0
+fi
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.cryptoadvance-specter.sh status)
-
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+  echo "# toraddress: ${toraddress}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -37,8 +61,9 @@ ${fingerprint}
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
 Hidden Service address for TOR Browser (QR see LCD):
-https://${toraddress}\n
-" 17 74
+https://${toraddress}
+Unfortunately the camera is currently not usable via Tor, though.
+" 18 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
@@ -49,10 +74,9 @@ https://${localip}:25441
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
 
-Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.\n
+Login with the PIN being Password B. If you have connected to a different Bitcoin RPC Endpoint, the PIN is the configured RPCPassword.\n
 Activate TOR to access the web block explorer from outside your local network.
-Unfortunately the camera is currently not usable via Tor, though.
-" 15 54
+" 15 74
   fi
 
   echo "# please wait ..."
@@ -62,25 +86,6 @@ fi
 # add default value to raspi config if needed
 if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
   echo "specter=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
-# status
-if [ "$1" = "status" ]; then
-
-  if [ "${specter}" = "on" ]; then
-    echo "configured=1"
-
-    # check for error
-    isDead=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
-      echo "error='Service Failed'"
-      exit 1
-    fi
-
-  else
-    echo "configured=0"
-  fi
-  exit 0
 fi
 
 # switch on
