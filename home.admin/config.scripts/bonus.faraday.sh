@@ -11,13 +11,13 @@ echo "## bonus.faraday.sh"
 
 # determine version by running lnd version
 lndOldVersion=$(lncli --version | grep -c "v0.10.")
-echo "# LND is old version: ${lndOldVersion}"
+#echo "# LND is old version: ${lndOldVersion}"
 if [ ${lndOldVersion} -eq 0 ]; then
   version="0.2.1-alpha"
 else
   version="0.1.0-alpha"
 fi
-echo "# Installing faraday version: ${version}"
+echo "# Able to work with faraday version: ${version}"
 
 # version and trusted release signer
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
@@ -50,7 +50,7 @@ fi
 
 # check if already installed
 installed=0
-installedVersion=$(sudo -u faraday frcli --version)
+installedVersion=$(sudo -u faraday /home/faraday/bin/frcli --version 2>/dev/null)
 if [ ${#installedVersion} -gt 0 ]; then
   installed=1
 fi
