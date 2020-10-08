@@ -75,10 +75,10 @@ https://${localip}:25441
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
 
-Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.\n
+Login with the PIN being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.\n
 Activate TOR to access the web block explorer from outside your local network.
 Unfortunately the camera is currently not usable via Tor, though.
-" 15 54
+" 15 74
   fi
 
   echo "# please wait ..."
