@@ -165,7 +165,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   #sudo install -m 0755 -o faraday -g faraday -t /usr/local/bin ${directoryName}/*
   sleep 3
 
-  installed=$(sudo -u admin frcli --version)
+  installed=$(sudo -u faraday /home/faraday/bin/frcli --version)
   if [ ${#installed} -eq 0 ]; then
     echo "error='install failed'"
     exit 1
