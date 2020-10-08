@@ -161,13 +161,14 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   directoryName="${binaryName%.*.*}"
   echo "# install binary directory '${directoryName}'"
   sudo -u faraday mkdir -p /home/faraday/bin
-  sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${directoryName}/*
+  sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${downloadDir}/${directoryName}/*
   sleep 3
-  installed=$(sudo -u admin frcli --version)
-  if [ ${#installed} -eq 0 ]; then
-    echo "error='install failed'"
-    exit 1
-  fi
+
+  #installed=$(sudo -u admin frcli --version)
+  #if [ ${#installed} -eq 0 ]; then
+  #  echo "error='install failed'"
+  #  exit 1
+  #fi
 
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/faraday/.lnd  # not a symlink.. delete it silently
