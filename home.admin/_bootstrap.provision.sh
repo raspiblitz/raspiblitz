@@ -35,21 +35,20 @@ isArmbian=$(echo $baseimage | grep -c 'armbian')
 resizeRaspbian="/usr/bin/raspi-config"
 resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
 
-minimumSize=8192000
-minimumSizeGB=$((minimumSize/1000/1000))
+minimumSizeByte=8192000000
+minimumSizeGB=$((minimumSize/1000/1000/1000))
 
-rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
-rootPartitionLength=${#rootPartition}
-rootDisk=${rootPartition:5:rootPartitionLength-6}
-rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
-echo "rootDisk(${rootDisk})" >> ${logFile}
-echo "rootDiskSize(${rootDiskSize})" >> ${logFile}
+rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
+rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
 
-if [ ${#rootDisk} -gt 0 ]; then
-   echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
+echo "rootPartition(${rootPartition})" >> ${logFile}
+echo "rootPartitionBytes(${rootPartitionBytes})" >> ${logFile}
+
+if [ ${#rootPartition} -gt 0 ]; then
+   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
    sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
-   echo "Size in Bytes is: ${rootDiskSize} ($rootDisk)" >> ${logFile}
-   if [ $rootDiskSize -lt $minimumSize ]; then
+   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
+   if [ $rootPartitionBytes -lt $minimumSize ]; then
       echo "Disk filesystem is smaller than ${minimumSizeGB}GB." >> ${logFile}
       if [ ${fsexpanded} -eq 1 ]; then
          echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
@@ -67,13 +66,15 @@ if [ ${#rootDisk} -gt 0 ]; then
 	          # TODO: Expand disk size on x86_64
          elif [ ${isRaspbian} -gt 0 ]; then
             if [ -x ${resizeRaspbian} ]; then
-		          $(sudo $resizeRaspbian --expand-rootfs)
+              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
+		          sudo $resizeRaspbian --expand-rootfs
 	          else
               echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
             fi
          elif [ ${isArmbian} -gt 0 ]; then
             if [ -x ${resizeArmbian} ]; then
-              $(sudo $resizeArmbian start)
+              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
+              sudo $resizeArmbian start
 	          else
               echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
             fi
@@ -86,7 +87,7 @@ if [ ${#rootDisk} -gt 0 ]; then
       echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
    fi
 else
-   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
+   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
