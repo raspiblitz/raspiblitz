@@ -36,8 +36,6 @@ resizeRaspbian="/usr/bin/raspi-config"
 resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
 
 minimumSizeByte=8192000000
-minimumSizeGB=$((minimumSize/1000/1000/1000))
-
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
 
@@ -48,8 +46,8 @@ if [ ${#rootPartition} -gt 0 ]; then
    echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
    sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
    echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
-   if [ $rootPartitionBytes -lt $minimumSize ]; then
-      echo "Disk filesystem is smaller than ${minimumSizeGB}GB." >> ${logFile}
+   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
       if [ ${fsexpanded} -eq 1 ]; then
          echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
          echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
@@ -84,7 +82,7 @@ if [ ${#rootPartition} -gt 0 ]; then
 	 exit 0
       fi
    else
-      echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
+      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
    fi
 else
    echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
