@@ -214,7 +214,7 @@ After=lnd.service
 User=faraday
 WorkingDirectory=/home/faraday/
 ExecStart=/home/faraday/bin/faraday \
---network=${chain}net
+#--network=${chain}net
 #--connect_bitcoin \
 #--bitcoin.host=127.0.0.1:8332 \
 #--bitcoin.user=raspibolt \
