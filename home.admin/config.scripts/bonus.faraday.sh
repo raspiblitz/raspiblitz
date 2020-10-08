@@ -155,8 +155,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   # install
   echo
-  echo "# unzip binary"
-
+  echo "# unzip binary: ${binaryName}"
   sudo -u admin tar -xzf ${binaryName}
   # removing the tar.gz ending from the binary
   directoryName="${binaryName%.*.*}"
