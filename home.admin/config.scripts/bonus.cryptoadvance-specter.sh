@@ -12,6 +12,34 @@ fi
 source /mnt/hdd/raspiblitz.conf
 echo "# bonus.cryptoadvance-specter.sh $1"
 
+# get status key/values
+if [ "$1" = "status" ]; then
+
+  if [ "${specter}" = "on" ]; then
+    echo "configured=1"
+
+    # check for error
+    isDead=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
+    if [ ${isDead} -eq 1 ]; then
+      echo "error='Service Failed'"
+      exit 1
+    fi
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+    echo "localip='${localip}'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
+  else
+    echo "configured=0"
+  fi
+  
+  exit 0
+fi
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -60,34 +88,6 @@ fi
 # add default value to raspi config if needed
 if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
   echo "specter=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
-# status
-if [ "$1" = "status" ]; then
-
-  if [ "${specter}" = "on" ]; then
-    echo "configured=1"
-
-    # check for error
-    isDead=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
-      echo "error='Service Failed'"
-      exit 1
-    fi
-
-    # get network info
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
-    fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
-    echo "localip='${localip}'"
-    echo "toraddress='${toraddress}'"
-    echo "fingerprint='${fingerprint}'"
-
-  else
-    echo "configured=0"
-  fi
-  
-  exit 0
 fi
 
 # switch on
