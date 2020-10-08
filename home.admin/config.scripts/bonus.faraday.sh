@@ -256,8 +256,6 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo rm /etc/systemd/system/faraday.service
 
   echo "# remove faraday user & binary"
-  sudo rm /usr/local/bin/frcli
-  sudo rm /usr/local/bin/faraday
   sudo userdel -r -f faraday
 
   echo "# modify config file"
