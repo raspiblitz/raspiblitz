@@ -19,8 +19,8 @@ if [ "$1" = "status" ]; then
     echo "configured=1"
 
     # check for error
-    isDead=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
+    serviceFailed=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
+    if [ "${serviceFailed}" = "1" ]; then
       echo "error='Service Failed'"
       exit 1
     fi
