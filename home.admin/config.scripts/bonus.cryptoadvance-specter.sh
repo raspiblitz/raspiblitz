@@ -18,15 +18,12 @@ if [ "$1" = "menu" ]; then
   # get status
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.cryptoadvance-specter.sh status)
-
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+  echo "# toraddress: ${toraddress}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
+    echo "# running TOR .."
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
     whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
@@ -43,6 +40,7 @@ https://${toraddress}\n
   else
 
     # IP + Domain
+    echo "# Not running TOR .."
     whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
@@ -76,6 +74,14 @@ if [ "$1" = "status" ]; then
       echo "error='Service Failed'"
       exit 1
     fi
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+    echo "localip=${localip}"
+    echo "toraddress=${toraddress}"
+    echo "fingerprint=${fingerprint}"
 
   else
     echo "configured=0"
