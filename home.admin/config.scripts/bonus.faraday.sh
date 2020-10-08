@@ -62,11 +62,12 @@ if [ "${mode}" = "menu" ]; then
     exit 1
   fi
   whiptail --title " Faraday " --msgbox "
-Faraday is a command line tool. Usage:
+Faraday is a command line tool. Details see:
 https://github.com/lightninglabs/faraday
-In terminal use the shortcut: 'faraday' to switch to the dedicated user.
-Type: 'frcli --help' for the available options.
-" 12 60
+
+Terminal-Shortcut: 'faraday' to switch to the dedicated user.
+Or use like: sudo -u faraday /home/faraday/bin/frcli -help
+" 13 70
   exit 1
 fi
 
@@ -162,7 +163,6 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# install binary directory '${directoryName}'"
   sudo -u faraday mkdir -p /home/faraday/bin
   sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${directoryName}/*
-  #sudo install -m 0755 -o faraday -g faraday -t /usr/local/bin ${directoryName}/*
   sleep 3
 
   installed=$(sudo -u faraday /home/faraday/bin/frcli --version)
