@@ -146,6 +146,8 @@ function jm() {
 function faraday() {
   if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the faraday user with the command: 'sudo su - faraday'"
+    echo "# when done use command 'exit' to return to admin user"
+    echo "# see faraday options with --> frcli -help"
     sudo su - faraday
   else
     echo "Faraday is not installed - to install run:"
