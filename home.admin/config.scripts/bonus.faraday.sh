@@ -150,9 +150,6 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# Add the 'faraday' user"
   sudo adduser --disabled-password --gecos "" faraday
 
-  # set PATH for the user
-  sudo bash -c "echo 'PATH=\$PATH:/home/faraday/bin/' >> /home/faraday/.profile"
-
   # install
   echo
   echo "# unzip binary: ${binaryName}"
@@ -161,14 +158,14 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   directoryName="${binaryName%.*.*}"
   echo "# install binary directory '${directoryName}'"
   sudo -u faraday mkdir -p /home/faraday/bin
-  sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${downloadDir}/${directoryName}/*
+  sudo install -m 0755 -o faraday -g faraday -t /usr/local/bin ${directoryName}/*
   sleep 3
 
-  #installed=$(sudo -u admin frcli --version)
-  #if [ ${#installed} -eq 0 ]; then
-  #  echo "error='install failed'"
-  #  exit 1
-  #fi
+  installed=$(sudo -u admin frcli --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo "error='install failed'"
+    exit 1
+  fi
 
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/faraday/.lnd  # not a symlink.. delete it silently
@@ -243,7 +240,9 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo systemctl disable faraday
   sudo rm /etc/systemd/system/faraday.service
 
-  echo "# remove faraday user"
+  echo "# remove faraday user & binaries"
+  sudo rm /usr/local/bin/frcli
+  sudo rm /usr/local/bin/faraday
   sudo userdel -r -f faraday
 
   echo "# modify config file"
