@@ -7,8 +7,19 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+echo "## bonus.faraday.sh"
+
+# determine version by running lnd version
+lndOldVersion=$(lncli --version | grep -c "v0.10.")
+echo "# LND is old version: ${lndOldVersion}"
+if [ ${lndOldVersion} -eq 0 ]; then
+  version="0.2.1-alpha"
+else
+  version="0.1.0-alpha"
+fi
+echo "# Installing faraday version: ${version}"
+
 # version and trusted release signer
-version="0.2.1-alpha"
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
 
