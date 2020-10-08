@@ -28,6 +28,7 @@ fi
 
 # check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
+echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
 source ${infoFile}
 isRaspbian=$(echo $baseimage | grep -c 'raspbian')
 isArmbian=$(echo $baseimage | grep -c 'armbian')
@@ -41,6 +42,8 @@ rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
 rootPartitionLength=${#rootPartition}
 rootDisk=${rootPartition:5:rootPartitionLength-6}
 rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
+echo "rootDisk(${rootDisk})" >> ${logFile}
+echo "rootDiskSize(${rootDiskSize})" >> ${logFile}
 
 if [ ${#rootDisk} -gt 0 ]; then
    echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
@@ -61,15 +64,19 @@ if [ ${#rootDisk} -gt 0 ]; then
          sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
          if [ "${cpu}" == "x86_64"  ]; then
             echo "Please expand disk size." >> ${logFile}
-	    # TODO: Expand disk size on x86_64
+	          # TODO: Expand disk size on x86_64
          elif [ ${isRaspbian} -gt 0 ]; then
-              if [ -x ${resizeRaspbian} ]; then
-		      $(sudo $resizeRaspbian --expand-rootfs)
-	      fi
+            if [ -x ${resizeRaspbian} ]; then
+		          $(sudo $resizeRaspbian --expand-rootfs)
+	          else
+              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
+            fi
          elif [ ${isArmbian} -gt 0 ]; then
-              if [ -x ${resizeArmbian} ]; then
-                 $(sudo $resizeArmbian start)
-	      fi
+            if [ -x ${resizeArmbian} ]; then
+              $(sudo $resizeArmbian start)
+	          else
+              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
+            fi
          fi
          sleep 6
          sudo shutdown -r now
