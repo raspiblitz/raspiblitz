@@ -61,7 +61,7 @@ ${fingerprint}
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
 Hidden Service address for TOR Browser (QR see LCD):
-https://${toraddress}\n
+https://${toraddress}
 Unfortunately the camera is currently not usable via Tor, though.
 " 18 74
     /home/admin/config.scripts/blitz.lcd.sh hide
