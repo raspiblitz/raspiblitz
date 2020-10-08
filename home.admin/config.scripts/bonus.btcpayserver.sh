@@ -348,7 +348,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer
     # check https://github.com/dgarage/NBXplorer/releases
-    sudo -u btcpay git reset --hard v2.1.34
+    sudo -u btcpay git reset --hard v2.1.44
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
 
@@ -431,7 +431,7 @@ EOF
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     # check https://github.com/btcpayserver/btcpayserver/releases
-    sudo -u btcpay git reset --hard v1.0.5.2
+    sudo -u btcpay git reset --hard v1.0.5.7
     # use latest commit (v1.0.4.4+) to fix build with latest dotNet
     # sudo -u btcpay git checkout f2bb24f6ab6d402af8214c67f84e08116eb650e7
     # from the build.sh with path
