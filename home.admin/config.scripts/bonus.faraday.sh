@@ -150,6 +150,9 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# Add the 'faraday' user"
   sudo adduser --disabled-password --gecos "" faraday
 
+  # set PATH for the user
+  sudo bash -c "echo 'PATH=\$PATH:/home/faraday/bin/' >> /home/faraday/.profile"
+
   # install
   echo
   echo "# unzip binary: ${binaryName}"
@@ -158,7 +161,8 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   directoryName="${binaryName%.*.*}"
   echo "# install binary directory '${directoryName}'"
   sudo -u faraday mkdir -p /home/faraday/bin
-  sudo install -m 0755 -o faraday -g faraday -t /usr/local/bin ${directoryName}/*
+  sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${directoryName}/*
+  #sudo install -m 0755 -o faraday -g faraday -t /usr/local/bin ${directoryName}/*
   sleep 3
 
   installed=$(sudo -u admin frcli --version)
@@ -198,7 +202,7 @@ After=lnd.service
 [Service]
 User=faraday
 WorkingDirectory=/home/faraday/
-ExecStart=/usr/local/bin/faraday \
+ExecStart=/home/faraday/bin/faraday \
 --network=${chain}net
 #--connect_bitcoin \
 #--bitcoin.host=127.0.0.1:8332 \
