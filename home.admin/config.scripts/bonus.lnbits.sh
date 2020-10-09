@@ -241,7 +241,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="tags/raspiblitz"
+    #githubBranch="tags/raspiblitz"
+    githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
     if [ "$3" != "" ]; then
       githubBranch="$3"
     fi
