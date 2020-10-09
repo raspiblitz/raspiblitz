@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 # https://github.com/cryptoadvance/specter-desktop  
 
 # command info
@@ -12,17 +11,42 @@ fi
 source /mnt/hdd/raspiblitz.conf
 echo "# bonus.cryptoadvance-specter.sh $1"
 
+# get status key/values
+if [ "$1" = "status" ]; then
+
+  if [ "${specter}" = "on" ]; then
+
+    echo "configured=1"
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+    echo "localip='${localip}'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
+    # check for error
+    serviceFailed=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
+    if [ "${serviceFailed}" = "1" ]; then
+      echo "error='Service Failed'"
+      exit 1
+    fi
+
+  else
+    echo "configured=0"
+  fi
+  
+  exit 0
+fi
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.cryptoadvance-specter.sh status)
-
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
+  echo "# toraddress: ${toraddress}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -37,8 +61,9 @@ ${fingerprint}
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
 Hidden Service address for TOR Browser (QR see LCD):
-https://${toraddress}\n
-" 17 74
+https://${toraddress}
+Unfortunately the camera is currently not usable via Tor, though.
+" 18 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
 
@@ -49,10 +74,9 @@ https://${localip}:25441
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
 
-Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.\n
+Login with the PIN being Password B. If you have connected to a different Bitcoin RPC Endpoint, the PIN is the configured RPCPassword.\n
 Activate TOR to access the web block explorer from outside your local network.
-Unfortunately the camera is currently not usable via Tor, though.
-" 15 54
+" 15 74
   fi
 
   echo "# please wait ..."
@@ -62,25 +86,6 @@ fi
 # add default value to raspi config if needed
 if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
   echo "specter=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
-# status
-if [ "$1" = "status" ]; then
-
-  if [ "${specter}" = "on" ]; then
-    echo "configured=1"
-
-    # check for error
-    isDead=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
-      echo "error='Service Failed'"
-      exit 1
-    fi
-
-  else
-    echo "configured=0"
-  fi
-  exit 0
 fi
 
 # switch on
@@ -111,7 +116,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.0
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.1
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
@@ -132,17 +137,17 @@ EOF
     # Ledger
     cat > /home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 # Blue
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000|0000|0001|0002|0003|0004|0005|0006|0007|0008|0009|000a|000b|000c|000d|000e|000f|0010|0011|0012|0013|0014|0015|0016|0017|0018|0019|001a|001b|001c|001d|001e|001f", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000|0000|0001|0002|0003|0004|0005|0006|0007|0008|0009|000a|000b|000c|000d|000e|000f|0010|0011|0012|0013|0014|0015|0016|0017|0018|0019|001a|001b|001c|001d|001e|001f", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 # Nano S
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001|1000|1001|1002|1003|1004|1005|1006|1007|1008|1009|100a|100b|100c|100d|100e|100f|1010|1011|1012|1013|1014|1015|1016|1017|1018|1019|101a|101b|101c|101d|101e|101f", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001|1000|1001|1002|1003|1004|1005|1006|1007|1008|1009|100a|100b|100c|100d|100e|100f|1010|1011|1012|1013|1014|1015|1016|1017|1018|1019|101a|101b|101c|101d|101e|101f", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 # Aramis
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0002|2000|2001|2002|2003|2004|2005|2006|2007|2008|2009|200a|200b|200c|200d|200e|200f|2010|2011|2012|2013|2014|2015|2016|2017|2018|2019|201a|201b|201c|201d|201e|201f", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0002|2000|2001|2002|2003|2004|2005|2006|2007|2008|2009|200a|200b|200c|200d|200e|200f|2010|2011|2012|2013|2014|2015|2016|2017|2018|2019|201a|201b|201c|201d|201e|201f", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 # HW2
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0003|3000|3001|3002|3003|3004|3005|3006|3007|3008|3009|300a|300b|300c|300d|300e|300f|3010|3011|3012|3013|3014|3015|3016|3017|3018|3019|301a|301b|301c|301d|301e|301f", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0003|3000|3001|3002|3003|3004|3005|3006|3007|3008|3009|300a|300b|300c|300d|300e|300f|3010|3011|3012|3013|3014|3015|3016|3017|3018|3019|301a|301b|301c|301d|301e|301f", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 # Nano X
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|4002|4003|4004|4005|4006|4007|4008|4009|400a|400b|400c|400d|400e|400f|4010|4011|4012|4013|4014|4015|4016|4017|4018|4019|401a|401b|401c|401d|401e|401f", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|4002|4003|4004|4005|4006|4007|4008|4009|400a|400b|400c|400d|400e|400f|4010|4011|4012|4013|4014|4015|4016|4017|4018|4019|401a|401b|401c|401d|401e|401f", TAG+="uaccess", TAG+="udev-acl", OWNER="bitcoin"
 EOF
     
     # ColdCard

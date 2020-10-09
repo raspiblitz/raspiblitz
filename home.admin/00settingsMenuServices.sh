@@ -15,6 +15,7 @@ if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
+if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
@@ -23,18 +24,19 @@ if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 echo "run dialog ..."
 
 OPTIONS=()
-OPTIONS+=(l 'Lightning Loop' ${loop})
+OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
 OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
+OPTIONS+=(t 'ThunderHub' ${thunderhub})
+OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
+OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
-OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
-OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
-OPTIONS+=(m 'lndmanage' ${lndmanage})
-OPTIONS+=(f 'Faraday' ${faraday})
-OPTIONS+=(o 'Balance of Satoshis' ${bos})
-OPTIONS+=(t 'ThunderHub' ${thunderhub})
-OPTIONS+=(i 'LNbits' ${LNBits})
+OPTIONS+=(a 'Mempool Explorer' ${mempoolExplorer})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
+OPTIONS+=(l 'Lightning Loop' ${loop})
+OPTIONS+=(o 'Balance of Satoshis' ${bos})
+OPTIONS+=(f 'Faraday' ${faraday})
+OPTIONS+=(m 'lndmanage' ${lndmanage})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -355,6 +357,33 @@ Then try activating JoinMarket again in SERVICES.\n
   fi
 else
   echo "JoinMarket not changed."
+fi
+
+# Mempool process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${mempoolExplorer}" != "${choice}" ]; then
+  echo "Mempool Explorer settings changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.mempool.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo sytemctl start mempool
+      whiptail --title " Installed Mempool Space " --msgbox "\
+The txindex may need to be created before Mempool can be active.\n
+This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
+When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
+" 14 50
+    else
+      l1="!!! FAIL on Mempool Explorer install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.mempool.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Mempool Explorer Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

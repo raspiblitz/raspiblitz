@@ -83,6 +83,9 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
 fi
+if [ "${mempoolExplorer}" == "on" ]; then
+  OPTIONS+=(MEMPOOL "Mempool Space")
+fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
@@ -186,7 +189,7 @@ case $CHOICE in
             fi
             ;;
         TOR)
-            sudo -u bitcoin nyx
+            sudo -u debian-tor nyx
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
@@ -212,6 +215,9 @@ case $CHOICE in
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
+            ;;
+        MEMPOOL)
+            /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
         SPECTER)
             /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu

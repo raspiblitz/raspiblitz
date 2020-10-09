@@ -40,6 +40,15 @@ do
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
+  # prevent restart if COPY OVER LAN is running
+  # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
+  source ${infoFile}
+  if [ "${state}" == "copysource" ]; then 
+    echo "copysource mode: skipping background loop"
+    sleep 10
+    continue
+  fi
+
   ####################################################
   # RECHECK DHCP-SERVER 
   # https://github.com/rootzoll/raspiblitz/issues/160
@@ -85,7 +94,11 @@ do
 
   ####################################################
   # RECHECK PUBLIC IP
-  # when public IP changes, restart LND with new IP
+  #
+  # when public IP changes
+  #  -  restart bitcoind with new IP
+  #  -  restart LND with new IP (if autounlock is enabled)
+  #  -  restart BTCRPCexplorer if enabled in config or running)
   ####################################################
 
   # every 15min - not too often
@@ -107,18 +120,47 @@ do
 
     # execute only after setup when config exists
     if [ ${configExists} -eq 1 ]; then
-
       publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
-      
-    # check if changed
-    elif [ ${publicIPChanged} -get 0 ]; then
+    fi
 
+    # check if changed
+    if [ ${publicIPChanged} -gt 0 ]; then
+
+      echo "*** change of public IP detected ***"
+      echo "  old: ${publicIP}"
       # refresh data
       source /mnt/hdd/raspiblitz.conf
+      echo "  new: ${publicIP}"
+
+      # if we run on IPv6 only, the global IPv6 address at the current network device (e.g: eth0) is the public IP
+      if [ "${ipv6}" = "on" ]; then
+        # restart bitcoind as the global IP is stored in the node configuration
+        # and we will get more connections if this matches our real IP address
+        # otherwise the bitcoin-node connections will slowly decline 
+        echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
+        sudo systemctl stop bitcoind
+        sleep 3
+        sudo systemctl start bitcoind
+
+        # if BTCRPCexplorer is currently running 
+        # it needs to be restarted to pickup the new IP for its "Node Status Page"
+        # but this is only needed in IPv6 only mode 
+        breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
+        if [ ${breIsRunning} -eq 1 ]; then
+          echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
+          sudo systemctl stop btc-rpc-explorer
+          sudo systemctl start btc-rpc-explorer
+        else 
+          echo "new publicIP but no BTCRPCexplorer restart because not running"
+        fi 
+
+      else
+        echo "IPv6 only is OFF => no need to restart bitcoind nor BTCRPCexplorer"
+      fi 
 
       # only restart LND if auto-unlock is activated
       if [ "${autoUnlock}" = "on" ]; then
-        echo "restart LND with to pickup up new publiIP"
+        echo "restart LND to pickup up new publicIP"
         sudo systemctl stop lnd
         sudo systemctl start lnd
       else
@@ -142,38 +184,27 @@ do
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
     echo "BlitzTUI Monitoring Check"
-
-    # prevent restart if COPY OVER LAN is running
-    # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
-    source ${infoFile}
-    if [ "${state}" == "copysource" ]; then 
-      echo "- skip BlitzTUI check while COPY over LAN is running"
+    if [ -d "/var/cache/raspiblitz" ]; then
+      latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
     else
-
-      if [ -d "/var/cache/raspiblitz" ]; then
-        latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
-      else
-        latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
-      fi
-      if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
-        #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
-        #echo "latestHeartBeatLine(${latestHeartBeatLine})"
-        if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
-          echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-          blitzTUIRestarts=$(($blitzTUIRestarts +1))
-          if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-            echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-          fi
-          sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-          sudo init 3 ; sleep 2 ; sudo init 5
-        fi
-      else
-        echo "blitzTUIHeartBeatLine is empty - skipping check"
-      fi
-      blitzTUIHeartBeatLine="${latestHeartBeatLine}"
-
+      latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
     fi
-
+    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
+      #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
+      #echo "latestHeartBeatLine(${latestHeartBeatLine})"
+      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
+        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+        blitzTUIRestarts=$(($blitzTUIRestarts +1))
+        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
+          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
+        fi
+        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
+        sudo init 3 ; sleep 2 ; sudo init 5
+      fi
+    else
+      echo "blitzTUIHeartBeatLine is empty - skipping check"
+    fi
+    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
   fi
   
   ###############################

@@ -8,11 +8,12 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
  exit 1
 fi
 
-echo "Detect Base Image ..." 
+torrc="/etc/tor/torrc"
+
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -32,11 +33,12 @@ if [ ${isDietPi} -gt 0 ]; then
 fi
 if [ "${baseImage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
-  echo "!!! FAIL !!!"
-  echo "Base Image cannot be detected or is not supported."
+  echo "# !!! FAIL !!!"
+  echo "# Base Image cannot be detected or is not supported."
+  echo "error='unknown os'"
   exit 1
 else
-  echo "OK running ${baseImage}"
+  echo "os='${baseImage}'"
 fi
 
 # function: install keys & sources
@@ -87,39 +89,35 @@ activateBitcoinOverTOR()
 
   btcExists=$(sudo ls /home/bitcoin/.${network}/${network}.conf | grep -c "${network}.conf")
   if [ ${btcExists} -gt 0 ]; then
-    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-    if [ ${networkIsTor} -eq 0 ]; then
-    
-      # clean all previous added nodes
-      sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-      sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-    
-      echo "Addding TOR config ..."
-      sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
-      echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf 
-      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf 
-      if [ "${network}" = "bitcoin" ]; then
-        # adding some bitcoin onion nodes to connect to to make connection easier
-        echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
-      fi
-      sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
-      # copy new bitcoin.conf to admin user for cli access
-      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-      sudo chown admin:admin /home/admin/.${network}/${network}.conf
+    # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
+    deactivateBitcoinOverTOR
 
-  else
-    echo "Chain network already configured for TOR"
-  fi
+    echo "Addding TOR config ..."
+    sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+    echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
+    echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
+    echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
+    if [ "${network}" = "bitcoin" ]; then
+      # adding some bitcoin onion nodes to connect to to make connection easier
+      echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
+    fi
+    sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+
+    # copy new bitcoin.conf to admin user for cli access
+    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
   else
     echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf-on' again later" 
   fi
@@ -128,8 +126,9 @@ activateBitcoinOverTOR()
 
 deactivateBitcoinOverTOR()
 {
-  echo "*** Changing ${network} Config ***"
+  # always make sure also to remove old settings
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -155,7 +154,18 @@ activateLndOverTOR()
 
     echo "editing /etc/systemd/system/lnd.service"
     sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735 \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
-  
+
+    # check if "tor.password" exists
+    valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tor.password=')
+    if [ ${valueExists} -eq 0 ]; then
+        echo "Adding tor config defaults to /mnt/hdd/lnd/lnd.conf"
+        PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+        sudo -u bitcoin tee -a /mnt/hdd/lnd/lnd.conf >/dev/null <<EOF
+[Tor]
+tor.password=$PASSWORD_B
+EOF
+    fi
+
     echo "Enable LND again"
     sudo systemctl enable lnd
     echo "OK"
@@ -189,6 +199,18 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
+# if started with status
+if [ "$1" = "status" ]; then
+  # is Tor activated
+  if [ "${runBehindTor}" == "on" ]; then
+    echo "activated=1"
+  else
+    echo "activated=0"
+  fi
+  echo "config='${torrc}'"
+  exit 0
+fi
+
 # if started with btcconf-on 
 if [ "$1" = "btcconf-on" ]; then
   activateBitcoinOverTOR
@@ -216,7 +238,6 @@ fi
 # location of TOR config
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
-torrc="/etc/tor/torrc"
 
 # stop services (if running)
 echo "making sure services are not running"
@@ -256,26 +277,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get update -y
     echo ""
 
-    echo "*** Install Tor ***"
-    echo "*** Installing NYX - TOR monitoring Tool ***"
-    # NYX - Tor monitor tool
-    #  https://nyx.torproject.org/#home
+    echo "*** Install Tor & NYX ***"
     sudo apt install tor tor-arm -y
 
     echo ""
     echo "*** Tor Config ***"
-    #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/sys 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/bitcoin8332 2>/dev/null
+    sudo mkdir -p /mnt/hdd/tor
+    sudo mkdir -p /mnt/hdd/tor/sys
     sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+    sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    HASHED_PASSWORD=$(sudo -u debian-tor tor --hash-password "$PASSWORD_B")
+
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
@@ -288,15 +301,11 @@ Log notice file /mnt/hdd/tor/notice.log
 Log info file /mnt/hdd/tor/info.log
 
 RunAsDaemon 1
-User bitcoin
-PortForwarding 1
 ControlPort 9051
 SocksPort 9050
 ExitRelay 0
 
-CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
-CookieAuthentication 1
-CookieAuthFileGroupReadable 1
+HashedControlPassword $HASHED_PASSWORD
 
 # Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
@@ -338,13 +347,15 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
+    sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
-    if ! grep -Eq "^ReadWriteDirectories=" /etc/systemd/system/tor@default.service.d/raspiblitz.conf; then
-      echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
-    fi
+    sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null <<EOF
+    # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
+[Service]
+ReadWriteDirectories=-/mnt/hdd/tor
+EOF
 
   else
     echo "TOR package/service is installed and was prepared earlier .. just activating again"
@@ -388,9 +399,8 @@ EOF
   fi
 
   echo "Setup logrotate"
-  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
-    # add logrotate config for modified Tor dir on ext. disk
-    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+  # add logrotate config for modified Tor dir on ext. disk
+  sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
 /mnt/hdd/tor/*log {
         daily
         rotate 5
@@ -398,7 +408,7 @@ EOF
         delaycompress
         missingok
         notifempty
-        create 0640 bitcoin bitcoin
+        create 0640 debian-tor debian-tor
         sharedscripts
         postrotate
                 if invoke-rc.d tor status > /dev/null; then
@@ -407,7 +417,8 @@ EOF
         endscript
 }
 EOF
-  fi
+
+  sudo systemctl restart tor@default
 
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
@@ -434,10 +445,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable lnd
   echo "editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
+  sudo sed -i '/\[Tor\]*/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^tor.password=*/d' /mnt/hdd/lnd/lnd.conf
 
   sudo systemctl enable lnd
   echo "OK"
   echo ""
+
+  echo "*** Stop TOR service ***"
+  sudo systemctl stop tor@default
+  echo ""
+
+  if [ "$2" == "clear" ]; then
+      echo "*** Deinstall Tor & Delete Data ***"
+       sudo apt remove tor tor-arm -y
+       sudo rm -r /mnt/hdd/tor 2>/dev/null
+  fi
 
   echo "needs reboot to activate new setting"
   exit 0

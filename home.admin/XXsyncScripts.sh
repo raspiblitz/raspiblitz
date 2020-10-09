@@ -84,6 +84,10 @@ if [ ${#wantedBranch} -gt 0 ]; then
     echo "# OK"
   else
 
+    # always clean & install fresh on branch change
+    clean=1
+    install=1
+
     echo "# checking if branch is locally available"
     localBranch=$(git branch | grep -c "${wantedBranch}")
     if [ ${localBranch} -eq 0 ]; then
@@ -164,7 +168,7 @@ if [ "${touchscreen}" = "1" ]; then
   checkSumBlitzTUIAfter=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
   echo "# checkSumBlitzTUIBefore = ${checkSumBlitzTUIBefore}"
   echo "# checkSumBlitzTUIAfter  = ${checkSumBlitzTUIAfter}"
-  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ ${install} -eq 0 ]; then
+  if [ "${checkSumBlitzTUIBefore}" = "${checkSumBlitzTUIAfter}" ] && [ ${install} -eq 0 ] && [ ${clean} -eq 0 ]; then
     echo "# BlitzTUI did not changed."
   else
     echo "# BlitzTUI changed --> UPDATING TOUCHSCREEN INSTALL ..."

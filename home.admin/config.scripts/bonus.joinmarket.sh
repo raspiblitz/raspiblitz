@@ -27,13 +27,13 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " JoinMarket info " --msgbox "Usage:
-https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md\n
-Start to use by logging in to the 'joinmarket' user with:
-sudo su joinmarket\n
+  whiptail --title " JoinMarket info " --msgbox "
+Type: 'jm' in the command line to swith to the dedicated user and start the JoininBox menu.
+Notes on usage:
+https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can log in directly with the 'joinmarket' user via ssh.
 The user password is the PASSWORD_B.
-" 14 81
+" 13 81
   exit 0
 fi
 
@@ -125,7 +125,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.6
+    sudo -u joinmarket git reset --hard v0.1.9
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
