@@ -167,6 +167,18 @@ function loop() {
   fi
 }
 
+# command: pool
+# switch to the pool user for the Pool Service
+function pool() {
+  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the pool user with the command: 'sudo su - pool'"
+    sudo su - pool
+  else
+    echo "Pool is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pool.sh on"
+  fi
+}
+
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
 # $ gettx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
