@@ -43,7 +43,7 @@ SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 15 57
+" 15 67
   fi
   echo "please wait ..."
   exit 0
