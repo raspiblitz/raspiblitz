@@ -34,10 +34,11 @@ sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
 if [ "${baseImage}" = "raspbian" ]; then
   sudo raspi-config --expand-rootfs
+  sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 elif [ "${baseImage}" = "armbian" ]; then
   sudo /usr/lib/armbian/armbian-resize-filesystem start
+  sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 fi
-sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 
 # mark setup is done
 sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
