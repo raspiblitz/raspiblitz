@@ -6,7 +6,13 @@ This guide was tested on vagrant
 
 This feature is very experimental and not supported.
 
-In order to run raspiblitz on `vagrant` you need `packer` to build the base box.
+In order to run raspiblitz on `vagrant` you need `packer` (>=1.6.0) to build the base box.
+
+On MacOS you need to install:
+1. brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
+2. packer: `brew install packer`
+3. vagrant: `brew install vagrant`
+4. virtualbox: `brew cask install virtualbox` (maybe re-run after you changed the requested secruity permission to be successfull)
 
 ```sha
 cd alternative.platforms/amd64/packer
