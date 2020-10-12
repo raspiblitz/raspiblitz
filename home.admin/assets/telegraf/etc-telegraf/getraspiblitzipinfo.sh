@@ -227,9 +227,14 @@ for i in $( seq 0 4 ); do
     ipaddr_online=$(( ${unixTimestamp} - ${creation_ts_curr[ $i ]}))
     #
     # create influx-line-format output
-    influxLine="raspiblitz_ip_info,origin=${origin[ $i ]},ipaddr=${ip_addr_curr[$i]},ipaddr_prev=${ip_addr_prev[$i]},ipaddr_changed=${has_changed[ $i ]} created=${creation_ts_curr[ $i ]}i,uptime=${ipaddr_online}i,changed=${has_changed[ $i ]}i"
-    if [ -f "${logFile}" ]; then printf "%s: === %s\n" "$sts" "$influxLine" >> ${logFile} ; fi
-    echo "${influxLine}"
+    # only if there is a proper creation timestamp
+    if [ ${creation_ts_curr[ $i ]} -gt 1000000000 ]; then 
+        influxLine="raspiblitz_ip_info,origin=${origin[ $i ]},ipaddr=${ip_addr_curr[$i]},ipaddr_prev=${ip_addr_prev[$i]},ipaddr_changed=${has_changed[ $i ]} created=${creation_ts_curr[ $i ]}i,uptime=${ipaddr_online}i,changed=${has_changed[ $i ]}i"
+        if [ -f "${logFile}" ]; then printf "%s: === %s\n" "$sts" "$influxLine" >> ${logFile} ; fi
+        echo "${influxLine}"
+    else 
+        if [ -f "${logFile}" ]; then printf "%s: creation time ERROR for origin %s \n" "$sts" "${origin[ $i ]}" >> ${logFile} ; fi
+    fi 
 done
 
 # -eof-
