@@ -101,7 +101,7 @@ copyHost()
   # transfere beginning flag
   date +%s > /home/admin/copy_begin.time
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
-  sudo -f rm /home/admin/copy_begin.time
+  sudo rm -f /home/admin/copy_begin.time
 
   # transfere blockchain data
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
@@ -110,7 +110,7 @@ copyHost()
   # transfere end flag
   date +%s > /home/admin/copy_end.time
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
-  sudo -f rm /home/admin/copy_end.time
+  sudo rm -f /home/admin/copy_end.time
 
   echo "# start services again ..."
   sudo systemctl enable ${network}d
