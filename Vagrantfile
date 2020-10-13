@@ -3,7 +3,7 @@
 
 Vagrant.configure('2') do |config|
 
-  config.vm.box = 'raspiblitz'
+  config.vm.box = 'rootzoll/raspiblitz'
 
   config.vm.network "private_network", type: "dhcp"
 
