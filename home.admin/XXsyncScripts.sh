@@ -30,6 +30,7 @@ if [ "$1" == "info" ]; then
 fi
 
 # change branch if set as parameter
+vagrant=0
 clean=0
 install=0
 wantedBranch="$1"
@@ -38,6 +39,12 @@ if [ "${wantedBranch}" = "-run" ]; then
   # "-run" ist just used by "patch" command and will ignore all further parameter
   wantedBranch="${activeBranch}"
   wantedGitHubUser="${activeGitHubUser}"
+  # detect if running in vagrant VM
+  vagrant=$(df | grep -c "/vagrant")
+  if [ "$2" = "git" ]; then 
+    echo "# forcing guthub over vagrant sync"
+    vagrant=0
+  fi
 fi
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
@@ -113,15 +120,27 @@ origin=$(git remote -v | grep 'origin' | tail -n1)
 checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
-echo "# *** SYNCING SHELL SCRIPTS WITH GITHUB ***"
-echo "# This is for developing on your RaspiBlitz."
-echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"
-echo "# and can lead to dirty state of your scripts."
-echo "# REPO ----> ${origin}"
-echo "# BRANCH --> ${activeBranch}"
-echo "# ******************************************"
-git pull 1>&2
-cd ..
+
+if [ ${vagrant} -eq 0 ]; then
+  echo "# *** SYNCING RASPIBLITZ CODE WITH GITHUB ***"
+  echo "# This is for developing on your RaspiBlitz."
+  echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"
+  echo "# and can lead to dirty state of your scripts."
+  echo "# REPO ----> ${origin}"
+  echo "# BRANCH --> ${activeBranch}"
+  echo "# ******************************************"
+  git pull 1>&2
+  cd ..
+else
+  cd ..
+  echo "# --> VAGRANT IS ACTIVE"
+  echo "# *** SYNCING RASPIBLITZ CODE WITH VAGRANT LINKED DIRECTORY ***"
+  echo "# This is for developing on your RaspiBlitz with a VM."
+  sudo rm -r /home/admin/raspiblitz
+  sudo cp /vagrant /home/admin/raspiblitz
+  sudo chown admin:admin -R /home/admin/raspiblitz
+fi
+
 if [ ${clean} -eq 1 ]; then
   echo "# Cleaning scripts & assets/config.scripts"
   sudo rm -f *.sh
