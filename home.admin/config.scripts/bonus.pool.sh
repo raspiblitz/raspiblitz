@@ -28,6 +28,9 @@ fi
 echo "# making sure the service is not running"
 sudo systemctl stop poold 2>/dev/null
 
+echo "# move existing data dir to /mnt/hdd/app-data/"
+sudo mv /home/pool/.pool /mnt/hdd/app-data/ 2>/dev/null
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# installing pool"
@@ -43,11 +46,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # create dedicated user
     sudo adduser --disabled-password --gecos "" pool
+    
+    echo "# persist settings in app-data"
+    echo "# make sure the data directory exists"
+    sudo -u pool mkdir -p /mnt/hdd/app-data/.pool
+    echo "# symlink"
+    sudo ln -s /mnt/hdd/app-data/.pool /home/pool/ 2>/dev/null
+    sudo chown pool:pool -R /mnt/hdd/app-data/.pool
 
     # set PATH for the user
-    sudo bash -c "echo 'PATH=\$PATH:/home/pool/go/bin/' >> /home/pool/.profile"
+    sudo bash -c "echo 'PATH=$PATH:/home/pool/go/bin/' >> /home/pool/.profile"
 
-    # make sure symlink to central app-data directory exists ***"
+    # make sure symlink to central app-data directory exists
     sudo rm -rf /home/pool/.lnd  # not a symlink.. delete it silently
     # create symlink
     sudo ln -s /mnt/hdd/app-data/lnd/ /home/pool/.lnd
