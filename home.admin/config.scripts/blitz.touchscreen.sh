@@ -27,6 +27,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "making sure system dependencies are installed"
   sudo apt-get update >/dev/null
   sudo apt-get install -y unclutter xterm python3-pyqt5 >/dev/null
+  sudo apt-get install -y xfonts-terminus >/dev/null
 
   # check if python3 env exists - if not install it
   if [ ! -d /home/admin/python3-env-lnd ]; then

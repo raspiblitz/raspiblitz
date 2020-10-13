@@ -293,6 +293,20 @@ EOF
     sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
   fi
 
+  # Tor
+  if [ "${runBehindTor}" == "on" ]; then
+      echo "# changing the password for Tor"
+
+      hashedPassword=$(sudo -u debian-tor tor --hash-password "${newPassword}")
+      sed -i "s/^HashedControlPassword .*/HashedControlPassword ${hashedPassword}/g" /etc/tor/torrc 2>/dev/null
+
+      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
+
+      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
   exit 0

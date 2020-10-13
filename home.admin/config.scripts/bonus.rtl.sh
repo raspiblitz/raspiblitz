@@ -43,7 +43,7 @@ SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 15 57
+" 15 67
   fi
   echo "please wait ..."
   exit 0
@@ -89,7 +89,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
-    sudo -u rtl git reset --hard v0.9.0
+    sudo -u rtl git reset --hard v0.9.1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -243,6 +243,39 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo ufw deny 3001
 
   echo "needs reboot to activate new setting"
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "# UPDATING RTL"
+  cd /home/rtl/RTL
+  # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+  # fetch latest master
+  sudo -u rtl git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# You are up-to-date on version" $TAG
+  else
+    echo "# Pulling latest changes..."
+    sudo -u rtl git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u rtl git reset --hard $TAG
+    # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
+    sudo -u rtl npm install --only=prod
+    echo "# Updated to version" $TAG
+  fi
+
+  echo "# Updated to the latest in https://github.com/Ride-The-Lightning/RTL/releases"
+  echo ""
+  echo "# Starting the RTL service ... "
+  sudo systemctl start RTL
   exit 0
 fi
 

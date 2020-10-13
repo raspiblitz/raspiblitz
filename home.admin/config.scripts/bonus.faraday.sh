@@ -7,8 +7,17 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+echo "## bonus.faraday.sh"
+
+# determine version by running lnd version
+lndOldVersion=$(lncli --version | grep -c "v0.10.")
+#echo "# LND is old version: ${lndOldVersion}"
+if [ ${lndOldVersion} -eq 0 ]; then
+  version="0.2.1-alpha"
+else
+  version="0.1.0-alpha"
+fi
 # version and trusted release signer
-version="0.2.1-alpha"
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
 
@@ -39,7 +48,7 @@ fi
 
 # check if already installed
 installed=0
-installedVersion=$(sudo -u faraday frcli --version)
+installedVersion=$(sudo -u faraday /home/faraday/bin/frcli --version 2>/dev/null)
 if [ ${#installedVersion} -gt 0 ]; then
   installed=1
 fi
@@ -62,11 +71,12 @@ if [ "${mode}" = "menu" ]; then
     exit 1
   fi
   whiptail --title " Faraday " --msgbox "
-Faraday is a command line tool. Usage:
+Faraday is a command line tool. Details see:
 https://github.com/lightninglabs/faraday
-In terminal use the shortcut: 'faraday' to switch to the dedicated user.
-Type: 'frcli --help' for the available options.
-" 12 60
+
+Terminal-Shortcut: 'faraday' to switch to the dedicated user.
+Or use like: sudo -u faraday /home/faraday/bin/frcli -help
+" 13 70
   exit 1
 fi
 
@@ -79,7 +89,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
     exit 1
   fi
 
-  echo "# INSTALL bonus.faraday.sh"
+  echo "# INSTALL bonus.faraday.sh version: ${version}"
 
   echo 
   echo "# clean & change into download directory"
@@ -155,8 +165,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   # install
   echo
-  echo "# unzip binary"
-
+  echo "# unzip binary: ${binaryName}"
   sudo -u admin tar -xzf ${binaryName}
   # removing the tar.gz ending from the binary
   directoryName="${binaryName%.*.*}"
@@ -164,7 +173,8 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   sudo -u faraday mkdir -p /home/faraday/bin
   sudo install -m 0755 -o faraday -g faraday -t /home/faraday/bin ${directoryName}/*
   sleep 3
-  installed=$(sudo -u admin frcli --version)
+
+  installed=$(sudo -u faraday /home/faraday/bin/frcli --version)
   if [ ${#installed} -eq 0 ]; then
     echo "error='install failed'"
     exit 1
@@ -199,10 +209,10 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
+User=faraday
 WorkingDirectory=/home/faraday/
-ExecStart=faraday
-User=faraday \
---network=${chain}net
+ExecStart=/home/faraday/bin/faraday \
+#--network=${chain}net
 #--connect_bitcoin \
 #--bitcoin.host=127.0.0.1:8332 \
 #--bitcoin.user=raspibolt \
@@ -243,7 +253,7 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo systemctl disable faraday
   sudo rm /etc/systemd/system/faraday.service
 
-  echo "# remove faraday user"
+  echo "# remove faraday user & binary"
   sudo userdel -r -f faraday
 
   echo "# modify config file"
