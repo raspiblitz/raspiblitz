@@ -28,9 +28,14 @@ esac
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
   echo "stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
+else
+  # make sure bitcoind is not running
+  sudo systemctl stop background <2 /dev/null
+  sudo systemctl stop bitcoind <2 /dev/null
 fi
 
 # check if old blockchain data exists
