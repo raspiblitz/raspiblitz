@@ -137,7 +137,7 @@ else
   echo "# *** SYNCING RASPIBLITZ CODE WITH VAGRANT LINKED DIRECTORY ***"
   echo "# This is for developing on your RaspiBlitz with a VM."
   sudo rm -r /home/admin/raspiblitz
-  sudo cp /vagrant /home/admin/raspiblitz
+  sudo cp -r /vagrant /home/admin/raspiblitz
   sudo chown admin:admin -R /home/admin/raspiblitz
 fi
 
