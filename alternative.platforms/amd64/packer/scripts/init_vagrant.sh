@@ -4,14 +4,6 @@ set -e
 
 echo "************* Vagrant provisioning ********************"
 
-
-if ! [ -e /dev/sdb1 ]; then
-    echo 'Data drive partitioning'
-
-    echo 'type=83' | sudo sfdisk /dev/sdb
-fi
-
-
 echo 'linking development files'
 source_dir=/vagrant/home.admin
 dest_dir=$HOME
