@@ -19,7 +19,7 @@ if [ "$1" = "status" ]; then
     echo "configured=1"
 
     # get network info
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
     echo "localip='${localip}'"
