@@ -86,6 +86,7 @@ copyHost()
   fi
 
   echo "# stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
@@ -116,6 +117,7 @@ copyHost()
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
   sudo systemctl start lnd
+  sudo systemctl start background
 
   echo "# show final message"
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
