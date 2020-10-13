@@ -253,20 +253,22 @@ if [ "$1" = "update" ]; then
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u rtl git fetch
+  # unset $1
+  set --
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
-  
   if [ $LOCAL = $REMOTE ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# You are up-to-date on version" $TAG
   else
     echo "# Pulling latest changes..."
     sudo -u rtl git pull -p
-
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u rtl git reset --hard $TAG
     # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
     sudo -u rtl npm install --only=prod
-    TAG=$(git tag | sort -V | tail -1)
     echo "# Updated to version" $TAG
   fi
 
