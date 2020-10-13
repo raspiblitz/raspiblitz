@@ -291,6 +291,9 @@ fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
 fi
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(RTL "Update RTL")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -314,5 +317,8 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
+    ;;
+  RTL)
+    /home/admin/config.scripts/bonus.rtl.sh update
     ;;
 esac
