@@ -64,7 +64,7 @@ if [ "${wantedBranch}" = "-justinstall" ]; then
 fi
 
 # set to another GutHub repo as origin
-if [ ${#wantedGitHubUser} -gt 0 ]; then
+if [ ${#wantedGitHubUser} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   echo "# your active GitHubUser is: ${activeGitHubUser}"
   echo "# your wanted GitHubUser is: ${wantedGitHubUser}"
   if [ "${activeGitHubUser}" = "${wantedGitHubUser}" ]; then
@@ -84,7 +84,7 @@ if [ ${#wantedGitHubUser} -gt 0 ]; then
   fi
 fi
 
-if [ ${#wantedBranch} -gt 0 ]; then
+if [ ${#wantedBranch} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   echo "# your active branch is: ${activeBranch}"
   echo "# your wanted branch is: ${wantedBranch}"
   if [ "${wantedBranch}" = "${activeBranch}" ]; then
@@ -116,12 +116,11 @@ if [ ${#wantedBranch} -gt 0 ]; then
   fi
 fi
 
-origin=$(git remote -v | grep 'origin' | tail -n1)
 checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
-
 if [ ${vagrant} -eq 0 ]; then
+  origin=$(git remote -v | grep 'origin' | tail -n1)
   echo "# *** SYNCING RASPIBLITZ CODE WITH GITHUB ***"
   echo "# This is for developing on your RaspiBlitz."
   echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"

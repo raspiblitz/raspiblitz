@@ -31,6 +31,7 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
       echo "You can either create a new dynamic VDI with around 900GB or download"
       echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
       echo "space on your laptop you can store the VDI file on an external drive."
+      echo "***********************************************************"
     fi
     exit
 fi
