@@ -584,14 +584,14 @@ fi
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.10.4-beta"
+lndVersion="0.11.1-beta"
 
 # olaoluwa
-PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+#PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+#PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
 # bitconner
-#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-#PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 # Joost Jager
 #PGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
 #PGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
