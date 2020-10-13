@@ -20,6 +20,17 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     echo "***********************************************************"
     echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
     echo "***********************************************************"
+    vagrant=$(df | grep -c "/vagrant")
+    if [ ${vagrant} ]; then
+      echo "To connect a HDD data disk to your VagrantVM:"
+      echo "- shutdown VM with command: off"
+      echo "- open your VirtualBox GUI and select RaspiBlitzVM"
+      echo "- 'change' the 'mass storage' settings"
+      echo "- add a second 'Primary Slave' drive to the already existing controller"
+      echo "You can either create a new dynamic VDI with around 900GB or download"
+      echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
+      echo "space on your laptop you can store the VDI file on an external drive."
+    fi
     exit
 fi
 
