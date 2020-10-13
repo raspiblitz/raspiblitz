@@ -1,26 +1,18 @@
 #!/bin/bash
 
-set -e
+echo "************* Vagrant Provisioning ********************"
 
-echo "************* Vagrant provisioning ********************"
+echo 'Syncing local code with RaspiBlitzVM'
 
-echo 'linking development files'
-source_dir=/vagrant/home.admin
-dest_dir=$HOME
+# make sure the lastest sync script is in place
+cp /vagrant/home.admin/XXsyncScripts.sh /home/admin/XXsyncScripts.sh
 
-cd $source_dir
-for f in *; do
-    if [ "$f" = "assets" ] ; then
-        continue
-    fi
+# execute 'patch' command to sync laptop with VM
+/home/admin/XXsyncScripts.sh -run
 
-    source_file="$source_dir/$f"
-    dest_file="$dest_dir/$f"
-
-    if [ -L $dest_file ] && [ "$(readlink "$dest_file")" = "$source_file" ]; then
-            continue
-    fi
-
-    rm -rf "$dest_file"
-    ln -s "$source_file" "$dest_file"
-done
+echo
+echo "************* NEXT ********************"
+echo "vagrant ssh --> ssh into your RaspiBlitzVM"
+echo "vagrant provision --> trigger code sync from outside VM"
+echo "patch --> trigger code sync from inside the VM"
+echo 

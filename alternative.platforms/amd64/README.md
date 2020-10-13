@@ -14,11 +14,10 @@ On MacOS you need to install:
 3. vagrant: `brew install vagrant`
 4. virtualbox: `brew cask install virtualbox` (maybe re-run after you changed the requested secruity permission to be successfull)
 
-```sha
+```
 cd alternative.platforms/amd64/packer
 packer build raspiblitz.json
-
-vagrant box add --force raspiblitz output/raspiblitz.box
+vagrant box add --force rotzoll/raspiblitz output/raspiblitz.box
 cd ../../..
 ```
 
