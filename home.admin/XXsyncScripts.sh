@@ -141,12 +141,10 @@ else
 fi
 
 if [ ${clean} -eq 1 ]; then
-  echo "# Cleaning scripts & assets/config.scripts"
+  echo "# Cleaning assets .. "
   sudo rm -f *.sh
   sudo rm -rf assets
-  mkdir assets
-  sudo rm -rf config.scripts
-  mkdir config.scripts
+  sudo -u admin mkdir assets
 else
   echo "# ******************************************"
   echo "# NOT cleaning/deleting old files"
@@ -155,16 +153,12 @@ else
 fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"
+sudo rm -r /home/admin/config.scripts
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
-#echo "# .."
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets /home/admin
-#echo "# .."
 sudo -u admin chmod +x /home/admin/*.sh
-#echo "# .."
 sudo -u admin chmod +x /home/admin/*.py
-#echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-#echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "# ******************************************"
 
