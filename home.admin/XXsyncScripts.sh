@@ -30,6 +30,7 @@ if [ "$1" == "info" ]; then
 fi
 
 # change branch if set as parameter
+vagrant=0
 clean=0
 install=0
 wantedBranch="$1"
@@ -38,6 +39,12 @@ if [ "${wantedBranch}" = "-run" ]; then
   # "-run" ist just used by "patch" command and will ignore all further parameter
   wantedBranch="${activeBranch}"
   wantedGitHubUser="${activeGitHubUser}"
+  # detect if running in vagrant VM
+  vagrant=$(df | grep -c "/vagrant")
+  if [ "$2" = "git" ]; then 
+    echo "# forcing guthub over vagrant sync"
+    vagrant=0
+  fi
 fi
 if [ "${wantedBranch}" = "-clean" ]; then
   clean=1
@@ -57,7 +64,7 @@ if [ "${wantedBranch}" = "-justinstall" ]; then
 fi
 
 # set to another GutHub repo as origin
-if [ ${#wantedGitHubUser} -gt 0 ]; then
+if [ ${#wantedGitHubUser} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   echo "# your active GitHubUser is: ${activeGitHubUser}"
   echo "# your wanted GitHubUser is: ${wantedGitHubUser}"
   if [ "${activeGitHubUser}" = "${wantedGitHubUser}" ]; then
@@ -77,7 +84,7 @@ if [ ${#wantedGitHubUser} -gt 0 ]; then
   fi
 fi
 
-if [ ${#wantedBranch} -gt 0 ]; then
+if [ ${#wantedBranch} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   echo "# your active branch is: ${activeBranch}"
   echo "# your wanted branch is: ${wantedBranch}"
   if [ "${wantedBranch}" = "${activeBranch}" ]; then
@@ -109,26 +116,35 @@ if [ ${#wantedBranch} -gt 0 ]; then
   fi
 fi
 
-origin=$(git remote -v | grep 'origin' | tail -n1)
 checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
 
-echo "# *** SYNCING SHELL SCRIPTS WITH GITHUB ***"
-echo "# This is for developing on your RaspiBlitz."
-echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"
-echo "# and can lead to dirty state of your scripts."
-echo "# REPO ----> ${origin}"
-echo "# BRANCH --> ${activeBranch}"
-echo "# ******************************************"
-git pull 1>&2
-cd ..
+if [ ${vagrant} -eq 0 ]; then
+  origin=$(git remote -v | grep 'origin' | tail -n1)
+  echo "# *** SYNCING RASPIBLITZ CODE WITH GITHUB ***"
+  echo "# This is for developing on your RaspiBlitz."
+  echo "# THIS IS NOT THE REGULAR UPDATE MECHANISM"
+  echo "# and can lead to dirty state of your scripts."
+  echo "# REPO ----> ${origin}"
+  echo "# BRANCH --> ${activeBranch}"
+  echo "# ******************************************"
+  git pull 1>&2
+  cd ..
+else
+  cd ..
+  echo "# --> VAGRANT IS ACTIVE"
+  echo "# *** SYNCING RASPIBLITZ CODE WITH VAGRANT LINKED DIRECTORY ***"
+  echo "# This is for developing on your RaspiBlitz with a VM."
+  sudo rm -r /home/admin/raspiblitz
+  sudo cp -r /vagrant /home/admin/raspiblitz
+  sudo chown admin:admin -R /home/admin/raspiblitz
+fi
+
 if [ ${clean} -eq 1 ]; then
-  echo "# Cleaning scripts & assets/config.scripts"
+  echo "# Cleaning assets .. "
   sudo rm -f *.sh
   sudo rm -rf assets
-  mkdir assets
-  sudo rm -rf config.scripts
-  mkdir config.scripts
+  sudo -u admin mkdir assets
 else
   echo "# ******************************************"
   echo "# NOT cleaning/deleting old files"
@@ -137,16 +153,12 @@ else
 fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"
+sudo rm -r /home/admin/config.scripts
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
-echo "# .."
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets /home/admin
-echo "# .."
 sudo -u admin chmod +x /home/admin/*.sh
-echo "# .."
 sudo -u admin chmod +x /home/admin/*.py
-echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-echo "# .."
 sudo -u admin chmod +x /home/admin/config.scripts/*.py
 echo "# ******************************************"
 
