@@ -81,7 +81,7 @@ if [ "$1" = "status" ]; then
     # find the HDD (biggest single partition)
     hdd=""
     sizeDataPartition=0
-    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1)
+    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
 
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -227,7 +227,7 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3)
+    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
@@ -860,7 +860,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # check if usb device is at least 30GB big
   usbdevsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdev}" | awk '$1=$1' | cut -d " " -f 2)
   if [ ${usbdevsize} -lt 30000000000 ]; then
-    >&2 echo "# FAIL ${usbdev} is smaller then the minimum 30GB"
+    >&2 echo "# FAIL ${usbdev} is smaller than the minimum 30GB"
     echo "error='dev too small'"
     exit 1
   fi
