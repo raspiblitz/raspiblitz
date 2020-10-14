@@ -1033,6 +1033,7 @@ if [ "$1" = "tempmount" ]; then
   # if hdd is a partition
   if [[ $hdd =~ [0-9] ]]; then
      hddDataPartition=$hdd
+     hddDataPartitionExt4=$hddDataPartition
      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
   else
      hddBTRFS=$hdd
