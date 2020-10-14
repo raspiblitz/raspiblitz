@@ -68,7 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     adduser joinmarket sudo
     # configure sudo for usage without password entry for the joinmarket user
     echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
-
+    
     # make a folder for authorized keys 
     sudo -u joinmarket mkdir -p /home/joinmarket/.ssh
     chmod -R 700 /home/joinmarket/.ssh
@@ -125,27 +125,33 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.9
+    sudo -u joinmarket git reset --hard v0.1.10
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
 
-    # joinin.conf settings
-    sudo -u joinmarket touch /home/joinmarket/joinin.conf
-    # tor config
-    # add default value to joinin.conf if needed
-    checkTorEntry=$(sudo -u joinmarket cat /home/joinmarket/joinin.conf | grep -c "runBehindTor")
-    if [ ${checkTorEntry} -eq 0 ]; then
-      echo "runBehindTor=off" | sudo -u joinmarket tee -a /home/joinmarket/joinin.conf
+    # Tor config
+    # add the joinmarket user to the Tor group
+    usermod -a -G debian-tor joinmarket
+    # fix Tor config
+    sudo sed -i "s:^CookieAuthFile*:#CookieAuthFile:g" /etc/tor/torrc
+    if ! grep -Eq "^CookieAuthentication 1" /etc/tor/torrc; then
+      echo "CookieAuthentication 1" | sudo tee -a /etc/tor/torrc
+      sudo systemctl restart tor
     fi
-    checkAllowOutboundLocalhost=$(sudo cat /etc/tor/torsocks.conf | grep -c "AllowOutboundLocalhost 1")
-    if [ ${checkAllowOutboundLocalhost} -eq 0 ]; then
+    if ! grep -Eq "^AllowOutboundLocalhost 1" /etc/tor/torsocks.conf; then          
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl restart tor
     fi
-    # setting value in joinin config
-    checkBlitzTorEntry=$(cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor=on")
-    if [ ${checkBlitzTorEntry} -gt 0 ]; then
+
+    # joinin.conf settings
+    sudo -u joinmarket touch /home/joinmarket/joinin.conf
+    # add default Tor value to joinin.conf if needed
+    if ! grep -Eq "^runBehindTor" /home/joinmarket/joinin.conf; then
+      echo "runBehindTor=off" | sudo -u joinmarket tee -a /home/joinmarket/joinin.conf
+    fi
+    # setting Tor value in joinin config
+    if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
 
