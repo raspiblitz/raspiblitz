@@ -4,7 +4,7 @@
 source /home/admin/raspiblitz.info
 
 # get local ip
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # Basic Options
 OPTIONS=(WINDOWS "Windows" \
@@ -28,9 +28,14 @@ esac
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
   echo "stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
+else
+  # make sure bitcoind is not running
+  sudo systemctl stop background <2 /dev/null
+  sudo systemctl stop bitcoind <2 /dev/null
 fi
 
 # check if old blockchain data exists

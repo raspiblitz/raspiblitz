@@ -81,7 +81,8 @@ if [ "$1" = "status" ]; then
     # find the HDD (biggest single partition)
     hdd=""
     sizeDataPartition=0
-    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1)
+    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
+    #echo "# OSPartition(${OSPartition})"
 
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -104,8 +105,8 @@ if [ "$1" = "status" ]; then
       testpartitioncount=$((testpartitioncount-1))
 
       if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip OS partition
-         if [ "$testpartition" != "$OSPartition" ]; then
+         # if a partition was found - make sure to skip OS partition & if <=32gb
+         if [ "$testpartition" != "$OSPartition" ] && [ ${testsize} -gt 32900000000 ]; then
 
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
@@ -115,8 +116,8 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	 # Partion to be created is smaller than disk so this is not correct (but close)
-	 sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+	       # Partion to be created is smaller than disk so this is not correct (but close)
+	       sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
          hddDataPartition="${testdevice}1"
          hdd="${testdevice}"
       fi
@@ -227,7 +228,7 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3)
+    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then

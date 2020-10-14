@@ -19,7 +19,7 @@ if [ "$1" = "status" ]; then
     echo "configured=1"
 
     # get network info
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /home/bitcoin/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
     echo "localip='${localip}'"
@@ -87,6 +87,14 @@ fi
 if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
   echo "specter=off" >> /mnt/hdd/raspiblitz.conf
 fi
+
+# blockfilterindex
+# add blockfilterindex with default value (0) to bitcoin.conf if missing
+if ! grep -Eq "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf; then
+  echo "blockfilterindex=0" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
+fi
+# set variable ${blockfilterindex}
+source <(grep -E "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf)
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -254,6 +262,19 @@ EOF
     # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
+
+  # blockfilterindex on
+  # check txindex (parsed and sourced from bitcoin network config above)
+  if [ ${blockfilterindex} == 0 ]; then
+    sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=1/g" /mnt/hdd/${network}/${network}.conf
+    echo "switching blockfilterindex=1 and restarting ${network}d"
+    sudo systemctl restart ${network}d
+    echo "The indexing takes ~10h on an RPi4 with SSD"
+    echo "check with: sudo cat /mnt/hdd/bitcoin/debug.log | grep filter"
+  else
+    echo "blockfilterindex is already active"
+  fi
+
   exit 0
 fi
 
@@ -286,9 +307,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
        	bitcoin-cli unloadwallet specter/$name 
       done
       sudo rm -rf /home/bitcoin/.bitcoin/specter
-
       echo "#    --> Removing /home/bitcoin/.specter"
       sudo rm -rf /home/bitcoin/.specter
+
+      echo "#     --> Removing blockfilterindex"
+      echo "# changing config ..."
+      sudo systemctl stop ${network}d
+      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
+      echo "# deleting blockfilterindex ..."
+      sudo rm -r /mnt/hdd/${network}/indexes/blockfilter
+      echo "# restarting bitcoind ..."
+      sudo systemctl restart ${network}d
+    else
+      echo "#     --> Switch off the blockfilterindex"
+      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
+      echo "# restarting bitcoind ..."
+      sudo systemctl restart ${network}d
     fi
 
     echo "#    --> OK Cryptoadvance Specter removed."
