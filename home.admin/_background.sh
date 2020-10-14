@@ -60,7 +60,7 @@ do
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localip(${localip})"
 
     # detect a missing DHCP config 
@@ -94,7 +94,11 @@ do
 
   ####################################################
   # RECHECK PUBLIC IP
-  # when public IP changes, restart LND with new IP
+  #
+  # when public IP changes
+  #  -  restart bitcoind with new IP
+  #  -  restart LND with new IP (if autounlock is enabled)
+  #  -  restart BTCRPCexplorer if enabled in config or running)
   ####################################################
 
   # every 15min - not too often
@@ -122,12 +126,41 @@ do
     # check if changed
     if [ ${publicIPChanged} -gt 0 ]; then
 
+      echo "*** change of public IP detected ***"
+      echo "  old: ${publicIP}"
       # refresh data
       source /mnt/hdd/raspiblitz.conf
+      echo "  new: ${publicIP}"
+
+      # if we run on IPv6 only, the global IPv6 address at the current network device (e.g: eth0) is the public IP
+      if [ "${ipv6}" = "on" ]; then
+        # restart bitcoind as the global IP is stored in the node configuration
+        # and we will get more connections if this matches our real IP address
+        # otherwise the bitcoin-node connections will slowly decline 
+        echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
+        sudo systemctl stop bitcoind
+        sleep 3
+        sudo systemctl start bitcoind
+
+        # if BTCRPCexplorer is currently running 
+        # it needs to be restarted to pickup the new IP for its "Node Status Page"
+        # but this is only needed in IPv6 only mode 
+        breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
+        if [ ${breIsRunning} -eq 1 ]; then
+          echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
+          sudo systemctl stop btc-rpc-explorer
+          sudo systemctl start btc-rpc-explorer
+        else 
+          echo "new publicIP but no BTCRPCexplorer restart because not running"
+        fi 
+
+      else
+        echo "IPv6 only is OFF => no need to restart bitcoind nor BTCRPCexplorer"
+      fi 
 
       # only restart LND if auto-unlock is activated
       if [ "${autoUnlock}" = "on" ]; then
-        echo "restart LND with to pickup up new publiIP"
+        echo "restart LND to pickup up new publicIP"
         sudo systemctl stop lnd
         sudo systemctl start lnd
       else

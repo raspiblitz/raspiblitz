@@ -20,7 +20,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -279,41 +279,45 @@ fi
 
 # update
 if [ "$1" = "update" ]; then
-  echo "*** UPDATING THUNDERHUB ***"
+  echo "# UPDATING THUNDERHUB"
   cd /home/thunderhub/thunderhub
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u thunderhub git fetch
+  # unset $1
+  set --
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
   
   if [ $LOCAL = $REMOTE ]; then
     TAG=$(git tag | sort -V | tail -1)
-    echo "You are up-to-date on version" $TAG
+    echo "# Up-to-date on version" $TAG
   else
-    echo "Pulling latest changes..."
+    echo "# Pulling latest changes..."
     sudo -u thunderhub git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u thunderhub git reset --hard $TAG
 
     # install deps
-    echo "Installing dependencies..."
+    echo "# Installing dependencies..."
     sudo -u thunderhub npm install --quiet
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
+        echo "# FAIL - npm install did not run correctly, aborting"
         exit 1
     fi
 
     # build nextjs
-    echo "Building application..."
+    echo "# Building application..."
     sudo -u thunderhub npm run build
 
-    TAG=$(git tag | sort -V | tail -1)
-    echo "Updated to version" $TAG
+    echo "# Updated to version" $TAG
   fi
 
-  echo "*** Updated to the latest in https://github.com/apotdevin/thunderhub ***"
+  echo "# Updated to the release in https://github.com/apotdevin/thunderhub"
   echo ""
-  echo "*** Starting the ThunderHub service ... *** "
+  echo "# Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub
   exit 0
 fi

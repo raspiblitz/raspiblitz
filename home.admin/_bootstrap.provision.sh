@@ -28,26 +28,26 @@ fi
 
 # check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
+echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
 source ${infoFile}
 isRaspbian=$(echo $baseimage | grep -c 'raspbian')
 isArmbian=$(echo $baseimage | grep -c 'armbian')
 resizeRaspbian="/usr/bin/raspi-config"
 resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
 
-minimumSize=8192000
-minimumSizeGB=$((minimumSize/1000/1000))
+minimumSizeByte=8192000000
+rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
+rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
 
-rootPartition=$(sudo mount|grep " / "|awk '{print $1}')
-rootPartitionLength=${#rootPartition}
-rootDisk=${rootPartition:5:rootPartitionLength-6}
-rootDiskSize=$(sudo fdisk -l|grep "Disk"|grep $rootDisk|awk '{print $5}')
+echo "rootPartition(${rootPartition})" >> ${logFile}
+echo "rootPartitionBytes(${rootPartitionBytes})" >> ${logFile}
 
-if [ ${#rootDisk} -gt 0 ]; then
-   echo "### CHECKING ROOT DISK SIZE ###" >> ${logFile}
+if [ ${#rootPartition} -gt 0 ]; then
+   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
    sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
-   echo "Size in Bytes is: ${rootDiskSize} ($rootDisk)" >> ${logFile}
-   if [ $rootDiskSize -lt $minimumSize ]; then
-      echo "Disk filesystem is smaller than ${minimumSizeGB}GB." >> ${logFile}
+   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
+   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
       if [ ${fsexpanded} -eq 1 ]; then
          echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
          echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
@@ -61,25 +61,31 @@ if [ ${#rootDisk} -gt 0 ]; then
          sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
          if [ "${cpu}" == "x86_64"  ]; then
             echo "Please expand disk size." >> ${logFile}
-	    # TODO: Expand disk size on x86_64
+	          # TODO: Expand disk size on x86_64
          elif [ ${isRaspbian} -gt 0 ]; then
-              if [ -x ${resizeRaspbian} ]; then
-		      $(sudo $resizeRaspbian --expand-rootfs)
-	      fi
+            if [ -x ${resizeRaspbian} ]; then
+              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
+		          sudo $resizeRaspbian --expand-rootfs
+	          else
+              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
+            fi
          elif [ ${isArmbian} -gt 0 ]; then
-              if [ -x ${resizeArmbian} ]; then
-                 $(sudo $resizeArmbian start)
-	      fi
+            if [ -x ${resizeArmbian} ]; then
+              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
+              sudo $resizeArmbian start
+	          else
+              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
+            fi
          fi
          sleep 6
          sudo shutdown -r now
 	 exit 0
       fi
    else
-      echo "Size looks good. Bigger than ${minimumSizeGB}GB disk is used." >> ${logFile}
+      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
    fi
 else
-   echo "Disk of root partition ('$rootDisk') not detected, skipping the size check." >> ${logFile}
+   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
@@ -456,6 +462,15 @@ if [ "${thunderhub}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
+fi
+
+# mempool explorer
+if [ "${mempoolExplorer}" = "on" ]; then
+  echo "Provisioning MempoolExplorer - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Mempool Explorer'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
 fi
 
 # letsencrypt

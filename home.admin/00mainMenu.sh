@@ -37,8 +37,8 @@ confirmation()
   return $answer
 }
 
-# get the local network IP to be displayed on the lCD
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+# get the local network IP to be displayed on the LCD
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # BASIC MENU INFO
 HEIGHT=17
@@ -82,6 +82,9 @@ if [ "${lndmanage}" == "on" ]; then
 fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
+fi
+if [ "${mempoolExplorer}" == "on" ]; then
+  OPTIONS+=(MEMPOOL "Mempool Space")
 fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
@@ -210,6 +213,9 @@ case $CHOICE in
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
+            ;;
+        MEMPOOL)
+            /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
         SPECTER)
             /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu

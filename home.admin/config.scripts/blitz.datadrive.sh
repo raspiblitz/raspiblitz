@@ -81,6 +81,9 @@ if [ "$1" = "status" ]; then
     # find the HDD (biggest single partition)
     hdd=""
     sizeDataPartition=0
+    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
+    #echo "# OSPartition(${OSPartition})"
+
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
 
@@ -88,24 +91,40 @@ if [ "$1" = "status" ]; then
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
       testdevice=$(echo $testname | sed 's/[^a-z]*//g')
       testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
-      testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
+      if [ ${#testpartition} -gt 0 ]; then
+         testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
+      else
+         testsize=0
+      fi
       #echo "# line($line)"
       #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
       
-      # if no matching device found yet - take first for the beginning (just in case no partions at all)
-      if [ ${#hdd} -eq 0 ]; then
-        hdd="${testdevice}"
-      fi
-      
-      # if a partition was found - make sure to use the biggest
-      if [ ${#testpartition} -gt 0 ] && [ ${testsize} -gt ${sizeDataPartition} ]; then
-        sizeDataPartition=${testsize}
-        hddDataPartition="${testpartition}"
-        hdd="${testdevice}"
+      # count partitions
+      testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
+      # do not count line with disk info
+      testpartitioncount=$((testpartitioncount-1))
+
+      if [ $testpartitioncount -gt 0 ]; then
+         # if a partition was found - make sure to skip OS partition & if <=32gb
+         if [ "$testpartition" != "$OSPartition" ] && [ ${testsize} -gt 32900000000 ]; then
+
+            # make sure to use the biggest
+            if [ ${testsize} -gt ${sizeDataPartition} ]; then
+               sizeDataPartition=${testsize}
+               hddDataPartition="${testpartition}"
+               hdd="${testdevice}"
+            fi
+         fi
+      else
+	       # Partion to be created is smaller than disk so this is not correct (but close)
+	       sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+         hddDataPartition="${testdevice}1"
+         hdd="${testdevice}"
       fi
       
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
+
     if [ ${#hddDataPartition} -lt 4 ]; then
       echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
       hddDataPartition=""
@@ -124,7 +143,10 @@ if [ "$1" = "status" ]; then
       echo "hddGigaBytes=${hddDataPartitionGigaBytes}"
   
       # check if single drive with that size
-      hddCount=$(lsblk -o NAME,SIZE -b | grep -c ${hddDataPartition})
+      hddCount=0
+      if [ ${#hddDataPartition} -gt 0 ]; then
+         hddCount=1
+      fi
       echo "hddCount=${hddCount}"
 
       # check format of devices partition
@@ -206,15 +228,18 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd" | cut -d " " -f 1 | cut -d "/" -f 3)
+    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
        hddDataPartitionExt4=$hddDataPartition
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
+    echo "hddRaspiData=${hddRaspiData}"
 
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
+
     echo "datadisk='${hdd}'"
     echo "datapartition='${hddDataPartition}'"
 

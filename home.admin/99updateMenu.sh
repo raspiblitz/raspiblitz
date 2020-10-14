@@ -174,13 +174,16 @@ patch()
       exitstatus=$?
       if [ $exitstatus = 0 ]; then
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
-        echo "--> " $pullRequestID
+        echo "# --> " $pullRequestID
         cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
         source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
+        else
+          echo "# update installs .."
+          /home/admin/XXsyncScripts.sh -justinstall
         fi
       fi
       exit 1
@@ -288,6 +291,9 @@ fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
 fi
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(RTL "Update RTL")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -311,5 +317,8 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
+    ;;
+  RTL)
+    /home/admin/config.scripts/bonus.rtl.sh update
     ;;
 esac

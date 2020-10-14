@@ -55,7 +55,7 @@ copyHost()
   echo "# get IP of RaspiBlitz to copy to ..."
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetIP=$(echo "${targetIP[0]}")
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#targetIP} -eq 0 ]; then
     return
   fi
@@ -86,6 +86,7 @@ copyHost()
   fi
 
   echo "# stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
@@ -99,23 +100,24 @@ copyHost()
   cd /mnt/hdd/${network}
 
   # transfere beginning flag
-  date +%s > ./copy_begin.time
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' ./copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
-  rm ./copy_begin.time
+  date +%s > /home/admin/copy_begin.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo rm -f /home/admin/copy_begin.time
 
   # transfere blockchain data
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
 
   # transfere end flag
-  date +%s > ./copy_end.time
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' ./copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
-  rm ./copy_end.time
+  date +%s > /home/admin/copy_end.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo rm -f /home/admin/copy_end.time
 
   echo "# start services again ..."
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
   sudo systemctl start lnd
+  sudo systemctl start background
 
   echo "# show final message"
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
