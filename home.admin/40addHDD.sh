@@ -108,7 +108,7 @@ else
     freshPublicIP=""
   fi
   if [ ${#freshPublicIP} -eq 0 ]; then
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "# WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
     freshPublicIP="${localIP}"
   fi
