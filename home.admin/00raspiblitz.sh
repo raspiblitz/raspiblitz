@@ -21,7 +21,7 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
     echo "***********************************************************"
     vagrant=$(df | grep -c "/vagrant")
-    if [ ${vagrant} ]; then
+    if [ ${vagrant} -gt 0 ]; then
       echo "To connect a HDD data disk to your VagrantVM:"
       echo "- shutdown VM with command: off"
       echo "- open your VirtualBox GUI and select RaspiBlitzVM"
