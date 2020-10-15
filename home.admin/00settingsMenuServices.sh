@@ -293,7 +293,7 @@ else
 fi
 
 # PyBLOCK process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "y")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${pyblock}" != "${choice}" ]; then
   echo "PyBLOCK Setting changed .."
