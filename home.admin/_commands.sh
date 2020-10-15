@@ -129,6 +129,18 @@ function bos() {
   fi
 }
 
+# command: pyblock
+# switch to the pyblock user for PyBLOCK
+function bos() {
+  if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
+    sudo su - pyblock
+  else
+    echo "PyBlock is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pyblock.sh on"
+  fi
+}
+
 # command: jm
 # switch to the joinmarket user for the JoininBox menu
 function jm() {

@@ -98,6 +98,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
+if [ "${pyblock}" == "on" ]; then
+  OPTIONS+=(PYBLOCK "PyBLOCk")
+fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "ThunderHub")
 fi
@@ -230,6 +233,9 @@ case $CHOICE in
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+		PYBLOCK)
+            sudo /home/admin/config.scripts/bonus.pyblock.sh menu
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu

@@ -18,6 +18,7 @@ if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
+if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 
 # show select dialog
@@ -35,6 +36,7 @@ OPTIONS+=(a 'Mempool Explorer' ${mempoolExplorer})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(l 'Lightning Loop' ${loop})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
+OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(f 'Faraday' ${faraday})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
 
@@ -288,6 +290,21 @@ if [ "${bos}" != "${choice}" ]; then
   fi
 else
   echo "Balance of Satoshis setting unchanged."
+fi
+
+# PyBLOCK process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${pyblock}" != "${choice}" ]; then
+  echo "PyBLOCK Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${pyblock}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh menu
+  fi
+else
+  echo "PyBLOCK setting unchanged."
 fi
 
 # thunderhub process choice
