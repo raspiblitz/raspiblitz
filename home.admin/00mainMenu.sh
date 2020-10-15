@@ -99,7 +99,7 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
 if [ "${pyblock}" == "on" ]; then
-  OPTIONS+=(PYBLOCK "PyBLOCk")
+  OPTIONS+=(PYBLOCK "PyBlock")
 fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "ThunderHub")
