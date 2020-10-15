@@ -131,7 +131,7 @@ function bos() {
 
 # command: pyblock
 # switch to the pyblock user for PyBLOCK
-function bos() {
+function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
     sudo su - pyblock
