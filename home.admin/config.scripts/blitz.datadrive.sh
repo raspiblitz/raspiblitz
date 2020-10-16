@@ -597,6 +597,7 @@ if [ "$1" = "fstab" ]; then
   # check if exist and which format
   # if hdd is a partition (ext4)
   if [[ $hdd =~ [0-9] ]]; then
+     # ext4
      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
   else
      # btrfs
@@ -1037,7 +1038,7 @@ if [ "$1" = "tempmount" ]; then
      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
   else
      hddBTRFS=$hdd
-     hddFormat="btrfs"
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}1 | cut -d ' ' -f 1)
   fi
 
   if [ ${#hddFormat} -eq 0 ]; then
@@ -1047,7 +1048,6 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   if [ "${hddFormat}" = "ext4" ]; then
-    hddDataPartitionExt4=$hddDataPartition
 
     # do EXT4 temp mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
