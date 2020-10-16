@@ -46,6 +46,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u pyblock pip3 install -r requirements.txt
   sudo apt-get install hexyl
 
+  # set PATH for the user
+  sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
   
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin pyblock
