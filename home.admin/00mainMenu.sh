@@ -89,6 +89,9 @@ fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
 fi
+if [ "${warden}" == "on" ]; then
+  OPTIONS+=(WARDEN "Specter WARDEN")
+fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JMARKET "JoinMarket")
 fi
@@ -221,6 +224,9 @@ case $CHOICE in
             ;;
         SPECTER)
             /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+            ;;
+        WARDEN)
+            /home/admin/config.scripts/bonus.specter-warden.sh menu
             ;;
         JMARKET)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu

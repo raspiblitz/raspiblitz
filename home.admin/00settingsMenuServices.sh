@@ -10,6 +10,7 @@ if [ ${#loop} -eq 0 ]; then loop="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#specter} -eq 0 ]; then specter="off"; fi
+if [ ${#warden} -eq 0 ]; then warden="off"; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
@@ -31,6 +32,7 @@ OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
 OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
+OPTIONS+=(w 'Specter WARDEN' ${warden})
 OPTIONS+=(a 'Mempool Explorer' ${mempoolExplorer})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(l 'Lightning Loop' ${loop})
@@ -157,6 +159,29 @@ if [ "${specter}" != "${choice}" ]; then
   fi
 else
   echo "Cryptoadvance Specter Setting unchanged."
+fi
+
+# Specter warden process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${warden}" != "${choice}" ]; then
+  echo "Specter WARDEN Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.specter-warden.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start specter-warden
+      /home/admin/config.scripts/bonus.specter-warden.sh menu
+    else
+      l1="!!! FAIL on Specter Warden install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.specter-warden.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Specter Warden Setting unchanged."
 fi
 
 # ElectRS process choice
