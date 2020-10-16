@@ -228,7 +228,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     if dnsservice == "duckdns":
         print("# dnsservice=duckdns --> update {0}".format(domain))
         duckdns_update(domain, token, real_ip)
-    if dnsservice == "dynu":
+    elif dnsservice == "dynu":
         print("# dnsservice=dynu --> update {0}".format(domain))
         dynu_update(domain, token, real_ip)
 
@@ -432,7 +432,7 @@ This looks not like a valid token.
         ''', title="Invalid Input")
             sys.exit(0)
 
-    if dnsservice == "dynu":
+    elif dnsservice == "dynu":
 
         # show basic info on duck dns
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -490,7 +490,13 @@ This looks not like valid.
             sys.exit(0)
 
         token = "{}:{}".format(clientid, secret)
-
+        
+    else:
+        os.system("clear")
+        print("Not supported yet: {0}".format(dnsservice))
+        time.sleep(4)
+        sys.exit(0)
+        
     ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
