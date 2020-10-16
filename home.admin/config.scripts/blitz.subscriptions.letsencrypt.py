@@ -491,12 +491,6 @@ This looks not like valid.
 
         token = "{}:{}".format(clientid, secret)
 
-    else:
-        os.system("clear")
-        print("Not supported yet: {0}".format(dnsservice))
-        time.sleep(4)
-        sys.exit(0)
-
     ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
