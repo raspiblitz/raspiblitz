@@ -369,6 +369,9 @@ sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainu
 # installs bandwidth monitoring for future statistics
 sudo apt install -y vnstat
 
+# prepare for format data drive
+sudo apt install -y parted dosfstools
+
 # prepare for BTRFS data drive raid
 sudo apt install -y btrfs-progs btrfs-tools
 
