@@ -26,6 +26,12 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# check that default parameter exist in config
+parameterExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c "lndExtraParameter=")
+if [ ${parameterExists} -eq 0 ]; then
+  echo "lndExtraParameter=''" >> ${configFile}
+fi
+
 # check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
 echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
@@ -489,6 +495,15 @@ if [ "${kindleDisplay}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.kindle-display.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
+fi
+
+# pyblock
+if [ "${pyblock}" = "on" ]; then
+  echo "Provisioning pyblock - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup pyblock'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning pyblock - keep default" >> ${logFile}
 fi
 
 # stacking-sats-kraken
