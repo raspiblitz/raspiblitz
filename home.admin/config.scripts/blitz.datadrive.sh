@@ -82,7 +82,6 @@ if [ "$1" = "status" ]; then
     hdd=""
     sizeDataPartition=0
     OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
-    #echo "# OSPartition(${OSPartition})"
 
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -105,8 +104,8 @@ if [ "$1" = "status" ]; then
       testpartitioncount=$((testpartitioncount-1))
 
       if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip OS partition & if <=32gb
-         if [ "$testpartition" != "$OSPartition" ] && [ ${testsize} -gt 32900000000 ]; then
+         # if a partition was found - make sure to skip OS partition
+         if [ "$testpartition" != "$OSPartition" ]; then
 
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
@@ -116,8 +115,8 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	       # Partion to be created is smaller than disk so this is not correct (but close)
-	       sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+	 # Partion to be created is smaller than disk so this is not correct (but close)
+	 sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
          hddDataPartition="${testdevice}1"
          hdd="${testdevice}"
       fi
@@ -596,7 +595,15 @@ if [ "$1" = "fstab" ]; then
   fi
 
   # check if exist and which format
-  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+  # if hdd is a partition (ext4)
+  if [[ $hdd =~ [0-9] ]]; then
+     # ext4
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+  else
+     # btrfs
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+  fi
+
   if [ ${#hddFormat} -eq 0 ]; then
     echo "# FAIL given device/partition not found"
     echo "error='device not found'"
@@ -851,10 +858,10 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
    sudo parted -s /dev/${usbdev} rm ${v_partition}
   done
 
-  # check if usb device is at least 30GB groß
+  # check if usb device is at least 30GB big
   usbdevsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdev}" | awk '$1=$1' | cut -d " " -f 2)
   if [ ${usbdevsize} -lt 30000000000 ]; then
-    >&2 echo "# FAIL ${usbdev} is smaller then the minumum 30GB"
+    >&2 echo "# FAIL ${usbdev} is smaller than the minimum 30GB"
     echo "error='dev too small'"
     exit 1
   fi
@@ -1016,15 +1023,24 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   # get device to temp mount
-  hddDataPartition=$2
-  if [ ${#hddDataPartition} -eq 0 ]; then
+  hdd=$2
+  if [ ${#hdd} -eq 0 ]; then
     >&2 echo "# FAIL which device should be temp mounted (e.g. sda)"
     >&2 echo "# run 'status' to see device candidates"
     echo "error='missing second parameter'"
     exit 1
   fi
 
-  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartition} | cut -d ' ' -f 1)
+  # if hdd is a partition
+  if [[ $hdd =~ [0-9] ]]; then
+     hddDataPartition=$hdd
+     hddDataPartitionExt4=$hddDataPartition
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
+  else
+     hddBTRFS=$hdd
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}1 | cut -d ' ' -f 1)
+  fi
+
   if [ ${#hddFormat} -eq 0 ]; then
     >&2 echo "# FAIL given device not found"
     echo "error='device not found'"
@@ -1032,7 +1048,6 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   if [ "${hddFormat}" = "ext4" ]; then
-     hddDataPartitionExt4=$hddDataPartition
 
     # do EXT4 temp mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
@@ -1049,7 +1064,6 @@ if [ "$1" = "tempmount" ]; then
     fi
     
   elif [ "${hddFormat}" = "btrfs" ]; then
-    hdd=$hddDataPartition
 
     # get user and grouid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
@@ -1059,9 +1073,9 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
-    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage
-    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hdd}3 /mnt/temp 
+    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
+    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
+    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")

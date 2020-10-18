@@ -15,7 +15,12 @@ if [ ${#error} -gt 0 ]; then
 fi
 
 # temp mount
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+if [ "$hddFormat" == "btrfs" ]; then
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+else
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+fi
+
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh tempmount --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -39,7 +44,13 @@ echo
 echo "# --> Adding the data drive to OS ..."
 echo "# hddCandidate='${hddCandidate}'"
 echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddPartitionCandidate})
+echo "# hddFormat='${hddFormat}'"
+if [ "$hddFormat" == "btrfs" ]; then
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddCandidate})
+else
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddPartitionCandidate})
+fi
+
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh fstab --> ${error}"
   echo "Please report issue to the raspiblitz github."
