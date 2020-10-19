@@ -104,7 +104,8 @@ fi
 if [ "$1" = "update" ]; then
   echo "*** UPDATING PyBLOCK ***"
   cd /home/pyblock/PyBLOCK
-  sudo -u pyblock git update
+  sudo -u pyblock git pull
+  sudo -u pyblock pip3 install -r requirements.txt
   echo "*** Updated to the latest in https://github.com/curly60e/pyblock ***"
   exit 0
 fi
