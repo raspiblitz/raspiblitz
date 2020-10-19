@@ -879,3 +879,19 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 
 - place own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` that will be started automatically on a recovery/update.
+
+# Versioning
+
+* Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
+* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
+* Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+
+# GitHub Workflow
+
+- Development is done on the 'dev' branch, new features should be done on single feature branches and merged into 'dev' once ready.
+- When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
+- All minor-releases will badically all work with the same 'build_sdcard.sh' script so that code could be updated by just calling 'patch'. Emergency updates on lnd & bitcoin may break this guideline, but basic structure & packaging should stay mostly consistent over a main-update version.
+- Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
+- Hot fixes & new features for minor verisons will be created as single branches from the release branch and once ready will be merged back into that release branch as a PullRequest using 'Squash-Merge' AND then this 'Squash-Merge' (one single commit) witll get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
+
+
