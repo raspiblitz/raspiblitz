@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6 with lnd 0.10.4 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6.1 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -36,12 +36,14 @@ There are further Services that can be switched on:
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 * **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 * **Stacking Sats Kraken** (Auto-DCA script) [details](https://github.com/dennisreimann/stacking-sats-kraken)
+* **Circuit Breaker** (Lighthing Channel Firewall) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+* **PyBlock**  (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+* **Mempool Explorer** [details](https://github.com/mempool/mempool)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
 * **Zap** (Android, iOS & Desktop) [details](https://zap.jackmallers.com/)
 * **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
-* **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 
@@ -126,15 +128,15 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6:**
+**Download SD-Card image - Version 1.6.1:**
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6-2020-08-04.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
 
-Torrent: [assets/raspiblitz-v1.6-20200802.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6-2020-08-04.img.gz.torrent)
+SHA-256: 6b9925f274f68ca109771b047c0272df31c01dc0a5d2b9e05b582accfa6029ec
 
-SHA-256: bf8f70cf3a6d87d1b786936306ae092b6350be22f0c19c3a06171450178594ca or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6-2020-08-04.img.gz.sig)
+Torrent: [assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent)
 
-* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-16-of-raspiblitz)
+* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-161-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
@@ -700,6 +702,18 @@ A CoinJoin transaction requires other people to take part. The right resources (
 For more details see [here](https://github.com/JoinMarket-Org/joinmarket-clientserver).
 
 After install, you will see a new `JMARKET` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### Circuit Breaker
+
+https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+
+##### PyBlock
+
+https://github.com/curly60e/pyblock/blob/master/README.md
+
+##### Mempool Explorer
+
+https://github.com/mempool/mempool
 
 #### SUBSCRIBE: Subscription Services
 
