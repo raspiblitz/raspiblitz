@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6 with lnd 0.10.4 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6.1 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -36,12 +36,14 @@ There are further Services that can be switched on:
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 * **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 * **Stacking Sats Kraken** (Auto-DCA script) [details](https://github.com/dennisreimann/stacking-sats-kraken)
+* **Circuit Breaker** (Lighthing Channel Firewall) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+* **PyBlock**  (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+* **Mempool Explorer** [details](https://github.com/mempool/mempool)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
 * **Zap** (Android, iOS & Desktop) [details](https://zap.jackmallers.com/)
 * **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
-* **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 
@@ -700,6 +702,18 @@ A CoinJoin transaction requires other people to take part. The right resources (
 For more details see [here](https://github.com/JoinMarket-Org/joinmarket-clientserver).
 
 After install, you will see a new `JMARKET` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### Circuit Breaker
+
+https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+
+##### PyBlock
+
+https://github.com/curly60e/pyblock/blob/master/README.md
+
+##### Mempool Explorer
+
+https://github.com/mempool/mempool
 
 #### SUBSCRIBE: Subscription Services
 
