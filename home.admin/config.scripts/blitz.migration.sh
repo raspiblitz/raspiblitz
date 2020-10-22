@@ -86,8 +86,7 @@ if [ "$1" = "export" ]; then
   blitzname="-"
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
   if [ ${#hostname} -gt 0 ]; then
-    blitzname=$(echo "${hostname}" | sed 's/[^0-9a-z]*//g')
-    blitzname=$(echo "-${blitzname}-")
+    blitzname="-${hostname}-"
   fi
   echo "# blitzname=${blitzname}"
 
