@@ -118,7 +118,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/mempool
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
-    sudo -u mempool git reset --hard v1.0.0
+    sudo -u mempool git reset --hard v1.0.1
 
     # modify an
     #echo "# try to suppress question on statistics report .."

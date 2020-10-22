@@ -38,7 +38,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # BASIC MENU INFO
 HEIGHT=17
@@ -97,6 +97,9 @@ if [ "${faraday}" == "on" ]; then
 fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
+fi
+if [ "${pyblock}" == "on" ]; then
+  OPTIONS+=(PYBLOCK "PyBlock")
 fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "ThunderHub")
@@ -168,9 +171,11 @@ case $CHOICE in
                 # show the same info as on LCD screen
                 /home/admin/00infoBlitz.sh
 
-                # wait 2 seconds for key input
-                echo "Screen is updating in loop .... keep 'x' pressed to exit to menu."
-                read -n 1 -t 2 keyPressed
+                # wait 6 seconds for user exiting loop
+                echo ""
+                echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+                read -n 1 -t 6 keyPressed
+                echo -en "\rGathering information to update info ... please wait.                \n"  
 
                 # check if user wants to abort session
                 if [ "${keyPressed}" = "x" ]; then
@@ -228,6 +233,9 @@ case $CHOICE in
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+		PYBLOCK)
+            sudo /home/admin/config.scripts/bonus.pyblock.sh menu
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu

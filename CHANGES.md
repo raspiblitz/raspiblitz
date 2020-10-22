@@ -2,7 +2,26 @@
 
 ## Whats new in Version 1.6.1 of RaspiBlitz?
 
+- EMERGENCY-Update: LND version 0.11.1-beta [details](https://lists.linuxfoundation.org/pipermail/lightning-dev/2020-October/002819.html)
 - Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/rootzoll/raspiblitz/issues/1412)
+- Update: JoininBox 0.1.12 (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
+- Update: BTCPayServer v1.0.5.8 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.8)
+- Update: RTL 0.9.1
+- Update: lndmanage 0.11.0
+- Update: Specter 0.8.1 (with running the numbers)
+- Update: Balance of Satoshi 6.1.0
+- Update: Thunderhub 0.9.15
+- Update: Loop 0.8.1
+- Update: Faraday 0.2.1
+- Update: Improved IPv6 support
+- Update: LNbits new Quart-Framework install
+- New: Circuit Breaker (config-script) [details](https://github.com/rootzoll/raspiblitz/issues/1581)
+- New: PyBlock (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+- New: Mempool Explorer [details](https://github.com/mempool/mempool)
+- New: dynu.com as alternative option for LetsEncrpyt FreeDNS provider 
+- New: Experimental running RaspiBlitz as VM (vagrant & docker)
+
+For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspiblitz/milestone/11
 
 ## Whats new in Version 1.6 of RaspiBlitz?
 

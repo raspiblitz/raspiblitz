@@ -42,9 +42,9 @@ echo "OK"
 # check minimal size of data drive needed
 echo
 echo "# --> Check HDD/SSD for Size ..."
-# bitcoin: 440 GB
+# bitcoin: 400 GB
 # litecoin: 120 GB
-minSize=440
+minSize=400
 if [ "${network}" = "litecoin" ]; then
   minSize=120
 fi
