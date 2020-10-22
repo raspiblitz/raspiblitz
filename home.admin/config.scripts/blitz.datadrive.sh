@@ -354,7 +354,11 @@ if [ "$1" = "format" ]; then
   fi
 
   # check if device is existing and a disk (not a partition)
-  isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
+  if [ "$2" = "btrfs" ]; then
+     isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
+  else
+     isValid=$(lsblk -o NAME,TYPE | grep part | grep -c "${hdd}")
+  fi
   if [ ${isValid} -eq 0 ]; then
     >&2 echo "# either given device was not found"
     >&2 echo "# or is not of type disk - see 'lsblk'"
