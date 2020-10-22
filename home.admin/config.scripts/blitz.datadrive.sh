@@ -357,7 +357,8 @@ if [ "$1" = "format" ]; then
   if [ "$2" = "btrfs" ]; then
      isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
   else
-     isValid=$(lsblk -o NAME,TYPE | grep part | grep -c "${hdd}")
+     #TODO: Validate ext4
+     isValid=1
   fi
   if [ ${isValid} -eq 0 ]; then
     >&2 echo "# either given device was not found"
@@ -413,55 +414,65 @@ if [ "$1" = "format" ]; then
     fi
   fi
 
-  # wipe all partitions and write fresh GPT
-  >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
-  sudo sfdisk --delete /dev/${hdd}
-  sleep 4
-  sudo wipefs -a /dev/${hdd}
-  sleep 4
-  partitions=$(lsblk | grep -c "─${hdd}")
-  if [ ${partitions} -gt 0 ]; then
-    >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
-    sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+  if [ "$2" = "btrfs" ]; then
+     # wipe all partitions and write fresh GPT
+     >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+     sudo sfdisk --delete /dev/${hdd}
+     sleep 4
+     sudo wipefs -a /dev/${hdd}
+     sleep 4
+     partitions=$(lsblk | grep -c "─${hdd}")
+     if [ ${partitions} -gt 0 ]; then
+       >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
+       sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+     fi
+     partitions=$(lsblk | grep -c "─${hdd}")
+     if [ ${partitions} -gt 0 ]; then
+       >&2 echo "# ERROR: partition cleaning failed"
+       echo "error='partition cleaning failed'"
+       exit 1
+     fi
+     sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
+     sleep 2
+     sync
   fi
-  partitions=$(lsblk | grep -c "─${hdd}")
-  if [ ${partitions} -gt 0 ]; then
-    >&2 echo "# ERROR: partition cleaning failed"
-    echo "error='partition cleaning failed'"
-    exit 1
-  fi
-  sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
-  sleep 2
-  sync
 
   # formatting old: EXT4
+
   if [ "$2" = "ext4" ]; then
+     if [[ $hdd =~ [0-9] ]]; then
+        ext4IsPartition=1
+     else
+        ext4IsPartition=0
+     fi
 
      # prepare temp mount point
      sudo mkdir -p /tmp/ext4 1>/dev/null
 
-     # write new EXT4 partition
-     >&2 echo "# Creating the one big partition"
-     sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
-     sleep 6
-     sync
-     # loop until the partion gets available
-     loopdone=0
-     loopcount=0
-     while [ ${loopdone} -eq 0 ]
-     do
-       >&2 echo "# waiting until the partion gets available"
-       sleep 2
-       sync
-       loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
-       loopcount=$(($loopcount +1))
-       if [ ${loopcount} -gt 10 ]; then
-         >&2 echo "# partion failed"
-         echo "error='partition failed'"
-         exit 1
-       fi
-     done
-     >&2 echo "# partion available"
+     if [ $ext4IsPartition -eq 0 ]; then
+        # write new EXT4 partition
+        >&2 echo "# Creating the one big partition"
+        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sleep 6
+        sync
+        # loop until the partion gets available
+        loopdone=0
+        loopcount=0
+        while [ ${loopdone} -eq 0 ]
+        do
+          >&2 echo "# waiting until the partion gets available"
+          sleep 2
+          sync
+          loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
+          loopcount=$(($loopcount +1))
+          if [ ${loopcount} -gt 10 ]; then
+            >&2 echo "# partion failed"
+            echo "error='partition failed'"
+            exit 1
+          fi
+        done
+        >&2 echo "# partion available"
+     fi
 
      # make sure /mnt/hdd is unmounted before formatting
      sudo umount -f /tmp/ext4 2>/dev/null
@@ -473,7 +484,11 @@ if [ "$1" = "format" ]; then
      fi
 
      >&2 echo "# Formatting"
-     sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+     if [ $ext4IsPartition -eq 0 ]; then
+        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+     else
+        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd} 1>/dev/null
+     fi
      loopdone=0
      loopcount=0
      while [ ${loopdone} -eq 0 ]
@@ -492,7 +507,11 @@ if [ "$1" = "format" ]; then
 
      # setting fsk check intervall to 1
      # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
-     sudo tune2fs -c 1 /dev/${hdd}1
+     if [ $ext4IsPartition -eq 0 ]; then
+        sudo tune2fs -c 1 /dev/${hdd}1
+     else
+        sudo tune2fs -c 1 /dev/${hdd}
+     fi
 
      >&2 echo "# OK EXT 4 format done"
      exit 0
