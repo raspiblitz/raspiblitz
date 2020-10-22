@@ -414,7 +414,21 @@ if [ "$1" = "format" ]; then
     fi
   fi
 
+  if [[ $hdd =~ [0-9] ]]; then
+     ext4IsPartition=1
+  else
+     ext4IsPartition=0
+  fi
+
+  wipePartitions=0
   if [ "$2" = "btrfs" ]; then
+     wipePartitions=1
+  fi
+  if [ "$2" = "ext4" ] && [ $ext4IsPartition -eq 0 ]; then
+     wipePartitions=1
+  fi
+
+  if [ $wipePartitions -eq 1 ]; then
      # wipe all partitions and write fresh GPT
      >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
      sudo sfdisk --delete /dev/${hdd}
@@ -440,11 +454,6 @@ if [ "$1" = "format" ]; then
   # formatting old: EXT4
 
   if [ "$2" = "ext4" ]; then
-     if [[ $hdd =~ [0-9] ]]; then
-        ext4IsPartition=1
-     else
-        ext4IsPartition=0
-     fi
 
      # prepare temp mount point
      sudo mkdir -p /tmp/ext4 1>/dev/null
