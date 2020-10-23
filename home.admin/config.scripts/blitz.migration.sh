@@ -320,7 +320,7 @@ if [ "$1" = "import-gui" ]; then
   esac
 
   if [ ${useBlockchain} -eq 1 ]; then
-     if [ ${isRaid} -eq 1 ]; then
+     if [ ${isBTRFS} -eq 1 ]; then
         hddFormat=btrfs
      else
         hddFormat=ext4
