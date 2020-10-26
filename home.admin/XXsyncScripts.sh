@@ -138,7 +138,7 @@ else
   echo "# - delete /home/admin/raspiblitz"
   sudo rm -r /home/admin/raspiblitz
   sudo mkdir /home/admin/raspiblitz
-  echo "# - copy from vragrant new raspiblitz files"
+  echo "# - copy from vagrant new raspiblitz files (ignore hidden dirs)"
   sudo cp -r /vagrant/* /home/admin/raspiblitz
   echo "# - set admin as owner of files"
   sudo chown admin:admin -R /home/admin/raspiblitz
