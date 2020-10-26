@@ -19,8 +19,8 @@ cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # gather info
-activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
-activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
+activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
+activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
