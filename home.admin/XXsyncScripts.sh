@@ -19,8 +19,8 @@ cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # gather info
-activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
-activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
+activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
+activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
@@ -135,8 +135,12 @@ else
   echo "# --> VAGRANT IS ACTIVE"
   echo "# *** SYNCING RASPIBLITZ CODE WITH VAGRANT LINKED DIRECTORY ***"
   echo "# This is for developing on your RaspiBlitz with a VM."
+  echo "# - delete /home/admin/raspiblitz"
   sudo rm -r /home/admin/raspiblitz
-  sudo cp -r /vagrant /home/admin/raspiblitz
+  sudo mkdir /home/admin/raspiblitz
+  echo "# - copy from vagrant new raspiblitz files (ignore hidden dirs)"
+  sudo cp -r /vagrant/* /home/admin/raspiblitz
+  echo "# - set admin as owner of files"
   sudo chown admin:admin -R /home/admin/raspiblitz
 fi
 
