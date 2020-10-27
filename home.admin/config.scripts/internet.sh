@@ -119,9 +119,9 @@ if [ ${runGlobal} -eq 1 ]; then
   # Global IP
   # the public IP that can be detected from outside
   if [ "${ipv6}" == "on" ]; then
-    globalIP=$(curl -s http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
+    globalIP=$(curl -s -f -S -m 5 http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
   else
-    globalIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+    globalIP=$(curl -s -f -S -m 5 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
   fi
   # prevent having no publicIP set at all and LND getting stuck
   # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
