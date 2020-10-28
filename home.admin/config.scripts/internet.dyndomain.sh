@@ -2,89 +2,114 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to set a dynamic domain like freeDNS"
- echo "internet.dyndomain.sh [on|off] [?domainName] [?updateURL]"
+ echo "set a dynamic domain like freeDNS"
+ echo "internet.dyndomain.sh status"
+ echo "internet.dyndomain.sh on --> interactive setup"
+ echo "internet.dyndomain.sh [domainName] [?updateURL]"
+ echo "internet.dyndomain.sh update"
+ echo "internet.dyndomain.sh off"
  exit 1
 fi
 
-# 1. parameter [on|off]
-turn="off"
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then turn="on"; fi
+## get system configs
+source /home/admin/raspiblitz.info 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-echo "number of args($#)"
-
-# 2. parameter [?domainName]
-if [ $# > 1 ]; then
-  dynDomain=$2
+# GETTING STATUS
+if [ "$1" = "status" ]; then
+  if [ ${#dynDomain} -gt 0 ]; then
+    echo "active=1"
+    echo "dynDomain='${dynDomain}'"
+    echo "dynUpdateUrl='${dynUpdateUrl}'"
+    echo "# checking if dyndomain dns resolving is matching public IP"
+    dynIPv4=$(host -W 8 ${dynDomain} | grep 'has address' | cut -d ' ' -f 4)
+    dynIPv6=$(host -W 8 ${dynDomain} | grep 'has IPv6 address' | cut -d ' ' -f 5)
+    source <(/home/admin/config.scripts/internet.sh status global)
+    echo "publicip='${publicip}'"
+    echo "dynipv4='${dynIPv4}'"
+    echo "dynipv6='${dynIPv6}'"
+    if [ ${#dynIPv4} -eq 0 ] && [ ${#dynIPv6} -eq 0 ]; then
+      echo "exists=0"
+    else
+      echo "exists=1"
+    fi
+    if [ "${publicip}" == "${dynIPv4}" ] || [ "${publicip}" == "${dynIPv6}" ]; then
+      echo "uptodate=1"
+    else
+      echo "uptodate=0"
+    fi
+  else
+    echo "active=0"
+  fi
+  exit
 fi
 
-# 3. parameter [?domainName]
-if [ $# > 2 ]; then
-  dynUpdateUrl=$3
+# FUNCTION updating dyndomain (if update URL is set)
+updateDynDNS()
+{
+  if [ ${#dynUpdateUrl} -gt 0 ]; then
+    echo "# calling: ${dynUpdateUrl}"
+    echo "# to update domain: ${dynDomain}"
+    curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
+  else
+    echo "# dynUpdateUrl not set - not updating"
+  fi 
+}
+
+# UPDATE
+if [ "$1" = "update" ]; then
+  echo "# internet.dyndomain.sh update"
+  if [ ${#dynUpdateUrl} -eq 0 ]; then
+    echo "error='no url set for dynamic domain update'"
+    exit 1
+  fi
+  updateDynDNS
+  exit
 fi
 
-# run interactive if 'turn on' && no further parameters
-if [ "${turn}" = "on" ] && [ ${#dynDomain} -eq 0 ]; then
+# ON
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # make sure dialog file is writeable
-  sudo touch ./.tmp
-  sudo chmod 777 ./.tmp
+  dynDomain=''
+  dynUpdateUrl=''
 
-  dialog --backtitle "DynamicDNS" --inputbox "ENTER the Dynamic Domain Name:
+  # when additional parameters are given
+  if [ $# > 1 ]; then
 
-For more details see chapter in GitHub README 
-'Public Domain with DynamicDNS'
-https://github.com/rootzoll/raspiblitz
+    # 2. parameter is dyndomain (required)
+    dynDomain=$2
 
-example: freedns.afraid.org
-" 13 52 2>./.tmp
-  dynDomain=$( cat ./.tmp )
+    # 3. parameter is the update url (optional - could be that router is doing the update)
+    if [ $# > 2 ]; then
+      dynUpdateUrl=$3
+    fi
+  fi
+
+  # if no parameters --> ask for it interactive
   if [ ${#dynDomain} -eq 0 ]; then
-    echo "FAIL input cannot be empty"
+
+    dynDomain=$(whiptail --inputbox "\nEnter the Dynamic Domain Name:\n(example: freedns.afraid.org)" 10 52 --title "Dynamic Domain" --backtitle "DynamicDNS" 3>&1 1>&2 2>&3)
+    # check if domain was entered
+    if [ ${#dynDomain} -eq 0 ]; then
+      whiptail --title " Error " --msgbox "\n  Domain cannot be empty." 8 30
+      exit 1
+    fi
+    # check if domain exists
+    notFound=$(host -W 16 ${dynDomain} | grep -c 'not found')
+    if [ ${notFound} -eq 1 ]; then
+      whiptail --title " Error " --msgbox "\n  Domain ${dynDomain} not found.\n  Make sure it exists before setup. " 9 50
+      exit 1
+    fi
+
+    dynUpdateUrl=$(whiptail --inputbox "\nPublic IP Update URL:\n(freedns.afraid.org use 'DirectURL')" 10 52 --title "Update URL (optional)" --backtitle "DynamicDNS" 3>&1 1>&2 2>&3)
+  fi
+
+  # check if any input to set
+  if [ ${#dynDomain} -eq 0 ]; then
+    echo "error='missing parameter'"
     exit 1
   fi
 
-  dialog --backtitle "DynamicDNS" --inputbox "OPTIONAL Public IP Update URL:
-
-The RaspiBlitz will call this URL regularly.
-4 service freedns.afraid.org use 'DirectURL' 
-" 10 52 2>./.tmp
-  dynUpdateUrl=$( cat ./.tmp )
-  shred -u ./.tmp
-
-fi
-
-# config file
-configFile="/mnt/hdd/raspiblitz.conf"
-
-# lnd conf file
-lndConfig="/mnt/hdd/lnd/lnd.conf"
-
-# check if config file exists
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
- echo "FAIL - missing ${configFile}"
- exit 1
-fi
-
-# make sure entry line for 'dynDomain' exists 
-entryExists=$(cat ${configFile} | grep -c 'dynDomain=')
-if [ ${entryExists} -eq 0 ]; then
-  echo "dynDomain=" >> ${configFile}
-fi
-
-# make sure entry line for 'dynUpdateUrl' exists 
-entryExists=$(cat ${configFile} | grep -c 'dynUpdateUrl')
-if [ ${entryExists} -eq 0 ]; then
-  echo "dynUpdateUrl=" >> ${configFile}
-fi
-
-# stop services
-echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
-
-# switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# switching the DynamicDNS ON"
   echo "# dynDomain(${dynDomain})"
   echo "# dynUpdateUrl(${dynUpdateUrl})"
@@ -100,28 +125,51 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
   echo "dynUpdateUrl='${dynUpdateUrl}'" >> /mnt/hdd/raspiblitz.conf
 
-  # lnd.conf: domain value &
+  # make sure dyndomain is added to lnd config file (just edits the config file)
   sudo /home/admin/config.scripts/lnd.tlscert.sh domain-add ${dynDomain}
 
+  # update the IP of the dyndomain once (if updateurl is set)
+  updateDynDNS
+
+  # just if lnd is running make sure to create a new TLS cert
+  lndRunning=$(systemctl is-active lnd | grep -c "^active")
+  if [ ${lndRunning} -eq 1 ]; then
+    echo "# lnd service is running - trigger TLS refresh"
+    sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
+  else
+    # this is important during update/recovery to ensure non-blocking run
+    echo "# lnd service is not running - skipping TLS recreation"
+  fi
+
   echo "# DynamicDNS is now ON"
+  exit
 fi
 
-# switch off
+# OFF
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+
   echo "# switching DynamicDNS OFF"
 
-  # setting value in raspi blitz config
+  # removing values in raspiblitz config
   sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
   sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
 
   # lnd.conf: remove domain tls entries
   sudo /home/admin/config.scripts/lnd.tlscert.sh domain-remove ALL
 
+  # just if lnd is running make sure to create a new TLS cert
+  lndRunning=$(systemctl is-active lnd | grep -c "^active")
+  if [ ${lndRunning} -eq 1 ]; then
+    echo "# lnd service is running - trigger TLS refresh"
+    sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
+  else
+    echo "# lnd service is not running - skipping TLS recreation"
+  fi
+
   echo "# DynamicDNS is now OFF"
+  exit
 fi
 
-# refresh TLS cert
-sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
-
-echo "# may needs reboot to run normal again"
-exit 0
+# if not matching and exiting on one of the commands above
+echo "error='unknown parameter'"
+exit 1
