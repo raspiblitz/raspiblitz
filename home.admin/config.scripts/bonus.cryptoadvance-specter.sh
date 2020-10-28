@@ -265,14 +265,20 @@ EOF
 
   # blockfilterindex on
   # check txindex (parsed and sourced from bitcoin network config above)
-  if [ ${blockfilterindex} == 0 ]; then
+  if [ "${blockfilterindex}" = "0" ]; then
     sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=1/g" /mnt/hdd/${network}/${network}.conf
-    echo "switching blockfilterindex=1 and restarting ${network}d"
-    sudo systemctl restart ${network}d
-    echo "The indexing takes ~10h on an RPi4 with SSD"
-    echo "check with: sudo cat /mnt/hdd/bitcoin/debug.log | grep filter"
+    echo "# switching blockfilterindex=1"
+    isBitcoinRunning=$(sudo systemctl is-active ${network}d | grep -c "^active")
+    if [ ${isBitcoinRunning} -eq 1 ]; then
+      echo "# ${network}d is running - so restarting"
+      sudo systemctl restart ${network}d
+    else
+      echo "# ${network}d is not running - so NOT restarting"
+    fi
+    echo "# The indexing takes ~10h on an RPi4 with SSD"
+    echo "# check with: sudo cat /mnt/hdd/bitcoin/debug.log | grep filter"
   else
-    echo "blockfilterindex is already active"
+    echo "# blockfilterindex is already active"
   fi
 
   exit 0
