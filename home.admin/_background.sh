@@ -376,11 +376,8 @@ do
   if [ ${updateDynDomain} -eq 1 ]; then
     echo "*** UPDATE DYNAMIC DOMAIN ***"
     # check if update URL for dyn Domain is set
-    if [ ${#dynUpdateUrl} -gt 6 ]; then
-      # calling the update url
-      echo "calling: ${dynUpdateUrl}"
-      echo "to update domain: ${dynDomain}"
-      curl -s --connect-timeout 6 ${dynUpdateUrl} 2>/dev/null
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      /home/admin/config.scripts/internet.dyndomain.sh update
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
     fi
