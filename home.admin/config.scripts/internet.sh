@@ -167,8 +167,11 @@ if [ "$1" == "status" ]; then
   echo "online=${online}"
   if [ ${runGlobal} -eq 1 ]; then
     echo "ipv6=${ipv6}"
+     echo "# globalip --> ip detected from the outside"   
     echo "globalip=${globalIP}"
+    echo "# publicip --> may consider the static IP overide by raspiblitz config"
     echo "publicip=${publicIP}"
+    echo "# cleanip --> the publicip with no brakets like used on IPv6"
     echo "cleanip=${cleanIP}"
   else
     echo "# for more global internet info use 'status global'"
