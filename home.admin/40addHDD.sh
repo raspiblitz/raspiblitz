@@ -103,32 +103,15 @@ else
   echo "lcd2hdmi=${lcd2hdmi}" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
 
-  # try to determine publicIP and if not possible use localIP as placeholder 
-  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
-  freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-
-  # sanity check on IP data
-  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-  echo "# sanity check of IP data:"
-  if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-    echo "# OK IPv6"
-  elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-    echo "# OK IPv4"
-  else
-    echo "# FAIL - not an IPv4 or IPv6 address"
-    freshPublicIP=""
-  fi
-  if [ ${#freshPublicIP} -eq 0 ]; then
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    echo "# WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
-    freshPublicIP="${localIP}"
-  fi
-  echo "publicIP='${freshPublicIP}'" >> /home/admin/raspiblitz.conf
-
   sudo mv /home/admin/raspiblitz.conf $configFile
   sudo chown root:root ${configFile}
   sudo chmod 777 ${configFile}
   sleep 3
+
+  # try to determine publicIP and make sure its in raspiblitz.conf
+  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+  /home/admin/config.scripts/internet.sh update-publicip
+
 fi
 
 # link ssh directory from SD catd to HDD
