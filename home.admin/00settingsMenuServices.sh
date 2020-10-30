@@ -390,7 +390,7 @@ if [ "${mempoolExplorer}" != "${choice}" ]; then
       whiptail --title " Installed Mempool Space " --msgbox "\
 The txindex may need to be created before Mempool can be active.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
-When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
+When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
 " 14 50
     else
       l1="!!! FAIL on Mempool Explorer install !!!"
