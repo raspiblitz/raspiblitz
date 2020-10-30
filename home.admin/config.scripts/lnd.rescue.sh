@@ -74,16 +74,17 @@ if [ ${mode} = "backup" ]; then
   echo "* DOWNLOAD THE RESCUE FILE *"
   echo "****************************"
   echo 
-  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
+  echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
+  echo "ON WINDOWS USE:"
+  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${byteSize} byte"
   echo
   echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again or rebooted its not adviced to restore the backup file anymore because"
-  echo "it cointains then outdated channel data & can lead to loss of channel funds."
+  echo "again or rebooted its not adviced to restore the backup file anymore."
 
 elif [ ${mode} = "restore" ]; then
 
