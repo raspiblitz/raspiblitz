@@ -34,7 +34,7 @@ source <(/home/admin/config.scripts/internet.sh status local)
 # SCP download and upload links
 scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
 scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ./"
-scpUploadUnix="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"
+scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 
 # output status data & exit
@@ -263,6 +263,7 @@ fi
 if [ "$1" = "import-gui" ]; then
 
   # get info about HDD
+  echo "# Gathering HDD/SSD info ..."
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
   # make sure HDD/SSD is not mounted

@@ -131,18 +131,24 @@ if [ "$1" = "status" ]; then
       echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
       hddDataPartition=""
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
-    echo "hddCandidate='${hdd}'"
-    echo "hddPartitionCandidate='${hddDataPartition}'"
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
+    echo "hddCandidate='${hdd}'"
+    hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+    hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    echo "hddBytes=${hddBytes}"
+    echo "hddGigaBytes=${hddGigaBytes}"
+
+    echo "hddPartitionCandidate='${hddDataPartition}'"
+    
     if [ ${#hddDataPartition} -gt 0 ]; then
 
       # check partition size in bytes and GBs
       echo "hddDataPartitionBytes=${sizeDataPartition}"
       hddDataPartitionGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
-      echo "hddGigaBytes=${hddDataPartitionGigaBytes}"
+      echo "hddPartitionGigaBytes=${hddDataPartitionGigaBytes}"
   
       # check if single drive with that size
       hddCount=0
@@ -183,7 +189,7 @@ if [ "$1" = "status" ]; then
         else
 
             # check for recoverable RaspiBlitz data (if config file exists) and raid 
-            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
             isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
             echo "hddRaspiData=${hddRaspiData}"
             sudo umount /mnt/hdd
@@ -532,24 +538,36 @@ if [ "$1" = "format" ]; then
   # formatting new: BTRFS layout - this consists of 3 volmunes:
   if [ "$2" = "btrfs" ]; then
 
-     # prepare temo mount point
+     # prepare temp mount point
      sudo mkdir -p /tmp/btrfs 1>/dev/null
 
-     >&2 echo "# Creating BLITZDATA"
+     >&2 echo "# Creating BLITZDATA (${hdd})"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZDATA)"
+         >&2 echo "# check with: lsblk -o NAME,LABEL | grep -c BLITZDATA"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZDATA exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
@@ -565,19 +583,30 @@ if [ "$1" = "format" ]; then
 
      >&2 echo "# Creating BLITZSTORAGE"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZSTORAGE)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZSTORAGE exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
@@ -601,12 +630,22 @@ if [ "$1" = "format" ]; then
  
      >&2 echo "# Creating Volume BLITZTEMP (format)"
      sudo mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting vfat failed (BLITZTEMP)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZTEMP exists now"
 
      >&2 echo "# OK BTRFS format done"
