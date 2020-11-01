@@ -30,15 +30,19 @@ defaultZipPath="/mnt/hdd/temp"
 
 # SCP download and upload links
 localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-scpDownload="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpUpload="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"
+scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
+scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ./"
+scpUploadUnix="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"
+scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "isBTRFS=${isBTRFS}"
-  echo "scpDownload=\"${scpDownload}\""
-  echo "scpUpload=\"${scpUpload}\""
+  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
+  echo "scpUploadUnix=\"${scpUploadUnix}\""
+  echo "scpDownloadWin=\"${scpDownloadWin}\""
+  echo "scpUploadWin=\"${scpUploadWin}\""
   exit 1
 fi
 
@@ -111,7 +115,8 @@ if [ "$1" = "export" ]; then
   rm ~/.exclude.temp
   rm ~/.include.temp
   
-  echo "scpDownload=\"${scpDownload}\""
+  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
+  echo "scpDownloadWin=\"${scpDownloadWin}\""  
   echo "# OK - Export done"
   exit 0
 fi
@@ -142,8 +147,10 @@ if [ "$1" = "export-gui" ]; then
   echo "* DOWNLOAD THE MIGRATION FILE *"
   echo "*******************************"
   echo 
-  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
-  echo "${scpDownload}"
+  echo "On yoz Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
+  echo "${scpDownloadUnix}"
+  echo "On Windows use command:"
+  echo "${scpDownloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo
@@ -200,7 +207,8 @@ if [ "$1" = "import" ]; then
   countZips=$(sudo ls ${importFile} 2>/dev/null | grep -c '.tar.gz')
   if [ ${countZips} -eq 0 ]; then
     echo "# can just find file when ends on .tar.gz and exists"
-    echo "scpUpload=\"${scpUpload}\"" 
+    echo "scpUploadUnix=\"${scpUploadUnix}\"" 
+    echo "scpUploadWin=\"${scpUploadWin}\"" 
     echo "error='file not found'"
     exit 1
   elif [ ${countZips} -eq 1 ]; then
@@ -337,7 +345,9 @@ if [ "$1" = "import-gui" ]; then
   echo
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND for Linux or MacOS:"
+  echo "scp -r './raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}'"
+  echo "OR for Windows:"
   echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."
