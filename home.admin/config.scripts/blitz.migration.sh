@@ -362,9 +362,7 @@ if [ "$1" = "import-gui" ]; then
   echo
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND for Linux or MacOS:"
-  echo "scp -r './raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}'"
-  echo "OR for Windows:"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
   echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."
