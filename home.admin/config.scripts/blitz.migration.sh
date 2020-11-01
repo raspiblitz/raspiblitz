@@ -394,6 +394,8 @@ if [ "$1" = "import-gui" ]; then
 
   echo
   echo "OK: Migration data was imported"
+  echo "PRESS ENTER"
+  read key
 
   # Copy from other computer is only option for Bitcoin
   if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then
