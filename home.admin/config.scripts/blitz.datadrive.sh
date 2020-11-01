@@ -561,8 +561,9 @@ if [ "$1" = "format" ]; then
        sync
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
        loopcount=$(($loopcount +1))
-       if [ ${loopcount} -gt 10 ]; then
+       if [ ${loopcount} -gt 60 ]; then
          >&2 echo "# ERROR: formatting BTRFS failed (BLITZDATA)"
+         >&2 echo "# check with: lsblk -o NAME,LABEL | grep -c BLITZDATA"
          echo "error='formatting failed'"
          exit 1
        fi
@@ -600,7 +601,7 @@ if [ "$1" = "format" ]; then
        sync
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
        loopcount=$(($loopcount +1))
-       if [ ${loopcount} -gt 10 ]; then
+       if [ ${loopcount} -gt 60 ]; then
          >&2 echo "# ERROR: formatting BTRFS failed (BLITZSTORAGE)"
          echo "error='formatting failed'"
          exit 1
@@ -639,7 +640,7 @@ if [ "$1" = "format" ]; then
        sync
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
        loopcount=$(($loopcount +1))
-       if [ ${loopcount} -gt 10 ]; then
+       if [ ${loopcount} -gt 60 ]; then
          >&2 echo "# ERROR: formatting vfat failed (BLITZTEMP)"
          echo "error='formatting failed'"
          exit 1
