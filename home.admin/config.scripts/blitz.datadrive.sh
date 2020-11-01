@@ -551,15 +551,22 @@ if [ "$1" = "format" ]; then
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
-     sync
-     sleep 6
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
-     if [ ${win} -eq 0 ]; then 
-       echo "# win(${win})"
-       echo "# lsblk -o NAME,LABEL | grep -c BLITZDATA"
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 10 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZDATA)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZDATA exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
@@ -583,15 +590,22 @@ if [ "$1" = "format" ]; then
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
-     sync
-     sleep 6
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
-     if [ ${win} -eq 0 ]; then 
-       echo "# win(${win})"
-       echo "# lsblk -o NAME,LABEL | grep -c BLITZSTORAGE"
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 10 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZSTORAGE)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZSTORAGE exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
