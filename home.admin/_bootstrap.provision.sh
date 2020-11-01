@@ -147,6 +147,10 @@ if [ ${kbSizeRAM} -gt 1500000 ]; then
   sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
 fi
+if [ ${kbSizeRAM} -gt 3500000 ]; then
+  echo "Detected RAM >3GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^maxmempool=.*/maxmempool=512/g" /mnt/hdd/${network}/${network}.conf
+fi
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
@@ -596,7 +600,11 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 # update /etc/fstab
 echo "datadisk --> ${datadisk}" >> ${logFile}
 echo "datapartition --> ${datapartition}" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+if [ ${isBTRFS} -eq 0 ]; then
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+else
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5

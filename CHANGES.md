@@ -10,7 +10,7 @@
 - Update: lndmanage 0.11.0
 - Update: Specter 0.8.1 (with running the numbers)
 - Update: Balance of Satoshi 6.1.0
-- Update: Thunderhub 0.9.15
+- Update: Thunderhub 0.9.14
 - Update: Loop 0.8.1
 - Update: Faraday 0.2.1
 - Update: Improved IPv6 support

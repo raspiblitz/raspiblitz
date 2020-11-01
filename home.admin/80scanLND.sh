@@ -19,6 +19,16 @@ if [ "$USER" == "admin" ]; then
   adminStr="Use CTRL+c to EXIT to Terminal"
 fi
 
+# waiting for Internet connection
+if [ "${state}" = "nointernet" ]; then
+  l1="Waiting for Internet ...\n"
+  l2="Please check infrastructure:\n"
+  l3="Router online? Network connected?\n"
+  dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 5 45
+  sleep 3
+  exit 0
+fi
+
 # bitcoin errors always first
 if [ ${bitcoinActive} -eq 0 ] || [ ${#bitcoinErrorFull} -gt 0 ] || [ "${1}" == "blockchain-error" ]; then
 

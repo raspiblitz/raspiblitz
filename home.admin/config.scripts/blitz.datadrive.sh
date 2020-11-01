@@ -115,10 +115,13 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	 # Partion to be created is smaller than disk so this is not correct (but close)
-	 sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
-         hddDataPartition="${testdevice}1"
-         hdd="${testdevice}"
+	     # make sure to use the biggest
+         if [ ${testsize} -gt ${sizeDataPartition} ]; then
+	        # Partion to be created is smaller than disk so this is not correct (but close)
+            sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+            hddDataPartition="${testdevice}1"
+            hdd="${testdevice}"
+	     fi
       fi
       
     done < .lsblk.tmp

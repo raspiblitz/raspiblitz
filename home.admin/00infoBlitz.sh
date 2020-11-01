@@ -20,7 +20,8 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
 ## get internet info
-source <(sudo /home/admin/config.scripts/internet.sh status global)
+source <(sudo /home/admin/config.scripts/internet.sh status)
+cleanip=$(echo "${publicIP}" | tr -d '[]')
 
 ## get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
@@ -180,7 +181,7 @@ else
 
   # IP address
   networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="${publicip}:${public_port}"
+  public_addr="${publicIP}:${public_port}"
   public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""

@@ -57,29 +57,6 @@ function wait_for_local_network() {
   done
 }
 
-# wait until raspberry pi gets a local IP
-function wait_for_internet() {
-  online=0
-  until [ ${online} -eq 1 ]
-  do
-    # check for internet connection
-    online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
-      sed -i "s/^message=.*/message='Network OK but NO Internet'/g" ${infoFile}
-    fi
-    sleep 1
-  done
-}
-
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 echo "***********************************************" >> $logFile
@@ -345,7 +322,11 @@ if [ ${isMounted} -eq 0 ]; then
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  if [ "${hddFormat}" != "btrfs" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  else
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  fi
   if [ ${#error} -gt 0 ]; then
     echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
@@ -475,9 +456,28 @@ if [ ${configExists} -eq 1 ]; then
   # load values
   echo "load and update publicIP" >> $logFile
   source ${configFile}
+
+  # if not running TOR before starting LND internet connection with a valid public IP is needed
+  waitForPublicIP=1
+  if [ "${runBehindTor}" = "on" ] || [ "${runBehindTor}" = "1" ]; then
+    echo "# no need to wait for internet - public Tor address already known" >> $logFile
+    waitForPublicIP=0
+  fi
+  while [ ${waitForPublicIP} -eq 1 ]
+    do
+      source <(/home/admin/config.scripts/internet.sh status)
+      if [ ${online} -eq 0 ]; then
+        echo "# (loop) waiting for internet ... " >> $logFile
+        sed -i "s/^state=.*/state=nointernet/g" ${infoFile}
+        sed -i "s/^message=.*/message='Waiting for Internet'/g" ${infoFile}
+        sleep 4
+      else
+        echo "# OK internet detected ... continue" >> $logFile
+        waitForPublicIP=0
+      fi
+    done
   
   # update public IP on boot - set to domain is available
-  sleep 3  
   /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
 
 fi

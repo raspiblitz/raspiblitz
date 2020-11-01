@@ -13,11 +13,11 @@ release()
 
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
-- Flash that SD card image to a new SD card
+- Flash that SD card image to a new SD card (best)
+  or override old SD card after shutdown (fallback) 
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
-
 Do you want to start the Update now?
       " 16 62
   if [ $? -eq 0 ]; then
