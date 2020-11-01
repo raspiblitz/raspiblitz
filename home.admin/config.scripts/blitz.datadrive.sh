@@ -555,6 +555,7 @@ if [ "$1" = "format" ]; then
      sleep 6
      win=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
      if [ ${win} -eq 0 ]; then 
+       echo "# win(${win})"
        echo "# lsblk -o NAME,LABEL | grep -c BLITZDATA"
        echo "error='formatting failed'"
        exit 1
@@ -586,6 +587,7 @@ if [ "$1" = "format" ]; then
      sleep 6
      win=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
      if [ ${win} -eq 0 ]; then 
+       echo "# win(${win})"
        echo "# lsblk -o NAME,LABEL | grep -c BLITZSTORAGE"
        echo "error='formatting failed'"
        exit 1
