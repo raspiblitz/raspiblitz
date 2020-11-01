@@ -132,10 +132,10 @@ if [ "$1" = "status" ]; then
       hddDataPartition=""
     fi
 
-    echo "hddCandidate='${hdd}'"
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
+    echo "hddCandidate='${hdd}'"
     hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
     hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     echo "hddBytes=${hddBytes}"
@@ -538,21 +538,24 @@ if [ "$1" = "format" ]; then
   # formatting new: BTRFS layout - this consists of 3 volmunes:
   if [ "$2" = "btrfs" ]; then
 
-     # prepare temo mount point
+     # prepare temp mount point
      sudo mkdir -p /tmp/btrfs 1>/dev/null
 
-     >&2 echo "# Creating BLITZDATA"
+     >&2 echo "# Creating BLITZDATA (${hdd})"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
      if [ ${win} -eq 0 ]; then 
+       echo "# lsblk -o NAME,LABEL | grep -c BLITZDATA"
        echo "error='formatting failed'"
        exit 1
      fi
@@ -571,16 +574,19 @@ if [ "$1" = "format" ]; then
 
      >&2 echo "# Creating BLITZSTORAGE"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
      if [ ${win} -eq 0 ]; then 
+       echo "# lsblk -o NAME,LABEL | grep -c BLITZSTORAGE"
        echo "error='formatting failed'"
        exit 1
      fi
