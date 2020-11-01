@@ -629,12 +629,22 @@ if [ "$1" = "format" ]; then
  
      >&2 echo "# Creating Volume BLITZTEMP (format)"
      sudo mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 10 ]; then
+         >&2 echo "# ERROR: formatting vfat failed (BLITZTEMP)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZTEMP exists now"
 
      >&2 echo "# OK BTRFS format done"
