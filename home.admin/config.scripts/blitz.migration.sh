@@ -90,8 +90,7 @@ if [ "$1" = "export" ]; then
   blitzname="-"
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
   if [ ${#hostname} -gt 0 ]; then
-    blitzname=$(echo "${hostname}" | sed 's/[^0-9a-z]*//g')
-    blitzname=$(echo "-${blitzname}-")
+    blitzname="-${hostname}-"
   fi
   echo "# blitzname=${blitzname}"
 
@@ -295,18 +294,21 @@ if [ "$1" = "import-gui" ]; then
   OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
 
   useBlockchain=0
+  hddFormat=None
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
     EXT4)
+      hddFormat=ext4
       echo "EXT4 FORMAT -->"
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddCandidate})
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddPartitionCandidate})
       if [ ${#error} -gt 0 ]; then
         echo "FAIL --> ${error}"
         exit 1
       fi
       ;;
     BTRFS)
+      hddFormat=btrfs
       echo "BTRFS FORMAT"
       source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format btrfs ${hddCandidate})
       if [ ${#error} -gt 0 ]; then
@@ -324,8 +326,20 @@ if [ "$1" = "import-gui" ]; then
       ;;
   esac
 
+  if [ ${useBlockchain} -eq 1 ]; then
+     if [ ${isBTRFS} -eq 1 ]; then
+        hddFormat=btrfs
+     else
+        hddFormat=ext4
+     fi
+  fi
+
   # now temp mount the HDD/SSD
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  if [ "$hddFormat" == "btrfs" ]; then
+     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  else
+     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  fi
   if [ ${#error} -gt 0 ]; then
     echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
     exit 1
@@ -390,6 +404,8 @@ if [ "$1" = "import-gui" ]; then
 
   echo
   echo "OK: Migration data was imported"
+  echo "PRESS ENTER"
+  read key
 
   # Copy from other computer is only option for Bitcoin
   if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then
