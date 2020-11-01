@@ -131,18 +131,24 @@ if [ "$1" = "status" ]; then
       echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
       hddDataPartition=""
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
     echo "hddCandidate='${hdd}'"
-    echo "hddPartitionCandidate='${hddDataPartition}'"
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
+    hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+    hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    echo "hddBytes=${hddBytes}"
+    echo "hddGigaBytes=${hddGigaBytes}"
+
+    echo "hddPartitionCandidate='${hddDataPartition}'"
+    
     if [ ${#hddDataPartition} -gt 0 ]; then
 
       # check partition size in bytes and GBs
       echo "hddDataPartitionBytes=${sizeDataPartition}"
       hddDataPartitionGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
-      echo "hddGigaBytes=${hddDataPartitionGigaBytes}"
+      echo "hddPartitionGigaBytes=${hddDataPartitionGigaBytes}"
   
       # check if single drive with that size
       hddCount=0
