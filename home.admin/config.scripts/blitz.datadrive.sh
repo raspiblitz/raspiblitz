@@ -356,15 +356,15 @@ if [ "$1" = "format" ]; then
     exit 1
   fi
 
-  # check if device is existing and a disk (not a partition)
   if [ "$2" = "btrfs" ]; then
+     # check if device is existing and a disk (not a partition)
      isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
   else
-     #TODO: Validate ext4
-     isValid=1
+     # check if device is existing (its OK when its a partition)
+     isValid=$(lsblk -o NAME,TYPE | grep -c "${hdd}")
   fi
   if [ ${isValid} -eq 0 ]; then
-    >&2 echo "# either given device was not found"
+    >&2 echo "# given device was not found"
     >&2 echo "# or is not of type disk - see 'lsblk'"
     echo "error='device not valid'"
     exit 1
