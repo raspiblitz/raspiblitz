@@ -28,8 +28,10 @@ isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " 
 # set place where zipped TAR file gets stored
 defaultZipPath="/mnt/hdd/temp"
 
+# get local ip
+source <(/home/admin/config.scripts/internet.sh status local)
+
 # SCP download and upload links
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
 scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ./"
 scpUploadUnix="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"

@@ -58,7 +58,7 @@ fi
 
 #############################################
 # get local IP (from different sources)
-localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|inet|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 if [ $(isValidIP ${localip_ALL}) -eq 0 ]; then
   localip_ALL=""
 fi
