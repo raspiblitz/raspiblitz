@@ -263,6 +263,7 @@ fi
 if [ "$1" = "import-gui" ]; then
 
   # get info about HDD
+  echo "# Gathering HDD/SSD info ..."
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
   # make sure HDD/SSD is not mounted
