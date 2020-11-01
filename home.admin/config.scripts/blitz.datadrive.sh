@@ -183,7 +183,7 @@ if [ "$1" = "status" ]; then
         else
 
             # check for recoverable RaspiBlitz data (if config file exists) and raid 
-            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
             isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
             echo "hddRaspiData=${hddRaspiData}"
             sudo umount /mnt/hdd
