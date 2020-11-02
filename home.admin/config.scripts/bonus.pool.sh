@@ -1,9 +1,13 @@
 #!/bin/bash
 
+# https://github.com/lightninglabs/pool/releases/
+pinnedVersion=v0.3.2-alpha
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the pool on or off"
  echo "bonus.pool.sh [on|off|menu]"
+ echo "Installs the Pool $pinnedVersion by default"
  exit 1
 fi
 
@@ -17,8 +21,8 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info Pool Service " --msgbox "\n\
-Usage and examples: https://gitlab.com/lightning-labs/pool\n
-Use the shortcut 'pool' on the terminal to switch to the dedicated user.\n
+Usage and examples: https://github.com/lightninglabs/pool\n
+Use the shortcut 'pool' in the terminal to switch to the dedicated user.\n
 Type 'pool' again to see the options.
 " 11 56
   exit 0
@@ -27,9 +31,6 @@ fi
 # stop services
 echo "# making sure the service is not running"
 sudo systemctl stop poold 2>/dev/null
-
-echo "# move existing data dir to /mnt/hdd/app-data/"
-sudo mv /home/pool/.pool /mnt/hdd/app-data/ 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -49,11 +50,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     
     echo "# persist settings in app-data"
     echo "# make sure the data directory exists"
-    sudo -u pool mkdir -p /mnt/hdd/app-data/.pool
+    sudo mkdir -p /mnt/hdd/app-data/.pool
     echo "# symlink"
-    sudo ln -s /mnt/hdd/app-data/.pool /home/pool/ 2>/dev/null
+    sudo rm -rf /home/pool/.pool # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/.pool/ /home/pool/.pool
     sudo chown pool:pool -R /mnt/hdd/app-data/.pool
-
+    
     # set PATH for the user
     sudo bash -c "echo 'PATH=$PATH:/home/pool/go/bin/' >> /home/pool/.profile"
 
@@ -64,13 +66,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install from source
     cd /home/pool
-    # copy ssh keys from admin
-    sudo cp -R /home/admin/.ssh /home/pool/
-    sudo chown -R pool:pool /home/pool/.ssh
-    sudo -u pool git clone git@gitlab.com:lightning-labs/pool.git || exit 1
-    # pin version
-    # sudo -u pool git reset --hard
+    
+    sudo -u pool git clone https://github.com/lightninglabs/pool.git || exit 1
     cd /home/pool/pool
+    # pin version 
+    sudo -u pool git reset --hard $pinnedVersion
+    # install to /home/pool/go/bin/
     sudo -u pool /usr/local/go/bin/go install ./... || exit 1
 
     # sync all macaroons and unix groups for access
@@ -133,27 +134,14 @@ WantedBy=multi-user.target
   
   isInstalled=$(sudo -u pool /home/pool/go/bin/pool  | grep -c pool)
   if [ ${isInstalled} -gt 0 ]; then
-    echo "Find info on how to use on https://gitlab.com/lightning-labs/pool"
-    
-    # add to _commands.sh
-    if [ $(grep -c "sudo su - pool" < /home/admin/_commands.sh) -eq 0 ]; then
-      cat << EOF | tee -a /home/admin/_commands.sh >/dev/null
-# command: pool
-# switch to the pool user for the Pool Service
-function pool() {
-  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the pool user with the command: 'sudo su - pool'"
-    sudo su - pool
+    echo "
+# Usage and examples: https://gitlab.com/lightning-labs/pool
+# Use the command: 'sudo su - pool' 
+# in the terminal to switch to the dedicated user.
+# Type 'pool' again to see the options.
+"
   else
-    echo "Pool is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.pool.sh on"
-  fi
-}
-EOF
-    
-    fi
-  else
-    echo " Failed to install Lightning pool "
+    echo "# Failed to install Lightning Pool "
     exit 1
   fi
   
@@ -168,16 +156,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/poold.service 2>/dev/null | grep -c 'poold.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "# REMOVING pool SERVICE"
+    echo "# Removing the Pool service"
     # remove the systemd service
     sudo systemctl stop poold
     sudo systemctl disable poold
     sudo rm /etc/systemd/system/poold.service
     # delete user and it's home directory
     sudo userdel -rf pool
-    echo "# OK, the pool Service is removed."
+    echo "# OK, the Pool Service is removed."
   else 
-    echo "# pool is not installed."
+    echo "# Pool is not installed."
   fi
 
   exit 0

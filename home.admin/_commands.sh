@@ -170,7 +170,7 @@ function loop() {
 # command: pool
 # switch to the pool user for the Pool Service
 function pool() {
-  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
     echo "# switching to the pool user with the command: 'sudo su - pool'"
     sudo su - pool
   else
