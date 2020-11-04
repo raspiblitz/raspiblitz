@@ -1,10 +1,13 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
+pinnedVersion="0.9.2"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch cryptoadvance specter on or off"
- echo "bonus.cryptoadvance-specter.sh [status|on|off]"
+ echo "config script to switch cryptoadvance specter on, off or update"
+ echo "bonus.cryptoadvance-specter.sh [status|on|off|update]"
+ echo "installing the version $pinnedVersion by default"
  exit 1
 fi
 
@@ -124,7 +127,7 @@ EOF
     sudo -u bitcoin virtualenv --python=python3 /home/bitcoin/.specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==0.8.1
+    sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion
     
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
@@ -343,8 +346,8 @@ if [ "$1" = "update" ]; then
   echo "#    --> UPDATING Cryptoadvance Specter"
   sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
-  echo "#    --> Starting the cryptoadvance-specter.service"
-  sudo systemctl start cryptoadvance-specter
+  echo "#    --> Restarting the cryptoadvance-specter.service"
+  sudo systemctl restart cryptoadvance-specter
   exit 0
 fi
 
