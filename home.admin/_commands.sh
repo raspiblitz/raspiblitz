@@ -147,6 +147,7 @@ function jm() {
   if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the joinmarket user with the command: 'sudo su - joinmarket'"
     sudo su - joinmarket
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
@@ -159,7 +160,7 @@ function faraday() {
   if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the faraday user with the command: 'sudo su - faraday'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'frcli -help' now to get more info"
+    echo "# use command 'frcli --help' now to get more info"
     sudo su - faraday
   else
     echo "Faraday is not installed - to install run:"
