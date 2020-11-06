@@ -20,6 +20,7 @@ if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
 if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
+if [ ${#pool} -eq 0 ]; then pool="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -39,6 +40,7 @@ OPTIONS+=(o 'Balance of Satoshis' ${bos})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(f 'Faraday' ${faraday})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
+OPTIONS+=(c 'Lightning Pool' ${pool})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -345,6 +347,20 @@ if [ "${LNBits}" != "${choice}" ]; then
   fi
 else
   echo "LNbits setting unchanged."
+fi
+
+# Lightning Pool
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${pool}" != "${choice}" ]; then
+  echo "Pool Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.pool.sh menu
+  fi
+else
+  echo "Pool setting unchanged."
 fi
 
 # JoinMarket process choice

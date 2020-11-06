@@ -107,6 +107,9 @@ fi
 if [ "${zerotier}" == "on" ]; then
   OPTIONS+=(ZEROTIER "ZeroTier")
 fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Lightning Pool")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -234,7 +237,7 @@ case $CHOICE in
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;
-		PYBLOCK)
+		    PYBLOCK)
             sudo /home/admin/config.scripts/bonus.pyblock.sh menu
             ;;
         THUB)
@@ -242,6 +245,9 @@ case $CHOICE in
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
+            ;;
+        POOL)
+            sudo /home/admin/config.scripts/bonus.pool.sh menu
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
