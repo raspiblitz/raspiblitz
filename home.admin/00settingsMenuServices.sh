@@ -40,7 +40,7 @@ OPTIONS+=(o 'Balance of Satoshis' ${bos})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(f 'Faraday' ${faraday})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
-OPTIONS+=(p 'Lightning Pool' ${pool})
+OPTIONS+=(c 'Lightning Pool' ${pool})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -350,7 +350,7 @@ else
 fi
 
 # Lightning Pool
-choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${pool}" != "${choice}" ]; then
   echo "Pool Setting changed .."
