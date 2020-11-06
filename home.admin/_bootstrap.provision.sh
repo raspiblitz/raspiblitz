@@ -519,6 +519,15 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
+# pool
+if [ "${pool}" = "on" ]; then
+  echo "Provisioning Pool - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Pool - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
