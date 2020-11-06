@@ -184,6 +184,7 @@ function loop() {
 function pool() {
   if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
     echo "# switching to the pool user with the command: 'sudo su - pool'"
+    echo "# use command 'pool --help' now to get more info"
     sudo su - pool
   else
     echo "Pool is not installed - to install run:"

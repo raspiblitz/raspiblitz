@@ -20,11 +20,10 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Info Pool Service " --msgbox "\n\
+  whiptail --title " Info Pool Service " --msgbox "\
 Usage and examples: https://github.com/lightninglabs/pool\n
-Use the shortcut 'pool' in the terminal to switch to the dedicated user.\n
-Type 'pool' again to see the options.
-" 11 56
+Use the shortcut 'pool' in the terminal to switch to the dedicated user and type 'pool' again to see the options.
+" 12 56
   exit 0
 fi
 
