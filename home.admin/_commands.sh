@@ -158,8 +158,8 @@ function jm() {
 function faraday() {
   if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the faraday user with the command: 'sudo su - faraday'"
-    echo "# when done use command 'exit' to return to admin user"
-    echo "# see faraday options with --> frcli -help"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'frcli -help' now to get more info"
     sudo su - faraday
   else
     echo "Faraday is not installed - to install run:"
@@ -172,6 +172,8 @@ function faraday() {
 function loop() {
   if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the loop user with the command: 'sudo su - loop'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'loop --help' now to get more info"
     sudo su - loop
   else
     echo "Lightning Loop is not installed - to install run:"
@@ -184,6 +186,7 @@ function loop() {
 function pool() {
   if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
     echo "# switching to the pool user with the command: 'sudo su - pool'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'pool --help' now to get more info"
     sudo su - pool
   else
