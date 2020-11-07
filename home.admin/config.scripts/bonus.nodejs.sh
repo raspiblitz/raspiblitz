@@ -1,8 +1,10 @@
 #!/bin/bash
 
+VERSION="v14.15.0"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to install NodeJs"
+ echo "config script to install NodeJs $VERSION"
  echo "bonus.nodejs.sh [on|off]"
  exit 1
 fi
@@ -26,20 +28,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
-    VERSION="v12.16.3"
-  
+      
     # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
     # https://nodejs.org/dist/v12.16.3/SHASUMS256.txt
   
     if [ ${isARM} -eq 1 ] ; then
       DISTRO="linux-armv7l"
-      CHECKSUM="8fdf1751c985c4e8048b23bbe9e36aa0cad0011c755427694ea0fda9efad6d97"
+      CHECKSUM="9be4afaa963b5742d111245f7cefff72d3dea4226041efbe4fca16bf729f1215"
     elif [ ${isAARCH64} -eq 1 ] ; then
       DISTRO="linux-arm64"
-      CHECKSUM="8311f513a7d1911200502dd3e00142cef56d600c851d5870f68d939802205b73"
+      CHECKSUM="18594c582ccc8c1a1a787d9b21ecb6f315ef879e82be254c598243f58ea7ccb4"
     elif [ ${isX86_64} -eq 1 ] ; then
       DISTRO="linux-x64"
-      CHECKSUM="1956e196e3c3c8ef5f0c45db76d7c1245af4ccdda2b7ab30a57ce91d6e165caa"
+      CHECKSUM="93e5b94cfaa3edec80832725f8c09cde2cd0c327da89ad9ad811cf9a1b5d0f1b"
     elif [ ${#DISTRO} -eq 0 ]; then
       echo "FAIL: Was not able to determine architecture"
       exit 1
