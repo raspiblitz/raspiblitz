@@ -159,9 +159,9 @@ if [ "$1" = "export-gui" ]; then
   echo ""
   echo "Use password A to authenticate file transfer."
   echo 
-  echo "To check if you downloaded the file correctly you can check:"
-  echo "md5-checksum: ${md5checksum}"
-  echo "byte-size: ${bytesize}"
+  echo "To check if you downloaded the file correctly:"
+  echo "md5-checksum --> ${md5checksum}"
+  echo "byte-size --> ${bytesize}"
   echo 
   echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
   echo "To complete the data migration follow then instructions on the github FAQ."
@@ -370,9 +370,7 @@ if [ "$1" = "import-gui" ]; then
   echo
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND for Linux or MacOS:"
-  echo "scp -r './raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}'"
-  echo "OR for Windows:"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
   echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."
