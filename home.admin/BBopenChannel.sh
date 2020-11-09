@@ -104,14 +104,14 @@ if [ ${#amount} -eq 0 ]; then
   exit 1
 fi
 
-# let user enter a confirmation speed
+# let user enter a confirmation target
 l1=""
 l2="Urgent = 1 / Economy = 20"
 dialog --title "Open channel speed" \
 --inputbox "$l1\n$l2" 10 60 2>$_temp
-speed=$(cat $_temp | xargs | tr -dc '0-9')
+conf_target=$(cat $_temp | xargs | tr -dc '0-9')
 shred -u $_temp
-if [ ${#speed} -eq 0 ]; then
+if [ ${#conf_target} -eq 0 ]; then
   echo
   echo "no valid speed entered - returning to menu ..."
   sleep 4
@@ -119,7 +119,7 @@ if [ ${#speed} -eq 0 ]; then
 fi
 
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=${speed} ${pubKey} ${amount} 0"
+command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
 
 # info output
 clear
