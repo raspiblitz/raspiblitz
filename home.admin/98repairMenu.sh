@@ -104,11 +104,46 @@ copyHost()
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sudo rm -f /home/admin/copy_begin.time
 
-  # transfere blockchain data
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
-  sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
+  # repeat the syncing of directories until
+  # a) there are no files left to transfere (be robust against failing connections, etc)
+  # b) the user hits a key to break loop after report
 
+
+  while :
+    do
+
+      # transfere blockchain data
+      rm -f ./transferred.rsync
+      sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 --log-file=./transferred.rsync ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+
+      # check result
+      # the idea is even after successfull transfer the loop will run a second time
+      # but on the second time there will be no files transfered (log lines are below 4)
+      # thats the signal that its done
+      linesInLogFile=$(wc -l ./transferred.rsync | cut -d " " -f 1) 
+      if [ ${linesInLogFile} -lt 4 ]; then
+        echo ""
+        echo "OK all files transfered. DONE"
+        sleep 2
+        break
+      fi
+
+      # wait 20 seconds for user exiting loop
+      echo ""
+      echo -en "OK on sync loop done ... will test in another if all was transferred."
+      echo -en "PRESS X TO MANUALLY FINISH SYNCING"
+      read -n 1 -t 6 keyPressed
+      if [ "${keyPressed}" = "x" ]; then
+        echo ""
+        echo "Ending Sync ..."
+        sleep 2
+        break
+      fi
+
+    done
+  
   # transfere end flag
+  sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
   date +%s > /home/admin/copy_end.time
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sudo rm -f /home/admin/copy_end.time
