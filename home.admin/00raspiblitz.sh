@@ -67,6 +67,14 @@ if [ "${state}" = "copysource" ]; then
   exit
 fi
 
+# check if copy blockchain over LAN to this RaspiBlitz was running
+source <(/home/admin/config.scripts/blitz.copyblockchain.sh status)
+if [ "${copyInProgress}" = "1" ]; then
+  echo "Detected interrupted COPY blochain process ..."
+  /home/admin/50copyHDD.sh
+  exit
+fi
+
 # signal that after bootstrap recover user dialog is needed
 recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
 if [ ${recoveredInfoExists} -gt 0 ]; then
