@@ -236,7 +236,13 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    if [ ${isBTRFS} -eq 1 ]; then
+      # on btrfs date the storage partition as the data partition
+      hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    else
+      # on ext4 its the whole /mnt/hdd
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    fi
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
@@ -1208,15 +1214,19 @@ if [ "$1" = "link" ]; then
     >&2 echo "# Creating BTRFS setup links"
     
     >&2 echo "# - linking blockchains into /mnt/hdd"
-    if [ $(ls /mnt/hdd/bitcoin 2>/dev/null | grep -c 'bitcoin') -eq 0 ]; then
+    if [ $(ls -F /mnt/hdd/bitcoin | grep -c '/mnt/hdd/bitcoin@') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/bitcoin
+      sudo cp -R /mnt/hdd/bitcoin/* /mnt/storage/bitcoin 2>/dev/null
       sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
+      sudo rm -r /mnt/hdd/bitcoin
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
       sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
-    if [ $(ls /mnt/hdd/litecoin 2>/dev/null | grep -c 'litecoin') -eq 0 ]; then
+    if [ $(ls -F /mnt/hdd/litecoin | grep -c '/mnt/hdd/litecoin@') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/litecoin
+      sudo cp -R /mnt/hdd/litecoin/* /mnt/storage/litecoin 2>/dev/null
       sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
+      sudo rm -r /mnt/hdd/litecoin
       sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
       sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
     fi

@@ -103,8 +103,12 @@ if [ "$1" = "export" ]; then
   # get md5 checksum
   echo "# Building checksum (can take also a while) ..." 
   md5checksum=$(md5sum ${defaultZipPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
-  echo "# md5checksum=${md5checksum}"
+  echo "md5checksum=${md5checksum}"
   
+  # get byte size
+  bytesize=$(wc -c ${defaultZipPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
+  echo "bytesize=${bytesize}"
+
   # final renaming 
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
   echo "exportpath='${defaultZipPath}'"
@@ -154,7 +158,11 @@ if [ "$1" = "export-gui" ]; then
   echo "${scpDownloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
-  echo
+  echo 
+  echo "To check if you downloaded the file correctly:"
+  echo "md5-checksum --> ${md5checksum}"
+  echo "byte-size --> ${bytesize}"
+  echo 
   echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
   echo "To complete the data migration follow then instructions on the github FAQ."
   echo
@@ -362,9 +370,7 @@ if [ "$1" = "import-gui" ]; then
   echo
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND for Linux or MacOS:"
-  echo "scp -r './raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}'"
-  echo "OR for Windows:"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
   echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."

@@ -206,11 +206,6 @@ echo "*********************************************"
 
 # if started with parameter "stop-after-script" - quit here
 if [ "$1" == "stop-after-script" ]; then
-  if [ ${quickCheckOK} -eq 0 ]; then
-    echo "cleaning up .."
-    sudo rm -rf /mnt/hdd/bitcoin/blocks
-    sudo rm -rf /mnt/hdd/bitcoin/chainstate
-  fi
   echo "DONE Copy"
   exit 0
 fi
