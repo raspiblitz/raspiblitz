@@ -5,10 +5,13 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
+pinnedVersion="v0.7.2"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
+ echo "Installs the version $pinnedVersion by default."
  exit 1
 fi
 
@@ -92,16 +95,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # install joinmarket
-    version="v0.7.1"
     cd /home/joinmarket
     # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
     echo "# installing ARM specific dependencies to run the QT GUI"
     sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui \
-    python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev python3-pyqt5
+    python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev python3-pyqt5 libltdl-dev
+    # https://github.com/JoinMarket-Org/joinmarket-clientserver/issues/668#issuecomment-717815719
+    sudo apt install build-essential automake pkg-config libffi-dev python3-dev libgmp-dev 
+    sudo -u joinmarket pip install libtool asn1crypto cffi pycparser coincurve
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    sudo -u joinmarket git reset --hard $version
+    sudo -u joinmarket git reset --hard $pinnedVersion
     # make install.sh set up jmvenv with -- system-site-packages
     # and import the PySide2 armf package from the system
     sudo -u joinmarket sed -i \
@@ -118,14 +123,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # don't install PyQt5 - using the system package instead 
     sudo -u joinmarket sed -i "s#^PyQt5==5.14.2##g" requirements/gui.txt
     sudo -u joinmarket ./install.sh --with-qt
-    echo "# installed JoinMarket $version"
+    echo "# installed JoinMarket $pinnedVersion"
 
     echo "# adding the joininbox menu"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.12
+    sudo -u joinmarket git reset --hard v0.1.14
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
