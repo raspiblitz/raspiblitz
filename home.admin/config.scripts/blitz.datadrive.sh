@@ -236,7 +236,11 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    if [ ${isBTRFS} -eq 1 ]; then
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    else
+      hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    fi
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
