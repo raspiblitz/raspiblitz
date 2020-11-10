@@ -237,9 +237,11 @@ if [ "$1" = "status" ]; then
 
     # output data drive
     if [ ${isBTRFS} -eq 1 ]; then
-      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
-    else
+      # on btrfs date the storage partition as the data partition
       hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    else
+      # on ext4 its the whole /mnt/hdd
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
     fi
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
