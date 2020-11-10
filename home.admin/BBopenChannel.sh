@@ -107,13 +107,13 @@ fi
 # let user enter a confirmation target
 l1=""
 l2="Urgent = 1 / Economy = 20"
-dialog --title "Open channel speed" \
+dialog --title "Set confirmation target" \
 --inputbox "$l1\n$l2" 10 60 2>$_temp
 conf_target=$(cat $_temp | xargs | tr -dc '0-9')
 shred -u $_temp
 if [ ${#conf_target} -eq 0 ]; then
   echo
-  echo "no valid speed entered - returning to menu ..."
+  echo "no valid target entered - returning to menu ..."
   sleep 4
   exit 1
 fi
