@@ -78,7 +78,7 @@ copyHost()
   echo "# install dependencies ..."
   sudo apt-get install -y sshpass
 
-  sudo rm /root/.ssh/known_hosts
+  sudo rm /root/.ssh/known_hosts 2>/dev/nul
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then
     whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
