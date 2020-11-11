@@ -182,6 +182,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u sphinxrelay git clone https://github.com/${githubUser}/sphinx-relay.git
     cd /home/sphinxrelay/sphinx-relay
     sudo -u sphinxrelay git checkout ${githubBranch}
+
+    echo "# NPM install dependencies ..."
     sudo -u sphinxrelay npm install
 
     # set database path to HDD data so that its survives updates and migrations
