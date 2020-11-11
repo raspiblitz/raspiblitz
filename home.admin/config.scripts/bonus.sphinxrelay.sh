@@ -17,7 +17,7 @@ source /mnt/hdd/raspiblitz.conf
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  # get LNbits status info
+  # get status info
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
@@ -138,7 +138,7 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   sudo git branch -v
   # pull latest code
   sudo git pull
-  # restart lnbits service
+  # restart service
   sudo systemctl restart sphinxrelay
   echo "# server is restarting ... maybe takes some seconds until available"
   exit 0
@@ -232,7 +232,7 @@ EOF
 
     source /home/admin/raspiblitz.info
     if [ "${state}" == "ready" ]; then
-      echo "# OK - sphinxrelay service is enabled, system is on ready so starting lnbits service"
+      echo "# OK - sphinxrelay service is enabled, system is on ready so starting service"
       sudo systemctl start sphinxrelay
     else
       echo "# OK - sphinxrelay service is enabled, but needs reboot or manual starting: sudo systemctl start sphinxrelay"
@@ -306,8 +306,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh off sphinxrelay
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
+  isInstalled=$(sudo ls /etc/systemd/system/sphinxrelay.service 2>/dev/null | grep -c 'sphinxrelay.service')
+  if [ ${isInstalled} -eq 1 ] || [ "${sphinxrelay}" == "on" ]; then
     echo "*** REMOVING SPHINXRELAY ***"
     sudo systemctl stop sphinxrelay
     sudo systemctl disable sphinxrelay
