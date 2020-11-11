@@ -189,14 +189,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/sphinxrelay 2>/dev/null
     sudo chown sphinxrelay:sphinxrelay -R /mnt/hdd/app-data/sphinxrelay
-    sudo jq '.production.storage = "/mnt/hdd/app-data/sphinxrelay/sphinx.db"' /home/sphinxrelay/sphinx-relay/config/config.json > "tmp" && mv "tmp" /home/admin/sphinx-relay/config/config.json
+    sudo jq '.production.storage = "/mnt/hdd/app-data/sphinxrelay/sphinx.db"' /home/sphinxrelay/sphinx-relay/config/config.json > ./tmp && sudo mv ./tmp /home/admin/sphinx-relay/config/config.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/config.json
 
     # general config
-    sudo jq '.production.tls_location = "/mnt/hdd/app-data/lnd/tls.cert"' /home/sphinxrelay/sphinx-relay/config/app.json > "tmp" && mv "tmp" /home/admin/sphinx-relay/config/app.json
-    sudo jq '.production.macaroon_location = "/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon"' /home/sphinxrelay/sphinx-relay/config/app.json > "tmp" && mv "tmp" /home/admin/sphinx-relay/config/app.json
-    sudo jq '.production.lnd_log_location = "/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"' /home/sphinxrelay/sphinx-relay/config/app.json > "tmp" && mv "tmp" /home/admin/sphinx-relay/config/app.json
-    sudo jq '.production.node_http_port = "3300"' /home/sphinxrelay/sphinx-relay/config/app.json > "tmp" && mv "tmp" /home/admin/sphinx-relay/config/app.json
+    sudo jq '.production.tls_location = "/mnt/hdd/app-data/lnd/tls.cert"' /home/sphinxrelay/sphinx-relay/config/app.json > ./tmp && sudo mv ./tmp /home/admin/sphinx-relay/config/app.json
+    sudo jq '.production.macaroon_location = "/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon"' /home/sphinxrelay/sphinx-relay/config/app.json > ./tmp && sudo mv ./tmp /home/admin/sphinx-relay/config/app.json
+    sudo jq '.production.lnd_log_location = "/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"' /home/sphinxrelay/sphinx-relay/config/app.json > ./tmp && sudo mv ./tmp /home/admin/sphinx-relay/config/app.json
+    sudo jq '.production.node_http_port = "3300"' /home/sphinxrelay/sphinx-relay/config/app.json > ./tmp && sudo mv ./tmp /home/admin/sphinx-relay/config/app.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
     # open firewall
