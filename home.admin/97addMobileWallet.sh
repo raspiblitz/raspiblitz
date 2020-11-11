@@ -221,7 +221,7 @@ Or scan the qr code on the LCD with your mobile phone.
     ;;
   ZAP_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
-      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      /home/admin/config.scripts/blitz.lcd.sh image /home/admin/raspiblitz/pictures/app_zap.png
 	  whiptail --title "Install Zap on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
