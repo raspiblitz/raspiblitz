@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # SOURCE: https://github.com/gcomte/ln-gems/blob/master/showTotalLightningBalance.sh
+# LATEST COMMIT: a2ea316f1962f26921a95922d5fe95f430b6120f
 
 ##############################################################################
 # COLORING
