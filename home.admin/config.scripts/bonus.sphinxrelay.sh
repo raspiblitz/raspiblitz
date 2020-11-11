@@ -179,7 +179,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# get the github code user(${githubUser}) branch(${githubBranch})"
     sudo rm -r /home/sphinxrelay/sphinx-relay 2>/dev/null
     cd /home/sphinxrelay
-    sudo -u sphinxrelay git clone https://github.com/${githubUser}/sphinx-relay.git.git
+    sudo -u sphinxrelay git clone https://github.com/${githubUser}/sphinx-relay.git
     cd /home/sphinxrelay/sphinx-relay
     sudo -u sphinxrelay git checkout ${githubBranch}
     sudo -u sphinxrelay npm install
