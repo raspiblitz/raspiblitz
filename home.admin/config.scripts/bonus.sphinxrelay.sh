@@ -200,7 +200,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="v1.0.11"
+    githubBranch="v1.0.13"
     if [ "$3" != "" ]; then
       githubBranch="$3"
     fi
