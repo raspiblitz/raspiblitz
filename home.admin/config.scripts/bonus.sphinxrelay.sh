@@ -158,6 +158,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
+    # make sure keysend is on
+    /home/admin/config.scripts/lnd.keysend.sh on
+
     echo "*** Add the 'sphinxrelay' user ***"
     sudo adduser --disabled-password --gecos "" sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndadmin sphinxrelay
