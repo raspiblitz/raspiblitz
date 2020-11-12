@@ -199,6 +199,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo jq ".production.node_http_port = \"3300\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
+    # prepare production run
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
+
     # open firewall
     echo
     echo "*** Updating Firewall ***"
@@ -214,7 +218,8 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/bin/node /home/sphinxrelay/sphinx-relay
+WorkingDirectory=/home/sphinxrelay/sphinx-relay
+ExecStart=env NODE_ENV=production /usr/bin/node dist/app.js
 User=sphinxrelay
 Restart=always
 TimeoutSec=120
