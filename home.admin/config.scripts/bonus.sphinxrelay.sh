@@ -71,9 +71,17 @@ if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # status
-if [ "$1" = "set-environment" ]; then
-  echo "NODE_ENV=production"
-  echo "NODE_IP=192.168.178.93:3300"
+if [ "$1" = "write-environment" ]; then
+  
+  # prepare production configs (loaded by nodejs app)
+  sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
+  sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
+
+  # update environment file (loaded by systemd service)
+  echo "NODE_ENV=production" > /mnt/hdd/temp/sphinxrelay.env
+  echo "NODE_IP=192.168.178.93:3300" >> /mnt/hdd/temp/sphinxrelay.env
+  sudo mv /mnt/hdd/temp/sphinxrelay.env /home/sphinxrelay/sphinxrelay.env
+  sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinxrelay.env
   exit 0
 fi
 
@@ -209,9 +217,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo jq ".production.node_http_port = \"3300\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
-    # prepare production run
-    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
-    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
+    # write environment
+    /home/admin/config.scripts/bonus.sphinxtrelay.sh write-environment
 
     # open firewall
     echo
@@ -229,7 +236,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/sphinxrelay/sphinx-relay
-EnvironmentFile=/home/admin/config.scripts/bonus.sphinxrelay.sh set-environment
+EnvironmentFile=/home/sphinxrelay/sphinxrelay.env
 ExecStart=/usr/bin/node dist/app.js
 User=sphinxrelay
 Restart=always
