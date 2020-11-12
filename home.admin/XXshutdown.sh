@@ -34,10 +34,10 @@ fi
 echo "-----------------------------------------------"
 echo "stop lnd - please wait .."
 sudo systemctl stop lnd 2>/dev/null
+sudo systemctl stop electrs 2>/dev/null
 echo "stop ${network}d (1) - please wait .."
 sudo -u bitcoin ${network}-cli stop 2>/dev/null
-sudo systemctl stop lnd 2>/dev/null
-sudo systemctl stop electrs 2>/dev/null
+sleep 10
 echo "stop ${network}d (2) - please wait .."
 sudo systemctl stop ${network}d 2>/dev/null
 sleep 3
