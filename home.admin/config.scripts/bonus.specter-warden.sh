@@ -102,7 +102,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 	cd /home/bitcoin/.specter
     sudo -u bitcoin git clone https://github.com/pxsocs/specter_warden.git
 	cd specter_warden
-    sudo -u bitcoin git reset --hard 0.01
+    sudo -u bitcoin git reset --hard 0.5a
 
 	sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install -r requirements.txt --upgrade
 
