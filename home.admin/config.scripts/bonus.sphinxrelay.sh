@@ -6,7 +6,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Sphinx-Relay on/off"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.sphinxrelay.sh [off|status|menu|set-environment]"
+  echo "bonus.sphinxrelay.sh [off|status|menu|write-environment]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
@@ -76,12 +76,15 @@ if [ "$1" = "write-environment" ]; then
   # prepare production configs (loaded by nodejs app)
   sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
   sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
+  echo "# ok - copied fresh config.json & app.json into dist directory"
 
   # update environment file (loaded by systemd service)
   echo "NODE_ENV=production" > /mnt/hdd/temp/sphinxrelay.env
   echo "NODE_IP=192.168.178.93:3300" >> /mnt/hdd/temp/sphinxrelay.env
   sudo mv /mnt/hdd/temp/sphinxrelay.env /home/sphinxrelay/sphinxrelay.env
   sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinxrelay.env
+
+  echo "# ok - written env values to: /home/sphinxrelay/sphinxrelay.env"
   exit 0
 fi
 
