@@ -101,7 +101,7 @@ if [ "$1" = "status" ]; then
 
     localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
-    echo "httpsPort='5001'"
+    echo "httpsPort='3301'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEnryptDomain for DynDns
@@ -235,7 +235,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 3300 comment 'sphinxrelay'
+    sudo ufw allow 3300 comment 'sphinxrelay HTTP'
+    sudo ufw allow 3301 comment 'sphinxrelay HTTPS'
     echo ""
 
     # install service
