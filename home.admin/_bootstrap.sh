@@ -557,7 +557,7 @@ if [ ${loaded} -gt 0 ]; then
 fi
 
 ################################
-# DELETE LOG FILES
+# DELETE LOG & LOCK FILES
 ################################
 # LND and Blockchain Errors will be still in systemd journals
 
@@ -565,6 +565,8 @@ fi
 sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+# https://github.com/rootzoll/raspiblitz/issues/1700
+sudo rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
 #####################################
 # CLEAN HDD TEMP
