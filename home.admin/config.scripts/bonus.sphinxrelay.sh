@@ -72,19 +72,22 @@ fi
 
 # status
 if [ "$1" = "write-environment" ]; then
-  
+
+  # update node ip in config
+  sudo jq ".production.node_ip = \"192.168.178.94\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
+  sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
+
   # prepare production configs (loaded by nodejs app)
   sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
   sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
   echo "# ok - copied fresh config.json & app.json into dist directory"
 
-  # update environment file (loaded by systemd service)
-  echo "NODE_ENV=production" > /mnt/hdd/temp/sphinxrelay.env
-  echo "NODE_IP=192.168.178.93:3300" >> /mnt/hdd/temp/sphinxrelay.env
-  sudo mv /mnt/hdd/temp/sphinxrelay.env /home/sphinxrelay/sphinxrelay.env
-  sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinxrelay.env
-
-  echo "# ok - written env values to: /home/sphinxrelay/sphinxrelay.env"
+  ## update environment file (loaded by systemd service)
+  #echo "NODE_ENV=production" > /mnt/hdd/temp/sphinxrelay.env
+  #echo "NODE_IP=192.168.178.93:3300" >> /mnt/hdd/temp/sphinxrelay.env
+  #sudo mv /mnt/hdd/temp/sphinxrelay.env /home/sphinxrelay/sphinxrelay.env
+  #sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinxrelay.env
+  # echo "# ok - written env values to: /home/sphinxrelay/sphinxrelay.env"
   exit 0
 fi
 
@@ -243,8 +246,8 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/sphinxrelay/sphinx-relay
-EnvironmentFile=/home/sphinxrelay/sphinxrelay.env
-ExecStart=/usr/bin/node dist/app.js
+ExecStartPre=/home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
+ExecStart=env NODE_ENV=production /usr/bin/node dist/app.js
 User=sphinxrelay
 Restart=always
 TimeoutSec=120
