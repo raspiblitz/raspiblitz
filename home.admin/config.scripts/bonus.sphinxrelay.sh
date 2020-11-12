@@ -145,7 +145,7 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
-if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
+if [ "$1" = "sync" ]; then
   echo "# pull all changes from github repo"
   # output basic info
   cd /home/sphinxrelay/sphinx-relay
@@ -153,6 +153,10 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   sudo git branch -v
   # pull latest code
   sudo git pull
+  # update npm installs
+  npm install
+  # write environment
+  /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
   # restart service
   sudo systemctl restart sphinxrelay
   echo "# server is restarting ... maybe takes some seconds until available"
@@ -218,7 +222,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
     # write environment
-    /home/admin/config.scripts/bonus.sphinxtrelay.sh write-environment
+    /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
 
     # open firewall
     echo
