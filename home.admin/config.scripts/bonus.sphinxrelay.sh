@@ -222,7 +222,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/sphinxrelay/sphinx-relay
-ExecStart=env NODE_ENV=production /usr/bin/node dist/app.js
+ExecStart=env NODE_ENV=production NODE_IP=192.168.178.93:3300 production /usr/bin/node dist/app.js
 User=sphinxrelay
 Restart=always
 TimeoutSec=120
