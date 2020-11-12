@@ -6,7 +6,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Sphinx-Relay on/off"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.sphinxrelay.sh [off|status|menu|write-macaroons]"
+  echo "bonus.sphinxrelay.sh [off|status|menu|set-environment]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
@@ -68,6 +68,13 @@ fi
 # add default value to raspi config if needed
 if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
   echo "sphinxrelay=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+# status
+if [ "$1" = "set-environment" ]; then
+  echo "NODE_ENV=production"
+  echo "NODE_IP=192.168.178.93:3300"
+  exit 0
 fi
 
 # status
@@ -222,7 +229,8 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/sphinxrelay/sphinx-relay
-ExecStart=env NODE_ENV=production NODE_IP=192.168.178.93:3300 production /usr/bin/node dist/app.js
+EnvironmentFile=/home/admin/config.scripts/bonus.sphinxrelay.sh set-environment
+ExecStart=/usr/bin/node dist/app.js
 User=sphinxrelay
 Restart=always
 TimeoutSec=120
