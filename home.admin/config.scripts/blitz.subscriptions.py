@@ -364,7 +364,7 @@ def main():
             service_name = SERVICE_SPHINX
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/sphinxrelay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-            tor_port = 3302
+            tor_port = 443
         if tag == "SELF":
             service_name = "CUSTOM"
             try:

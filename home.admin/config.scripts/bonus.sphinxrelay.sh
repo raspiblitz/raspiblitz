@@ -300,7 +300,7 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 3302 3302 3303 3303
+    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
   fi
   exit 0
 fi
