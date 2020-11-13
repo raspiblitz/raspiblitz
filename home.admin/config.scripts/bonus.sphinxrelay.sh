@@ -310,7 +310,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   elif [ "$2" = "--keep-data" ]; then
     deleteData=0
   else
-    if (whiptail --title " DELETE DATA? " --yesno "Do you want to delete\nthe SphinxRelay Server Data?" 8 30); then
+    if (whiptail --title " DELETE DATA? " --yesno "Do you want to delete\nthe SphinxRelay Data?" 8 30); then
       deleteData=1
    else
       deleteData=0
