@@ -77,9 +77,9 @@ if [ "$1" = "write-environment" ]; then
 
   # update node ip in config
 
-  sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | 
-  jq ".production.public_url = \"http://test2:3300\"" | 
-  jq ".production.media_host = \"test2\"" | 
+  sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | \
+  jq ".production.public_url = \"http://test2:3300\"" | \
+  jq ".production.media_host = \"test2\"" | \
   sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
 
   #sudo jq ".production.public_url = \"http://${localIP}:3300\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
