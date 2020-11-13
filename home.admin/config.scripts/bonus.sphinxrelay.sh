@@ -25,6 +25,7 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
   fi
 
+  extraPairInfo=""
   text="Go to https://sphinx.chat and download the Sphinx Chat app."
 
   # When IP2TOR AND LETS ENCRYPT
@@ -39,7 +40,6 @@ SHA1 ${sslFingerprintTOR}"
 IP2TOR: https://${ip2torIP}:${ip2torPort}
 For this connection to be secure it needs LetsEncrypt HTTPS
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
-
   # When PublicDomain (dyndns)
   elif [ ${#publicDomain} -gt 0 ]; then
      text="${text}\n
@@ -54,6 +54,7 @@ within the local network - without transport encryption.
 Local server for test & debug: http://${localIP}:${httpPort}\n
 To enable easy reachability from the outside consider
 adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+   extraPairInfo="You need to be on the same local network to make this work."
   fi
 
   text="${text}\n\nUse 'Connect App' to pair Sphinx App with RaspiBlitz."
@@ -67,8 +68,19 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
 
   # show qr code on LCD & console
   /home/admin/config.scripts/blitz.lcd.sh qr "${connectionCode}"
-  /home/admin/config.scripts/blitz.lcd.sh qr-console "${connectionCode}"
-  /home/admin/config.scripts/blitz.lcd.sh hide
+	whiptail --title " Connect App with Sphinx Relay " \
+	  --yes-button "Continue" \
+		--no-button "Show QR Code" \
+		--yesno "Open the Sphinx Chat app and scan the QR code (on LCD or from 'Show QR Code').\n${extraPairInfo}" 13 65
+	  if [ $? -eq 1 ]; then
+      clear
+      qrencode -t ANSI256 "${connectionCode}"
+      /home/admin/config.scripts/blitz.lcd.sh hide
+      echo "--> Scan this code (or the on on the LCD) with your Sphinx Chat App"
+      echo "(To shrink QR code: macOS press CMD- / LINUX press CTRL-)"
+      echo "Press ENTER when finished."
+      read key
+	  fi
 
   exit 0
 fi
@@ -209,7 +221,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="v1.0.13"
+    githubBranch="v1.0.14"
     if [ "$3" != "" ]; then
       githubBranch="$3"
     fi
