@@ -71,7 +71,10 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
 	whiptail --title " Connect App with Sphinx Relay " \
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
-		--yesno "Open the Sphinx Chat app and scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n\nThe connection string in clear text is:\n${connectionCode}\n\n${extraPairInfo}" 12 65
+		--yesno "Open the Sphinx Chat app and scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
+The connection string in clear text is:
+${connectionCode}\n
+${extraPairInfo}" 13 69
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
@@ -122,7 +125,7 @@ if [ "$1" = "status" ]; then
 
     # get connection string from file
     connectionCode="base64TODOnkdjhoaisdhoashdoahdiashdiasdadasdasdsad="
-    echo "connectionCode='${publicIP}'"
+    echo "connectionCode='${connectionCode}'"
 
     # check for LetsEnryptDomain for DynDns
     error=""
