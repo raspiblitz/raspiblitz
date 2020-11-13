@@ -128,9 +128,10 @@ if [ "$1" = "status" ]; then
       source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
         echo "ip2torDomain='${domain}'"
-        domainWarning=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".warning")
-        if [ ${#domainWarning} -gt 0 ]; then
-          echo "ip2torWarn='${domainWarning}'"
+        # by default the relay gives a 404 .. so just test of no HTTP code at all comes back
+        httpcode=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".https_response")
+        if [ "${httpcode}" = "0" ]; then
+          echo "ip2torWarn='Not able to get HTTPS response.'"
         fi
       fi
     fi
