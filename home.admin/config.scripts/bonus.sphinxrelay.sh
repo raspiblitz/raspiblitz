@@ -53,7 +53,7 @@ At the moment your Sphinx Relay Server is just available
 within the local network - without transport encryption.
 Local server for test & debug: http://${localIP}:${httpPort}\n
 To enable easy reachability from the outside consider
-adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
    extraPairInfo="You need to be on the same local network to make this work."
   fi
 
