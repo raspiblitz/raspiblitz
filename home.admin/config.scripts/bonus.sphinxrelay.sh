@@ -71,7 +71,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
 	whiptail --title " Connect App with Sphinx Relay " \
 	  --yes-button "Continue" \
 		--no-button "Show QR Code" \
-		--yesno "Open the Sphinx Chat app and scan the QR code (on LCD or from 'Show QR Code').\n${extraPairInfo}" 13 65
+		--yesno "Open the Sphinx Chat app and scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n\n${extraPairInfo}" 10 65
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
