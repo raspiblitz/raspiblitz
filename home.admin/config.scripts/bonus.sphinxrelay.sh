@@ -25,37 +25,35 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
   fi
 
-  text="Choose 'Connect App' option to connect Sphinx Chat App with RaspiBlitz."
+  text="Use 'Connect App' to connect Sphinx Chat App with RaspiBlitz."
 
-  text="${text}\nSphinx Relay Server running locally: http://${localIP}:${httpPort}"
-
-  if [ ${#publicDomain} -gt 0 ]; then
-     text="${text}\n
-Public Domain: https://${publicDomain}:${httpsPort}
-port forwarding on router needs to be active & may change port" 
-  fi
-
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
-    text="${text}\n
-TOR Browser Hidden Service address (QR see LCD):
-${toraddress}"
-  fi
-  
+  # When IP2TOR AND LETS ENCRYPT
   if [ ${#ip2torDomain} -gt 0 ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
 SHA1 ${sslFingerprintTOR}"
+
+  # When just IP2TOR (inbetween step)
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}
+For this connection to be secure it needs LetsEncrypt HTTPS
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
-  elif [ ${#publicDomain} -eq 0 ]; then
+
+  # When PublicDomain (dyndns)
+  elif [ ${#publicDomain} -gt 0 ]; then
+     text="${text}\n
+Public Domain: https://${publicDomain}:${httpsPort}
+port forwarding on router needs to be active & may change port" 
+
+  # When nothing advise 
+  else
     text="${text}\n
-To enable easy reachability with normal browser from the outside
-consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+To enable easy reachability from the outside consider
+adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
+
+  text="${text}\n\nLocal address for test and debug: http://${localIP}:${httpPort}"
   
   whiptail --title " SPHINX RELAY " --yes-button "Back" --no-button "Connect App" --yesno "${text}" 15 69
   response=$?
@@ -101,6 +99,7 @@ if [ "$1" = "status" ]; then
     localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "httpsPort='3301'"
+    echo "httpPort='3300'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEnryptDomain for DynDns
