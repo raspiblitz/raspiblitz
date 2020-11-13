@@ -72,8 +72,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
-The connection string in clear text is:
-${connectionCode}\n
+The connection string in clear text is: ${connectionCode}\n
 ${extraPairInfo}" 13 70
 	  if [ $? -eq 1 ]; then
       clear
@@ -94,6 +93,7 @@ if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # write environment configs fresh before every start
+# IMPORTANT: all this needs to work without sudo because will run from systemd as pshinxrelay user
 if [ "$1" = "write-environment" ]; then
 
   # set default public ip
@@ -103,8 +103,7 @@ if [ "$1" = "write-environment" ]; then
   port="3300"
 
   # now check if there is a IP2TOR bridge for SPHINX
-
- 
+  # TODO
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
