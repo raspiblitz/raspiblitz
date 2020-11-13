@@ -478,7 +478,7 @@ if [ "$1" = "update" ]; then
   sudo apt build-dep -y tor deb.torproject.org-keyring
   rm -rf /home/admin/download/debian-packages
   mkdir -p /home/admin/download/debian-packages
-  cd home/admin/download/debian-packages
+  cd /home/admin/download/debian-packages
   echo "# Building Tor from the source code ..."
   apt source tor
   cd tor-*
