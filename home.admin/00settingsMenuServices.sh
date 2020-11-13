@@ -42,7 +42,7 @@ OPTIONS+=(f 'Faraday' ${faraday})
 OPTIONS+=(c 'Lightning Pool' ${pool})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
-OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+OPTIONS+=(d 'Sphinx-Relay' ${sphinxrelay})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -366,7 +366,7 @@ else
 fi
 
 # Sphinx Relay
-choice="off"; check=$(echo "${CHOICES}" | grep -c "x")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${pool}" != "${choice}" ]; then
   echo "Sphinx-Relay Setting changed .."
