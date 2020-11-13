@@ -77,7 +77,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
       qrencode -t ANSI256 "${connectionCode}"
       /home/admin/config.scripts/blitz.lcd.sh hide
       echo "--> Scan this code (or the on on the LCD) with your Sphinx Chat App"
-      echo "(To shrink QR code: macOS press CMD- / LINUX press CTRL-)"
+      echo "To shrink QR code: macOS press CMD- / LINUX press CTRL-"
       echo "Press ENTER when finished."
       read key
 	  fi
