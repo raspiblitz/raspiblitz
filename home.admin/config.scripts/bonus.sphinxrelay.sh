@@ -25,7 +25,7 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
   fi
 
-  text="Use 'Connect App' to pair Sphinx Chat App with RaspiBlitz."
+  text="Go to https://sphinx.chat and download the Sphinx Chat app."
 
   # When IP2TOR AND LETS ENCRYPT
   if [ ${#ip2torDomain} -gt 0 ]; then
@@ -49,12 +49,15 @@ port forwarding on router needs to be active & may change port"
   # When nothing advise 
   else
     text="${text}\n
+At the moment your Sphinx Relay Server is just available
+within the local network - without transport encryption.
+Local server for test & debug: http://${localIP}:${httpPort}\n
 To enable easy reachability from the outside consider
 adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  text="${text}\n\nLocal server for test & debug: http://${localIP}:${httpPort}"
-  
+  text="${text}\n\nUse 'Connect App' to pair Sphinx App with RaspiBlitz."
+
   whiptail --title " SPHINX RELAY " --yes-button "Back" --no-button "Connect App" --yesno "${text}" 15 69
   response=$?
   /home/admin/config.scripts/blitz.lcd.sh hide
