@@ -25,16 +25,15 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
   fi
 
-  text="Local Webrowser: https://${localIP}:${httpsPort}"
+  text="Choose 'Connect App' option to connect Sphinx Chat App with RaspiBlitz."
+
+  text="${text}\nSphinx Relay Server running locally: http://${localIP}:${httpPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
-     text="${text}
+     text="${text}\n
 Public Domain: https://${publicDomain}:${httpsPort}
 port forwarding on router needs to be active & may change port" 
   fi
-
-  text="${text}
-SHA1 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
@@ -57,10 +56,15 @@ go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
 To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
-
-  whiptail --title " SPHINX RELAY " --msgbox "${text}" 15 69
   
+  whiptail --title " SPHINX RELAY " --yes-button "Back" --no-button "Connect App" --yesno "${text}" 15 69
+  response=$?
   /home/admin/config.scripts/blitz.lcd.sh hide
+  if [ "${response}" = "1" ]; then
+    echo "TODO: Connect App"
+  fi
+  sleep 5
+
   echo "please wait ..."
   exit 0
 fi
