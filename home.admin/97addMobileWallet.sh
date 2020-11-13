@@ -158,9 +158,21 @@ case $CHOICE in
   	exit 1;
     ;;
 	SPHINX)
-	  whiptail --title " Install Sphinx App " --msgbox "Go to https://sphinx.chat\n\nMake sure to have the app installed on your Android or iOS smartphone." 10 42
-	  checkIP2TOR SPHINX
-      /home/admin/config.scripts/bonus.lndconnect.sh sphinx ${connect}
+	  if [ "${sphinxrelay}" != "on" ]; then
+	  	whiptail --title " Install Sphinx Relay Server? " \
+	    --yes-button "Install" \
+		--no-button "Cancel" \
+		--yesno "To use the Sphinx Chat App you need to install the Sphinx Relay Server on your RaspiBlitz. You can deinstall it under SERVICES if needed.\n\n Do you want to install the Sphinx Relay Server now?" 10 60
+	  	if [ $? -eq 1 ]; then
+		  echo "TODO install"
+	      # /home/admin/config.scripts/bonus.sphinxrelay.sh on
+	  	fi
+	  fi
+	  echo "done"
+	  sleep 5
+	  exit 1
+	  # make pairing thru sphinx relay script
+      /home/admin/config.scripts/bonus.sphinxrelay.sh menu
 	  exit 1;
 	  ;;
 	SHANGO_IOS)

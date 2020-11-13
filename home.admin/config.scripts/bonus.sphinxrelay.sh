@@ -58,14 +58,18 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
 
   text="${text}\n\nUse 'Connect App' to pair Sphinx App with RaspiBlitz."
 
-  whiptail --title " SPHINX RELAY " --yes-button "Back" --no-button "Connect App" --yesno "${text}" 15 69
+  whiptail --title " SPHINX RELAY " --yes-button "Connect App" --no-button "Back" --yesno "${text}" 15 69
   response=$?
-  /home/admin/config.scripts/blitz.lcd.sh hide
-  if [ "${response}" = "1" ]; then
-    /home/admin/config.scripts/bonus.lndconnect.sh sphinx
+  if [ "${response}" == "1" ]; then
+      echo "please wait ..."
+      exit 0
   fi
 
-  echo "please wait ..."
+  # show qr code on LCD & console
+  /home/admin/config.scripts/blitz.lcd.sh qr "${connectionCode}"
+  /home/admin/config.scripts/blitz.lcd.sh qr-console "${connectionCode}"
+  /home/admin/config.scripts/blitz.lcd.sh hide
+
   exit 0
 fi
 
@@ -103,6 +107,10 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='3301'"
     echo "httpPort='3300'"
     echo "publicIP='${publicIP}'"
+
+    # get connection string from file
+    connectionCode="base64TODOnkdjhoaisdhoashdoahdiashdiasdadasdasdsad="
+    echo "connectionCode='${publicIP}'"
 
     # check for LetsEnryptDomain for DynDns
     error=""
