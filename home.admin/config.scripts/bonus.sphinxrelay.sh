@@ -76,12 +76,18 @@ if [ "$1" = "write-environment" ]; then
   localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
   # update node ip in config
-  sudo jq ".production.public_url = \"http://${localIP}:3300\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
-  sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
+
+  sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | 
+  jq ".production.public_url = \"http://test2:3300\"" | 
+  jq ".production.media_host = \"test2\"" | 
+  sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
+
+  #sudo jq ".production.public_url = \"http://${localIP}:3300\"" /home/sphinxrelay/sphinx-relay/config/app.json > /mnt/hdd/temp/tmp && sudo mv /mnt/hdd/temp/tmp /home/sphinxrelay/sphinx-relay/config/app.json
+  #sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
   # prepare production configs (loaded by nodejs app)
-  sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
-  sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
+  #sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
+  #sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/dist/config/config.json
   echo "# ok - copied fresh config.json & app.json into dist directory"
 
   exit 0
