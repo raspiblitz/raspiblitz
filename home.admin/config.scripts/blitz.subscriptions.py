@@ -360,7 +360,7 @@ def main():
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "SPHINX":
-            # get TOR address for SPINX
+            # get TOR address for SPHINX
             service_name = SERVICE_SPHINX
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/sphinxrelay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
