@@ -162,15 +162,15 @@ case $CHOICE in
 	  	whiptail --title " Install Sphinx Relay Server? " \
 	    --yes-button "Install" \
 		--no-button "Cancel" \
-		--yesno "To use the Sphinx Chat App you need to install the Sphinx Relay Server on your RaspiBlitz. If you want to deinstall the relay later on, just switch it off under MENU > SERVICES.\n\n Do you want to install the Sphinx Relay Server now?" 14 60
+		--yesno "To use the Sphinx Chat App you need to install the Sphinx Relay Server on your RaspiBlitz. If you want to deinstall the relay later on, just switch it off under MENU > SERVICES.\n\nDo you want to install the Sphinx Relay Server now?" 14 60
 	  	if [ "$?" = "0" ]; then
-		  echo "TODO install"
-	      # /home/admin/config.scripts/bonus.sphinxrelay.sh on
-	  	fi
+	      /home/admin/config.scripts/bonus.sphinxrelay.sh on
+	  	else
+		  echo "No install ... returning to main menu."
+		  sleep 2
+	  	  exit 0
+		fi
 	  fi
-	  echo "done"
-	  sleep 5
-	  exit 1
 	  # make pairing thru sphinx relay script
       /home/admin/config.scripts/bonus.sphinxrelay.sh menu
 	  exit 1;
