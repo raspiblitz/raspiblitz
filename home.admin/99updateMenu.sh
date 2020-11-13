@@ -297,6 +297,9 @@ fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
 fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Update Lightning Pool")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -326,5 +329,8 @@ case $CHOICE in
     ;;
   PYBLOCK)
     /home/admin/config.scripts/bonus.pyblock.sh update
+    ;;
+  POOL)
+    /home/admin/config.scripts/bonus.pool.sh update  
     ;;
 esac
