@@ -8,7 +8,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on|update]"
  exit 1
 fi
 
@@ -239,11 +239,13 @@ fi
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
 
-# stop services (if running)
-echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
-sudo systemctl stop ${network}d 2>/dev/null
-sudo systemctl stop tor@default 2>/dev/null
+if [ "$1" != "update" ]; then 
+  # stop services (if running)
+  echo "making sure services are not running"
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop tor@default 2>/dev/null
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -463,6 +465,32 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "needs reboot to activate new setting"
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  # as in https://2019.www.torproject.org/docs/debian#source
+  prepareTorSources
+  echo "# Install the dependencies"
+  sudo apt update
+  sudo apt install -y build-essential fakeroot devscripts
+  sudo apt build-dep -y tor deb.torproject.org-keyring
+  rm -rf /home/admin/download/debian-packages
+  mkdir -p /home/admin/download/debian-packages
+  cd home/admin/download/debian-packages
+  echo "# Building Tor from the source code ..."
+  apt source tor
+  cd tor-*
+  debuild -rfakeroot -uc -us
+  cd ..
+  echo "# Stopping the tor.service before updating"
+  sudo systemctl stop tor
+  echo "# Update ..."
+  sudo dpkg -i tor_*.deb
+  echo "# Starting the tor.service "
+  sudo systemctl start tor
+  echo "# Installed $(tor --version)"
   exit 0
 fi
 
