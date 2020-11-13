@@ -135,7 +135,8 @@ checkIP2TOR()
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
-        ZEUS_ANDROID "Zeus Wallet (Android)"
+        ZEUS_ANDROID "Zeus Wallet (Android)" \
+		SPHINX "Sphinx Chat (Android or iOS)"
 	)
 
 # add SEND MANY APP
@@ -156,6 +157,12 @@ case $CHOICE in
   CLOSE)
   	exit 1;
     ;;
+	SPHINX)
+	  whiptail --title " Install Sphinx App " --msgbox "Go to https://sphinx.chat\n\nMake sure to have the app installed on your Android or iOS smartphone." 10 42
+	  checkIP2TOR SPHINX
+      /home/admin/config.scripts/bonus.lndconnect.sh sphinx ${connect}
+	  exit 1;
+	  ;;
 	SHANGO_IOS)
 	  appstoreLink="https://testflight.apple.com/join/WwCjFnS8"
 	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
