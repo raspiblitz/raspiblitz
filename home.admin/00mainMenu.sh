@@ -110,6 +110,9 @@ fi
 if [ "${pool}" == "on" ]; then
   OPTIONS+=(POOL "Lightning Pool")
 fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Sphinx Chat Relay")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -248,6 +251,9 @@ case $CHOICE in
             ;;
         POOL)
             sudo /home/admin/config.scripts/bonus.pool.sh menu
+            ;;
+        SPHINX)
+            sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
