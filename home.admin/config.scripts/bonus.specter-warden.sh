@@ -97,8 +97,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/specter-warden.service 2>/dev/null | grep -c 'specter-warden.service' || /bin/true)
   if [ ${isInstalled} -eq 0 ]; then
 
-	sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install --upgrade gunicorn
-
 	cd /home/bitcoin/.specter
     sudo -u bitcoin git clone https://github.com/pxsocs/specter_warden.git
 	cd specter_warden
@@ -107,15 +105,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 	sudo -u bitcoin /home/bitcoin/.specter/.env/bin/python3 -m pip install -r requirements.txt --upgrade
 
     # activating Authentication here ...
-    echo "#    --> creating App-config"
-    cat > /home/admin/wsgi.py <<EOF
-from warden import create_app
-
-app = create_app()
-EOF
-
-	sudo mv /home/admin/wsgi.py /home/bitcoin/.specter/specter_warden/
-    sudo chown bitcoin:bitcoin /home/bitcoin/.specter/specter_warden/wsgi.py
 
     # open firewall
     echo "#    --> Updating Firewall"
@@ -132,17 +121,10 @@ After = network.target
 
 [Service]
 PermissionsStartOnly = true
-PIDFile = /run/warden/warden.pid
 User = bitcoin
 Group = bitcoin
 WorkingDirectory = /home/bitcoin/.specter/specter_warden
-ExecStartPre = /bin/mkdir /run/warden
-ExecStartPre = /bin/chown -R bitcoin:bitcoin /run/warden
-ExecStart = /home/bitcoin/.specter/.env/bin/gunicorn --certfile /home/bitcoin/.specter/cert.pem --keyfile /home/bitcoin/.specter/key.pem --workers=1 wsgi:app -b 0.0.0.0:25442 --pid /run/warden/warden.pid
-ExecReload = /bin/kill -s HUP $MAINPID
-ExecStop = /bin/kill -s TERM $MAINPID
-ExecStopPost = /bin/rm -rf /run/warden
-PrivateTmp = true
+ExecStart = /home/bitcoin/.specter/.env/bin/flask run --cert /home/bitcoin/.specter/cert.pem --key /home/bitcoin/.specter/key.pem --port 25442 --host '0.0.0.0'
 
 [Install]
 WantedBy = multi-user.target
