@@ -93,14 +93,22 @@ if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
   echo "sphinxrelay=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
-# status
+# write environment configs fresh before every start
 if [ "$1" = "write-environment" ]; then
 
+  # set default public ip
   localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  protocol="http://"
+  domain="${localIP}"
+  port="3300"
+
+  # now check if there is a IP2TOR bridge for SPHINX
+
+ 
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-  jq ".production.public_url = \"http://${localIP}:3300\"" | \
+  jq ".production.public_url = \"${protocol}${localIP}:${port}\"" | \
   tee /home/sphinxrelay/sphinx-relay/config/app.json
 
   # prepare production configs (loaded by nodejs app)
@@ -124,7 +132,7 @@ if [ "$1" = "status" ]; then
     echo "publicIP='${publicIP}'"
 
     # get connection string from file
-    connectionCode="base64TODOnkdjhoaisdhoashdoahdiashdiasdadasdasdsad="
+    connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
     echo "connectionCode='${connectionCode}'"
 
     # check for LetsEnryptDomain for DynDns
@@ -256,6 +264,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     jq ".production.lnd_log_location = \"/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log\"" | \
     jq ".production.node_http_port = \"3300\"" | \
     sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
+
+    # set permissions on connection string
+    sudo -u sphinxrelay touch /home/sphinxrelay/sphinx-relay/connection_string.txt
+    sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
 
     # write environment
     /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
