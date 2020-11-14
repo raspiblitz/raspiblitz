@@ -319,8 +319,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
 
     # set permissions on connection string
-    sudo -u sphinxrelay touch /home/sphinxrelay/sphinx-relay/connection_string.txt
-    sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
+    # sudo -u sphinxrelay touch /home/sphinxrelay/sphinx-relay/connection_string.txt
+    # sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
 
     # write environment
     /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
