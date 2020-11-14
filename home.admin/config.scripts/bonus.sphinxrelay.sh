@@ -29,33 +29,42 @@ if [ "$1" = "menu" ]; then
   text="Go to https://sphinx.chat and download the Sphinx Chat app."
 
   # When IP2TOR AND LETS ENCRYPT
-  if [ ${#ip2torDomain} -gt 0 ]; then
+  if [ ${connection} = "ip2tor&letsencrypt" ]; then
     text="${text}\n
-IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
+IP2TOR+LetsEncrypt: ${publicURL}
 SHA1 ${sslFingerprintTOR}"
 
-  # When just IP2TOR (inbetween step)
-  elif [ ${#ip2torIP} -gt 0 ]; then
+  # When DynDNS & LETSENCRYPT
+  elif [ ${connection} = "dns&letsencrypt" ]; then
+     text="${text}\n
+Public Domain: ${publicURL}
+port forwarding on router needs to be active & may change port" 
+
+  # When just IP2TOR
+  elif [ ${connection} = "ip2tor&selfsigned" ]; then
     text="${text}\n
-IP2TOR: https://${ip2torIP}:${ip2torPort}
+IP2TOR: ${publicURL}
 For this connection to be secure it needs LetsEncrypt HTTPS
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
 
-  # When PublicDomain (dyndns)
-  elif [ ${#publicDomain} -gt 0 ]; then
+  # When DynDNS
+  elif [ ${connection} = "dns&selfsigned" ]; then
      text="${text}\n
-Public Domain: https://${publicDomain}:${httpsPort}
-port forwarding on router needs to be active & may change port" 
+Public Domain: ${publicURL}
+port forwarding on router needs to be active & may change port"
 
   # When nothing advise 
-  else
+  elif [ ${connection} = "localnetwork" ]; then
     text="${text}\n
 At the moment your Sphinx Relay Server is just available
 within the local network - without transport encryption.
-Local server for test & debug: http://${localIP}:${httpPort}\n
+Local server for test & debug: ${publicURL}\n
 To enable easy reachability from the outside consider
 adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
    extraPairInfo="You need to be on the same local network to make this work."
+
+  else
+    text="${text}\nUnknown Connection!"
   fi
 
   text="${text}\n\nUse 'Connect App' to pair Sphinx App with RaspiBlitz."
@@ -97,19 +106,12 @@ fi
 # IMPORTANT: all this needs to work without sudo because will run from systemd as sphinxrelay user
 if [ "$1" = "write-environment" ]; then
 
-  # set default public ip
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  protocol="http://"
-  domain="${localIP}"
-  port="3300"
-
-  # now check if there is a IP2TOR bridge for SPHINX
-
-  
+  # get basic data from status
+  source <(/home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-  jq ".production.public_url = \"${protocol}${localIP}:${port}\"" | \
+  jq ".production.public_url = \"${publicURL}\"" | \
   tee /home/sphinxrelay/sphinx-relay/config/app.json
 
   # prepare production configs (loaded by nodejs app)
