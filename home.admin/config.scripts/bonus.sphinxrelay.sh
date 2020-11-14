@@ -40,6 +40,7 @@ SHA1 ${sslFingerprintTOR}"
 IP2TOR: https://${ip2torIP}:${ip2torPort}
 For this connection to be secure it needs LetsEncrypt HTTPS
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+
   # When PublicDomain (dyndns)
   elif [ ${#publicDomain} -gt 0 ]; then
      text="${text}\n
@@ -125,70 +126,113 @@ if [ "$1" = "status" ]; then
 
   if [ "${sphinxrelay}" = "on" ]; then
     echo "installed=1"
-
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    echo "localIP='${localIP}'"
-    echo "httpsPort='3301'"
-    echo "httpPort='3300'"
-    echo "publicIP='${publicIP}'"
-
-    # get connection string from file
-    connectionCode=$(cat /home/sphinxrelay/sphinx-relay/connection_string.txt 2>/dev/null)
-    if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ]; then
-      # try again with sodu
-      connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
-    fi
-    echo "connectionCode='${connectionCode}'"
-
-    # check for LetsEnryptDomain for DynDns
-    error=""
-    source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
-    if [ ${#error} -eq 0 ]; then
-      echo "publicDomain='${domain}'"
-    fi
-
-    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-    echo "sslFingerprintIP='${sslFingerprintIP}'"
-
-    toraddress=$(cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
-    echo "toraddress='${toraddress}'"
-
-    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
-
-    # check for IP2TOR
-    error=""
-    source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
-    if [ ${#error} -eq 0 ]; then
-      echo "ip2torType='${ip2tor-v1}'"
-      echo "ip2torID='${id}'"
-      echo "ip2torIP='${ip}'"
-      echo "ip2torPort='${port}'"
-      # check for LetsEnryptDomain on IP2TOR
-      error=""
-      source <(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
-      if [ ${#error} -eq 0 ]; then
-        echo "ip2torDomain='${domain}'"
-        # by default the relay gives a 404 .. so just test of no HTTP code at all comes back
-        httpcode=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".https_response")
-        if [ "${httpcode}" = "0" ]; then
-          echo "ip2torWarn='Not able to get HTTPS response.'"
-        fi
-      fi
-    fi
-
-    # check for error (only when sudo)
-    if [ "$EUID" -eq 0 ]; then
-      isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
-      if [ ${isDead} -eq 1 ]; then
-        echo "error='Service Failed'"
-        exit 1
-      fi
-    fi
-  
   else
     echo "installed=0"
   fi
+
+  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  echo "localIP='${localIP}'"
+  echo "httpsPort='3301'"
+  echo "httpPort='3300'"
+  echo "publicIP='${publicIP}'"
+
+  # get connection string from file
+  connectionCode=$(cat /home/sphinxrelay/sphinx-relay/connection_string.txt 2>/dev/null)
+  if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ]; then
+    # try again with sodu
+    connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
+  fi
+  echo "connectionCode='${connectionCode}'"
+
+  # check for LetsEnryptDomain for DynDns
+  error=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+  publicDomain="${domain}"
+  if [ ${#error} -eq 0 ]; then
+    echo "publicDomain='${publicDomain}'"
+  else
+    echo "publicDomain=''"
+  fi
+
+  sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+  echo "sslFingerprintIP='${sslFingerprintIP}'"
+
+  toraddress=$(cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+  echo "toraddress='${toraddress}'"
+
+  sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+  echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+
+  # check for IP2TOR
+  error=""
+  ip2torIP=""
+  ip2torPort=""
+  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
+  if [ ${#error} -eq 0 ]; then
+    ip2torIP="${ip}"
+    ip2torPort="${port}"
+    echo "ip2torType='${ip2tor-v1}'"
+    echo "ip2torID='${id}'"
+    echo "ip2torIP='${ip}'"
+    echo "ip2torPort='${port}'"
+    # check for LetsEnryptDomain on IP2TOR
+    error=""
+    source <(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
+    if [ ${#error} -eq 0 ]; then
+      ip2torDomain="${domain}"
+      echo "ip2torDomain='${ip2torDomain}'"
+      # by default the relay gives a 404 .. so just test of no HTTP code at all comes back
+      httpcode=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".https_response")
+      if [ "${httpcode}" = "0" ]; then
+        echo "ip2torWarn='Not able to get HTTPS response.'"
+      fi
+    fi
+  fi
+
+  # check for dyndomain
+
+  # check for error (only when sudo)
+  if [ "$EUID" -eq 0 ]; then
+    isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
+    if [ ${isDead} -eq 1 ]; then
+      echo "error='Service Failed'"
+      exit 1
+    fi
+  fi
+
+  # determnine the public url for the pairing code based on best setup
+  connection=""
+  publicURL=""
+
+  # 1) IP2TOR & LETS ENCRYPT HTTPS
+  if [ "${ip2torDomain}" != "" ]; then
+    connection="ip2tor&letsencrypt"
+    publicURL="https://${ip2torDomain}:${ip2torPort}"
+
+  # 2) DYNDNS & LETS ENCRYPT HTTPS (forwarding same port)
+  elif [ "${publicDomain}" != "" ]; then
+    connection="dns&letsencrypt"
+    publicURL="https://${publicDomain}:3301"
+
+  # 3) IP2TOR & SELFSIGNED HTTPS
+  elif [ "${ip2torIP}" != "" ]; then
+    connection="ip2tor&selfsigned"
+    publicURL="https://${ip2torIP}:${ip2torPort}"
+
+  # 4) DYNDOMAIN & SELFSIGNED HTTPS (forwarding same port)
+  elif [ "${dynDomain}" != "" ]; then
+    connection="dns&selfsigned"
+    publicURL="https://${dynDomain}:3301"
+
+  # 5) LOCAL NETWORK (just HTTP)
+  else
+    connection="localnetwork"
+    publicURL="http://${localIP}:3300"
+
+  fi
+  echo "connection='${connection}'"
+  echo "publicURL='${publicURL}'"
+
   exit 0
 fi
 
