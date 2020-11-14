@@ -93,7 +93,7 @@ if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # write environment configs fresh before every start
-# IMPORTANT: all this needs to work without sudo because will run from systemd as pshinxrelay user
+# IMPORTANT: all this needs to work without sudo because will run from systemd as sphinxrelay user
 if [ "$1" = "write-environment" ]; then
 
   # set default public ip
@@ -103,7 +103,8 @@ if [ "$1" = "write-environment" ]; then
   port="3300"
 
   # now check if there is a IP2TOR bridge for SPHINX
-  # TODO
+
+  
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
@@ -119,6 +120,7 @@ if [ "$1" = "write-environment" ]; then
 fi
 
 # status
+# IMPORTANT: make sure it can run as sphinxrelay user without sudo
 if [ "$1" = "status" ]; then
 
   if [ "${sphinxrelay}" = "on" ]; then
@@ -131,12 +133,16 @@ if [ "$1" = "status" ]; then
     echo "publicIP='${publicIP}'"
 
     # get connection string from file
-    connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
+    connectionCode=$(cat /home/sphinxrelay/sphinx-relay/connection_string.txt 2>/dev/null)
+    if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ]; then
+      # try again with sodu
+      connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
+    fi
     echo "connectionCode='${connectionCode}'"
 
     # check for LetsEnryptDomain for DynDns
     error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+    source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
     if [ ${#error} -eq 0 ]; then
       echo "publicDomain='${domain}'"
     fi
@@ -144,7 +150,7 @@ if [ "$1" = "status" ]; then
     sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    toraddress=$(cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
     sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
@@ -152,7 +158,7 @@ if [ "$1" = "status" ]; then
 
     # check for IP2TOR
     error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
+    source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
     if [ ${#error} -eq 0 ]; then
       echo "ip2torType='${ip2tor-v1}'"
       echo "ip2torID='${id}'"
@@ -160,20 +166,20 @@ if [ "$1" = "status" ]; then
       echo "ip2torPort='${port}'"
       # check for LetsEnryptDomain on IP2TOR
       error=""
-      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
+      source <(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
         echo "ip2torDomain='${domain}'"
         # by default the relay gives a 404 .. so just test of no HTTP code at all comes back
-        httpcode=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".https_response")
+        httpcode=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".https_response")
         if [ "${httpcode}" = "0" ]; then
           echo "ip2torWarn='Not able to get HTTPS response.'"
         fi
       fi
     fi
 
-    # check for error
+    # check for error (only when sudo)
     isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
+    if [ "$EUID" -eq 0 ] && [ ${isDead} -eq 1 ]; then
       echo "error='Service Failed'"
       exit 1
     fi
@@ -231,7 +237,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="v1.0.14"
+    githubBranch="v1.0.15"
     if [ "$3" != "" ]; then
       githubBranch="$3"
     fi
@@ -341,6 +347,8 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    # allow everybody to read the hostname (no need for sudo for read)
+    sudo chmod +r /mnt/hdd/tor/sphinxrelay/hostname
   fi
   exit 0
 fi
