@@ -1068,7 +1068,6 @@ def subscription_by_service():
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == service_name:
@@ -1102,7 +1101,6 @@ def ip_by_tor():
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and (sub['tor'] == onion or sub['tor'].split(":")[0] == onion):
