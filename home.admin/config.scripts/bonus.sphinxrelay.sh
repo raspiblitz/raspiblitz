@@ -178,12 +178,14 @@ if [ "$1" = "status" ]; then
     fi
 
     # check for error (only when sudo)
-    isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
-    if [ "$EUID" -eq 0 ] && [ ${isDead} -eq 1 ]; then
-      echo "error='Service Failed'"
-      exit 1
+    if [ "$EUID" -eq 0 ]; then
+      isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
+      if [ ${isDead} -eq 1 ]; then
+        echo "error='Service Failed'"
+        exit 1
+      fi
     fi
-
+  
   else
     echo "installed=0"
   fi
@@ -349,6 +351,8 @@ EOF
     /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
     # allow everybody to read the hostname (no need for sudo for read)
     sudo chmod +r /mnt/hdd/tor/sphinxrelay/hostname
+    sudo chmod +x /mnt/hdd/tor/sphinxrelay
+    sudo chmod +x /mnt/hdd/tor
   fi
   exit 0
 fi
