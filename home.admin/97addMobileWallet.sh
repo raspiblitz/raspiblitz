@@ -135,7 +135,8 @@ checkIP2TOR()
 OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
         ZAP_ANDROID "Zap Wallet (Android)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
-        ZEUS_ANDROID "Zeus Wallet (Android)"
+        ZEUS_ANDROID "Zeus Wallet (Android)" \
+		SPHINX "Sphinx Chat (Android or iOS)"
 	)
 
 # add SEND MANY APP
@@ -156,6 +157,24 @@ case $CHOICE in
   CLOSE)
   	exit 1;
     ;;
+	SPHINX)
+	  if [ "${sphinxrelay}" != "on" ]; then
+	  	whiptail --title " Install Sphinx Relay Server? " \
+	    --yes-button "Install" \
+		--no-button "Cancel" \
+		--yesno "To use the Sphinx Chat App you need to install the Sphinx Relay Server on your RaspiBlitz. If you want to deinstall the relay later on, just switch it off under MENU > SERVICES.\n\nDo you want to install the Sphinx Relay Server now?" 14 60
+	  	if [ "$?" = "0" ]; then
+	      /home/admin/config.scripts/bonus.sphinxrelay.sh on
+	  	else
+		  echo "No install ... returning to main menu."
+		  sleep 2
+	  	  exit 0
+		fi
+	  fi
+	  # make pairing thru sphinx relay script
+      /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+	  exit 1;
+	  ;;
 	SHANGO_IOS)
 	  appstoreLink="https://testflight.apple.com/join/WwCjFnS8"
 	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
