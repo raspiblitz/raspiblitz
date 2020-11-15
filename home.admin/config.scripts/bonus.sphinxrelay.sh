@@ -191,17 +191,6 @@ if [ "$1" = "status" ]; then
     fi
   fi
 
-  # check for dyndomain
-
-  # check for error (only when sudo)
-  if [ "$EUID" -eq 0 ]; then
-    isDead=$(sudo systemctl status sphinxrelay | grep -c 'inactive (dead)')
-    if [ ${isDead} -eq 1 ]; then
-      echo "error='Service Failed'"
-      exit 1
-    fi
-  fi
-
   # determnine the public url for the pairing code based on best setup
   connection=""
   publicURL=""
