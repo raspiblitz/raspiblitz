@@ -622,6 +622,8 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
             hosts = shopList(shopurl)
         except Exception as e:
             # shopurl not working
+            eprint(e)
+            time.sleep(3)
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 Cannot reach a shop under that address.
 Please check domain or cancel dialog.
