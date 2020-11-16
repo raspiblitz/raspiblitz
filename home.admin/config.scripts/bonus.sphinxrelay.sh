@@ -318,7 +318,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
 
     # write environment
-    /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
+    sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
 
     # open firewall
     echo
