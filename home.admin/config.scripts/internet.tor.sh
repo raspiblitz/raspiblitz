@@ -204,12 +204,6 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
 
-# make sure the network was set (by sourcing raspiblitz.conf)
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
-
 # if started with status
 if [ "$1" = "status" ]; then
   # is Tor activated
@@ -261,6 +255,12 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the TOR ON"
+
+  # make sure the network was set (by sourcing raspiblitz.conf)
+  if [ ${#network} -eq 0 ]; then
+    echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
+    exit 1
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
