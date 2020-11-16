@@ -80,14 +80,18 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
       exit 0
   fi
 
+  if [ ${#extraPairInfo} -eq 0 ]; then
+    extraPairInfo="The base64 decoded content is (for debug):\n${connectionCodeClear}"
+  fi
+
   # show qr code on LCD & console
   /home/admin/config.scripts/blitz.lcd.sh qr "${connectionCode}"
 	whiptail --title " Connect App with Sphinx Relay " \
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
-The connection string in clear text is: ${connectionCode}\n
-${extraPairInfo}" 13 70
+The connection string can also be copied if needed: ${connectionCode}\n
+${extraPairInfo}" 14 70
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
@@ -149,7 +153,11 @@ if [ "$1" = "status" ]; then
     connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
   fi
   echo "connectionCode='${connectionCode}'"
-
+  
+  # decode with base64 for debug
+  connectionCodeClear=$(echo -n "${connectionCode}" | base64 --decode)
+  echo "connectionCodeClear='${connectionCodeClear}'"
+  
   # check for LetsEnryptDomain for DynDns
   error=""
   source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
