@@ -45,16 +45,6 @@ fi
 prepareTorSources()
 {
 
-    # QUICKFIX: compile Tor from source
-    # https://github.com/rootzoll/raspiblitz/issues/1752
-    # remove once switched to a 64-bit RaspberryPi OS
-    if [ "${baseImage}" = "raspbian" ]; then
-      echo "TOR: COMPILE FROM SOURCE"
-      sudo /home/admin/config.scripts/internet.tor.sh update
-    else
-      echo "TOR: NOT COMPILING FROM SOURCE"
-    fi
-
     # Prepare for TOR service
     echo "*** INSTALL TOR REPO ***"
     echo ""
