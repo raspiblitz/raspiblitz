@@ -91,13 +91,13 @@ ${extraPairInfo}" 13 70
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
-      /home/admin/config.scripts/blitz.lcd.sh hide
       echo "--> Scan this code with your Sphinx Chat App"
       echo "To shrink QR code: macOS press CMD- / LINUX press CTRL-"
       echo "Press ENTER when finished."
       read key
 	  fi
 
+  /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
 fi
 
