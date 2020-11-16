@@ -32,7 +32,10 @@ if [ "$1" = "menu" ]; then
   if [ ${connection} = "ip2tor&letsencrypt" ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: ${publicURL}
-SHA1 ${sslFingerprintTOR}"
+SHA1 ${sslFingerprintTOR}\n
+If you connect your app with this setup you should be able to
+use it securly from everywhere.
+"
 
   # When DynDNS & LETSENCRYPT
   elif [ ${connection} = "dns&letsencrypt" ]; then
