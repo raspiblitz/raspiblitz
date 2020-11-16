@@ -400,6 +400,15 @@ EOF
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
+  if [ "${sphinxrelay}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+  fi
+
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
   echo "Setup logrotate"
   # add logrotate config for modified Tor dir on ext. disk

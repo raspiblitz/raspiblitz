@@ -163,7 +163,7 @@ if [ "$1" = "status" ]; then
   sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
   echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-  toraddress=$(cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+  toraddress=$(cat /home/sphinxrelay/sphinx-relay/dist/toraddress.txt 2>/dev/null)
   echo "toraddress='${toraddress}'"
 
   sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
@@ -388,10 +388,9 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
-    # allow everybody to read the hostname (no need for sudo for read)
-    sudo chmod +r /mnt/hdd/tor/sphinxrelay/hostname
-    sudo chmod +x /mnt/hdd/tor/sphinxrelay
-    sudo chmod +x /mnt/hdd/tor
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
   exit 0
 fi
