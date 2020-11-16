@@ -86,7 +86,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
-The connection string in clear text is: ${connectionCode}\n
+The connection string in clear text is: ${}\n
 ${extraPairInfo}" 13 70
 	  if [ $? -eq 1 ]; then
       clear
@@ -144,7 +144,7 @@ if [ "$1" = "status" ]; then
 
   # get connection string from file
   connectionCode=$(cat /home/sphinxrelay/sphinx-relay/connection_string.txt 2>/dev/null)
-  if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ]; then
+  if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ] && [ "$EUID" -eq 0 ]; then
     # try again with sodu
     connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
   fi
