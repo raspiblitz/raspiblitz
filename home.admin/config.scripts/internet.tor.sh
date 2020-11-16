@@ -7,7 +7,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch TOR on or off"
+ echo "script to switch TOR on or off"
  echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on|update]"
  exit 1
 fi
@@ -44,6 +44,17 @@ fi
 # function: install keys & sources
 prepareTorSources()
 {
+
+    # QUICKFIX: compile Tor from source
+    # https://github.com/rootzoll/raspiblitz/issues/1752
+    # remove once switched to a 64-bit RaspberryPi OS
+    if [ "${baseImage}" = "raspbian" ]; then
+      echo "TOR: COMPILE FROM SOURCE"
+      sudo /home/admin/config.scripts/internet.tor.sh update
+    else
+      echo "TOR: NOT COMPILING FROM SOURCE"
+    fi
+
     # Prepare for TOR service
     echo "*** INSTALL TOR REPO ***"
     echo ""
