@@ -312,7 +312,6 @@ def get_subscription(subscription_id):
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             return []
