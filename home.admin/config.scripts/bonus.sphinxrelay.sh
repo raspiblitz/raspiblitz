@@ -32,7 +32,10 @@ if [ "$1" = "menu" ]; then
   if [ ${connection} = "ip2tor&letsencrypt" ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: ${publicURL}
-SHA1 ${sslFingerprintTOR}"
+SHA1 ${sslFingerprintTOR}\n
+If you connect your app with this setup you should be able to
+use it securly from everywhere.
+"
 
   # When DynDNS & LETSENCRYPT
   elif [ ${connection} = "dns&letsencrypt" ]; then
@@ -43,9 +46,10 @@ port forwarding on router needs to be active & may change port"
   # When just IP2TOR
   elif [ ${connection} = "ip2tor&selfsigned" ]; then
     text="${text}\n
-IP2TOR: ${publicURL}
-For this connection to be secure it needs LetsEncrypt HTTPS
-go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+IP2TOR+self-signed-HTTPS: ${publicURL}\n
+IMPORTANT: For this connection to work & be secure it needs a
+additional Domain with LetsEncrypt certificate for HTTPS:
+MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
 
   # When DynDNS
   elif [ ${connection} = "dns&selfsigned" ]; then
