@@ -297,6 +297,9 @@ fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
 fi
+if [ "${loop}" == "on" ]; then
+  OPTIONS+=(LOOP "Update Lightning Loop")
+fi
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
 fi
@@ -332,6 +335,9 @@ case $CHOICE in
     ;;
   POOL)
     /home/admin/config.scripts/bonus.pool.sh update  
+    ;;
+  LOOP)
+    /home/admin/config.scripts/bonus.loop.sh update  
     ;;
   TOR)
     sudo /home/admin/config.scripts/internet.tor.sh update  
