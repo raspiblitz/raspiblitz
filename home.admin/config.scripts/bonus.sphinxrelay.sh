@@ -144,7 +144,7 @@ if [ "$1" = "status" ]; then
 
   # get connection string from file
   connectionCode=$(cat /home/sphinxrelay/sphinx-relay/connection_string.txt 2>/dev/null)
-  if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ] && [ "$EUID" -eq 0 ]; then
+  if [ -f "/home/sphinxrelay/sphinx-relay/connection_string.txt" ] && [ "${connectionCode}" = "" ]; then
     # try again with sodu
     connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
   fi

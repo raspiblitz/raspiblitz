@@ -330,7 +330,6 @@ def get_subscription(subscription_id):
 def get_domain_by_ip(ip):
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
-        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
         raise BlitzError("no match")
