@@ -22,7 +22,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\nCheck if Tor is running:${toraddress}/n" 12 65
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\nCheck if Tor is running:\n${toraddress}" 12 75
   fi
 
   extraPairInfo=""
