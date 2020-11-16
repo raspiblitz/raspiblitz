@@ -22,7 +22,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\nCheck if Tor is running:${toraddress}/n" 10 65
   fi
 
   extraPairInfo=""
@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
 IP2TOR+LetsEncrypt: ${publicURL}
 SHA1 ${sslFingerprintTOR}\n
 If you connect your app with this setup you should be able to
-use it securly from everywhere.
+use it securely from everywhere.
 "
 
   # When DynDNS & LETSENCRYPT
