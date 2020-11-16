@@ -299,11 +299,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown sphinxrelay:sphinxrelay -R /mnt/hdd/app-data/sphinxrelay
 
     # database config
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/config/config.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/config.json | \
     jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
     sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/config.json
 
-    # general config
+    # general app config
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/config/app.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | \
     jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
     jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
