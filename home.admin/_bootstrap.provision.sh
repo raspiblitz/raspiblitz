@@ -232,7 +232,7 @@ fi
 # TOR
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup Tor (takes much time!)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning TOR - keep default" >> ${logFile}
