@@ -86,7 +86,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
-The connection string in clear text is: ${}\n
+The connection string in clear text is: ${connectionCode}\n
 ${extraPairInfo}" 13 70
 	  if [ $? -eq 1 ]; then
       clear
