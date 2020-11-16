@@ -81,7 +81,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
   fi
 
   if [ ${#extraPairInfo} -eq 0 ]; then
-    extraPairInfo="The base64 decoded content is (for debug):\n${connectionCodeClear}"
+    extraPairInfo="The base64 decoded connection string (for debug):\n${connectionCodeClear}"
   fi
 
   # show qr code on LCD & console
@@ -91,7 +91,7 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
 The connection string can also be copied if needed: ${connectionCode}\n
-${extraPairInfo}" 14 70
+${extraPairInfo}" 16 70
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
