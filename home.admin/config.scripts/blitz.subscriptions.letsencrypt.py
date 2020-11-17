@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import time
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -24,7 +25,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
     print("# blitz.subscriptions.letsencrypt.py subscriptions-list")
-    print("# blitz.subscriptions.letsencrypt.py subscription-new <dyndns|ip> <duckdns> <id> <token> [ip|tor|ip&tor]")
+    print("# blitz.subscriptions.letsencrypt.py subscription-new <dyndns|ip> <duckdns> <domain> <token> [ip|tor|ip&tor]")
+    print("# blitz.subscriptions.letsencrypt.py subscription-new <ip> <dynu> <domain> <clientid:secret> [ip|tor|ip&tor]")
     print("# blitz.subscriptions.letsencrypt.py subscription-detail <id>")
     print("# blitz.subscriptions.letsencrypt.py subscription-cancel <id>")
     print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
@@ -97,7 +99,10 @@ def duckdns_update(domain, token, ip):
 
 def dynu_update(domain, token, ip):
 
-    print("# dynu update IP API call for {0}".format(domain))
+    print("# dynu update IP API call")
+    print("# domain({0})".format(domain))
+    print("# token({0})".format(token))
+    print("# ip({0})".format(ip))
 
     # split token to oAuth username and password
     try:
@@ -117,7 +122,7 @@ def dynu_update(domain, token, ip):
     try:
         response = session.get(url, headers=headers, auth=(username, password))
         if response.status_code != 200:
-            raise BlitzError("failed HTTP request", url + str(response.status_code))
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         raise BlitzError("failed HTTP request", url, e)
@@ -132,8 +137,13 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if len(apitoken) == 0:
         raise BlitzError("access_token not found", response.content)
+    print("# apitoken({0})".format(apitoken))
+    apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
+    print("# cleaning API token:")
+    print("# apitoken({0})".format(apitoken))
 
     # get id for domain
+    print("# API CALL --> Getting ID for Domain (list all domains and search thru)")
     url = "https://api.dynu.com/v2/dns"
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
     print("# calling URL: {0}".format(url))
@@ -141,7 +151,7 @@ def dynu_update(domain, token, ip):
     try:
         response = session.get(url, headers=headers)
         if response.status_code != 200:
-            raise BlitzError("failed HTTP request", url + str(response.status_code))
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         print(e)
@@ -163,8 +173,10 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if id_for_domain == 0:
         raise BlitzError("domain not found", response.content)
+    
 
     # update ip address
+    print("# API CALL --> Update IP for Domain-ID")
     url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
     print("# calling URL: {0}".format(url))
     headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
@@ -180,7 +192,7 @@ def dynu_update(domain, token, ip):
     try:
         response = session.post(url, headers=headers, data=data)
         if response.status_code != 200:
-            raise BlitzError("failed HTTP request", url + str(response.status_code))
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         print(e)
