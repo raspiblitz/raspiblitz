@@ -151,7 +151,7 @@ def dynu_update(domain, token, ip):
     try:
         response = session.get(url, headers=headers)
         if response.status_code == 401:
-            raise BlitzError("failed service", url + " ErrorCode:" + str(response.status_code))
+            raise BlitzError("failed oAuth Service", url + " ErrorCode:" + str(response.status_code))
         if response.status_code != 200:
             raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
@@ -616,9 +616,9 @@ to reach the service you wanted.
 
         # service flaky
         # https://github.com/rootzoll/raspiblitz/issues/1772
-        if "failed service" in str(e):
+        if "failed oAuth Service" in str(e):
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-A temporary error with the DYNU API happend:\n Unvalid Bearer Token
+A temporary error with the DYNU API happend:\nUnvalid OAuth Bearer Token
 Please try again later or choose another dynamic domain service.
 ''', title="Exception on Subscription")
             sys.exit(1)
