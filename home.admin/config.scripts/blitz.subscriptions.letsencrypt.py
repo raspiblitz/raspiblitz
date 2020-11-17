@@ -618,8 +618,8 @@ to reach the service you wanted.
         # https://github.com/rootzoll/raspiblitz/issues/1772
         if "failed service" in str(e):
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-An error with the dynu API happend (unvalid bearer token).
-Please try again later or try another dynamic domain service.
+A temporary error with the DYNU API happend:\n Unvalid Bearer Token
+Please try again later or choose another dynamic domain service.
 ''', title="Exception on Subscription")
             sys.exit(1)
 
