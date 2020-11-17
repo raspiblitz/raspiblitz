@@ -600,7 +600,7 @@ This looks not like a valid IP.
         subscription = subscriptions_new(ip, dnsservice, domain, token, target)
 
         # restart certain services to update urls
-        if serviceName == "IP2TOR SPHINX":
+        if "SPHINX" in serviceName:
             print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
 
