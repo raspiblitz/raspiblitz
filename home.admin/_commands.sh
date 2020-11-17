@@ -119,21 +119,21 @@ function status() {
 
 # command: lnbalance
 # show balance report
-function lnbalance() {
+function balance() {
   echo echo "*** YOUR SATOSHI BALANCES ***"
   /home/admin/config.scripts/lnd.balance.sh
 }
 
 # command: lnchannels
 # show channel listing
-function lnchannels() {
+function channels() {
   echo "*** YOUR LIGHTNING CHANNELS ***"
   /home/admin/config.scripts/lnd.channels.sh
 }
 
 # command: lnfwdreport
 # show forwarding report
-function lnbalance() {
+function fwdreport() {
   /home/admin/config.scripts/lnd.fwdreport.sh
 }
 
