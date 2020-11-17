@@ -22,7 +22,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 13 72
   fi
 
   extraPairInfo=""
@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
 IP2TOR+LetsEncrypt: ${publicURL}
 SHA1 ${sslFingerprintTOR}\n
 If you connect your app with this setup you should be able to
-use it securly from everywhere.
+use it securely from everywhere.
 "
 
   # When DynDNS & LETSENCRYPT
@@ -80,24 +80,28 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
       exit 0
   fi
 
+  if [ ${#extraPairInfo} -eq 0 ]; then
+    extraPairInfo="The base64 decoded connection string (for debug):\n${connectionCodeClear}"
+  fi
+
   # show qr code on LCD & console
   /home/admin/config.scripts/blitz.lcd.sh qr "${connectionCode}"
 	whiptail --title " Connect App with Sphinx Relay " \
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
-The connection string in clear text is: ${connectionCode}\n
-${extraPairInfo}" 13 70
+The connection string can also be copied if needed: ${connectionCode}\n
+${extraPairInfo}" 16 70
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
-      /home/admin/config.scripts/blitz.lcd.sh hide
       echo "--> Scan this code with your Sphinx Chat App"
       echo "To shrink QR code: macOS press CMD- / LINUX press CTRL-"
       echo "Press ENTER when finished."
       read key
 	  fi
 
+  /home/admin/config.scripts/blitz.lcd.sh hide
   exit 0
 fi
 
@@ -149,7 +153,11 @@ if [ "$1" = "status" ]; then
     connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
   fi
   echo "connectionCode='${connectionCode}'"
-
+  
+  # decode with base64 for debug
+  connectionCodeClear=$(echo -n "${connectionCode}" | base64 --decode)
+  echo "connectionCodeClear='${connectionCodeClear}'"
+  
   # check for LetsEnryptDomain for DynDns
   error=""
   source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
@@ -163,7 +171,7 @@ if [ "$1" = "status" ]; then
   sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
   echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-  toraddress=$(cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+  toraddress=$(cat /home/sphinxrelay/sphinx-relay/dist/toraddress.txt 2>/dev/null)
   echo "toraddress='${toraddress}'"
 
   sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
@@ -299,11 +307,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown sphinxrelay:sphinxrelay -R /mnt/hdd/app-data/sphinxrelay
 
     # database config
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/config/config.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/config.json | \
     jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
     sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/config.json
 
-    # general config
+    # general app config
+    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/config/app.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | \
     jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
     jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
@@ -316,7 +326,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
 
     # write environment
-    /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
+    sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
 
     # open firewall
     echo
@@ -388,10 +398,9 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
-    # allow everybody to read the hostname (no need for sudo for read)
-    sudo chmod +r /mnt/hdd/tor/sphinxrelay/hostname
-    sudo chmod +x /mnt/hdd/tor/sphinxrelay
-    sudo chmod +x /mnt/hdd/tor
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
   exit 0
 fi

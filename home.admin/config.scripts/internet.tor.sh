@@ -7,7 +7,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch TOR on or off"
+ echo "script to switch TOR on or off"
  echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on|update]"
  exit 1
 fi
@@ -44,6 +44,7 @@ fi
 # function: install keys & sources
 prepareTorSources()
 {
+
     # Prepare for TOR service
     echo "*** INSTALL TOR REPO ***"
     echo ""
@@ -193,12 +194,6 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
 
-# make sure the network was set (by sourcing raspiblitz.conf)
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
-
 # if started with status
 if [ "$1" = "status" ]; then
   # is Tor activated
@@ -250,6 +245,12 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the TOR ON"
+
+  # make sure the network was set (by sourcing raspiblitz.conf)
+  if [ ${#network} -eq 0 ]; then
+    echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
+    exit 1
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
@@ -399,6 +400,15 @@ EOF
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
+  if [ "${sphinxrelay}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+  fi
+
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
   echo "Setup logrotate"
   # add logrotate config for modified Tor dir on ext. disk

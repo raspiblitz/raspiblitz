@@ -134,7 +134,7 @@ WantedBy=multi-user.target
   isInstalled=$(sudo -u pool /home/pool/go/bin/pool  | grep -c pool)
   if [ ${isInstalled} -gt 0 ]; then
     echo "
-# Usage and examples: https://gitlab.com/lightning-labs/pool
+# Usage and examples: https://github.com/lightninglabs/pool
 # Use the command: 'sudo su - pool' 
 # in the terminal to switch to the dedicated user.
 # Type 'pool' again to see the options.
