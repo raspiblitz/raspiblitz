@@ -208,6 +208,10 @@ The following additional information is available:
             print("# FAIL: unknown subscription type")
             time.sleep(3)
 
+    # trigger restart of relevant services so they can pickup new environment
+    print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+    os.system("sudo systemctl restart sphinxrelay")
+
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     my_subscriptions()
 
@@ -407,8 +411,13 @@ def main():
             service_name, tor_address, tor_port)
         print("# running: {0}".format(cmd))
         os.system(cmd)
-        sys.exit(0)
 
+        # action after possibly new created bride
+        if service_name == SERVICE_SPHINX:
+            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            os.system("sudo systemctl restart sphinxrelay")
+
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()

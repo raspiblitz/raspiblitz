@@ -23,7 +23,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
 
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}" 8 55
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 13 72
   fi
 
   text="Local Webrowser: https://${localIP}:${httpsPort}"
