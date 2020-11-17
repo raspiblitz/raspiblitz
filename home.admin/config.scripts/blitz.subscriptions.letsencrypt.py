@@ -30,12 +30,6 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
     sys.exit(1)
 
-# constants for standard services
-SERVICE_LND_REST_API = "LND-REST-API"
-SERVICE_LND_GRPC_API = "LND-GRPC-API"
-SERVICE_LNBITS = "LNBITS"
-SERVICE_BTCPAY = "BTCPAY"
-
 #####################
 # BASIC SETTINGS
 #####################
@@ -318,7 +312,6 @@ def get_subscription(subscription_id):
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             return []
@@ -336,7 +329,6 @@ def get_subscription(subscription_id):
 def get_domain_by_ip(ip):
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
-        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
         raise BlitzError("no match")
@@ -520,6 +512,7 @@ This looks not like valid.
     # default target are the nginx ip ports
     target = "ip"
     ip = ""
+    serviceName = ""
 
     if tag == "IP2TOR":
 
@@ -558,6 +551,7 @@ Create one first and try again.
         # get the slected IP2TOR bridge
         ip2tor_select = ip2tor_subs[int(tag)]
         ip = ip2tor_select["ip"]
+        serviceName = ip2tor_select["name"]
         target = "tor"
 
     elif tag == "DYNDNS":
@@ -590,6 +584,11 @@ This looks not like a valid IP.
     try:
         os.system("clear")
         subscription = subscriptions_new(ip, dnsservice, domain, token, target)
+
+        # restart certain services to update urls
+        if serviceName == "IP2TOR SPHINX":
+            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            os.system("sudo systemctl restart sphinxrelay")
 
         # success dialog
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -758,6 +757,7 @@ def subscription_cancel():
     subscription_id = sys.argv[2]
     try:
         subscriptions_cancel(subscription_id)
+
     except Exception as e:
         handleException(e)
 
