@@ -98,7 +98,11 @@ def duckdns_update(domain, token, ip):
 
 def dynu_update(domain, token, ip):
 
-    print("# dynu update IP API call for {0}".format(domain))
+    print("# dynu update IP API call")
+    print("# domain({0})".format(domain))
+    print("# token({0})".format(token))
+    print("# ip({0})".format(ip))
+    time.sleep(10)
 
     # split token to oAuth username and password
     try:
