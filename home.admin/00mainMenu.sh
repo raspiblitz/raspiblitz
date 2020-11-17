@@ -261,19 +261,19 @@ case $CHOICE in
         lnbalance)
             clear
             echo "*** YOUR SATOSHI BALANCES ***"
-            lnbalance ${network}
+            /home/admin/config.scripts/lnd.balance.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
             ;;
         lnchannels)
             clear
             echo "*** YOUR LIGHTNING CHANNELS ***"
-            lnchannels ${network}
+            /home/admin/config.scripts/lnd.channels.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
             ;;
         lnfwdreport)
-            ./XXlnfwdreport.sh
+            /home/admin/config.scripts/lnd.fwdreport.sh
             echo "Press ENTER to return to main menu."
             read key
             ./00mainMenu.sh
