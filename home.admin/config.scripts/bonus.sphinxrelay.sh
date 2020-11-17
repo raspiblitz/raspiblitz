@@ -236,6 +236,11 @@ if [ "$1" = "status" ]; then
   echo "connection='${connection}'"
   echo "publicURL='${publicURL}'"
 
+  connectionCodeContainsPublicUrl=$( echo "${connectionCodeClear}" | grep -c "${publicURL}" )
+  if [ ${connectionCodeContainsPublicUrl} -eq 0 ]; then
+    echo "ip2torWarn='Connection String not updated yet. Try again a bit later or check for errors.'"
+  fi
+
   exit 0
 fi
 
