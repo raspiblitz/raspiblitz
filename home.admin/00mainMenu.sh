@@ -267,7 +267,8 @@ case $CHOICE in
             ;;
         lnchannels)
             clear
-            channels
+            echo "*** YOUR LIGHTNING CHANNELS ***"
+            /home/admin/config.scripts/lnd.channels.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
             ;;
@@ -275,7 +276,6 @@ case $CHOICE in
             /home/admin/config.scripts/lnd.fwdreport.sh
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         CONNECT)
             /home/admin/BBconnectPeer.sh
