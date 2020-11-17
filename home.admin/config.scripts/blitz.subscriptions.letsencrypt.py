@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import time
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -136,6 +137,9 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if len(apitoken) == 0:
         raise BlitzError("access_token not found", response.content)
+    print("# apitoken({0})".format(apitoken))
+    apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
+    print("# cleaning API token:")
     print("# apitoken({0})".format(apitoken))
 
     # get id for domain
