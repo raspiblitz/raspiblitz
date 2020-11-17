@@ -273,7 +273,7 @@ case $CHOICE in
             read key
             ;;
         lnfwdreport)
-            /home/admin/config.scripts/lnd.fwdreport.sh
+            /home/admin/config.scripts/lnd.fwdreport.sh -menu
             echo "Press ENTER to return to main menu."
             read key
             ;;
