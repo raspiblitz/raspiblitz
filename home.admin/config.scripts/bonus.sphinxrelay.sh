@@ -119,8 +119,8 @@ if [ "$1" = "write-environment" ]; then
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-  jq ".production.public_url = \"${publicURL}\"" | \
-  tee /home/sphinxrelay/sphinx-relay/config/app.json
+  jq ".production.public_url = \"${publicURL}\"" > /home/sphinxrelay/sphinx-relay/config/app.json.tmp
+  mv /home/sphinxrelay/sphinx-relay/config/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
 
   # prepare production configs (loaded by nodejs app)
   cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
@@ -318,12 +318,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
     jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
     jq ".production.lnd_log_location = \"/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log\"" | \
-    jq ".production.node_http_port = \"3300\"" | \
-    sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
-
-    # set permissions on connection string
-    # sudo -u sphinxrelay touch /home/sphinxrelay/sphinx-relay/connection_string.txt
-    # sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
+    jq ".production.node_http_port = \"3300\"" > /home/admin/app.json.tmp
+    sudo mv /home/admin/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
+    sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
     # write environment
     sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
