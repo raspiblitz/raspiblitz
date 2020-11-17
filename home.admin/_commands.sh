@@ -117,6 +117,26 @@ function status() {
   sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
+# command: lnbalance
+# show balance report
+function balance() {
+  echo "*** YOUR SATOSHI BALANCES ***"
+  /home/admin/config.scripts/lnd.balance.sh
+}
+
+# command: lnchannels
+# show channel listing
+function channels() {
+  echo "*** YOUR LIGHTNING CHANNELS ***"
+  /home/admin/config.scripts/lnd.channels.sh
+}
+
+# command: lnfwdreport
+# show forwarding report
+function fwdreport() {
+  /home/admin/config.scripts/lnd.fwdreport.sh -menu
+}
+
 # command: bos
 # switch to the bos user for Balance of Satoshis
 function bos() {
