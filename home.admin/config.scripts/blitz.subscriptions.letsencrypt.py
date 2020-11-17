@@ -616,7 +616,12 @@ to reach the service you wanted.
 
         # service flaky
         # https://github.com/rootzoll/raspiblitz/issues/1772
-        
+        if "failed service" in str(e):
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+An error with the dynu API happend (unvalid bearer token).
+Please try again later or try another dynamic domain service.
+''', title="Exception on Subscription")
+            sys.exit(1)
 
         # unknown error happened
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
