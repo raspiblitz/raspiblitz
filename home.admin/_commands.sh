@@ -158,7 +158,7 @@ _input=$(cat $_temp | xargs )
   if [ ${#_input} -eq 0 ]; then
     exit 1
   fi
-
+  clear
   /home/admin/config.scripts/lnd.fwdreport.sh -n ${chain}net -c ${network} -- ${_input}
 }
 

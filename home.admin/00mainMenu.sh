@@ -267,8 +267,7 @@ case $CHOICE in
             ;;
         lnchannels)
             clear
-            echo "*** YOUR LIGHTNING CHANNELS ***"
-            /home/admin/config.scripts/lnd.channels.sh ${network}
+            channels
             echo "Press ENTER to return to main menu."
             read key
             ;;
