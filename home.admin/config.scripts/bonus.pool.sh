@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/pool/releases/
-pinnedVersion=v0.3.2-alpha
+pinnedVersion="v0.3.3-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the pool on or off"
- echo "bonus.pool.sh [on|off|menu]"
- echo "Installs the Pool $pinnedVersion by default"
+ echo "# config script to switch Lightning Pool on, off or update"
+ echo "# bonus.pool.sh [on|off|menu|update]"
+ echo "# installs Pool $pinnedVersion by default"
  exit 1
 fi
 
@@ -102,7 +102,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # sudo nano /etc/systemd/system/poold.service 
     echo "
 [Unit]
-Description=poold Service
+Description=poold.service
 After=lnd.service
 
 [Service]
@@ -117,7 +117,7 @@ RestartSec=60
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee -a /etc/systemd/system/poold.service
+" | sudo tee /etc/systemd/system/poold.service
     sudo systemctl enable poold
     echo "# OK - the poold.service is now enabled"
 
@@ -167,6 +167,48 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# Pool is not installed."
   fi
 
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "# Updating Pool "
+  cd /home/pool/pool
+  # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+  # fetch latest master
+  sudo -u pool git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# You are up-to-date on version" $TAG
+  else
+    echo "# Pulling the latest changes..."
+    sudo -u pool git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u pool git reset --hard $TAG
+    echo "# Updating ..."
+    # install to /home/pool/go/bin/
+    sudo -u pool /usr/local/go/bin/go install ./... || exit 1
+    isInstalled=$(sudo -u pool /home/pool/go/bin/pool  | grep -c pool)
+    if [ ${isInstalled} -gt 0 ]; then
+      TAG=$(git tag | sort -V | tail -1)
+      echo "# Updated to version" $TAG
+    else
+      echo "# Failed to install Lightning Pool "
+      exit 1
+    fi
+  fi
+
+  echo "# At the latest in https://github.com/lightninglabs/pool/releases/"
+  echo ""
+  echo "# Starting the poold.service ... *** "
+  sudo systemctl start poold
   exit 0
 fi
 
