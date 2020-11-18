@@ -22,7 +22,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 13 72
+    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
   fi
 
   extraPairInfo=""
@@ -119,8 +119,8 @@ if [ "$1" = "write-environment" ]; then
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-  jq ".production.public_url = \"${publicURL}\"" | \
-  tee /home/sphinxrelay/sphinx-relay/config/app.json
+  jq ".production.public_url = \"${publicURL}\"" > /home/sphinxrelay/sphinx-relay/config/app.json.tmp
+  mv /home/sphinxrelay/sphinx-relay/config/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
 
   # prepare production configs (loaded by nodejs app)
   cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
@@ -236,6 +236,11 @@ if [ "$1" = "status" ]; then
   echo "connection='${connection}'"
   echo "publicURL='${publicURL}'"
 
+  connectionCodeContainsPublicUrl=$( echo "${connectionCodeClear}" | grep -c "${publicURL}" )
+  if [ ${connectionCodeContainsPublicUrl} -eq 0 ]; then
+    echo "ip2torWarn='Connection String not updated yet. Try again a bit later or check for errors.'"
+  fi
+
   exit 0
 fi
 
@@ -318,12 +323,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
     jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
     jq ".production.lnd_log_location = \"/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log\"" | \
-    jq ".production.node_http_port = \"3300\"" | \
-    sudo -u sphinxrelay tee /home/sphinxrelay/sphinx-relay/config/app.json
-
-    # set permissions on connection string
-    # sudo -u sphinxrelay touch /home/sphinxrelay/sphinx-relay/connection_string.txt
-    # sudo chmod 640 /home/sphinxrelay/sphinx-relay/connection_string.txt
+    jq ".production.node_http_port = \"3300\"" > /home/admin/app.json.tmp
+    sudo mv /home/admin/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
+    sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
     # write environment
     sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
