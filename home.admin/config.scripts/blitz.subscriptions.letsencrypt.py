@@ -150,6 +150,8 @@ def dynu_update(domain, token, ip):
     print("# headers: {0}".format(headers))
     try:
         response = session.get(url, headers=headers)
+        if response.status_code == 401:
+            raise BlitzError("failed oAuth Service", url + " ErrorCode:" + str(response.status_code))
         if response.status_code != 200:
             raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
         print("# response-code: {0}".format(response.status_code))
@@ -598,7 +600,7 @@ This looks not like a valid IP.
         subscription = subscriptions_new(ip, dnsservice, domain, token, target)
 
         # restart certain services to update urls
-        if serviceName == "IP2TOR SPHINX":
+        if "SPHINX" in serviceName:
             print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
 
@@ -611,6 +613,15 @@ to reach the service you wanted.
             '''.format(domain), title="OK LetsEncrypt Created")
 
     except Exception as e:
+
+        # service flaky
+        # https://github.com/rootzoll/raspiblitz/issues/1772
+        if "failed oAuth Service" in str(e):
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+A temporary error with the DYNU API happend:\nUnvalid OAuth Bearer Token
+Please try again later or choose another dynamic domain service.
+''', title="Exception on Subscription")
+            sys.exit(1)
 
         # unknown error happened
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
