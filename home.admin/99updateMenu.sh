@@ -297,6 +297,9 @@ fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
 fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Update Lightning Pool")
+fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Update Lightning Loop")
 fi
