@@ -213,7 +213,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     # https://github.com/rootzoll/raspiblitz/issues/1786
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
-        if "subscriptions_letsencrypt" not in subs:
+        if "subscriptions_letsencrypt" in subs:
             if len(subs['subscriptions_letsencrypt']) > 1:
                 raise BlitzError("not more than one letsencrypt subscription", "cancel existing letsencrypt first")
 
