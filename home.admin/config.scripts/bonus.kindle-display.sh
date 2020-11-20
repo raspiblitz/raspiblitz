@@ -29,6 +29,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c 'kindle-display')
   if [ ${isInstalled} -eq 0 ]; then
     # install dependencies
+	sudo apt update
     sudo apt install -y firefox-esr pngcrush jo jq
 
     # install nodeJS
@@ -68,7 +69,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 DISPLAY_SERVER_PORT=$SERVER_PORT
 
 # Require Tor for outside API calls
-DISPLAY_FORCE_TOR=true
+DISPLAY_FORCE_TOR=false
 
 # Bitcoin RPC credentials for getting the blockcount.
 # Omit these setting to use blockchain.info as a fallback.
