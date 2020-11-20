@@ -30,7 +30,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
     # install dependencies
 	sudo apt update
-    sudo apt install -y firefox-esr pngcrush jo jq
+    sudo apt install -y firefox-esr pngcrush jo jq torsocks
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
@@ -69,7 +69,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 DISPLAY_SERVER_PORT=$SERVER_PORT
 
 # Require Tor for outside API calls
-DISPLAY_FORCE_TOR=false
+DISPLAY_FORCE_TOR=true
 
 # Bitcoin RPC credentials for getting the blockcount.
 # Omit these setting to use blockchain.info as a fallback.
