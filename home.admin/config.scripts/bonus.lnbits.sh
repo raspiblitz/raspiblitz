@@ -22,8 +22,15 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
 
+  # display possible problems with IP2TOR setup
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 13 72
+    whiptail --title " Warning " \
+    --yes-button "Back" \
+    --no-button "Continue Anyway" \
+    --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+    if [ "$?" != "1" ]; then
+      exit 0
+	  fi
   fi
 
   text="Local Webrowser: https://${localIP}:${httpsPort}"
