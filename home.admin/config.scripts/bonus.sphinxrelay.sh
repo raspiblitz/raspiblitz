@@ -21,8 +21,15 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
+  ip2torWarn="test"
   if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " --msgbox "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+    whiptail --title " Warning " \
+    --yes-button "Back" \
+    --no-button "Continue Anyway" \
+    --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+    if [ $? -eq 0 ]; then
+      exit 0
+	  fi
   fi
 
   extraPairInfo=""
