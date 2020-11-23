@@ -114,13 +114,14 @@ else
 
 fi
 
-# link ssh directory from SD catd to HDD
+# link ssh directory from SD card to HDD
 echo "# --> SSH key settings"
 echo "# moving SSH pub keys to HDD"
 sudo cp -r /etc/ssh /mnt/hdd/ssh
 sudo rm -rf /etc/ssh
 sudo ln -s /mnt/hdd/ssh /etc/ssh
 echo "# OK"
+sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd
 echo ""
 
 # set SetupState

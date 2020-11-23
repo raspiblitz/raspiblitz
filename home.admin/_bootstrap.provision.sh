@@ -139,6 +139,7 @@ else
 fi
 sudo rm -rf /etc/ssh >> ${logFile} 2>&1
 sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
 # optimze if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
