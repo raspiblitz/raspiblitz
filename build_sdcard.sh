@@ -717,6 +717,10 @@ sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
 sudo apt -y install fzf
 
 sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
+sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 homeFile=/home/admin/.bashrc
