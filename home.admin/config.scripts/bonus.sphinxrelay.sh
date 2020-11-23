@@ -21,7 +21,7 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
-  ip2torWarn="test"
+  # display possible problems with IP2TOR setup
   if [ ${#ip2torWarn} -gt 0 ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
