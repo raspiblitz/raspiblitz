@@ -281,7 +281,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     echo "*** Install Tor & NYX ***"
-    sudo apt install tor tor-arm -y
+    sudo apt install tor tor-arm torsocks -y
 
     echo ""
     echo "*** Tor Config ***"
