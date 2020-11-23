@@ -6,7 +6,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "bonus.letsencrypt.sh [on|off]"
   echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
   echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh refresh-ngnix-certs"
+  echo "bonus.letsencrypt.sh refresh-nginx-certs"
   exit 1
 fi
 
@@ -109,7 +109,7 @@ function refresh_certs_with_nginx() {
 
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo rm /mnt/hdd/app-data/nginx/tls.key
     sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
     sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
 
@@ -136,12 +136,12 @@ function refresh_certs_with_nginx() {
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
-        
+
         # replace certs for clearnet
         if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
           echo "# replacing IP certs for ${FQDN}"
           sudo rm /mnt/hdd/app-data/nginx/tls.cert
-          sudo rm /mnt/hdd/app-data/nginx/tls.key 
+          sudo rm /mnt/hdd/app-data/nginx/tls.key
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
         fi
@@ -353,7 +353,7 @@ elif [ "$1" = "remove-cert" ]; then
 # REFRESH NGINX CERTS
 ###################
 
-elif [ "$1" = "refresh-ngnix-certs" ]; then
+elif [ "$1" = "refresh-nginx-certs" ]; then
 
   # refresh nginx
   refresh_certs_with_nginx
@@ -367,7 +367,7 @@ elif [ "$1" = "refresh-ngnix-certs" ]; then
 
   echo "# restarting nginx"
   sudo systemctl restart nginx 2>&1
-  
+
 
 ###################
 # OFF
