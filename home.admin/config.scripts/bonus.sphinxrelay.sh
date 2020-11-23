@@ -27,7 +27,7 @@ if [ "$1" = "menu" ]; then
     --yes-button "Back" \
     --no-button "Continue Anyway" \
     --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
-    if [ $? -eq 0 ]; then
+    if [ "$?" != "1" ]; then
       exit 0
 	  fi
   fi
