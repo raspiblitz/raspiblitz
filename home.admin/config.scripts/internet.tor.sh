@@ -358,6 +358,7 @@ EOF
     # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
 [Service]
 ReadWriteDirectories=-/mnt/hdd/tor
+After=network.target nss-lookup.target mnt-hdd.mount
 EOF
 
   else
