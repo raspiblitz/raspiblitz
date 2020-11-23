@@ -29,7 +29,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c 'kindle-display')
   if [ ${isInstalled} -eq 0 ]; then
     # install dependencies
-    sudo apt install -y firefox-esr pngcrush jo jq
+    sudo apt update
+    sudo apt install -y firefox-esr pngcrush jo jq torsocks
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
