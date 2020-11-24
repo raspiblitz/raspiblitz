@@ -116,12 +116,14 @@ fi
 
 # link ssh directory from SD card to HDD
 echo "# --> SSH key settings"
-echo "# moving SSH pub keys to HDD"
+echo "# copying SSH pub keys to HDD"
 sudo cp -r /etc/ssh /mnt/hdd/ssh
-sudo rm -rf /etc/ssh
-sudo ln -s /mnt/hdd/ssh /etc/ssh
+# just copy dont link anymore
+# see: https://github.com/rootzoll/raspiblitz/issues/1798
+#sudo rm -rf /etc/ssh
+#sudo ln -s /mnt/hdd/ssh /etc/ssh
+#sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd
 echo "# OK"
-sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd
 echo ""
 
 # set SetupState
