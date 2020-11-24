@@ -46,6 +46,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     export NG_CLI_ANALYTICS=ci
     NG_CLI_ANALYTICS=ci
     echo "# install angular CLI"
+    sudo apt install -y yes
     yes | npm install -g @angular/cli
     echo "# link ng"
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/ng /usr/bin/ng
