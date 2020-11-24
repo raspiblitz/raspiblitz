@@ -133,8 +133,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (frontend)"
 
     cd frontend
+    sudo -u mempool bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/mempool/.bashrc"
     sudo -u mempool ng analytics off
-    sudo -u mempool npm install
+    yes | sudo -u mempool npm install
     sudo -u mempool npm run build
 
     echo "# npm install for mempool explorer (backend)"
