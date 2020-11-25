@@ -390,12 +390,11 @@ if [ ${isMounted} -eq 0 ]; then
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
     echo "state=recovered" >> /home/admin/raspiblitz.recover.info
+    echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
-    echo "shutdown in 1min" >> $logFile
     sync
-
-    sudo shutdown -r -F +1
+    sudo shutdown -r -F -t 60
     exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
