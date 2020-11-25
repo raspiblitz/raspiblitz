@@ -135,7 +135,7 @@ if [ "$1" = "menu" ]; then
 The electrum system service is not running.
 Please check the following debug info.
       " 8 48
-    /home/admin/XXdebugInfo.sh
+    /home/admin/XXdebugLogs.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -282,7 +282,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
-    sudo -u electrs git reset --hard v0.8.5
+    sudo -u electrs git reset --hard v0.8.6
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
     echo ""
