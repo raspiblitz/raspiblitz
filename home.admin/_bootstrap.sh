@@ -252,7 +252,7 @@ fi
 # SSH SERVER CERTS RESET
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
-# the sd card - switch to hdmi
+# the sd card - delete old ssh data
 ################################
 
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
