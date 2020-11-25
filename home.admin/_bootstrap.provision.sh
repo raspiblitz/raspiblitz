@@ -132,13 +132,17 @@ sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.
 # link old SSH PubKeys
 # so that client ssh_known_hosts is not complaining after update
 if [ -d "/mnt/hdd/ssh" ]; then
-  echo "Old SSH PubKey exists on HDD > just linking them" >> ${logFile}
+  echo "Old SSH PubKey exists on HDD > copy them HDD to SD card for next start" >> ${logFile}
+  sudo cp -r /mnt/hdd/ssh/* /etc/ssh/ >> ${logFile} 2>&1
 else
-  echo "No SSH PubKey exists on HDD > copy from SD card and linking them" >> ${logFile}
+  echo "No SSH PubKey exists on HDD > copy from SD card to HDD as backup" >> ${logFile}
   sudo cp -r /etc/ssh /mnt/hdd/ssh >> ${logFile} 2>&1
 fi
-sudo rm -rf /etc/ssh >> ${logFile} 2>&1
-sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+# just copy - dont link anymore so that sshd will also start without HDD connected
+# see: https://github.com/rootzoll/raspiblitz/issues/1798
+#sudo rm -rf /etc/ssh >> ${logFile} 2>&1
+#sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+#sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
 # optimze if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
