@@ -6,7 +6,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Sphinx-Relay on/off"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.sphinxrelay.sh [off|status|menu|write-environment]"
+  echo "bonus.sphinxrelay.sh [off|status|menu|write-environment|update]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
@@ -414,6 +414,38 @@ EOF
   # setting value in raspi blitz config
   sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=on/g" /mnt/hdd/raspiblitz.conf
 
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "# UPDATING SPHINX"
+  sudo systemctl stop sphinxrelay
+  cd /home/sphinxrelay/sphinx-relay
+  # fetch latest master
+  sudo -u sphinxrelay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# You are up-to-date on version" $TAG
+  else
+    echo "# Pulling latest changes..."
+    sudo -u sphinxrelay git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u sphinxrelay git reset --hard $TAG
+    sudo -u sphinxrelay npm install
+    echo "# Updated to version" $TAG
+  fi
+
+  echo "# Updated to the latest in https://github.com/stakwork/sphinx-relay/releases"
+  echo ""
+  echo "# Starting the sphinxrelay service ... "
+  sudo systemctl start sphinxrelay
   exit 0
 fi
 
