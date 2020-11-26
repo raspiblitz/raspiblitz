@@ -306,6 +306,9 @@ fi
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
 fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -332,6 +335,9 @@ case $CHOICE in
     ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update
+    ;;
+  SPHINX)
+    /home/admin/config.scripts/bonus.sphinxrelay.sh update
     ;;
   PYBLOCK)
     /home/admin/config.scripts/bonus.pyblock.sh update
