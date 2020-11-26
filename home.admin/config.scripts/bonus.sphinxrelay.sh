@@ -6,7 +6,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Sphinx-Relay on/off"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.sphinxrelay.sh [off|status|menu|write-environment]"
+  echo "bonus.sphinxrelay.sh [off|status|menu|write-environment|update]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
@@ -314,6 +314,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# NPM install dependencies ..."
     sudo -u sphinxrelay npm install
 
+    # open firewall
+    echo
+    echo "*** Updating Firewall ***"
+    sudo ufw allow 3300 comment 'sphinxrelay HTTP'
+    sudo ufw allow 3301 comment 'sphinxrelay HTTPS'
+    echo ""
+
+    # Hidden Service if Tor is active
+    source /mnt/hdd/raspiblitz.conf
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with internet.tor.sh script
+      /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+      # get TOR address and store it readable for sphixrelay user
+      toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+      sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+    fi
+
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/sphinxrelay 2>/dev/null
     sudo chown sphinxrelay:sphinxrelay -R /mnt/hdd/app-data/sphinxrelay
@@ -322,7 +339,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/config/config.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/config.json | \
     jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
-    sudo -u sphinxrelay tee /home/admin/config.json.tmp
+    sudo -u admin tee /home/admin/config.json.tmp
     sudo mv /home/admin/config.json.tmp /home/sphinxrelay/sphinx-relay/config/config.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/config.json
 
@@ -336,15 +353,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mv /home/admin/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
-    # write environment
+    # write environment (do after possible tor activation)
     sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
-
-    # open firewall
-    echo
-    echo "*** Updating Firewall ***"
-    sudo ufw allow 3300 comment 'sphinxrelay HTTP'
-    sudo ufw allow 3301 comment 'sphinxrelay HTTPS'
-    echo ""
 
     # install service
     echo "*** Install systemd ***"
@@ -404,15 +414,38 @@ EOF
   # setting value in raspi blitz config
   sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=on/g" /mnt/hdd/raspiblitz.conf
 
-  # Hidden Service if Tor is active
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
-    # get TOR address and store it readable for sphixrelay user
-    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
-    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "# UPDATING SPHINX"
+  sudo systemctl stop sphinxrelay
+  cd /home/sphinxrelay/sphinx-relay
+  # fetch latest master
+  sudo -u sphinxrelay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# You are up-to-date on version" $TAG
+  else
+    echo "# Pulling latest changes..."
+    sudo -u sphinxrelay git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u sphinxrelay git reset --hard $TAG
+    sudo -u sphinxrelay npm install
+    echo "# Updated to version" $TAG
   fi
+
+  echo "# Updated to the latest in https://github.com/stakwork/sphinx-relay/releases"
+  echo ""
+  echo "# Starting the sphinxrelay service ... "
+  sudo systemctl start sphinxrelay
   exit 0
 fi
 
