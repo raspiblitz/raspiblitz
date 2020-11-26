@@ -298,7 +298,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="v1.0.15"
+    githubBranch="v1.1.1"
     if [ "$3" != "" ]; then
       githubBranch="$3"
     fi
