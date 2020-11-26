@@ -322,7 +322,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/config/config.json.bak
     sudo cat /home/sphinxrelay/sphinx-relay/config/config.json | \
     jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
-    sudo -u sphinxrelay tee /home/admin/config.json.tmp
+    sudo -u admin tee /home/admin/config.json.tmp
     sudo mv /home/admin/config.json.tmp /home/sphinxrelay/sphinx-relay/config/config.json
     sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/config.json
 
