@@ -126,8 +126,9 @@ if [ "$1" = "write-environment" ]; then
 
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-  jq ".production.public_url = \"${publicURL}\"" > /home/sphinxrelay/sphinx-relay/config/app.json.tmp
-  mv /home/sphinxrelay/sphinx-relay/config/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
+  jq ".production.public_url = \"${publicURL}\"" > /home/admin/config.json.tmp
+  mv /home/admin/config.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
+  sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/config.json
 
   # prepare production configs (loaded by nodejs app)
   cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/dist/config/app.json
