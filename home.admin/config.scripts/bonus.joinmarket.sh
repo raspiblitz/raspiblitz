@@ -5,7 +5,7 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-pinnedVersion="v0.7.2"
+pinnedVersion="v0.8.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -31,7 +31,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "
-Type: 'jm' in the command line to swith to the dedicated user and start the JoininBox menu.
+Type: 'jm' in the command line to switch to the dedicated user and start the JoininBox menu.
 Notes on usage:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can log in directly with the 'joinmarket' user via ssh.
