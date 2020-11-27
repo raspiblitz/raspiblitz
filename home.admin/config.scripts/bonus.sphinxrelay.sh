@@ -4,7 +4,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to switch Sphinx-Relay on/off"
+  echo "config script to switch Sphinx-Relay on,off or update"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
   echo "bonus.sphinxrelay.sh [off|status|menu|write-environment|update]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
@@ -419,32 +419,28 @@ fi
 
 # update
 if [ "$1" = "update" ]; then
-  echo "# UPDATING SPHINX"
-  sudo systemctl stop sphinxrelay
-  cd /home/sphinxrelay/sphinx-relay
-  # fetch latest master
-  sudo -u sphinxrelay git fetch
-  # unset $1
-  set --
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
-  if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | sort -V | tail -1)
-    echo "# You are up-to-date on version" $TAG
-  else
-    echo "# Pulling latest changes..."
-    sudo -u sphinxrelay git pull -p
-    echo "# Reset to the latest release tag"
-    TAG=$(git tag | sort -V | tail -1)
-    sudo -u sphinxrelay git reset --hard $TAG
-    sudo -u sphinxrelay npm install
-    echo "# Updated to version" $TAG
+  echo "# Updating Sphinx-Relay"
+  cd /home/sphinxrelay/sphinx-relay/
+  # https://github.com/stakwork/sphinx-relay/blob/master/docs/raspiblitz_deployment.md#fast-method
+  echo "# Stashing the config"
+  if [ $(sudo -u sphinxrelay git stash|grep -c "Please tell me who you are") -gt 0 ]; then
+    git config user.email "you@example.com"
+    git config user.name "Your Name"
   fi
-
-  echo "# Updated to the latest in https://github.com/stakwork/sphinx-relay/releases"
-  echo ""
-  echo "# Starting the sphinxrelay service ... "
+  sudo -u sphinxrelay git stash
+  echo "# Pulling latest changes..."
+  sudo -u sphinxrelay git checkout master || exit 1
+  sudo -u sphinxrelay git pull  || exit 1
+  echo "# Reset to the latest release tag"
+  TAG=$(git tag | sort -V | tail -1)
+  sudo -u sphinxrelay git reset --hard $TAG || exit 1
+  echo "# Reapplying the config"
+  sudo -u sphinxrelay git stash pop
+  echo "# Installing NPM dependencies"
+  sudo -u sphinxrelay npm install
+  echo "# Updated to version" $TAG
+  echo
+  echo "# Starting the sphinxrelay.service ... "
   sudo systemctl start sphinxrelay
   exit 0
 fi
