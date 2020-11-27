@@ -417,8 +417,8 @@ if [ "$1" = "update" ]; then
   # https://github.com/stakwork/sphinx-relay/blob/master/docs/raspiblitz_deployment.md#fast-method
   echo "# Stashing the config"
   if [ $(sudo -u sphinxrelay git stash|grep -c "Please tell me who you are") -gt 0 ]; then
-    git config user.email "you@example.com"
-    git config user.name "Your Name"
+    sudo -u sphinxrelay git config user.email "you@example.com"
+    sudo -u sphinxrelay git config user.name "Your Name"
   fi
   sudo -u sphinxrelay git stash
   echo "# Pulling latest changes..."
