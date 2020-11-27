@@ -128,8 +128,7 @@ if [ "$1" = "write-environment" ]; then
 
   # database config
   cat /home/sphinxrelay/sphinx-relay/config/config.json | \
-  jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
-  sudo -u admin tee /home/sphinxrelay/sphinx-relay/config/config.json.tmp
+  jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" > /home/sphinxrelay/sphinx-relay/config/config.json.tmp
   mv /home/sphinxrelay/sphinx-relay/config/config.json.tmp /home/sphinxrelay/sphinx-relay/config/config.json
 
   # update node ip in config
