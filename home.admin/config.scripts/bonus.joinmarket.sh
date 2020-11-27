@@ -31,7 +31,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "
-Type: 'jm' in the command line to swith to the dedicated user and start the JoininBox menu.
+Type: 'jm' in the command line to switch to the dedicated user and start the JoininBox menu.
 Notes on usage:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can log in directly with the 'joinmarket' user via ssh.
