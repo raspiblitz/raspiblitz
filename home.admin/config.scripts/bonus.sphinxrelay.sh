@@ -121,11 +121,22 @@ fi
 # IMPORTANT: all this needs to work without sudo because will run from systemd as sphinxrelay user
 if [ "$1" = "write-environment" ]; then
 
+  # !! all this needs to run (be called as) user: sphinxrelay
+
   # get basic data from status
   source <(/home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
+  # database config
+  cat /home/sphinxrelay/sphinx-relay/config/config.json | \
+  jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" > /home/sphinxrelay/sphinx-relay/config/config.json.tmp
+  mv /home/sphinxrelay/sphinx-relay/config/config.json.tmp /home/sphinxrelay/sphinx-relay/config/config.json
+
   # update node ip in config
   cat /home/sphinxrelay/sphinx-relay/config/app.json | \
+  jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
+  jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
+  jq ".production.lnd_log_location = \"/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log\"" | \
+  jq ".production.node_http_port = \"3300\"" | \
   jq ".production.public_url = \"${publicURL}\"" > /home/sphinxrelay/sphinx-relay/config/app.json.tmp
   mv /home/sphinxrelay/sphinx-relay/config/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
 
@@ -334,24 +345,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/sphinxrelay 2>/dev/null
     sudo chown sphinxrelay:sphinxrelay -R /mnt/hdd/app-data/sphinxrelay
-
-    # database config
-    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/config.json /home/sphinxrelay/sphinx-relay/config/config.json.bak
-    sudo cat /home/sphinxrelay/sphinx-relay/config/config.json | \
-    jq ".production.storage = \"/mnt/hdd/app-data/sphinxrelay/sphinx.db\"" | \
-    sudo -u admin tee /home/admin/config.json.tmp
-    sudo mv /home/admin/config.json.tmp /home/sphinxrelay/sphinx-relay/config/config.json
-    sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/config.json
-
-    # general app config
-    sudo -u sphinxrelay cp /home/sphinxrelay/sphinx-relay/config/app.json /home/sphinxrelay/sphinx-relay/config/app.json.bak
-    sudo cat /home/sphinxrelay/sphinx-relay/config/app.json | \
-    jq ".production.tls_location = \"/mnt/hdd/app-data/lnd/tls.cert\"" | \
-    jq ".production.macaroon_location = \"/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon\"" | \
-    jq ".production.lnd_log_location = \"/mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log\"" | \
-    jq ".production.node_http_port = \"3300\"" > /home/admin/app.json.tmp
-    sudo mv /home/admin/app.json.tmp /home/sphinxrelay/sphinx-relay/config/app.json
-    sudo chown sphinxrelay:sphinxrelay /home/sphinxrelay/sphinx-relay/config/app.json
 
     # write environment (do after possible tor activation)
     sudo -u sphinxrelay /home/admin/config.scripts/bonus.sphinxrelay.sh write-environment
