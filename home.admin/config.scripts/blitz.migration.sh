@@ -390,6 +390,7 @@ if [ "$1" = "import-gui" ]; then
   if [ ${countZips} -gt 1 ]; then
     echo
     echo "FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "# use command to retry: raspiblitz"
     exit 0
   fi
 
@@ -400,6 +401,7 @@ if [ "$1" = "import-gui" ]; then
   if [ ${#error} -gt 0 ]; then
     echo
     echo "FAIL: Was not able to restore data --> ${error}"
+    echo "# use command to retry: raspiblitz"
     exit 1
   fi
   
@@ -408,6 +410,7 @@ if [ "$1" = "import-gui" ]; then
   if [ ${#network} -eq 0 ]; then
     echo
     echo "FAIL: No raspiblitz.conf found afer migration restore"
+    echo "# use command to retry: raspiblitz"
     exit 1
   fi
 
