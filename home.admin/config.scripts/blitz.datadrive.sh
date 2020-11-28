@@ -95,18 +95,23 @@ if [ "$1" = "status" ]; then
       else
          testsize=0
       fi
-      echo "# line($line)"
-      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
-      
+
       # count partitions
       testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
       # do not count line with disk info
       testpartitioncount=$((testpartitioncount-1))
 
+      # more debug output on experimental BTRFS
+      if [ ${isBTRFS} -eq 1 ]; then
+        echo "# line($line)"
+        echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+        echo "# testpartitioncount($testpartitioncount)"
+        echo "# testpartitioncount(${testpartitioncount})"
+      fi
+
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip OS partition
          if [ "$testpartition" != "$OSPartition" ]; then
-
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
                sizeDataPartition=${testsize}
@@ -115,7 +120,7 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	     # make sure to use the biggest
+	       # make sure to use the biggest
          if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partion to be created is smaller than disk so this is not correct (but close)
             sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
