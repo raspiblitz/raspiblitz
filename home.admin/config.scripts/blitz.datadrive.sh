@@ -109,6 +109,8 @@ if [ "$1" = "status" ]; then
 
       echo "# testpartitioncount($testpartitioncount)"
       echo "# testpartitioncount(${testpartitioncount})"
+      echo "# OSPartition(${OSPartition})"
+      echo "# hdd(${hdd})"
 
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip OS partition
@@ -125,7 +127,7 @@ if [ "$1" = "status" ]; then
          echo "ELSE"
 
          # default hdd set, when there is no OSpartition and there might ne no partitions at all
-         if [ "$OSPartition" = "" ] && [ "$hdd" = "" ] && [ "${testdevice}" != "" ]; then
+         if [ "${OSPartition}" = "" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
           echo "DO"
          else
