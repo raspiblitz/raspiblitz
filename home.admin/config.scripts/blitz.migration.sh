@@ -384,6 +384,7 @@ if [ "$1" = "import-gui" ]; then
     echo
     echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
     echo "error='no file found'"
+    sleep 3
     exit 1
   fi
 
@@ -392,6 +393,7 @@ if [ "$1" = "import-gui" ]; then
     echo
     echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
     echo "error='multiple files'"
+    sleep 3
     exit 1
   fi
 
@@ -403,6 +405,7 @@ if [ "$1" = "import-gui" ]; then
     echo
     echo "# FAIL: Was not able to restore data"
     echo "error='${error}'"
+    sleep 3
     exit 1
   fi
   
@@ -412,6 +415,7 @@ if [ "$1" = "import-gui" ]; then
     echo
     echo "FAIL: No raspiblitz.conf found afer migration restore"
     echo "error='migration contains no raspiblitz.conf'"
+    sleep 3
     exit 1
   fi
 
