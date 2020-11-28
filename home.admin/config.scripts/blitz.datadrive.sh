@@ -96,8 +96,8 @@ if [ "$1" = "status" ]; then
          testsize=0
       fi
 
-      echo "# line($line)"
-      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      #echo "# line($line)"
+      #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
 
       # count partitions
       testpartitioncount=0
@@ -107,10 +107,10 @@ if [ "$1" = "status" ]; then
         testpartitioncount=$((testpartitioncount-1))
       fi
 
-      echo "# testpartitioncount($testpartitioncount)"
-      echo "# testpartitioncount(${testpartitioncount})"
-      echo "# OSPartition(${OSPartition})"
-      echo "# hdd(${hdd})"
+      #echo "# testpartitioncount($testpartitioncount)"
+      #echo "# testpartitioncount(${testpartitioncount})"
+      #echo "# OSPartition(${OSPartition})"
+      #echo "# hdd(${hdd})"
 
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip OS partition
@@ -124,14 +124,9 @@ if [ "$1" = "status" ]; then
          fi
       else
 
-         echo "ELSE"
-
          # default hdd set, when there is no OSpartition and there might ne no partitions at all
          if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
-          echo "DO"
-         else
-          echo "DONT"
          fi
 
 	       # make sure to use the biggest
@@ -146,7 +141,7 @@ if [ "$1" = "status" ]; then
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
-    if [ ${#hddDataPartition} -lt 4 ]; then
+    if [ "${hddPartitionCandidate}" != "" ] && [ ${#hddDataPartition} -lt 4 ]; then
       echo "# WARNING: found invalid partition (${hddDataPartition}) - redacting"
       hddDataPartition=""
     fi
