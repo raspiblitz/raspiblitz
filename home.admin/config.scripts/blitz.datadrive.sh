@@ -86,6 +86,8 @@ if [ "$1" = "status" ]; then
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
 
+      echo "# line($line)"
+
       # cut line info into different informations
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
       testdevice=$(echo $testname | sed 's/[^a-z]*//g')
@@ -103,7 +105,7 @@ if [ "$1" = "status" ]; then
 
       # more debug output on experimental BTRFS
       if [ ${isBTRFS} -eq 1 ]; then
-        echo "# line($line)"
+        
         echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
         echo "# testpartitioncount($testpartitioncount)"
         echo "# testpartitioncount(${testpartitioncount})"
