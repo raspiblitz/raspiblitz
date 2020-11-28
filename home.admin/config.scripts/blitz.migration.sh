@@ -383,15 +383,16 @@ if [ "$1" = "import-gui" ]; then
   if [ ${countZips} -eq 0 ]; then
     echo
     echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
-    exit 0
+    echo "error='no file found'"
+    exit 1
   fi
 
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
     echo
-    echo "FAIL: Multiple possible files detected in ${defaultZipPath}"
-    echo "# use command to retry: raspiblitz"
-    exit 0
+    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "error='multiple files'"
+    exit 1
   fi
 
   # restore upload
@@ -400,8 +401,8 @@ if [ "$1" = "import-gui" ]; then
   source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
   if [ ${#error} -gt 0 ]; then
     echo
-    echo "FAIL: Was not able to restore data --> ${error}"
-    echo "# use command to retry: raspiblitz"
+    echo "# FAIL: Was not able to restore data"
+    echo "error='${error}'"
     exit 1
   fi
   
@@ -410,7 +411,7 @@ if [ "$1" = "import-gui" ]; then
   if [ ${#network} -eq 0 ]; then
     echo
     echo "FAIL: No raspiblitz.conf found afer migration restore"
-    echo "# use command to retry: raspiblitz"
+    echo "error='migration contains no raspiblitz.conf'"
     exit 1
   fi
 
