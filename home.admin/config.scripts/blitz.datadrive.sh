@@ -122,9 +122,14 @@ if [ "$1" = "status" ]; then
          fi
       else
 
+         echo "ELSE"
+
          # default hdd set, when there is no OSpartition and there might ne no partitions at all
          if [ "$OSPartition" = "" ] && [ "$hdd" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
+          echo "DO"
+         else
+          echo "DONT"
          fi
 
 	       # make sure to use the biggest
