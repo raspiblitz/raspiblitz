@@ -128,7 +128,7 @@ if [ "$1" = "status" ]; then
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
     if [ ${#hddDataPartition} -lt 4 ]; then
-      echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
+      echo "# WARNING: found invalid partition (${hddDataPartition}) - redacting"
       hddDataPartition=""
     fi
 
