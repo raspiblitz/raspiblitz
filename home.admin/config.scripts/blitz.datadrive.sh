@@ -96,11 +96,8 @@ if [ "$1" = "status" ]; then
          testsize=0
       fi
 
-      # more debug output on experimental BTRFS
-      if [ ${isBTRFS} -eq 1 ]; then
-        echo "# line($line)"
-        echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
-      fi
+      echo "# line($line)"
+      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
 
       # count partitions
       testpartitioncount=0
@@ -110,11 +107,8 @@ if [ "$1" = "status" ]; then
         testpartitioncount=$((testpartitioncount-1))
       fi
 
-      # more debug output on experimental BTRFS
-      if [ ${isBTRFS} -eq 1 ]; then
-        echo "# testpartitioncount($testpartitioncount)"
-        echo "# testpartitioncount(${testpartitioncount})"
-      fi
+      echo "# testpartitioncount($testpartitioncount)"
+      echo "# testpartitioncount(${testpartitioncount})"
 
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip OS partition
