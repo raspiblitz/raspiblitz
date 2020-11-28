@@ -103,20 +103,15 @@ if [ "$1" = "status" ]; then
       fi
 
       # count partitions
-      testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
-      # do not count line with disk info
-      testpartitioncount=$((testpartitioncount-1))
-
-      # more debug output on experimental BTRFS
-      if [ ${isBTRFS} -eq 1 ]; then
-        echo "# testpartitioncount($testpartitioncount)"
-        echo "# testpartitioncount(${testpartitioncount})"
+      testpartitioncount=0
+      if [ ${#testdevice} -gt 0 ]; then
+        testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
+        # do not count line with disk info
+        testpartitioncount=$((testpartitioncount-1))
       fi
 
       # more debug output on experimental BTRFS
       if [ ${isBTRFS} -eq 1 ]; then
-        echo "# line($line)"
-        echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
         echo "# testpartitioncount($testpartitioncount)"
         echo "# testpartitioncount(${testpartitioncount})"
       fi
