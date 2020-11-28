@@ -422,6 +422,7 @@ case $CHOICE in
             sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
             # on error clean & repeat
             if [ "$?" = "1" ]; then
+              echo
               echo "# clean and unmount for next try"
               sudo rm -f ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null
               sudo umount /mnt/hdd 2>/dev/null
