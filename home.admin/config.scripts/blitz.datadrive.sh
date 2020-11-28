@@ -148,8 +148,12 @@ if [ "$1" = "status" ]; then
     echo "isSSD=${isSSD}"
 
     echo "hddCandidate='${hdd}'"
-    hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
-    hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    hddBytes=0
+    hddGigaBytes=0
+    if [ "${hdd}" != "" ]; then
+      hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+      hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
 
