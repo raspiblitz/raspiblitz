@@ -121,13 +121,19 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
+
+         # default hdd set, when there is no OSpartition and there might ne no partitions at all
+         if [ "$OSPartition" = "" ] && [ "$hdd" = "" ] && [ "${testdevice}" != "" ]; then
+          hdd="${testdevice}"
+         fi
+
 	       # make sure to use the biggest
          if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partion to be created is smaller than disk so this is not correct (but close)
             sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
             hddDataPartition="${testdevice}1"
             hdd="${testdevice}"
-	     fi
+	       fi
       fi
       
     done < .lsblk.tmp
@@ -327,7 +333,7 @@ if [ "$1" = "status" ]; then
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
       # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${hdd}" != "" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
         vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
