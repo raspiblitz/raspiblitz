@@ -95,8 +95,8 @@ if [ "$1" = "status" ]; then
       else
          testsize=0
       fi
-      #echo "# line($line)"
-      #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      echo "# line($line)"
+      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
       
       # count partitions
       testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
