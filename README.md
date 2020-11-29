@@ -685,8 +685,7 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 
 ![LNBITS](pictures/lnbits.png)
 
-It can be used for:
-- Account system to mitigate the risk of exposing applications to your full balance, via unique API keys for each wallet
+It can be used together with IP2Tor to provide:
 - Lightning Paper Vouchers (Plugin: LNURLw)
 - Merchant Onboarding (Plugin: TPOS)
 
