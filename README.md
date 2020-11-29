@@ -637,9 +637,7 @@ After install, you will see a new `ELECTRS` option in the SSH main menu - it wil
 
 ![BTCPAY](pictures/btcpay.png)
 
-*At the moment, the RaspiBlitz will only make the BTCPayServer publicly available to the outside over the Tor network (Hidden Service).*
-
-[Details on Service](https://btcpayserver.org/)
+Find all details on how to use the BTCPay Server on your RaspiBlitz in this great tutorial: https://coincharge.io/en/raspiblitz-btcpay-server/
 
 After install, you will see a new `BTCPAY` option in the SSH main menu - it will give you all the information you need to start using it.
 
