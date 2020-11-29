@@ -770,8 +770,14 @@ At the moment, the following mobile wallets are supported:
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
 * [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md)
+* [Sphinx Chat App (iOS/Android)](https://sphinx.chat/)
 
 Mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. Then you need to `pair` them with your RaspiBlitz - also via a QR code displayed on the LCD. If you run your RaspiBlitz without an LCD, there is the fallback option to display that QR code on the terminal as ASCII code (which might involve lowering your terminal's font size).
+
+There is a special video how to connect the Zeus thru Tor:
+
+<a href="https://www.youtube.com/watch?v=XStiTJosklY" target="_blank"><img src="pictures/video-zeus.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=XStiTJosklY
+
 
 #### LNDCREDS: Macaroons and TLS.cert
 
