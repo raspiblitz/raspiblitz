@@ -615,7 +615,10 @@ Since Electrum Rust Server runs on the user's own machine, there is no need for 
 
 By contrast, if you use your Trezor Hardware Wallet with the trezor.io wallet, it will tell their third party server your public keys - connecting it with your IP. Now you can use your Trezor with the Electrum Wallet, just talking to your own Electrum Server, preserving your privacy.
 
-[YouTube: TOR and Electrum Server on Raspiblitz](https://www.youtube.com/watch?v=AiosKK_TA7w)
+Learn how you can activate and use your own Electrum Server over Tor:
+
+<a href="https://www.youtube.com/watch?v=AiosKK_TA7w" target="_blank"><img src="pictures/video-electrs.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=AiosKK_TA7w
+
 [More Details on Service](https://github.com/romanz/electrs)
 
 After install, you will see a new `ELECTRS` option in the SSH main menu - it will give you all the information you need to start using it.
@@ -692,7 +695,6 @@ It can be used together with IP2Tor to provide:
 - Merchant Onboarding (Plugin: TPOS)
 
 <a href="https://www.youtube.com/watch?v=0Bt3tHULAnw" target="_blank"><img src="pictures/video-vouchers.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=0Bt3tHULAnw
-
 
 You can also develop your own extensions on it.
 
@@ -774,7 +776,7 @@ At the moment, the following mobile wallets are supported:
 
 Mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. Then you need to `pair` them with your RaspiBlitz - also via a QR code displayed on the LCD. If you run your RaspiBlitz without an LCD, there is the fallback option to display that QR code on the terminal as ASCII code (which might involve lowering your terminal's font size).
 
-There is a special video how to connect the Zeus thru Tor:
+There is a special video on how to connect the Zeus app thru Tor:
 
 <a href="https://www.youtube.com/watch?v=XStiTJosklY" target="_blank"><img src="pictures/video-zeus.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=XStiTJosklY
 
