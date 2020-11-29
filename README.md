@@ -571,6 +571,14 @@ A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz term
 
 After install, you will see a new `LOOP` option in the SSH main menu - it will give you all the information you need to start using it.
 
+##### Lightning Pool
+
+Lightning Pool is a non-custodial, peer-to-peer marketplace that allows node operators that need inbound liquidity to pay node operators with available capital to open channels in their direction while retaining full custody of their funds. Pool’s first product is a Lightning Channel Lease - an inbound channel with a pre-agreed duration.
+
+[Details on Service](https://github.com/lightninglabs/pool)
+
+After install, you will see a new `POOL` option in the SSH main menu - it will give you all the information you need to start using it.
+
 ##### RTL Webinterface
 
 The RTL Webinterface is an LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitz SSH menus. It's recommended to give it a try.
@@ -725,6 +733,14 @@ https://github.com/curly60e/pyblock/blob/master/README.md
 ##### Mempool Explorer
 
 https://github.com/mempool/mempool
+
+##### Sphinx Relay Server
+
+The Sphinx App allows chat over the Lightning Network and ties into the idea of [Podcasting 2.0](https://u.today/father-of-podcasting-integrates-bitcoin-lightning-into-his-app). To use the mobile app with your own RaspiBlitz you need to install the [Sphinx Relay Server](https://github.com/stakwork/sphinx-relay/blob/master/README.md).
+
+![SPHINX](https://github.com/stakwork/sphinx-relay/raw/master/public/relay.jpg)
+
+After install, you will see a new `SPHINX` option in the SSH main menu - it will give you all the information you need to start using it.
 
 #### SUBSCRIBE: Subscription Services
 
