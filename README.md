@@ -615,7 +615,7 @@ Since Electrum Rust Server runs on the user's own machine, there is no need for 
 
 By contrast, if you use your Trezor Hardware Wallet with the trezor.io wallet, it will tell their third party server your public keys - connecting it with your IP. Now you can use your Trezor with the Electrum Wallet, just talking to your own Electrum Server, preserving your privacy.
 
-Learn how you can activate and use your own Electrum Server over Tor:
+Learn how you can use Electrum with your own Server over Tor:
 
 <a href="https://www.youtube.com/watch?v=AiosKK_TA7w" target="_blank"><img src="pictures/video-electrs.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=AiosKK_TA7w
 
