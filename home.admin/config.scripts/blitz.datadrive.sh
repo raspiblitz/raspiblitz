@@ -1175,7 +1175,7 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/temp 1>/dev/null
     sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
     sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
-    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
+    sudo mount -o umask=0766,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1309,6 +1309,7 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
   sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
   sudo chmod -R 766 /mnt/hdd/temp
+  sudo chmod -R 766 /mnt/temp
 
   # write info files about what directories are for
 
