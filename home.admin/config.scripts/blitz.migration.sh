@@ -293,8 +293,6 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
-
-
   # ask format for new HDD/SSD
   OPTIONS=()
   # check if HDD/SSD contains Bitcoin Blockchain
@@ -355,6 +353,9 @@ if [ "$1" = "import-gui" ]; then
     echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
     exit 1
   fi
+
+  # make sure all directories betare propper linked
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # make sure that temp directory exists and can be written by admin
   sudo mkdir -p ${defaultZipPath}
