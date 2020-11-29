@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6.1 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6.2 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -29,7 +29,8 @@ There are further Services that can be switched on:
 * **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
-* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop/blob/master/README.md)
+* **Pool** (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Faraday** (Channel Analysis & Recommendations CLI) [details](https://github.com/lightninglabs/faraday/blob/master/README.md)
@@ -39,6 +40,7 @@ There are further Services that can be switched on:
 * **Circuit Breaker** (Lighthing Channel Firewall) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 * **PyBlock**  (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 * **Mempool Explorer** [details](https://github.com/mempool/mempool)
+* **Sphinx Relay Server** [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -46,6 +48,8 @@ You can connect the following Wallet-Apps to your RaspiBlitz:
 * **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
+* **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
+
 
 Also many more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
