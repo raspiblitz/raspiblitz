@@ -577,7 +577,9 @@ The RTL Webinterface is an LND Control Dashboard you can run in your browser wit
 
 ![RTL](pictures/RTL-dashboard.png)
 
-[YouTube: CHANNEL MANAGEMENT and RTL interface in RaspiBlitz](https://www.youtube.com/watch?v=pESO_Pm0v10)
+Get all the details on how to mannage your channels with RTL in this video:
+
+<a href="https://www.youtube.com/watch?v=pESO_Pm0v10" target="_blank"><img src="pictures/video-rtl.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=pESO_Pm0v10
 
 Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
 
