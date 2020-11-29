@@ -1038,7 +1038,9 @@ To test it, try opening or closing a channel, and then check if you can find a c
 
 If you have a RaspiBlitz older than version v1.0, please [see here](FAQ.md).
 
-If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions.
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions - see the process in detail in the following video.
+
+<a href="https://www.youtube.com/watch?v=Xvn0WQfHUdI" target="_blank"><img src="pictures/video-update.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=Xvn0WQfHUdI
 
 If you have a RaspiBlitz v1.0 or v1.1 or higher do the following:
 
