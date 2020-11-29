@@ -699,6 +699,9 @@ After install, you will see a new `LNBITS` option in the SSH main menu - it will
 
 ##### JoinMarket
 
+<img src="pictures/video-joinmarket.png" alt="Video Tutorial" width="400">
+--watch--> https://www.youtube.com/watch?v=uGHRjilMhwY
+
 JoinMarket is software to create a special kind of bitcoin transaction called a CoinJoin transaction. Its aim is to improve the confidentiality and privacy of bitcoin transactions.
 
 A CoinJoin transaction requires other people to take part. The right resources (coins) have to be in the right place, at the right time, in the right quantity. This isn't a software or tech problem, it's an economic problem. JoinMarket works by creating a new kind of market that would allocate these resources in the best way.
