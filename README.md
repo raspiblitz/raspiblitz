@@ -685,12 +685,15 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 
 ![LNBITS](pictures/lnbits.png)
 
-It can be used as:
+It can be used for:
 - Account system to mitigate the risk of exposing applications to your full balance, via unique API keys for each wallet
-- Fallback wallet for the LNURL scheme
-- Instant wallet for LN demonstrations
+- Lightning Paper Vouchers (Plugin: LNURLw)
+- Merchant Onboarding (Plugin: TPOS)
 
-You can also develop extensions on it.
+<a href="https://www.youtube.com/watch?v=0Bt3tHULAnw" target="_blank"><img src="pictures/video-vouchers.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=0Bt3tHULAnw
+
+
+You can also develop your own extensions on it.
 
 [Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
 
