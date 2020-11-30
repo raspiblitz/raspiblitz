@@ -131,7 +131,11 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6.1:**
+**Download SD-Card image - Version 1.6.2:**
+
+RELEASE 1.6.2 IS IN PREPERATION AND LAST TESTING
+
+**Download SD-Card image - Version 1.6.1 (OLD VERSION)**
 
 Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
 
