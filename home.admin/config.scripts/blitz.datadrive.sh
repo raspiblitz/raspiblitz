@@ -95,18 +95,26 @@ if [ "$1" = "status" ]; then
       else
          testsize=0
       fi
+
       #echo "# line($line)"
       #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
-      
+
       # count partitions
-      testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
-      # do not count line with disk info
-      testpartitioncount=$((testpartitioncount-1))
+      testpartitioncount=0
+      if [ ${#testdevice} -gt 0 ]; then
+        testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
+        # do not count line with disk info
+        testpartitioncount=$((testpartitioncount-1))
+      fi
+
+      #echo "# testpartitioncount($testpartitioncount)"
+      #echo "# testpartitioncount(${testpartitioncount})"
+      #echo "# OSPartition(${OSPartition})"
+      #echo "# hdd(${hdd})"
 
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip OS partition
          if [ "$testpartition" != "$OSPartition" ]; then
-
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
                sizeDataPartition=${testsize}
@@ -115,20 +123,26 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	     # make sure to use the biggest
+
+         # default hdd set, when there is no OSpartition and there might ne no partitions at all
+         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+          hdd="${testdevice}"
+         fi
+
+	       # make sure to use the biggest
          if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partion to be created is smaller than disk so this is not correct (but close)
             sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
             hddDataPartition="${testdevice}1"
             hdd="${testdevice}"
-	     fi
+	       fi
       fi
       
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
-    if [ ${#hddDataPartition} -lt 4 ]; then
-      echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
+    if [ "${hddPartitionCandidate}" != "" ] && [ ${#hddDataPartition} -lt 4 ]; then
+      echo "# WARNING: found invalid partition (${hddDataPartition}) - redacting"
       hddDataPartition=""
     fi
 
@@ -136,8 +150,12 @@ if [ "$1" = "status" ]; then
     echo "isSSD=${isSSD}"
 
     echo "hddCandidate='${hdd}'"
-    hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
-    hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    hddBytes=0
+    hddGigaBytes=0
+    if [ "${hdd}" != "" ]; then
+      hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+      hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
 
@@ -317,7 +335,7 @@ if [ "$1" = "status" ]; then
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
       # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${hdd}" != "" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
         vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
@@ -1155,7 +1173,7 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/temp 1>/dev/null
     sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
     sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
-    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
+    sudo mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1288,7 +1306,9 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
   sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
-  sudo chmod -R 766 /mnt/hdd/temp
+  sudo chmod -R 777 /mnt/temp
+  sudo chmod -R 777 /mnt/hdd/temp
+  sudo chmod 777 /mnt
 
   # write info files about what directories are for
 
