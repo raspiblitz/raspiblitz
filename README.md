@@ -135,6 +135,8 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 RELEASE 1.6.2 IS IN PREPERATION AND LAST TESTING
 
+* [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
+
 **Download SD-Card image - Version 1.6.1 (OLD VERSION)**
 
 Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
