@@ -201,7 +201,6 @@ elif [ "$1" == "update-publicip" ]; then
     publicIP="$2"
   elif  [ "${globalIP}" == "${cleanIP}" ]; then
     echo "ip_changed=0"
-    exit 0
   else
     echo "ip_changed=1"
     if [ "${ipv6}" == "on" ]; then
