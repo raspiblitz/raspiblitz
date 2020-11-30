@@ -252,6 +252,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/bitcoin 2>/dev/null
   fi
   if [ -d "/mnt/hdd/backup_litecoin" ]; then
     echo "# Copying back litecoin backup data .."
@@ -259,6 +260,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
     sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/litecoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/litecoin 2>/dev/null
   fi
 
   echo "# OK done - you may now want to:"
@@ -292,8 +294,6 @@ if [ "$1" = "import-gui" ]; then
     echo "FAIL --> connected HDD/SSD is too small"
     exit 1
   fi
-
-
 
   # ask format for new HDD/SSD
   OPTIONS=()
@@ -356,6 +356,9 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
+  # make sure all directories betare propper linked
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
+
   # make sure that temp directory exists and can be written by admin
   sudo mkdir -p ${defaultZipPath}
   sudo chmod 777 -R ${defaultZipPath}
@@ -383,14 +386,18 @@ if [ "$1" = "import-gui" ]; then
   if [ ${countZips} -eq 0 ]; then
     echo
     echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
-    exit 0
+    echo "error='no file found'"
+    sleep 3
+    exit 1
   fi
 
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
     echo
-    echo "FAIL: Multiple possible files detected in ${defaultZipPath}"
-    exit 0
+    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "error='multiple files'"
+    sleep 3
+    exit 1
   fi
 
   # restore upload
@@ -399,7 +406,9 @@ if [ "$1" = "import-gui" ]; then
   source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
   if [ ${#error} -gt 0 ]; then
     echo
-    echo "FAIL: Was not able to restore data --> ${error}"
+    echo "# FAIL: Was not able to restore data"
+    echo "error='${error}'"
+    sleep 3
     exit 1
   fi
   
@@ -408,6 +417,8 @@ if [ "$1" = "import-gui" ]; then
   if [ ${#network} -eq 0 ]; then
     echo
     echo "FAIL: No raspiblitz.conf found afer migration restore"
+    echo "error='migration contains no raspiblitz.conf'"
+    sleep 3
     exit 1
   fi
 
