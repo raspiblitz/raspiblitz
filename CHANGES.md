@@ -1,5 +1,23 @@
 # CHANGES between Releases
 
+## Whats new in Version 1.6.2 of RaspiBlitz?
+
+- New: Pool (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
+- New: Sphinx Relay Server [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
+- Update: LNbits (Lightning Vouchers)
+- Update: Joinmarket 0.8.0 (bech32 orderbook)
+- Update: JoinInBox 0.1.15
+- Update: LN Balance Script
+- Update: Thunderhub 0.10.4
+- Update: RTL 0.9.3
+- Update: EletcRS 0.8.6
+- Update: Specter 0.10.0
+- Update: BTCPay Server 1.0.5.9
+- Update: Loop 0.11.1
+- Update: stacking-sats-kraken 0.3.0
+- Update: Experimental BTRFS support 
+- Fix: DropBox API
+
 ## Whats new in Version 1.6.1 of RaspiBlitz?
 
 - EMERGENCY-Update: LND version 0.11.1-beta [details](https://lists.linuxfoundation.org/pipermail/lightning-dev/2020-October/002819.html)
