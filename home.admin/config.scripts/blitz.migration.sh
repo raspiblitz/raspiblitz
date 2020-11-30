@@ -252,6 +252,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/bitcoin 2>/dev/null
   fi
   if [ -d "/mnt/hdd/backup_litecoin" ]; then
     echo "# Copying back litecoin backup data .."
@@ -259,6 +260,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
     sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/litecoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/litecoin 2>/dev/null
   fi
 
   echo "# OK done - you may now want to:"
