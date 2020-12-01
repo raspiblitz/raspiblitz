@@ -969,7 +969,7 @@ if [ "${lcdInstalled}" == "true" ]; then
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
   elif [ "${baseImage}" = "raspbian64" ]; then
-    cd wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
     chmod +x install.sh
     sudo bash install.sh
   else
