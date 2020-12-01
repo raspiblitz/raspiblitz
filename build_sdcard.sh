@@ -93,7 +93,6 @@ sleep 3
 echo ""
 echo "*** CHECK BASE IMAGE ***"
 
-# armv7=32Bit , armv8=64Bit
 echo "Detect CPU architecture ..."
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
@@ -104,7 +103,7 @@ if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
   uname -m
   exit 1
 else
- echo "OK running on $(uname -m) architecture."
+  echo "OK running on $(uname -m) architecture."
 fi
 
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
@@ -112,14 +111,18 @@ echo "Detect Base Image ..."
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
+isDebian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
 isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
 fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
+if [ ${isDebian} -gt 0 ]; then
+  if [ $(uname -n | grep -c 'raspberrypi') -eq 0 ]; then
+    baseImage="armbian"
+  else
+    baseImage="raspbian64"
+  fi
 fi
 if [ ${isUbuntu} -gt 0 ]; then
 baseImage="ubuntu"
@@ -887,38 +890,48 @@ echo ""
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
 if [ "${lcdInstalled}" == "true" ]; then
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
-     echo "*** LCD DRIVER ***"
-     echo "--> Downloading LCD Driver from Github"
-     cd /home/admin/
-     sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-     sudo -u admin chmod -R 755 LCD-show
-     sudo -u admin chown -R admin:admin LCD-show
-     cd LCD-show/
-     sudo -u admin git reset --hard 53dd0bf
-
-     # install xinput calibrator package
-     echo "--> install xinput calibrator package"
-     sudo apt install -y libxi6
-     sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
-   fi
-
-   # make dietpi preparations
-   if [ "${baseImage}" = "dietpi" ]; then
-     echo "--> dietpi preparations"
-     sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-     sudo mkdir /etc/X11/xorg.conf.d
-     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-     sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-     sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-     sudo cp ./usr/cmdline.txt /DietPi/
-     sudo cp ./usr/inittab /etc/
-     sudo cp ./boot/config-35.txt /DietPi/config.txt
-     # make LCD screen rotation correct
-     sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-   fi
+  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+    echo "*** 32bit LCD DRIVER ***"
+    echo "--> Downloading LCD Driver from Github"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
+    sudo -u admin chmod -R 755 LCD-show
+    sudo -u admin chown -R admin:admin LCD-show
+    cd LCD-show/
+    sudo -u admin git reset --hard 53dd0bf || exit 1
+    # install xinput calibrator package
+    echo "--> install xinput calibrator package"
+    sudo apt install -y libxi6
+    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+ 
+    if [ "${baseImage}" = "dietpi" ]; then
+      echo "--> dietpi preparations"
+      sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+      sudo mkdir /etc/X11/xorg.conf.d
+      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+      sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+      sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+      sudo cp ./usr/cmdline.txt /DietPi/
+      sudo cp ./usr/inittab /etc/
+      sudo cp ./boot/config-35.txt /DietPi/config.txt
+      # make LCD screen rotation correct
+      sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+    fi
+  elif [ "${baseImage}" = "raspbian64" ]; then
+    echo "*** 64bit LCD DRIVER ***"
+    echo "--> Downloading LCD Driver from Github"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    cd wavesharelcd-64bit-rpi
+    sudo -u admin git reset --hard 5a206a7 || exit 1
+    # TODO touchscreen calibration
+    # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+  fi
 fi
+
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
@@ -929,7 +942,7 @@ echo ""
 
 if [ "${lcdInstalled}" == "true" ]; then
    echo "Your SD Card Image for RaspiBlitz is almost ready."
-   if [ "${baseImage}" = "raspbian" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
       echo "Last step is to install LCD drivers. This will reboot your Pi when done."
       echo ""
    fi
@@ -948,14 +961,18 @@ echo "REMEMBER for login now use --> user:admin password:raspiblitz"
 echo ""
 
 if [ "${lcdInstalled}" == "true" ]; then
-   # activate LCD and trigger reboot
-   # dont do this on dietpi to allow for automatic build
-   if [ "${baseImage}" = "raspbian" ]; then
-      sudo chmod +x -R /home/admin/LCD-show
-      cd /home/admin/LCD-show/
-      sudo apt-mark hold raspberrypi-bootloader
-      sudo ./LCD35-show
-   else
-     echo "Use 'sudo reboot' to restart manually."
-   fi
+  # activate LCD and trigger reboot
+  # dont do this on dietpi to allow for automatic build
+  if [ "${baseImage}" = "raspbian" ]; then
+    sudo chmod +x -R /home/admin/LCD-show
+    cd /home/admin/LCD-show/
+    sudo apt-mark hold raspberrypi-bootloader
+    sudo ./LCD35-show
+  elif [ "${baseImage}" = "raspbian64" ]; then
+    cd wavesharelcd-64bit-rpi
+    chmod +x install.sh
+    sudo bash install.sh
+  else
+    echo "Use 'sudo reboot' to restart manually."
+  fi
 fi
