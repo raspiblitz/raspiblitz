@@ -197,7 +197,7 @@ if [ "${baseImage}" = "dietpi" ]; then
 fi
 
 # special prepare when Raspbian
-if [ "${baseImage}" = "raspbian" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -270,7 +270,7 @@ echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
 if [ "${lcdInstalled}" == "true" ]; then
-   if [ "${baseImage}" = "raspbian" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
       sudo raspi-config nonint do_boot_behaviour B2
@@ -784,43 +784,39 @@ else
 fi
  
 if [ "${lcdInstalled}" == "true" ]; then
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ]; then
-
-     homeFile=/home/pi/.bashrc
-     autostart="automatic start the LCD"
-     autostartDone=$(cat $homeFile|grep -c "$autostart")
-
-     if [ ${autostartDone} -eq 0 ]; then
-        # bash autostart for pi
-        # run as exec to dont allow easy physical access by keyboard
-        # see https://github.com/rootzoll/raspiblitz/issues/54
-        sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-        sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-        sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-        sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-        echo "autostart LCD added to $homeFile"
-     else
-        echo "autostart LCD already in $homeFile"
-     fi
-   fi
-
-   if [ "${baseImage}" = "dietpi" ]; then
-
-     homeFile=/home/dietpi/.bashrc
-     startLCD="automatic start the LCD"
-     autostartDone=$(cat $homeFile|grep -c "$startLCD")
-
-     if [ ${autostartDone} -eq 0 ]; then
-        # bash autostart for dietpi
-        sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-        sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-        sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-        sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-        echo "autostart LCD added to $homeFile"
-     else
-        echo "autostart LCD already in $homeFile"
-     fi
-   fi
+  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ] || \
+  [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ] ; then
+    homeFile=/home/pi/.bashrc
+    autostart="automatic start the LCD"
+    autostartDone=$(cat $homeFile|grep -c "$autostart")
+    if [ ${autostartDone} -eq 0 ]; then
+      # bash autostart for pi
+      # run as exec to dont allow easy physical access by keyboard
+      # see https://github.com/rootzoll/raspiblitz/issues/54
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+      echo "autostart LCD added to $homeFile"
+    else
+      echo "autostart LCD already in $homeFile"
+    fi
+  fi
+  if [ "${baseImage}" = "dietpi" ]; then
+    homeFile=/home/dietpi/.bashrc
+    startLCD="automatic start the LCD"
+    autostartDone=$(cat $homeFile|grep -c "$startLCD")
+    if [ ${autostartDone} -eq 0 ]; then
+       # bash autostart for dietpi
+       sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+       sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+       sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+       sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+       echo "autostart LCD added to $homeFile"
+    else
+       echo "autostart LCD already in $homeFile"
+    fi
+  fi
 fi
 
 echo ""
@@ -830,7 +826,7 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
-if [ "${baseImage}" = "raspbian" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
   if [ "${disableWifi}" == "true" ]; then
      echo ""
      echo "*** DISABLE WIFI ***"
