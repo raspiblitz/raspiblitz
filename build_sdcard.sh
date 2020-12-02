@@ -857,6 +857,16 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
 
   # remove bluetooth packages
   sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  
+  echo
+  echo "*** DISABLE AUDIO (snd_bcm2835) ***"
+  sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
+  echo
+  
+  echo "*** DISABLE DRM VC4 V3D driver ***"
+  dtoverlay=vc4-fkms-v3d
+  sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+
 fi
 
 # *** CACHE DISK IN RAM ***
