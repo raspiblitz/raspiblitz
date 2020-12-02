@@ -121,7 +121,7 @@ if [ ${isDebian} -gt 0 ]; then
   if [ $(uname -n | grep -c 'raspberrypi') -eq 0 ]; then
     baseImage="armbian"
   else
-    baseImage="raspbian64"
+    baseImage="raspios_arm64"
   fi
 fi
 if [ ${isUbuntu} -gt 0 ]; then
@@ -197,7 +197,7 @@ if [ "${baseImage}" = "dietpi" ]; then
 fi
 
 # special prepare when Raspbian
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -270,7 +270,7 @@ echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
 if [ "${lcdInstalled}" == "true" ]; then
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
       sudo raspi-config nonint do_boot_behaviour B2
@@ -784,7 +784,7 @@ else
 fi
  
 if [ "${lcdInstalled}" == "true" ]; then
-  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ] || \
+  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || \
   [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ] ; then
     homeFile=/home/pi/.bashrc
     autostart="automatic start the LCD"
@@ -826,7 +826,7 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   if [ "${disableWifi}" == "true" ]; then
      echo ""
      echo "*** DISABLE WIFI ***"
@@ -924,7 +924,7 @@ if [ "${lcdInstalled}" == "true" ]; then
       # make LCD screen rotation correct
       sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
     fi
-  elif [ "${baseImage}" = "raspbian64" ]; then
+  elif [ "${baseImage}" = "raspios_arm64" ]; then
     echo "*** 64bit LCD DRIVER ***"
     echo "--> Downloading LCD Driver from Github"
     cd /home/admin/
@@ -948,7 +948,7 @@ echo ""
 
 if [ "${lcdInstalled}" == "true" ]; then
    echo "Your SD Card Image for RaspiBlitz is almost ready."
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspbian64" ]; then
+   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
       echo "Last step is to install LCD drivers. This will reboot your Pi when done."
       echo ""
    fi
@@ -974,7 +974,7 @@ if [ "${lcdInstalled}" == "true" ]; then
     cd /home/admin/LCD-show/
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
-  elif [ "${baseImage}" = "raspbian64" ]; then
+  elif [ "${baseImage}" = "raspios_arm64" ]; then
     cd /home/admin/wavesharelcd-64bit-rpi
     # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
