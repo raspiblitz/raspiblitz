@@ -22,9 +22,9 @@ if [ ${#wantedBranch} -eq 0 ]; then
   wantedBranch="master"
 else
   if [ "${wantedBranch}" == "-h" -o "${wantedBranch}" == "--help" ]; then
-     echo "Usage: [branch] [github user] [root partition] [LCD screen installed true|false] [Wifi disabled true|false]"
-     echo "Example (USB boot, no LCD and no wifi): $0 v1.6 rootzoll /dev/sdb2 false true"
-     exit 1
+    echo "Usage: [branch] [github user] [root partition] [LCD screen installed true|false] [Wifi disabled true|false]"
+    echo "Example (USB boot, no LCD and no wifi): $0 v1.6 rootzoll /dev/sdb2 false true"
+    exit 1
   fi
 fi
 echo "will use code from branch --> '${wantedBranch}'"
@@ -51,7 +51,7 @@ if [ ${#lcdInstalled} -eq 0 ]; then
   lcdInstalled="true"
 else
   if [ "${lcdInstalled}" != "false" ]; then
-     lcdInstalled="true"
+    lcdInstalled="true"
   fi
 fi
 echo "will activate LCD screen --> '${lcdInstalled}'"
@@ -62,7 +62,7 @@ if [ ${#disableWifi} -eq 0 ]; then
   disableWifi="false"
 else
   if [ "${disableWifi}" != "true" ]; then
-     disableWifi="false"
+    disableWifi="false"
   fi
 fi
 echo "will disable wifi --> '${disableWifi}'"
@@ -73,16 +73,16 @@ if [ ${#wifiCountry} -eq 0 ]; then
   wifiCountry="US"
 fi
 if [ "${disableWifi}" == "false" ]; then
-   echo "will use Wifi country --> '${wifiCountry}'"
+  echo "will use Wifi country --> '${wifiCountry}'"
 fi
 
 echo -n "Do you wish to install Raspiblitz branch ${wantedBranch}? (yes/no) "
 read installRaspiblitzAnswer
 if [ "$installRaspiblitzAnswer" == "yes" ] ;then
-   echo ""
-   echo ""
+  echo ""
+  echo ""
 else
-   exit 1
+  exit 1
 fi
 
 
@@ -204,7 +204,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   if [ "${disableWifi}" == "false" ]; then
-     sudo raspi-config nonint do_wifi_country $wifiCountry
+    sudo raspi-config nonint do_wifi_country $wifiCountry
   fi
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
@@ -234,16 +234,16 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   fsOption2InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption2})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
-     sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
-     echo "$fsOption1 added to $kernelOptionsFile"
+    sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
+    echo "$fsOption1 added to $kernelOptionsFile"
   else
-     echo "$fsOption1 already in $kernelOptionsFile"
+    echo "$fsOption1 already in $kernelOptionsFile"
   fi
   if [ ${fsOption2InFile} -eq 0 ]; then
-     sudo sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
-     echo "$fsOption2 added to $kernelOptionsFile"
+    sudo sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
+    echo "$fsOption2 added to $kernelOptionsFile"
   else
-     echo "$fsOption2 already in $kernelOptionsFile"
+    echo "$fsOption2 already in $kernelOptionsFile"
   fi
 
 fi
@@ -557,17 +557,17 @@ fi
 if [ ! -f "./${binaryName}" ]; then
    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
 else
-   # check binary checksum test
-   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-      echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-      rm -v ./${binaryName}
-   else
-      downloadOK=1
-   fi
+  # check binary checksum test
+  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
+    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+    rm -v ./${binaryName}
+  else
+    downloadOK=1
+  fi
 fi
 if [ downloadOK == 0 ]; then
-    exit 1
+  exit 1
 fi
 
 echo ""
@@ -661,7 +661,7 @@ echo ""
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
-   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
 fi
 
 # check binary was not manipulated (checksum test)
@@ -727,10 +727,10 @@ keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
 keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
 
 if [ ${keyBindingsDone} -eq 0 ]; then
-   sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
-   echo "key-bindings added to $homeFile"
+  sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+  echo "key-bindings added to $homeFile"
 else
-   echo "key-bindings already in $homeFile"
+  echo "key-bindings already in $homeFile"
 fi
 
 # *** SHELL SCRIPTS AND ASSETS
@@ -770,17 +770,17 @@ autostart="automatically start main menu"
 autostartDone=$(cat $homeFile|grep -c "$autostart")
 
 if [ ${autostartDone} -eq 0 ]; then
-   # bash autostart for admin
-   sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
-   sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-   sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
-   sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
-   sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-   sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
-   sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
-   echo "autostart added to $homeFile"
+  # bash autostart for admin
+  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+  echo "autostart added to $homeFile"
 else
-   echo "autostart already in $homeFile"
+  echo "autostart already in $homeFile"
 fi
  
 if [ "${lcdInstalled}" == "true" ]; then
@@ -807,14 +807,14 @@ if [ "${lcdInstalled}" == "true" ]; then
     startLCD="automatic start the LCD"
     autostartDone=$(cat $homeFile|grep -c "$startLCD")
     if [ ${autostartDone} -eq 0 ]; then
-       # bash autostart for dietpi
-       sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-       sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-       sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-       sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-       echo "autostart LCD added to $homeFile"
+      # bash autostart for dietpi
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+      echo "autostart LCD added to $homeFile"
     else
-       echo "autostart LCD already in $homeFile"
+      echo "autostart LCD already in $homeFile"
     fi
   fi
 fi
@@ -828,10 +828,10 @@ sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   if [ "${disableWifi}" == "true" ]; then
-     echo ""
-     echo "*** DISABLE WIFI ***"
-     sudo systemctl disable wpa_supplicant.service
-     sudo ifconfig wlan0 down
+    echo ""
+    echo "*** DISABLE WIFI ***"
+    sudo systemctl disable wpa_supplicant.service
+    sudo ifconfig wlan0 down
   fi
 
   echo ""
@@ -953,13 +953,13 @@ if [ "${lcdInstalled}" == "true" ]; then
       echo ""
    fi
 else
-   echo "Your SD Card Image for RaspiBlitz is ready."
+  echo "Your SD Card Image for RaspiBlitz is ready."
 fi
 echo "Take the chance & look thru the output above if you can spot any errror."
 echo ""
 if [ "${lcdInstalled}" == "true" ]; then
-   echo "After final reboot - your SD Card Image is ready."
-   echo ""
+  echo "After final reboot - your SD Card Image is ready."
+  echo ""
 fi
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
@@ -981,7 +981,7 @@ if [ "${lcdInstalled}" == "true" ]; then
     rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
     mkdir -p /etc/X11/xorg.conf.d
     cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
-    cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf
+    # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
 
     # load module on boot
     cp ./waveshare35a.dtbo /boot/overlays/
