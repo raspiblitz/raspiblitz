@@ -931,9 +931,30 @@ if [ "${lcdInstalled}" == "true" ]; then
     sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
     sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
     sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
-    cd wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
-    # TODO touchscreen calibration
+
+    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+    # prepare X11
+    rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+    mkdir -p /etc/X11/xorg.conf.d
+    cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
+    # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+
+    # load module on boot
+    cp ./waveshare35a.dtbo /boot/overlays/
+    echo "hdmi_force_hotplug=1" >> /boot/config.txt 
+    # don't enable I2C, SPI and UART ports by default
+    # echo "dtparam=i2c_arm=on" >> /boot/config.txt
+    # echo "dtparam=spi=on" >> /boot/config.txt
+    # echo "enable_uart=1" >> /boot/config.txt
+    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+    cp ./cmdline.txt /boot/
+
+    # touch screen calibration
+    apt-get install xserver-xorg-input-evdev
+    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+    # TODO manual touchscreen calibration option
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
   fi
 fi
@@ -947,11 +968,11 @@ echo "**********************************************"
 echo ""
 
 if [ "${lcdInstalled}" == "true" ]; then
-   echo "Your SD Card Image for RaspiBlitz is almost ready."
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
-      echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-      echo ""
-   fi
+  echo "Your SD Card Image for RaspiBlitz is almost ready."
+  if [ "${baseImage}" = "raspbian" ]; then
+    echo "Last step is to install LCD drivers. This will reboot your Pi when done."
+    echo ""
+  fi
 else
   echo "Your SD Card Image for RaspiBlitz is ready."
 fi
@@ -974,32 +995,6 @@ if [ "${lcdInstalled}" == "true" ]; then
     cd /home/admin/LCD-show/
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
-  elif [ "${baseImage}" = "raspios_arm64" ]; then
-    cd /home/admin/wavesharelcd-64bit-rpi
-    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-    # prepare X11
-    rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-    mkdir -p /etc/X11/xorg.conf.d
-    cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
-    # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-    # load module on boot
-    cp ./waveshare35a.dtbo /boot/overlays/
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt 
-    # don't enable I2C, SPI and UART ports by default
-    # echo "dtparam=i2c_arm=on" >> /boot/config.txt
-    # echo "dtparam=spi=on" >> /boot/config.txt
-    # echo "enable_uart=1" >> /boot/config.txt
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-    cp ./cmdline.txt /boot/
-
-    # touch screen calibration
-    apt-get install xserver-xorg-input-evdev
-    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-
-    echo "reboot now"
-    reboot
-
   else
     echo "Use 'sudo reboot' to restart manually."
   fi
