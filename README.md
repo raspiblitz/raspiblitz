@@ -133,19 +133,13 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.6.2:**
 
-RELEASE 1.6.2 IS IN PREPERATION AND LAST TESTING
+Browser: https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz
+
+SHA-256: 07f033e98f0b747a7a2332f1f7d348f5c7478f01a99fab976d7f095daf7c5ea9 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz.sig)
+
+Torrent: [assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent)
 
 * [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
-
-**Download SD-Card image - Version 1.6.1 (OLD VERSION)**
-
-Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
-
-SHA-256: 6b9925f274f68ca109771b047c0272df31c01dc0a5d2b9e05b582accfa6029ec or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz.sig)
-
-Torrent: [assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent)
-
-* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-161-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
