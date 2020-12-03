@@ -111,9 +111,9 @@ fi
 echo "Detect Base Image ..."
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+isRaspbian=$(grep -c 'Raspbian' /etc/os-release 2>/dev/null)
+isArmbian=$(grep -c 'Debian' /etc/os-release 2>/dev/null)
+isUbuntu=$(grep -c 'Ubuntu' /etc/os-release 2>/dev/null)
 isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
@@ -207,7 +207,7 @@ if [ "${baseImage}" = "raspbian" ]; then
 
   configFile="/boot/config.txt"
   max_usb_current="max_usb_current=1"
-  max_usb_currentDone=$(cat $configFile|grep -c "$max_usb_current")
+  max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
 
   if [ ${max_usb_currentDone} -eq 0 ]; then
     sudo echo "" >> $configFile
@@ -227,8 +227,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   kernelOptionsFile=/boot/cmdline.txt
   fsOption1="fsck.mode=force"
   fsOption2="fsck.repair=yes"
-  fsOption1InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption1})
-  fsOption2InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption2})
+  fsOption1InFile=$(grep -c ${fsOption1} ${kernelOptionsFile})
+  fsOption2InFile=$(grep -c ${fsOption2} ${kernelOptionsFile})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
      sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
@@ -725,7 +725,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
-keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
+keyBindingsDone=$(grep -c "$keyBindings" $homeFile)
 
 if [ ${keyBindingsDone} -eq 0 ]; then
    sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
@@ -768,7 +768,7 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 homeFile=/home/admin/.bashrc
 autostart="automatically start main menu"
-autostartDone=$(cat $homeFile|grep -c "$autostart")
+autostartDone=$(grep -c "$autostart" $homeFile)
 
 if [ ${autostartDone} -eq 0 ]; then
    # bash autostart for admin
@@ -789,7 +789,7 @@ if [ "${lcdInstalled}" == "true" ]; then
 
      homeFile=/home/pi/.bashrc
      autostart="automatic start the LCD"
-     autostartDone=$(cat $homeFile|grep -c "$autostart")
+     autostartDone=$(grep -c "$autostart" $homeFile)
 
      if [ ${autostartDone} -eq 0 ]; then
         # bash autostart for pi
@@ -809,7 +809,7 @@ if [ "${lcdInstalled}" == "true" ]; then
 
      homeFile=/home/dietpi/.bashrc
      startLCD="automatic start the LCD"
-     autostartDone=$(cat $homeFile|grep -c "$startLCD")
+     autostartDone=$(grep -c "$startLCD" $homeFile)
 
      if [ ${autostartDone} -eq 0 ]; then
         # bash autostart for dietpi
@@ -844,7 +844,7 @@ if [ "${baseImage}" = "raspbian" ]; then
 
   configFile="/boot/config.txt"
   disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(cat $configFile|grep -c "$disableBT")
+  disableBTDone=$(grep -c "$disableBT" $configFile)
 
   if [ ${disableBTDone} -eq 0 ]; then
     # disable bluetooth module
