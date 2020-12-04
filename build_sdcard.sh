@@ -210,8 +210,8 @@ if [ "${baseImage}" = "raspbian" ]; then
   max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
 
   if [ ${max_usb_currentDone} -eq 0 ]; then
-    sudo echo "" >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
+    echo "" | sudo tee -a $configFile
+    echo "# Raspiblitz" | sudo tee -a $configFile
     echo "$max_usb_current" | sudo tee -a $configFile
   else
     echo "$max_usb_current already in $configFile"
@@ -848,10 +848,10 @@ if [ "${baseImage}" = "raspbian" ]; then
 
   if [ ${disableBTDone} -eq 0 ]; then
     # disable bluetooth module
-    sudo echo "" >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
-    echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
-    echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
+    echo "" | sudo tee -a $configFile
+    echo "# Raspiblitz" | sudo tee -a $configFile
+    echo "dtoverlay=pi3-disable-bt" | sudo tee -a $configFile
+    echo "dtoverlay=disable-bt" | sudo tee -a $configFile
   else
     echo "disable BT already in $configFile"
   fi
