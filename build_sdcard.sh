@@ -563,7 +563,7 @@ else
       downloadOK=1
    fi
 fi
-if [ downloadOK == 0 ]; then
+if [ $downloadOK == 0 ]; then
     exit 1
 fi
 
@@ -622,7 +622,7 @@ sleep 3
 verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
