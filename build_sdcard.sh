@@ -19,7 +19,7 @@ echo ""
 echo "*** CHECK INPUT PARAMETERS ***"
 wantedBranch="$1"
 if [ ${#wantedBranch} -eq 0 ]; then
-  wantedBranch="master"
+  wantedBranch="dev"
 else
   if [ "${wantedBranch}" == "-h" -o "${wantedBranch}" == "--help" ]; then
     echo "Usage: [branch] [github user] [root partition] [LCD screen installed true|false] [Wifi disabled true|false]"
