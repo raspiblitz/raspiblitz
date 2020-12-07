@@ -241,6 +241,7 @@ EOF
     sudo udevadm trigger
     sudo udevadm control --reload-rules
     sudo groupadd plugdev || /bin/true
+    sudo usermod -aG plugdev bitcoin
     sudo usermod -aG plugdev specter
 
     # install service
