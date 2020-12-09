@@ -373,7 +373,7 @@ sudo apt install -y vnstat
 sudo apt install -y parted dosfstools
 
 # prepare for BTRFS data drive raid
-sudo apt install -y btrfs-progs btrfs-tools
+sudo apt install -y btrfs-progs
 
 # network tools
 sudo apt install -y autossh telnet
