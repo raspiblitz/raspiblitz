@@ -743,9 +743,9 @@ if [ "$1" = "fstab" ]; then
     updated=$(cat /etc/fstab | grep -c "/mnt/hdd")
     if [ $updated -eq 0 ]; then
        echo "# updating /etc/fstab"
-       #sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
-       # changing to the RaspiBolt recommended fstab options for the ext4 HDD
-       sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 rw,nosuid,dev,noexec,noatime,nodiratime,auto,nouser,async,nofail 0 2" -i /etc/fstab 1>/dev/null
+
+       sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
+
     fi
 
     sync

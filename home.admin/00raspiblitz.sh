@@ -33,10 +33,6 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
       echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
       echo "space on your laptop you can store the VDI file on an external drive."
       echo "***********************************************************"
-    else
-      echo "If HDD is connected - please report the result of the following command:"
-      echo "sudo /home/admin/config.scripts/blitz.datadrive.sh status"
-      echo "***********************************************************"
     fi
     exit
 fi
@@ -240,6 +236,7 @@ How do you want to continue?
               echo "please wait ... update to next screen can be slow"
             else
               /home/admin/80scanLND.sh lightning-error
+              sudo rm /home/admin/systemd.lightning.log
               echo "(exit after too much restarts/unlocks - restart to try again)"
               exit 0
             fi
