@@ -82,8 +82,8 @@ patchNotice()
 It means it will sync the program code with the
 GitHub repo for your version branch v${codeVersion}.
 
-This can be usefull if there are important updates 
-inbetween releases to fix severe bugs. It can also
+This can be useful if there are important updates 
+in between releases to fix severe bugs. It can also
 be used to sync your own code with your RaspiBlitz 
 if you are developing on your own GitHub Repo.
 
