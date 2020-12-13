@@ -469,6 +469,13 @@ Restart=on-failure
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
 
+  echo "# configure BTCPay to use sqlite database" 
+  if ! grep -Eq "^sqlitefile=sqllite.db" /home/btcpay/.btcpayserver/Main/settings.config; then
+    echo "
+### Database ###
+sqlitefile=sqllite.db" | sudo tee -a /home/btcpay/.btcpayserver/Main/settings.config
+  fi
+
     sudo systemctl daemon-reload
     sudo systemctl enable btcpayserver
 
