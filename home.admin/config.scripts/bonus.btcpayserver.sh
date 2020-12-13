@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.1.46"
+NBXplorerVersion="v2.1.47"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.5.9"
+BTCPayVersion="v1.0.6.3"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
