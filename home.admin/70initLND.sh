@@ -183,10 +183,12 @@ if [ ${walletExists} -eq 0 ]; then
 ############################
 
     # let user enter password c
-    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
-    passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
+    sudo touch /var/cache/raspiblitz/.pass.tmp
+    sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
+    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /var/cache/raspiblitz/.pass.tmp
+    passwordC=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+    sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
 
     # make sure passwordC is set
     if [ ${#passwordC} -eq 0 ]; then
@@ -197,10 +199,12 @@ if [ ${walletExists} -eq 0 ]; then
     # generate wallet with seed and set passwordC
     clear
     echo "Generating new Wallet ...."
-    python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /home/admin/.seed.tmp
-    source /home/admin/.seed.tmp
-    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-
+    sudo touch /var/cache/raspiblitz/.seed.tmp
+    sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
+    python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /var/cache/raspiblitz/.seed.tmp
+    source /var/cache/raspiblitz/.seed.tmp
+    sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
+    
     # in case of error - retry
     if [ ${#err} -gt 0 ]; then
       whiptail --title "lnd.initwallet.py - ERROR" --msgbox "${err}" 8 50
@@ -299,10 +303,12 @@ or having a complete LND rescue-backup from your old node.
     clear
 
     # let user enter password c
-    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /home/admin/.pass.tmp
-    passwordC=`sudo cat /home/admin/.pass.tmp`
-    sudo shred -u /home/admin/.pass.tmp 2>/dev/null
+    sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
+    sudo touch /var/cache/raspiblitz/.pass.tmp
+    sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
+    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /var/cache/raspiblitz/.pass.tmp
+    passwordC=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+    sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
 
     # get seed word list
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
@@ -311,9 +317,11 @@ or having a complete LND rescue-backup from your old node.
       while [ ${wordsCorrect} -eq 0 ]
       do
         # dialog to enter
-        dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/home/admin/.seed.tmp
-        wordstring=$( cat /home/admin/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
-        shred -u /home/admin/.seed.tmp
+        sudo touch /var/cache/raspiblitz/.seed.tmp
+        sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
+        dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+        wordstring=$( cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
+        shred -u /var/cache/raspiblitz/.seed.tmp
         echo "processing ... ${wordstring}"
 
         # check correct number of words
@@ -353,10 +361,12 @@ During wallet creation LND offers to set an extra password
 to protect the seed words. Most users did not set this.
       " 11 65
       if [ $? -eq 1 ]; then
-        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /home/admin/.pass.tmp empty-allowed
-        passwordD=`sudo cat /home/admin/.pass.tmp`
-        sudo shred -u /home/admin/.pass.tmp 2>/dev/null
+        sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
+        sudo touch /var/cache/raspiblitz/.pass.tmp
+        sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
+        passwordD=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+        sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
       fi
 
     fi
