@@ -45,7 +45,7 @@ while [ ${chainIsReady} -eq 0 ]
   do
     loopCount=$(($loopCount +1))
     result=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>error.out)
-    error=`cat error.out`
+    error=$(cat error.out)
     rm error.out
     if [ ${#error} -gt 0 ]; then
       if [ ${loopCount} -gt 33 ]; then
@@ -187,7 +187,7 @@ if [ ${walletExists} -eq 0 ]; then
     sudo touch /var/cache/raspiblitz/.pass.tmp
     sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /var/cache/raspiblitz/.pass.tmp
-    passwordC=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+    passwordC=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
     sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
 
     # make sure passwordC is set
@@ -307,7 +307,7 @@ or having a complete LND rescue-backup from your old node.
     sudo touch /var/cache/raspiblitz/.pass.tmp
     sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
     sudo /home/admin/config.scripts/blitz.setpassword.sh x "Set your Password C for the LND Wallet Unlock" /var/cache/raspiblitz/.pass.tmp
-    passwordC=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+    passwordC=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
     sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
 
     # get seed word list
@@ -365,7 +365,7 @@ to protect the seed words. Most users did not set this.
         sudo touch /var/cache/raspiblitz/.pass.tmp
         sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
         sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
-        passwordD=`sudo cat /var/cache/raspiblitz/.pass.tmp`
+        passwordD=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
         sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
       fi
 
