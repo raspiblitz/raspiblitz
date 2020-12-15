@@ -274,8 +274,7 @@ case $CHOICE in
             echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
             echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
             echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
-            echo "Fee-PerMil -> amount based fee (in millisatoshis per 1 satoshi) on forwarding on channel"
-            echo ""
+            echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
             /home/admin/config.scripts/lnd.channels.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
