@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.1.46"
+NBXplorerVersion="v2.1.47"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.5.9"
+BTCPayVersion="v1.0.6.3"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -468,6 +468,13 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
+
+  echo "# configure BTCPay to use sqlite database" 
+  if ! grep -Eq "^sqlitefile=sqllite.db" /home/btcpay/.btcpayserver/Main/settings.config; then
+    echo "
+### Database ###
+sqlitefile=sqllite.db" | sudo tee -a /home/btcpay/.btcpayserver/Main/settings.config
+  fi
 
     sudo systemctl daemon-reload
     sudo systemctl enable btcpayserver
