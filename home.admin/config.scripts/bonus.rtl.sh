@@ -1,9 +1,12 @@
 #!/bin/bash
 
+pinnedVersion="v0.9.3"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch WebGUI RideTheLightning on or off"
- echo "bonus.rtl.sh [on|off|menu]"
+ echo "# config script to switch the RideTheLightning WebGUI on, off or update"
+ echo "# bonus.rtl.sh [on|off|update<commit>|menu]"
+ echo "# installs the version $pinnedVersion by default"
  exit 1
 fi
 
@@ -82,6 +85,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
     fi
 
+    echo "# add the rtl user to the loop group"
+    sudo /usr/sbin/usermod --append --groups loop rtl
+    echo "# symlink the loop.macaroon"
+    if ! [[ -L "/home/rtl/.loop" ]]; then
+      sudo rm -rf "/home/rtl/.loop"                     # not a symlink.. delete it silently
+      sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # and create symlink
+    fi
+
     # download source code and set to tag release
     echo "*** Get the RTL Source Code ***"
     rm -rf /home/admin/RTL 2>/dev/null
@@ -89,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
-    sudo -u rtl git reset --hard v0.9.3
+    sudo -u rtl git reset --hard $pinnedVersion
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
@@ -128,11 +139,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 var data = require('/home/rtl/RTL/sample-RTL-Config.json');
 //Manipulate data
 data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/';
+data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
+data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
 data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/lnd.conf';
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
 data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.swapServerUrl = 'https://localhost:8081'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
@@ -250,30 +263,40 @@ fi
 if [ "$1" = "update" ]; then
   echo "# UPDATING RTL"
   cd /home/rtl/RTL
-  # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
-  # fetch latest master
-  sudo -u rtl git fetch
-  # unset $1
-  set --
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
-  if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | sort -V | tail -1)
-    echo "# You are up-to-date on version" $TAG
-  else
-    echo "# Pulling latest changes..."
+  updateOption="$2"
+  if [ ${#updateOption} -eq 0 ]; then
+    # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+    # fetch latest master
+    sudo -u rtl git fetch
+    # unset $1
+    set --
+    UPSTREAM=${1:-'@{u}'}
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse "$UPSTREAM")
+    if [ $LOCAL = $REMOTE ]; then
+      TAG=$(git tag | sort -V | tail -1)
+      echo "# You are up-to-date on version" $TAG
+    else
+      echo "# Pulling latest changes..."
+      sudo -u rtl git pull -p
+      echo "# Reset to the latest release tag"
+      TAG=$(git tag | sort -V | tail -1)
+      sudo -u rtl git reset --hard $TAG
+      echo "# updating to the latest"
+      # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
+      sudo -u rtl npm install --only=prod
+      echo "# Updated to version" $TAG
+    fi
+  elif [ "$updateOption" = "commit" ]; then
+    echo "# updating to the latest commit in https://github.com/Ride-The-Lightning/RTL"
     sudo -u rtl git pull -p
-    echo "# Reset to the latest release tag"
-    TAG=$(git tag | sort -V | tail -1)
-    sudo -u rtl git reset --hard $TAG
-    # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
     sudo -u rtl npm install --only=prod
-    echo "# Updated to version" $TAG
+    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
+    echo "# Updated RTL to $currentRTLcommit"
+  else 
+    echo "# unknown option: $updateOption"
   fi
-
-  echo "# Updated to the latest in https://github.com/Ride-The-Lightning/RTL/releases"
-  echo ""
+  echo
   echo "# Starting the RTL service ... "
   sudo systemctl start RTL
   exit 0
