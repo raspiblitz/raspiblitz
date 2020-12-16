@@ -161,6 +161,16 @@ else
   echo "- SPECTER is OFF by config"
 fi
 
+if [ "${sphinxrelay}" = "on" ]; then
+  echo ""
+  echo "*** LAST 20 SPHINX LOGS ***"
+  echo "sudo journalctl -u sphinxrelay -b --no-pager -n20"
+  sudo journalctl -u sphinxrelay -b --no-pager -n20
+  echo ""
+else
+  echo "- SPHINX is OFF by config"
+fi
+
 echo ""
 echo "*** MOUNTED DRIVES ***"
 df -T
