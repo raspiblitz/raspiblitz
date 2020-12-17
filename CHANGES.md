@@ -12,7 +12,7 @@
 - Update: RTL 0.9.3
 - Update: EletcRS 0.8.6
 - Update: Specter 0.10.0
-- Update: BTCPay Server 1.0.5.9
+- Update: BTCPay Server 1.0.5.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.9)
 - Update: Loop 0.11.1
 - Update: stacking-sats-kraken 0.3.0
 - Update: Experimental BTRFS support 
