@@ -374,7 +374,10 @@ if [ "${sphinxrelay}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
   if [ "${choice}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+    whiptail --title " Installed Sphinx Server" --msgbox "\
+Sphinx Server was installed.\n
+Use the new 'SPHINX' entry in Main Menu for more info.\n
+" 10 35
   fi
 else
   echo "Sphinx Relay unchanged."
