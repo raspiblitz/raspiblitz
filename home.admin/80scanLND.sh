@@ -206,7 +206,7 @@ else
   ####################
 
   # check number of peers
-  source <(/home/admin/config.scripts/network.monitor.sh peer-status)
+  source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
 
   # basic dialog info
   height=6
