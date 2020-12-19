@@ -183,11 +183,11 @@ do
   # check every 1min
   recheckSync=$(($counter % 60))
   if [ ${recheckSync} -eq 1 ]; then
-    source <(/home/admin/config.scripts/network.monitor.sh peer-status)
+    source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
     echo "Blockchain Sync Monitoring: peers=${peers}"
     if [ "${peers}" == "0" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
-      /home/admin/config.scripts/network.monitor.sh peer-kickstart
+      sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-kickstart
     fi
   fi
 
