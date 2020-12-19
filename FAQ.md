@@ -625,7 +625,7 @@ In the menu, go to
 ![Raspi-config menu](pictures/vnc-raspi-config-menu.png)  
   
 After that reboot the Raspiblitz. You can do this easily from the Raspiblitz menu.  
-In the command line, type   
+In the command line, type:   
 `menu`  
 The Raspiblitz menu has a reboot option if you scroll down. Select it and reboot.
 
@@ -646,7 +646,7 @@ Open the relevant port in the firewall (ufw):
 
 Start the VNC server from the Raspiblitz:  
 `vncserver`  
-This will run by default in the display number '1'. If you want to specify another number, run this (change  \<display-number\> to whatever you prefer):  
+This will run by default in the display number '1'. If you want to specify another number, run this (change  *\<display-number\>* to whatever you prefer):  
 `vncserver :<display-number>`  
 
 ![VNC server started](pictures/vnc-server-started.png)  
@@ -660,12 +660,13 @@ For example:
 `vncserver -kill :1`  
 
 
-**Note**: You may have to set the resolution through raspi-config in certain situations:
-sudo raspi-config > Advance Options > Resolution
+**Note**: You may have to set the resolution through raspi-config in certain situations:  
+`sudo raspi-config`  
+ *Advanced Options > Resolution*
 
-Hint: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app  
+**Hint**: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app  
 
-Hint 2: Find more info about VNC in Raspberry [here](https://www.raspberrypi.org/documentation/remote-access/vnc/).
+**Hint 2**: Find more info about VNC in Raspberry [here](https://www.raspberrypi.org/documentation/remote-access/vnc/).
 
 ## I have two RaspiBlitz in my network - can they both be public?
 
