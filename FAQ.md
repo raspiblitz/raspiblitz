@@ -613,22 +613,48 @@ If you are already logged in you can use on the console the commands:
 
 ## How do I set up VNC?
 
-Enter the Console/Terminal by selecting the last option from the Raspiblitz menu
-Enable the VNC server using raspi-config:
-sudo raspi-config > Interface Options > VNC > Enable. Reboot.
-Set a password for the VNC Server:
-sudo vncpasswd -service
-Set the Authentication parameter:
-sudo echo "Authentication=VncAuth" > /etc/vnc/config.d/common.custom
-Restart the VNC Server for settings to take effect
-sudo systemctl restart vncserver-x11-serviced
-Open the relevant port in the firewall (ufw):
-sudo ufw allow vnc
+Enter the Console/Terminal by selecting the last option from the Raspiblitz menu.  
+Enable the VNC server using raspi-config:  
 
-Note: You may have to set the resolution through raspi-config in certain situations:
+`sudo raspi-config`
+
+In the menu, go to  
+*Interface Options > VNC > Enable*  
+  
+After that reboot the Raspiblitz  
+*Reboot*  
+
+Set a password for the VNC Server:  
+`sudo vncpasswd -service`  
+
+Set the Authentication parameter:  
+`sudo echo "Authentication=VncAuth" > /etc/vnc/config.d/common.custom`  
+
+Restart the VNC Server for settings to take effect:  
+`sudo systemctl restart vncserver-x11-serviced`  
+
+Open the relevant port in the firewall (ufw):  
+`sudo ufw allow vnc`
+
+Start the VNC server from the Raspiblitz:  
+`vncserver`  
+This will run by default in the display number '1'. If you want to specify another number, run this (change  \<display-number\> to whatever you prefer):  
+`vncserver :<display-number>`  
+
+From the VNC client (e.g. your PC, laptop), connect to the IP that the previous command has displayed in the screen.  If everything is alright, you can see the display from the VNC client now.
+
+In order to stop broadcasting your display, stop the server from the Raspiblitz with this:  
+`vncserver -kill :<display-number>`  
+
+For example:
+`vncserver -kill :1`
+
+**Note**: You may have to set the resolution through raspi-config in certain situations:
 sudo raspi-config > Advance Options > Resolution
 
-Hint: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app
+Hint: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app  
+
+Hint 2: Find more info about VNC in Raspberry [here](https://www.raspberrypi.org/documentation/remote-access/vnc/).
 
 ## I have two RaspiBlitz in my network - can they both be public?
 
