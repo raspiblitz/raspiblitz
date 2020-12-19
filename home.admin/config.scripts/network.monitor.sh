@@ -18,7 +18,7 @@ if [ "$1" = "peer-status" ]; then
   echo "#network.monitor.sh peer-status"
 
   # number of peers connected
-  peerNum=$(bitcoin-cli getnetworkinfo | grep "connections" | tr -cd '[[:digit:]]')
+  peerNum=$(${network}-cli getnetworkinfo | grep "connections" | tr -cd '[[:digit:]]')
   echo "peers=${peerNum}"
 
   exit 0
