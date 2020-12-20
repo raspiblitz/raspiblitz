@@ -187,7 +187,7 @@ do
     echo "Blockchain Sync Monitoring: peers=${peers}"
     if [ "${peers}" == "0" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
-      sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-kickstart
+      sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
     fi
   fi
 
