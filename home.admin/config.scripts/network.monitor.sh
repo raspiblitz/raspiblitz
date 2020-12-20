@@ -132,8 +132,10 @@ if [ "$1" = "peer-disconnectall" ]; then
   # get all peer id and disconnect them
   sudo -u admin bitcoin-cli getpeerinfo | grep '"id":' | while read line 
   do
-    echo "${line}"
+    echo "${line//[^0-9.]/}"
   done
+
+  exit 0
 fi
 
 echo "FAIL - Unknown Parameter $1"
