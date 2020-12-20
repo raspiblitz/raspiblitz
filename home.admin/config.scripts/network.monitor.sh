@@ -36,9 +36,6 @@ if [ "$1" = "peer-kickstart" ]; then
     exit 1
   fi
 
-  # set network type based on 2nd parameter (auto = default)
-  if [ "$2" ]
-
   # get raw node data from bitnodes.io (use Tor if available)
   bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
   if [ ${#bitnodesRawData} -lt 100 ]; then
