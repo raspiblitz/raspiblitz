@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "monitor and troubleshot the bitcoin network"
  echo "network.monitor.sh peer-status"
- echo "network.monitor.sh peer-kickstart"
+ echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
  exit 1
 fi
 
@@ -36,26 +36,55 @@ if [ "$1" = "peer-kickstart" ]; then
     exit 1
   fi
 
+  # set network type based on 2nd parameter (auto = default)
+  if [ "$2" ]
+
   # get raw node data from bitnodes.io (use Tor if available)
   bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  echo "${bitnodesRawData}"
+  if [ ${#bitnodesRawData} -lt 100 ]; then
+    echo "error='no valid data from bitnodes.io'"
+    exit 1
+  fi
+
+  # determine which address to choose
+  addressFormat="$2"
+  # set default to auto
+  if [ "${addressFormat}" == "" ]; then
+    addressFormat="auto"
+  fi
+  # check valid value
+  if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "auto" ]; then
+    echo "error='unvalid network type'"
+    exit 1
+  fi
+  # if auto then deterine whats running
+  if [ "${addressFormat}" == "auto" ]; then
+    if [ "${runBehindTor}" == "on" ]; then
+      addressFormat="tor"
+    else
+      source <(sudo ./config.scripts/internet.sh status global)
+      if [ "${ipv6}" == "off" ]; then
+        addressFormat="ipv4"
+      else
+        addressFormat="ipv6"
+      fi
+    fi
+  fi
+  echo "addressFormat='${addressFormat}'"
 
   # filter raw data for node addresses based on what kind of connection is running
-  addressFormat="ipv4"
-  if [ "${runBehindTor}" == "on" ]; then
-    # get TOR nodes
-    addressFormat="tor"
+  if [ "${addressFormat}" == "tor" ]; then
+    # get Tor nodes (v2 or v3)
     nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9a-z]\{16,56\}\.onion')
+  elif [ "${addressFormat}" == "ipv4" ]; then
+    # get IPv4 nodes
+    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+  elif [ "${addressFormat}" == "ipv6" ]; then
+    # get IPv6 nodes
+    nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
   else
-    source <(sudo ./config.scripts/internet.sh status global)
-    if [ "${ipv6}" == "off" ]; then
-      # get IPv4 nodes
-      nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
-    else
-      # get IPv6 nodes
-      nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
-    fi
-  fi  
+    # get IPv6 nodes
+  fi
   echo "${nodeList}"  
 
   # random line number (1-25)
@@ -65,10 +94,6 @@ if [ "$1" = "peer-kickstart" ]; then
   # random node
   nodeAddress=$(echo "${nodeList}" | sed -n "${randNodeNumber}p")
   echo "${nodeAddress}"
-
-#   | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}' | 
-#echo 'f"vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion:8333",sg' | grep -o '[0-9a-z]\{16,56\}\.onion'
-#echo '189.164.139.162:8333","rdvlepy6ghgpapzo.onion:8333","189.164.140.162:8333":[70015,"/Satoshi:0.20.1/",1607715058,1037,662239,null,null,null,0.0,0.0,null,"TOR","Tor network"]'
 
   exit 0
 fi
