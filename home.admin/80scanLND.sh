@@ -205,10 +205,13 @@ else
   # Sync Progress
   ####################
 
+  # check number of peers
+  source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
+
   # basic dialog info
   height=6
   width=43
-  title="Node is Syncing (${scriptRuntime})"
+  title="Node is Syncing (${peers} peers)"
   actionString="Please wait - this can take some time"
 
   # formatting BLOCKCHAIN SYNC PROGRESS
