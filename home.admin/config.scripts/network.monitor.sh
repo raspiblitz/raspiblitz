@@ -83,7 +83,9 @@ if [ "$1" = "peer-kickstart" ]; then
     # get IPv6 nodes
     nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
   else
-    # get IPv6 nodes
+    # unvalid address
+    echo "error='unvalid 2nd parameter'"
+    exit 1
   fi
   echo "${nodeList}"  
 
