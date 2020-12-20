@@ -86,13 +86,22 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
   echo "${nodeList}"  
 
-  # random line number (1-25)
-  randNodeNumber=$((1 + RANDOM % 26))
-  echo "${randNodeNumber}"
+  # pick random node from list (just use first 25 nodes)
+  randomLineNumber=$((1 + RANDOM % 26))
+  randomLineNumber=100000
+  nodeAddress=$(echo "${nodeList}" | sed -n "${randomLineNumber}p")
+  if [ "${nodeAddress}" == "" ]; then
+    # if random pick fails pick first line
+    nodeAddress=$(echo "${nodeList}" | sed -n "1p")
+  fi
+  if [ "${nodeAddress}" == "" ]; then
+    echo "error='selecting node from list failed'"
+    exit 1
+  fi
+  echo "newpeer='${nodeAddress}"
 
-  # random node
-  nodeAddress=$(echo "${nodeList}" | sed -n "${randNodeNumber}p")
-  echo "${nodeAddress}"
+  # kick start node with 
+  sudo -u admin bitcoin-cli addnode "${nodeAddress}" "onetry" 
 
   exit 0
 fi
