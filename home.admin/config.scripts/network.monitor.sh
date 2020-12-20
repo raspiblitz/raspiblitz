@@ -104,6 +104,7 @@ if [ "$1" = "peer-kickstart" ]; then
 
   # kick start node with 
   sudo -u admin bitcoin-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
+  echo "exitcode=$?"
 
   exit 0
 fi
