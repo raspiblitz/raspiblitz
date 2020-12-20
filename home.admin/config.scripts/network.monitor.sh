@@ -130,9 +130,9 @@ if [ "$1" = "peer-disconnectall" ]; then
   fi
 
   # get all peer id and disconnect them
-  sudo -u admin ${network}-cli getpeerinfo | grep '"id":' | while read line 
+  sudo -u admin ${network}-cli getpeerinfo | grep '"addr": "' | while read line 
   do
-    peerID=$(echo "${line//[^0-9.]/}")
+    peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"
     sudo -u admin ${network}-cli disconnectnode ${peerID}
   done
