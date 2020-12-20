@@ -84,11 +84,10 @@ if [ "$1" = "peer-kickstart" ]; then
     echo "error='unvalid 2nd parameter'"
     exit 1
   fi
-  echo "${nodeList}"  
+  #echo "${nodeList}"
 
   # pick random node from list (just use first 25 nodes)
   randomLineNumber=$((1 + RANDOM % 26))
-  randomLineNumber=100000
   nodeAddress=$(echo "${nodeList}" | sed -n "${randomLineNumber}p")
   if [ "${nodeAddress}" == "" ]; then
     # if random pick fails pick first line
