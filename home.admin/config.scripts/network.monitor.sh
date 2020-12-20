@@ -5,6 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "monitor and troubleshot the bitcoin network"
  echo "network.monitor.sh peer-status"
  echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
+ echo "network.monitor.sh peer-disconnectall"
  exit 1
 fi
 
@@ -25,7 +26,7 @@ if [ "$1" = "peer-status" ]; then
 fi
 
 ###################
-# STATUS
+# PEER KICK START
 ###################
 if [ "$1" = "peer-kickstart" ]; then
   echo "#network.monitor.sh peer-kickstart"
@@ -113,6 +114,26 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "exitcode=$?"
 
   exit 0
+fi
+
+###################
+# DISCONNECT ALL PEERS
+# for testing peer kick-start
+###################
+if [ "$1" = "peer-disconnectall" ]; then
+  echo "#network.monitor.sh peer-disconnectall"
+
+  # check if started with sudo
+  if [ "$EUID" -ne 0 ]; then 
+    echo "error='missing sudo'"
+    exit 1
+  fi
+
+  # get all peer id and disconnect them
+  sudo -u admin bitcoin-cli getpeerinfo | grep '"id":' | while read line 
+  do
+    echo "${line}"
+  done
 fi
 
 echo "FAIL - Unknown Parameter $1"
