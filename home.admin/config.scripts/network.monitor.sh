@@ -103,13 +103,10 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "newpeer='${nodeAddress}"
 
   # kick start node with 
-  sudo -u admin bitcoin-cli addnode "${nodeAddress}" "onetry" 
+  sudo -u admin bitcoin-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
 
   exit 0
 fi
-
-
-
 
 echo "FAIL - Unknown Parameter $1"
 exit 1
