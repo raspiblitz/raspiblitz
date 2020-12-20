@@ -37,13 +37,13 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
 
   # get raw node data from bitnodes.io (use Tor if available)
-  if [ "${runBehindTor}" == "on" ]; then
+  #if [ "${runBehindTor}" == "on" ]; then
     # call over tor proxy
-    bitnodesRawData=$(curl --socks5-hostname 127.0.0.1:9050 -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  else
+    #bitnodesRawData=$(curl --socks5-hostname 127.0.0.1:9050 -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
+  #else
     # call over clearnet
     bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  fi
+  #fi
   if [ ${#bitnodesRawData} -lt 100 ]; then
     echo "error='no valid data from bitnodes.io'"
     exit 1
