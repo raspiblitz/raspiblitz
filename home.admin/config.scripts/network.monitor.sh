@@ -85,6 +85,8 @@ if [ "$1" = "peer-kickstart" ]; then
     exit 1
   fi
   #echo "${nodeList}"
+  nodesAvailable=$(echo "${nodeList}" | wc -l)
+  echo "nodesAvailable=${nodesAvailable}"
 
   # pick random node from list (just use first 25 nodes)
   randomLineNumber=$((1 + RANDOM % 26))
