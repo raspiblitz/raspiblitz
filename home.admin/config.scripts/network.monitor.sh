@@ -40,8 +40,22 @@ if [ "$1" = "peer-kickstart" ]; then
   bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
   echo "${bitnodesRawData}"
 
-  # filter raw data for node addresses
-  nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+  # filter raw data for node addresses based on what kind of connection is running
+  addressFormat="ipv4"
+  if [ "${runBehindTor}" == "on" ]; then
+    # get TOR nodes
+    addressFormat="tor"
+    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9a-z]\{16,56\}\.onion')
+  else
+    source <(sudo ./config.scripts/internet.sh status global)
+    if [ "${ipv6}" == "off" ]; then
+      # get IPv4 nodes
+      nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+    else
+      # get IPv6 nodes
+      nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+    fi
+  fi  
   echo "${nodeList}"  
 
   # random line number (1-25)
@@ -53,7 +67,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "${nodeAddress}"
 
 #   | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}' | 
-#echo '189.164.139.162:8333","rdvlepy6ghgpapzo.onion:8333","189.164.140.162:8333":[70015,"/Satoshi:0.20.1/",1607715058,1037,662239,null,null,null,0.0,0.0,null,"TOR","Tor network"]' | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}'
+#echo 'f"vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion:8333",sg' | grep -o '[0-9a-z]\{16,56\}\.onion'
 #echo '189.164.139.162:8333","rdvlepy6ghgpapzo.onion:8333","189.164.140.162:8333":[70015,"/Satoshi:0.20.1/",1607715058,1037,662239,null,null,null,0.0,0.0,null,"TOR","Tor network"]'
 
   exit 0
