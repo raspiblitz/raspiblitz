@@ -88,8 +88,9 @@ if [ "$1" = "peer-kickstart" ]; then
   nodesAvailable=$(echo "${nodeList}" | wc -l)
   echo "nodesAvailable=${nodesAvailable}"
 
-  # pick random node from list (just use first 25 nodes)
-  randomLineNumber=$((1 + RANDOM % 26))
+  # pick random node from list
+  randomLineNumber=$((1 + RANDOM % ${nodesAvailable}))
+  echo "randomNumber=${randomLineNumber}"
   nodeAddress=$(echo "${nodeList}" | sed -n "${randomLineNumber}p")
   if [ "${nodeAddress}" == "" ]; then
     # if random pick fails pick first line
