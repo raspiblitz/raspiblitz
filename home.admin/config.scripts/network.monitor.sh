@@ -37,7 +37,7 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
 
   # get raw node data from bitnodes.io (use Tor if available)
-  if [  ]; then
+  if [ "${runBehindTor}" == "on" ]; then
     # call over tor proxy
     bitnodesRawData=$(curl --socks5-hostname 127.0.0.1:9050 -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
   else
