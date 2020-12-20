@@ -110,7 +110,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "newpeer='${nodeAddress}"
 
   # kick start node with 
-  sudo -u admin bitcoin-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
+  sudo -u admin ${network}-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
   exit 0
@@ -130,11 +130,15 @@ if [ "$1" = "peer-disconnectall" ]; then
   fi
 
   # get all peer id and disconnect them
-  sudo -u admin bitcoin-cli getpeerinfo | grep '"id":' | while read line 
+  sudo -u admin ${network}-cli getpeerinfo | grep '"id":' | while read line 
   do
-    echo "${line//[^0-9.]/}"
+    peerID=$(echo "${line//[^0-9.]/}")
+    echo "# disconnecting peer with ID: ${peerID}"
+    sudo -u admin ${network}-cli disconnectnode ${peerID}
   done
 
+  echo "#### FINAL PEER INFO FORM BITCOIND"
+  sudo -u admin ${network}-cli getpeerinfo
   exit 0
 fi
 
