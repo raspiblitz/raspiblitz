@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pinnedVersion="v0.9.3"
+pinnedVersion="v0.10.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
