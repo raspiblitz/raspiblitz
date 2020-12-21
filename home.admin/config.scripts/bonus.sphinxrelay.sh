@@ -22,11 +22,12 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
   # display possible problems with IP2TOR setup
+  ip2torWarn="TEST"
   if [ ${#ip2torWarn} -gt 0 ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
     --no-button "Continue Anyway" \
-    --yesno "Your SPHINX SERVER may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+    --yesno "Your SPHINX SERVER may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n(You should see "Cannot GET /" from a browser)\n\nCheck if service is reachable over Tor:\n${toraddress}" 15 72
     if [ "$?" != "1" ]; then
       exit 0
 	  fi
