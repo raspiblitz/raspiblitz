@@ -489,6 +489,14 @@ sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
 
 #################################
+# FIX BLOCKING FILES (just in case)
+# https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
+# https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
+sudo rm -f /home/bitcoin/.bitcoin/bitcoind.pid 2>/dev/null
+sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
+
+
+#################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
 #################################
 source ${configFile}
