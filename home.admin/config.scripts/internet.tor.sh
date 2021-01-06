@@ -57,8 +57,8 @@ prepareTorSources()
     torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
     echo "torKeyAvailable=${torKeyAvailable}"
     if [ ${torKeyAvailable} -eq 0 ]; then
-      curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
-      sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+      wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import
+      gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
       echo "OK"
     else
       echo "TOR key is available"
@@ -71,11 +71,11 @@ prepareTorSources()
     if [ ${torSourceListAvailable} -eq 0 ]; then
       echo "Adding TOR sources ..."
       if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
-        echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+        echo "deb-src [arch=amd64] https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
       elif [ "${baseImage}" = "ubuntu" ]; then
-        echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+        echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
+        echo "deb-src [arch=amd64] https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
       fi
       echo "OK"
     else
