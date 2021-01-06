@@ -360,6 +360,7 @@ if [ "${pool}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.pool.sh ${choice}
   if [ "${choice}" =  "on" ]; then
+    sudo systemctl start poold
     sudo -u admin /home/admin/config.scripts/bonus.pool.sh menu
   fi
 else
