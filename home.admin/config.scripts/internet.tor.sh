@@ -66,6 +66,15 @@ prepareTorSources()
     echo ""
  
     echo "*** Adding Tor Sources to sources.list ***"
+
+    # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
+    sudo sed -i \
+    "s#deb https://deb.torproject.org/torproject.org buster main#deb [arch=amd64] https://deb.torproject.org/torproject.org buster main#g"\
+    /etc/apt/sources.list
+    sudo sed -i \
+    "s#deb-src https://deb.torproject.org/torproject.org buster main#deb-src [arch=amd64] https://deb.torproject.org/torproject.org buster main#g"\
+    /etc/apt/sources.list    
+
     torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
     echo "torSourceListAvailable=${torSourceListAvailable}"  
     if [ ${torSourceListAvailable} -eq 0 ]; then
