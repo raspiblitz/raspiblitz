@@ -59,13 +59,6 @@ prepareTorSources()
     # force update keys
     wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
     sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-    # change to the [arch=amd64] repo
-    sudo sed -i \
-    "s#deb https://deb.torproject.org/torproject.org buster main#deb [arch=amd64] https://deb.torproject.org/torproject.org buster main#g"\
-    /etc/apt/sources.list
-    sudo sed -i \
-    "s#deb-src https://deb.torproject.org/torproject.org buster main#deb-src [arch=amd64] https://deb.torproject.org/torproject.org buster main#g"\
-    /etc/apt/sources.list  
 
     torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
     echo "torKeyAvailable=${torKeyAvailable}"
@@ -79,18 +72,16 @@ prepareTorSources()
     echo ""
  
     echo "*** Adding Tor Sources to sources.list ***"
-
-
     torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
     echo "torSourceListAvailable=${torSourceListAvailable}"  
     if [ ${torSourceListAvailable} -eq 0 ]; then
       echo "Adding TOR sources ..."
       if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
-        echo "deb [arch=amd64] https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src [arch=amd64] https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+        echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+        echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
       elif [ "${baseImage}" = "ubuntu" ]; then
-        echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src [arch=amd64] https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+        echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
+        echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
       fi
       echo "OK"
     else
