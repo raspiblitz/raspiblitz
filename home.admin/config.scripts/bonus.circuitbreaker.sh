@@ -100,7 +100,7 @@ WantedBy=multi-user.target
     echo "# The circuitbreaker.service is already installed."
   fi
 
-  # setting value in raspi blitz configS
+  # setting value in raspi blitz config
   sudo sed -i "s/^circuitbreaker=.*/circuitbreaker=on/g" /mnt/hdd/raspiblitz.conf
 
   isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreaker version")
