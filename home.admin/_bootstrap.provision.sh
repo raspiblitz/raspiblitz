@@ -541,6 +541,15 @@ else
   echo "Sphinx-Relay - keep default" >> ${logFile}
 fi
 
+# circuitbreaker
+if [ "${circuitbreaker}" = "on" ]; then
+  echo "Provisioning CircuitBreaker - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup CircuitBreaker'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.circuitbreaker.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
