@@ -382,6 +382,7 @@ case $CHOICE in
             echo "* RaspiBlitz Commandline"
             echo "* Here be dragons .. have fun :)"
             echo "***********************************"
+	    echo "Bitcoin command line options: bitcoin-cli help"
             echo "LND command line options: lncli -h"
             echo "Back to main menu use command: raspiblitz"
             echo
