@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/pool/releases/
-pinnedVersion="v0.3.3-alpha"
+pinnedVersion="v0.3.4-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -125,9 +125,13 @@ WantedBy=multi-user.target
     echo "the poold.service already installed."
   fi
 
-  # start service
-  sudo systemctl start poold.service
-
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    echo "# OK - the poold.service is enabled, system is on ready so starting service"
+    sudo systemctl start poold
+  else
+    echo "# OK - the poold.service is enabled, to start manually use: sudo systemctl start poold"
+  fi
   # setting value in raspi blitz config
   sudo sed -i "s/^pool=.*/pool=on/g" /mnt/hdd/raspiblitz.conf
   
