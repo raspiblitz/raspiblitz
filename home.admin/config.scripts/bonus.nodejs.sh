@@ -1,6 +1,10 @@
 #!/bin/bash
 
 VERSION="v14.15.4"
+# get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.gz files)
+CHECKSUM-linux-arm64="b681bda8eaa1ed2ac85e0ed2c2041a0408963c2198a24da183dc3ab60d93d975"
+CHECKSUM-linux-armv7l="ffce90b07675434491361dfc74eee230f9ffc65c6c08efb88a18781bcb931871"
+CHECKSUM-linux-x64="b51c033d40246cd26e52978125a3687df5cd02ee532e8614feff0ba6c13a774f"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,19 +32,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
-      
-    # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
-    # https://nodejs.org/dist/v12.16.3/SHASUMS256.txt
-  
+        
     if [ ${isARM} -eq 1 ] ; then
       DISTRO="linux-armv7l"
-      CHECKSUM="9be4afaa963b5742d111245f7cefff72d3dea4226041efbe4fca16bf729f1215"
+      CHECKSUM="${CHECKSUM-linux-armv7l}"
     elif [ ${isAARCH64} -eq 1 ] ; then
       DISTRO="linux-arm64"
-      CHECKSUM="18594c582ccc8c1a1a787d9b21ecb6f315ef879e82be254c598243f58ea7ccb4"
+      CHECKSUM="${CHECKSUM-linux-arm64}"
     elif [ ${isX86_64} -eq 1 ] ; then
       DISTRO="linux-x64"
-      CHECKSUM="93e5b94cfaa3edec80832725f8c09cde2cd0c327da89ad9ad811cf9a1b5d0f1b"
+      CHECKSUM="${CHECKSUM-linux-x64}"
     elif [ ${#DISTRO} -eq 0 ]; then
       echo "FAIL: Was not able to determine architecture"
       exit 1
