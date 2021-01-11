@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v14.15.0"
+VERSION="v14.15.4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
