@@ -478,10 +478,10 @@ else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
 fi
 
-# mempool explorer
+# mempool space
 if [ "${mempoolExplorer}" = "on" ]; then
-  echo "Provisioning MempoolExplorer - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Mempool Explorer'/g" ${infoFile}
+  echo "Provisioning MempoolSpace - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Mempool Space'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
