@@ -1,9 +1,18 @@
 # CHANGES between Releases
 
-## Whats new in Version 1.6.2 of RaspiBlitz?
+## Whats new in Version 1.6.3 of RaspiBlitz?
 
-- Update: mempool space 2.0 [details](https://github.com/mempool/mempool)
+- Update: mempool space 2.0.1 [details](https://github.com/mempool/mempool)
+- Update: specter 1.0.0
+- Update: RTL 0.10.0 [details](https://twitter.com/RTL_App/status/1340815355959267329?s=20)
+- Update: btcpay v1.0.6.3
+- Update: NodeJS v14.15.4
+- Update: pool v0.3.4
+- Update: joininbox v0.1.16
+- Update: Sphinx Relay Server (installs always latest master)
+- Fix: circuitbreaker install on recovery
 - Fix: Specter Persistence
+- Experimental: MENU > LNDCRED > EXPORT > BTCPAY Server connection string with baked macaroon
 
 ## Whats new in Version 1.6.2 of RaspiBlitz?
 

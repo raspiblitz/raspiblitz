@@ -9,7 +9,6 @@ color_green='\033[0;32m'
 color_amber='\033[0;33m'
 color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
-color_purple='\033[0;35m'
 
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
@@ -165,13 +164,13 @@ networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | c
 # TOR or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
-networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
 if [ "${runBehindTor}" = "on" ]; then
 
   # TOR address
   onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
@@ -180,7 +179,7 @@ if [ "${runBehindTor}" = "on" ]; then
 else
 
   # IP address
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
   public_addr="${publicIP}:${public_port}"
   public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
@@ -274,7 +273,7 @@ else
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
+    ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
     ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
     ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
     ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
