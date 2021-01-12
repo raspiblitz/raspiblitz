@@ -2,6 +2,11 @@
 
 ## Whats new in Version 1.6.2 of RaspiBlitz?
 
+- Update: mempool space 2.0 [details](https://github.com/mempool/mempool)
+- Fix: Specter Persistence
+
+## Whats new in Version 1.6.2 of RaspiBlitz?
+
 - New: Pool (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
 - New: Sphinx Relay Server [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
 - Update: LNbits (Lightning Vouchers)
