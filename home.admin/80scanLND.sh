@@ -210,7 +210,7 @@ else
 
   # basic dialog info
   height=6
-  width=46
+  width=45
   title="Node is Syncing"
   actionString="Please wait - this can take some time"
 
