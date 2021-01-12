@@ -535,19 +535,19 @@ Keysend is a feature of LND that allows your node to accept payments without cre
 
 ##### Testnet
 
-It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this though the "Testnet" setting.
+It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through the "Testnet" setting.
 You can freely switch from prod environemt (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
 The state of your environments is restored everytime you switch (blockchain, wallets, channels) which is very convenient and safe.
-Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it has been left before switching environment. 
+Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it left before switching.
 
 Of course it would be much more fun and less scary if everyone could afford to own 2 distinct RaspiBlitz, one for each environment, this way your production RaspiBlitz remains online all the time and you can recklessly play around on the other one. 
 
-Once in "TESTNET" environment go ahead! Get hold of some Bitcoin Testnet Faucets (these are worthless bitcoins for the testnet) and start playing around with them!
-You can get Bitcoin Testnet Faucets at different places on the internet, here are a few links:
-https://coinfaucet.eu/en/btc-testnet/
-https://testnet-faucet.mempool.co/
-https://kuttler.eu/en/bitcoin/btc/faucet/
-https://faucet.lightning.community/
+Once in "TESTNET" environment go ahead! Get hold of some Bitcoin Testnet Faucets (these are worthless bitcoins on testnet) and start playing around with them!
+You can get Bitcoin Testnet Faucets from different places on the internet, here are a few links:
+* https://coinfaucet.eu/en/btc-testnet/
+* https://testnet-faucet.mempool.co/
+* https://kuttler.eu/en/bitcoin/btc/faucet/
+* https://faucet.lightning.community/
 
 You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 Have fun.
