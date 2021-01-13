@@ -2,11 +2,14 @@
 
 # https://github.com/mempool/mempool
 
+pinnedVersion="v2.0.1"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "# small config script to switch Mempool on or off"
- echo "# bonus.mempool.sh [status|on|off]"
- exit 1
+  echo "# small config script to switch Mempool on or off"
+  echo "# installs the $pinnedVersion by default"
+  echo "# bonus.mempool.sh [status|on|off]"
+  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -116,7 +119,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/mempool
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
-    sudo -u mempool git reset --hard v2.0.1
+    sudo -u mempool git reset --hard $pinnedVersion
 
     # modify an
     #echo "# try to suppress question on statistics report .."
@@ -258,7 +261,14 @@ EOF
     echo "# mempool already installed."
   fi
 
-  sudo systemctl start mempool
+  # start the service if ready
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    echo "# OK - the mempool.service is enabled, system is on ready so starting service"
+    sudo systemctl start mempool
+  else
+    echo "# OK - the mempool.service is enabled, to start manually use: sudo systemctl start mempool"
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
