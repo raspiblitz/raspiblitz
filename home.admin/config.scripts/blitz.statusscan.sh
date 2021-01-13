@@ -69,6 +69,22 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     initialSync=$(echo ${blockchaininfo} | jq -r '.initialblockdownload' | grep -c 'true')
     echo "initialSync=${initialSync}"
 
+    # get number of bitcoin connections
+    sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getconnectioncount 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
+    # check if error on request
+    bitcoinPeers=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
+    btcError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
+    #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
+    if [ ${#bitcoinError} -gt 0 ]; then
+     bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
+     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
+     bitcoinErrorFull=$(echo ${bitcoinError} | tr -d "'")
+     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
+    else
+     bitcoinPeers=$(echo ${bitcoinPeers})
+     echo "bitcoinPeers=${bitcoinPeers}"
+    fi
+
     # get blockchain sync progress
     syncProgress="$(echo ${blockchaininfo} | jq -r '.verificationprogress')"
     syncProgress=$(echo $syncProgress | awk '{printf( "%.2f%%", 100 * $1)}' | tr '%' ' ' | tr -s " ")
