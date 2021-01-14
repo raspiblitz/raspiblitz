@@ -176,7 +176,6 @@ echo "*** MOUNTED DRIVES ***"
 df -T -h
 echo ""
 
-echo ""
 echo "*** NETWORK Info ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
 echo ""
