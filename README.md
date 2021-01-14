@@ -131,15 +131,15 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6.2:**
+**Download SD-Card image - Version 1.6.3:**
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6.3-2021-01-13.img.gz
 
-SHA-256: 07f033e98f0b747a7a2332f1f7d348f5c7478f01a99fab976d7f095daf7c5ea9 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz.sig)
+SHA-256: 4f12f95465b4305ced8ed50feb540e0b88ff20f19f59347c8bee8712f00959c1 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.3-2021-01-13.img.gz.sig)
 
-Torrent: [assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent)
+Torrent: [assets/raspiblitz-v1.6.3-2021-01-13.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.3-2021-01-13.img.gz.torrent)
 
-* [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
+* [What's new in Version 1.6.3 of RaspiBlitz?](CHANGES.md#whats-new-in-version-163-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
