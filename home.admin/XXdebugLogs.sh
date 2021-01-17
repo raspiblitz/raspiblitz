@@ -276,3 +276,4 @@ echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"
 echo "/home/admin/XXdebugLogs.sh | nc termbin.com 9999"
 echo ""
+
