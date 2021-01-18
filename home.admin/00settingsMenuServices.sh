@@ -44,7 +44,7 @@ OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 
-CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 25 45 23  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
