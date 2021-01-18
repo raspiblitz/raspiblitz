@@ -41,9 +41,9 @@ confirmation()
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=17
+HEIGHT=45
 WIDTH=64
-CHOICE_HEIGHT=10
+CHOICE_HEIGHT=42
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
