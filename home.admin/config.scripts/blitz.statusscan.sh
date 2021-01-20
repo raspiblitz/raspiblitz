@@ -254,7 +254,8 @@ if [ ${lndRunning} -eq 1 ]; then
 
       totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)
       scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
-      scanProgress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
+      scanProgress=$(echo "scale=5; $scannedSeconds/$totalSeconds" | bc)
+      scanProgress=$(echo $scanProgress | awk '{printf( "%.2f%%",100 * $1)}' | tr '%' ' ' | tr -s " ")
       echo "scanProgress=${scanProgress}"
     else
       echo "# was not able to parse 'best_header_timestamp' from: lncli getinfo"
