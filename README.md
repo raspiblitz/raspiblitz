@@ -523,6 +523,8 @@ If you switch this on, you can rotate the LCD of your RaspiBlitz 180 degrees. Th
 
 The autopilot is a feature of LND that you can switch on. It automatically uses around half of your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
 
+Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waist of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
+
 ##### Accept Keysend
 
 Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
