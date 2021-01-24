@@ -552,6 +552,8 @@ You can get Bitcoin Testnet Faucets from different places on the internet, here 
 You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 Have fun.
 
+IMPORTANT: Presently BTCPay Server service is NOT supported on TESTNET (RPC connection error messages). Until this [issue #1724](https://github.com/rootzoll/raspiblitz/issues/1724) is resolved you can [play around with BTCPay Server on TESTNET](https://testnet.demo.btcpayserver.org)
+
 ##### LND Auto-Unlock
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
