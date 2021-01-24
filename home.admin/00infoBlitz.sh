@@ -379,7 +379,7 @@ $lastLine
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
-"${hdd}" "${sync_percentage} ${sync_behind}"
+"${hdd}" "${sync_percentage}"
 
 source /home/admin/stresstest.report 2>/dev/null
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
