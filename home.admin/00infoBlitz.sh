@@ -99,21 +99,26 @@ if [ -n ${btc_path} ]; then
     block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
+
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
 
     if [ ${block_diff} -eq 0 ]; then    # fully synced
       sync="OK"
       sync_color="${color_green}"
+      sync_behind=" "
     elif [ ${block_diff} -eq 1 ]; then   # fully synced
-      sync="-1 blk"
+      sync="OK"
       sync_color="${color_green}"
+      sync_behind="-1 block"
     elif [ ${block_diff} -le 10 ]; then   # <= 2 blocks behind
-      sync="-${block_diff} blks"
+      sync=""
       sync_color="${color_red}"
+      sync_behind="-${block_diff} blocks"
     else
-      sync="${sync_percentage}"
+      sync=""
       sync_color="${color_red}"
+      sync_behind="${sync_percentage}"
     fi
 
     # get last known block
@@ -174,7 +179,7 @@ if [ "${runBehindTor}" = "on" ]; then
 else
 
   # IP address
-  networkConnectionsInfo="${color_gray}Peers ${color_green}${networkConnections}"
+  networkConnectionsInfo="${color_gray}connections ${color_green}${networkConnections}"
   public_addr="${publicIP}:${public_port}"
   public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
@@ -214,14 +219,6 @@ else
 
 fi
 
-#break lines to be aligned for v3 addresses on bitcoin
- btc_external_pt1=$( echo ${public_addr} | cut -c1-35)
- btc_external_pt2=$( echo ${public_addr} | cut -c36-77)
- btc_external_pt3=$( echo ${public_addr} | cut -c78-119)
- btc_external_pt4=$( echo ${public_addr} | cut -c111-134)
-
-
-
 # LIGHTNING NETWORK
 
 ln_baseInfo="-"
@@ -234,6 +231,8 @@ if [ ${#ln_port} -eq 0 ]; then
   ln_port="9735"
 fi
 
+public_addr_lnd="LNDpub "
+
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
@@ -242,12 +241,6 @@ else
  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
-
-#break lines to be aligned for v3 addresses on lnd
- ln_external_pt1=$( echo ${ln_external} | cut -c1-35)
- ln_external_pt2=$( echo ${ln_external} | cut -c36-77)
- ln_external_pt3=$( echo ${ln_external} | cut -c78-119)
- ln_external_pt4=$( echo ${ln_external} | cut -c120-134)
 
  #for lnd scan progress
  lndinfo=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>/mnt/hdd/temp/.lnd.error)
@@ -272,7 +265,7 @@ else
   null
  fi
 
- if [ ${ln_tor} -eq 1 ]; then
+if [ ${ln_tor} -eq 1 ]; then
    ln_publicColor="${color_green}"
  else
    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
@@ -295,8 +288,11 @@ else
       scan_color="${color_red}"
     else
       ln_baseInfo="${color_amber} Waiting for Chain Sync"
+      scan="-${lnd_block_diff} blks"
+      scan_color="${color_red}"
     fi
- else
+  else
+    ln_baseInfo="${color_amber} Waiting for Chain Sync"
     scan="OK "
     scan_color="${color_green}"
     ln_walletbalance="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
@@ -313,17 +309,16 @@ else
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
     ln_peersInfo="${color_gray}Peers ${color_green}${ln_peers}"
-    scanProgress="${scan_color}${scan}${scanProgress}"%
     ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
     ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
     ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
     ln_feeReport="Fee Report: ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat (D-W-M)"
-  fi
+    scanProgress="${scan_color}${scan}${scanProgress}"% 
+ fi
 fi
 
 # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
 
-public_addr_lnd="LNDpub "
 source /home/joinmarket/joinin.conf 2>/dev/null
 if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
   JMstats=$(mktemp 2>/dev/null)
@@ -338,12 +333,12 @@ ${color_gray}     ╦╔╦╗      ${color_gray}$JMstatsL1
 ${color_gray}     ║║║║      ${color_gray}$JMstatsL2
 ${color_gray}    ╚╝╩ ╩      ${color_gray}$JMstatsL3
 ${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
-else    lastLine="\
-${color_yellow}               ${color_gray}${public_addr_lnd}${color_yellow}${ln_publicColor}${ln_external_pt1}${color_gray}
-${color_yellow}               ${ln_publicColor}${ln_external_pt2}
-${color_yellow}               ${ln_publicColor}${ln_external_pt3}
-${color_yellow}               ${ln_publicColor}${ln_external_pt4} ${color_gray}"
+else
+    lastLine="\
+${color_gray}${public_addr_pre}${public_color}${ln_external} ${public}
+${color_gray}${public_addr_lnd}${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 fi
+
 sleep 5
 
 ## get uptime and current date & time
@@ -354,7 +349,6 @@ clear
 printf "
 ${color_yellow}
 ${color_yellow}
-${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
@@ -362,16 +356,10 @@ ${color_yellow}      ,´/      ${color_gray}%s
 ${color_yellow}    ,´ /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,´  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow},´_____    ,´  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow}      /  ,´    ${color_gray}
-${color_yellow}     / ,´      ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
-${color_yellow}    /,´        ${color_gray}${public_addr_pre}${public_color}${btc_external_pt1} ${public}
-${color_yellow}   /´          ${color_gray}${public_color}${btc_external_pt2}
-${color_yellow}               ${color_gray}${public_color}${btc_external_pt3}
-${color_yellow}               ${color_gray}${public_color}${btc_external_pt4} ${color_gray}| ${networkConnectionsInfo}
-${color_yellow}               ${color_gray}
-${color_yellow}               ${color_gray}${webinterfaceInfo}
-${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${color_gray}Scan ${scanProgress} ${color_gray}| ${ln_peersInfo} ${color_gray}
-${color_yellow}               ${color_gray}${ln_channelInfo} | ${ln_baseInfo}
+${color_yellow}      /  ,´    ${color_gray}${webinterfaceInfo}
+${color_yellow}     / ,´      ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync${sync_color} %s ${color_gray}${networkConnectionsInfo}
+${color_yellow}    /,´        ${color_gray}LND ${color_green}${ln_version} ${color_gray}Scan ${scanProgress} ${color_gray}${ln_peersInfo} ${color_gray}
+${color_yellow}   /´          ${color_gray}${ln_channelInfo} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
 " \
@@ -457,18 +445,9 @@ if [ "${EUID}" = "$(id -u pi)" ]; then
     "ln_baseInfo": "${json_ln_baseInfo}",
     "ln_peers": "${ln_peers}",
     "ln_channelInfo": "${ln_channelInfo}",
-    "scanProgress": "${scanProgress}",
-    "public_addr_lnd": "${public_addr_lnd}",
     "ln_external": "${ln_external}",
-    "ln_external_pt1": "${ln_external_pt1}",
-    "ln_external_pt2": "${ln_external_pt2}",
-    "ln_external_pt3": "${ln_external_pt3}",
-    "ln_external_pt4": "${ln_external_pt4}",
-    "ln_block_height": "${ln_block_height}",
-    "btc_external_pt1": "${btc_external_pt1}",
-    "btc_external_pt2": "${btc_external_pt2}",
-    "btc_external_pt3": "${btc_external_pt3}",
-    "btc_external_pt4": "${btc_external_pt4}"
+    "scanProgress": "${scanProgress}",
+    "public_addr_lnd": "${public_addr_lnd}"
 }
 EOF
 
