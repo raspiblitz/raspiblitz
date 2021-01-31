@@ -195,31 +195,71 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
       exit 1
     fi
-
-    # install
+    ###########
+    # install #
+    ###########
     tar -xzf ${binaryName}
     sudo install -m 0755 -o root -g root -t /usr/local/bin lightning-terminal-linux-${OSversion}-v${pinnedVersion}/*
 
+    ###########
+    # config  #
+    ###########
+    #source /mnt/hdd/raspiblitz.conf
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    cat > /home/admin/lit.conf <<EOF
+# Application Options
+httpslisten=0.0.0.0:8443
+uipassword=$PASSWORD_B
+#letsencrypt=true
+#letsencrypthost=loop.merchant.com
+lit-dir=~/.lit
+
+# Remote options
+remote.lit-debuglevel=debug
+
+# Remote lnd options
+remote.lnd.network=${chain}net
+remote.lnd.rpcserver=127.0.0.1:10009
+remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/${network}/${chain}net/admin.macaroon
+remote.lnd.tlscertpath=/home/lit/.lnd/tls.cert
+
+# Loop
+loop.loopoutmaxparts=5
+
+# Pool
+pool.newnodesonly=true
+
+# Faraday
+faraday.min_monitored=48h
+
+# Faraday - bitcoin
+faraday.connect_bitcoin=true
+faraday.bitcoin.host=localhost
+faraday.bitcoin.user=raspibolt
+faraday.bitcoin.password=$PASSWORD_B
+EOF
+    # remove symlink or old file
+    sudo rm -f /home/lit/.lit/lit.conf
+               /home/lit/.lit/lit.conf
+    # move to app-data
+    sudo mv /home/admin/lit.conf /mnt/hdd/app-data/.lit/lit.conf
+    # secure
+    sudo chown lit:lit /mnt/hdd/app-data/.lit/lit.conf
+    sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf | exit 1
+    # symlink
+    sudo ln -s /mnt/hdd/app-data/.lit/lit.conf /home/lit/.lit/
+
+    ############
+    # service  #
+    ############
     # sudo nano /etc/systemd/system/litd.service
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-) 
     echo "
 [Unit]
 Description=litd Service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/local/bin/litd \
---httpslisten=0.0.0.0:8443 \
---uipassword=$PASSWORD_B \
---lnd.bitcoin.active \
---lnd.bitcoin.mainnet \
---lnd.bitcoin.node=bitcoind \
---lnd.bitcoind.rpchost=localhost \
---lnd.bitcoind.rpcuser=raspibolt \
---lnd.bitcoind.rpcpass=$PASSWORD_B \
---loop.loopoutmaxparts=5 \
---faraday.min_monitored=48h
-
+ExecStart=/usr/local/bin/litd
 User=lit
 Group=lit
 Type=simple
@@ -270,8 +310,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo userdel -rf lit
     # close ports on firewall
     sudo ufw deny 8443
-    # delete Go packages
-    sudo rm /usr/local/bin/lit
+    # delete Go package
     sudo rm /usr/local/bin/litd
     echo "# OK, the lit.service is removed."
     # Hidden Service if Tor is active
