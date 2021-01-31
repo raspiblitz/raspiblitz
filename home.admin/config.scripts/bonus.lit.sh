@@ -87,18 +87,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo /usr/sbin/usermod --append --groups lndrouter lit
 
     echo "# persist settings in app-data"
+    # move old data if present
+    sudo mv /home/lit/.lit /mnt/hdd/app-data/ 2>/dev/null
     echo "# make sure the data directory exists"
     sudo mkdir -p /mnt/hdd/app-data/.lit
     echo "# symlink"
     sudo rm -rf /home/lit/.lit # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/.lit/ /home/pool/.lit
+    sudo ln -s /mnt/hdd/app-data/.lit/ /home/lit/.lit
     sudo chown lit:lit -R /mnt/hdd/app-data/.lit
 
-    # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-    # guggero
-    PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-    PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
-    downloadDir="/home/admin/download/lit"  # edit your download directory
+    echo "# move the standalone Loop and Pool data to LiT"
+    echo "# Loop"
+    # move old data if present
+    sudo mv /home/loop/.loop /mnt/hdd/app-data/ 2>/dev/null
+    echo "# remove so can't be used parallel with LiT"
+    config.scripts/bonus.loop.sh off
+    echo "# make sure the data directory exists"
+    sudo mkdir -p /mnt/hdd/app-data/.loop
+    echo "# symlink"
+    sudo rm -rf /home/lit/.loop # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/.loop/ /home/lit/.loop
+    sudo chown lit:lit -R /mnt/hdd/app-data/.loop
+    
+    echo "# Pool"
+    echo "# remove so can't be used parallel with LiT"
+    config.scripts/bonus.pool.sh off
+    echo "# make sure the data directory exists"
+    sudo mkdir -p /mnt/hdd/app-data/.pool
+    echo "# symlink"
+    sudo rm -rf /home/lit/.pool # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/.pool/ /home/lit/.pool
+    sudo chown lit:lit -R /mnt/hdd/app-data/.pool
 
     echo "Detect CPU architecture ..." 
     isARM=$(uname -m | grep -c 'arm')
@@ -112,10 +131,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     else
     echo "OK running on $(uname -m) architecture."
     fi
-
-    rm -rf "${downloadDir}"
-    mkdir -p "${downloadDir}"
-    cd "${downloadDir}" || exit 1
 
     # extract the SHA256 hash from the manifest file for the corresponding platform
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt
@@ -133,9 +148,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "SHA256 hash: $SHA256"
     echo
 
+    downloadDir="/home/admin/download/lit"  # edit your download directory
+    rm -rf "${downloadDir}"
+    mkdir -p "${downloadDir}"
+    cd "${downloadDir}" || exit 1
+
     echo "# get LiT binary"
     binaryName="lightning-terminal-linux-${OSversion}-v${pinnedVersion}.tar.gz"
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/${binaryName}
+
+    # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
+    # guggero
+    PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+    PGPcheck="03DB6322267C373B"
 
     echo "# check binary was not manipulated (checksum test)"
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt.asc
@@ -148,8 +173,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# check gpg finger print"
-    gpg ./pgp_keys.asc
-    fingerprint=$(sudo gpg "./pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+    gpg --keyid-format LONG ./pgp_keys.asc
+    fingerprint=$(gpg --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
+    | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
       echo "!!! BUILD WARNING --> LiT PGP author not as expected"
