@@ -33,8 +33,11 @@ https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for the Tor Browser (see LCD for QR):\nhttps://${toraddress}
-" 16 74
+Hidden Service address for the Tor Browser (see LCD for QR):
+https://${toraddress}\n
+For the command line switch to 'lit' user with: 'sudo su - lit'
+use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
+" 19 74
     /home/admin/config.scripts/blitz.lcd.sh hide
   else
     # Info without TOR
@@ -43,8 +46,10 @@ https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Activate TOR to access the web interface from outside your local network.
-" 16 63
+Activate TOR to access the web interface from outside your local network.\n
+For the command line switch to 'lit' user with: 'sudo su - lit'
+use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
+" 19 63
   fi
   echo "please wait ..."
   exit 0
@@ -277,6 +282,19 @@ WantedBy=multi-user.target
   else 
     echo "lit service already installed."
   fi
+
+  # aliases
+  echo "
+alias lit-loop=\"loop --rpcserver=localhost:8443 \\
+  --tlscertpath=~/.lit/tls.cert \\	
+  --macaroonpath=~/.loop/${chain}net/loop.macaroon\"
+alias lit-pool=\"pool --rpcserver=localhost:8443 \\
+  --tlscertpath=~/.lit/tls.cert \\	
+  --macaroonpath=~/.pool/${chain}net/pool.macaroon\"
+alias lit-frcli=\"frcli --rpcserver=localhost:8443 \\
+  --tlscertpath=~/.lit/tls.cert \\
+  --macaroonpath=~/.faraday/${chain}net/faraday.macaroon\"
+" | sudo tee -a /home/lit/.bashrc
 
   # open ports on firewall
   sudo ufw allow 8443 comment "Lightning Terminal"
