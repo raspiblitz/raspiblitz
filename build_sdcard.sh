@@ -245,7 +245,9 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   else
     echo "$fsOption2 already in $kernelOptionsFile"
   fi
-
+  # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
+  sudo rm -f /etc/apt/sources.list.d/vscode.list 
+  sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg
 fi
 
 # special prepare when Ubuntu or Armbian
