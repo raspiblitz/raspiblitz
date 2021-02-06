@@ -6,11 +6,11 @@
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
 if [ $lndVersion -eq 12 ]; then
-  pinnedVersion="0.8.1"
+  pinnedVersion="0.8.2"
 elif [ $lndVersion -eq 11 ]; then
   pinnedVersion="0.7.1" 
 else
-  echo "LND not installed or not tested with chantools"
+  echo "LND not installed or a version not tested with chantools"
   lncli -v
 fi
 
@@ -51,7 +51,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isX86_64=$(uname -m | grep -c 'x86_64')
   if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
     echo "!!! FAIL !!!"
-    echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
+    echo "Can only build on arm, aarch64 or x86_64 not on:"
     uname -m
     exit 1
   else
@@ -66,17 +66,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # get the SHA256 for the corresponding platform from manifest file
   if [ ${isARM} -eq 1 ] ; then
     OSversion="armv7"
-    SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
-  fi
-  if [ ${isAARCH64} -eq 1 ] ; then
+  elif [ ${isAARCH64} -eq 1 ] ; then
     OSversion="arm64"
-    SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
-  fi
-  if [ ${isX86_64} -eq 1 ] ; then
+  elif [ ${isX86_64} -eq 1 ] ; then
     OSversion="amd64"
-    SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
   fi
-
+  SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
   echo 
   echo "*** Channel Tools v${pinnedVersion} for ${OSversion} ***"
   echo "SHA256 hash: $SHA256"
@@ -121,9 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install
   sudo -u admin tar -xzf ${binaryName}
   sudo -u bitcoin mkdir /home/bitcoin/bin
-  sudo install -m 0755 -o bitcoin -g bitcoin -t /home/bitcoin/bin chantools-linux-${OSversion}-v${pinnedVe$
+  sudo install -m 0755 -o bitcoin -g bitcoin -t /home/bitcoin/bin chantools-linux-${OSversion}-v${pinnedVersion}/*
   sleep 3
-  installed=$(sudo -u admin chantools --version)
+  installed=$(sudo -u bitcoin /home/bitcoin/bin/chantools --version)
   if [ ${#installed} -eq 0 ]; then
     echo ""
     echo "!!! BUILD FAILED --> Was not able to install Channel Tools"
