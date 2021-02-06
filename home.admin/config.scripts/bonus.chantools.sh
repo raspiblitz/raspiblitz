@@ -10,7 +10,7 @@ if [ $lndVersion -eq 12 ]; then
 elif [ $lndVersion -eq 11 ]; then
   pinnedVersion="0.7.1" 
 else
-  echo "LND not installed or a version not tested with chantools"
+  echo "# LND not installed or a version not tested with chantools"
   lncli -v
 fi
 
@@ -50,12 +50,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isAARCH64=$(uname -m | grep -c 'aarch64')
   isX86_64=$(uname -m | grep -c 'x86_64')
   if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
-    echo "!!! FAIL !!!"
-    echo "Can only build on arm, aarch64 or x86_64 not on:"
+    echo "# !!! FAIL !!!"
+    echo "# Can only build on arm, aarch64 or x86_64 not on:"
     uname -m
     exit 1
   else
-    echo "OK running on $(uname -m) architecture."
+    echo "# OK running on $(uname -m) architecture."
   fi
 
   cd "${downloadDir}"
@@ -73,8 +73,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
   echo 
-  echo "*** Channel Tools v${pinnedVersion} for ${OSversion} ***"
-  echo "SHA256 hash: $SHA256"
+  echo "# Channel Tools v${pinnedVersion} for ${OSversion}"
+  echo "# SHA256 hash: $SHA256"
   echo 
 
   # get binary
@@ -86,7 +86,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${PGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${SHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded Channel Tools BINARY not matching SHA256 checksum: ${SHA256}"
+    echo "# !!! FAIL !!! Downloaded Channel Tools BINARY not matching SHA256 checksum: ${SHA256}"
     exit 1
   fi
 
@@ -95,33 +95,33 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo
-    echo "!!! BUILD WARNING --> Channel Tools PGP author not as expected"
-    echo "Should contain PGP: ${PGPcheck}"
-    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+    echo "# !!! BUILD WARNING --> Channel Tools PGP author not as expected"
+    echo "# Should contain PGP: ${PGPcheck}"
+    echo "# PRESS ENTER to TAKE THE RISK if you think all is OK"
     read key
   fi
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-v${pinnedVersion}.txt.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
+  echo "# goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
-  echo "correctKey(${correctKey})"
+  echo "# correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> Channel Tools PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# !!! BUILD FAILED --> Channel Tools PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   fi
 
   # install
   sudo -u admin tar -xzf ${binaryName}
-  sudo -u bitcoin mkdir /home/bitcoin/bin
+  sudo -u bitcoin mkdir -p /home/bitcoin/bin 2>/dev/null
   sudo install -m 0755 -o bitcoin -g bitcoin -t /home/bitcoin/bin chantools-linux-${OSversion}-v${pinnedVersion}/*
   sleep 3
   installed=$(sudo -u bitcoin /home/bitcoin/bin/chantools --version)
   if [ ${#installed} -eq 0 ]; then
-    echo ""
-    echo "!!! BUILD FAILED --> Was not able to install Channel Tools"
+    echo
+    echo "# !!! BUILD FAILED --> Was not able to install Channel Tools"
     exit 1
   fi
   # setting value in raspi blitz config
@@ -130,10 +130,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo
   echo "Installed ${installed}"
   echo "
-Channel Tools is a command line tool.
-Type: 'sudo su - bitcoin' in the command line to switch to the bitcoin user.
-Then see 'chantools' for the options.
-Usage: https://github.com/guggero/chantools/blob/master/README.md
+# Channel Tools is a command line tool.
+# Type: 'sudo su - bitcoin' in the command line to switch to the bitcoin user.
+# Then see 'chantools' for the options.
+# Usage: https://github.com/guggero/chantools/blob/master/README.md
 "
   exit 0
 fi
@@ -144,7 +144,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^chantools=.*/chantools=off/g" /mnt/hdd/raspiblitz.conf
   
-  echo "*** REMOVING Channel Tools ***"
+  echo "# REMOVING Channel Tools"
   sudo rm -rf /home/admin/download/chantools*
   sudo rm -rf /home/bitcoin/bin/chantools*
   echo "# OK, chantools is removed."
@@ -152,5 +152,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
 fi
 
-echo "FAIL - Unknown Parameter $1"
+echo "# FAIL - Unknown Parameter $1"
 exit 1
