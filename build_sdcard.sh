@@ -144,7 +144,7 @@ else
 fi
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
-   [ "${baseImage}" = "debian_rpi64" ]; then
+   [ "${baseImage}" = "raspios_arm64" ]||[ "${baseImage}" = "debian_rpi64" ]; then
   # fixing locales for build
   # https://github.com/rootzoll/raspiblitz/issues/138
   # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
