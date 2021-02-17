@@ -971,7 +971,7 @@ if [ "${lcdInstalled}" == "true" ]; then
     cp ./cmdline.txt /boot/
 
     # touch screen calibration
-    apt-get install xserver-xorg-input-evdev
+    apt-get install -y xserver-xorg-input-evdev
     cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
     # TODO manual touchscreen calibration option
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
