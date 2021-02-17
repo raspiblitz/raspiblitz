@@ -139,7 +139,8 @@ else
   echo "OK running ${baseImage}"
 fi
 
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] ; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
+   [ "${baseImage}" = "raspios_arm64" ]; then
   # fixing locales for build
   # https://github.com/rootzoll/raspiblitz/issues/138
   # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
@@ -190,10 +191,14 @@ sudo apt upgrade -f -y
 echo ""
 echo "*** PREPARE ${baseImage} ***"
 
-# special prepare when DietPi
-if [ "${baseImage}" = "dietpi" ]; then
-  echo "renaming dietpi user to pi"
+# make sure the pi user is present
+if [ "$(compgen -u | grep -c dietpi)" -gt 0 ];then
+  echo "# Renaming dietpi user to pi"
   sudo usermod -l pi dietpi
+elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then  
+  echo "# Adding the user pi"
+  sudo adduser --disabled-password --gecos "" pi
+  sudo adduser pi sudo
 fi
 
 # special prepare when Raspbian
@@ -248,13 +253,6 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
   sudo rm -f /etc/apt/sources.list.d/vscode.list 
   sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg
-fi
-
-# special prepare when Ubuntu or Armbian
-if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
-  # make user pi and add to sudo
-  sudo adduser --disabled-password --gecos "" pi
-  sudo adduser pi sudo
 fi
 
 # special prepare when Nvidia Jetson Nano
