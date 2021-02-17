@@ -78,7 +78,7 @@ fi
 
 echo -n "Do you wish to install Raspiblitz branch ${wantedBranch}? (yes/no) "
 read installRaspiblitzAnswer
-if [ "$installRaspiblitzAnswer" == "yes" ] ;then
+if [ "$installRaspiblitzAnswer" == "yes" ] ; then
   echo ""
   echo ""
 else
@@ -118,10 +118,14 @@ if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
 fi
 if [ ${isDebian} -gt 0 ]; then
-  if [ $(uname -n | grep -c 'raspberrypi') -eq 0 ]; then
+  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
+    baseImage="debian_rpi64"
+  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
+    baseImage="raspios_arm64"
+  elif [ ${isAARCH64} -gt 0 ] || [ ${isARM} -gt 0 ] ; then
     baseImage="armbian"
   else
-    baseImage="raspios_arm64"
+    baseImage="debian"
   fi
 fi
 if [ ${isUbuntu} -gt 0 ]; then
@@ -140,7 +144,7 @@ else
 fi
 
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
-   [ "${baseImage}" = "raspios_arm64" ]; then
+   [ "${baseImage}" = "debian_rpi64" ]; then
   # fixing locales for build
   # https://github.com/rootzoll/raspiblitz/issues/138
   # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
@@ -153,17 +157,21 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
   sudo locale-gen
   export LANGUAGE=en_US.UTF-8
   export LANG=en_US.UTF-8
-  export LC_ALL=en_US.UTF-8
+  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+    export LC_ALL=en_US.UTF-8
 
-  # https://github.com/rootzoll/raspiblitz/issues/684
-  sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
+    # https://github.com/rootzoll/raspiblitz/issues/684
+    sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
 
-  # remove unneccesary files
-  sudo rm -rf /home/pi/MagPi
-
+    # remove unneccesary files
+    sudo rm -rf /home/pi/MagPi
+    # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
+    sudo rm -f /etc/apt/sources.list.d/vscode.list 
+    sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg
+  fi
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
     echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
-    echo "deb http://archive.raspberrypi.org/debian/ buster main" | sudo tee -a /etc/apt/sources.list.d/raspi.list
+    echo "deb http://archive.raspberrypi.org/debian/ buster main" | sudo tee /etc/apt/sources.list.d/raspi.list
   fi
 fi
 
@@ -207,7 +215,9 @@ elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then
 fi
 
 # special prepare when Raspbian
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
+if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
+   [ "${baseImage}" = "debian_rpi64" ]; then
+  sudo apt install -y raspi-config 
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -255,9 +265,6 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
   else
     echo "$fsOption2 already in $kernelOptionsFile"
   fi
-  # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
-  sudo rm -f /etc/apt/sources.list.d/vscode.list 
-  sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg
 fi
 
 # special prepare when Nvidia Jetson Nano
@@ -275,7 +282,8 @@ echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
 if [ "${lcdInstalled}" == "true" ]; then
-   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
+   if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
+      [ "${baseImage}" = "debian_rpi64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
       sudo raspi-config nonint do_boot_behaviour B2
@@ -793,8 +801,9 @@ else
 fi
  
 if [ "${lcdInstalled}" == "true" ]; then
-  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || \
-  [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "ubuntu" ] ; then
+  if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
+     [ "${baseImage}" = "debian_rpi64" ]||[ "${baseImage}" = "armbian" ]||\
+     [ "${baseImage}" = "ubuntu" ]; then
     homeFile=/home/pi/.bashrc
     autostart="automatic start the LCD"
     autostartDone=$(cat $homeFile|grep -c "$autostart")
@@ -835,7 +844,8 @@ echo "*** HARDENING ***"
 # fail2ban (no config required)
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ]; then
+if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
+   [ "${baseImage}" = "debian_rpi64" ]; then
   if [ "${disableWifi}" == "true" ]; then
     echo ""
     echo "*** DISABLE WIFI ***"
@@ -933,7 +943,7 @@ if [ "${lcdInstalled}" == "true" ]; then
       # make LCD screen rotation correct
       sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
     fi
-  elif [ "${baseImage}" = "raspios_arm64" ]; then
+  elif [ "${baseImage}" = "raspios_arm64"  ]||[ "${baseImage}" = "debian_rpi64" ]; then
     echo "*** 64bit LCD DRIVER ***"
     echo "--> Downloading LCD Driver from Github"
     cd /home/admin/
