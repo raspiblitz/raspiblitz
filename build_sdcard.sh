@@ -160,6 +160,11 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
 
   # remove unneccesary files
   sudo rm -rf /home/pi/MagPi
+
+  if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
+    echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
+    echo "deb http://archive.raspberrypi.org/debian/ buster main" | sudo tee -a /etc/apt/sources.list.d/raspi.list
+  fi
 fi
 
 # remove some (big) packages that are not needed
