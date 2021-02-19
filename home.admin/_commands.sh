@@ -216,6 +216,21 @@ function pool() {
   fi
 }
 
+# aliases for lit
+# switch to the pool user for the Pool Service
+if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+  source /mnt/hdd/raspiblitz.conf
+  alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \
+    --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
+  alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
+    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
+  alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
+fi
+
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
 # $ gettx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"

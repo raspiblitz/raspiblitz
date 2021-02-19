@@ -217,7 +217,7 @@ httpslisten=0.0.0.0:8443
 uipassword=$PASSWORD_B
 #letsencrypt=true
 #letsencrypthost=loop.merchant.com
-lit-dir=~/.lit
+lit-dir=/home/lit/.lit
 
 # Remote options
 remote.lit-debuglevel=debug
@@ -286,14 +286,14 @@ WantedBy=multi-user.target
   # aliases
   echo "
 alias lit-loop=\"loop --rpcserver=localhost:8443 \\
-  --tlscertpath=~/.lit/tls.cert \\	
-  --macaroonpath=~/.loop/${chain}net/loop.macaroon\"
+  --tlscertpath=/home/lit/.lit/tls.cert \\	
+  --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon\"
 alias lit-pool=\"pool --rpcserver=localhost:8443 \\
-  --tlscertpath=~/.lit/tls.cert \\	
-  --macaroonpath=~/.pool/${chain}net/pool.macaroon\"
+  --tlscertpath=/home/lit/.lit/tls.cert \\	
+  --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon\"
 alias lit-frcli=\"frcli --rpcserver=localhost:8443 \\
-  --tlscertpath=~/.lit/tls.cert \\
-  --macaroonpath=~/.faraday/${chain}net/faraday.macaroon\"
+  --tlscertpath=/home/lit/.lit/tls.cert \\
+  --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon\"
 " | sudo tee -a /home/lit/.bashrc
 
   # open ports on firewall
