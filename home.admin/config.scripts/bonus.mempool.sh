@@ -174,6 +174,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "BACKEND": "electrum",
     "HTTP_PORT": 8999,
     "API_URL_PREFIX": "/api/v1/",
+    "CACHE_DIR": "/mnt/hdd/app-storage/mempool/cache",
     "POLL_RATE_MS": 2000
   },
   "CORE_RPC": {
@@ -203,6 +204,9 @@ EOF
     sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
     cd /home/mempool/mempool/frontend
+
+    sudo mkdir -p /mnt/hdd/app-storage/mempool/cache
+    sudo chown mempool:mempool /mnt/hdd/app-storage/mempool/cache
 
     sudo mkdir -p /var/www/mempool
     sudo rsync -av --delete dist/mempool/ /var/www/mempool/
