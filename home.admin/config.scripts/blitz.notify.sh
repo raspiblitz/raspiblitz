@@ -81,6 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # install sstmp if not already present
   if ! command -v ssmtp >/dev/null; then
+    [ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mtime -7)" ] && sudo apt-get update
     sudo apt-get install -y ssmtp
   fi
 
