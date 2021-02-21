@@ -22,6 +22,7 @@ if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#pool} -eq 0 ]; then pool="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
+if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -43,6 +44,7 @@ OPTIONS+=(c 'Lightning Pool' ${pool})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -438,6 +440,21 @@ When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
   fi
 else
   echo "Mempool Explorer Setting unchanged."
+fi
+
+# Whitepaper process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${whitepaper}" != "${choice}" ]; then
+  echo "Whitepaper setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${whitepaper}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh menu
+  fi
+else
+  echo "Whitepaper setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
