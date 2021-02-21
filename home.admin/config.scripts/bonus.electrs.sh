@@ -329,7 +329,7 @@ jsonrpc_import = true
 db_dir = "/mnt/hdd/app-storage/electrs/db"
 cookie = "$RPC_USER:$PASSWORD_B"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
-txid_limit = 0
+txid_limit = 1000
 EOF
     sudo mv /home/admin/config.toml /home/electrs/.electrs/config.toml
     sudo chown electrs:electrs /home/electrs/.electrs/config.toml

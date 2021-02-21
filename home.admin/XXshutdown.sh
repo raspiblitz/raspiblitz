@@ -32,12 +32,21 @@ fi
 
 # do shutdown/reboot
 echo "-----------------------------------------------"
+
+# stopping electRS (if installed)
+echo "stop electrs - please wait .."
+sudo systemctl stop electrs 2>/dev/null
+
+# stopping lnd
 echo "stop lnd - please wait .."
 sudo systemctl stop lnd 2>/dev/null
-sudo systemctl stop electrs 2>/dev/null
+
+# stopping bitcoin (thru cli)
 echo "stop ${network}d (1) - please wait .."
 sudo -u bitcoin ${network}-cli stop 2>/dev/null
 sleep 10
+
+# stopping bitcoind (thru systemd)
 echo "stop ${network}d (2) - please wait .."
 sudo systemctl stop ${network}d 2>/dev/null
 sleep 3

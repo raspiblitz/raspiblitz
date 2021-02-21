@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6.2 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.6.3 with lnd 0.11.1 and bitcoin 0.20.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -51,7 +51,7 @@ You can connect the following Wallet-Apps to your RaspiBlitz:
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
 
 
-Also many more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
+Also many more features like Touchscreen, Channels Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## DeepDive Video (July 2020)
 
@@ -131,15 +131,15 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6.2:**
+**Download SD-Card image - Version 1.6.3:**
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz
+Browser: https://raspiblitz.org/raspiblitz-v1.6.3-2021-01-13.img.gz
 
-SHA-256: 07f033e98f0b747a7a2332f1f7d348f5c7478f01a99fab976d7f095daf7c5ea9 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.2-2020-11-30.img.gz.sig)
+SHA-256: 4f12f95465b4305ced8ed50feb540e0b88ff20f19f59347c8bee8712f00959c1 or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.3-2021-01-13.img.gz.sig)
 
-Torrent: [assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.2-2020-11-30.img.gz.torrent)
+Torrent: [assets/raspiblitz-v1.6.3-2021-01-13.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.3-2021-01-13.img.gz.torrent)
 
-* [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
+* [What's new in Version 1.6.3 of RaspiBlitz?](CHANGES.md#whats-new-in-version-163-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
@@ -519,19 +519,38 @@ It will give you 4 buttons on the right side.
 
 If you switch this on, you can rotate the LCD of your RaspiBlitz 180 degrees. This might make sense if you have a special case or wall mount.
 
-##### Channel Autopilot
+##### Channels Autopilot
 
-The autopilot is a feature of LND that you can switch on. It automatically uses around half of your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
+The channels autopilot feature of LND allows to automatically uses around half of your on-chain funds (if available) to open new channels with other lightning nodes. 
+Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you. 
+It is very likely that after a while, once you will have a hang of the concept of channels and how they work that you will not need channels autopilot anymore.
+
+Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waist of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
 
 ##### Accept Keysend
 
-Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
+Keysend is a feature of LND that allows your node to accept payments without having created an invoice first. This needs to be activated, for example, if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
 
 ##### Testnet
 
-You can switch from the mainnet to testnet blockchain if you want to try things out and play with free test coins.
+It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through the "Testnet" setting.
+You can freely switch from prod environemt (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
+The state of your environments is restored everytime you switch (blockchain, wallets, channels) which is very convenient and safe.
+Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it left before switching.
 
-Please beware that this might take some time to sync the test blockchain and you need to setup a new lnd testnet wallet during the process.
+Of course it would be much more fun and less scary if everyone could afford to own 2 distinct RaspiBlitz, one for each environment, this way your production RaspiBlitz remains online all the time and you can recklessly play around on the other one. 
+
+Once in "TESTNET" environment go ahead! Get hold of some Bitcoin Testnet Faucets (these are worthless bitcoins on testnet) and start playing around with them!
+You can get Bitcoin Testnet Faucets from different places on the internet, here are a few links:
+* https://coinfaucet.eu/en/btc-testnet/
+* https://testnet-faucet.mempool.co/
+* https://kuttler.eu/en/bitcoin/btc/faucet/
+* https://faucet.lightning.community/
+
+You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
+Have fun.
+
+IMPORTANT: Presently BTCPay Server service is NOT supported on TESTNET (RPC connection error messages). Until this [issue #1724](https://github.com/rootzoll/raspiblitz/issues/1724) is resolved you can [play around with BTCPay Server on TESTNET](https://testnet.demo.btcpayserver.org)
 
 ##### LND Auto-Unlock
 

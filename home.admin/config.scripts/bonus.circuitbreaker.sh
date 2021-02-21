@@ -103,11 +103,20 @@ WantedBy=multi-user.target
   # setting value in raspi blitz config
   sudo sed -i "s/^circuitbreaker=.*/circuitbreaker=on/g" /mnt/hdd/raspiblitz.conf
 
+  isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreaker version")
   if [ ${isInstalled} -eq 1 ]; then
+    echo
+
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      echo "# OK - the circuitbreaker.service is enabled, system is on ready so starting service"
+      sudo systemctl start circuitbreaker
+    else
+      echo "# OK - the circuitbreaker.service is enabled, to start manually use: sudo systemctl start circuitbreaker"
+    fi
     echo 
     echo "# Find more info at https://github.com/lightningequipment/circuitbreaker"
     echo
-    echo "# Start in the background with: 'sudo systemctl start circuitbreaker'"
     echo "# Monitor with: 'sudo journalctl -fu circuitbreaker'"
   else
     echo "# Failed to install circuitbreaker "
