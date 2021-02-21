@@ -27,9 +27,7 @@ if [ "$1" = "menu" ]; then
 This service downloads Satoshi's Whitepaper directly from the blockchain.
 When enabled, the Whitepaper is downloaded to $DownloadPath$WhitepaperFilename
 When disabled, the Whitepaper is deleted from $DownloadPath$WhitepaperFilename
-
-Also, you can use the command 'whitepaper' from the command line to download 
-the whitepaper directly
+Also, use the command 'whitepaper' from the command line to download the whitepaper directly
 " 10 75
   exit 0
 fi
