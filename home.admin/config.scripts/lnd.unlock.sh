@@ -82,7 +82,7 @@ while [ ${fallback} -eq 0 ]
 
     else
 
-        # UNKOWN RESULT
+        # UNKNOWN RESULT
 
         # check if wallet was unlocked anyway
         walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
@@ -91,7 +91,7 @@ while [ ${fallback} -eq 0 ]
             exit 0
         fi
 
-        echo "# unkown error"
+        echo "# unknown error"
         if [ ${manualEntry} -eq 1 ]; then
             whiptail --title " LND ERROR " --msgbox "${result}" --ok-button "Try CLI" 8 60
             fallback=1
