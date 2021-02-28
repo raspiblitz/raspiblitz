@@ -53,5 +53,5 @@ if [ "$1" = "status" ]; then
 fi
 
 # if no other 
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1
