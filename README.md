@@ -525,7 +525,7 @@ The channels autopilot feature of LND allows to automatically uses around half o
 Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you. 
 It is very likely that after a while, once you will have a hang of the concept of channels and how they work that you will not need channels autopilot anymore.
 
-Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waist of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
+Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waste of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
 
 ##### Accept Keysend
 
