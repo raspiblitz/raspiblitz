@@ -13,13 +13,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^nodeJS=" /mnt/hdd/raspiblitz.conf; then
-  echo "nodeJS=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if nodeJS was installed
@@ -87,8 +80,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   fi
-  # setting value in raspi blitz config
-  sudo sed -i "s/^nodeJS=.*/nodeJS=on/g" /mnt/hdd/raspiblitz.conf
   echo "Installed nodeJS $(node -v)"
   exit 0
 fi
@@ -96,7 +87,6 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^nodeJS=.*/nodeJS=off/g" /mnt/hdd/raspiblitz.conf
   echo "*** REMOVING NODEJS ***"
   sudo rm -rf /usr/local/lib/nodejs
   echo "OK NodeJS removed."

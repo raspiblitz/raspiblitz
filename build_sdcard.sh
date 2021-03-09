@@ -10,73 +10,96 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.6   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
 echo "*****************************************"
-echo ""
+echo "For details on optional parameters - see build script source code:"
 
-# 1st optional parameter is the BRANCH to get code from when
-# provisioning sd card with raspiblitz assets/scripts later on
-echo "*** CHECK INPUT PARAMETERS ***"
-wantedBranch="$1"
-if [ ${#wantedBranch} -eq 0 ]; then
-  wantedBranch="dev"
-else
-  if [ "${wantedBranch}" == "-h" -o "${wantedBranch}" == "--help" ]; then
-    echo "Usage: [branch] [github user] [root partition] [LCD screen installed true|false] [Wifi disabled true|false]"
-    echo "Example (USB boot, no LCD and no wifi): $0 v1.6 rootzoll /dev/sdb2 false true"
-    exit 1
-  fi
+# 1st optional paramater: FATPACK
+# -------------------------------
+# could be 'true' or 'false' (default)
+# When 'true' it will pre-install needed frameworks for additional apps and features
+# as a convenience to safe on install and update time for additional apps.
+# When 'false' it will just install the bare minimum and additional apps will just
+# install needed frameworks and libraries on demand when activated by user.
+# Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
+
+fatpack="$1"
+if [ ${#fatpack} -eq 0 ]; then
+  fatpack="false"
 fi
-echo "will use code from branch --> '${wantedBranch}'"
+if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
+  echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
+  exit 1
+else
+  echo "1) will use FATPACK --> '${fatpack}'"
+fi
 
-# 2nd optional parameter is the GITHUB-USERNAME to get code from when
-# provisioning sd card with raspiblitz assets/scripts later on
-# if 2nd parameter is used - 1st is mandatory
+# 2st optional paramater: GITHUB-USERNAME
+# ---------------------------------------
+# could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
+# The 'raspiblitz' repo of this user is used to provisioning sd card 
+# with raspiblitz assets/scripts later on.
+# If this parameter is set also the branch needs to be given (see next parameter).
 githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
-echo "will use code from user --> '${githubUser}'"
+echo "2) will use GITHUB-USERNAME --> '${githubUser}'"
 
-# 3rd optional parameter is the root partition
-rootPartition="$3"
-if [ ${#rootPartition} -eq 0 ]; then
-  rootPartition="/dev/mmcblk0p2"
+# 3rd optional paramater: GITHUB-BRANCH
+# -------------------------------------
+# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - 'dev' is default
+githubBranch="$3"
+if [ ${#githubBranch} -eq 0 ]; then
+  githubBranch="dev"
 fi
-echo "will use root partition --> '${rootPartition}'"
+echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
 
-# 4th optional parameter is the LCD screen
+# 4rd optional paramater: LCD-DRIVER
+# ----------------------------------------
+# could be 'false' or 'GPIO' (default)
+# Use 'false' if you want to build an image that runs without a specialized LCD (like the GPIO).
+# On 'false' the standard video output is used (HDMI) by default.
 lcdInstalled="$4"
-if [ ${#lcdInstalled} -eq 0 ]; then
-  lcdInstalled="true"
+if [ ${#lcdInstalled} -eq 0 ] || [ "${lcdInstalled}" == "true" ]; then
+  lcdInstalled="GPIO"
+fi
+if [ "${lcdInstalled}" != "false" ] && [ "${lcdInstalled}" != "GPIO" ]; then
+  echo "ERROR: LCD-DRIVER parameter needs to be either 'false' or 'GPIO'"
+  exit 1
 else
-  if [ "${lcdInstalled}" != "false" ]; then
-    lcdInstalled="true"
-  fi
+  echo "4) will use LCD-DRIVER --> '${lcdInstalled}'"
 fi
-echo "will activate LCD screen --> '${lcdInstalled}'"
 
-# 5th optional parameter is Wifi
-disableWifi="$5"
-if [ ${#disableWifi} -eq 0 ]; then
-  disableWifi="false"
+# 5rd optional paramater: TWEAK-BOOTDRIVE
+# ---------------------------------------
+# could be 'true' (default) or 'false'
+# If 'true' it will try (based on the base OS) to optimize the boot drive.
+# If 'false' this will skipped.
+tweakBootdrives="$5"
+if [ ${#tweakBootdrives} -eq 0 ]; then
+  tweakBootdrives="true"
+fi
+if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; then
+  echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
+  exit 1
 else
-  if [ "${disableWifi}" != "true" ]; then
-    disableWifi="false"
-  fi
-fi
-echo "will disable wifi --> '${disableWifi}'"
-
-# 6th optional parameter is Wifi country
-wifiCountry="$6"
-if [ ${#wifiCountry} -eq 0 ]; then
-  wifiCountry="US"
-fi
-if [ "${disableWifi}" == "false" ]; then
-  echo "will use Wifi country --> '${wifiCountry}'"
+  echo "5) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
-echo -n "Do you wish to install Raspiblitz branch ${wantedBranch}? (yes/no) "
+# 6rd optional paramater: WIFI
+# ---------------------------------------
+# could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
+# If 'false' WIFI will be deactivated by default
+# If 'true' WIFI will be activated by with default country code 'US'
+# If any valid wifi country code Wifi will be activated with that country code by default
+modeWifi="$6"
+if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
+  modeWifi="US"
+fi
+echo "6) will use WIFI --> '${modeWifi}'"
+
+echo -n "Do you agree with all parameters above? (yes/no) "
 read installRaspiblitzAnswer
 if [ "$installRaspiblitzAnswer" == "yes" ] ; then
   echo ""
@@ -85,9 +108,7 @@ else
   exit 1
 fi
 
-
 echo "Installing Raspiblitz..."
-
 sleep 3
 
 echo ""
@@ -223,8 +244,9 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
   # set to wait until network is available on boot (0 seems to yes)
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
-  if [ "${disableWifi}" == "false" ]; then
-    sudo raspi-config nonint do_wifi_country $wifiCountry
+  if [ "${modeWifi}" != "false" ]; then
+    # this will undo the softblock of rfkill on RaspiOS
+    sudo raspi-config nonint do_wifi_country $modeWifi
   fi
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
@@ -242,9 +264,15 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
-  # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
-  sudo tune2fs -c 1 ${rootPartition}
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
+  # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
+  if [ "${tweakBootdrives}" == "true" ]; then
+    rootPartition = "/dev/mmcblk0p2"
+    echo "* running tune2fs on ${rootPartition}"
+    sudo tune2fs -c 1 ${rootPartition}
+  else
+    echo "* skipping tweakBootdrives"
+  fi
 
   # edit kernel parameters
   kernelOptionsFile=/boot/cmdline.txt
@@ -281,7 +309,7 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" != "false" ]; then
    if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
       [ "${baseImage}" = "debian_rpi64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
@@ -755,7 +783,7 @@ fi
 # move files from gitclone
 cd /home/admin/
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b ${wantedBranch} https://github.com/${githubUser}/raspiblitz.git
+sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin chmod +x *.sh
@@ -800,7 +828,7 @@ else
   echo "autostart already in $homeFile"
 fi
  
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" != "false" ]; then
   if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
      [ "${baseImage}" = "debian_rpi64" ]||[ "${baseImage}" = "armbian" ]||\
      [ "${baseImage}" = "ubuntu" ]; then
@@ -846,7 +874,7 @@ sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
 if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
    [ "${baseImage}" = "debian_rpi64" ]; then
-  if [ "${disableWifi}" == "true" ]; then
+  if [ "${modeWifi}" == "false" ]; then
     echo ""
     echo "*** DISABLE WIFI ***"
     sudo systemctl disable wpa_supplicant.service
@@ -888,6 +916,25 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
 
 fi
 
+# *** FATPACK ***
+if [ "${fatpack}" == "true" ]; then
+  echo "*** FATPACK ***"
+  echo "* Adding GO Framework ..."
+  sudo /home/admin/config.scripts/bonus.go.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+  echo "* Adding nodeJS Framework ..."
+  sudo /home/admin/config.scripts/bonus.nodjs.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+else
+  echo "* skiping FATPACK"
+fi
+
 # *** CACHE DISK IN RAM ***
 echo "Activating CACHE RAM DISK ... "
 sudo /home/admin/config.scripts/blitz.cache.sh on
@@ -914,7 +961,7 @@ echo ""
 
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" == "GPIO" ]; then
   if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
     echo "*** 32bit LCD DRIVER ***"
     echo "--> Downloading LCD Driver from Github"
@@ -986,7 +1033,7 @@ echo "SD CARD BUILD DONE"
 echo "**********************************************"
 echo ""
 
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" != "false" ]; then
   echo "Your SD Card Image for RaspiBlitz is almost ready."
   if [ "${baseImage}" = "raspbian" ]; then
     echo "Last step is to install LCD drivers. This will reboot your Pi when done."
@@ -995,9 +1042,9 @@ if [ "${lcdInstalled}" == "true" ]; then
 else
   echo "Your SD Card Image for RaspiBlitz is ready."
 fi
-echo "Take the chance & look thru the output above if you can spot any errror."
+echo "Take the chance & look thru the output above if you can spot any error."
 echo ""
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" != "false" ]; then
   echo "After final reboot - your SD Card Image is ready."
   echo ""
 fi
@@ -1006,7 +1053,7 @@ echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease
 echo "REMEMBER for login now use --> user:admin password:raspiblitz"
 echo ""
 
-if [ "${lcdInstalled}" == "true" ]; then
+if [ "${lcdInstalled}" != "false" ]; then
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
   if [ "${baseImage}" = "raspbian" ]; then

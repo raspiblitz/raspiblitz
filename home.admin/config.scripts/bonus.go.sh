@@ -7,13 +7,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^golang=" /mnt/hdd/raspiblitz.conf; then
-  echo "golang=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
@@ -89,7 +82,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^golang=.*/golang=on/g" /mnt/hdd/raspiblitz.conf
   echo ""
   echo "Installed $(go version)"
   echo ""
@@ -99,7 +91,6 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^golang=.*/golang=off/g" /mnt/hdd/raspiblitz.conf
   echo "*** REMOVING GO ***"
   sudo rm -rf /usr/local/go
   sudo rm -rf /usr/local/gocode
