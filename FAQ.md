@@ -538,7 +538,7 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh '[BRANCH]'`
+* `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh true rootzoll [BRANCH] true true true`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
