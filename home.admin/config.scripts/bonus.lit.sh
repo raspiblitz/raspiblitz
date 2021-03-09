@@ -1,6 +1,7 @@
 #!/bin/bash
 
-pinnedVersion="0.4.0-alpha"
+# https://github.com/lightninglabs/lightning-terminal/releases
+pinnedVersion="0.4.1-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -8,6 +9,14 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "installs the version $pinnedVersion"
  echo "bonus.lit.sh [on|off|menu]"
  exit 1
+fi
+
+# check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
+
+PGPsigner="guggero" 
+if [ $PGPsigner=guggero ];then
+  PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+  PGPcheck="03DB6322267C373B"
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -137,6 +146,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "OK running on $(uname -m) architecture."
     fi
 
+    downloadDir="/home/admin/download/lit"  # edit your download directory
+    rm -rf "${downloadDir}"
+    mkdir -p "${downloadDir}"
+    cd "${downloadDir}" || exit 1
+
     # extract the SHA256 hash from the manifest file for the corresponding platform
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt
     if [ ${isARM} -eq 1 ] ; then
@@ -153,23 +167,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "SHA256 hash: $SHA256"
     echo
 
-    downloadDir="/home/admin/download/lit"  # edit your download directory
-    rm -rf "${downloadDir}"
-    mkdir -p "${downloadDir}"
-    cd "${downloadDir}" || exit 1
-
     echo "# get LiT binary"
     binaryName="lightning-terminal-linux-${OSversion}-v${pinnedVersion}.tar.gz"
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/${binaryName}
 
-    # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-    # guggero
-    PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-    PGPcheck="03DB6322267C373B"
-
     echo "# check binary was not manipulated (checksum test)"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt.asc
-    sudo rm -rf pgp_keys.asc 
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-${PGPsigner}-v${pinnedVersion}.sig
     wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -190,7 +193,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(gpg --verify manifest-v${pinnedVersion}.txt.asc 2>&1)
+    verifyResult=$(gpg --verify manifest-${PGPsigner}-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt 2>&1)
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
