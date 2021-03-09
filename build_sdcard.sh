@@ -935,7 +935,7 @@ if [ "${fatpack}" == "true" ]; then
     exit 1
   fi
   echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodjs.sh on
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on
   if [ "$?" != "0" ]; then
     echo "FATPACK FAILED"
     exit 1
