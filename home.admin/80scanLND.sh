@@ -205,10 +205,13 @@ else
   # Sync Progress
   ####################
 
+  # check number of peers
+  source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
+
   # basic dialog info
   height=6
-  width=43
-  title="Node is Syncing (${scriptRuntime})"
+  width=45
+  title="Node is Syncing"
   actionString="Please wait - this can take some time"
 
   # formatting BLOCKCHAIN SYNC PROGRESS
@@ -220,9 +223,9 @@ else
       actionString="Login with SSH for more details:"
     fi
   elif [ ${#syncProgress} -lt 6 ]; then
-    syncProgress=" ${syncProgress} %"
+    syncProgress=" ${syncProgress} % ${peers} peers"
   else
-    syncProgress="${syncProgress} %"
+    syncProgress="${syncProgress} % ${peers} peers"
   fi
 
   # formatting LIGHTNING SCAN PROGRESS  
@@ -251,9 +254,9 @@ else
     fi
 
   elif [ ${#scanProgress} -lt 6 ]; then
-    scanProgress=" ${scanProgress} %"
+    scanProgress=" ${scanProgress} % ${lndPeers} peers"
   else
-    scanProgress="${scanProgress} %"
+    scanProgress="${scanProgress} % ${lndPeers} peers"
   fi
 
   # setting info string

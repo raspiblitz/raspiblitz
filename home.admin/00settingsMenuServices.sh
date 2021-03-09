@@ -34,7 +34,7 @@ OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
 OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
-OPTIONS+=(a 'Mempool Explorer' ${mempoolExplorer})
+OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(l 'Lightning Loop' ${loop})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
@@ -360,6 +360,7 @@ if [ "${pool}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.pool.sh ${choice}
   if [ "${choice}" =  "on" ]; then
+    sudo systemctl start poold
     sudo -u admin /home/admin/config.scripts/bonus.pool.sh menu
   fi
 else
@@ -374,7 +375,10 @@ if [ "${sphinxrelay}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
   if [ "${choice}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+    whiptail --title " Installed Sphinx Server" --msgbox "\
+Sphinx Server was installed.\n
+Use the new 'SPHINX' entry in Main Menu for more info.\n
+" 10 35
   fi
 else
   echo "Sphinx Relay unchanged."
@@ -419,7 +423,7 @@ if [ "${mempoolExplorer}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo sytemctl start mempool
+      sudo systemctl start mempool
       whiptail --title " Installed Mempool Space " --msgbox "\
 The txindex may need to be created before Mempool can be active.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n

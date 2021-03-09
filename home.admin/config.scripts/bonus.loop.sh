@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/loop/releases-
-pinnedVersion="v0.11.1-beta"
+pinnedVersion="v0.11.2-beta"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
