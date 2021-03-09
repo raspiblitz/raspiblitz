@@ -634,12 +634,15 @@ fi
 lndVersion="0.12.1-beta"
 
 # olaoluwa
+#PGPauthor="roasbeef"
 #PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 #PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
 # bitconner
+PGPauthor="bitconner"
 PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 # Joost Jager
+#PGPauthor="joostjager"
 #PGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
 #PGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
 
@@ -650,7 +653,7 @@ cd /home/admin/download
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
 
 # check if checksums are signed by lnd dev team
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt.sig
+sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-${PGPauthor}-v${lndVersion}.sig
 sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
 gpg ./pgp_keys.asc
 fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
@@ -663,7 +666,7 @@ if [ ${fingerprint} -lt 1 ]; then
 fi
 gpg --import ./pgp_keys.asc
 sleep 3
-verifyResult=$(gpg --verify manifest-v${lndVersion}.txt.sig 2>&1)
+verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndVersion}.sig manifest-v${lndVersion}.txt 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
 correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
