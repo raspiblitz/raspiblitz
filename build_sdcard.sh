@@ -29,10 +29,10 @@ if [ ${#fatpack} -eq 0 ]; then
   fatpack="false"
 fi
 if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
-  echo "ERROR: fatpack parameter needs to be either 'true' or 'false'"
+  echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "will use fatpack --> '${fatpack}'"
+  echo "1) will use FATPACK --> '${fatpack}'"
 fi
 
 # 2st optional paramater: GITHUB-USERNAME
@@ -45,7 +45,7 @@ githubUser="$2"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
-echo "will use code from user --> '${githubUser}'"
+echo "2) will use GITHUB-USERNAME --> '${githubUser}'"
 
 # 3rd optional paramater: GITHUB-BRANCH
 # -------------------------------------
@@ -54,7 +54,7 @@ githubBranch="$3"
 if [ ${#githubBranch} -eq 0 ]; then
   githubBranch="dev"
 fi
-echo "will use code from branch --> '${githubBranch}'"
+echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
 
 # 4rd optional paramater: LCD-DRIVER
 # ----------------------------------------
@@ -69,7 +69,7 @@ if [ "${lcdInstalled}" != "false" ] && [ "${lcdInstalled}" != "GPIO" ]; then
   echo "ERROR: LCD-DRIVER parameter needs to be either 'false' or 'GPIO'"
   exit 1
 else
-  echo "will use LCD-DRIVER --> '${lcdInstalled}'"
+  echo "4) will use LCD-DRIVER --> '${lcdInstalled}'"
 fi
 
 # 5rd optional paramater: TWEAK-BOOTDRIVE
@@ -85,7 +85,7 @@ if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; th
   echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
+  echo "5) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
 # 6rd optional paramater: WIFI
@@ -98,7 +98,7 @@ modeWifi="$6"
 if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
   modeWifi="US"
 fi
-echo "will use WIFI --> '${modeWifi}'"
+echo "6) will use WIFI --> '${modeWifi}'"
 
 echo -n "Do you agree with all parameters above? (yes/no) "
 read installRaspiblitzAnswer
