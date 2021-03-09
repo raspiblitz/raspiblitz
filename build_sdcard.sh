@@ -13,7 +13,6 @@ echo "*****************************************"
 echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
-echo ""
 
 # 1st optional paramater: FATPACK
 # -------------------------------
