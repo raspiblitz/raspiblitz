@@ -265,11 +265,10 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
-  # use command to check last fsck check: sudo tune2fs -l ${rootPartition}
+  # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
   if [ "${tweakBootdrives}" == "true" ]; then
-    rootPartition = "/dev/mmcblk0p2"
-    echo "* running tune2fs on ${rootPartition}"
-    sudo tune2fs -c 1 ${rootPartition}
+    echo "* running tune2fs"
+    sudo tune2fs -c 1 /dev/mmcblk0p2
   else
     echo "* skipping tweakBootdrives"
   fi
