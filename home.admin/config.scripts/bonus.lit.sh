@@ -212,9 +212,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###########
     # config  #
     ###########
-    #source /mnt/hdd/raspiblitz.conf
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    cat > /home/admin/lit.conf <<EOF
+    echo "
 # Application Options
 httpslisten=0.0.0.0:8443
 uipassword=$PASSWORD_B
@@ -226,7 +225,6 @@ lit-dir=/home/lit/.lit
 remote.lit-debuglevel=debug
 
 # Remote lnd options
-remote.lnd.network=${chain}net
 remote.lnd.rpcserver=127.0.0.1:10009
 remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/${network}/${chain}net/admin.macaroon
 remote.lnd.tlscertpath=/home/lit/.lnd/tls.cert
@@ -245,17 +243,11 @@ faraday.connect_bitcoin=true
 faraday.bitcoin.host=localhost
 faraday.bitcoin.user=raspibolt
 faraday.bitcoin.password=$PASSWORD_B
-EOF
-    # remove symlink or old file
-    sudo rm -f /home/lit/.lit/lit.conf
-               /home/lit/.lit/lit.conf
-    # move to app-data
-    sudo mv /home/admin/lit.conf /mnt/hdd/app-data/.lit/lit.conf
+" | sudo tee /mnt/hdd/app-data/.lit/lit.conf
+
     # secure
     sudo chown lit:lit /mnt/hdd/app-data/.lit/lit.conf
     sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf | exit 1
-    # symlink
-    sudo ln -s /mnt/hdd/app-data/.lit/lit.conf /home/lit/.lit/
 
     ############
     # service  #
