@@ -710,8 +710,10 @@ fi
 
 # check binary was not manipulated (checksum test)
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
-  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum: ${lndSHA256}"
+echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
+checksumCorrect=$(echo ${lndSHA256} | grep -c "${binaryChecksum}")
+if [ "${checksumCorrect}" != "1" ]; then
+  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
   rm -v ./${binaryName}
   exit 1
 else
