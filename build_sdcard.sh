@@ -1042,7 +1042,7 @@ if [ "${lcdInstalled}" != "false" ]; then
 else
   echo "Your SD Card Image for RaspiBlitz is ready."
 fi
-echo "Take the chance & look thru the output above if you can spot any errror."
+echo "Take the chance & look thru the output above if you can spot any error."
 echo ""
 if [ "${lcdInstalled}" != "false" ]; then
   echo "After final reboot - your SD Card Image is ready."
