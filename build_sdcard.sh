@@ -705,13 +705,17 @@ echo ""
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
+  echo "- downloading lnd binary"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+else
+  echo "- using existing lnd binary"
 fi
 
 # check binary was not manipulated (checksum test)
+echo "- binary checksum calc"
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
 echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
-checksumCorrect=$(echo ${lndSHA256} | grep -c "${binaryChecksum}")
+checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
 if [ "${checksumCorrect}" != "1" ]; then
   echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
   rm -v ./${binaryName}
