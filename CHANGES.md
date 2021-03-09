@@ -1,5 +1,12 @@
 # CHANGES between Releases
 
+## Whats new in Version 1.7.0 of RaspiBlitz?
+
+- Update: Raspberry Pi OS Base Image 64-bit (August 2020)
+- Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
+- Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
+- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+
 ## Whats new in Version 1.6.3 of RaspiBlitz?
 
 - Update: mempool space 2.0.1 [details](https://github.com/mempool/mempool)
