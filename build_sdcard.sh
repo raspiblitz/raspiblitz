@@ -833,8 +833,9 @@ echo ""
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
-  echo "- downloading lnd binary"
-  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+  echo "- downloading lnd binary --> ${binaryName}"
+  sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+  echo "- download done"
 else
   echo "- using existing lnd binary"
 fi
@@ -857,6 +858,7 @@ else
 fi
 
 # install
+echo "- install LND binary"
 sudo -u admin tar -xzf ${binaryName}
 sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${lndOSversion}-v${lndVersion}/*
 sleep 3
