@@ -495,6 +495,56 @@ sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
 sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 
+# *** SHELL SCRIPTS AND ASSETS
+
+# move files from gitclone
+cd /home/admin/
+sudo -u admin rm -rf /home/admin/raspiblitz
+sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin chmod +x *.sh
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin chmod +x /home/admin/config.scripts/*.sh
+
+# install newest version of BlitzPy
+blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
+blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
+echo ""
+echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
+sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
+
+# make sure lndlibs are patched for compatibility for both Python2 and Python3
+if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
+
+if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
+  sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+fi
+
+# add /sbin to path for all
+sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
+
+homeFile=/home/admin/.bashrc
+autostart="automatically start main menu"
+autostartDone=$(cat $homeFile|grep -c "$autostart")
+
+if [ ${autostartDone} -eq 0 ]; then
+  # bash autostart for admin
+  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+  echo "autostart added to $homeFile"
+else
+  echo "autostart already in $homeFile"
+fi
+
 echo ""
 echo "*** SWAP FILE ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#moving-the-swap-file
@@ -865,56 +915,7 @@ else
   echo "key-bindings already in $homeFile"
 fi
 
-# *** SHELL SCRIPTS AND ASSETS
-
-# move files from gitclone
-cd /home/admin/
-sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin chmod +x *.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-
-# install newest version of BlitzPy
-blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
-blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
-echo ""
-echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
-sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
-
-# make sure lndlibs are patched for compatibility for both Python2 and Python3
-if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-  sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
-fi
-
-if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-  sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
-fi
-
-# add /sbin to path for all
-sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
-
-homeFile=/home/admin/.bashrc
-autostart="automatically start main menu"
-autostartDone=$(cat $homeFile|grep -c "$autostart")
-
-if [ ${autostartDone} -eq 0 ]; then
-  # bash autostart for admin
-  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
-  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
-  echo "autostart added to $homeFile"
-else
-  echo "autostart already in $homeFile"
-fi
- 
+# lcd preparations
 if [ "${lcdInstalled}" != "false" ]; then
   if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
      [ "${baseImage}" = "debian_rpi64" ]||[ "${baseImage}" = "armbian" ]||\
