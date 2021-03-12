@@ -518,6 +518,85 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
+# *** TOR Prepare ***
+echo "*** Prepare TOR source+keys ***"
+sudo /home/admin/config.scripts/internet.tor.sh prepare
+echo ""
+
+# *** fail2ban ***
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
+echo "*** HARDENING ***"
+sudo apt install -y --no-install-recommends python3-systemd fail2ban 
+
+# *** CACHE DISK IN RAM ***
+echo "Activating CACHE RAM DISK ... "
+sudo /home/admin/config.scripts/blitz.cache.sh on
+
+# *** Wifi & Bluetooth ***
+if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
+   [ "${baseImage}" = "debian_rpi64" ]; then
+   
+  if [ "${modeWifi}" == "false" ]; then
+    echo ""
+    echo "*** DISABLE WIFI ***"
+    sudo systemctl disable wpa_supplicant.service
+    sudo ifconfig wlan0 down
+  fi
+
+  echo ""
+  echo "*** DISABLE BLUETOOTH ***"
+
+  configFile="/boot/config.txt"
+  disableBT="dtoverlay=disable-bt"
+  disableBTDone=$(cat $configFile|grep -c "$disableBT")
+
+  if [ ${disableBTDone} -eq 0 ]; then
+    # disable bluetooth module
+    sudo echo "" >> $configFile
+    sudo echo "# Raspiblitz" >> $configFile
+    echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
+    echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
+  else
+    echo "disable BT already in $configFile"
+  fi
+
+  # remove bluetooth services
+  sudo systemctl disable bluetooth.service
+  sudo systemctl disable hciuart.service
+
+  # remove bluetooth packages
+  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  
+  echo
+  echo "*** DISABLE AUDIO (snd_bcm2835) ***"
+  sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
+  echo
+  
+  echo "*** DISABLE DRM VC4 V3D driver ***"
+  dtoverlay=vc4-fkms-v3d
+  sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+
+fi
+
+# *** FATPACK ***
+if [ "${fatpack}" == "true" ]; then
+  echo "*** FATPACK ***"
+  echo "* Adding GO Framework ..."
+  sudo /home/admin/config.scripts/bonus.go.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+  echo "* Adding nodeJS Framework ..."
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+else
+  echo "* skiping FATPACK"
+fi
+
 # "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
@@ -874,78 +953,6 @@ if [ "${lcdInstalled}" != "false" ]; then
 fi
 
 echo ""
-echo "*** HARDENING ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
-
-# fail2ban (no config required)
-sudo apt install -y --no-install-recommends python3-systemd fail2ban 
-
-if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
-   [ "${baseImage}" = "debian_rpi64" ]; then
-  if [ "${modeWifi}" == "false" ]; then
-    echo ""
-    echo "*** DISABLE WIFI ***"
-    sudo systemctl disable wpa_supplicant.service
-    sudo ifconfig wlan0 down
-  fi
-
-  echo ""
-  echo "*** DISABLE BLUETOOTH ***"
-
-  configFile="/boot/config.txt"
-  disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(cat $configFile|grep -c "$disableBT")
-
-  if [ ${disableBTDone} -eq 0 ]; then
-    # disable bluetooth module
-    sudo echo "" >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
-    echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
-    echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
-  else
-    echo "disable BT already in $configFile"
-  fi
-
-  # remove bluetooth services
-  sudo systemctl disable bluetooth.service
-  sudo systemctl disable hciuart.service
-
-  # remove bluetooth packages
-  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
-  
-  echo
-  echo "*** DISABLE AUDIO (snd_bcm2835) ***"
-  sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
-  echo
-  
-  echo "*** DISABLE DRM VC4 V3D driver ***"
-  dtoverlay=vc4-fkms-v3d
-  sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
-
-fi
-
-# *** FATPACK ***
-if [ "${fatpack}" == "true" ]; then
-  echo "*** FATPACK ***"
-  echo "* Adding GO Framework ..."
-  sudo /home/admin/config.scripts/bonus.go.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
-  echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodejs.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
-else
-  echo "* skiping FATPACK"
-fi
-
-# *** CACHE DISK IN RAM ***
-echo "Activating CACHE RAM DISK ... "
-sudo /home/admin/config.scripts/blitz.cache.sh on
 
 # *** BOOTSTRAP ***
 # see background README for details
@@ -961,11 +968,6 @@ echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp ./assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
-
-# *** TOR Prepare ***
-echo "*** Prepare TOR source+keys ***"
-sudo /home/admin/config.scripts/internet.tor.sh prepare
-echo ""
 
 # *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
 # based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
@@ -1032,7 +1034,6 @@ if [ "${lcdInstalled}" == "GPIO" ]; then
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
   fi
 fi
-
 
 # *** RASPIBLITZ IMAGE READY ***
 echo ""
