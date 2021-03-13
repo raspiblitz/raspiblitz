@@ -456,8 +456,12 @@ sudo apt install -y netcat
 # install OpenSSH client + server
 sudo apt install -y openssh-client
 sudo apt install -y openssh-sftp-server
+sudo apt install -y sshpass
 # install killall, fuser
 sudo apt install -y psmisc
+# install firewall
+sudo apt install -y ufw
+
 
 sudo apt clean
 sudo apt -y autoremove
@@ -691,7 +695,7 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
 
 fi
 
-# *** FATPACK ***
+# *** FATPACK *** (can be activated by parameter - see details at start of script)
 if [ "${fatpack}" == "true" ]; then
   echo "*** FATPACK ***"
   echo "* Adding GO Framework ..."
@@ -706,15 +710,33 @@ if [ "${fatpack}" == "true" ]; then
     echo "FATPACK FAILED"
     exit 1
   fi
+  echo "* Optional Packages (may be needed for extended features)"
+  sudo apt-get install -y qrencode
+  sudo apt-get install -y btrfs-tools
+  sudo apt-get install -y secure-delete
+  sudo apt-get install -y fbi
+  sudo apt-get install -y ssmtp
+  sudo apt-get install -y unclutter xterm python3-pyqt5
+  sudo apt-get install -y xfonts-terminus
+  sudo apt-get install -fy apcupsd
+  sudo apt-get install -y nginx apache2-utils
+  sudo apt-get install -y nginx
+  sudo apt-get install -y python3-jinja2
+  sudo apt-get install -y socat
+  sudo apt-get install -y libatlas-base-dev
+  sudo apt-get install -y mariadb-server mariadb-client
+  sudo apt-get install -y hexyl
+  sudo apt-get install -y autossh
+
 else
-  echo "* skiping FATPACK"
+  echo "* skipping FATPACK"
 fi
 
 # "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
 
 echo ""
-echo "*** PREPARING BITCOIN & Co ***"
+echo "*** PREPARING BITCOIN ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
@@ -790,7 +812,10 @@ if [ ! -f "./${binaryName}" ]; then
    exit 1
 else
   # check binary checksum test
+  echo "- checksum test"
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  echo "Valid SHA256 checksum should be: ${bitcoinSHA256}"
+  echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
     echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
     rm -v ./${binaryName}
@@ -815,6 +840,10 @@ if [ ${installed} -lt 1 ]; then
   echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
   exit 1
 fi
+echo "- Bitcoin install OK"
+
+echo ""
+echo "*** PREPARING LIGHTNING ***"
 
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
@@ -902,8 +931,9 @@ else
 fi
 
 # check binary was not manipulated (checksum test)
-echo "- binary checksum calc"
+echo "- checksum test"
 binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+echo "Valid SHA256 checksum(s) should be: ${lndSHA256}"
 echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
 checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
 if [ "${checksumCorrect}" != "1" ]; then
