@@ -703,7 +703,6 @@ if [ "${fatpack}" == "true" ]; then
   sudo apt-get install -y ssmtp
   sudo apt-get install -y unclutter xterm python3-pyqt5
   sudo apt-get install -y xfonts-terminus
-  sudo apt-get install -fy apcupsd
   sudo apt-get install -y nginx apache2-utils
   sudo apt-get install -y nginx
   sudo apt-get install -y python3-jinja2
