@@ -495,7 +495,21 @@ sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
 sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 
-# *** SHELL SCRIPTS AND ASSETS
+echo ""
+echo "*** Python DEFAULT libs & dependencies ***"
+
+# for setup shell scripts
+sudo apt -y install dialog bc python3-dialog
+
+# libs (for global python scripts)
+sudo -H python3 -m pip install grpcio==1.29.0
+sudo -H python3 -m pip install googleapis-common-protos==1.51.0
+sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install j2cli==0.3.10
+sudo -H python3 -m pip install requests[socks]==2.21.0
+
+echo ""
+echo "*** SHELL SCRIPTS AND ASSETS ***"
 
 # move files from gitclone
 cd /home/admin/
@@ -519,7 +533,6 @@ sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzP
 if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
   sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
 fi
-
 if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
   sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
 fi
@@ -543,6 +556,56 @@ if [ ${autostartDone} -eq 0 ]; then
   echo "autostart added to $homeFile"
 else
   echo "autostart already in $homeFile"
+fi
+
+# *** BOOTSTRAP ***
+# see background README for details
+echo ""
+echo "*** RASPI BOOTSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
+
+# *** BACKGROUND ***
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
+echo ""
+echo "*** RASPIBLITZ EXTRAS ***"
+
+# for background processes
+sudo apt -y install screen
+
+# for multiple (detachable/background) sessions when using SSH
+# https://github.com/rootzoll/raspiblitz/issues/990
+sudo apt -y install tmux
+
+# optimization for torrent download
+sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
+sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
+
+# install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+sudo apt -y install fzf
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
+sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
+
+homeFile=/home/admin/.bashrc
+keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
+keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
+
+if [ ${keyBindingsDone} -eq 0 ]; then
+  sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+  echo "key-bindings added to $homeFile"
+else
+  echo "key-bindings already in $homeFile"
 fi
 
 echo ""
@@ -718,32 +781,29 @@ echo ""
 echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # download resources
-downloadOK=0
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
    sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
 fi
 if [ ! -f "./${binaryName}" ]; then
    echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+   exit 1
 else
   # check binary checksum test
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
     echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
     rm -v ./${binaryName}
+    exit 1
   else
-    downloadOK=1
+    echo ""
+    echo "****************************************"
+    echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+    echo "****************************************"
+    sleep 10
+    echo ""
   fi
 fi
-if [ downloadOK == 0 ]; then
-  exit 1
-fi
-
-echo ""
-echo "****************************************"
-echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
-echo "****************************************"
-echo ""
 
 # install
 sudo -u admin tar -xvf ${binaryName}
@@ -856,6 +916,7 @@ else
   echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
   echo "****************************************"
   echo ""
+  sleep 10
 fi
 
 # install
@@ -872,55 +933,13 @@ fi
 sudo chown -R admin /home/admin
 echo "- OK install of LND done"
 
-echo "*** Python DEFAULT libs & dependencies ***"
-
-# for setup schell scripts
-sudo apt -y install dialog bc python3-dialog
-
-# libs (for global python scripts)
-sudo -H python3 -m pip install grpcio==1.29.0
-sudo -H python3 -m pip install googleapis-common-protos==1.51.0
-sudo -H python3 -m pip install toml==0.10.1
-sudo -H python3 -m pip install j2cli==0.3.10
-sudo -H python3 -m pip install requests[socks]==2.21.0
-
 echo ""
-echo "*** RASPIBLITZ EXTRAS ***"
-
-# for background processes
-sudo apt -y install screen
-
-# for multiple (detachable/background) sessions when using SSH
-# https://github.com/rootzoll/raspiblitz/issues/990
-sudo apt -y install tmux
-
-# optimization for torrent download
-sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
-sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
-
-# install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-sudo apt -y install fzf
-
-sudo bash -c "echo '' >> /home/admin/.bashrc"
-sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
-sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
-
-sudo bash -c "echo '' >> /home/admin/.bashrc"
-sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
-
-homeFile=/home/admin/.bashrc
-keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
-keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
-
-if [ ${keyBindingsDone} -eq 0 ]; then
-  sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
-  echo "key-bindings added to $homeFile"
-else
-  echo "key-bindings already in $homeFile"
-fi
-
-# lcd preparations
+echo "*** DISPLAY OPTIONS ***"
+# (do last - because makes a reboot)
+# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
 if [ "${lcdInstalled}" != "false" ]; then
+
+  # lcd preparations based on os
   if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
      [ "${baseImage}" = "debian_rpi64" ]||[ "${baseImage}" = "armbian" ]||\
      [ "${baseImage}" = "ubuntu" ]; then
@@ -955,89 +974,77 @@ if [ "${lcdInstalled}" != "false" ]; then
       echo "autostart LCD already in $homeFile"
     fi
   fi
-fi
 
-echo ""
-
-# *** BOOTSTRAP ***
-# see background README for details
-echo ""
-echo "*** RASPI BOOTSTRAP SERVICE ***"
-sudo chmod +x /home/admin/_bootstrap.sh
-sudo cp ./assets/bootstrap.service /etc/systemd/system/bootstrap.service
-sudo systemctl enable bootstrap
-
-# *** BACKGROUND ***
-echo ""
-echo "*** RASPI BACKGROUND SERVICE ***"
-sudo chmod +x /home/admin/_background.sh
-sudo cp ./assets/background.service /etc/systemd/system/background.service
-sudo systemctl enable background
-
-# *** RASPIBLITZ LCD DRIVER (do last - because makes a reboot) ***
-# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-if [ "${lcdInstalled}" == "GPIO" ]; then
-  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
-    echo "*** 32bit LCD DRIVER ***"
-    echo "--> Downloading LCD Driver from Github"
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-    sudo -u admin chmod -R 755 LCD-show
-    sudo -u admin chown -R admin:admin LCD-show
-    cd LCD-show/
-    sudo -u admin git reset --hard 53dd0bf || exit 1
-    # install xinput calibrator package
-    echo "--> install xinput calibrator package"
-    sudo apt install -y libxi6
-    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+  echo ""
+  if [ "${lcdInstalled}" == "GPIO" ]; then
+    if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+      echo "*** 32bit LCD DRIVER ***"
+      echo "--> Downloading LCD Driver from Github"
+      cd /home/admin/
+      sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
+      sudo -u admin chmod -R 755 LCD-show
+      sudo -u admin chown -R admin:admin LCD-show
+      cd LCD-show/
+      sudo -u admin git reset --hard 53dd0bf || exit 1
+      # install xinput calibrator package
+      echo "--> install xinput calibrator package"
+      sudo apt install -y libxi6
+      sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
  
-    if [ "${baseImage}" = "dietpi" ]; then
-      echo "--> dietpi preparations"
-      sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-      sudo mkdir /etc/X11/xorg.conf.d
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-      sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-      sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-      sudo cp ./usr/cmdline.txt /DietPi/
-      sudo cp ./usr/inittab /etc/
-      sudo cp ./boot/config-35.txt /DietPi/config.txt
-      # make LCD screen rotation correct
-      sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+      if [ "${baseImage}" = "dietpi" ]; then
+        echo "--> dietpi preparations"
+        sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+        sudo mkdir /etc/X11/xorg.conf.d
+        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+        sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+        sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+        sudo cp ./usr/cmdline.txt /DietPi/
+        sudo cp ./usr/inittab /etc/
+        sudo cp ./boot/config-35.txt /DietPi/config.txt
+        # make LCD screen rotation correct
+        sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+      fi
+    elif [ "${baseImage}" = "raspios_arm64"  ] || [ "${baseImage}" = "debian_rpi64" ]; then
+      echo "*** 64bit LCD DRIVER ***"
+      echo "--> Downloading LCD Driver from Github"
+      cd /home/admin/
+      sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+      sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+      sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+      cd /home/admin/wavesharelcd-64bit-rpi
+      sudo -u admin git reset --hard 5a206a7 || exit 1
+
+      # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+      # prepare X11
+      rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+      mkdir -p /etc/X11/xorg.conf.d
+      cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
+      # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+
+      # load module on boot
+      cp ./waveshare35a.dtbo /boot/overlays/
+      echo "hdmi_force_hotplug=1" >> /boot/config.txt 
+      # don't enable I2C, SPI and UART ports by default
+      # echo "dtparam=i2c_arm=on" >> /boot/config.txt
+      # echo "dtparam=spi=on" >> /boot/config.txt
+      # echo "enable_uart=1" >> /boot/config.txt
+      echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+      cp ./cmdline.txt /boot/
+
+      # touch screen calibration
+      apt-get install -y xserver-xorg-input-evdev
+      cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+      # TODO manual touchscreen calibration option
+      # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
     fi
-  elif [ "${baseImage}" = "raspios_arm64"  ]||[ "${baseImage}" = "debian_rpi64" ]; then
-    echo "*** 64bit LCD DRIVER ***"
-    echo "--> Downloading LCD Driver from Github"
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
-    cd /home/admin/wavesharelcd-64bit-rpi
-    sudo -u admin git reset --hard 5a206a7 || exit 1
-
-    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-    # prepare X11
-    rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-    mkdir -p /etc/X11/xorg.conf.d
-    cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
-    # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-    # load module on boot
-    cp ./waveshare35a.dtbo /boot/overlays/
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt 
-    # don't enable I2C, SPI and UART ports by default
-    # echo "dtparam=i2c_arm=on" >> /boot/config.txt
-    # echo "dtparam=spi=on" >> /boot/config.txt
-    # echo "enable_uart=1" >> /boot/config.txt
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-    cp ./cmdline.txt /boot/
-
-    # touch screen calibration
-    apt-get install -y xserver-xorg-input-evdev
-    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-    # TODO manual touchscreen calibration option
-    # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+  else
+    echo "FAIL: Unknown LCD-DRIVER: ${lcdInstalled}"
+    exit 1
   fi
+
+else
+  echo "- LCD options are deactivated"
 fi
 
 # *** RASPIBLITZ IMAGE READY ***
@@ -1067,7 +1074,7 @@ echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease
 echo "REMEMBER for login now use --> user:admin password:raspiblitz"
 echo ""
 
-if [ "${lcdInstalled}" != "false" ]; then
+if [ "${lcdInstalled}" == "GPIO" ]; then
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
   if [ "${baseImage}" = "raspbian" ]; then
@@ -1075,6 +1082,11 @@ if [ "${lcdInstalled}" != "false" ]; then
     cd /home/admin/LCD-show/
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
+  elif [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ]; then
+    sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
+    sudo apt-mark hold raspberrypi-bootloader
+    sudo ./install.sh
   else
     echo "Use 'sudo reboot' to restart manually."
   fi
