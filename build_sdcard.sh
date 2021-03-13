@@ -833,8 +833,9 @@ echo ""
 # get LND binary
 binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
-  echo "- downloading lnd binary --> ${binaryName}"
-  sudo -u admin wget https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}
+  lndDownloadUrl="https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}"
+  echo "- downloading lnd binary --> ${lndDownloadUrl}"
+  sudo -u admin wget ${lndDownloadUrl}
   echo "- download done"
 else
   echo "- using existing lnd binary"
@@ -869,6 +870,7 @@ if [ ${#installed} -eq 0 ]; then
   exit 1
 fi
 sudo chown -R admin /home/admin
+echo "- OK install of LND done"
 
 echo "*** Python DEFAULT libs & dependencies ***"
 
