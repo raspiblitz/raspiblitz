@@ -562,21 +562,6 @@ else
   echo "autostart already in $homeFile"
 fi
 
-# *** BOOTSTRAP ***
-# see background README for details
-echo ""
-echo "*** RASPI BOOTSTRAP SERVICE ***"
-sudo chmod +x /home/admin/_bootstrap.sh
-sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
-sudo systemctl enable bootstrap
-
-# *** BACKGROUND ***
-echo ""
-echo "*** RASPI BACKGROUND SERVICE ***"
-sudo chmod +x /home/admin/_background.sh
-sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
-sudo systemctl enable background
-
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
@@ -731,6 +716,20 @@ if [ "${fatpack}" == "true" ]; then
 else
   echo "* skipping FATPACK"
 fi
+
+# *** BOOTSTRAP ***
+echo ""
+echo "*** RASPI BOOTSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
+
+# *** BACKGROUND ***
+echo ""
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
 
 # "*** BITCOIN ***"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
