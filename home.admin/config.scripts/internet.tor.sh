@@ -19,33 +19,6 @@ fi
 
 torrc="/etc/tor/torrc"
 
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-if [ "${baseImage}" = "?" ]; then
-  cat /etc/os-release 2>/dev/null
-  echo "# !!! FAIL !!!"
-  echo "# Base Image cannot be detected or is not supported."
-  echo "error='unknown os'"
-  exit 1
-else
-  echo "os='${baseImage}'"
-fi
-
 activateBitcoinOverTOR()
 {
   echo "*** Changing ${network} Config ***"
@@ -158,6 +131,7 @@ if [ "$1" = "status" ]; then
   else
     echo "activated=0"
   fi
+
   echo "config='${torrc}'"
   exit 0
 fi
@@ -238,11 +212,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# - creating tor data directory"
     sudo mkdir -p /mnt/hdd/tor
     sudo mkdir -p /mnt/hdd/tor/sys
-    sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
   else
     echo "# - tor data directory exists"
   fi
+  # make sure its the correct owner
+  sudo chmod -R 700 /mnt/hdd/tor
+  sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
 
   # create tor config .. if not exists or is old
   isTorConfigOK=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "BITCOIN")
