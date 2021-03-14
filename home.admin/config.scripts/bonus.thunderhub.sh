@@ -1,9 +1,12 @@
 #!/bin/bash
 
+THUBVERSION="v0.12.7"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall ThunderHub"
  echo "bonus.thunderhub.sh [on|off|menu|update]"
+ echo "install $THUBVERSION by default"
  exit 1
 fi
 
@@ -81,7 +84,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.10.4
+    sudo -u thunderhub git reset --hard $THUBVERSION
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     if ! [ $? -eq 0 ]; then
