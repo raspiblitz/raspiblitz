@@ -99,36 +99,29 @@ if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
 fi
 echo "6) will use WIFI --> '${modeWifi}'"
 
-echo -n "Do you agree with all parameters above? (yes/no) "
-read installRaspiblitzAnswer
-if [ "$installRaspiblitzAnswer" == "yes" ] ; then
-  echo ""
-  echo ""
-else
-  exit 1
-fi
-
-echo "Installing Raspiblitz..."
-sleep 3
-
-echo ""
-echo "*** CHECK BASE IMAGE ***"
-
-echo "Detect CPU architecture ..."
+# AUTO-DETECTION: CPU-ARCHITECTURE
+# ---------------------------------------
+# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 isARM=$(uname -m | grep -c 'arm')
 isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
+cpu="?"
+if [ ${isARM} -gt 0 ]; then
+  cpu="arm"
+elif [ ${isAARCH64} -gt 0 ]; then
+  cpu="aarch64"
+elif [ ${isX86_64} -gt 0 ]; then
+  cpu="x86_64"
+else
   echo "!!! FAIL !!!"
-  echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
+  echo "Can only build on ARM, aarch64, x86_64 not on:"
   uname -m
   exit 1
-else
-  echo "OK running on $(uname -m) architecture."
 fi
+echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
-# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
-echo "Detect Base Image ..."
+# AUTO-DETECTION: OPERATINGSYSTEM
+# ---------------------------------------
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
@@ -150,26 +143,78 @@ if [ ${isDebian} -gt 0 ]; then
   fi
 fi
 if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
+  baseImage="ubuntu"
 fi
 if [ ${isDietPi} -gt 0 ]; then
   baseImage="dietpi"
 fi
 if [ "${baseImage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
-  echo "!!! FAIL !!!"
-  echo "Base Image cannot be detected or is not supported."
+  echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
+fi
+echo "X) will use OPERATINGSYSTEM ---> '${baseImage}'"
+
+# USER-CONFIRMATION
+echo -n "Do you agree with all parameters above? (yes/no) "
+read installRaspiblitzAnswer
+if [ "$installRaspiblitzAnswer" == "yes" ] ; then
+  echo ""
+  echo ""
+  echo "Building RaspiBlitz ..."
+  sleep 3
+  echo ""
 else
-  echo "OK running ${baseImage}"
+  exit 1
 fi
 
+# INSTALL TOR
+echo "*** INSTALL TOR BY DEFAULT ***"
+echo ""
+sudo apt install -y dirmngr
+echo "*** Adding KEYS deb.torproject.org ***"
+# fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
+wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
+if [ ${torKeyAvailable} -eq 0 ]; then
+  echo "!!! FAIL: Was not able to import deb.torproject.org key"
+  exit 1
+fi
+echo "- OK key added"
+
+echo "*** Adding Tor Sources to sources.list ***"
+torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
+echo "torSourceListAvailable=${torSourceListAvailable}"  
+if [ ${torSourceListAvailable} -eq 0 ]; then
+  echo "- adding TOR sources ..."
+  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
+    echo "- using https://deb.torproject.org/torproject.org buster"
+    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+  elif [ "${baseImage}" = "ubuntu" ]; then
+    echo "- using https://deb.torproject.org/torproject.org focal"
+    echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+  else
+    echo "!!! FAIL: No Tor sources for os: ${baseImage}"
+    exit 1
+  fi
+  echo "- OK sources added"
+else
+  echo "TOR sources are available"
+fi
+
+echo "*** Install & Enable Tor ***"
+sudo apt install tor tor-arm torsocks -y
+echo ""
+
+# FIXING LOCALES
+# https://github.com/rootzoll/raspiblitz/issues/138
+# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
+# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
    [ "${baseImage}" = "raspios_arm64" ]||[ "${baseImage}" = "debian_rpi64" ]; then
-  # fixing locales for build
-  # https://github.com/rootzoll/raspiblitz/issues/138
-  # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
-  # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
   echo ""
   echo "*** FIXING LOCALES FOR BUILD ***"
 
@@ -620,10 +665,6 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
-# *** TOR Prepare ***
-echo "*** Prepare TOR source+keys ***"
-sudo /home/admin/config.scripts/internet.tor.sh prepare
-echo ""
 
 # *** fail2ban ***
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
