@@ -151,7 +151,8 @@ if [ "${mode}" = "verified" ]; then
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   echo "# binary chdecksum: ${binaryChecksum}"
   echo "# lndSHA256: ${lndSHA256}"
-  if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
+  validSignature=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
+  if [ ${validSignature} -eq 0 ]; then
     echo "error='checksum not matching'"
     exit 1
   fi
