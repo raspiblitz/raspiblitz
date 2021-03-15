@@ -275,7 +275,8 @@ if [ "${faraday}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.faraday.sh ${choice}
   source /mnt/hdd/raspiblitz.conf
   if [ "${faraday}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
+    #sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
+    needsReboot=1
   fi
 else
   echo "faraday setting unchanged."

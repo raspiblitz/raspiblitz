@@ -225,13 +225,9 @@ WantedBy=multi-user.target
     sudo systemctl start faraday
   fi
 
-  echo "# config"
+  echo "# default config path"
   sudo mkdir /home/faraday/.faraday
   sudo mkdir /home/faraday/.faraday/${chain}net
-  cd /home/admin
-  lncli bakemacaroon --save_to=faraday.macaroon invoices:write invoices:read offchain:read offchain:write onchain:write onchain:read peers:write info:read address:read
-  sudo mv ./faraday.macaroon /home/faraday/.faraday/${chain}net/faraday.macaroon
-  sudo chmod 644 /home/faraday/.faraday/${chain}net/faraday.macaroon
   sudo chown -R faraday:faraday /home/faraday/.faraday
 
   echo "# flag in raspiblitz config"
@@ -240,7 +236,8 @@ WantedBy=multi-user.target
   fi
   sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
 
-  echo "# OK Faraday  is installed"
+  echo "# OK Faraday is installed"
+  echo "# please 'restart' for clean creation of faraday tls/macaroons"
   exit 1
 
 fi
