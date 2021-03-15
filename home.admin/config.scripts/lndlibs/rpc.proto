@@ -32,8 +32,9 @@ service Lightning {
     rpc WalletBalance (WalletBalanceRequest) returns (WalletBalanceResponse);
 
     /* lncli: `channelbalance`
-    ChannelBalance returns the total funds available across all open channels
-    in satoshis.
+    ChannelBalance returns a report on the total funds across all open channels,
+    categorized in local/remote, pending local/remote and unsettled local/remote
+    balances.
     */
     rpc ChannelBalance (ChannelBalanceRequest) returns (ChannelBalanceResponse);
 
@@ -140,6 +141,14 @@ service Lightning {
     */
     rpc GetInfo (GetInfoRequest) returns (GetInfoResponse);
 
+    /** lncli: `getrecoveryinfo`
+    GetRecoveryInfo returns information concerning the recovery mode including
+    whether it's in a recovery mode, whether the recovery is finished, and the
+    progress made so far.
+    */
+    rpc GetRecoveryInfo (GetRecoveryInfoRequest)
+        returns (GetRecoveryInfoResponse);
+
     // TODO(roasbeef): merge with below with bool?
     /* lncli: `pendingchannels`
     PendingChannels returns a list of all the channels that are currently
@@ -227,8 +236,10 @@ service Lightning {
     /* lncli: `abandonchannel`
     AbandonChannel removes all channel state from the database except for a
     close summary. This method can be used to get rid of permanently unusable
-    channels due to bugs fixed in newer versions of lnd. Only available
-    when in debug builds of lnd.
+    channels due to bugs fixed in newer versions of lnd. This method can also be
+    used to remove externally funded channels where the funding transaction was
+    never broadcast. Only available for non-externally funded channels in dev
+    build.
     */
     rpc AbandonChannel (AbandonChannelRequest) returns (AbandonChannelResponse);
 
@@ -483,6 +494,26 @@ service Lightning {
     offline.
     */
     rpc BakeMacaroon (BakeMacaroonRequest) returns (BakeMacaroonResponse);
+
+    /* lncli: `listmacaroonids`
+    ListMacaroonIDs returns all root key IDs that are in use.
+    */
+    rpc ListMacaroonIDs (ListMacaroonIDsRequest)
+        returns (ListMacaroonIDsResponse);
+
+    /* lncli: `deletemacaroonid`
+    DeleteMacaroonID deletes the specified macaroon ID and invalidates all
+    macaroons derived from that ID.
+    */
+    rpc DeleteMacaroonID (DeleteMacaroonIDRequest)
+        returns (DeleteMacaroonIDResponse);
+
+    /* lncli: `listpermissions`
+    ListPermissions lists all RPC method URIs and their required macaroon
+    permissions to access them.
+    */
+    rpc ListPermissions (ListPermissionsRequest)
+        returns (ListPermissionsResponse);
 }
 
 message Utxo {
@@ -760,6 +791,58 @@ message ChannelAcceptResponse {
 
     // The pending channel id to which this response applies.
     bytes pending_chan_id = 2;
+
+    /*
+    An optional error to send the initiating party to indicate why the channel
+    was rejected. This field *should not* contain sensitive information, it will
+    be sent to the initiating party. This field should only be set if accept is
+    false, the channel will be rejected if an error is set with accept=true
+    because the meaning of this response is ambiguous. Limited to 500
+    characters.
+    */
+    string error = 3;
+
+    /*
+    The upfront shutdown address to use if the initiating peer supports option
+    upfront shutdown script (see ListPeers for the features supported). Note
+    that the channel open will fail if this value is set for a peer that does
+    not support this feature bit.
+    */
+    string upfront_shutdown = 4;
+
+    /*
+    The csv delay (in blocks) that we require for the remote party.
+    */
+    uint32 csv_delay = 5;
+
+    /*
+    The reserve amount in satoshis that we require the remote peer to adhere to.
+    We require that the remote peer always have some reserve amount allocated to
+    them so that there is always a disincentive to broadcast old state (if they
+    hold 0 sats on their side of the channel, there is nothing to lose).
+    */
+    uint64 reserve_sat = 6;
+
+    /*
+    The maximum amount of funds in millisatoshis that we allow the remote peer
+    to have in outstanding htlcs.
+    */
+    uint64 in_flight_max_msat = 7;
+
+    /*
+    The maximum number of htlcs that the remote peer can offer us.
+    */
+    uint32 max_htlc_count = 8;
+
+    /*
+    The minimum value in millisatoshis for incoming htlcs on the channel.
+    */
+    uint64 min_htlc_in = 9;
+
+    /*
+    The number of confirmations we require before we consider the channel open.
+    */
+    uint32 min_accept_depth = 10;
 }
 
 message ChannelPoint {
@@ -832,6 +915,13 @@ message SendManyRequest {
 
     // An optional label for the transaction, limited to 500 characters.
     string label = 6;
+
+    // The minimum number of confirmations each one of your outputs used for
+    // the transaction must satisfy.
+    int32 min_confs = 7;
+
+    // Whether unconfirmed outputs should be used as inputs for the transaction.
+    bool spend_unconfirmed = 8;
 }
 message SendManyResponse {
     // The id of the transaction
@@ -862,6 +952,13 @@ message SendCoinsRequest {
 
     // An optional label for the transaction, limited to 500 characters.
     string label = 7;
+
+    // The minimum number of confirmations each one of your outputs used for
+    // the transaction must satisfy.
+    int32 min_confs = 8;
+
+    // Whether unconfirmed outputs should be used as inputs for the transaction.
+    bool spend_unconfirmed = 9;
 }
 message SendCoinsResponse {
     // The transaction ID of the transaction
@@ -939,6 +1036,12 @@ message ConnectPeerRequest {
     /* If set, the daemon will attempt to persistently connect to the target
      * peer. Otherwise, the call will be synchronous. */
     bool perm = 2;
+
+    /*
+    The connection timeout value (in seconds) for this request. It won't affect
+    other requests.
+    */
+    uint64 timeout = 3;
 }
 message ConnectPeerResponse {
 }
@@ -955,6 +1058,21 @@ message HTLC {
     int64 amount = 2;
     bytes hash_lock = 3;
     uint32 expiration_height = 4;
+
+    // Index identifying the htlc on the channel.
+    uint64 htlc_index = 5;
+
+    // If this HTLC is involved in a forwarding operation, this field indicates
+    // the forwarding channel. For an outgoing htlc, it is the incoming channel.
+    // For an incoming htlc, it is the outgoing channel. When the htlc
+    // originates from this node or this node is the final destination,
+    // forwarding_channel will be zero. The forwarding channel will also be zero
+    // for htlcs that need to be forwarded but don't have a forwarding decision
+    // persisted yet.
+    uint64 forwarding_channel = 6;
+
+    // Index identifying the htlc on the forwarding channel.
+    uint64 forwarding_htlc_index = 7;
 }
 
 enum CommitmentType {
@@ -983,6 +1101,30 @@ enum CommitmentType {
     Returned when the commitment type isn't known or unavailable.
     */
     UNKNOWN_COMMITMENT_TYPE = 999;
+}
+
+message ChannelConstraints {
+    /*
+    The CSV delay expressed in relative blocks. If the channel is force closed,
+    we will need to wait for this many blocks before we can regain our funds.
+    */
+    uint32 csv_delay = 1;
+
+    // The minimum satoshis this node is required to reserve in its balance.
+    uint64 chan_reserve_sat = 2;
+
+    // The dust limit (in satoshis) of the initiator's commitment tx.
+    uint64 dust_limit_sat = 3;
+
+    // The maximum amount of coins in millisatoshis that can be pending in this
+    // channel.
+    uint64 max_pending_amt_msat = 4;
+
+    // The smallest HTLC in millisatoshis that the initiator will accept.
+    uint64 min_htlc_msat = 5;
+
+    // The total number of incoming HTLC's that the initiator will accept.
+    uint32 max_accepted_htlcs = 6;
 }
 
 message Channel {
@@ -1057,10 +1199,11 @@ message Channel {
     repeated HTLC pending_htlcs = 15;
 
     /*
-    The CSV delay expressed in relative blocks. If the channel is force closed,
-    we will need to wait for this many blocks before we can regain our funds.
+    Deprecated. The CSV delay expressed in relative blocks. If the channel is
+    force closed, we will need to wait for this many blocks before we can regain
+    our funds.
     */
-    uint32 csv_delay = 16;
+    uint32 csv_delay = 16 [deprecated = true];
 
     // Whether this channel is advertised to the network or not.
     bool private = 17;
@@ -1071,13 +1214,15 @@ message Channel {
     // A set of flags showing the current state of the channel.
     string chan_status_flags = 19;
 
-    // The minimum satoshis this node is required to reserve in its balance.
-    int64 local_chan_reserve_sat = 20;
+    // Deprecated. The minimum satoshis this node is required to reserve in its
+    // balance.
+    int64 local_chan_reserve_sat = 20 [deprecated = true];
 
     /*
-    The minimum satoshis the other node is required to reserve in its balance.
+    Deprecated. The minimum satoshis the other node is required to reserve in
+    its balance.
     */
-    int64 remote_chan_reserve_sat = 21;
+    int64 remote_chan_reserve_sat = 21 [deprecated = true];
 
     // Deprecated. Use commitment_type.
     bool static_remote_key = 22 [deprecated = true];
@@ -1122,9 +1267,17 @@ message Channel {
     frozen channel doest not allow a cooperative channel close by the
     initiator. The thaw_height is the height that this restriction stops
     applying to the channel. This field is optional, not setting it or using a
-    value of zero will mean the channel has no additional restrictions.
+    value of zero will mean the channel has no additional restrictions. The
+    height can be interpreted in two ways: as a relative height if the value is
+    less than 500,000, or as an absolute height otherwise.
     */
     uint32 thaw_height = 28;
+
+    // List constraints for the local node.
+    ChannelConstraints local_constraints = 29;
+
+    // List constraints for the remote node.
+    ChannelConstraints remote_constraints = 30;
 }
 
 message ListChannelsRequest {
@@ -1206,6 +1359,79 @@ message ChannelCloseSummary {
     force closes, although only one party's close will be confirmed on chain.
     */
     Initiator close_initiator = 12;
+
+    repeated Resolution resolutions = 13;
+}
+
+enum ResolutionType {
+    TYPE_UNKNOWN = 0;
+
+    // We resolved an anchor output.
+    ANCHOR = 1;
+
+    /*
+    We are resolving an incoming htlc on chain. This if this htlc is
+    claimed, we swept the incoming htlc with the preimage. If it is timed
+    out, our peer swept the timeout path.
+    */
+    INCOMING_HTLC = 2;
+
+    /*
+    We are resolving an outgoing htlc on chain. If this htlc is claimed,
+    the remote party swept the htlc with the preimage. If it is timed out,
+    we swept it with the timeout path.
+    */
+    OUTGOING_HTLC = 3;
+
+    // We force closed and need to sweep our time locked commitment output.
+    COMMIT = 4;
+}
+
+enum ResolutionOutcome {
+    // Outcome unknown.
+    OUTCOME_UNKNOWN = 0;
+
+    // An output was claimed on chain.
+    CLAIMED = 1;
+
+    // An output was left unclaimed on chain.
+    UNCLAIMED = 2;
+
+    /*
+    ResolverOutcomeAbandoned indicates that an output that we did not
+    claim on chain, for example an anchor that we did not sweep and a
+    third party claimed on chain, or a htlc that we could not decode
+    so left unclaimed.
+    */
+    ABANDONED = 3;
+
+    /*
+    If we force closed our channel, our htlcs need to be claimed in two
+    stages. This outcome represents the broadcast of a timeout or success
+    transaction for this two stage htlc claim.
+    */
+    FIRST_STAGE = 4;
+
+    // A htlc was timed out on chain.
+    TIMEOUT = 5;
+}
+
+message Resolution {
+    // The type of output we are resolving.
+    ResolutionType resolution_type = 1;
+
+    // The outcome of our on chain action that resolved the outpoint.
+    ResolutionOutcome outcome = 2;
+
+    // The outpoint that was spent by the resolution.
+    OutPoint outpoint = 3;
+
+    // The amount that was claimed by the resolution.
+    uint64 amount_sat = 4;
+
+    // The hex-encoded transaction ID of the sweep transaction that spent the
+    // output.
+    string sweep_txid = 5;
 }
 
 message ClosedChannelsRequest {
@@ -1261,6 +1487,11 @@ message Peer {
         Denotes that we are not receiving new graph updates from the peer.
         */
         PASSIVE_SYNC = 2;
+
+        /*
+        Denotes that this peer is pinned into an active sync.
+        */
+        PINNED_SYNC = 3;
     }
 
     // The type of sync we are currently performing with this peer.
@@ -1277,6 +1508,20 @@ message Peer {
     spamming us with errors at no cost.
     */
     repeated TimestampedError errors = 12;
+
+    /*
+    The number of times we have recorded this peer going offline or coming
+    online, recorded across restarts. Note that this value is decreased over
+    time if the peer has not recently flapped, so that we can forgive peers
+    with historically high flap counts.
+    */
+    int32 flap_count = 13;
+
+    /*
+    The timestamp of the last flap we observed for this peer. If this value is
+    zero, we have not observed any flaps for this peer.
+    */
+    int64 last_flap_ns = 14;
 }
 
 message TimestampedError {
@@ -1379,6 +1624,19 @@ message GetInfoResponse {
     announcements and invoices.
     */
     map<uint32, Feature> features = 19;
+}
+
+message GetRecoveryInfoRequest {
+}
+message GetRecoveryInfoResponse {
+    // Whether the wallet is in recovery mode
+    bool recovery_mode = 1;
+
+    // Whether the wallet recovery progress is finished
+    bool recovery_finished = 2;
+
+    // The recovery progress, ranging from 0 to 1.
+    double progress = 3;
 }
 
 message Chain {
@@ -1537,6 +1795,24 @@ message OpenChannelRequest {
     carried out in an interactive manner (PSBT based).
     */
     FundingShim funding_shim = 14;
+
+    /*
+    The maximum amount of coins in millisatoshi that can be pending within
+    the channel. It only applies to the remote party.
+    */
+    uint64 remote_max_value_in_flight_msat = 15;
+
+    /*
+    The maximum number of concurrent HTLCs we will allow the remote party to add
+    to the commitment transaction.
+    */
+    uint32 remote_max_htlcs = 16;
+
+    /*
+    Max local csv is the maximum csv delay we will allow for our own commitment
+    transaction.
+    */
+    uint32 max_local_csv = 17;
 }
 message OpenStatusUpdate {
     oneof update {
@@ -1611,10 +1887,11 @@ message ChanPointShim {
     bytes pending_chan_id = 5;
 
     /*
-    This uint32 indicates if this channel is to be considered 'frozen'. A
-    frozen channel does not allow a cooperative channel close by the
-    initiator. The thaw_height is the height that this restriction stops
-    applying to the channel.
+    This uint32 indicates if this channel is to be considered 'frozen'. A frozen
+    channel does not allow a cooperative channel close by the initiator. The
+    thaw_height is the height that this restriction stops applying to the
+    channel. The height can be interpreted in two ways: as a relative height if
+    the value is less than 500,000, or as an absolute height otherwise.
     */
     uint32 thaw_height = 6;
 }
@@ -1632,6 +1909,16 @@ message PsbtShim {
     non-empty, it must be a binary serialized PSBT.
     */
     bytes base_psbt = 2;
+
+    /*
+    If a channel should be part of a batch (multiple channel openings in one
+    transaction), it can be dangerous if the whole batch transaction is
+    published too early before all channel opening negotiations are completed.
+    This flag prevents this particular channel from broadcasting the transaction
+    after the negotiation with the remote peer. In a batch of channel openings
+    this flag should be set to true for every channel but the very last.
+    */
+    bool no_publish = 3;
 }
 
 message FundingShim {
@@ -1671,12 +1958,19 @@ message FundingPsbtFinalize {
     /*
     The funded PSBT that contains all witness data to send the exact channel
     capacity amount to the PK script returned in the open channel message in a
-    previous step.
+    previous step. Cannot be set at the same time as final_raw_tx.
     */
     bytes signed_psbt = 1;
 
     // The pending channel ID of the channel to get the PSBT for.
     bytes pending_chan_id = 2;
+
+    /*
+    As an alternative to the signed PSBT with all witness data, the final raw
+    wire format transaction can also be specified directly. Cannot be set at the
+    same time as signed_psbt.
+    */
+    bytes final_raw_tx = 3;
 }
 
 message FundingTransitionMsg {
@@ -1932,14 +2226,40 @@ message WalletBalanceResponse {
     int64 unconfirmed_balance = 3;
 }
 
+message Amount {
+    // Value denominated in satoshis.
+    uint64 sat = 1;
+
+    // Value denominated in milli-satoshis.
+    uint64 msat = 2;
+}
+
 message ChannelBalanceRequest {
 }
 message ChannelBalanceResponse {
-    // Sum of channels balances denominated in satoshis
-    int64 balance = 1;
+    // Deprecated. Sum of channels balances denominated in satoshis
+    int64 balance = 1 [deprecated = true];
 
-    // Sum of channels pending balances denominated in satoshis
-    int64 pending_open_balance = 2;
+    // Deprecated. Sum of channels pending balances denominated in satoshis
+    int64 pending_open_balance = 2 [deprecated = true];
+
+    // Sum of channels local balances.
+    Amount local_balance = 3;
+
+    // Sum of channels remote balances.
+    Amount remote_balance = 4;
+
+    // Sum of channels local unsettled balances.
+    Amount unsettled_local_balance = 5;
+
+    // Sum of channels remote unsettled balances.
+    Amount unsettled_remote_balance = 6;
+
+    // Sum of channels pending local balances.
+    Amount pending_open_local_balance = 7;
+
+    // Sum of channels pending remote balances.
+    Amount pending_open_remote_balance = 8;
 }
 
 message QueryRoutesRequest {
@@ -2379,9 +2699,15 @@ message GraphTopologyUpdate {
 message NodeUpdate {
     repeated string addresses = 1;
     string identity_key = 2;
-    bytes global_features = 3;
+    bytes global_features = 3 [deprecated = true];
     string alias = 4;
     string color = 5;
+
+    /*
+    Features that the node has advertised in the init message, node
+    announcements and invoices.
+    */
+    map<uint32, Feature> features = 6;
 }
 message ChannelEdgeUpdate {
     /*
@@ -2582,6 +2908,13 @@ message Invoice {
     [EXPERIMENTAL].
     */
     bool is_keysend = 25;
+
+    /*
+    The payment address of this invoice. This value will be used in MPP
+    payments, and also for newer invoies that always require the MPP paylaod
+    for added end-to-end security.
+    */
+    bytes payment_addr = 26;
 }
 
 enum InvoiceHTLCState {
@@ -2621,6 +2954,31 @@ message InvoiceHTLC {
 
     // The total amount of the mpp payment in msat.
     uint64 mpp_total_amt_msat = 10;
+
+    // Details relevant to AMP HTLCs, only populated if this is an AMP HTLC.
+    AMP amp = 11;
+}
+
+// Details specific to AMP HTLCs.
+message AMP {
+    // An n-of-n secret share of the root seed from which child payment hashes
+    // and preimages are derived.
+    bytes root_share = 1;
+
+    // An identifier for the HTLC set that this HTLC belongs to.
+    bytes set_id = 2;
+
+    // A nonce used to randomize the child preimage and child hash from a given
+    // root_share.
+    uint32 child_index = 3;
+
+    // The payment hash of the AMP HTLC.
+    bytes hash = 4;
+
+    // The preimage used to settle this AMP htlc. This field will only be
+    // populated if the invoice is in InvoiceState_ACCEPTED or
+    // InvoiceState_SETTLED.
+    bytes preimage = 5;
 }
 
 message AddInvoiceResponse {
@@ -2640,6 +2998,13 @@ message AddInvoiceResponse {
     invoices with an add_index greater than this one.
     */
     uint64 add_index = 16;
+
+    /*
+    The payment address of the generated invoice. This value should be used
+    in all payments for this invoice as we require it for end to end
+    security.
+    */
+    bytes payment_addr = 17;
 }
 message PaymentHash {
     /*
@@ -2811,6 +3176,9 @@ message Payment {
 }
 
 message HTLCAttempt {
+    // The unique ID that is used for this attempt.
+    uint64 attempt_id = 7;
+
     enum HTLCStatus {
         IN_FLIGHT = 0;
         SUCCEEDED = 1;
@@ -2886,6 +3254,13 @@ message ListPaymentsResponse {
 }
 
 message DeleteAllPaymentsRequest {
+    // Only delete failed payments.
+    bool failed_payments_only = 1;
+
+    /*
+    Only delete failed HTLCs from payments, not the payment itself.
+    */
+    bool failed_htlcs_only = 2;
 }
 
 message DeleteAllPaymentsResponse {
@@ -2893,6 +3268,8 @@ message DeleteAllPaymentsResponse {
 
 message AbandonChannelRequest {
     ChannelPoint channel_point = 1;
+
+    bool pending_funding_shim_only = 2;
 }
 
 message AbandonChannelResponse {
@@ -2944,6 +3321,12 @@ enum FeatureBit {
     PAYMENT_ADDR_OPT = 15;
     MPP_REQ = 16;
     MPP_OPT = 17;
+    WUMBO_CHANNELS_REQ = 18;
+    WUMBO_CHANNELS_OPT = 19;
+    ANCHORS_REQ = 20;
+    ANCHORS_OPT = 21;
+    ANCHORS_ZERO_FEE_HTLC_REQ = 22;
+    ANCHORS_ZERO_FEE_HTLC_OPT = 23;
 }
 
 message Feature {
@@ -3044,8 +3427,8 @@ message ForwardingHistoryRequest {
 }
 message ForwardingEvent {
     // Timestamp is the time (unix epoch offset) that this circuit was
-    // completed.
-    uint64 timestamp = 1;
+    // completed. Deprecated by timestamp_ns.
+    uint64 timestamp = 1 [deprecated = true];
 
     // The incoming channel ID that carried the HTLC that created the circuit.
     uint64 chan_id_in = 2 [jstype = JS_STRING];
@@ -3075,6 +3458,10 @@ message ForwardingEvent {
     // The total amount (in milli-satoshis) of the outgoing HTLC that created
     // the second half of the circuit.
     uint64 amt_out_msat = 10;
+
+    // The number of nanoseconds elapsed since January 1, 1970 UTC when this
+    // circuit was completed.
+    uint64 timestamp_ns = 11;
 
     // TODO(roasbeef): add settlement latency?
     //  * use FPE on the chan id?
@@ -3181,10 +3568,44 @@ message MacaroonPermission {
 message BakeMacaroonRequest {
     // The list of permissions the new macaroon should grant.
     repeated MacaroonPermission permissions = 1;
+
+    // The root key ID used to create the macaroon, must be a positive integer.
+    uint64 root_key_id = 2;
 }
 message BakeMacaroonResponse {
     // The hex encoded macaroon, serialized in binary format.
     string macaroon = 1;
+}
+
+message ListMacaroonIDsRequest {
+}
+message ListMacaroonIDsResponse {
+    // The list of root key IDs that are in use.
+    repeated uint64 root_key_ids = 1;
+}
+
+message DeleteMacaroonIDRequest {
+    // The root key ID to be removed.
+    uint64 root_key_id = 1;
+}
+message DeleteMacaroonIDResponse {
+    // A boolean indicates that the deletion is successful.
+    bool deleted = 1;
+}
+
+message MacaroonPermissionList {
+    // A list of macaroon permissions.
+    repeated MacaroonPermission permissions = 1;
+}
+
+message ListPermissionsRequest {
+}
+message ListPermissionsResponse {
+    /*
+    A map between all RPC method URIs and their required macaroon permissions to
+    access them.
+    */
+    map<string, MacaroonPermissionList> method_permissions = 1;
 }
 
 message Failure {
@@ -3219,6 +3640,7 @@ message Failure {
         PERMANENT_CHANNEL_FAILURE = 21;
         EXPIRY_TOO_FAR = 22;
         MPP_TIMEOUT = 23;
+        INVALID_ONION_PAYLOAD = 24;
 
         /*
         An internal error occurred.
@@ -3348,4 +3770,15 @@ message ChannelUpdate {
     network in a forwards compatible manner.
     */
     bytes extra_opaque_data = 12;
+}
+
+message MacaroonId {
+    bytes nonce = 1;
+    bytes storageId = 2;
+    repeated Op ops = 3;
+}
+
+message Op {
+    string entity = 1;
+    repeated string actions = 2;
 }
