@@ -18,23 +18,27 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-lndUpdateVersion="0.11.1-beta"
-lndUpdateComment="This is a main LND update with a database migration. You will not be able to downgrade again. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
+lndUpdateVersion="0.12.1-beta"
+lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
+# PGPauthor="roasbeef"
 # lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 # lndUpdatePGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
 
 #joostjager
+# PGPauthor="joostjager"
 # lndUpdatePGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
 # lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
 
 # bitconner 
+PGPauthor="bitconner"
 lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # wpaulino
+# PGPauthor="wpaulino"
 # lndUpdatePGPpkeys="https://keybase.io/wpaulino/pgp_keys.asc"
 # lndUpdatePGPcheck="729E9D9D92C75A5FBFEEE057B5DD717BEF7CA5B1"
 
@@ -142,7 +146,7 @@ if [ "${mode}" = "verified" ]; then
 
   echo
   echo "# check binary was not manipulated (checksum test)"
-  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-v${lndUpdateVersion}.txt.sig
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-${PGPauthor}-v${lndUpdateVersion}.sig
   sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
@@ -164,7 +168,7 @@ if [ "${mode}" = "verified" ]; then
   echo "# checking gpg finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-v${lndUpdateVersion}.txt.sig 2>&1)
+  verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${lndUpdatePGPcheck}" -c)
