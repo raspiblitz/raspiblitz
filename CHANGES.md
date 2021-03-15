@@ -5,6 +5,7 @@
 - Update: Raspberry Pi OS Base Image 64-bit (August 2020)
 - Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
+- Update: Faraday 0.2.3-alpha https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?
