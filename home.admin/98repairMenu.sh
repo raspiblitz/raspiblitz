@@ -75,9 +75,6 @@ copyHost()
     return
   fi
 
-  echo "# install dependencies ..."
-  sudo apt-get install -y sshpass
-
   sudo rm /root/.ssh/known_hosts 2>/dev/null
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then

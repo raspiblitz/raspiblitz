@@ -74,14 +74,15 @@ dialog --backtitle "RaspiBlitz" --msgbox "OK - RPC password changed \n\nNow star
 ###################
 # TOR BY DEFAULT 
 # https://github.com/rootzoll/raspiblitz/issues/592
+# 
 ###################
-
-whiptail --title ' Privacy Level - How do you want to run your node? ' --yes-button='Public IP' --no-button='TOR NETWORK' --yesno "Running your Lightning node with your Public IP is common and faster, but might reveal your personal identity and location.\n
-You can better protect your privacy with running your lightning node as a TOR Hidden Service from the start, but it can make it harder to connect with other non-TOR nodes and remote mobile apps later on.
-  " 12 75
-if [ $? -eq 1 ]; then
-  echo "runBehindTor=on" >> /home/admin/raspiblitz.info
-fi
+echo "runBehindTor=on" >> /home/admin/raspiblitz.info
+#whiptail --title ' Privacy Level - How do you want to run your node? ' --yes-button='Public IP' --no-button='TOR NETWORK' --yesno "Running your Lightning node with your Public IP is common and faster, but might reveal your personal identity and location.\n
+#You can better protect your privacy with running your lightning node as a TOR Hidden Service from the start, but it can make it harder to connect with other non-TOR nodes and remote mobile apps later on.
+#  " 12 75
+#if [ $? -eq 1 ]; then
+#  echo "runBehindTor=on" >> /home/admin/raspiblitz.info
+#fi
 
 # set SetupState
 sudo sed -i "s/^setupStep=.*/setupStep=20/g" /home/admin/raspiblitz.info
