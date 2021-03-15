@@ -999,6 +999,13 @@ if [ ${#installed} -eq 0 ]; then
   echo "!!! BUILD FAILED --> Was not able to install LND"
   exit 1
 fi
+correctVersion=$(sudo -u admin lnd --version | grep "${lndVersion}")
+if [ ${correctVersion} -eq 0 ]; then
+  echo ""
+  echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
+  sudo -u admin lnd --version
+  exit 1
+fi
 sudo chown -R admin /home/admin
 echo "- OK install of LND done"
 
