@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-version="0.2.1-alpha"
+version="0.2.3-alpha"
 echo "## bonus.faraday.sh ${version}"
 
 # version and trusted release signer
