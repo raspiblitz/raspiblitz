@@ -1,5 +1,5 @@
 #!/bin/bash
-_temp="./download/dialog.$$"
+_temp=$(mktemp -p /dev/shm/)
 
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null

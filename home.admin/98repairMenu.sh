@@ -219,7 +219,7 @@ case $CHOICE in
     result=""
     while [ ${#result} -eq 0 ]
     do
-        _temp="/home/admin/download/dialog.$$"
+        _temp=$(mktemp -p /dev/shm/)
         l1="Please enter the new name of your LND node:\n"
         l2="different name is better for a fresh identity\n"
         l3="one word, keep characters basic & not too long"
