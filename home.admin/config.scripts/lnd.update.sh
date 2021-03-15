@@ -149,6 +149,8 @@ if [ "${mode}" = "verified" ]; then
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-${PGPauthor}-v${lndUpdateVersion}.sig
   sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  echo "# binary chdecksum: ${binaryChecksum}"
+  echo "# lndSHA256: ${lndSHA256}"
   if [ "${binaryChecksum}" != "${lndSHA256}" ]; then
     echo "error='checksum not matching'"
     exit 1
