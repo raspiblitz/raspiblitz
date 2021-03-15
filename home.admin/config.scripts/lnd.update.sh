@@ -171,7 +171,7 @@ if [ "${mode}" = "verified" ]; then
   echo "# checking gpg finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig 2>&1)
+  verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig manifest-v${lndVersion}.txt 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${lndUpdatePGPcheck}" -c)
