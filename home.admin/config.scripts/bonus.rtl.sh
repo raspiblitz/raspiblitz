@@ -58,12 +58,64 @@ if ! grep -Eq "^rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # stop services
-echo "making sure services are not running"
+echo "# making sure services are not running"
 sudo systemctl stop RTL 2>/dev/null
+
+function configRTL() {
+  SWAPSERVERPORT=8081
+  if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then 
+    if [ $lit = on ];then
+      echo "# Add the rtl user to the lit group"
+      sudo /usr/sbin/usermod --append --groups lit rtl
+      echo "# Symlink the lit-loop.macaroon"
+      sudo rm -rf "/home/rtl/.loop"                    #  delete symlink
+      sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop"  # create symlink
+      SWAPSERVERPORT=8443
+    elif [ $loop = on ];then
+      echo "# Add the rtl user to the loop group"
+      sudo /usr/sbin/usermod --append --groups loop rtl
+      echo "# Symlink the loop.macaroon"
+      sudo rm -rf "/home/rtl/.loop"                     # delete symlink
+      sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
+    fi
+    echo "# Make the loop macaroon group readable"
+    sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
+  else
+    echo "# No Loop or LiT is installed"
+  fi
+
+  # prepare RTL-Config.json file
+  echo "# RTL.conf"
+  # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
+  sudo cp /home/rtl/RTL/sample-RTL-Config.json /home/admin/RTL-Config.json
+  sudo chown admin:admin /home/admin/RTL-Config.json
+  sudo chmod 600 /home/admin/RTL-Config.json || exit 1
+  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  # modify sample-RTL-Config.json and save in RTL-Config.json
+  sudo node > /home/admin/RTL-Config.json <<EOF
+//Read data
+var data = require('/home/rtl/RTL/sample-RTL-Config.json');
+//Manipulate data
+data.nodes[0].lnNode = '$hostname'
+data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
+data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/lnd.conf';
+data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
+data.nodes[0].Authentication.boltzMacaroonPath = '/home/rtl/.boltz-lnd/macaroons/'
+data.multiPass = '$PASSWORD_B';
+data.nodes[0].Settings.userPersona = 'OPERATOR'
+data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
+//Output data
+console.log(JSON.stringify(data, null, 2));
+EOF
+  sudo rm -f /home/rtl/RTL/RTL-Config.json
+  sudo mv /home/admin/RTL-Config.json /home/rtl/RTL/
+  sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
+}
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL RTL ***"
+  echo "# INSTALL RTL"
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if ! [ ${isInstalled} -eq 0 ]; then
@@ -75,21 +127,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create rtl user
     sudo adduser --disabled-password --gecos "" rtl
 
-    echo "*** make sure rtl is member of lndadmin ***"
+    echo "# make sure rtl is member of lndadmin"
     sudo /usr/sbin/usermod --append --groups lndadmin rtl
 
-    echo "*** make sure symlink to central app-data directory exists ***"
+    echo "# make sure symlink to central app-data directory exists"
     if ! [[ -L "/home/rtl/.lnd" ]]; then
       sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
       sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
-    fi
-
-    echo "# add the rtl user to the loop group"
-    sudo /usr/sbin/usermod --append --groups loop rtl
-    echo "# symlink the loop.macaroon"
-    if ! [[ -L "/home/rtl/.loop" ]]; then
-      sudo rm -rf "/home/rtl/.loop"                     # not a symlink.. delete it silently
-      sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # and create symlink
     fi
 
     # download source code and set to tag release
@@ -112,7 +156,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # install
-    echo "*** Run: npm install ***"
+    echo "# Run: npm install"
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
     if ! [ $? -eq 0 ]; then
@@ -122,36 +166,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         echo "OK - RTL install looks good"
         echo ""
     fi
-
-    cd ..
-
-    # prepare RTL-Config.json file
-    echo "*** RTL.conf ***"
-    # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
-    sudo cp /home/rtl/RTL/sample-RTL-Config.json /home/admin/RTL-Config.json
-    sudo chown admin:admin /home/admin/RTL-Config.json
-    sudo chmod 600 /home/admin/RTL-Config.json || exit 1
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    # modify sample-RTL-Config.json and save in RTL-Config.json
-    sudo node > /home/admin/RTL-Config.json <<EOF
-//Read data
-var data = require('/home/rtl/RTL/sample-RTL-Config.json');
-//Manipulate data
-data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
-data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
-data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/lnd.conf';
-data.multiPass = '$PASSWORD_B';
-data.nodes[0].Settings.userPersona = 'OPERATOR'
-data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
-data.nodes[0].Settings.swapServerUrl = 'https://localhost:8081'
-//Output data
-console.log(JSON.stringify(data, null, 2));
-EOF
-    sudo rm -f /home/rtl/RTL/RTL-Config.json
-    sudo mv /home/admin/RTL-Config.json /home/rtl/RTL/
-    sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
-    echo ""
 
     # setup nginx symlinks
     if ! [ -f /etc/nginx/sites-available/rtl_ssl.conf ]; then
@@ -169,13 +183,12 @@ EOF
     sudo nginx -t
     sudo systemctl reload nginx
 
-    # open firewall
-    echo "*** Updating Firewall ***"
+    echo "# Updating Firewall"
     sudo ufw allow 3000 comment 'RTL HTTP'
     sudo ufw allow 3001 comment 'RTL HTTPS'
-    echo ""
+    echo
 
-    # install service
+    echo "# Install service"
     echo "*** Install RTL systemd for ${network} on ${chain} ***"
     cat > /home/admin/RTL.service <<EOF
 # Systemd unit for RTL
@@ -205,6 +218,8 @@ EOF
     sudo systemctl enable RTL
     echo "OK - the RTL service is now enabled"
   fi
+
+  configRTL
 
   # setting value in raspi blitz config
   sudo sed -i "s/^rtlWebinterface=.*/rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
@@ -300,14 +315,17 @@ if [ "$1" = "update" ]; then
     currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
     echo "# Updated RTL to $currentRTLcommit"
   else 
-    echo "# unknown option: $updateOption"
+    echo "# Unknown option: $updateOption"
   fi
+
+  configRTL
+  
   echo
   echo "# Starting the RTL service ... "
   sudo systemctl start RTL
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
-echo "may need reboot to run normal again"
+echo "# FAIL - Unknown Parameter $1"
+echo "# may need reboot to run normal again"
 exit 1
