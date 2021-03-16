@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.1.47"
+NBXplorerVersion="v2.1.49"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.6.3"
+BTCPayVersion="v1.0.7.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -32,7 +32,7 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='23001'"
     echo "publicIP='${publicIP}'"
 
-    # check for LetsEnryptDomain for DynDns
+    # check for LetsEncryptDomain for DynDns
     error=""
     source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
     if [ ${#error} -eq 0 ]; then
@@ -212,7 +212,7 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "# *** INSTALL BTCPAYSERVER ***"
+  echo "# INSTALL BTCPAYSERVER"
 
   ##################
   # NGINX
@@ -234,7 +234,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl reload nginx
   
   # open the firewall
-  echo "# *** Updating Firewall ***"
+  echo "# Updating the firewall"
   sudo ufw allow 23000 comment 'allow BTCPay HTTP'
   sudo ufw allow 23001 comment 'allow BTCPay HTTPS'
   echo
@@ -257,7 +257,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
     # create btcpay user
     sudo adduser --disabled-password --gecos "" btcpay 2>/dev/null
-    cd /home/btcpay
+    cd /home/btcpay || exit 1
 
     # store BTCpay data on HDD
     sudo mkdir /mnt/hdd/app-data/.btcpayserver 2>/dev/null
@@ -270,14 +270,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.btcpayserver /home/btcpay/ 2>/dev/null
     sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
-
-
     echo 
-    echo "# ***"
     echo "# Installing .NET"
-    echo "# ***"
     echo 
-
     # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     # dependencies
@@ -353,11 +348,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # NBXplorer
     echo
-    echo "# ***"
     echo "# Install NBXplorer"
-    echo "# ***"
     echo
-
     cd /home/btcpay
     echo "# Downloading NBXplorer source code.."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
@@ -413,20 +405,15 @@ WantedBy=multi-user.target
     fi
 
     echo
-    echo "# ***"
     echo "# getting RPC credentials from the bitcoin.conf"
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-    #sudo mv /home/btcpay/.nbxplorer/Main/settings.config /home/btcpay/.nbxplorer/Main/settings.config.backup
     sudo -u btcpay mkdir -p /home/btcpay/.nbxplorer/Main
-    touch /home/admin/settings.config
-    sudo chmod 600 /home/admin/settings.config || exit 1
-    cat >> /home/admin/settings.config <<EOF
-btc.rpc.user=raspibolt
+    echo "\
+btc.rpc.user=$RPC_USER
 btc.rpc.password=$PASSWORD_B
-EOF
-
-    sudo mv /home/admin/settings.config /home/btcpay/.nbxplorer/Main/settings.config
+" | sudo tee /home/btcpay/.nbxplorer/Main/settings.config
+    sudo chmod 600 /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
 
     if [ "${state}" == "ready" ]; then
@@ -435,11 +422,9 @@ EOF
 
     # BTCPayServer
     echo
-    echo "# ***"
     echo "# Install BTCPayServer"
-    echo "# ***"
-    echo
 
+    echo
     cd /home/btcpay
     echo "# Downloading BTCPayServer source code.."
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
@@ -469,48 +454,46 @@ Restart=on-failure
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
 
-  echo "# configure BTCPay to use sqlite database" 
-  if ! grep -Eq "^sqlitefile=sqllite.db" /home/btcpay/.btcpayserver/Main/settings.config; then
-    echo "
+  echo "# configure BTCPay to use sqllite database" 
+  if [ ! -f /home/btcpay/.btcpayserver/Main/settings.config ] || \
+  ! grep -Eq "^sqlitefile=sqllite.db" /home/btcpay/.btcpayserver/Main/settings.config; then
+    echo "\
 ### Database ###
 sqlitefile=sqllite.db" | sudo tee -a /home/btcpay/.btcpayserver/Main/settings.config
+  sudo chown btcpay:btcpay /home/btcpay/.btcpayserver/Main/settings.config
   fi
 
-    sudo systemctl daemon-reload
-    sudo systemctl enable btcpayserver
+  sudo systemctl daemon-reload
+  sudo systemctl enable btcpayserver
 
-   if [ "${state}" == "ready" ]; then
+    if [ "${state}" == "ready" ]; then
       echo "# Starting btcpayserver"
       sudo systemctl start btcpayserver
       echo "# Checking for btcpayserver config"
-      while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]
-       do
-          echo "# Waiting for btcpayserver to start - CTRL+C to abort"
-          sleep 10
-          hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
-          if [ ${hasFailed} -eq 1 ]; then
-            echo "# seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
-            echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
-          fi
+      while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]; do
+        echo "# Waiting for btcpayserver to start - CTRL+C to abort"
+        sleep 10
+        hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
+        if [ ${hasFailed} -eq 1 ]; then
+          echo "# seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+          echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+        fi
       done
     else
       echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
     fi
     
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
-
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 
   else
     echo "# BTCPay Server is already installed."
-
     if [ "${state}" == "ready" ]; then
       # start service
       echo "# start service"
       sudo systemctl start nbxplorer 2>/dev/null
       sudo systemctl start btcpayserver 2>/dev/null
     fi
-
   fi
 
   # setting value in raspi blitz config

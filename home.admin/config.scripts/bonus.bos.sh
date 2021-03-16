@@ -1,9 +1,13 @@
 #!/bin/bash
 
+https://github.com/alexbosworth/balanceofsatoshis/blob/ba7c35b42f1bad0dbb0c9c03d64ee34472665029/package.json#L79
+BOSVERSION="8.0.0"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall Balance of Satoshis"
  echo "bonus.bos.sh [on|off|menu|update]"
+ echo "installs the version $BOSVERSION by default"
  exit 1
 fi
 
@@ -61,7 +65,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70
-  sudo -u bos npm install -g balanceofsatoshis@6.1.0
+  sudo -u bos npm install -g balanceofsatoshis@$BOSVERSION
   if ! [ $? -eq 0 ]; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
