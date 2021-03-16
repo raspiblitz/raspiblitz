@@ -210,6 +210,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###########
     # config  #
     ###########
+    if [ "${runBehindTor}" = "on" ]; then
+      echo " # Connect tothe Pool server through Tor"
+      LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
+      POOLPROXY="pool.proxy=127.0.0.1:9050"
+    else
+      echo "# Connect to Pool and Loop server through clearnet"
+      LOOPPROXY=""
+      POOLPROXY=""
+    fi
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Application Options
@@ -229,9 +238,11 @@ remote.lnd.tlscertpath=/home/lit/.lnd/tls.cert
 
 # Loop
 loop.loopoutmaxparts=5
+$LOOPPROXY
 
 # Pool
 pool.newnodesonly=true
+$POOLPROXY
 
 # Faraday
 faraday.min_monitored=48h
