@@ -11,7 +11,8 @@ import time
 from datetime import datetime
 
 import toml
-from blitzpy import RaspiBlitzConfig
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
 from dialog import Dialog
 
 # constants for standard services

@@ -11,7 +11,10 @@ from pathlib import Path
 
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig,BlitzError
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
+from excpetions import BlitzError
 
 #####################
 # SCRIPT INFO
