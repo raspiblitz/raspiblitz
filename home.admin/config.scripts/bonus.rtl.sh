@@ -68,7 +68,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if ! [ ${isInstalled} -eq 0 ]; then
     echo "RTL already installed."
-
   else
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
@@ -214,6 +213,13 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
+  fi
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    echo "# OK - the RTL.service is enabled, system is on ready so starting service"
+    sudo systemctl start RTL
+  else
+    echo "# OK - the RTL.service is enabled, to start manually use: 'sudo systemctl start RTL'"
   fi
   exit 0
 fi
