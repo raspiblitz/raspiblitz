@@ -17,7 +17,10 @@ import qrcode
 from PyQt5.QtCore import Qt, QProcess, QThread, pyqtSignal, QCoreApplication, QTimer, QEventLoop
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
-from blitzpy import RaspiBlitzConfig, RaspiBlitzInfo
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig, RaspiBlitzInfo
+
 from blitztui.file_logger import setup_logging
 from blitztui.client import ReadOnlyStub, InvoiceStub
 from blitztui.client import check_lnd, check_lnd_channels
