@@ -179,9 +179,12 @@ fi
 # see https://github.com/rootzoll/raspiblitz/issues/647
 # see https://github.com/rootzoll/raspiblitz/pull/1580
 randnum=$(shuf -i 0-7 -n 1)
-if [ -f /dev/fb1 ] ; then
+lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+if [ ${lcdExists} -eq 1 ] ; then
+   # LCD
    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 else
+   # HDMI
    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 fi
 sleep 5
