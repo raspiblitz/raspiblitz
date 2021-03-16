@@ -1,12 +1,12 @@
 #!/bin/bash
 
-pinnedVersion="v0.10.0"
+RTLVERSION="v0.10.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to switch the RideTheLightning WebGUI on, off or update"
  echo "# bonus.rtl.sh [on|off|update<commit>|menu]"
- echo "# installs the version $pinnedVersion by default"
+ echo "# installs the version $RTLVERSION by default"
  exit 1
 fi
 
@@ -100,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
-    sudo -u rtl git reset --hard $pinnedVersion
+    sudo -u rtl git reset --hard $RTLVERSION
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
