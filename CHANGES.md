@@ -7,12 +7,12 @@
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: Thunderhub 0.12.4 [details](https://github.com/apotdevin/thunderhub/blob/master/CHANGELOG.md#0124-2021-01-09)
 - Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
-- Update: BTCPayServer v1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
+- Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
 - Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Balance of Satoshis (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-800)
 - Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
-- Update: JoininBox v0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
+- Update: JoininBox 0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?
