@@ -1,18 +1,17 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-pinnedVersion="0.4.1-alpha"
+LITVERSION="0.4.1-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Lightning Terminal Service on or off"
- echo "installs the version $pinnedVersion"
+ echo "installs the version $LITVERSION"
  echo "bonus.lit.sh [on|off|menu]"
  exit 1
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-
 PGPsigner="guggero" 
 if [ $PGPsigner=guggero ];then
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
@@ -70,7 +69,7 @@ sudo systemctl stop litd 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "# INSTALL LIGHTNING TERMINAL ***"
+  echo "# INSTALL LIGHTNING TERMINAL"
   
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -152,7 +151,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd "${downloadDir}" || exit 1
 
     # extract the SHA256 hash from the manifest file for the corresponding platform
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.txt
     if [ ${isARM} -eq 1 ] ; then
       OSversion="armv7"
     elif [ ${isAARCH64} -eq 1 ] ; then
@@ -160,19 +159,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     elif [ ${isX86_64} -eq 1 ] ; then
       OSversion="amd64"
     fi 
-    SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
+    SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
 
     echo
-    echo "*** LiT v${pinnedVersion} for ${OSversion} ***"
-    echo "SHA256 hash: $SHA256"
+    echo "# LiT v${LITVERSION} for ${OSversion}"
+    echo "# SHA256 hash: $SHA256"
     echo
-
     echo "# get LiT binary"
-    binaryName="lightning-terminal-linux-${OSversion}-v${pinnedVersion}.tar.gz"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/${binaryName}
+    binaryName="lightning-terminal-linux-${OSversion}-v${LITVERSION}.tar.gz"
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/${binaryName}
 
     echo "# check binary was not manipulated (checksum test)"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${pinnedVersion}/manifest-${PGPsigner}-v${pinnedVersion}.sig
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-${PGPsigner}-v${LITVERSION}.sig
     wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -193,7 +191,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(gpg --verify manifest-${PGPsigner}-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt 2>&1)
+    verifyResult=$(gpg --verify manifest-${PGPsigner}-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -207,7 +205,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install #
     ###########
     tar -xzf ${binaryName}
-    sudo install -m 0755 -o root -g root -t /usr/local/bin lightning-terminal-linux-${OSversion}-v${pinnedVersion}/*
+    sudo install -m 0755 -o root -g root -t /usr/local/bin lightning-terminal-linux-${OSversion}-v${LITVERSION}/*
 
     ###########
     # config  #
@@ -275,7 +273,7 @@ WantedBy=multi-user.target
     echo "OK - the Lightning lit service is now enabled"
 
   else 
-    echo "lit service already installed."
+    echo "# The Lightning Terminal is already installed."
   fi
 
   # aliases
@@ -301,6 +299,14 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \\
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lit 443 8443
+  fi
+
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    echo "# OK - the litd.service is enabled, system is on ready so starting service"
+    sudo systemctl start litd
+  else
+    echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
   fi
 
   exit 0
