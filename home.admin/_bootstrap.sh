@@ -177,8 +177,16 @@ fi
 # display 3 secs logo - try to kickstart LCD
 # see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
 # see https://github.com/rootzoll/raspiblitz/issues/647
+# see https://github.com/rootzoll/raspiblitz/pull/1580
 randnum=$(shuf -i 0-7 -n 1)
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+if [ ${lcdExists} -eq 1 ] ; then
+   # LCD
+   sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+else
+   # HDMI
+   sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+fi
 sleep 5
 sudo killall -3 fbi
 
