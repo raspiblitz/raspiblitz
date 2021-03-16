@@ -119,25 +119,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if ! [ ${isInstalled} -eq 0 ]; then
-    echo "RTL already installed."
+    echo "# RTL already installed."
   else
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # create rtl user
-    sudo adduser --disabled-password --gecos "" rtl
+    sudo adduser --disabled-password --gecos "" rtl || exit 1
 
-    echo "# make sure rtl is member of lndadmin"
+    echo "# Make sure rtl is member of lndadmin"
     sudo /usr/sbin/usermod --append --groups lndadmin rtl
 
-    echo "# make sure symlink to central app-data directory exists"
+    echo "# Make sure symlink to central app-data directory exists"
     if ! [[ -L "/home/rtl/.lnd" ]]; then
       sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
       sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
     fi
 
     # download source code and set to tag release
-    echo "*** Get the RTL Source Code ***"
+    echo "# Get the RTL Source Code"
     rm -rf /home/admin/RTL 2>/dev/null
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
@@ -147,10 +147,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -d "/home/rtl/RTL" ]; then
-      echo "OK - RTL code copy looks good"
+      echo "# OK - RTL code copy looks good"
     else
-      echo "FAIL - code copy did not run correctly"
-      echo "ABORT - RTL install"
+      echo "# FAIL - code copy did not run correctly"
+      echo "# ABORT - RTL install"
       exit 1
     fi
     echo ""
@@ -160,11 +160,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
+        echo "# FAIL - npm install did not run correctly, aborting"
         exit 1
     else
-        echo "OK - RTL install looks good"
-        echo ""
+        echo "# OK - RTL install looks good"
+        echo
     fi
 
     # setup nginx symlinks
@@ -189,7 +189,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
 
     echo "# Install service"
-    echo "*** Install RTL systemd for ${network} on ${chain} ***"
+    echo "# Install RTL systemd for ${network} on ${chain}"
     cat > /home/admin/RTL.service <<EOF
 # Systemd unit for RTL
 # /etc/systemd/system/RTL.service
@@ -231,7 +231,7 @@ EOF
   fi
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
-    echo "# OK - the RTL.service is enabled, system is on ready so starting service"
+    echo "# OK - the RTL.service is enabled, system is ready so starting service"
     sudo systemctl start RTL
   else
     echo "# OK - the RTL.service is enabled, to start manually use: 'sudo systemctl start RTL'"
@@ -262,21 +262,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING RTL ***"
+    echo "# REMOVING RTL"
     sudo systemctl disable RTL
     sudo rm /etc/systemd/system/RTL.service
     # delete user and home directory
     sudo userdel -rf rtl
-    echo "OK RTL removed."
+    echo "# OK RTL removed."
   else
-    echo "RTL is not installed."
+    echo "# RTL is not installed."
   fi
 
   # close ports on firewall
   sudo ufw deny 3000
   sudo ufw deny 3001
-
-  echo "needs reboot to activate new setting"
   exit 0
 fi
 

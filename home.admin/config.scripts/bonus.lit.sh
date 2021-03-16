@@ -75,7 +75,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
  
     # create dedicated user
-    sudo adduser --disabled-password --gecos "" lit
+    sudo adduser --disabled-password --gecos "" lit || exit 1
 
     # make sure symlink to central app-data directory exists
     sudo rm -rf /home/lit/.lnd  # not a symlink.. delete it silently
@@ -211,7 +211,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config  #
     ###########
     if [ "${runBehindTor}" = "on" ]; then
-      echo " # Connect tothe Pool server through Tor"
+      echo "# Connect to the Pool server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
       POOLPROXY="pool.proxy=127.0.0.1:9050"
     else
@@ -314,7 +314,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \\
 
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
-    echo "# OK - the litd.service is enabled, system is on ready so starting service"
+    echo "# OK - the litd.service is enabled, system is ready so starting service"
     sudo systemctl start litd
   else
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
