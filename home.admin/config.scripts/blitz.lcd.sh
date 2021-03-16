@@ -32,6 +32,10 @@ command=$1
 oldKernel=$(uname -srm | cut -d ' ' -f2 | cut -d '-' -f1 | grep -c '4.19.118')
 oldDrivers=$(sudo cat /home/admin/LCD-show/.git/config 2>/dev/null | grep -c 'github.com/goodtft/LCD')
 
+# check if LCD (/dev/fb1) or HDMI (/dev/fb0)
+# see https://github.com/rootzoll/raspiblitz/pull/1580
+lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+
 ###################
 # CHECK-REPAIR
 # make sure that LCD drivers match linux kernel
@@ -173,9 +177,11 @@ if [ "${command}" == "image" ]; then
   fi
 
   # see https://github.com/rootzoll/raspiblitz/pull/1580
-  if [ -f /dev/fb1 ] ; then
+  if [ ${lcdExists} -eq 1 ] ; then
+    # LCD
     sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
   else
+    # HDMI
     sudo fbi -a -T 1 -d /dev/fb0 --noverbose ${imagePath} 2> /dev/null
   fi
   exit 0
@@ -196,9 +202,11 @@ if [ "${command}" == "qr" ]; then
 
   qrencode -l L -o /home/admin/qr.png "${datastring}" > /dev/null
   # see https://github.com/rootzoll/raspiblitz/pull/1580
-  if [ -f /dev/fb1 ] ; then
+  if [ ${lcdExists} -eq 1 ] ; then
+    # LCD
     sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
   else
+    # HDMI
     sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/qr.png 2> /dev/null
   fi
   exit 0
