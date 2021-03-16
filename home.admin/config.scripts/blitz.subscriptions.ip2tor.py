@@ -15,7 +15,7 @@ import toml
 
 sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
 from config import RaspiBlitzConfig
-from excpetions import BlitzError
+from exceptions import BlitzError
 
 from lndlibs import rpc_pb2 as lnrpc
 from lndlibs import rpc_pb2_grpc as rpcstub

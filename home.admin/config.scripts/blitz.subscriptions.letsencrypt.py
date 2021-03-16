@@ -14,7 +14,7 @@ import toml
 
 sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
 from config import RaspiBlitzConfig
-from excpetions import BlitzError
+from exceptions import BlitzError
 
 #####################
 # SCRIPT INFO
