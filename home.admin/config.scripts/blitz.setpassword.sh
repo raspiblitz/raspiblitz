@@ -17,7 +17,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # tempfile 
-_temp="./dialog.$$"
+_temp=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
