@@ -5,13 +5,14 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-pinnedVersion="v0.8.0"
+JMVERSION="v0.8.2"
+JBVERSION="v0.3.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs the version $pinnedVersion by default."
+ echo "Installs JoinMarket $pinnedVersion with JoininBox $JBVERSION"
  exit 1
 fi
 
@@ -106,7 +107,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
     cd joinmarket-clientserver
-    sudo -u joinmarket git reset --hard $pinnedVersion
+    sudo -u joinmarket git reset --hard $JMVERSION
     # make install.sh set up jmvenv with -- system-site-packages
     # and import the PySide2 armf package from the system
     sudo -u joinmarket sed -i \
@@ -123,14 +124,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # don't install PyQt5 - using the system package instead 
     sudo -u joinmarket sed -i "s#^PyQt5==5.14.2##g" requirements/gui.txt
     sudo -u joinmarket ./install.sh --with-qt
-    echo "# installed JoinMarket $pinnedVersion"
+    echo "# installed JoinMarket $JMVERSION"
 
     echo "# adding the joininbox menu"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard v0.1.16
+    sudo -u joinmarket git reset --hard $JBVERSION
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
