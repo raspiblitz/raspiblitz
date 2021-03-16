@@ -30,7 +30,7 @@ command=$1
 
 # check if its updated kernel version of v1.6 base image
 oldKernel=$(uname -srm | cut -d ' ' -f2 | cut -d '-' -f1 | grep -c '4.19.118')
-oldDrivers=$(sudo cat /home/admin/LCD-show/.git/config | grep -c 'github.com/goodtft/LCD')
+oldDrivers=$(sudo cat /home/admin/LCD-show/.git/config 2>/dev/null | grep -c 'github.com/goodtft/LCD')
 
 ###################
 # CHECK-REPAIR
