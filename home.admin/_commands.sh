@@ -142,6 +142,8 @@ function fwdreport() {
 function bos() {
   if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the bos user with the command: 'sudo su - bos'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'bos --help' to list all possible options"
     sudo su - bos
     echo "# use command 'raspiblitz' to return to menu"
   else
@@ -155,6 +157,8 @@ function bos() {
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'pyblock' again to start"
     sudo su - pyblock
     echo "# use command 'raspiblitz' to return to menu"
   else
