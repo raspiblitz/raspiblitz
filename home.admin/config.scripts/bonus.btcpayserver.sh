@@ -256,7 +256,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then
     # create btcpay user
-    sudo adduser --disabled-password --gecos "" btcpay 2>/dev/null
+    sudo adduser --disabled-password --gecos "" btcpay  || exit 1
     cd /home/btcpay || exit 1
 
     # store BTCpay data on HDD
@@ -350,15 +350,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Install NBXplorer"
     echo
-    cd /home/btcpay
-    echo "# Downloading NBXplorer source code.."
+    cd /home/btcpay || exit 1
+    echo "# Download the NBXplorer source code ..."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer
     sudo -u btcpay git reset --hard $NBXplorerVersion
+    echo "# Build NBXplorer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
-
-    # create nbxplorer service
+    # see the configuration options with:
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet "/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll" -c /home/btcpay/.nbxplorer/Main/settings.config -h
+    # run manually to debug:
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet "/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll" -c /home/btcpay/.nbxplorer/Main/settings.config --network=mainnet
+    echo"# create the nbxplorer.service"
     echo "
 [Unit]
 Description=NBXplorer daemon
@@ -366,7 +370,9 @@ Requires=bitcoind.service
 After=bitcoind.service
 
 [Service]
-ExecStart=/home/btcpay/dotnet/dotnet \"/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll\" -c /home/btcpay/.nbxplorer/Main/settings.config
+ExecStart=/home/btcpay/dotnet/dotnet \
+ \"/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll\" \
+ -c /home/btcpay/.nbxplorer/Main/settings.config --network=${chain}net
 User=btcpay
 Group=btcpay
 Type=simple
@@ -423,27 +429,32 @@ btc.rpc.password=$PASSWORD_B
     # BTCPayServer
     echo
     echo "# Install BTCPayServer"
-
     echo
-    cd /home/btcpay
-    echo "# Downloading BTCPayServer source code.."
+    cd /home/btcpay || exit 1
+    echo "# Download the BTCPayServer source code ..."
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
-    # use latest commit (v1.0.4.4+) to fix build with latest dotNet
-    # sudo -u btcpay git checkout f2bb24f6ab6d402af8214c67f84e08116eb650e7
+    echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
 
-    # create btcpayserver service
+    # see the configuration options with:
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
+    # run manually to debug:
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db --network=mainnet
+    echo "# create the btcpayserver.service"
     echo "
 [Unit]
 Description=BtcPayServer daemon
-Requires=btcpayserver.service
+Requires=nbxplorer.service
 After=nbxplorer.service
 
 [Service]
-ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" -- \$@
+ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
+ -c Release \
+ -p \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" -- \
+ --sqlitefile=sqllite.db --network=${chain}net
 User=btcpay
 Group=btcpay
 Type=simple
@@ -453,17 +464,6 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
-
-  echo "# configure BTCPay to use sqllite database" 
-  if [ ! -f /home/btcpay/.btcpayserver/Main/settings.config ] || \
-  ! grep -Eq "^sqlitefile=sqllite.db" /home/btcpay/.btcpayserver/Main/settings.config; then
-    echo "\
-### Database ###
-sqlitefile=sqllite.db" | sudo tee -a /home/btcpay/.btcpayserver/Main/settings.config
-  sudo chown btcpay:btcpay /home/btcpay/.btcpayserver/Main/settings.config
-  fi
-
-  sudo systemctl daemon-reload
   sudo systemctl enable btcpayserver
 
     if [ "${state}" == "ready" ]; then
