@@ -28,6 +28,7 @@ if [ "$1" == "off" ]; then
   # remove double empty lines
   sudo cp /etc/tor/torrc /mnt/hdd/temp/tmp
   sudo chmod 777 /mnt/hdd/temp/tmp
+  sudo chown admin:admin /mnt/hdd/temp/tmp
   sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /mnt/hdd/temp/tmp
   sudo mv /mnt/hdd/temp/tmp /etc/tor/torrc
   sudo chmod 644 /etc/tor/torrc
