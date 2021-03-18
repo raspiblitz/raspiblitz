@@ -203,7 +203,7 @@ function lit() {
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'"
-    sudo su - faraday
+    sudo su - lit
     echo "# use command 'raspiblitz' to return to menu"
   else
     echo "LIT is not installed - to install run:"
