@@ -166,6 +166,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/poold.service
     # delete user and it's home directory
     sudo userdel -rf pool
+    # remove symlink
+    sudo rm -r /mnt/hdd/app-data/.pool
     echo "# OK, the Pool Service is removed."
   else 
     echo "# Pool is not installed."
