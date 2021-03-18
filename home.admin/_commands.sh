@@ -313,3 +313,10 @@ function notifyme() {
     content="${1:-Notified}"
     /home/admin/config.scripts/blitz.notify.sh send "${content}"
 }
+
+# command: whitepaper
+# downloads the whitepaper from the blockchain to /home/admin/bitcoin.pdf
+function whitepaper() {
+  cd /home/admin/config.scripts
+  ./bonus.whitepaper.sh on
+}
