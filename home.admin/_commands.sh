@@ -195,6 +195,22 @@ function faraday() {
   fi
 }
 
+
+# command: lit
+# switch to the lit user for the loop, pool & faraday services
+function faraday() {
+  if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the lit user with the command: 'sudo su - lit'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'"
+    sudo su - faraday
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "LIT is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.lit.sh on"
+  fi
+}
+
 # command: loop
 # switch to the loop user for the Lightning Loop Service
 function loop() {
