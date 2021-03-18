@@ -125,7 +125,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #echo "# try to suppress question on statistics report .."
     #sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
-    sudo mariadb -e "DROP DATABASE mempool;"
+    sudo mariadb -e "DROP DATABASE IF EXISTS mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
@@ -166,7 +166,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     touch /home/admin/mempool-config.json
-    sudo chmod 600 /home/admin/mempool-config.json || exit 1 
+    sudo chmod 600 /home/admin/mempool-config.json || exit 1
     cat > /home/admin/mempool-config.json <<EOF
 {
   "MEMPOOL": {
@@ -213,7 +213,7 @@ EOF
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
 
-    
+
     ##################
     # NGINX
     ##################
@@ -242,7 +242,7 @@ After=${network}d.service
 
 [Service]
 WorkingDirectory=/home/mempool/mempool/backend
-# ExecStartPre=/usr/bin/npm run build 
+# ExecStartPre=/usr/bin/npm run build
 ExecStart=/usr/bin/node --max-old-space-size=2048 dist/index.js
 User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
@@ -253,11 +253,11 @@ RestartSec=600
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service 
+    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service
     sudo systemctl enable mempool
     echo "# OK - the mempool service is now enabled"
 
-  else 
+  else
     echo "# mempool already installed."
   fi
 
@@ -272,7 +272,7 @@ EOF
 
   # setting value in raspi blitz config
   sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
@@ -321,8 +321,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
     echo "# OK Mempool removed."
-  
-  else 
+
+  else
     echo "# Mempool is not installed."
   fi
 
