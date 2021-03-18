@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.0.1"
+pinnedVersion="v2.1.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -125,7 +125,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #echo "# try to suppress question on statistics report .."
     #sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
-    sudo mariadb -e "DROP DATABASE mempool;"
+    sudo mariadb -e "DROP DATABASE IF EXISTS mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
@@ -166,7 +166,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     touch /home/admin/mempool-config.json
-    sudo chmod 600 /home/admin/mempool-config.json || exit 1 
+    sudo chmod 600 /home/admin/mempool-config.json || exit 1
     cat > /home/admin/mempool-config.json <<EOF
 {
   "MEMPOOL": {
@@ -174,6 +174,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "BACKEND": "electrum",
     "HTTP_PORT": 8999,
     "API_URL_PREFIX": "/api/v1/",
+    "CACHE_DIR": "/mnt/hdd/app-storage/mempool/cache",
     "POLL_RATE_MS": 2000
   },
   "CORE_RPC": {
@@ -183,8 +184,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   "ELECTRUM": {
     "HOST": "127.0.0.1",
     "PORT": 50002,
-    "TLS_ENABLED": true,
-    "TX_LOOKUPS": false
+    "TLS_ENABLED": true
   },
   "DATABASE": {
     "ENABLED": true,
@@ -204,6 +204,9 @@ EOF
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
     cd /home/mempool/mempool/frontend
 
+    sudo mkdir -p /mnt/hdd/app-storage/mempool/cache
+    sudo chown mempool:mempool /mnt/hdd/app-storage/mempool/cache
+
     sudo mkdir -p /var/www/mempool
     sudo rsync -av --delete dist/mempool/ /var/www/mempool/
     sudo chown -R www-data:www-data /var/www/mempool
@@ -213,7 +216,7 @@ EOF
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
 
-    
+
     ##################
     # NGINX
     ##################
@@ -242,7 +245,7 @@ After=${network}d.service
 
 [Service]
 WorkingDirectory=/home/mempool/mempool/backend
-# ExecStartPre=/usr/bin/npm run build 
+# ExecStartPre=/usr/bin/npm run build
 ExecStart=/usr/bin/node --max-old-space-size=2048 dist/index.js
 User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
@@ -253,11 +256,11 @@ RestartSec=600
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service 
+    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service
     sudo systemctl enable mempool
     echo "# OK - the mempool service is now enabled"
 
-  else 
+  else
     echo "# mempool already installed."
   fi
 
@@ -272,7 +275,7 @@ EOF
 
   # setting value in raspi blitz config
   sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
@@ -321,8 +324,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
     echo "# OK Mempool removed."
-  
-  else 
+
+  else
     echo "# Mempool is not installed."
   fi
 
