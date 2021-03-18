@@ -198,7 +198,7 @@ function faraday() {
 
 # command: lit
 # switch to the lit user for the loop, pool & faraday services
-function faraday() {
+function lit() {
   if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
