@@ -1,6 +1,6 @@
 #!/bin/bash
-_temp="./download/dialog.$$"
-_error="./.error.out"
+_temp=$(mktemp -p /dev/shm/)
+_error=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info

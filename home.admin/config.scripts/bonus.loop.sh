@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/loop/releases-
-pinnedVersion="v0.11.1-beta"
+pinnedVersion="v0.11.2-beta"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -63,7 +63,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /mnt/hdd/app-data/.loop
     echo "# symlink"
     sudo rm -rf /home/loop/.loop # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/.loop/ 
+    sudo ln -s /mnt/hdd/app-data/.loop/ /home/loop/.loop
     sudo chown loop:loop -R /mnt/hdd/app-data/.loop
 
     # install from source

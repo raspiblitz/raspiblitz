@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
-pinnedVersion="0.10.4"
+pinnedVersion="1.2.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -110,6 +110,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/network.wallet.sh on
 
     echo "#    --> Installing prerequisites"
+    sudo apt update
     sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
 
     sudo adduser --disabled-password --gecos "" specter
@@ -126,18 +127,42 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # activating Authentication here ...
     echo "#    --> creating App-config"
+    if [ "${runBehindTor}" = "on" ];then
+      proxy="socks5h://localhost:9050"
+      torOnly="true"
+    else
+      proxy=""
+      torOnly="false"
+    fi
     cat > /home/admin/config.json <<EOF
 {
-  "rpc": {
-      "autodetect": true,
-      "datadir": "/home/bitcoin/.bitcoin",
-      "user": "",
-      "password": "",
-      "port": "",
-      "host": "localhost",
-      "protocol": "http"
-  },
-	"auth":"rpcpasswordaspin"
+    "rpc": {
+        "autodetect": true,
+        "datadir": "/home/bitcoin/.bitcoin",
+        "user": "",
+        "password": "",
+        "port": "",
+        "host": "localhost",
+        "protocol": "http"
+    },
+    "auth": "rpcpasswordaspin",
+    "explorers": {
+        "main": "",
+        "test": "",
+        "regtest": "",
+        "signet": ""
+    },
+    "proxy_url": "$proxy",
+    "only_tor": $torOnly,
+    "tor_control_port": "",
+    "hwi_bridge_url": "/hwi/api/",
+    "uid": "",
+    "unit": "btc",
+    "price_check": false,
+    "alt_rate": 1,
+    "alt_symbol": "BTC",
+    "price_provider": "",
+    "validate_merkle_proofs": false
 }
 EOF
     sudo mv /home/admin/config.json /home/specter/.specter/config.json

@@ -9,7 +9,6 @@ color_green='\033[0;32m'
 color_amber='\033[0;33m'
 color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
-color_purple='\033[0;35m'
 
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
@@ -90,6 +89,7 @@ fi
 
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
+blockInfo="-"
 if [ -n ${btc_path} ]; then
   btc_title=$network
   blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo 2>/dev/null)"
@@ -100,6 +100,7 @@ if [ -n ${btc_path} ]; then
     block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
+    blockInfo="${block_verified}/${block_chain}"
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
@@ -165,13 +166,13 @@ networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | c
 # TOR or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
-networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
 if [ "${runBehindTor}" = "on" ]; then
 
   # TOR address
   onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
@@ -180,7 +181,7 @@ if [ "${runBehindTor}" = "on" ]; then
 else
 
   # IP address
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
   public_addr="${publicIP}:${public_port}"
   public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
@@ -274,7 +275,7 @@ else
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
+    ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
     ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
     ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
     ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
@@ -323,8 +324,8 @@ ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
 ${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
-${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
-${color_yellow}    /,'        ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
+${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
 ${color_yellow}   /'          ${color_gray}
 ${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
@@ -351,7 +352,8 @@ else
 
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
-    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+    error=""
+    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
@@ -359,7 +361,8 @@ else
 
   # BTC RPC EXPLORER
   if [ "${BTCRPCexplorer}" = "on" ]; then
-    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
+    error=""
+    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status 2>/dev/null)
     if [ ${#error} -gt 0 ]; then
       appInfoLine="ERROR BTC-RPC-Explorer: ${error} (try restart)"
     elif [ "${isIndexed}" = "0" ]; then

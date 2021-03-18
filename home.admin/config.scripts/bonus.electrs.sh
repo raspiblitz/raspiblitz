@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/blob/master/doc/usage.md
+ELECTRSVERSION=v0.8.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status [?showAddress]"
  echo "bonus.electrs.sh [on|off|menu]"
+ echo "installs the version $ELECTRSVERSION by default"
  exit 1
 fi
 
@@ -192,7 +194,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "To start directly from laptop terminal use:"
     echo "electrum --oneserver --server ${localip}:${portHTTP}:s"
     if [ ${TORrunning} -eq 1 ]; then
-      echo ""
+      echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
@@ -239,12 +241,12 @@ if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # stop service
-echo "making sure services are not running"
+echo "# Making sure services are not running"
 sudo systemctl stop electrs 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL ELECTRS ***"
+  echo "# INSTALL ELECTRS"
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -252,45 +254,31 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #cleanup
     sudo rm -f /home/electrs/.electrs/config.toml 
 
-    echo ""
-    echo "***"
-    echo "Creating the electrs user"
-    echo "***"
-    echo ""
+    echo
+    echo "# Creating the electrs user"
+    echo
     sudo adduser --disabled-password --gecos "" electrs
     cd /home/electrs
 
-    echo ""
-    echo "***"
-    echo "Installing Rust"
-    echo "***"
-    echo ""
+    echo
+    echo "# Installing Rust"
+    echo
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-    # check Rust version with: $ sudo -u electrs /home/electrs/.cargo/bin/cargo --version
-    # workaround to keep Rust at v1.37.0
-    # sudo -u electrs /home/electrs/.cargo/bin/rustup install 1.37.0 --force
-    # sudo -u electrs /home/electrs/.cargo/bin/rustup override set 1.37.0
 
-    #source $HOME/.cargo/env
     sudo apt update
     sudo apt install -y clang cmake  # for building 'rust-rocksdb'
 
-    echo ""
-    echo "***"
-    echo "Downloading and building electrs. This will take ~30 minutes" # ~22 min on an Odroid XU4
-    echo "***"
-    echo ""
+    echo
+    echo "# Downloading and building electrs. This will take ~30 minutes" # ~22 min on an Odroid XU4
+    echo
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs
-    sudo -u electrs git reset --hard v0.8.6
+    sudo -u electrs git reset --hard $ELECTRSVERSION
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
 
-    echo ""
-    echo "***"
-    echo "The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
-    echo "***"
-    echo ""
-
+    echo
+    echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
+    echo
     # move old-database if present
     if [ -d "/mnt/hdd/electrs/db" ]; then
       echo "Moving existing ElectRS index to /mnt/hdd/app-storage/electrs..."
@@ -300,45 +288,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
-    echo ""
-    echo "***"
-    echo "getting RPC credentials from the bitcoin.conf"
-    echo "***"
-    echo ""
-    #echo "Type the PASSWORD B of your RaspiBlitz followed by [ENTER] (needed for Electrs to access the bitcoind RPC):"
+    echo
+    echo "# Getting RPC credentials from the bitcoin.conf"
     #read PASSWORD_B
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-    echo "Done"
+    echo "# Done"
 
-    echo ""
-    echo "***"
-    echo "generating electrs.toml setting file with the RPC passwords"
-    echo "***"
-    echo ""
+    echo
+    echo "# Generating electrs.toml setting file with the RPC passwords"
+    echo
     # generate setting file: https://github.com/romanz/electrs/issues/170#issuecomment-530080134
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
-
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
-    touch /home/admin/config.toml
-    chmod 600 /home/admin/config.toml || exit 1 
-    cat > /home/admin/config.toml <<EOF
+    echo "
 verbose = 4
 timestamp = true
 jsonrpc_import = true
-db_dir = "/mnt/hdd/app-storage/electrs/db"
-cookie = "$RPC_USER:$PASSWORD_B"
+db_dir = \"/mnt/hdd/app-storage/electrs/db\"
+auth = \"$RPC_USER:$PASSWORD_B\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
-txid_limit = 0
-EOF
-    sudo mv /home/admin/config.toml /home/electrs/.electrs/config.toml
+txid_limit = 1000
+# https://github.com/Stadicus/RaspiBolt/issues/646
+wait_duration_secs = 20
+server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"
+" | sudo tee /home/electrs/.electrs/config.toml
+    sudo chmod 600 /home/electrs/.electrs/config.toml
     sudo chown electrs:electrs /home/electrs/.electrs/config.toml
 
-    echo ""
-    echo "***"
-    echo "Checking for config.toml"
-    echo "***"
-    echo ""
+    echo
+    echo "# Checking for config.toml"
+    echo
     if [ ! -f "/home/electrs/.electrs/config.toml" ]
         then
             echo "Failed to create config.toml"
@@ -347,12 +327,9 @@ EOF
             echo "OK"
     fi
 
-    echo ""
-    echo "***"
-    echo "Setting up nginx.conf"
-    echo "***"
-    echo ""
-
+    echo
+    echo "# Setting up the nginx.conf"
+    echo
     isElectrs=$(sudo cat /etc/nginx/nginx.conf 2>/dev/null | grep -c 'upstream electrs')
     if [ ${isElectrs} -gt 0 ]; then
             echo "electrs is already configured with Nginx. To edit manually run \`sudo nano /etc/nginx/nginx.conf\`"
@@ -405,20 +382,15 @@ stream {
 
     sudo systemctl restart nginx
 
-    echo ""
-    echo "***"
-    echo "Open ports 50001 and 5002 on UFW "
-    echo "***"
-    echo ""
+    echo
+    echo "# Open ports 50001 and 5002 on UFW "
+    echo
     sudo ufw allow 50001 comment 'electrs TCP'
     sudo ufw allow 50002 comment 'electrs SSL'
 
-    echo ""
-    echo "***"
-    echo "Installing the systemd service"
-    echo "***"
-    echo ""
-
+    echo
+    echo "# Installing the systemd service"
+    echo
     # sudo nano /etc/systemd/system/electrs.service 
     echo "
 [Unit]
@@ -442,14 +414,8 @@ WantedBy=multi-user.target
     sudo systemctl enable electrs
     # manual start:
     # sudo -u electrs /home/electrs/.cargo/bin/cargo run --release -- --index-batch-size=10 --electrum-rpc-addr="0.0.0.0:50001"
-    echo ""
-    echo "***"
-    echo "Starting ElectRS in the background"
-    echo "***"
-    echo ""
-
   else 
-    echo "ElectRS is already installed."
+    echo "# ElectRS is already installed."
   fi
 
   # setting value in raspiblitz config
@@ -465,9 +431,9 @@ WantedBy=multi-user.target
   # see /home/admin/config.scripts/bonus.electrsexplorer.sh
   # run every 10 min by _background.sh
   
-  echo ""
+  echo
   echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
-  echo ""
+  echo
   
   exit 0
 fi
@@ -492,7 +458,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
 
-    echo "#*** REMOVING ELECTRS ***"
+    echo "# REMOVING ELECTRS"
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
     # delete user and home directory
@@ -510,5 +476,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
+echo "# FAIL - Unknown Parameter $1"
 exit 1

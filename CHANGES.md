@@ -1,5 +1,35 @@
 # CHANGES between Releases
 
+## Whats new in Version 1.7.0 of RaspiBlitz?
+
+- Update: Raspberry Pi OS Base Image 64-bit (August 2020)
+- Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
+- Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
+- Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
+- Update: Thunderhub 0.12.7 [details](https://github.com/apotdevin/thunderhub/blob/master/CHANGELOG.md#0124-2021-01-09)
+- Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
+- Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
+- Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Balance of Satoshis 8.0.2 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
+- Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
+- Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
+- Update: JoininBox 0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
+- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+
+## Whats new in Version 1.6.3 of RaspiBlitz?
+
+- Update: mempool space 2.0.1 [details](https://github.com/mempool/mempool)
+- Update: specter 1.0.0
+- Update: RTL 0.10.0 [details](https://twitter.com/RTL_App/status/1340815355959267329?s=20)
+- Update: btcpay v1.0.6.3
+- Update: NodeJS v14.15.4
+- Update: pool v0.3.4
+- Update: joininbox v0.1.16
+- Update: Sphinx Relay Server (installs always latest master)
+- Fix: circuitbreaker install on recovery
+- Fix: Specter Persistence
+- Experimental: MENU > LNDCRED > EXPORT > BTCPAY Server connection string with baked macaroon
+
 ## Whats new in Version 1.6.2 of RaspiBlitz?
 
 - New: Pool (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
@@ -12,7 +42,7 @@
 - Update: RTL 0.9.3
 - Update: EletcRS 0.8.6
 - Update: Specter 0.10.0
-- Update: BTCPay Server 1.0.5.9
+- Update: BTCPay Server 1.0.5.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.9)
 - Update: Loop 0.11.1
 - Update: stacking-sats-kraken 0.3.0
 - Update: Experimental BTRFS support 

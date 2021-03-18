@@ -6,7 +6,7 @@ See https://dev.lightning.community/guides/python-grpc/
 To generate the lnd RPC libs - login as admin and run:
 ```
 cd
-python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2
+sudo python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2
 git clone https://github.com/googleapis/googleapis.git
 mkdir protobuffs
 curl -o ./rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto

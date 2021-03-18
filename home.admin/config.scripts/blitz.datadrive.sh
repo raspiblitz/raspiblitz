@@ -497,23 +497,23 @@ if [ "$1" = "format" ]; then
         sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
         sleep 6
         sync
-        # loop until the partion gets available
+        # loop until the partition gets available
         loopdone=0
         loopcount=0
         while [ ${loopdone} -eq 0 ]
         do
-          >&2 echo "# waiting until the partion gets available"
+          >&2 echo "# waiting until the partition gets available"
           sleep 2
           sync
           loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
           loopcount=$(($loopcount +1))
           if [ ${loopcount} -gt 10 ]; then
-            >&2 echo "# partion failed"
+            >&2 echo "# partition failed"
             echo "error='partition failed'"
             exit 1
           fi
         done
-        >&2 echo "# partion available"
+        >&2 echo "# partition available"
      fi
 
      # make sure /mnt/hdd is unmounted before formatting
