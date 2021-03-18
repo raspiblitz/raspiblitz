@@ -1,6 +1,8 @@
 #!/bin/bash
 RTLVERSION="v0.10.1"
 
+pinnedVersion="v0.10.0"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to switch the RideTheLightning WebGUI on, off or update"
@@ -133,6 +135,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if ! [[ -L "/home/rtl/.lnd" ]]; then
       sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
       sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
+    fi
+
+    echo "# add the rtl user to the loop group"
+    sudo /usr/sbin/usermod --append --groups loop rtl
+    echo "# symlink the loop.macaroon"
+    if ! [[ -L "/home/rtl/.loop" ]]; then
+      sudo rm -rf "/home/rtl/.loop"                     # not a symlink.. delete it silently
+      sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # and create symlink
     fi
 
     # download source code and set to tag release

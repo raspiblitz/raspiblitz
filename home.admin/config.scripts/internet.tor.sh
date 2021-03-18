@@ -131,7 +131,6 @@ if [ "$1" = "status" ]; then
   else
     echo "activated=0"
   fi
-
   echo "config='${torrc}'"
   exit 0
 fi
@@ -181,6 +180,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "!! FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
     echo "# switching Tor config on for RaspiBlitz services is just possible after basic hdd/ssd setup"
     echo "# but with new 'Tor by default' basic Tor socks will already be available from the start"
+    exit 1
+  fi
+
+  # make sure the network was set (by sourcing raspiblitz.conf)
+  if [ ${#network} -eq 0 ]; then
+    echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
     exit 1
   fi
 
