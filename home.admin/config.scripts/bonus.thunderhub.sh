@@ -204,8 +204,24 @@ EOF
     ##################
     # SYSTEMD SERVICE
     ##################
-    echo "*** Install ThunderHub systemd for ${network} on ${chain} ***"
-    cat > /home/admin/thunderhub.service <<EOF
+
+    # torify service if Tor is used
+    if [ "${runBehindTor}" = "on" ]; then
+      echo "# Connect to the external APIs through Tor"
+      proxy="torify"
+      echo "# set up torsocks"
+      sudo cp /etc/tor/torsocks.conf /etc/tor/torsocks-thunderhub.conf
+      sudo sed -i "s/^#AllowInbound 1/AllowInbound 1/g" /etc/tor/torsocks-thunderhub.conf
+      sudo sed -i "s/^#AllowOutboundLocalhost 1/AllowOutboundLocalhost 1/g" /etc/tor/torsocks-thunderhub.conf
+      env="Environment=TORSOCKS_CONF_FILE=/etc/tor/torsocks-thunderhub.conf"
+    else
+      echo "# Connect to the external APIs through clearnet"
+      proxy=""
+      env=""
+    fi
+
+    echo "# Install ThunderHub systemd for ${network} on ${chain}"
+    echo "
 # Systemd unit for thunderhub
 # /etc/systemd/system/thunderhub.service
 
@@ -216,7 +232,8 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-ExecStart=/usr/bin/npm run start -- -p 3010
+$env
+ExecStart=$proxy /usr/bin/npm run start -- -p 3010
 User=thunderhub
 Restart=always
 TimeoutSec=120
@@ -226,9 +243,7 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-EOF
-    sudo mv /home/admin/thunderhub.service /etc/systemd/system/thunderhub.service 
-    sudo chown root:root /etc/systemd/system/thunderhub.service
+" | sudo tee /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
     echo "OK - the ThunderHub service is now enabled"
 
