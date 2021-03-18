@@ -1,5 +1,76 @@
 # CHANGES between Releases
 
+## Whats new in Version 1.7.0 of RaspiBlitz?
+
+- Update: Raspberry Pi OS Base Image 64-bit (August 2020)
+- Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
+- Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
+- Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
+- Update: Thunderhub 0.12.7 [details](https://github.com/apotdevin/thunderhub/blob/master/CHANGELOG.md#0124-2021-01-09)
+- Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
+- Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
+- Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Balance of Satoshis 8.0.2 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
+- Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
+- Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
+- Update: JoininBox 0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
+- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+
+## Whats new in Version 1.6.3 of RaspiBlitz?
+
+- Update: mempool space 2.0.1 [details](https://github.com/mempool/mempool)
+- Update: specter 1.0.0
+- Update: RTL 0.10.0 [details](https://twitter.com/RTL_App/status/1340815355959267329?s=20)
+- Update: btcpay v1.0.6.3
+- Update: NodeJS v14.15.4
+- Update: pool v0.3.4
+- Update: joininbox v0.1.16
+- Update: Sphinx Relay Server (installs always latest master)
+- Fix: circuitbreaker install on recovery
+- Fix: Specter Persistence
+- Experimental: MENU > LNDCRED > EXPORT > BTCPAY Server connection string with baked macaroon
+
+## Whats new in Version 1.6.2 of RaspiBlitz?
+
+- New: Pool (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
+- New: Sphinx Relay Server [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
+- Update: LNbits (Lightning Vouchers)
+- Update: Joinmarket 0.8.0 (bech32 orderbook)
+- Update: JoinInBox 0.1.15
+- Update: LN Balance Script
+- Update: Thunderhub 0.10.4
+- Update: RTL 0.9.3
+- Update: EletcRS 0.8.6
+- Update: Specter 0.10.0
+- Update: BTCPay Server 1.0.5.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.9)
+- Update: Loop 0.11.1
+- Update: stacking-sats-kraken 0.3.0
+- Update: Experimental BTRFS support 
+- Fix: DropBox API
+
+## Whats new in Version 1.6.1 of RaspiBlitz?
+
+- EMERGENCY-Update: LND version 0.11.1-beta [details](https://lists.linuxfoundation.org/pipermail/lightning-dev/2020-October/002819.html)
+- Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/rootzoll/raspiblitz/issues/1412)
+- Update: JoininBox 0.1.12 (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
+- Update: BTCPayServer v1.0.5.8 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.8)
+- Update: RTL 0.9.1
+- Update: lndmanage 0.11.0
+- Update: Specter 0.8.1 (with running the numbers)
+- Update: Balance of Satoshi 6.1.0
+- Update: Thunderhub 0.9.14
+- Update: Loop 0.8.1
+- Update: Faraday 0.2.1
+- Update: Improved IPv6 support
+- Update: LNbits new Quart-Framework install
+- New: Circuit Breaker (config-script) [details](https://github.com/rootzoll/raspiblitz/issues/1581)
+- New: PyBlock (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+- New: Mempool Explorer [details](https://github.com/mempool/mempool)
+- New: dynu.com as alternative option for LetsEncrpyt FreeDNS provider 
+- New: Experimental running RaspiBlitz as VM (vagrant & docker)
+
+For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspiblitz/milestone/11
+
 ## Whats new in Version 1.6 of RaspiBlitz?
 
 - Update: Raspberry Pi OS Base Image (May 2020)

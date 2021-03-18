@@ -5,12 +5,16 @@ import os
 import subprocess
 import sys
 import time
+import re
 from datetime import datetime
 from pathlib import Path
 
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig,BlitzError
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
+from exceptions import BlitzError
 
 #####################
 # SCRIPT INFO
@@ -23,18 +27,13 @@ from blitzpy import RaspiBlitzConfig,BlitzError
 if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# manage letsencrypt HTTPS certificates for raspiblitz")
     print("# blitz.subscriptions.letsencrypt.py create-ssh-dialog")
-    print("# blitz.subscriptions.ip2tor.py subscriptions-list")
-    print("# blitz.subscriptions.ip2tor.py subscription-new <dyndns|ip> <duckdns> <id> <token> [ip|tor|ip&tor]")
-    print("# blitz.subscriptions.ip2tor.py subscription-detail <id>")
-    print("# blitz.subscriptions.ip2tor.py domain-by-ip <ip>")
-    print("# blitz.subscriptions.ip2tor.py subscription-cancel <id>")
+    print("# blitz.subscriptions.letsencrypt.py subscriptions-list")
+    print("# blitz.subscriptions.letsencrypt.py subscription-new <dyndns|ip> <duckdns> <domain> <token> [ip|tor|ip&tor]")
+    print("# blitz.subscriptions.letsencrypt.py subscription-new <ip> <dynu> <domain> <clientid:secret> [ip|tor|ip&tor]")
+    print("# blitz.subscriptions.letsencrypt.py subscription-detail <id>")
+    print("# blitz.subscriptions.letsencrypt.py subscription-cancel <id>")
+    print("# blitz.subscriptions.letsencrypt.py domain-by-ip <ip>")
     sys.exit(1)
-
-# constants for standard services
-SERVICE_LND_REST_API = "LND-REST-API"
-SERVICE_LND_GRPC_API = "LND-GRPC-API"
-SERVICE_LNBITS = "LNBITS"
-SERVICE_BTCPAY = "BTCPAY"
 
 #####################
 # BASIC SETTINGS
@@ -101,12 +100,126 @@ def duckdns_update(domain, token, ip):
 
     return response.content
 
+def dynu_update(domain, token, ip):
+
+    print("# dynu update IP API call")
+    print("# domain({0})".format(domain))
+    print("# token({0})".format(token))
+    print("# ip({0})".format(ip))
+
+    # split token to oAuth username and password
+    try:
+        print("Splitting oAuth user & pass:")
+        username = token.split(":")[0]
+        password = token.split(":")[1]
+        print(username)
+        print(password)
+    except Exception as e:
+        raise BlitzError("failed to split token", token, e)
+
+    # get API token from oAuth data
+    url="https://api.dynu.com/v2/oauth2/token"
+    headers = {'accept': 'application/json'}
+    print("# calling URL: {0}".format(url))
+    print("# headers: {0}".format(headers))
+    try:
+        response = session.get(url, headers=headers, auth=(username, password))
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        raise BlitzError("failed HTTP request", url, e)
+    
+    # parse data
+    apitoken=""
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        apitoken = data["access_token"];
+    except Exception as e:
+        raise BlitzError("failed parsing data", response.content, e)
+    if len(apitoken) == 0:
+        raise BlitzError("access_token not found", response.content)
+    print("# apitoken({0})".format(apitoken))
+    apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
+    print("# cleaning API token:")
+    print("# apitoken({0})".format(apitoken))
+
+    # get id for domain
+    print("# API CALL --> Getting ID for Domain (list all domains and search thru)")
+    url = "https://api.dynu.com/v2/dns"
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
+    print("# calling URL: {0}".format(url))
+    print("# headers: {0}".format(headers))
+    try:
+        response = session.get(url, headers=headers)
+        if response.status_code == 401:
+            raise BlitzError("failed oAuth Service", url + " ErrorCode:" + str(response.status_code))
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed HTTP request", url, e)
+
+    # parse data
+    id_for_domain=0
+    try:
+        print(response.content)
+        data = json.loads(response.content)
+        for entry in data["domains"]:   
+            if entry['name'] == domain:
+                id_for_domain = entry['id']
+                break
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed parsing data", response.content, e)
+    if id_for_domain == 0:
+        raise BlitzError("domain not found", response.content)
+    
+
+    # update ip address
+    print("# API CALL --> Update IP for Domain-ID")
+    url = "https://api.dynu.com/v2/dns/{0}".format(id_for_domain)
+    print("# calling URL: {0}".format(url))
+    headers = {'accept': 'application/json', 'Authorization': "Bearer {0}".format(apitoken)}
+    print("# headers: {0}".format(headers))
+    data = {
+        "name": domain,
+        "ipv4Address": ip,
+        "ipv4": True,
+        "ipv6": False
+    }
+    data = json.dumps(data)
+    print("# post data: {0}".format(data))
+    try:
+        response = session.post(url, headers=headers, data=data)
+        if response.status_code != 200:
+            raise BlitzError("failed HTTP request", url + " ErrorCode:" + str(response.status_code))
+        print("# response-code: {0}".format(response.status_code))
+    except Exception as e:
+        print(e)
+        time.sleep(4)
+        raise BlitzError("failed HTTP request", url, e)
+
+    return response.content    
 
 #####################
 # PROCESS FUNCTIONS
 #####################
 
 def subscriptions_new(ip, dnsservice, domain, token, target):
+
+    # check if already one subscrption exists (limit to just one)
+    # https://github.com/rootzoll/raspiblitz/issues/1786
+    if Path(SUBSCRIPTIONS_FILE).is_file():
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        if "subscriptions_letsencrypt" in subs:
+            if len(subs['subscriptions_letsencrypt']) > 0:
+                raise BlitzError("not more than one letsencrypt subscription", "cancel existing letsencrypt first")
+
     # domain needs to be the full domain name
     if domain.find(".") == -1:
         raise BlitzError("not a fully qualified domain name", domain)
@@ -127,11 +240,17 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
         subprocess.run(['/home/admin/config.scripts/internet.dyndomain.sh', 'on', domain, update_url],
                        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         real_ip = cfg.public_ip
+        if dnsservice == "dynu":
+            raise BlitzError("not implemented", "dynamic ip updating for dynu.com not implemented yet ", e)
+            sys.exit(0)
 
     # update DNS with actual IP
     if dnsservice == "duckdns":
-        print("# dnsservice=dnsservice --> update {0}".format(domain))
+        print("# dnsservice=duckdns --> update {0}".format(domain))
         duckdns_update(domain, token, real_ip)
+    elif dnsservice == "dynu":
+        print("# dnsservice=dynu --> update {0}".format(domain))
+        dynu_update(domain, token, real_ip)
 
     # create subscription data for storage
     subscription = dict()
@@ -219,7 +338,6 @@ def get_subscription(subscription_id):
     try:
 
         if Path(SUBSCRIPTIONS_FILE).is_file():
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
         else:
             return []
@@ -237,7 +355,6 @@ def get_subscription(subscription_id):
 def get_domain_by_ip(ip):
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
-        os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
         raise BlitzError("no match")
@@ -268,6 +385,7 @@ def menu_make_subscription():
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append(("DUCKDNS", "Use duckdns.org"))
+    choices.append(("DYNU", "Use dynu.com"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")
@@ -297,7 +415,7 @@ If you havent already go to https://duckdns.org
 
         # enter the subdomain
         code, text = d.inputbox(
-            "Enter yor duckDNS subdomain:",
+            "Enter your duckDNS subdomain:",
             height=10, width=40, init="",
             title="DuckDNS Domain")
         subdomain = text.strip()
@@ -332,13 +450,72 @@ This looks not like a valid token.
         ''', title="Invalid Input")
             sys.exit(0)
 
+    elif dnsservice == "dynu":
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+If you havent already go to https://dynu.com
+- consider using the TOR browser
+- create an account or login
+- DDNS Services -> create new
+        ''', title="dynu.com Account needed")
+        
+        # enter the subdomain
+        code, text = d.inputbox(
+            "Enter the complete DDNS name:",
+            height=10, width=40, init="",
+            title="dynu.com DDNS Domain")
+        domain = text.strip()
+        if len(domain) < 6:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like a valid DDNS.
+        ''', title="Invalid Input")
+            sys.exit(0)
+        os.system("clear")
+
+        # show basic info on duck dns
+        Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+Continue in your dynu.com account: 
+- open 'Control Panel' > 'API Credentials'
+- see listed 'OAuth2' ClientID & Secret
+- click glasses icon to view values
+        ''', title="dynu.com API Key needed")
+
+        # enter the CLIENTID
+        code, text = d.inputbox(
+            "Enter the OAuth2 CLIENTID:",
+            height=10, width=50, init="",
+            title="dynu.com OAuth2 ClientID")
+        clientid = text.strip()
+        clientid = clientid.split(' ')[0]
+        if len(clientid) < 20 or len(clientid.split('-'))<2: 
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like valid ClientID.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        # enter the SECRET
+        code, text = d.inputbox(
+            "Enter the OAuth2 SECRET:",
+            height=10, width=50, init="",
+            title="dynu.com OAuth2 SECRET")
+        secret = text.strip()
+        secret = secret.split(' ')[0]
+        if len(secret) < 10:
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+This looks not like valid.
+        ''', title="Invalid Input")
+            sys.exit(0)
+
+        token = "{}:{}".format(clientid, secret)
+        
     else:
         os.system("clear")
         print("Not supported yet: {0}".format(dnsservice))
         time.sleep(4)
         sys.exit(0)
-
-        ############################
+        
+    ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
     # ask user for which RaspiBlitz service the bridge should be used
@@ -361,6 +538,7 @@ This looks not like a valid token.
     # default target are the nginx ip ports
     target = "ip"
     ip = ""
+    serviceName = ""
 
     if tag == "IP2TOR":
 
@@ -399,6 +577,7 @@ Create one first and try again.
         # get the slected IP2TOR bridge
         ip2tor_select = ip2tor_subs[int(tag)]
         ip = ip2tor_select["ip"]
+        serviceName = ip2tor_select["name"]
         target = "tor"
 
     elif tag == "DYNDNS":
@@ -432,6 +611,11 @@ This looks not like a valid IP.
         os.system("clear")
         subscription = subscriptions_new(ip, dnsservice, domain, token, target)
 
+        # restart certain services to update urls
+        if "SPHINX" in serviceName:
+            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            os.system("sudo systemctl restart sphinxrelay")
+
         # success dialog
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 OK your LetsEncrypt subscription is now ready.
@@ -441,6 +625,15 @@ to reach the service you wanted.
             '''.format(domain), title="OK LetsEncrypt Created")
 
     except Exception as e:
+
+        # service flaky
+        # https://github.com/rootzoll/raspiblitz/issues/1772
+        if "failed oAuth Service" in str(e):
+            Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
+A temporary error with the DYNU API happend:\nUnvalid OAuth Bearer Token
+Please try again later or choose another dynamic domain service.
+''', title="Exception on Subscription")
+            sys.exit(1)
 
         # unknown error happened
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -517,6 +710,7 @@ def subscriptions_list():
 #######################
 # SUBSCRIPTION DETAIL
 #######################
+
 def subscription_detail():
     # check parameters
     try:
@@ -526,8 +720,35 @@ def subscription_detail():
         handleException(e)
 
     subscription_id = sys.argv[2]
+    httpsTestport = ""
+    if len(sys.argv) > 3:
+        httpsTestport = sys.argv[3]
     try:
         sub = get_subscription(subscription_id)
+
+        # use unix 'getent' to resolve DNS to IP
+        dns_result = subprocess.Popen(
+        ["getent", "hosts", subscription_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
+        out, err = dns_result.communicate()
+        sub['dns_response'] = "unknown"
+        if subscription_id in out:        
+            sub['dns_response'] = out.split(" ")[0]
+            if sub['dns_response']!=sub['ip'] and len(sub['warning'])==0:
+                sub['warning'] = "Domain resolves not to target IP yet."
+
+        # when https testport is set - check if you we get a https response
+        sub['https_response'] = -1
+        if len(httpsTestport) > 0:
+            url = "https://{0}:{1}".format(subscription_id, httpsTestport)
+            try:
+                response = session.get(url)
+                sub['https_response'] = response.status_code
+            except Exception as e:
+                sub['https_response'] = 0
+            if sub['https_response']!=200 and len(sub['warning'])==0:
+                sub['warning'] = "Not able to get HTTPS response."
+                
         print(json.dumps(sub, indent=2))
 
     except Exception as e:
@@ -571,6 +792,7 @@ def subscription_cancel():
     subscription_id = sys.argv[2]
     try:
         subscriptions_cancel(subscription_id)
+
     except Exception as e:
         handleException(e)
 

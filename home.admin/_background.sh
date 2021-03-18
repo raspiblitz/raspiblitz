@@ -40,6 +40,15 @@ do
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
+  # prevent restart if COPY OVER LAN is running
+  # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
+  source ${infoFile}
+  if [ "${state}" == "copysource" ]; then 
+    echo "copysource mode: skipping background loop"
+    sleep 10
+    continue
+  fi
+
   ####################################################
   # RECHECK DHCP-SERVER 
   # https://github.com/rootzoll/raspiblitz/issues/160
@@ -51,7 +60,7 @@ do
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localip(${localip})"
 
     # detect a missing DHCP config 
@@ -85,7 +94,11 @@ do
 
   ####################################################
   # RECHECK PUBLIC IP
-  # when public IP changes, restart LND with new IP
+  #
+  # when public IP changes
+  #  -  restart bitcoind with new IP
+  #  -  restart LND with new IP (if autounlock is enabled)
+  #  -  restart BTCRPCexplorer if enabled in config or running)
   ####################################################
 
   # every 15min - not too often
@@ -107,54 +120,75 @@ do
 
     # execute only after setup when config exists
     if [ ${configExists} -eq 1 ]; then
-
-      # get actual public IP
-      freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
-
-      # sanity check on IP data
-      # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-      echo "-> sanity check of new IP data"
-      if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-        echo "OK IPv6"
-      elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-        echo "OK IPv4"
-      else
-        echo "FAIL - not an IPv4 or IPv6 address"
-        freshPublicIP=""
-      fi
-
-      if [ ${#freshPublicIP} -eq 0 ]; then 
-
-        echo "freshPublicIP is ZERO - ignoring"
-
-      # check if changed
-      elif [ "${freshPublicIP}" != "${publicIP}" ]; then
-
-        # 1) update config file
-        echo "update config value"
-        sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
-        publicIP='${freshPublicIP}'
-
-        # 2) only restart LND if dynDNS is activated
-        # because this signals that user wants "public node"
-        if [ ${#dynDomain} -gt 0 ]; then
-          echo "restart LND with new environment config"
-          # restart and let to auto-unlock (if activated) do the rest
-          sudo systemctl stop lnd
-          sudo systemctl start lnd
-        fi
-
-        # 2) trigger update if dnyamic domain (if set)
-        updateDynDomain=1
-
-      else
-        echo "public IP has not changed"
-      fi
-
-    else
-      echo "skip - because setup is still running"
+      publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
     fi
 
+    # check if changed
+    if [ ${publicIPChanged} -gt 0 ]; then
+
+      echo "*** change of public IP detected ***"
+      echo "  old: ${publicIP}"
+      # refresh data
+      source /mnt/hdd/raspiblitz.conf
+      echo "  new: ${publicIP}"
+
+      # if we run on IPv6 only, the global IPv6 address at the current network device (e.g: eth0) is the public IP
+      if [ "${ipv6}" = "on" ]; then
+        # restart bitcoind as the global IP is stored in the node configuration
+        # and we will get more connections if this matches our real IP address
+        # otherwise the bitcoin-node connections will slowly decline 
+        echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
+        sudo systemctl stop bitcoind
+        sleep 3
+        sudo systemctl start bitcoind
+
+        # if BTCRPCexplorer is currently running 
+        # it needs to be restarted to pickup the new IP for its "Node Status Page"
+        # but this is only needed in IPv6 only mode 
+        breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
+        if [ ${breIsRunning} -eq 1 ]; then
+          echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
+          sudo systemctl stop btc-rpc-explorer
+          sudo systemctl start btc-rpc-explorer
+        else 
+          echo "new publicIP but no BTCRPCexplorer restart because not running"
+        fi 
+
+      else
+        echo "IPv6 only is OFF => no need to restart bitcoind nor BTCRPCexplorer"
+      fi 
+
+      # only restart LND if auto-unlock is activated
+      if [ "${autoUnlock}" = "on" ]; then
+        echo "restart LND to pickup up new publicIP"
+        sudo systemctl stop lnd
+        sudo systemctl start lnd
+      else
+        echo "new publicIP but no LND restart because no auto-unlock"
+      fi
+
+      # trigger update if dnyamic domain (if set)
+      updateDynDomain=1
+
+    else
+        echo "public IP has not changed"
+    fi
+
+  fi
+
+  ###############################
+  # Blockchain Sync Monitor
+  ###############################
+
+  # check every 1min
+  recheckSync=$(($counter % 60))
+  if [ ${recheckSync} -eq 1 ]; then
+    source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "Blockchain Sync Monitoring: peers=${peers}"
+    if [ "${peers}" == "0" ]; then
+      echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
+      sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
+    fi
   fi
 
   ###############################
@@ -165,38 +199,27 @@ do
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
     echo "BlitzTUI Monitoring Check"
-
-    # prevent restart if COPY OVER LAN is running
-    # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
-    source ${infoFile}
-    if [ "${state}" == "copysource" ]; then 
-      echo "- skip BlitzTUI check while COPY over LAN is running"
+    if [ -d "/var/cache/raspiblitz" ]; then
+      latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
     else
-
-      if [ -d "/var/cache/raspiblitz" ]; then
-        latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
-      else
-        latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
-      fi
-      if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
-        #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
-        #echo "latestHeartBeatLine(${latestHeartBeatLine})"
-        if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
-          echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-          blitzTUIRestarts=$(($blitzTUIRestarts +1))
-          if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-            echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-          fi
-          sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-          sudo init 3 ; sleep 2 ; sudo init 5
-        fi
-      else
-        echo "blitzTUIHeartBeatLine is empty - skipping check"
-      fi
-      blitzTUIHeartBeatLine="${latestHeartBeatLine}"
-
+      latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
     fi
-
+    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
+      #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
+      #echo "latestHeartBeatLine(${latestHeartBeatLine})"
+      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
+        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+        blitzTUIRestarts=$(($blitzTUIRestarts +1))
+        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
+          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
+        fi
+        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
+        sudo init 3 ; sleep 2 ; sudo init 5
+      fi
+    else
+      echo "blitzTUIHeartBeatLine is empty - skipping check"
+    fi
+    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
   fi
   
   ###############################
@@ -368,11 +391,8 @@ do
   if [ ${updateDynDomain} -eq 1 ]; then
     echo "*** UPDATE DYNAMIC DOMAIN ***"
     # check if update URL for dyn Domain is set
-    if [ ${#dynUpdateUrl} -gt 6 ]; then
-      # calling the update url
-      echo "calling: ${dynUpdateUrl}"
-      echo "to update domain: ${dynDomain}"
-      curl --connect-timeout 6 ${dynUpdateUrl}
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      /home/admin/config.scripts/internet.dyndomain.sh update
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
     fi
@@ -431,7 +451,7 @@ do
   # check every 10 minutes
   electrsExplorer=$((($counter % 600)+1))
   if [ ${electrsExplorer} -eq 1 ]; then
-    if [ "${BTCRPCexplorer}" = "on" ] & [ "${ElectRS}" = "on" ]; then
+    if [ "${BTCRPCexplorer}" = "on" ]; then
       /home/admin/config.scripts/bonus.electrsexplorer.sh
     fi
   fi

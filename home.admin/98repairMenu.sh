@@ -55,7 +55,7 @@ copyHost()
   echo "# get IP of RaspiBlitz to copy to ..."
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetIP=$(echo "${targetIP[0]}")
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#targetIP} -eq 0 ]; then
     return
   fi
@@ -75,10 +75,7 @@ copyHost()
     return
   fi
 
-  echo "# install dependencies ..."
-  sudo apt-get install -y sshpass
-
-  sudo rm /root/.ssh/known_hosts
+  sudo rm /root/.ssh/known_hosts 2>/dev/null
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then
     whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
@@ -86,6 +83,7 @@ copyHost()
   fi
 
   echo "# stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
@@ -97,18 +95,73 @@ copyHost()
   echo "# Starting copy over LAN (around 4-6 hours) ..."
   sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
   cd /mnt/hdd/${network}
-  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+
+  # transfere beginning flag
+  date +%s > /home/admin/copy_begin.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_begin.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo rm -f /home/admin/copy_begin.time
+
+  # repeat the syncing of directories until
+  # a) there are no files left to transfere (be robust against failing connections, etc)
+  # b) the user hits a key to break loop after report
+
+
+  while :
+    do
+
+      # transfere blockchain data
+      rm -f ./transferred.rsync
+      sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 --log-file=./transferred.rsync ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
+
+      # check result
+      # the idea is even after successfull transfer the loop will run a second time
+      # but on the second time there will be no files transfered (log lines are below 4)
+      # thats the signal that its done
+      linesInLogFile=$(wc -l ./transferred.rsync | cut -d " " -f 1) 
+      if [ ${linesInLogFile} -lt 4 ]; then
+        echo ""
+        echo "OK all files transfered. DONE"
+        sleep 2
+        break
+      fi
+
+      # wait 20 seconds for user exiting loop
+      echo ""
+      echo -en "OK on sync loop done ... will test in another if all was transferred."
+      echo -en "PRESS X TO MANUALLY FINISH SYNCING"
+      read -n 1 -t 6 keyPressed
+      if [ "${keyPressed}" = "x" ]; then
+        echo ""
+        echo "Ending Sync ..."
+        sleep 2
+        break
+      fi
+
+    done
+  
+  # transfere end flag
   sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
+  date +%s > /home/admin/copy_end.time
+  sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
+  sudo rm -f /home/admin/copy_end.time
 
   echo "# start services again ..."
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
   sudo systemctl start lnd
+  sudo systemctl start background
 
   echo "# show final message"
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
 
 }
+
+# when called with parameter "sourcemode"
+if [ "$1" == "sourcemode" ]; then
+  copyHost
+  raspiblitz
+  exit 0
+fi
 
 # Basic Options
 OPTIONS=(HARDWARE "Run Hardwaretest" \
@@ -163,7 +216,7 @@ case $CHOICE in
     result=""
     while [ ${#result} -eq 0 ]
     do
-        _temp="/home/admin/download/dialog.$$"
+        _temp=$(mktemp -p /dev/shm/)
         l1="Please enter the new name of your LND node:\n"
         l2="different name is better for a fresh identity\n"
         l3="one word, keep characters basic & not too long"

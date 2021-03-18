@@ -5,26 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 source /home/admin/_version.info
 
-clear
-
-# Basic Options
-OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery" \
-LND "Interim LND Update Options" \
-PATCH "Patch RaspiBlitz v${codeVersion}"
-)
-
-if [ "${bos}" == "on" ]; then
-  OPTIONS+=(BOS "Update Balance of Satoshis")
-fi
-if [ "${thunderhub}" == "on" ]; then
-  OPTIONS+=(THUB "Update ThunderHub")
-fi
-if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
-fi
-
-CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+## PROCEDURES
 
 release()
 {
@@ -32,11 +13,11 @@ release()
 
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
-- Flash that SD card image to a new SD card
+- Flash that SD card image to a new SD card (best)
+  or override old SD card after shutdown (fallback) 
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
-
 Do you want to start the Update now?
       " 16 62
   if [ $? -eq 0 ]; then
@@ -99,10 +80,10 @@ patchNotice()
 {
   whiptail --title "Patching Notice" --yes-button "Dont Patch" --no-button "Patch Menu" --yesno "This is the possibility to patch your RaspiBlitz:
 It means it will sync the program code with the
-the GitHub repo for your version branch v${codeVersion}.
+GitHub repo for your version branch v${codeVersion}.
 
-This can be usefull if there are important updates 
-inbetween releases to fix severe bugs. It can also
+This can be useful if there are important updates 
+in between releases to fix severe bugs. It can also
 be used to sync your own code with your RaspiBlitz 
 if you are developing on your own GitHub Repo.
 
@@ -193,13 +174,16 @@ patch()
       exitstatus=$?
       if [ $exitstatus = 0 ]; then
         pullRequestID=$(echo "${pullRequestID}" | cut -d " " -f1)
-        echo "--> " $pullRequestID
+        echo "# --> " $pullRequestID
         cd /home/admin/raspiblitz
-        git fetch origin pull/${pullRequestID}/head:${pullRequestID}pr
+        git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${pullRequestID}pr)
+        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
+        else
+          echo "# update installs .."
+          /home/admin/XXsyncScripts.sh -justinstall
         fi
       fi
       exit 1
@@ -216,7 +200,9 @@ lnd()
 
   # LND Update Options
   OPTIONS=()
-  # OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  if [ ${lndUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional LND update to ${lndUpdateVersion}")
+  fi
   OPTIONS+=(RECKLESS "Experimental LND update to ${lndLatestVersion}")
 
   CHOICE=$(whiptail --clear --title "Update LND Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -283,6 +269,49 @@ Do you really want to update LND now?
   esac
 }
 
+# quick call by parameter
+if [ "$1" == "github" ]; then
+  patch
+  exit 0
+fi
+
+# Basic Options Menu
+OPTIONS=(
+RELEASE "RaspiBlitz Release Update/Recovery" \
+LND "Interim LND Update Options" \
+PATCH "Patch RaspiBlitz v${codeVersion}"
+)
+
+if [ "${bos}" == "on" ]; then
+  OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+if [ "${thunderhub}" == "on" ]; then
+  OPTIONS+=(THUB "Update ThunderHub")
+fi
+if [ "${specter}" == "on" ]; then
+  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+fi
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(RTL "Update RTL")
+fi
+if [ "${pyblock}" == "on" ]; then
+  OPTIONS+=(PYBLOCK "Update PyBLOCK")
+fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Update Lightning Pool")
+fi
+if [ "${loop}" == "on" ]; then
+  OPTIONS+=(LOOP "Update Lightning Loop")
+fi
+if [ "${runBehindTor}" == "on" ]; then
+  OPTIONS+=(TOR "Update Tor from the source code")
+fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
+fi
+
+CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
 clear
 case $CHOICE in
   RELEASE)
@@ -303,5 +332,23 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
+    ;;
+  RTL)
+    /home/admin/config.scripts/bonus.rtl.sh update
+    ;;
+  SPHINX)
+    /home/admin/config.scripts/bonus.sphinxrelay.sh update
+    ;;
+  PYBLOCK)
+    /home/admin/config.scripts/bonus.pyblock.sh update
+    ;;
+  POOL)
+    /home/admin/config.scripts/bonus.pool.sh update  
+    ;;
+  LOOP)
+    /home/admin/config.scripts/bonus.loop.sh update  
+    ;;
+  TOR)
+    sudo /home/admin/config.scripts/internet.tor.sh update  
     ;;
 esac

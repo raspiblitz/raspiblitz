@@ -295,12 +295,14 @@ if [ "${autoUnlock}" != "${choice}" ]; then
   echo "LND Autounlock Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
-  l1="AUTO-UNLOCK IS NOW OFF"
-  if [ "${choice}" = "on" ]; then
-    l1="AUTO-UNLOCK IS NOW ACTIVE"
-  fi  
-  dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
-  needsReboot=1
+  if [ $? -eq 0 ]; then
+    l1="AUTO-UNLOCK IS NOW OFF"
+    if [ "${choice}" = "on" ]; then
+      l1="AUTO-UNLOCK IS NOW ACTIVE"
+    fi  
+    dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
+    needsReboot=1
+  fi
 else
   echo "LND Autounlock Setting unchanged."
 fi

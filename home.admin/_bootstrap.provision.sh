@@ -26,46 +26,72 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
-# check if file system was expanded to full capacity and sd card is bigger then 8GB
+# check that default parameter exist in config
+parameterExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c "lndExtraParameter=")
+if [ ${parameterExists} -eq 0 ]; then
+  echo "lndExtraParameter=''" >> ${configFile}
+fi
+
+# check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isRaspbian} -gt 0 ] || [ ${isArmbian} -gt 0 ]; then
-  if [ ${isRaspbian} -gt 0 ]; then
-    echo "### RASPBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  elif [ ${isArmbian} -gt 0 ]; then
-    echo "### ARMBIAN: CHECKING SD CARD SIZE ###" >> ${logFile}
-  fi
-  sudo sed -i "s/^message=.*/message='Checking SD Card'/g" ${infoFile}
-  byteSizeSdCard=$(df --output=size,source | grep "/dev/root" | tr -cd "[0-9]")
-  echo "Size in Bytes is: ${byteSizeSdCard}" >> ${logFile}
-  if [ ${byteSizeSdCard} -lt 8192000 ]; then
-    echo "SD Card filesystem is smaller then 8GB." >> ${logFile}
-    if [ ${fsexpanded} -eq 1 ]; then
-      echo "There was already an attempt to expand the fs, but still not bigger then 8GB." >> ${logFile}
-      echo "SD card seems to small - at least a 16GB card is needed. Display on LCD to user." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-      exit 1
-    else
-      echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-      sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-      sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-      sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-      if [ ${isRaspbian} -gt 0 ]; then
-        sudo raspi-config --expand-rootfs
-      elif [ ${isArmbian} -gt 0 ]; then
-        sudo /usr/lib/armbian/armbian-resize-filesystem start
+echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
+source ${infoFile}
+isRaspbian=$(echo $baseimage | grep -c 'raspbian')
+isArmbian=$(echo $baseimage | grep -c 'armbian')
+resizeRaspbian="/usr/bin/raspi-config"
+resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
+
+minimumSizeByte=8192000000
+rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
+rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
+
+echo "rootPartition(${rootPartition})" >> ${logFile}
+echo "rootPartitionBytes(${rootPartitionBytes})" >> ${logFile}
+
+if [ ${#rootPartition} -gt 0 ]; then
+   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
+   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
+   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
+   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
+      if [ ${fsexpanded} -eq 1 ]; then
+         echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
+         echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+         exit 1
+      else
+         echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+         sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+         sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+         sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+         if [ "${cpu}" == "x86_64"  ]; then
+            echo "Please expand disk size." >> ${logFile}
+	          # TODO: Expand disk size on x86_64
+         elif [ ${isRaspbian} -gt 0 ]; then
+            if [ -x ${resizeRaspbian} ]; then
+              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
+		          sudo $resizeRaspbian --expand-rootfs
+	          else
+              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
+            fi
+         elif [ ${isArmbian} -gt 0 ]; then
+            if [ -x ${resizeArmbian} ]; then
+              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
+              sudo $resizeArmbian start
+	          else
+              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
+            fi
+         fi
+         sleep 6
+         sudo shutdown -r now
+	 exit 0
       fi
-      sleep 6
-      sudo shutdown -r now
-      exit 0
-    fi
-  else
-    echo "Size looks good. Bigger than 8GB card is used." >> ${logFile}
-  fi
+   else
+      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
+   fi
 else
-  echo "Baseimage is not raspbian (${isRaspbian}), skipping the sd card size check." >> ${logFile}
+   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
 fi
 
 # import config values
@@ -106,13 +132,17 @@ sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.
 # link old SSH PubKeys
 # so that client ssh_known_hosts is not complaining after update
 if [ -d "/mnt/hdd/ssh" ]; then
-  echo "Old SSH PubKey exists on HDD > just linking them" >> ${logFile}
+  echo "Old SSH PubKey exists on HDD > copy them HDD to SD card for next start" >> ${logFile}
+  sudo cp -r /mnt/hdd/ssh/* /etc/ssh/ >> ${logFile} 2>&1
 else
-  echo "No SSH PubKey exists on HDD > copy from SD card and linking them" >> ${logFile}
+  echo "No SSH PubKey exists on HDD > copy from SD card to HDD as backup" >> ${logFile}
   sudo cp -r /etc/ssh /mnt/hdd/ssh >> ${logFile} 2>&1
 fi
-sudo rm -rf /etc/ssh >> ${logFile} 2>&1
-sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+# just copy - dont link anymore so that sshd will also start without HDD connected
+# see: https://github.com/rootzoll/raspiblitz/issues/1798
+#sudo rm -rf /etc/ssh >> ${logFile} 2>&1
+#sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+#sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
 # optimze if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
@@ -120,6 +150,10 @@ if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
   sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
+fi
+if [ ${kbSizeRAM} -gt 3500000 ]; then
+  echo "Detected RAM >3GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^maxmempool=.*/maxmempool=512/g" /mnt/hdd/${network}/${network}.conf
 fi
 
 # link and copy HDD content into new OS on sd card
@@ -183,8 +217,8 @@ if [ ${#lndInterimsUpdate} -gt 0 ]; then
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard LND version is most more up to date
-    echo "Provisioning LND secure interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.update.sh secure ${lndInterimsUpdate} >> ${logFile}
+    echo "Provisioning LND verified interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.update.sh verified ${lndInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
@@ -202,7 +236,7 @@ fi
 # TOR
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning TOR - keep default" >> ${logFile}
@@ -235,13 +269,13 @@ else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
-# DYNAMIC DNS
+# DYNAMIC DOMAIN
 if [ "${#dynDomain}" -gt 0 ]; then
-    echo "Provisioning DYNAMIC DNS - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup DynamicDNS'/g" ${infoFile}
+    echo "Provisioning DYNAMIC DOMAIN - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup DynamicDomain'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
-    echo "Provisioning DYNAMIC DNS - keep default" >> ${logFile}
+    echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
 fi
 
 # RTL
@@ -307,7 +341,7 @@ if [ "${lndmanage}" = "on" ]; then
   sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
 else
-  echo "Provisioning ElectRS - keep default" >> ${logFile}
+  echo "Provisioning lndmanage - not active" >> ${logFile}
 fi
 
 # CUSTOM PORT
@@ -444,6 +478,15 @@ else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
 fi
 
+# mempool space
+if [ "${mempoolExplorer}" = "on" ]; then
+  echo "Provisioning MempoolSpace - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Mempool Space'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
+fi
+
 # letsencrypt
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}
@@ -462,6 +505,15 @@ else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
 fi
 
+# pyblock
+if [ "${pyblock}" = "on" ]; then
+  echo "Provisioning pyblock - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup pyblock'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning pyblock - keep default" >> ${logFile}
+fi
+
 # stacking-sats-kraken
 if [ "${stackingSatsKraken}" = "on" ]; then
   echo "Provisioning Stacking Sats Kraken - run config script" >> ${logFile}
@@ -469,6 +521,33 @@ if [ "${stackingSatsKraken}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
+fi
+
+# pool
+if [ "${pool}" = "on" ]; then
+  echo "Provisioning Pool - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Pool - keep default" >> ${logFile}
+fi
+
+# sphinxrelay
+if [ "${sphinxrelay}" = "on" ]; then
+  echo "Sphinx-Relay - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Sphinx-Relay'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh on >> ${logFile} 2>&1
+else
+  echo "Sphinx-Relay - keep default" >> ${logFile}
+fi
+
+# circuitbreaker
+if [ "${circuitbreaker}" = "on" ]; then
+  echo "Provisioning CircuitBreaker - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup CircuitBreaker'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.circuitbreaker.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
 # custom install script from user
@@ -495,7 +574,6 @@ echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/mnt/hdd/backup_lnd" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  sudo cp /mnt/hdd/backup_lnd/lnd.conf /mnt/hdd/lnd/lnd.conf >> ${logFile} 2>&1
   sudo cp /mnt/hdd/backup_lnd/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
   sudo cp /mnt/hdd/backup_lnd/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
@@ -552,7 +630,12 @@ echo "Prepare fstab for permanent data drive mounting .." >> ${logFile}
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 # update /etc/fstab
 echo "datadisk --> ${datadisk}" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+echo "datapartition --> ${datapartition}" >> ${logFile}
+if [ ${isBTRFS} -eq 0 ]; then
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+else
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5

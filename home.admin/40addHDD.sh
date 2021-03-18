@@ -15,7 +15,12 @@ if [ ${#error} -gt 0 ]; then
 fi
 
 # temp mount
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+if [ "$hddFormat" == "btrfs" ]; then
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+else
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+fi
+
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh tempmount --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -26,7 +31,8 @@ fi
 echo
 echo "# --> Linking drives/directories"
 echo "# hddCandidate='${hddCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link ${hddCandidate})
+echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh link)
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh link --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -37,7 +43,14 @@ fi
 echo
 echo "# --> Adding the data drive to OS ..."
 echo "# hddCandidate='${hddCandidate}'"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddCandidate})
+echo "# hddPartitionCandidate='${hddPartitionCandidate}'"
+echo "# hddFormat='${hddFormat}'"
+if [ "$hddFormat" == "btrfs" ]; then
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddCandidate})
+else
+   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${hddPartitionCandidate})
+fi
+
 if [ ${#error} -gt 0 ]; then
   echo "FAIL blitz.datadrive.sh fstab --> ${error}"
   echo "Please report issue to the raspiblitz github."
@@ -90,40 +103,26 @@ else
   echo "lcd2hdmi=${lcd2hdmi}" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
 
-  # try to determine publicIP and if not possible use localIP as placeholder 
-  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
-  freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-
-  # sanity check on IP data
-  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-  echo "# sanity check of IP data:"
-  if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-    echo "# OK IPv6"
-  elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-    echo "# OK IPv4"
-  else
-    echo "# FAIL - not an IPv4 or IPv6 address"
-    freshPublicIP=""
-  fi
-  if [ ${#freshPublicIP} -eq 0 ]; then
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    echo "# WARNING: No publicIP information at all yet - working with placeholder : ${localIP}"
-    freshPublicIP="${localIP}"
-  fi
-  echo "publicIP='${freshPublicIP}'" >> /home/admin/raspiblitz.conf
-
   sudo mv /home/admin/raspiblitz.conf $configFile
   sudo chown root:root ${configFile}
   sudo chmod 777 ${configFile}
   sleep 3
+
+  # try to determine publicIP and make sure its in raspiblitz.conf
+  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+  /home/admin/config.scripts/internet.sh update-publicip
+
 fi
 
-# link ssh directory from SD catd to HDD
+# link ssh directory from SD card to HDD
 echo "# --> SSH key settings"
-echo "# moving SSH pub keys to HDD"
+echo "# copying SSH pub keys to HDD"
 sudo cp -r /etc/ssh /mnt/hdd/ssh
-sudo rm -rf /etc/ssh
-sudo ln -s /mnt/hdd/ssh /etc/ssh
+# just copy dont link anymore
+# see: https://github.com/rootzoll/raspiblitz/issues/1798
+#sudo rm -rf /etc/ssh
+#sudo ln -s /mnt/hdd/ssh /etc/ssh
+#sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd
 echo "# OK"
 echo ""
 

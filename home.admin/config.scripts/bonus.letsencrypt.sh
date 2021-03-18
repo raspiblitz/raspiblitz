@@ -6,7 +6,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "bonus.letsencrypt.sh [on|off]"
   echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
   echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh refresh-ngnix-certs"
+  echo "bonus.letsencrypt.sh refresh-nginx-certs"
   exit 1
 fi
 
@@ -66,10 +66,10 @@ function acme_install() {
     sudo apt-get install -y socat >/dev/null 2>&1
   fi
 
-  if ! [ -d "/mnt/hdd/app-data/letsencrypt" ]; then
-    sudo mkdir -p "/mnt/hdd/app-data/letsencrypt"
+  if ! [ -d $ACME_CONFIG_HOME ]; then
+    sudo mkdir -p $ACME_CONFIG_HOME
   fi
-  sudo chown admin:admin "/mnt/hdd/app-data/letsencrypt"
+  sudo chown admin:admin $ACME_CONFIG_HOME
 
   rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
   if ! curl --silent --fail -o "/tmp/acme.sh_${ACME_VERSION}.tar.gz" "${ACME_LOAD_BASE_URL}/${ACME_VERSION}" 2>&1; then
@@ -109,7 +109,7 @@ function refresh_certs_with_nginx() {
 
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
-    sudo rm /mnt/hdd/app-data/nginx/tls.key 
+    sudo rm /mnt/hdd/app-data/nginx/tls.key
     sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
     sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
 
@@ -136,12 +136,12 @@ function refresh_certs_with_nginx() {
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
-        
+
         # replace certs for clearnet
         if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
           echo "# replacing IP certs for ${FQDN}"
           sudo rm /mnt/hdd/app-data/nginx/tls.cert
-          sudo rm /mnt/hdd/app-data/nginx/tls.key 
+          sudo rm /mnt/hdd/app-data/nginx/tls.key
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tls.cert
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
         fi
@@ -204,9 +204,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # make sure storage directory exist
-    sudo mkdir -p /mnt/hdd/app-data/letsencrypt/certs 2>/dev/null
-    sudo chown -R admin:admin /mnt/hdd/app-data/letsencrypt
-    sudo chmod -R 733 /mnt/hdd/app-data/letsencrypt
+    sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+    sudo chown -R admin:admin $ACME_CONFIG_HOME
+    sudo chmod -R 733 $ACME_CONFIG_HOME
 
     # install the acme script
     acme_install "${address}"
@@ -236,6 +236,11 @@ elif [ "$1" = "issue-cert" ]; then
     exit 1
   fi
 
+  # make sure storage directory exist
+  sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+  sudo chown -R admin:admin $ACME_CONFIG_HOME
+  sudo chmod -R 733 $ACME_CONFIG_HOME
+
   # get and check parameters
   dnsservice=$2
   FQDN=$3
@@ -254,6 +259,13 @@ elif [ "$1" = "issue-cert" ]; then
       echo "# preparing DUCKDNS"
       dnsservice="dns_duckdns"
       export DuckDNS_Token=${apitoken}
+  elif [ "${dnsservice}" == "dynu" ]; then
+      echo "# preparing DYNYU"
+      dnsservice="dns_dynu"
+      clientid=$(echo "${apitoken}" | cut -d ':' -f 1)
+      secret=$(echo "${apitoken}" | cut -d ':' -f 2)
+      export Dynu_ClientId="${clientid}"
+      export Dynu_Secret="${secret}"
   else
     echo "error='not supported dnsservice'"
     exit 1
@@ -298,6 +310,11 @@ elif [ "$1" = "remove-cert" ]; then
     exit 1
   fi
 
+  # make sure storage directory exist
+  sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
+  sudo chown -R admin:admin $ACME_CONFIG_HOME
+  sudo chmod -R 733 $ACME_CONFIG_HOME
+
   # get and check parameters
   FQDN=$2
   options=$3
@@ -333,10 +350,10 @@ elif [ "$1" = "remove-cert" ]; then
 
 
 ###################
-# REMOVE-CERT
+# REFRESH NGINX CERTS
 ###################
 
-elif [ "$1" = "refresh-ngnix-certs" ]; then
+elif [ "$1" = "refresh-nginx-certs" ]; then
 
   # refresh nginx
   refresh_certs_with_nginx
@@ -350,7 +367,7 @@ elif [ "$1" = "refresh-ngnix-certs" ]; then
 
   echo "# restarting nginx"
   sudo systemctl restart nginx 2>&1
-  
+
 
 ###################
 # OFF

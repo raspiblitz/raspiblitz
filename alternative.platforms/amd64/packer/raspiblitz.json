@@ -1,0 +1,72 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<esc><wait>",
+        "auto ",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        "<enter>"
+      ],
+      "boot_wait": "5s",
+      "disk_size": "16384",
+      "guest_os_type": "Debian_64",
+      "headless": false,
+      "http_directory": "http",
+      "iso_checksum": "{{ user `iso_checksum_type` }}:{{ user `iso_checksum` }}",
+      "iso_url": "{{ user `iso_url` }}",
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "30m",
+      "ssh_username": "vagrant",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "1024"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ],
+      "vm_name": "raspiblitz-amd64"
+    }
+  ],
+  "post-processors": [
+    {
+      "compression_level": "8",
+      "output": "output/raspiblitz.box",
+      "type": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/init.sh",
+      "type": "shell"
+    },
+    {
+      "execute_command": "echo 'yes' | {{.Vars}} bash '{{.Path}}' {{ user `branch` }} {{ user `github_user` }} /dev/sda1 false false",
+      "script": "../../../build_sdcard.sh",
+      "type": "shell"
+    },
+    {
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/cleanup.sh",
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "branch": "dev",
+    "github_user": "rootzoll",
+    "iso_checksum": "2af8f43d4a7ab852151a7f630ba596572213e17d3579400b5648eba4cc974ed0",
+    "iso_checksum_type": "sha256",
+    "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.6.0-amd64-netinst.iso"
+  }
+}
+

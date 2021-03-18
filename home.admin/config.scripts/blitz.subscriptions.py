@@ -11,7 +11,8 @@ import time
 from datetime import datetime
 
 import toml
-from blitzpy import RaspiBlitzConfig
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
 from dialog import Dialog
 
 # constants for standard services
@@ -19,6 +20,7 @@ SERVICE_LND_REST_API = "LND-REST-API"
 SERVICE_LND_GRPC_API = "LND-GRPC-API"
 SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
+SERVICE_SPHINX = "SPHINX"
 
 # load config 
 cfg = RaspiBlitzConfig()
@@ -207,6 +209,10 @@ The following additional information is available:
             print("# FAIL: unknown subscription type")
             time.sleep(3)
 
+    # trigger restart of relevant services so they can pickup new environment
+    print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+    os.system("sudo systemctl restart sphinxrelay")
+
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     my_subscriptions()
 
@@ -274,6 +280,7 @@ def main():
         lnd_grpc_api = False
         lnbits = False
         btcpay = False
+        sphinx = False
         try:
             if os.path.isfile(SUBSCRIPTIONS_FILE):
                 os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
@@ -289,6 +296,8 @@ def main():
                         lnbits = True
                     if sub['active'] and sub['name'] == SERVICE_BTCPAY:
                         btcpay = True
+                    if sub['active'] and sub['name'] == SERVICE_SPHINX:
+                        sphinx = True
         except Exception as e:
             print(e)
 
@@ -299,6 +308,13 @@ def main():
         if status_data.find("installed=1") > -1:
             btc_pay_server = True
 
+        # check if Sphinx-Relay is installed
+        sphinx_relay = False
+        status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'],
+                                     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        if status_data.find("installed=1") > -1:
+            sphinx_relay = True
+
         # ask user for which RaspiBlitz service the bridge should be used
         choices = list()
         choices.append(("REST", "LND REST API {0}".format("--> ALREADY BRIDGED" if lnd_rest_api else "")))
@@ -307,6 +323,8 @@ def main():
             choices.append(("LNBITS", "LNbits Webinterface {0}".format("--> ALREADY BRIDGED" if lnbits else "")))
         if btc_pay_server:
             choices.append(("BTCPAY", "BTCPay Server Webinterface {0}".format("--> ALREADY BRIDGED" if btcpay else "")))
+        if sphinx_relay:
+            choices.append(("SPHINX", "Sphinx Relay  {0}".format("--> ALREADY BRIDGED" if sphinx else "")))
         choices.append(("SELF", "Create a custom IP2TOR Bridge"))
 
         d = Dialog(dialog="dialog", autowidgetsize=True)
@@ -344,6 +362,12 @@ def main():
             # get TOR address for BTCPAY
             service_name = SERVICE_BTCPAY
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/btcpay/hostname'],
+                                         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+            tor_port = 443
+        if tag == "SPHINX":
+            # get TOR address for SPHINX
+            service_name = SERVICE_SPHINX
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/sphinxrelay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "SELF":
@@ -388,8 +412,13 @@ def main():
             service_name, tor_address, tor_port)
         print("# running: {0}".format(cmd))
         os.system(cmd)
-        sys.exit(0)
 
+        # action after possibly new created bride
+        if service_name == SERVICE_SPHINX:
+            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            os.system("sudo systemctl restart sphinxrelay")
+
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()

@@ -4,7 +4,7 @@
 source /home/admin/raspiblitz.info
 
 # get local ip
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 # Basic Options
 OPTIONS=(WINDOWS "Windows" \
@@ -28,9 +28,14 @@ esac
 if [ "${setupStep}" = "100" ]; then
   # make sure services are not running
   echo "stopping services ..."
+  sudo systemctl stop background
   sudo systemctl stop lnd 
   sudo systemctl stop bitcoind
   sudo cp -f /mnt/hdd/bitcoin/bitcoin.conf /home/admin/assets/bitcoin.conf 
+else
+  # make sure bitcoind is not running
+  sudo systemctl stop background <2 /dev/null
+  sudo systemctl stop bitcoind <2 /dev/null
 fi
 
 # check if old blockchain data exists
@@ -45,7 +50,7 @@ if [ ${#sizeChainstate} -gt 0 ] && [ ${sizeChainstate} -gt 0 ]; then
 fi
 
 if [ ${hasOldBlockchainData} -eq 1 ] && [ "$1" != "stop-after-script" ]; then
-  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the old/local blockchain data now?" 7 60
+  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
   response=$?
   echo "response(${response})"
   if [ "${response}" = "1" ]; then
@@ -201,11 +206,6 @@ echo "*********************************************"
 
 # if started with parameter "stop-after-script" - quit here
 if [ "$1" == "stop-after-script" ]; then
-  if [ ${quickCheckOK} -eq 0 ]; then
-    echo "cleaning up .."
-    sudo rm -rf /mnt/hdd/bitcoin/blocks
-    sudo rm -rf /mnt/hdd/bitcoin/chainstate
-  fi
   echo "DONE Copy"
   exit 0
 fi
@@ -231,6 +231,15 @@ if [ ${quickCheckOK} -eq 0 ]; then
 
   echo "Wait 5 secs ..."
   sleep 5
+
+  dialog --title " INVALID TRANSFER - TRY AGAIN?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. Maybe transfere was interrupted and not completed.\n\nDo you want retry/proceed the copy process?" 8 70
+  response=$?
+  echo "response(${response})"
+  if [ "${response}" == "0" ]; then
+    /home/admin/50copyHDD.sh
+    exit 0
+  fi
+
   dialog --title " INVALID TRANSFER - DELETE DATA?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. This can lead further RaspiBlitz setup to get stuck in error state.\nDo you want to reset/delete data?" 8 60
   response=$?
   echo "response(${response})"

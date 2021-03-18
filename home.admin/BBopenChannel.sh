@@ -1,6 +1,6 @@
 #!/bin/bash
-_temp="./download/dialog.$$"
-_error="./.error.out"
+_temp=$(mktemp -p /dev/shm/)
+_error=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
@@ -89,7 +89,7 @@ if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
   minSat=$(echo "${error}" | tr -dc '0-9')
 fi
 
-# let user enter a amount
+# let user enter an amount
 l1="Amount in SATOSHI to fund this channel:"
 l2="min required  : ${minSat}"
 l3="max available : ${confirmedBalance}"
@@ -104,8 +104,22 @@ if [ ${#amount} -eq 0 ]; then
   exit 1
 fi
 
+# let user enter a confirmation target
+l1=""
+l2="Urgent = 1 / Economy = 20"
+dialog --title "Set confirmation target" \
+--inputbox "$l1\n$l2" 10 60 2>$_temp
+conf_target=$(cat $_temp | xargs | tr -dc '0-9')
+shred -u $_temp
+if [ ${#conf_target} -eq 0 ]; then
+  echo
+  echo "no valid target entered - returning to menu ..."
+  sleep 4
+  exit 1
+fi
+
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=1 ${pubKey} ${amount} 0"
+command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
 
 # info output
 clear

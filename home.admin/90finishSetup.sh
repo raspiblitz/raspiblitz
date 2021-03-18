@@ -18,7 +18,6 @@ fi
 ####### FIREWALL - just install (not configure)
 echo ""
 echo "*** Setting and Activating Firewall ***"
-sudo apt-get install -y ufw
 echo "deny incoming connection on other ports"
 sudo ufw default deny incoming
 echo "allow outgoing connections"

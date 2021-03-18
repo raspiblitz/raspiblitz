@@ -30,6 +30,12 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: sourcemode
+function sourcemode() {
+  cd /home/admin
+  ./98repairMenu.sh sourcemode
+}
+
 # command: check
 function check() {
   /home/admin/config.scripts/blitz.configcheck.py
@@ -58,6 +64,13 @@ function restart() {
 function off() {
   cd /home/admin
   ./XXshutdown.sh
+}
+
+# command: github
+# jumpng directly into the options to change branch/repo/pr
+function github() {
+  cd /home/admin
+  ./99updateMenu.sh github
 }
 
 # command: hdmi
@@ -104,27 +117,128 @@ function status() {
   sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
-# command: balance
-# switch to the bos user for Balance of Satoshis
+# command: lnbalance
+# show balance report
 function balance() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "bos=on") -eq 1 ]; then
+  echo "*** YOUR SATOSHI BALANCES ***"
+  /home/admin/config.scripts/lnd.balance.sh
+}
+
+# command: lnchannels
+# show channel listing
+function channels() {
+  echo "*** YOUR LIGHTNING CHANNELS ***"
+  /home/admin/config.scripts/lnd.channels.sh
+}
+
+# command: lnfwdreport
+# show forwarding report
+function fwdreport() {
+  /home/admin/config.scripts/lnd.fwdreport.sh -menu
+}
+
+# command: bos
+# switch to the bos user for Balance of Satoshis
+function bos() {
+  if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the bos user with the command: 'sudo su - bos'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'bos --help' to list all possible options"
     sudo su - bos
+    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "Balance of Satoshis is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.bos.sh on"
   fi
 }
 
-# command: jmarket
+# command: pyblock
+# switch to the pyblock user for PyBLOCK
+function pyblock() {
+  if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'pyblock' again to start"
+    sudo su - pyblock
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "PyBlock is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pyblock.sh on"
+  fi
+}
+
+# command: jm
 # switch to the joinmarket user for the JoininBox menu
-function jmarket() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "joinmarket=on") -eq 1 ]; then
+function jm() {
+  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the joinmarket user with the command: 'sudo su - joinmarket'"
     sudo su - joinmarket
+    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
   fi
 }
+
+# command: faraday
+# switch to the faraday user for the Faraday Service
+function faraday() {
+  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the faraday user with the command: 'sudo su - faraday'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'frcli --help' now to get more info"
+    sudo su - faraday
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "Faraday is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.faraday.sh on"
+  fi
+}
+
+# command: loop
+# switch to the loop user for the Lightning Loop Service
+function loop() {
+  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the loop user with the command: 'sudo su - loop'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'loop --help' now to get more info"
+    sudo su - loop
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "Lightning Loop is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.loop.sh on"
+  fi
+}
+
+# command: pool
+# switch to the pool user for the Pool Service
+function pool() {
+  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+    echo "# switching to the pool user with the command: 'sudo su - pool'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'pool --help' now to get more info"
+    sudo su - pool
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "Pool is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pool.sh on"
+  fi
+}
+
+# aliases for lit
+# switch to the pool user for the Pool Service
+if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+  source /mnt/hdd/raspiblitz.conf
+  alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \
+    --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
+  alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
+    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
+  alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
+fi
 
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON

@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http]"
+ echo "lnd.export.sh [hexstring|scp|http|btcpay]"
  exit 1
 fi
 
@@ -13,9 +13,10 @@ exportType=$1
 # interactive choose type of export if not set
 if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
-    OPTIONS+=(HEX "Hex-String (Copy+Paste)")
     OPTIONS+=(SCP "SSH Download (Commands)")
     OPTIONS+=(HTTP "Browserdownload (bit risky)")
+    OPTIONS+=(HEX "Hex-String (Copy+Paste)")   
+    OPTIONS+=(STR "BTCPay Connection String") 
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Export Macaroons & TLS.cert" \
@@ -28,6 +29,9 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
         HEX)
           exportType='hexstring';
           ;;
+        STR)
+          exportType='btcpay';
+          ;;
         SCP)
           exportType='scp';
           ;;
@@ -35,6 +39,7 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
           exportType='http';
           ;;
     esac
+
 fi
 
 # load data from config
@@ -70,12 +75,55 @@ elif [ "${exportType}" = "hexstring" ]; then
   sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert
   echo ""
 
+########################
+# BTCPAY Connection String
+########################
+elif [ "${exportType}" = "btcpay" ]; then
+
+  # take public IP as default
+  # TODO: IP2TOR --> check if there is a forwarding for LND REST oe ask user to set one up
+  #ip="${publicIP}"
+  ip="127.0.0.1"
+  port="8080"
+
+  # will overwrite ip & port if IP2TOR tunnel is available
+  source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
+
+  # bake macaroon that just can create invoices and monitor them
+  macaroon=$(sudo -u admin lncli bakemacaroon address:read address:write info:read invoices:read invoices:write onchain:read)
+
+  # old: admin macaroon (remove after v1.6.3 release)
+  #macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+
+  # get certificate thumb
+  certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)
+
+  # construct connection string
+  connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"
+
+  clear
+  echo "###### BTCPAY CONNECTION STRING ######"
+  echo ""
+  echo "${connectionString}"
+  echo ""
+
+  # add info about outside reachability (type would have a value if IP2TOR tunnel was found)
+  if [ ${#type} -gt 0 ]; then
+    echo "NOTE: You have a IP2TOR connection for LND REST API .. so you can use this connection string also with a external BTCPay server."
+  else
+    echo "IMPORTANT: You can only use this connection string for a BTCPay server running on this RaspiBlitz."
+    echo "If you want to connect from a external BTCPay server activate a IP2TOR tunnel for LND-REST first:"
+    echo "MAIN MENU > SUBSCRIBE > IP2TOR > LND REST API"
+    echo "Then come back and get a new connection string."
+  fi
+  echo ""
+
 ###########################
 # SHH / SCP File Download
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
@@ -93,7 +141,7 @@ elif [ "${exportType}" = "scp" ]; then
 ###########################
 elif [ "${exportType}" = "http" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear

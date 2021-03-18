@@ -1,9 +1,13 @@
 #!/bin/bash
 
+# https://github.com/lightninglabs/loop/releases-
+pinnedVersion="v0.11.2-beta"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the Lightning Loop Service on or off"
- echo "bonus.loop.sh [on|off|menu]"
+ echo "config script to switch the Lightning Loop Service on,off or update"
+ echo "bonus.loop.sh [on|off|menu|update]"
+ echo "Installs Lightning Loop $pinnedVersion by default"
  exit 1
 fi
 
@@ -18,18 +22,19 @@ fi
 if [ "$1" = "menu" ]; then
   dialog --title " Info Loop Service " --msgbox "\n\
 Usage and examples: https://github.com/lightninglabs/loop#loop-out-swaps\n
-Use the command 'loop' on the terminal to see the options.
+Use the shortcut 'loop' in the terminal to switch to the dedicated user.\n
+Type 'loop' again to see the available options.
 " 10 56
   exit 0
 fi
 
 # stop services
-echo "making sure the loop service is not running"
+echo "making sure the loopd.service is not running"
 sudo systemctl stop loopd 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL LIGHTNING LOOP ***"
+  echo "# Install Lightning Loop"
   
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 0 ]; then
@@ -43,10 +48,31 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     sudo adduser --disabled-password --gecos "" loop
 
-    # make sure symlink to central app-data directory exists ***"
+    # set PATH for the user
+    sudo bash -c "echo 'PATH=\$PATH:/home/loop/go/bin/' >> /home/loop/.profile"
+
+    # make sure symlink to central app-data directory exists
     sudo rm -rf /home/loop/.lnd  # not a symlink.. delete it silently
     # create symlink
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/loop/.lnd"
+    sudo ln -s /mnt/hdd/app-data/lnd/ /home/loop/.lnd
+
+    echo "# persist settings in app-data"
+    # move old data if present
+    sudo mv /home/loop/.loop /mnt/hdd/app-data/ 2>/dev/null
+    echo "# make sure the data directory exists"
+    sudo mkdir -p /mnt/hdd/app-data/.loop
+    echo "# symlink"
+    sudo rm -rf /home/loop/.loop # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/.loop/ /home/loop/.loop
+    sudo chown loop:loop -R /mnt/hdd/app-data/.loop
+
+    # install from source
+    cd /home/loop
+    sudo -u loop git clone https://github.com/lightninglabs/loop.git
+    cd /home/loop/loop
+    sudo -u loop git reset --hard $pinnedversion
+    cd /home/loop/loop/cmd
+    sudo -u loop /usr/local/go/bin/go install ./... || exit 1
 
     # sync all macaroons and unix groups for access
     /home/admin/config.scripts/lnd.credentials.sh sync
@@ -65,22 +91,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo /usr/sbin/usermod --append --groups lndwalletkit loop
     sudo /usr/sbin/usermod --append --groups lndrouter loop
 
-    # install from source
-    cd /home/loop
-    sudo -u loop git clone https://github.com/lightninglabs/loop.git
-    cd /home/loop/loop
-
-    # https://github.com/lightninglabs/loop/releases
-    sudo -u loop git reset --hard v0.8.0-beta
-    cd /home/loop/loop/cmd
-    go install ./...
-
     # make systemd service
     if [ "${runBehindTor}" = "on" ]; then
-      echo "Will connect to Loop server through Tor"
+      echo "# Will connect to Loop server through Tor"
       proxy="--server.proxy=127.0.0.1:9050"
     else
-      echo "Will connect to Loop server through clearnet"
+      echo "# Will connect to Loop server through clearnet"
       proxy=""
     fi
 
@@ -92,7 +108,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/loop/loop
-ExecStart=/usr/local/gocode/bin/loopd --network=${chain}net ${proxy}
+ExecStart=/home/loop/go/bin/loopd --network=${chain}net ${proxy}
 User=loop
 Group=loop
 Type=simple
@@ -105,20 +121,20 @@ RestartSec=60
 WantedBy=multi-user.target
 " | sudo tee -a /etc/systemd/system/loopd.service
     sudo systemctl enable loopd
-    echo "OK - the Lightning Loop service is now enabled"
+    echo "# OK - the Lightning Loop service is now enabled"
 
   else 
-    echo "Loop service already installed."
+    echo "# The Loop service already installed."
   fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
   
-  isInstalled=$(loop | grep -c loop)
+  isInstalled=$(sudo -u loop /home/loop/go/bin/loop | grep -c loop)
   if [ ${isInstalled} -gt 0 ] ; then
-    echo "Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
+    echo "# Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
   else
-    echo " Failed to install Lightning Loop "
+    echo "# Failed to install Lightning Loop "
     exit 1
   fi
   
@@ -133,25 +149,65 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** REMOVING LIGHTNING LOOP SERVICE ***"
+    echo "# Removing the Lightning Loop service"
     # remove the systemd service
     sudo systemctl stop loopd
     sudo systemctl disable loopd
     sudo rm /etc/systemd/system/loopd.service
-    # delete user 
+    # delete user and it's home directory
     sudo userdel -rf loop
-    # delete Go packages
-    sudo rm  /usr/local/gocode/bin/loop
-    sudo rm  /usr/local/gocode/bin/loopd
-    echo "OK, the Loop Service is removed."
+    echo "# OK, the Loop Service is removed."
   else 
-    echo "Loop is not installed."
+    echo "# Loop is not installed."
   fi
 
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
-echo "may need reboot to run normal again"
+# update
+if [ "$1" = "update" ]; then
+  echo "# Updating Loop "
+  cd /home/loop/loop
+  # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+  # fetch latest master
+  sudo -u loop git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# You are up-to-date on version" $TAG
+  else
+    echo "# Pulling the latest changes..."
+    sudo -u loop git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(git tag | sort -V | tail -1)
+    sudo -u loop git reset --hard $TAG
+    echo "# Updating ..."
+    # install to /home/loop/go/bin/
+    cd /home/loop/loop/cmd
+    sudo -u loop /usr/local/go/bin/go install ./... || exit 1
+    isInstalled=$(sudo -u loop /home/loop/go/bin/loop  | grep -c loop)
+    if [ ${isInstalled} -gt 0 ]; then
+      TAG=$(git tag | sort -V | tail -1)
+      echo "# Updated to version" $TAG
+    else
+      echo "# Failed to install Lightning Loop "
+      exit 1
+    fi
+  fi
+
+  echo "# At the latest in https://github.com/lightninglabs/loop/releases/"
+  echo ""
+  echo "# Starting the loopd.service ..."
+  sudo systemctl start loopd
+  exit 0
+fi
+
+echo "# FAIL - Unknown Parameter $1"
+echo "# may need reboot to run normal again"
 exit 1
   

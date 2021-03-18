@@ -34,7 +34,7 @@ function wait_for_local_network() {
   gotLocalIP=0
   until [ ${gotLocalIP} -eq 1 ]
   do
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     if [ ${#localip} -eq 0 ]; then
       configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
       if [ ${configWifiExists} -eq 0 ]; then
@@ -52,29 +52,6 @@ function wait_for_local_network() {
       sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
     else
       gotLocalIP=1
-    fi
-    sleep 1
-  done
-}
-
-# wait until raspberry pi gets a local IP
-function wait_for_internet() {
-  online=0
-  until [ ${online} -eq 1 ]
-  do
-    # check for internet connection
-    online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
-      sed -i "s/^message=.*/message='Network OK but NO Internet'/g" ${infoFile}
     fi
     sleep 1
   done
@@ -200,8 +177,16 @@ fi
 # display 3 secs logo - try to kickstart LCD
 # see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
 # see https://github.com/rootzoll/raspiblitz/issues/647
+# see https://github.com/rootzoll/raspiblitz/pull/1580
 randnum=$(shuf -i 0-7 -n 1)
-sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+if [ ${lcdExists} -eq 1 ] ; then
+   # LCD
+   sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+else
+   # HDMI
+   sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+fi
 sleep 5
 sudo killall -3 fbi
 
@@ -242,6 +227,7 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 6 secs ... one more reboot needed ... "
+
   sudo shutdown -r now
   sleep 100
 fi
@@ -274,7 +260,7 @@ fi
 # SSH SERVER CERTS RESET
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
-# the sd card - switch to hdmi
+# the sd card - delete old ssh data
 ################################
 
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
@@ -296,13 +282,19 @@ fi
 # HDD CHECK & PRE-INIT
 ################################
  
+# Without LCD message needs to be printed
 # wait loop until HDD is connected
+echo ""
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  echo "isMounted: $isMounted" >> $logFile
+  echo "hddCandidate: $hddCandidate" >> $logFile
+  message="Connect the Hard Drive"
+  echo $message
   if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
-    sed -i "s/^message=.*/message='Connect the Hard Drive'/g" ${infoFile}
+    sed -i "s/^message=.*/message='$message'/g" ${infoFile}
   fi
   sleep 2
 done
@@ -313,6 +305,7 @@ sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+echo "isMounted: $isMounted" >> $logFile
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 if [ ${isMounted} -eq 0 ]; then
@@ -336,8 +329,12 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   # temp mount the HDD
-  echo "Temp mounting data drive" >> $logFile
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  echo "Temp mounting data drive ($hddCandidate)" >> $logFile
+  if [ "${hddFormat}" != "btrfs" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  else
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  fi
   if [ ${#error} -gt 0 ]; then
     echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
@@ -349,16 +346,8 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
-  # check if there is a WIFI configuration to restore
-  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-  configWifiHDD=$(sudo cat /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-  if [ ${configWifiExists} -eq 0 ] && [ ${configWifiHDD} -eq 1 ]; then
-    echo "Restoring WIFI setting & rebooting .." >> $logFile
-    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /boot/wpa_supplicant.conf
-    sudo chmod 755 /boot/wpa_supplicant.conf
-    sudo reboot now
-    exit 0
-  fi
+  # check if there is a WIFI configuration to backup or restore
+  sudo /home/admin/config.scripts/internet.wifi.sh backup-restore
 
   # make sure at this point local network is connected
   wait_for_local_network
@@ -409,11 +398,11 @@ if [ ${isMounted} -eq 0 ]; then
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
     echo "state=recovered" >> /home/admin/raspiblitz.recover.info
+    echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
-    echo "shutdown in 1min" >> $logFile
     sync
-    sudo shutdown -r -F +1
+    sudo shutdown -r -F -t 60
     exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
@@ -474,64 +463,29 @@ if [ ${configExists} -eq 1 ]; then
   # load values
   echo "load and update publicIP" >> $logFile
   source ${configFile}
-  freshPublicIP=""
-  
-  # determine the publicIP/domain that LND should announce
-  if [ ${#lndAddress} -gt 3 ]; then
 
-    # use domain as PUBLICIP 
-    freshPublicIP="${lndAddress}"
-
-  else
-
-    # update public IP on boot
-    # wait otherwise looking for publicIP fails
-    sleep 5
-    freshPublicIP=$(curl -s http://v4.ipv6-test.com/api/myip.php)
-
-    # sanity check on IP data
-    # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
-    echo "-> sanity check of IP data:"
-    if [[ $freshPublicIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-      echo "OK IPv6"
-    elif [[ $freshPublicIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-      echo "OK IPv4"
-    else
-      echo "FAIL - not an IPv4 or IPv6 address"
-      freshPublicIP=""
-    fi
-
-    if [ ${#freshPublicIP} -eq 0 ]; then
-      # prevent having no publicIP set at all and LND getting stuck
-      # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
-      if [ ${#publicIP} -eq 0 ]; then
-        localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-        echo "WARNING: No publicIP information at all - working with placeholder: ${localIP}" >> $logFile
-        freshPublicIP="${localIP}"
+  # if not running TOR before starting LND internet connection with a valid public IP is needed
+  waitForPublicIP=1
+  if [ "${runBehindTor}" = "on" ] || [ "${runBehindTor}" = "1" ]; then
+    echo "# no need to wait for internet - public Tor address already known" >> $logFile
+    waitForPublicIP=0
+  fi
+  while [ ${waitForPublicIP} -eq 1 ]
+    do
+      source <(/home/admin/config.scripts/internet.sh status)
+      if [ ${online} -eq 0 ]; then
+        echo "# (loop) waiting for internet ... " >> $logFile
+        sed -i "s/^state=.*/state=nointernet/g" ${infoFile}
+        sed -i "s/^message=.*/message='Waiting for Internet'/g" ${infoFile}
+        sleep 4
+      else
+        echo "# OK internet detected ... continue" >> $logFile
+        waitForPublicIP=0
       fi
-    fi
-
-  fi
-
-  # set publicip value in raspiblitz.conf
-  if [ ${#freshPublicIP} -eq 0 ]; then
-    echo "WARNING: Was not able to determine external IP/domain on startup." >> $logFile
-  else
-    publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
-    if [ ${publicIPValueExists} -gt 1 ]; then
-      # remove one 
-      echo "more then one publiIp entry - removing one" >> $logFile
-      sed -i "s/^publicIP=.*//g" ${configFile}
-      publicIPValueExists=$( sudo cat ${configFile} | grep -c 'publicIP=' )
-    fi
-    if [ ${publicIPValueExists} -eq 0 ]; then
-      echo "create value (${freshPublicIP})" >> $logFile
-      echo "publicIP='${freshPublicIP}'" >> $configFile
-    else
-      echo "update value (${freshPublicIP})" >> $logFile
-      sed -i "s/^publicIP=.*/publicIP='${freshPublicIP}'/g" ${configFile}
-    fi
-  fi
+    done
+  
+  # update public IP on boot - set to domain is available
+  /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
 
 fi
 
@@ -540,6 +494,14 @@ fi
 # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
+
+
+#################################
+# FIX BLOCKING FILES (just in case)
+# https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
+# https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
+sudo rm -f /home/bitcoin/.bitcoin/bitcoind.pid 2>/dev/null
+sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
 
 
 #################################
@@ -610,7 +572,7 @@ if [ ${loaded} -gt 0 ]; then
 fi
 
 ################################
-# DELETE LOG FILES
+# DELETE LOG & LOCK FILES
 ################################
 # LND and Blockchain Errors will be still in systemd journals
 
@@ -618,6 +580,8 @@ fi
 sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+# https://github.com/rootzoll/raspiblitz/issues/1700
+sudo rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
 #####################################
 # CLEAN HDD TEMP

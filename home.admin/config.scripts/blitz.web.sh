@@ -124,6 +124,14 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get update
   sudo apt-get install -y nginx apache2-utils
 
+  # additional config
+  sudo mkdir -p /etc/systemd/system/nginx.service.d
+  sudo tee /etc/systemd/system/nginx.service.d/raspiblitz.conf >/dev/null <<EOF
+    # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
+[Unit]
+After=network.target nss-lookup.target mnt-hdd.mount
+EOF
+
   # make sure that it is enabled and started
   sudo systemctl enable nginx 
   sudo systemctl start nginx

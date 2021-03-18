@@ -34,14 +34,17 @@ if [ "$1" = "status" ]; then
 
   else
     echo "backupdevice=0"
+
+    # get info on possible already existing BTRFS RAID1 usb drive
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     
     # get all the devices that are not mounted and possible candidates
     drivecounter=0
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+      # is raid candidate when: not mounted & not the data drive cadidate (hdd/ssd) & not BTRFS RAID
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${disk}" != "${raidUsbDev}" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
         vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
@@ -127,7 +130,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
     if [ ${isDeviceName} -eq 1 ]; then
       hdd="${uuid}"
       # check if mounted
-      checkIfAlreadyMounted=$(lsblk | grep "${hdd}" | grep -c '/mnt/')
+      checkIfAlreadyMounted=$(lsblk -o NAME,UUID,MOUNTPOINT | grep "${hdd}" | grep -c '/mnt/')
       if [ ${checkIfAlreadyMounted} -gt 0 ]; then
         echo "# cannot format a device that is mounted"
         echo "error='device is in use'"
@@ -136,7 +139,9 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       echo "# OK found device name ${hdd} that will now be formatted ..."
       echo "# Wiping all partitions (sfdisk/wipefs)"
       sudo sfdisk --delete /dev/${hdd} 1>&2
+      sleep 4
       sudo wipefs -a /dev/${hdd} 1>&2
+      sleep 4
       partitions=$(lsblk | grep -c "─${hdd}")
       if [ ${partitions} -gt 0 ]; then
         echo "# WARNING: partitions are still not clean"

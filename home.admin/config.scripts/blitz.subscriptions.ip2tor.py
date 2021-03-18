@@ -12,7 +12,11 @@ from pathlib import Path
 import grpc
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig, BlitzError
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
+from exceptions import BlitzError
+
 from lndlibs import rpc_pb2 as lnrpc
 from lndlibs import rpc_pb2_grpc as rpcstub
 
@@ -39,6 +43,7 @@ SERVICE_LND_REST_API = "LND-REST-API"
 SERVICE_LND_GRPC_API = "LND-GRPC-API"
 SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
+SERVICE_SPHINX = "SPHINX"
 
 #####################
 # BASIC SETTINGS
@@ -596,14 +601,18 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     except Exception as e:
         print("# using default shop url")
 
+    # remove https:// from shop url (to keep it short)
+    if shopurl.find("://") > 0:
+        shopurl = shopurl[shopurl.find("://") + 3:]
+
     while True:
 
         # input shop url
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
         code, text = d.inputbox(
-            "Enter Address of a IP2TOR Shop (OR USE DEFAULT):",
-            height=10, width=60, init=shopurl,
+            "Enter Address of a IP2TOR Shop (OR JUST USE DEFAULT):",
+            height=10, width=72, init=shopurl,
             title="Shop Address")
 
         # if user canceled
@@ -617,6 +626,8 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
             hosts = shopList(shopurl)
         except Exception as e:
             # shopurl not working
+            eprint(e)
+            time.sleep(3)
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 Cannot reach a shop under that address.
 Please check domain or cancel dialog.
@@ -1063,7 +1074,6 @@ def subscription_by_service():
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == service_name:
@@ -1097,7 +1107,6 @@ def ip_by_tor():
 
     try:
         if os.path.isfile(SUBSCRIPTIONS_FILE):
-            os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and (sub['tor'] == onion or sub['tor'].split(":")[0] == onion):

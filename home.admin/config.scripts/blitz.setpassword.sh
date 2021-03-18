@@ -17,7 +17,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # tempfile 
-_temp="./dialog.$$"
+_temp=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
@@ -35,9 +35,16 @@ abcd=$1
 # 2. parameter [?newpassword]
 newPassword=$2
 
+# 4. parameter [?newpassword]
+emptyAllowed=0
+if [ "$4" == "empty-allowed" ]; then
+  emptyAllowed=1
+fi
+
 # run interactive if no further parameters
 OPTIONS=()
 if [ ${#abcd} -eq 0 ]; then
+    emptyAllowed=1
     OPTIONS+=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
     OPTIONS+=(C "LND Wallet Password")
@@ -82,9 +89,25 @@ if [ "${abcd}" = "a" ]; then
 
     # ask user for new password A (first time)
     password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then
+      if [ ${emptyAllowed} -eq 0 ]; then
+        echo "CANCEL not possible"
+        sleep 2
+      else
+        exit 1
+      fi
+    fi
 
     # ask user for new password A (second time)
     password2=$(whiptail --passwordbox "\nRe-Enter Password A:\n(This is new password to login per SSH)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then
+      if [ ${emptyAllowed} -eq 0 ]; then
+        echo "CANCEL not possible"
+        sleep 2
+      else
+        exit 1
+      fi
+    fi
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -141,9 +164,25 @@ elif [ "${abcd}" = "b" ]; then
 
     # ask user for new password B (first time)
     password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then
+      if [ ${emptyAllowed} -eq 0 ]; then
+        echo "CANCEL not possible"
+        sleep 2
+      else
+        exit 1
+      fi
+    fi
 
     # ask user for new password B (second time)
     password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then
+      if [ ${emptyAllowed} -eq 0 ]; then
+        echo "CANCEL not possible"
+        sleep 2
+      else
+        exit 1
+      fi
+    fi
 
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
@@ -254,6 +293,20 @@ EOF
     sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
   fi
 
+  # Tor
+  if [ "${runBehindTor}" == "on" ]; then
+      echo "# changing the password for Tor"
+
+      hashedPassword=$(sudo -u debian-tor tor --hash-password "${newPassword}")
+      sed -i "s/^HashedControlPassword .*/HashedControlPassword ${hashedPassword}/g" /etc/tor/torrc 2>/dev/null
+
+      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
+
+      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
+      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
   exit 0
@@ -327,7 +380,7 @@ elif [ "${abcd}" = "x" ]; then
       exit 1
     fi
 
-    if [ "$4" != "empty-allowed" ]; then
+    if [ ${emptyAllowed} -eq 0 ]; then
 
       # password zero
       if [ ${#password1} -eq 0 ]; then

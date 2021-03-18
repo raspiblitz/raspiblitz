@@ -20,6 +20,20 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     echo "***********************************************************"
     echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
     echo "***********************************************************"
+    vagrant=$(df | grep -c "/vagrant")
+    if [ ${vagrant} -gt 0 ]; then
+      echo "To connect a HDD data disk to your VagrantVM:"
+      echo "- shutdown VM with command: off"
+      echo "- open your VirtualBox GUI and select RaspiBlitzVM"
+      echo "- change the 'mass storage' settings"
+      echo "- add a second 'Primary Slave' drive to the already existing controller"
+      echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
+      echo "***********************************************************"
+      echo "You can either create a new dynamic VDI with around 900GB or download"
+      echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
+      echo "space on your laptop you can store the VDI file on an external drive."
+      echo "***********************************************************"
+    fi
     exit
 fi
 
@@ -40,6 +54,24 @@ if [ "${state}" = "recovering" ]; then
   echo "WARNING: bootstrap still updating - close SSH, login later"
   echo "To monitor progress --> tail -n1000 -f raspiblitz.log"
   echo "***********************************************************"
+  exit
+fi
+
+if [ "${state}" = "copysource" ]; then
+  echo "***********************************************************"
+  echo "INFO: You lost connection during copying the blockchain"
+  echo "You have the following options:"
+  echo "a) continue/check progress with command: sourcemode"
+  echo "b) return to normal mode with command: restart"
+  echo "***********************************************************"
+  exit
+fi
+
+# check if copy blockchain over LAN to this RaspiBlitz was running
+source <(/home/admin/config.scripts/blitz.copyblockchain.sh status)
+if [ "${copyInProgress}" = "1" ]; then
+  echo "Detected interrupted COPY blochain process ..."
+  /home/admin/50copyHDD.sh
   exit
 fi
 
@@ -204,6 +236,7 @@ How do you want to continue?
               echo "please wait ... update to next screen can be slow"
             else
               /home/admin/80scanLND.sh lightning-error
+              sudo rm /home/admin/systemd.lightning.log
               echo "(exit after too much restarts/unlocks - restart to try again)"
               exit 0
             fi
@@ -333,6 +366,9 @@ if LND was able to recover funds from your channels.
   
   fi
 
+  # check if DNS is working (if not it will trigger dialog)
+  sudo /home/admin/config.scripts/internet.dns.sh test
+
   #forward to main menu
   /home/admin/00mainMenu.sh
   exit 0
@@ -381,6 +417,17 @@ case $CHOICE in
             ;; 
         MIGRATION)
             sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
+            # on error clean & repeat
+            if [ "$?" = "1" ]; then
+              echo
+              echo "# clean and unmount for next try"
+              sudo rm -f ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null
+              sudo umount /mnt/hdd 2>/dev/null
+              sudo umount /mnt/storage 2>/dev/null
+              sudo umount /mnt/temp 2>/dev/null
+              sleep 2
+              /home/admin/00raspiblitz.sh
+            fi
             exit 0
             ;;
         CONTINUE)

@@ -5,7 +5,11 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh [on|off|status|menu|write-macaroons]"
+  echo "bonus.lnbits.sh on [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
+  echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
+  echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh github sync"
   exit 1
 fi
 
@@ -17,6 +21,17 @@ if [ "$1" = "menu" ]; then
   # get LNbits status info
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
+
+  # display possible problems with IP2TOR setup
+  if [ ${#ip2torWarn} -gt 0 ]; then
+    whiptail --title " Warning " \
+    --yes-button "Back" \
+    --no-button "Continue Anyway" \
+    --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+    if [ "$?" != "1" ]; then
+      exit 0
+	  fi
+  fi
 
   text="Local Webrowser: https://${localIP}:${httpsPort}"
 
@@ -69,7 +84,7 @@ if [ "$1" = "status" ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "httpsPort='5001'"
     echo "publicIP='${publicIP}'"
@@ -103,6 +118,10 @@ if [ "$1" = "status" ]; then
       source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
         echo "ip2torDomain='${domain}'"
+        domainWarning=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".warning")
+        if [ ${#domainWarning} -gt 0 ]; then
+          echo "ip2torWarn='${domainWarning}'"
+        fi
       fi
     fi
 
@@ -160,6 +179,53 @@ if [ "$1" = "write-macaroons" ]; then
   exit 0
 fi
 
+if [ "$1" = "repo" ]; then
+
+  # get github parameters
+  githubUser="$2"
+  if [ ${#githubUser} -eq 0 ]; then
+    echo "echo='missing parameter'"
+    exit 1
+  fi
+  githubBranch="$3"
+  if [ ${#githubBranch} -eq 0 ]; then
+    githubBranch="master"
+  fi
+
+  # check if repo exists
+  githubRepo="https://github.com/${githubUser}/lnbits"
+  httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
+  if [ "${httpcode}" != "200" ]; then
+    echo "# tested github repo: ${githubRepo}"
+    echo "error='repo for user does not exist'"
+    exit 1
+  fi
+
+  # change origin repo of lnbits code
+  echo "# changing LNbits github repo(${githubUser}) branch(${githubBranch})"
+  cd /home/lnbits/lnbits
+  sudo git remote remove origin
+  sudo git remote add origin ${githubRepo}
+  sudo git fetch
+  sudo git checkout ${githubBranch}
+  sudo git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
+
+fi
+
+if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
+  echo "# pull all changes from github repo"
+  # output basic info
+  cd /home/lnbits/lnbits
+  sudo git remote -v
+  sudo git branch -v
+  # pull latest code
+  sudo git pull
+  # restart lnbits service
+  sudo systemctl restart lnbits
+  echo "# server is restarting ... maybe takes some seconds until available"
+  exit 0
+fi
+
 # stop service
 echo "making sure services are not running"
 sudo systemctl stop lnbits 2>/dev/null
@@ -176,29 +242,32 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure needed debian packages are installed
     echo "# installing needed packages"
-    sudo apt-get install -y pipenv  2>/dev/null
+
+    # get optional github parameter
+    githubUser="lnbits"
+    if [ "$2" != "" ]; then
+      githubUser="$2"
+    fi
+    githubBranch="tags/raspiblitz"
+    #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
+    if [ "$3" != "" ]; then
+      githubBranch="$3"
+    fi
 
     # install from GitHub
-    echo "# get the github code"
+    echo "# get the github code user(${githubUser}) branch(${githubBranch})"
     sudo rm -r /home/lnbits/lnbits 2>/dev/null
     cd /home/lnbits
-    sudo -u lnbits git clone https://github.com/lnbits/lnbits.git
+    sudo -u lnbits git clone https://github.com/${githubUser}/lnbits.git
     cd /home/lnbits/lnbits
-    if [ "$2" == "master" ]; then
-      echo "# checking out master branch"
-      sudo -u lnbits git checkout
-    else
-      echo "# checking out tag 'raspiblitz'"
-      sudo -u lnbits git checkout tags/raspiblitz
-    fi
+    sudo -u lnbits git checkout ${githubBranch}
 
     # prepare .env file
     echo "# preparing env file"
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
-    sudo bash -c "echo 'FLASK_APP=lnbits' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'FLASK_ENV=production' >>  /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
@@ -216,15 +285,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# installing application dependencies"
     cd /home/lnbits/lnbits
     # do install like this
-    sudo -u lnbits pipenv run pip install python-dotenv
-    sudo -u lnbits pipenv run pip install -r requirements.txt
-    # instead of this
-    #sudo -u lnbits pipenv install
-    #sudo -u lnbits /usr/bin/pipenv run pip install python-dotenv
+
+    sudo -u lnbits python3 -m venv venv
+    #sudo -u lnbits /home/lnbits/lnbits/venv/bin/pip install hypercorn
+    sudo -u lnbits ./venv/bin/pip install -r requirements.txt
+
+    # process assets
+    echo "# processing assets"
+    sudo -u lnbits ./venv/bin/quart assets
 
     # update databases (if needed)
     echo "# updating databases"
-    sudo -u lnbits pipenv run flask migrate
+    sudo -u lnbits ./venv/bin/quart migrate
+
+    # quickfix bug: https://github.com/lnbits/lnbits/issues/99
+    chmod 777 /home/admin/assets/bundle.css
+    sudo -u lnbits cp /home/admin/assets/bundle.css /home/lnbits/lnbits/lnbits/static/bundle.css
 
     # open firewall
     echo
@@ -244,7 +320,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && pipenv run gunicorn -b 127.0.0.1:5000 lnbits:app -k gevent'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/hypercorn -k trio --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -308,7 +384,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   elif [ "$2" = "--keep-data" ]; then
     deleteData=0
   else
-    if (whiptail --title " DELETE DATA? " --yesno "Do you want want to delete\nthe LNbits Server Data?" 8 30); then
+    if (whiptail --title " DELETE DATA? " --yesno "Do you want to delete\nthe LNbits Server Data?" 8 30); then
       deleteData=1
    else
       deleteData=0

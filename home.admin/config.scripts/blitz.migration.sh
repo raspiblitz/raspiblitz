@@ -28,17 +28,23 @@ isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " 
 # set place where zipped TAR file gets stored
 defaultZipPath="/mnt/hdd/temp"
 
+# get local ip
+source <(/home/admin/config.scripts/internet.sh status local)
+
 # SCP download and upload links
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-scpDownload="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpUpload="scp -r './raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}'"
+scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
+scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ./"
+scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
+scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "isBTRFS=${isBTRFS}"
-  echo "scpDownload=\"${scpDownload}\""
-  echo "scpUpload=\"${scpUpload}\""
+  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
+  echo "scpUploadUnix=\"${scpUploadUnix}\""
+  echo "scpDownloadWin=\"${scpDownloadWin}\""
+  echo "scpUploadWin=\"${scpUploadWin}\""
   exit 1
 fi
 
@@ -86,8 +92,7 @@ if [ "$1" = "export" ]; then
   blitzname="-"
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
   if [ ${#hostname} -gt 0 ]; then
-    blitzname=$(echo "${hostname}" | sed 's/[^0-9a-z]*//g')
-    blitzname=$(echo "-${blitzname}-")
+    blitzname="-${hostname}-"
   fi
   echo "# blitzname=${blitzname}"
 
@@ -98,8 +103,12 @@ if [ "$1" = "export" ]; then
   # get md5 checksum
   echo "# Building checksum (can take also a while) ..." 
   md5checksum=$(md5sum ${defaultZipPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
-  echo "# md5checksum=${md5checksum}"
+  echo "md5checksum=${md5checksum}"
   
+  # get byte size
+  bytesize=$(wc -c ${defaultZipPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
+  echo "bytesize=${bytesize}"
+
   # final renaming 
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
   echo "exportpath='${defaultZipPath}'"
@@ -111,7 +120,8 @@ if [ "$1" = "export" ]; then
   rm ~/.exclude.temp
   rm ~/.include.temp
   
-  echo "scpDownload=\"${scpDownload}\""
+  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
+  echo "scpDownloadWin=\"${scpDownloadWin}\""  
   echo "# OK - Export done"
   exit 0
 fi
@@ -142,11 +152,17 @@ if [ "$1" = "export-gui" ]; then
   echo "* DOWNLOAD THE MIGRATION FILE *"
   echo "*******************************"
   echo 
-  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
-  echo "${scpDownload}"
+  echo "On yoz Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
+  echo "${scpDownloadUnix}"
+  echo "On Windows use command:"
+  echo "${scpDownloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
-  echo
+  echo 
+  echo "To check if you downloaded the file correctly:"
+  echo "md5-checksum --> ${md5checksum}"
+  echo "byte-size --> ${bytesize}"
+  echo 
   echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
   echo "To complete the data migration follow then instructions on the github FAQ."
   echo
@@ -200,7 +216,8 @@ if [ "$1" = "import" ]; then
   countZips=$(sudo ls ${importFile} 2>/dev/null | grep -c '.tar.gz')
   if [ ${countZips} -eq 0 ]; then
     echo "# can just find file when ends on .tar.gz and exists"
-    echo "scpUpload=\"${scpUpload}\"" 
+    echo "scpUploadUnix=\"${scpUploadUnix}\"" 
+    echo "scpUploadWin=\"${scpUploadWin}\"" 
     echo "error='file not found'"
     exit 1
   elif [ ${countZips} -eq 1 ]; then
@@ -235,6 +252,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/bitcoin 2>/dev/null
   fi
   if [ -d "/mnt/hdd/backup_litecoin" ]; then
     echo "# Copying back litecoin backup data .."
@@ -242,6 +260,7 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
     sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/litecoin
+    sudo chown bitcoin:bitcoin -R /mnt/storage/litecoin 2>/dev/null
   fi
 
   echo "# OK done - you may now want to:"
@@ -254,6 +273,7 @@ fi
 if [ "$1" = "import-gui" ]; then
 
   # get info about HDD
+  echo "# Gathering HDD/SSD info ..."
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
   # make sure HDD/SSD is not mounted
@@ -275,8 +295,6 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
-
-
   # ask format for new HDD/SSD
   OPTIONS=()
   # check if HDD/SSD contains Bitcoin Blockchain
@@ -287,18 +305,21 @@ if [ "$1" = "import-gui" ]; then
   OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
 
   useBlockchain=0
+  hddFormat=None
   CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
   case $CHOICE in
     EXT4)
+      hddFormat=ext4
       echo "EXT4 FORMAT -->"
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddCandidate})
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddPartitionCandidate})
       if [ ${#error} -gt 0 ]; then
         echo "FAIL --> ${error}"
         exit 1
       fi
       ;;
     BTRFS)
+      hddFormat=btrfs
       echo "BTRFS FORMAT"
       source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format btrfs ${hddCandidate})
       if [ ${#error} -gt 0 ]; then
@@ -316,12 +337,27 @@ if [ "$1" = "import-gui" ]; then
       ;;
   esac
 
+  if [ ${useBlockchain} -eq 1 ]; then
+     if [ ${isBTRFS} -eq 1 ]; then
+        hddFormat=btrfs
+     else
+        hddFormat=ext4
+     fi
+  fi
+
   # now temp mount the HDD/SSD
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  if [ "$hddFormat" == "btrfs" ]; then
+     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  else
+     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  fi
   if [ ${#error} -gt 0 ]; then
     echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
     exit 1
   fi
+
+  # make sure all directories betare propper linked
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # make sure that temp directory exists and can be written by admin
   sudo mkdir -p ${defaultZipPath}
@@ -350,14 +386,18 @@ if [ "$1" = "import-gui" ]; then
   if [ ${countZips} -eq 0 ]; then
     echo
     echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
-    exit 0
+    echo "error='no file found'"
+    sleep 3
+    exit 1
   fi
 
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
     echo
-    echo "FAIL: Multiple possible files detected in ${defaultZipPath}"
-    exit 0
+    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "error='multiple files'"
+    sleep 3
+    exit 1
   fi
 
   # restore upload
@@ -366,7 +406,9 @@ if [ "$1" = "import-gui" ]; then
   source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
   if [ ${#error} -gt 0 ]; then
     echo
-    echo "FAIL: Was not able to restore data --> ${error}"
+    echo "# FAIL: Was not able to restore data"
+    echo "error='${error}'"
+    sleep 3
     exit 1
   fi
   
@@ -375,11 +417,15 @@ if [ "$1" = "import-gui" ]; then
   if [ ${#network} -eq 0 ]; then
     echo
     echo "FAIL: No raspiblitz.conf found afer migration restore"
+    echo "error='migration contains no raspiblitz.conf'"
+    sleep 3
     exit 1
   fi
 
   echo
   echo "OK: Migration data was imported"
+  echo "PRESS ENTER"
+  read key
 
   # Copy from other computer is only option for Bitcoin
   if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then

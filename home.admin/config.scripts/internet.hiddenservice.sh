@@ -24,11 +24,17 @@ if [ "$1" == "off" ]; then
 
   # remove service paragraph
   sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+
   # remove double empty lines
-  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > .tmp && sudo mv .tmp /etc/tor/torrc
+  sudo cp /etc/tor/torrc /mnt/hdd/temp/tmp
+  sudo chmod 777 /mnt/hdd/temp/tmp
+  sudo chown admin:admin /mnt/hdd/temp/tmp
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /mnt/hdd/temp/tmp
+  sudo mv /mnt/hdd/temp/tmp /etc/tor/torrc
+  sudo chmod 644 /etc/tor/torrc
+  sudo chown bitcoin:bitcoin /etc/tor/torrc
 
   echo "# OK service is removed - restarting TOR ..."
-  sudo chmod 644 /etc/tor/torrc
   sudo systemctl restart tor
   sleep 10
   echo "# Done"

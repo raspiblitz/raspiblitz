@@ -1,17 +1,16 @@
 #!/bin/bash
 
+VERSION="v14.15.4"
+# get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
+CHECKSUM_linux_arm64="b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"
+CHECKSUM_linux_armv7l="bafe4bfb22b046cdda3475d23cd6999c5ea85180c180c4bbb94014920aa7231b"
+CHECKSUM_linux_x64="ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to install NodeJs"
+ echo "config script to install NodeJs $VERSION"
  echo "bonus.nodejs.sh [on|off]"
  exit 1
-fi
-
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^nodeJS=" /mnt/hdd/raspiblitz.conf; then
-  echo "nodeJS=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on
@@ -26,20 +25,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
-    VERSION="v12.16.3"
-  
-    # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt
-    # https://nodejs.org/dist/v12.16.3/SHASUMS256.txt
-  
+        
     if [ ${isARM} -eq 1 ] ; then
       DISTRO="linux-armv7l"
-      CHECKSUM="8fdf1751c985c4e8048b23bbe9e36aa0cad0011c755427694ea0fda9efad6d97"
+      CHECKSUM="${CHECKSUM_linux_armv7l}"
     elif [ ${isAARCH64} -eq 1 ] ; then
       DISTRO="linux-arm64"
-      CHECKSUM="8311f513a7d1911200502dd3e00142cef56d600c851d5870f68d939802205b73"
+      CHECKSUM="${CHECKSUM_linux_arm64}"
     elif [ ${isX86_64} -eq 1 ] ; then
       DISTRO="linux-x64"
-      CHECKSUM="1956e196e3c3c8ef5f0c45db76d7c1245af4ccdda2b7ab30a57ce91d6e165caa"
+      CHECKSUM="${CHECKSUM_linux_x64}"
     elif [ ${#DISTRO} -eq 0 ]; then
       echo "FAIL: Was not able to determine architecture"
       exit 1
@@ -85,8 +80,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   fi
-  # setting value in raspi blitz config
-  sudo sed -i "s/^nodeJS=.*/nodeJS=on/g" /mnt/hdd/raspiblitz.conf
   echo "Installed nodeJS $(node -v)"
   exit 0
 fi
@@ -94,7 +87,6 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^nodeJS=.*/nodeJS=off/g" /mnt/hdd/raspiblitz.conf
   echo "*** REMOVING NODEJS ***"
   sudo rm -rf /usr/local/lib/nodejs
   echo "OK NodeJS removed."

@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
-_temp="./download/dialog.$$"
-_error="./.error.out"
+_temp=$(mktemp -p /dev/shm/)
+_error=$(mktemp -p /dev/shm/)
 sudo chmod 7777 ${_error} 2>/dev/null
 
 # load raspiblitz config data (with backup from old config)

@@ -9,7 +9,6 @@ color_green='\033[0;32m'
 color_amber='\033[0;33m'
 color_yellow='\033[1;93m'
 color_gray='\033[0;37m'
-color_purple='\033[0;35m'
 
 ## get basic info
 source /home/admin/raspiblitz.info 2>/dev/null
@@ -19,7 +18,11 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
-# get UPS info
+## get internet info
+source <(sudo /home/admin/config.scripts/internet.sh status)
+cleanip=$(echo "${publicIP}" | tr -d '[]')
+
+## get UPS info
 source <(/home/admin/config.scripts/blitz.ups.sh status)
 upsInfo=""
 if [ "${upsStatus}" = "ONLINE" ]; then
@@ -84,22 +87,9 @@ else
   color_ram=${color_green}
 fi
 
-# get name of active interface (eth0 or wlan0)
-network_active_if=$(ip route get 255.255.255.255 | awk -- '{print $4}' | head -n 1)
-
-# get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-else
-  network_rx=$(ifconfig ${network_active_if} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${network_active_if} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-fi
-
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
+blockInfo="-"
 if [ -n ${btc_path} ]; then
   btc_title=$network
   blockchaininfo="$(${network}-cli -datadir=${bitcoin_dir} getblockchaininfo 2>/dev/null)"
@@ -110,6 +100,7 @@ if [ -n ${btc_path} ]; then
     block_chain="$(${network}-cli -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
+    blockInfo="${block_verified}/${block_chain}"
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
@@ -148,9 +139,8 @@ fi
 
 # get IP address & port
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
-source <(sudo /home/admin/config.scripts/internet.sh status)
-local_ip="${localip}"
-public_ip="${publicIP}"
+local_ip="${localip}" # from internet.sh
+public_ip="${cleanip}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
 if [ "${public_port}" = "null" ]; then
   if [ "${chain}" = "test" ]; then
@@ -176,13 +166,13 @@ networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | c
 # TOR or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
-networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
+networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
 if [ "${runBehindTor}" = "on" ]; then
 
   # TOR address
   onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}peers"
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"
   public=""
   public_color="${color_green}"
@@ -191,10 +181,10 @@ if [ "${runBehindTor}" = "on" ]; then
 else
 
   # IP address
-  networkConnectionsInfo="${color_purple}${networkConnections} ${color_gray}connections"
-  public_addr="${public_ip}:${public_port}"
-  public_check=$(nc -z -w6 ${public_ip} ${public_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
+  public_addr="${publicIP}:${public_port}"
+  public_check=$(nc -z -w6 ${cleanip} ${public_port} 2>/dev/null; echo $?)
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ] ; then
     public=""
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     public_color="${color_amber}"
@@ -203,10 +193,10 @@ else
     public_color="${color_red}"
   fi
 
-  # DynDNS
+  # DynDomain
   if [ ${#dynDomain} -gt 0 ]; then
 
-    #check if dyndns resolves to correct IP
+    #check if dynamic domain resolves to correct IP
     ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
     if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
       public_color="${color_red}"
@@ -214,8 +204,8 @@ else
       public_color="${color_amber}"
     fi
 
-    # replace IP display with dynDNS
-    public_addr_pre="DynDNS "
+    # replace IP display with dynDN
+    public_addr_pre="DynDN "
     public_addr="${dynDomain}"
   fi
 
@@ -255,7 +245,7 @@ else
    ln_publicColor="${color_green}"
  else
    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ]; then
+  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
     ln_publicColor="${color_amber}"
   else
@@ -285,7 +275,7 @@ else
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_purple}${ln_peers} ${color_gray}peers"
+    ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
     ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
     ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
     ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
@@ -293,7 +283,34 @@ else
   fi
 fi
 
+# show JoinMarket stats in place of the LND URI only if the Yield Generator is running
+
+source /home/joinmarket/joinin.conf 2>/dev/null
+if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
+  JMstats=$(mktemp 2>/dev/null)
+  sudo -u joinmarket /home/joinmarket/info.stats.sh > $JMstats
+  JMstatsL1=$(sed -n 1p < "$JMstats")
+  JMstatsL2=$(sed -n 2p < "$JMstats")
+  JMstatsL3=$(sed -n 3p < "$JMstats")
+  JMstatsL4=$(sed -n 4p < "$JMstats")
+  lastLine="\
+${color_gray}
+${color_gray}     ╦╔╦╗      ${color_gray}$JMstatsL1
+${color_gray}     ║║║║      ${color_gray}$JMstatsL2
+${color_gray}    ╚╝╩ ╩      ${color_gray}$JMstatsL3
+${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
+else
+    lastLine="\
+${color_yellow}
+${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+  fi
+
 sleep 5
+
+## get uptime and current date & time
+uptime=$(uptime --pretty)
+datetime=$(date -R)
+
 clear
 printf "
 ${color_yellow}
@@ -302,22 +319,22 @@ ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
-${color_yellow}      ,'/      ${color_gray}%s, temp %s°C %s°F
-${color_yellow}    ,' /       ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow}  ,'  /_____,  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow} .'____    ,'  ${color_gray}${webinterfaceInfo}
-${color_yellow}      /  ,'    ${color_gray}${network} ${color_green}${networkVersion} ${chain}net ${color_gray}Sync ${sync_color}${sync} %s
-${color_yellow}     / ,'      ${color_gray}${public_addr_pre}${public_color}${public_addr} ${public}${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}
-${color_yellow}   /'          ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}      ,'/      ${color_gray}%s
+${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
+${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
+${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
+${color_yellow}   /'          ${color_gray}
+${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
-${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}${color_gray}
-
+$lastLine
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
+"Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
@@ -335,7 +352,8 @@ else
 
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
-    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+    error=""
+    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
@@ -343,7 +361,8 @@ else
 
   # BTC RPC EXPLORER
   if [ "${BTCRPCexplorer}" = "on" ]; then
-    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
+    error=""
+    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status 2>/dev/null)
     if [ ${#error} -gt 0 ]; then
       appInfoLine="ERROR BTC-RPC-Explorer: ${error} (try restart)"
     elif [ "${isIndexed}" = "0" ]; then
@@ -356,9 +375,6 @@ else
   fi
 
 fi
-
-uptime=$(uptime --pretty)
-datetime=$(date)
 
 # if running as user "pi":
 #  - write results to a JSON file on RAM disk

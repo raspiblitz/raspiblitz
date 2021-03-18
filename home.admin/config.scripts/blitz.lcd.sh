@@ -30,7 +30,11 @@ command=$1
 
 # check if its updated kernel version of v1.6 base image
 oldKernel=$(uname -srm | cut -d ' ' -f2 | cut -d '-' -f1 | grep -c '4.19.118')
-oldDrivers=$(sudo cat /home/admin/LCD-show/.git/config | grep -c 'github.com/goodtft/LCD')
+oldDrivers=$(sudo cat /home/admin/LCD-show/.git/config 2>/dev/null | grep -c 'github.com/goodtft/LCD')
+
+# check if LCD (/dev/fb1) or HDMI (/dev/fb0)
+# see https://github.com/rootzoll/raspiblitz/pull/1580
+lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 
 ###################
 # CHECK-REPAIR
@@ -172,7 +176,14 @@ if [ "${command}" == "image" ]; then
     fi
   fi
 
-  sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
+  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  if [ ${lcdExists} -eq 1 ] ; then
+    # LCD
+    sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
+  else
+    # HDMI
+    sudo fbi -a -T 1 -d /dev/fb0 --noverbose ${imagePath} 2> /dev/null
+  fi
   exit 0
 fi
 
@@ -190,7 +201,14 @@ if [ "${command}" == "qr" ]; then
   fi
 
   qrencode -l L -o /home/admin/qr.png "${datastring}" > /dev/null
-  sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  if [ ${lcdExists} -eq 1 ] ; then
+    # LCD
+    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+  else
+    # HDMI
+    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/qr.png 2> /dev/null
+  fi
   exit 0
 fi
 
@@ -207,8 +225,7 @@ if [ "${command}" == "qr-console" ]; then
     exit 1
   fi
 
-  whiptail --title "Get ready" --backtitle "QR-Code in Terminal Window" \
-    --msgbox "Make this terminal window as large as possible - fullscreen would be best. \n\nThe QR-Code might be too large for your display. In that case, shrink the letters by pressing the keys Ctrl and Minus (or Cmd and Minus if you are on a Mac) \n\nPRESS ENTER when you are ready to see the QR-code." 20 60
+  whiptail --title "Get ready" --backtitle "QR-Code in Terminal Window" --msgbox "Make this terminal window as large as possible - fullscreen would be best. \n\nThe QR-Code might be too large for your display. In that case, shrink the letters by pressing the keys Ctrl and Minus (or Cmd and Minus if you are on a Mac) \n\nPRESS ENTER when you are ready to see the QR-code." 15 60
 
   clear
   qrencode -t ANSI256 ${datastring}

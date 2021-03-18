@@ -5,81 +5,19 @@
 # https://bitcoin.stackexchange.com/questions/70069/how-can-i-setup-bitcoin-to-be-anonymous-with-tor
 # https://github.com/lightningnetwork/lnd/blob/master/docs/configuring_tor.md
 
+# INFO
+# --------------------
+# basic install of Tor is done by the build script now .. on/off will just switch service on/off
+# also thats where the sources are set and the preparation is done
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ echo "script to switch TOR on or off"
+ echo "internet.tor.sh [status|on|off|btcconf-on|btcconf-off|lndconf-on|update]"
  exit 1
 fi
 
-echo "Detect Base Image ..." 
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-if [ "${baseImage}" = "?" ]; then
-  cat /etc/os-release 2>/dev/null
-  echo "!!! FAIL !!!"
-  echo "Base Image cannot be detected or is not supported."
-  exit 1
-else
-  echo "OK running ${baseImage}"
-fi
-
-# function: install keys & sources
-prepareTorSources()
-{
-    # Prepare for TOR service
-    echo "*** INSTALL TOR REPO ***"
-    echo ""
-
-    echo "*** Install dirmngr ***"
-    sudo apt install dirmngr -y
-    echo ""
-
-    echo "*** Adding KEYS deb.torproject.org ***"
-    torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
-    echo "torKeyAvailable=${torKeyAvailable}"
-    if [ ${torKeyAvailable} -eq 0 ]; then
-      curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
-      sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-      echo "OK"
-    else
-      echo "TOR key is available"
-    fi
-    echo ""
- 
-    echo "*** Adding Tor Sources to sources.list ***"
-    torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
-    echo "torSourceListAvailable=${torSourceListAvailable}"  
-    if [ ${torSourceListAvailable} -eq 0 ]; then
-      echo "Adding TOR sources ..."
-      if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
-        echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-      elif [ "${baseImage}" = "ubuntu" ]; then
-        echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-        echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
-      fi
-      echo "OK"
-    else
-      echo "TOR sources are available"
-    fi
-    echo ""
-}
+torrc="/etc/tor/torrc"
 
 activateBitcoinOverTOR()
 {
@@ -87,39 +25,35 @@ activateBitcoinOverTOR()
 
   btcExists=$(sudo ls /home/bitcoin/.${network}/${network}.conf | grep -c "${network}.conf")
   if [ ${btcExists} -gt 0 ]; then
-    networkIsTor=$(sudo cat /home/bitcoin/.${network}/${network}.conf | grep 'onlynet=onion' -c)
-    if [ ${networkIsTor} -eq 0 ]; then
-    
-      # clean all previous added nodes
-      sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-      sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
-    
-      echo "Addding TOR config ..."
-      sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
-      echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
-      echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf 
-      echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf 
-      if [ "${network}" = "bitcoin" ]; then
-        # adding some bitcoin onion nodes to connect to to make connection easier
-        echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
-        echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
-      fi
-      sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
-      # copy new bitcoin.conf to admin user for cli access
-      sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-      sudo chown admin:admin /home/admin/.${network}/${network}.conf
+    # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
+    deactivateBitcoinOverTOR
 
-  else
-    echo "Chain network already configured for TOR"
-  fi
+    echo "Addding TOR config ..."
+    sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
+    echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
+    echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
+    echo "main.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
+    echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
+    if [ "${network}" = "bitcoin" ]; then
+      # adding some bitcoin onion nodes to connect to to make connection easier
+      echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
+    fi
+    sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+
+    # copy new bitcoin.conf to admin user for cli access
+    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
+    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+
   else
     echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf-on' again later" 
   fi
@@ -128,8 +62,9 @@ activateBitcoinOverTOR()
 
 deactivateBitcoinOverTOR()
 {
-  echo "*** Changing ${network} Config ***"
+  # always make sure also to remove old settings
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
+  sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^main.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^test.addnode=.*//g" /home/bitcoin/.${network}/${network}.conf
   sudo sed -i "s/^proxy=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -155,7 +90,18 @@ activateLndOverTOR()
 
     echo "editing /etc/systemd/system/lnd.service"
     sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --listen=127\.0\.0\.1\:9735 \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
-  
+
+    # check if "tor.password" exists
+    valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'tor.password=')
+    if [ ${valueExists} -eq 0 ]; then
+        echo "Adding tor config defaults to /mnt/hdd/lnd/lnd.conf"
+        PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+        sudo -u bitcoin tee -a /mnt/hdd/lnd/lnd.conf >/dev/null <<EOF
+[Tor]
+tor.password=$PASSWORD_B
+EOF
+    fi
+
     echo "Enable LND again"
     sudo systemctl enable lnd
     echo "OK"
@@ -167,12 +113,6 @@ activateLndOverTOR()
 
 }
 
-# if started with prepare 
-if [ "$1" = "prepare" ] || [ "$1" = "-prepare" ]; then
-  prepareTorSources
-  exit 0
-fi
-
 # check and load raspiblitz config
 # to know which network is running
 if [ -f "/home/admin/raspiblitz.info" ]; then
@@ -183,10 +123,17 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
 
-# make sure the network was set (by sourcing raspiblitz.conf)
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
- exit 1
+# if started with status
+if [ "$1" = "status" ]; then
+  # is Tor activated
+  if [ "${runBehindTor}" == "on" ]; then
+    echo "activated=1"
+  else
+    echo "activated=0"
+  fi
+
+  echo "config='${torrc}'"
+  exit 0
 fi
 
 # if started with btcconf-on 
@@ -216,17 +163,26 @@ fi
 # location of TOR config
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
-torrc="/etc/tor/torrc"
 
-# stop services (if running)
-echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
-sudo systemctl stop ${network}d 2>/dev/null
-sudo systemctl stop tor@default 2>/dev/null
+if [ "$1" != "update" ]; then 
+  # stop services (if running)
+  echo "making sure services are not running"
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop tor@default 2>/dev/null
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "switching the TOR ON"
+  echo "# switching the TOR ON"
+
+  # make sure the network was set (by sourcing raspiblitz.conf)
+  if [ ${#network} -eq 0 ]; then
+    echo "!! FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
+    echo "# switching Tor config on for RaspiBlitz services is just possible after basic hdd/ssd setup"
+    echo "# but with new 'Tor by default' basic Tor socks will already be available from the start"
+    exit 1
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
@@ -245,37 +201,30 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
   fi
 
-  # check if TOR package is installed
+  # install package just in case it was deinstalled
   packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
   if [ ${packageInstalled} -eq 0 ]; then
+    sudo apt install tor tor-arm torsocks -y
+  fi
 
-    # calling function from above
-    prepareTorSources
+  # create tor data directory if it not exist
+  if [ ! -d "/mnt/hdd/tor" ]; then
+    echo "# - creating tor data directory"
+    sudo mkdir -p /mnt/hdd/tor
+    sudo mkdir -p /mnt/hdd/tor/sys
+  else
+    echo "# - tor data directory exists"
+  fi
+  # make sure its the correct owner
+  sudo chmod -R 700 /mnt/hdd/tor
+  sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
 
-    echo "*** Updating System ***"
-    sudo apt-get update -y
-    echo ""
-
-    echo "*** Install Tor ***"
-    echo "*** Installing NYX - TOR monitoring Tool ***"
-    # NYX - Tor monitor tool
-    #  https://nyx.torproject.org/#home
-    sudo apt install tor tor-arm -y
-
-    echo ""
-    echo "*** Tor Config ***"
-    #sudo rm -r -f /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/sys 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/web80 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lnd9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrpc9735fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/lndrest8080fallback 2>/dev/null
-    sudo mkdir /mnt/hdd/tor/bitcoin8332 2>/dev/null
-    sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/tor 
+  # create tor config .. if not exists or is old
+  isTorConfigOK=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "BITCOIN")
+  if [ ${isTorConfigOK} -eq 0 ]; then
+    echo "# - updating Tor config ${torrc}"
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    HASHED_PASSWORD=$(sudo -u debian-tor tor --hash-password "$PASSWORD_B")
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
@@ -288,15 +237,11 @@ Log notice file /mnt/hdd/tor/notice.log
 Log info file /mnt/hdd/tor/info.log
 
 RunAsDaemon 1
-User bitcoin
-PortForwarding 1
 ControlPort 9051
 SocksPort 9050
 ExitRelay 0
 
-CookieAuthFile /mnt/hdd/tor/sys/control_auth_cookie
-CookieAuthentication 1
-CookieAuthFileGroupReadable 1
+HashedControlPassword $HASHED_PASSWORD
 
 # Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
@@ -338,16 +283,20 @@ EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
     sudo chmod 644 $torrc
-    sudo chown -R bitcoin:bitcoin /var/run/tor/ 2>/dev/null
+    sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
-    if ! grep -Eq "^ReadWriteDirectories=" /etc/systemd/system/tor@default.service.d/raspiblitz.conf; then
-      echo -e "[Service]\nReadWriteDirectories=-/mnt/hdd/tor" | sudo tee -a /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null
-    fi
+    sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf >/dev/null <<EOF
+    # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
+[Service]
+ReadWriteDirectories=-/mnt/hdd/tor
+[Unit]
+After=network.target nss-lookup.target mnt-hdd.mount
+EOF
 
   else
-    echo "TOR package/service is installed and was prepared earlier .. just activating again"
+    echo "# - Tor config ${torrc} is already updated"
   fi
 
   # ACTIVATE TOR SERVICE
@@ -386,11 +335,19 @@ EOF
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
+  if [ "${sphinxrelay}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+  fi
+
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
   echo "Setup logrotate"
-  if ! grep -Eq "^/mnt/hdd/tor/" /etc/logrotate.d/tor; then
-    # add logrotate config for modified Tor dir on ext. disk
-    cat << EOF | sudo tee -a /etc/logrotate.d/tor >/dev/null
+  # add logrotate config for modified Tor dir on ext. disk
+  sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
 /mnt/hdd/tor/*log {
         daily
         rotate 5
@@ -398,7 +355,7 @@ EOF
         delaycompress
         missingok
         notifempty
-        create 0640 bitcoin bitcoin
+        create 0640 debian-tor debian-tor
         sharedscripts
         postrotate
                 if invoke-rc.d tor status > /dev/null; then
@@ -407,7 +364,8 @@ EOF
         endscript
 }
 EOF
-  fi
+
+  sudo systemctl restart tor@default
 
   echo "OK - TOR is now ON"
   echo "needs reboot to activate new setting"
@@ -416,13 +374,13 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  echo "switching TOR OFF"
+  echo "# switching TOR OFF"
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
 
   # disable TOR service
-  echo "*** Disable TOR service ***"
+  echo "# *** Disable TOR service ***"
   sudo systemctl disable tor@default
   echo ""
 
@@ -430,19 +388,58 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   deactivateBitcoinOverTOR
   echo ""
 
-  echo "*** Removing TOR from LND ***"
+  echo "# *** Removing TOR from LND ***"
   sudo systemctl disable lnd
-  echo "editing /etc/systemd/system/lnd.service"
+  echo "# editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
+  sudo sed -i '/\[Tor\]*/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^tor.password=*/d' /mnt/hdd/lnd/lnd.conf
+
+  sudo /home/admin/config.scripts/internet.sh update-publicip
 
   sudo systemctl enable lnd
-  echo "OK"
+  echo "# OK"
   echo ""
 
-  echo "needs reboot to activate new setting"
+  echo "# *** Stop TOR service ***"
+  sudo systemctl stop tor@default
+  echo ""
+
+  if [ "$2" == "clear" ]; then
+      echo "# *** Deinstall Tor & Delete Data ***"
+      sudo rm -r /mnt/hdd/tor 2>/dev/null
+      sudo apt remove tor tor-arm -y
+  fi
+
+  echo "# needs reboot to activate new setting"
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
-echo "may needs reboot to run normal again"
+# update
+if [ "$1" = "update" ]; then
+  # as in https://2019.www.torproject.org/docs/debian#source
+  echo "# Install the dependencies"
+  sudo apt update
+  sudo apt install -y build-essential fakeroot devscripts
+  sudo apt build-dep -y tor deb.torproject.org-keyring
+  rm -rf /home/admin/download/debian-packages
+  mkdir -p /home/admin/download/debian-packages
+  cd /home/admin/download/debian-packages
+  echo "# Building Tor from the source code ..."
+  apt source tor
+  cd tor-*
+  debuild -rfakeroot -uc -us
+  cd ..
+  echo "# Stopping the tor.service before updating"
+  sudo systemctl stop tor
+  echo "# Update ..."
+  sudo dpkg -i tor_*.deb
+  echo "# Starting the tor.service "
+  sudo systemctl start tor
+  echo "# Installed $(tor --version)"
+  exit 0
+fi
+
+echo "# FAIL - Unknown Parameter $1"
+echo "# may needs reboot to run normal again"
 exit 1

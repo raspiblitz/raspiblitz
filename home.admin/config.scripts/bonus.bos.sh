@@ -1,9 +1,13 @@
 #!/bin/bash
 
+https://github.com/alexbosworth/balanceofsatoshis/blob/ba7c35b42f1bad0dbb0c9c03d64ee34472665029/package.json#L79
+BOSVERSION="8.0.2"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall Balance of Satoshis"
  echo "bonus.bos.sh [on|off|menu|update]"
+ echo "installs the version $BOSVERSION by default"
  exit 1
 fi
 
@@ -16,11 +20,12 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Info Balance of Satoshis " --msgbox "\n\
+  dialog --title " Info Balance of Satoshis " --msgbox "
+Balance of Satoshis is a command line tool.
+Type: 'bos' in the command line to switch to the dedicated user.
+Then see 'bos help' for the options.
 Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
-To start type: 'sudo su bos' in the command line.\n
-Then see 'bos help' for options.
-" 9 75
+" 10 75
   exit 0
 fi
 
@@ -60,7 +65,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70
-  sudo -u bos npm install -g balanceofsatoshis@5.43.1
+  sudo -u bos npm install -g balanceofsatoshis@$BOSVERSION
   if ! [ $? -eq 0 ]; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1

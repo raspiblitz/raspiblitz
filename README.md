@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.6 with lnd 0.10.4 and bitcoin 0.20.0 (or litecoin 0.18.1)`
+`Version 1.7.0 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -29,28 +29,33 @@ There are further Services that can be switched on:
 * **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://twitter.com/CryptoAdvance/status/1233833767283941376?s=20)
 * **LNDmanage** (Advanced Channel Management CLI) [details](https://github.com/bitromortac/lndmanage)
-* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop)
+* **Loop** (Submarine Swaps Service) [details](https://github.com/lightninglabs/loop/blob/master/README.md)
+* **Pool** (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Faraday** (Channel Analysis & Recommendations CLI) [details](https://github.com/lightninglabs/faraday/blob/master/README.md)
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 * **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
 * **Stacking Sats Kraken** (Auto-DCA script) [details](https://github.com/dennisreimann/stacking-sats-kraken)
+* **Circuit Breaker** (Lighthing Channel Firewall) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+* **PyBlock**  (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+* **Mempool Explorer** [details](https://github.com/mempool/mempool)
+* **Sphinx Relay Server** [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
 * **Zap** (Android, iOS & Desktop) [details](https://zap.jackmallers.com/)
 * **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
-* **Shango** (Android & iOS-TestFlight) [details](https://github.com/neogeno/shango-lightning-wallet)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
+* **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
 
-Also many more features like Touchscreen, Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
+
+Also many more features like Touchscreen, Channels Autopilot, DynDNS, SSH-Tunneling, UPS Support, ...
 
 ## DeepDive Video (July 2020)
 
-<img src="pictures/raspiblitz-deepdive.png" alt="DeepDive Video" width="400">
---watch--> https://www.youtube.com/watch?v=QXUGg45CWLo
+<a href="https://www.youtube.com/watch?v=QXUGg45CWLo" target="_blank"><img src="pictures/raspiblitz-deepdive.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=QXUGg45CWLo
 
 ## Time Estimate to Set Up a RaspiBlitz
 
@@ -126,15 +131,21 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6:**
+**Download SD-Card image - Version 1.6.2:**
 
-Browser: https://raspiblitz.org/raspiblitz-v1.6-2020-08-04.img.gz
+RELEASE 1.6.2 IS IN PREPERATION AND LAST TESTING
 
-Torrent: [assets/raspiblitz-v1.6-20200802.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6-2020-08-04.img.gz.torrent)
+* [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
 
-SHA-256: bf8f70cf3a6d87d1b786936306ae092b6350be22f0c19c3a06171450178594ca or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6-2020-08-04.img.gz.sig)
+**Download SD-Card image - Version 1.6.1 (OLD VERSION)**
 
-* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-16-of-raspiblitz)
+Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
+
+SHA-256: 6b9925f274f68ca109771b047c0272df31c01dc0a5d2b9e05b582accfa6029ec or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz.sig)
+
+Torrent: [assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent)
+
+* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-161-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
@@ -514,19 +525,38 @@ It will give you 4 buttons on the right side.
 
 If you switch this on, you can rotate the LCD of your RaspiBlitz 180 degrees. This might make sense if you have a special case or wall mount.
 
-##### Channel Autopilot
+##### Channels Autopilot
 
-The autopilot is a feature of LND that you can switch on. It automatically uses around half of your on-chain funds (if available) to open channels with other lightning nodes the autopilot thinks can be useful to improve your payment routes.
+The channels autopilot feature of LND allows to automatically uses around half of your on-chain funds (if available) to open new channels with other lightning nodes. 
+Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you. 
+It is very likely that after a while, once you will have a hang of the concept of channels and how they work that you will not need channels autopilot anymore.
+
+Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waste of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
 
 ##### Accept Keysend
 
-Keysend is a feature of LND that allows your node to accept payments without creating an invoice first. This needs to be activated for example if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
+Keysend is a feature of LND that allows your node to accept payments without having created an invoice first. This needs to be activated, for example, if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
 
 ##### Testnet
 
-You can switch from the mainnet to testnet blockchain if you want to try things out and play with free test coins.
+It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through the "Testnet" setting.
+You can freely switch from prod environemt (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
+The state of your environments is restored everytime you switch (blockchain, wallets, channels) which is very convenient and safe.
+Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it left before switching.
 
-Please beware that this might take some time to sync the test blockchain and you need to setup a new lnd testnet wallet during the process.
+Of course it would be much more fun and less scary if everyone could afford to own 2 distinct RaspiBlitz, one for each environment, this way your production RaspiBlitz remains online all the time and you can recklessly play around on the other one. 
+
+Once in "TESTNET" environment go ahead! Get hold of some Bitcoin Testnet Faucets (these are worthless bitcoins on testnet) and start playing around with them!
+You can get Bitcoin Testnet Faucets from different places on the internet, here are a few links:
+* https://coinfaucet.eu/en/btc-testnet/
+* https://testnet-faucet.mempool.co/
+* https://kuttler.eu/en/bitcoin/btc/faucet/
+* https://faucet.lightning.community/
+
+You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
+Have fun.
+
+IMPORTANT: Presently BTCPay Server service is NOT supported on TESTNET (RPC connection error messages). Until this [issue #1724](https://github.com/rootzoll/raspiblitz/issues/1724) is resolved you can [play around with BTCPay Server on TESTNET](https://testnet.demo.btcpayserver.org)
 
 ##### LND Auto-Unlock
 
@@ -566,13 +596,23 @@ A Submarine Swaps Service by lighting labs. You call it from the RaspiBlitz term
 
 After install, you will see a new `LOOP` option in the SSH main menu - it will give you all the information you need to start using it.
 
+##### Lightning Pool
+
+Lightning Pool is a non-custodial, peer-to-peer marketplace that allows node operators that need inbound liquidity to pay node operators with available capital to open channels in their direction while retaining full custody of their funds. Pool’s first product is a Lightning Channel Lease - an inbound channel with a pre-agreed duration.
+
+[Details on Service](https://github.com/lightninglabs/pool)
+
+After install, you will see a new `POOL` option in the SSH main menu - it will give you all the information you need to start using it.
+
 ##### RTL Webinterface
 
 The RTL Webinterface is an LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitz SSH menus. It's recommended to give it a try.
 
 ![RTL](pictures/RTL-dashboard.png)
 
-[YouTube: CHANNEL MANAGEMENT and RTL interface in RaspiBlitz](https://www.youtube.com/watch?v=pESO_Pm0v10)
+Get all the details on how to mannage your channels with RTL in this video:
+
+<a href="https://www.youtube.com/watch?v=pESO_Pm0v10" target="_blank"><img src="pictures/video-rtl.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=pESO_Pm0v10
 
 Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
 
@@ -608,7 +648,10 @@ Since Electrum Rust Server runs on the user's own machine, there is no need for 
 
 By contrast, if you use your Trezor Hardware Wallet with the trezor.io wallet, it will tell their third party server your public keys - connecting it with your IP. Now you can use your Trezor with the Electrum Wallet, just talking to your own Electrum Server, preserving your privacy.
 
-[YouTube: TOR and Electrum Server on Raspiblitz](https://www.youtube.com/watch?v=AiosKK_TA7w)
+Learn how you can use Electrum with your own Server over Tor:
+
+<a href="https://www.youtube.com/watch?v=AiosKK_TA7w" target="_blank"><img src="pictures/video-electrs.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=AiosKK_TA7w
+
 [More Details on Service](https://github.com/romanz/electrs)
 
 After install, you will see a new `ELECTRS` option in the SSH main menu - it will give you all the information you need to start using it.
@@ -619,9 +662,7 @@ After install, you will see a new `ELECTRS` option in the SSH main menu - it wil
 
 ![BTCPAY](pictures/btcpay.png)
 
-*At the moment, the RaspiBlitz will only make the BTCPayServer publicly available to the outside over the Tor network (Hidden Service).*
-
-[Details on Service](https://btcpayserver.org/)
+Find all details on how to use the BTCPay Server on your RaspiBlitz in this great tutorial: https://coincharge.io/en/raspiblitz-btcpay-server/
 
 After install, you will see a new `BTCPAY` option in the SSH main menu - it will give you all the information you need to start using it.
 
@@ -680,12 +721,13 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 
 ![LNBITS](pictures/lnbits.png)
 
-It can be used as:
-- Account system to mitigate the risk of exposing applications to your full balance, via unique API keys for each wallet
-- Fallback wallet for the LNURL scheme
-- Instant wallet for LN demonstrations
+It can be used together with IP2Tor to provide:
+- Lightning Paper Vouchers (Plugin: LNURLw)
+- Merchant Onboarding (Plugin: TPOS)
 
-You can also develop extensions on it.
+<a href="https://www.youtube.com/watch?v=0Bt3tHULAnw" target="_blank"><img src="pictures/video-vouchers.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=0Bt3tHULAnw
+
+You can also develop your own extensions on it.
 
 [Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
 
@@ -695,11 +737,33 @@ After install, you will see a new `LNBITS` option in the SSH main menu - it will
 
 JoinMarket is software to create a special kind of bitcoin transaction called a CoinJoin transaction. Its aim is to improve the confidentiality and privacy of bitcoin transactions.
 
+<a href="https://www.youtube.com/watch?v=uGHRjilMhwY" target="_blank"><img src="pictures/video-joinmarket.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=uGHRjilMhwY
+
 A CoinJoin transaction requires other people to take part. The right resources (coins) have to be in the right place, at the right time, in the right quantity. This isn't a software or tech problem, it's an economic problem. JoinMarket works by creating a new kind of market that would allocate these resources in the best way.
 
 For more details see [here](https://github.com/JoinMarket-Org/joinmarket-clientserver).
 
 After install, you will see a new `JMARKET` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### Circuit Breaker
+
+https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+
+##### PyBlock
+
+https://github.com/curly60e/pyblock/blob/master/README.md
+
+##### Mempool Explorer
+
+https://github.com/mempool/mempool
+
+##### Sphinx Relay Server
+
+The Sphinx App allows chat over the Lightning Network and ties into the idea of [Podcasting 2.0](https://u.today/father-of-podcasting-integrates-bitcoin-lightning-into-his-app). To use the mobile app with your own RaspiBlitz you need to install the [Sphinx Relay Server](https://github.com/stakwork/sphinx-relay/blob/master/README.md).
+
+![SPHINX](https://github.com/stakwork/sphinx-relay/raw/master/public/relay.jpg)
+
+After install, you will see a new `SPHINX` option in the SSH main menu - it will give you all the information you need to start using it.
 
 #### SUBSCRIBE: Subscription Services
 
@@ -747,8 +811,14 @@ At the moment, the following mobile wallets are supported:
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus)
 * [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md)
+* [Sphinx Chat App (iOS/Android)](https://sphinx.chat/)
 
 Mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. Then you need to `pair` them with your RaspiBlitz - also via a QR code displayed on the LCD. If you run your RaspiBlitz without an LCD, there is the fallback option to display that QR code on the terminal as ASCII code (which might involve lowering your terminal's font size).
+
+There is a special video on how to connect the Zeus app thru Tor:
+
+<a href="https://www.youtube.com/watch?v=XStiTJosklY" target="_blank"><img src="pictures/video-zeus.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=XStiTJosklY
+
 
 #### LNDCREDS: Macaroons and TLS.cert
 
@@ -957,33 +1027,39 @@ To recover your funds this way, you will need two things:
 
 You should have written down the word seed during wallet setup; keep it at a safe (offline) location. The `channel.backup` is stored on the HDD and updated by LND every time a new channel is opened or closed. The latest version of this file is needed to recover all your funds. In case your HDD gets damaged, RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
 
-If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completely damaged, stolen or lost) then you can additionally set up an off-location or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so it's OK to store the file to untrusted third parties for backup (if you want). The feature is still new ... here is how you can set it up at the moment. The following two off-location options are available (and/or):
+If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completely damaged, stolen or lost) then you can additionally set up an off-location or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so it's OK to store the file to untrusted third parties for backup (if you want). 
+
+This video explains in detail how you can set further back Static Channel information:
+
+<a href="https://www.youtube.com/watch?v=5wi6l9jRVQs" target="_blank"><img src="pictures/video-backup.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=5wi6l9jRVQs
+
+The following options are also explained here shortly:
 
 #### A) DropBox Backup Target
 
-Activate the StaticChannelBackup to DropBox in the `SERVICES` menu of your RaspiBlitz. It will ask you for the Dropbox-Authtoken. This is how you can get this token:
+Activate the StaticChannelBackup to DropBox in the `SETTINGS` menu of your RaspiBlitz. It will ask you for the Dropbox-Authtoken. This is how you can get this token:
 
 Go to your web browser, do the following:
 
 1. Go to https://www.dropbox.com/developers/apps/create and sign in.
 
-1. Choose **Dropbox Api**.
+1. Choose **Create App**.
 
-    ![Dropbox API 1](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-1.png)
+    ![Dropbox API 1](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-1.png)
 
-1. Choose **App Folder**.
+    Choose the 'Scoped Access' & 'App Folder' and set a unique name - for example `LNDbackup` with a random number behind it. Agree to Terms of Service and click 'Create App'.
 
-    ![Dropbox API 2](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-2.png)
+1. Set **Permissions**.
 
-1. Name your app and click **Create App** to proceed.
+    ![Dropbox API 2](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-2.png)
 
-    ![Dropbox API 3](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-3.png)
+    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Dont forget to `Submit` the change before continue.
 
-1. On the settings page for your new app, scroll down to **OAuth 2** and click **Generate**.
+1. Generate **OAUth2 Token**.
 
-    ![Dropbox API 4](https://raw.githubusercontent.com/vindard/lnd-backup/master/images/dropbox-4.png)
+    ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
 
-1. You will now see a string of letters and numbers appear. This is your **Dropbox-Authtoken**.
+    Now go back to the 'Settings' tab and under 'OAuth2' click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field. 
 
 To test it, try opening or closing a channel, and then check if you can find a copy of `channel.backup` in your Dropbox. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
@@ -1011,7 +1087,9 @@ To test it, try opening or closing a channel, and then check if you can find a c
 
 If you have a RaspiBlitz older than version v1.0, please [see here](FAQ.md).
 
-If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions.
+If you have a RaspiBlitz v1.2 or higher - just follow the `UPDATE` option from the main menu (choose `RELEASE` if asked) and follow the instructions - see the process in detail in the following video.
+
+<a href="https://www.youtube.com/watch?v=Xvn0WQfHUdI" target="_blank"><img src="pictures/video-update.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=Xvn0WQfHUdI
 
 If you have a RaspiBlitz v1.0 or v1.1 or higher do the following:
 
@@ -1023,7 +1101,7 @@ Now download the new RaspiBlitz SD card image and write it to your SD card. Yes,
 
 *If you have done manual changes to the system (installed packages, added scripts, etc), you might need to do some preparations before overwriting your SD card - see [FAQ](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).*
 
-If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and don't worry, you don't need to re-download the blockchain again.
+If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and don't worry, you don't need to re-download the blockchain again. It is worth noting here that your SSH password will be reset to `raspiblitz`. You will be promted to change this once the update is finished.
 
 * [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
 
@@ -1031,20 +1109,20 @@ If done successfully, simply put the SD card into the RaspiBlitz and power on ag
 
 A ready-to-use SD card image of RaspiBlitz is provided by us for download, to get everybody started quickly (see above). But if you want to build that image yourself - here is a quick guide:
 
-* Get a fresh Raspbian RASPBIAN BUSTER WITH DESKTOP card image: [DOWNLOAD](https://www.raspberrypi.org/downloads/raspbian/).
+* Get a fresh RaspiOS 64-bit: [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
 * Write the image to an SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
-* Add a file called `ssh` to the root of the SD card when mounted to enable SSH login.
-* Start the card in Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
+* Add a file called `ssh` to the root of the SD card when mounted on your laptop to enable SSH login.
+* Start the card on a Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
 
 Now you are ready to start the SD card build script (check the code to see if the installation and config are OK for you). Copy the following command into your terminal and execute:
 
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.6/build_sdcard.sh && sudo bash build_sdcard.sh`
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`. You can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
 
-The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. An installer of the SD card image should automatically launch. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitzes, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image.
+The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. The install dialog of the RaspiBlitz schould automatically start. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitzes, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image.
 
-*Note: If you plan to use your self-built sd card as a MASTER copy to backup image and distribute it. Use a smaller 8GB card for that. This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
+*Note: If you plan to use your self-build sd card as a MASTER copy and distribute it: Use a smaller 8GB card for that. This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
 * [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 * [How can I build an SD card other than the master branch?](FAQ.md#how-can-i-build-an-sd-card-other-then-the-master-branch)
@@ -1067,7 +1145,9 @@ Everybody is welcome to join, improve, and extend the RaspiBlitz - it's a work i
 
 To start your Deep Dive into the RaspiBlitz project, the following YouTube video (July 2020) is recommended: [https://www.youtube.com/watch?v=QXUGg45CWLo](https://www.youtube.com/watch?v=QXUGg45CWLo)
 
-[![Watch the RaspiBlitz DeepDive](pictures/raspiblitz-deepdive.png)](https://www.youtube.com/watch?v=QXUGg45CWLo)
+Get all details on "How to contribute to RaspiBlitz Development" on this video:
+
+<a href="https://www.youtube.com/watch?v=ZVtZepV3OfM" target="_blank"><img src="pictures/video-contrib.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=ZVtZepV3OfM
 
 Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
 

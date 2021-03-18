@@ -16,7 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 mode="$1"
 if [ ${mode} = "backup" ]; then
@@ -74,16 +74,18 @@ if [ ${mode} = "backup" ]; then
   echo "* DOWNLOAD THE RESCUE FILE *"
   echo "****************************"
   echo 
-  echo "ON YOUR LAPTOP - RUN IN NEW TERMINAL:"
+  echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
+  echo "ON WINDOWS USE:"
+  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${byteSize} byte"
   echo
   echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
-  echo "again or rebooted its not adviced to restore the backup file anymore because"
-  echo "it cointains then outdated channel data & can lead to loss of channel funds."
+  echo "again or rebooted, it's not advised to restore the backup file because"
+  echo "it would contain outdated channel data and can lead to loss of channel funds."
 
 elif [ ${mode} = "restore" ]; then
 

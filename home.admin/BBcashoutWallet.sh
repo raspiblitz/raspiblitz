@@ -1,6 +1,6 @@
 #!/bin/bash
-_temp="./download/dialog.$$"
-_error="./.error.out"
+_temp=$(mktemp -p /dev/shm/)
+_error=$(mktemp -p /dev/shm/)
 
 echo "please wait ..."
 
