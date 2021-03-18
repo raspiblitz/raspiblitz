@@ -70,6 +70,20 @@ sudo systemctl stop litd 2>/dev/null
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# INSTALL LIGHTNING TERMINAL"
+
+  # switching off single installs of pool, loop or faraday if installed
+  if [ "${loop}" = "on" ]; then
+      echo "# Replacing single install of: LOOP"
+      /home/admin/config.scripts/bonus.loop.sh off
+  fi
+  if [ "${pool}" = "on" ]; then
+      echo "# Replacing single install of: POOL"
+      /home/admin/config.scripts/bonus.pool.sh off
+  fi
+  if [ "${faraday}" = "on" ]; then
+      echo "# Replacing single install of: FARADAY"
+      /home/admin/config.scripts/bonus.faraday.sh off
+  fi
   
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
   if [ ${isInstalled} -eq 0 ]; then
