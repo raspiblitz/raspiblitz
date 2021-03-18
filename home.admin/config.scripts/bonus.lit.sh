@@ -303,14 +303,14 @@ WantedBy=multi-user.target
 
   # aliases
   echo "
-alias lit-loop=\"loop --rpcserver=localhost:8443 \\
-  --tlscertpath=/home/lit/.lit/tls.cert \\	
+alias lit-loop=\"loop --rpcserver=localhost:8443 \
+  --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon\"
-alias lit-pool=\"pool --rpcserver=localhost:8443 \\
-  --tlscertpath=/home/lit/.lit/tls.cert \\	
+alias lit-pool=\"pool --rpcserver=localhost:8443 \
+  --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon\"
-alias lit-frcli=\"frcli --rpcserver=localhost:8443 \\
-  --tlscertpath=/home/lit/.lit/tls.cert \\
+alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
+  --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon\"
 " | sudo tee -a /home/lit/.bashrc
 
