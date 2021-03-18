@@ -64,17 +64,22 @@ fi
 # switch on
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
   # check txindex (parsed and sourced from bitcoin network config above)
   if [ ${txindex} == 0 ]; then
     sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/${network}/${network}.conf
-    echo "switching txindex=1 and restarting ${network}d"
-    sudo systemctl restart ${network}d
-    echo "The indexing takes ~7h on an RPi4 with SSD"
-    echo "monitor with: sudo tail -n 20 -f /mnt/hdd/${network}${pathAdd}/debug.log"
+    echo "# switching txindex=1"
+    isBitcoinRunning=$(systemctl is-active ${network}d | grep -c "^active")
+    if [ ${isBitcoinRunning} -eq 1 ]; then
+      echo "# ${network}d is running - so restarting"
+      sudo systemctl restart ${network}d
+    else
+      echo "# ${network}d is not running - so NOT restarting"
+    fi
+    echo "# The indexing takes ~7h on an RPi4 with SSD"
+    echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/${network}${pathAdd}/debug.log"
     exit 0
   else
-    echo "txindex is already active"
+    echo "# txindex is already active"
     exit 0
   fi
 fi

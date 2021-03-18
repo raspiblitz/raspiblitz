@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# !! NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
+# this single install script will still be available for now
+# but main focus for the future development should be on LIT
+
 # https://github.com/lightninglabs/loop/releases-
 pinnedVersion="v0.11.2-beta"
 
@@ -7,7 +11,7 @@ pinnedVersion="v0.11.2-beta"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Lightning Loop Service on,off or update"
  echo "bonus.loop.sh [on|off|menu|update]"
- echo "Installs Lightning Loop $pinnedVersion by default"
+ echo "!! DEPRECATED use instead: bonus.lit.sh"
  exit 1
 fi
 
