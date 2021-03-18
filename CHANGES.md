@@ -16,7 +16,7 @@
 - Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
 - Update: JoininBox 0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
-- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+- Update: mempool v2.1.2 [detail](https://github.com/mempool/mempool/releases/tag/v2.1.2)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?
 
