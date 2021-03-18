@@ -1,9 +1,14 @@
 #!/bin/bash
 
+# !! NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
+# this single install script will still be available for now
+# but main focus for the future development should be on LIT
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Bonus App: faraday -> https://github.com/lightninglabs/faraday"
  echo "lnd.faraday.sh [status|on|off]"
+ echo "!! DEPRECATED use instead: bonus.lit.sh"
  exit 1
 fi
 

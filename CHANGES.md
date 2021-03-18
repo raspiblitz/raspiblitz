@@ -2,7 +2,9 @@
 
 ## Whats new in Version 1.7.0 of RaspiBlitz?
 
-- Update: Raspberry Pi OS Base Image 64-bit (August 2020)
+- New: Raspberry Pi OS Base Image 64-bit (August 2020)
+- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+- New: Lightning Terminal 0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
@@ -14,7 +16,7 @@
 - Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
 - Update: JoininBox 0.3.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
-- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+- Update: mempool v2.1.2 [detail](https://github.com/mempool/mempool/releases/tag/v2.1.2)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?
 
