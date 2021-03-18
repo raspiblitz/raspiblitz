@@ -202,7 +202,7 @@ function lit() {
   if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'"
+    echo "# use the commands: 'lncli', 'loop', 'pool' and 'frcli'"
     sudo su - lit
     echo "# use command 'raspiblitz' to return to menu"
   else
