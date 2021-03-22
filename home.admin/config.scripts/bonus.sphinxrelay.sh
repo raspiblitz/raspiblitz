@@ -332,6 +332,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Add the 'sphinxrelay' user ***"
     sudo adduser --disabled-password --gecos "" sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndadmin sphinxrelay
+    sudo /usr/sbin/usermod --append --groups lndsigner sphinxrelay
 
     # install needed install packages
     sudo apt install -y sqlite3
