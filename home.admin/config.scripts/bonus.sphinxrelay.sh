@@ -36,7 +36,7 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
     --no-button "Continue Anyway" \
-    --yesno "Your HTTPS connection over IP2TOR as has problems:\n${ip2torWarn}\n\nCheck if service is reachable over Tor:\n${toraddress}/app\n\nMaybe cancel the IP2Tor & LetsEncrypt and setup fresh." 14 72
+    --yesno "Your HTTPS connection over IP2TOR as has problems:\n${ip2torWarn}\n\nCheck if service is reachable over Tor:\n${toraddress}/app\n\nMaybe cancel the IP2Tor & LetsEncrypt subscription & setup fresh." 14 72
     if [ "$?" != "1" ]; then
       exit 0
 	  fi
