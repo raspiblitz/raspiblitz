@@ -21,12 +21,19 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
+  connectionTest="fail"
+
   # display possible problems with IP2TOR setup
-  if [ ${#ip2torWarn} -gt 0 ]; then
+  if [ "${connectionTest}" != "OK" ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
     --no-button "Continue Anyway" \
-    --yesno "Your SPHINX SERVER may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}\n(You should see 'Cannot GET /' from a browser)\n\nCheck if service is reachable over Tor:\n${toraddress}" 15 72
+    --yesno "Your SPHINX SERVER may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}/app\n(You should see 'INDEX' in your browser)\n\nCheck if service is reachable over Tor:\n${toraddress}\Also check logs with 'debug' on terminal." 15 72
+  elif [ ${#ip2torWarn} -gt 0 ]; then
+    whiptail --title " Warning " \
+    --yes-button "Back" \
+    --no-button "Continue Anyway" \
+    --yesno "Your HTTPS connection over IP2TOR as has problems:\n${ip2torWarn}\n\nCheck if service is reachable over Tor:\n${toraddress}\n\nMaybe cancel the IP2Tor & LetsEncrypt and setup fresh." 14 72
     if [ "$?" != "1" ]; then
       exit 0
 	  fi
@@ -282,7 +289,7 @@ if [ "$1" = "status" ]; then
     connectionTest="fail"
   fi
   echo "connectionTest='${connectionTest}'"
-  
+
   exit 0
 fi
 
