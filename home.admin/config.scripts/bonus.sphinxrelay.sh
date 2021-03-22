@@ -111,7 +111,7 @@ It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMEN
 There CANNOT BE MORE THAN ONE APP connected at the same time.\n
 To switch devices within the Sphnix app: see PROFILE & export keys or
 you have to deinstall the Sphinx-Relay with DELETE DATA & reinstall.\n
-If you just upgraded from local network to IP2Tor + HTTPS--> 
+If you just upgraded from local network to IP2Tor + HTTPS --> 
 open the app > PROFILE & under ADVANCED change the SERVER URL to:
 ${publicURL}"
     whiptail --title " Warning " \
