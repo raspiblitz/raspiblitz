@@ -506,6 +506,8 @@ sudo apt install -y sshpass
 sudo apt install -y psmisc
 # install firewall
 sudo apt install -y ufw
+# make sure sqlite3 is available
+sudo apt install -y sqlite3
 
 
 sudo apt clean

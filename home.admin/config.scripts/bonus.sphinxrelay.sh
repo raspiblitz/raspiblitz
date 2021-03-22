@@ -291,6 +291,10 @@ if [ "$1" = "status" ]; then
   fi
   echo "connectionTest='${connectionTest}'"
 
+  # check if already an app was connected to relay (after that a second connection will not work)
+  connectionApp=$(sudo sqlite3 /mnt/hdd/app-data/sphinxrelay/sphinx.db "SELECT * FROM sphinx_contacts WHERE auth_token IS NOT NULL;" 2>/dev/null | grep -c "1||")
+  echo "connectionApp='${connectionApp}'"
+
   exit 0
 fi
 
@@ -462,28 +466,36 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# Updating Sphinx-Relay"
-  cd /home/sphinxrelay/sphinx-relay/
-  # https://github.com/stakwork/sphinx-relay/blob/master/docs/raspiblitz_deployment.md#fast-method
-  echo "# Stashing the config"
-  if [ $(sudo -u sphinxrelay git stash 2>&1 | grep -c "Please tell me who you are") -gt 0 ]; then
-    sudo -u sphinxrelay git config user.email "you@example.com"
-    sudo -u sphinxrelay git config user.name "Your Name"
-  fi
-  sudo -u sphinxrelay git stash
-  echo "# Pulling latest changes..."
-  sudo -u sphinxrelay git checkout master || exit 1
-  sudo -u sphinxrelay git pull  || exit 1
-  echo "# Reset to the latest release tag"
-  TAG=$(git tag | sort -V | tail -1)
-  sudo -u sphinxrelay git reset --hard $TAG || exit 1
-  echo "# Reapplying the config"
-  sudo -u sphinxrelay git stash pop
-  echo "# Installing NPM dependencies"
-  sudo -u sphinxrelay npm install
-  echo "# Updated to version" $TAG
-  echo
-  echo "# Starting the sphinxrelay.service ... "
-  sudo systemctl start sphinxrelay
+
+  # deinstall without deleting data
+  /home/admin/config.scripts/bonus.sphinxrelay.sh off --keep-data
+
+  # reinstall to work with same data
+  /home/admin/config.scripts/bonus.sphinxrelay.sh on
+
+  #cd /home/sphinxrelay/sphinx-relay/
+  ## https://github.com/stakwork/sphinx-relay/blob/master/docs/raspiblitz_deployment.md#fast-method
+  #echo "# Stashing the config"
+  #if [ $(sudo -u sphinxrelay git stash 2>&1 | grep -c "Please tell me who you are") -gt 0 ]; then
+  #  sudo -u sphinxrelay git config user.email "you@example.com"
+  #  sudo -u sphinxrelay git config user.name "Your Name"
+  #fi
+  #sudo -u sphinxrelay git stash
+  #echo "# Pulling latest changes..."
+  #sudo -u sphinxrelay git checkout master || exit 1
+  #sudo -u sphinxrelay git pull  || exit 1
+  #echo "# Reset to the latest release tag"
+  #TAG=$(git tag | sort -V | tail -1)
+  #sudo -u sphinxrelay git reset --hard $TAG || exit 1
+  #echo "# Reapplying the config"
+  #sudo -u sphinxrelay git stash pop
+  #echo "# Installing NPM dependencies"
+  #sudo -u sphinxrelay npm install
+  #echo "# Updated to version" $TAG
+  #echo
+  #echo "# Starting the sphinxrelay.service ... "
+  #sudo systemctl start sphinxrelay
+  
   exit 0
 fi
 
