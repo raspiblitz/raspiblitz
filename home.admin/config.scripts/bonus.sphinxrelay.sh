@@ -90,21 +90,13 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 
   if [ "${connection}" = "ip2tor&selfsigned" ]; then
 
-    text="\n
-OK you now have an IP2Tor connection running - thats great!\n
-BUT TO MAKE THIS WORK:
-It needs an additional Domain with LetsEncrypt certificate for HTTPS:
-MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
-
+    text="OK you now have an IP2Tor connection running - thats great!\n
+BUT TO MAKE THIS WORK:\n
+It needs an additional Domain with LetsEncrypt certificate for HTTPS: MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
+(if thats not working cancel the IP2Tor and just use sphinx within local network)"
     whiptail --title " Warning " \
-    --yes-button "Back" \
-    --no-button "Get LetsEncrypt" \
-    --yesno "${text}" 15 72
-    if [ "$?" != "1" ]; then
-      exit 0
-	  else
-      exit 0
-    fi
+    --msgbox "${text}" 15 72
+    exit 0
   fi
 
   if [ ${#extraPairInfo} -eq 0 ]; then
