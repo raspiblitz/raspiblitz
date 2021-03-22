@@ -309,9 +309,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "$2" != "" ]; then
       githubUser="$2"
     fi
-    githubBranch="v1.1.3"
+    githubBranch="master"
     if [ "$3" != "" ]; then
       githubBranch="$3"
+    fi
+    TAG=""
+    if [ "$4" != "" ]; then
+      TAG="$3"
     fi
 
     # install from GitHub
@@ -320,7 +324,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/sphinxrelay
     sudo -u sphinxrelay git clone https://github.com/${githubUser}/sphinx-relay.git
     cd /home/sphinxrelay/sphinx-relay
-    sudo -u sphinxrelay git checkout ${githubBranch}
+
+    # set to latest release tag
+    sudo -u sphinxrelay git checkout ${githubBranch} || exit 1
+    sudo -u sphinxrelay git pull  || exit 1
+    if [ "${TAG}" == "" ]; then
+      TAG=$(git tag | sort -V | tail -1)
+    fi
+    if [ "${TAG}" != "ignore" ]; then
+      echo "# Reset to the latest release tag --> ${TAG}"
+      sudo -u sphinxrelay git reset --hard $TAG || exit 1
+    else
+      echo "# IGNORING release tag .. running latest code of branch ${githubBranch}"
+    fi
 
     echo "# NPM install dependencies ..."
     sudo -u sphinxrelay npm install
