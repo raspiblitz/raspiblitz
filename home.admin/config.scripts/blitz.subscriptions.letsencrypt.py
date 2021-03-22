@@ -71,14 +71,11 @@ def eprint(*args, **kwargs):
 
 
 def handleException(e):
-    print("handleException A")
     if isinstance(e, BlitzError):
-        print("handleException B")
-        eprint(e.errorLong)
-        eprint(e.errorException)
+        #eprint(e.errorLong)
+        #eprint(e.errorException)
         print("error='{0}'".format(e.errorShort))
     else:
-        print("handleException C")
         eprint(e)
         print("error='{0}'".format(str(e)))
     sys.exit(1)
