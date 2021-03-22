@@ -71,11 +71,14 @@ def eprint(*args, **kwargs):
 
 
 def handleException(e):
+    print("handleException A")
     if isinstance(e, BlitzError):
+        print("handleException A")
         eprint(e.errorLong)
         eprint(e.errorException)
         print("error='{0}'".format(e.errorShort))
     else:
+        print("handleException A")
         eprint(e)
         print("error='{0}'".format(str(e)))
     sys.exit(1)
@@ -353,20 +356,16 @@ def get_subscription(subscription_id):
 
 
 def get_domain_by_ip(ip):
-    print("# get_domain_by_ip A")
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
         raise BlitzError("no match")
-    print("# get_domain_by_ip B")
     # section with letsencrypt subs exists
     if "subscriptions_letsencrypt" not in subs:
         raise BlitzError("no match")
-    print("# get_domain_by_ip C")
     # go thru subscription and check of a match
     for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
-        print("# get_domain_by_ip D")
         # if IP is a direct match
         if sub['ip'] == ip:
             return sub['id']
@@ -764,18 +763,14 @@ def subscription_detail():
 # to check if an ip has a domain mapping
 #######################
 def domain_by_ip():
-    print("domain_by_ip A")
     # check parameters
     try:
         if len(sys.argv) <= 2:
-            print("domain_by_ip B")
             raise BlitzError("incorrect parameters", "")
 
     except Exception as e:
-        print("domain_by_ip C")
         handleException(e)
 
-    print("domain_by_ip D")
     ip = sys.argv[2]
     try:
 
