@@ -764,6 +764,7 @@ def subscription_detail():
 # to check if an ip has a domain mapping
 #######################
 def domain_by_ip():
+    print("domain_by_ip A")
     # check parameters
     try:
         if len(sys.argv) <= 2:
