@@ -353,16 +353,20 @@ def get_subscription(subscription_id):
 
 
 def get_domain_by_ip(ip):
+    print("# get_domain_by_ip A")
     # does subscriptin file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
         raise BlitzError("no match")
+    print("# get_domain_by_ip B")
     # section with letsencrypt subs exists
     if "subscriptions_letsencrypt" not in subs:
         raise BlitzError("no match")
+    print("# get_domain_by_ip C")
     # go thru subscription and check of a match
     for idx, sub in enumerate(subs['subscriptions_letsencrypt']):
+        print("# get_domain_by_ip D")
         # if IP is a direct match
         if sub['ip'] == ip:
             return sub['id']
