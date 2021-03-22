@@ -21,7 +21,7 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait - can take a while)"
   source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
 
-  connectionTest="fail"
+  ip2torWarn="HTTPS problems"
 
   # display possible problems with IP2TOR setup
   if [ "${connectionTest}" != "OK" ]; then
