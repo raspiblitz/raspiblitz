@@ -96,13 +96,24 @@ MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
       exit 0
   fi
 
-
   if [ "${connection}" = "ip2tor&selfsigned" ]; then
-
     text="OK you now have an IP2Tor connection running - thats great!\n
 BUT TO MAKE THIS WORK:\n
 It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
 (or cancel the IP2Tor & just use sphinx within local network)"
+    whiptail --title " Warning " \
+    --msgbox "${text}" 15 72
+    exit 0
+  fi
+
+  if [ "${connectionApp}" != "0" ]; then
+    text="There is already one app connected to the Sphinx-Relay.\n
+There CANNOT BE MORE THAN ONE APP connected at the same time.\n
+You can either switch devices within the Sphnix app: see PROFILE & export keys
+or you have to deinstall the Sphinx-Relay with DELETE DATA & reinstall.\n
+If you just upgraded from local network to IP2Tor --> 
+open the app > PROFILE & under ADVANCED change the SERVER URL to:
+${publicURL}"
     whiptail --title " Warning " \
     --msgbox "${text}" 15 72
     exit 0
