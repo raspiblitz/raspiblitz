@@ -208,6 +208,7 @@ if [ "$1" = "status" ]; then
     echo "ip2torIP='${ip}'"
     echo "ip2torPort='${port}'"
     # check for LetsEnryptDomain on IP2TOR
+    ip2torDomain=""
     error=""
     source <(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
     if [ ${#error} -eq 0 ]; then
