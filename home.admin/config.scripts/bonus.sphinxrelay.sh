@@ -293,7 +293,7 @@ if [ "$1" = "status" ]; then
 
   # check if already an app was connected to relay (after that a second connection will not work)
   connectionApp=$(sudo sqlite3 /mnt/hdd/app-data/sphinxrelay/sphinx.db "SELECT * FROM sphinx_contacts WHERE auth_token IS NOT NULL;" 2>/dev/null | grep -c "1||")
-  echo "connectionApp='${connectionApp}'"
+  echo "connectionApp=${connectionApp}"
 
   exit 0
 fi
