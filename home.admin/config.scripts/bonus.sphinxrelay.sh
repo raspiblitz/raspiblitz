@@ -28,7 +28,7 @@ if [ "$1" = "menu" ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
     --no-button "Continue Anyway" \
-    --yesno "Your SPHINX SERVER may have problems:\n${ip2torWarn}\n\nCheck if locally responding: http://${localIP}:${httpPort}/app\n(You should see 'INDEX' in your browser)\n\nCheck if service is reachable over Tor:\n${toraddress}\Also check logs with 'debug' on terminal." 15 72
+    --yesno "Your SPHINX SERVER may have problems.\n\nCheck if locally responding: http://${localIP}:${httpPort}/app\n(You should see 'INDEX' in your browser)\n\nCheck if service is reachable over Tor:\n${toraddress}\Also check logs with 'debug' on terminal." 15 72
   elif [ ${#ip2torWarn} -gt 0 ]; then
     whiptail --title " Warning " \
     --yes-button "Back" \
