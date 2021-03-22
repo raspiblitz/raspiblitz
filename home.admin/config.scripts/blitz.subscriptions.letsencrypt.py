@@ -768,11 +768,14 @@ def domain_by_ip():
     # check parameters
     try:
         if len(sys.argv) <= 2:
+            print("domain_by_ip B")
             raise BlitzError("incorrect parameters", "")
 
     except Exception as e:
+        print("domain_by_ip C")
         handleException(e)
 
+    print("domain_by_ip D")
     ip = sys.argv[2]
     try:
 
