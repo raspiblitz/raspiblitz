@@ -335,14 +335,15 @@ else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
 
+# deprecated - see: #2031
 # LNDMANAGE
-if [ "${lndmanage}" = "on" ]; then
-  echo "Provisioning lndmanage - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning lndmanage - not active" >> ${logFile}
-fi
+#if [ "${lndmanage}" = "on" ]; then
+#  echo "Provisioning lndmanage - run config script" >> ${logFile}
+#  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
+#  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
+#else
+#  echo "Provisioning lndmanage - not active" >> ${logFile}
+#fi
 
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}

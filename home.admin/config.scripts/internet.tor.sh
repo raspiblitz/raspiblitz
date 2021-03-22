@@ -41,12 +41,12 @@ activateBitcoinOverTOR()
     echo "torpassword=$PASSWORD_B" >> /home/bitcoin/.${network}/${network}.conf
     if [ "${network}" = "bitcoin" ]; then
       # adding some bitcoin onion nodes to connect to to make connection easier
-      echo "main.addnode=fno4aakpl6sg6y47.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=toguvy5upyuctudx.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=ndndword5lpb7eex.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=6m2iqgnqjxh7ulyk.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=5tuxetn7tar3q5kp.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=juo4oneckybinerq.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ira7kqcbff52wofoong2dieh2xlvmw4e7ya3znsqn7wivn6armetvrqd.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=xlpi353v7ia5b73msynr7tmddgxoco7n2r2bljt5txpv6bpzzphkreyd.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ccjrb6va3j6re4lg2lerlt6wyvlb4tod7qbe7rwiouuapb7etvterxyd.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=s7m4mnd6bokujhywsocxibispktruormushdroeaeqeb3imvztfs3vid.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=ldvhlpsrvspquqnl3gutz7grfu5lb3m2dgnezpl3tlkxgpoiw2g5mzid.onion" >> /home/bitcoin/.${network}/${network}.conf
+      echo "main.addnode=gliovxxzyy2rkwaoz25khf6oa64c3csqzjn3t6dodsjuf34w6a6ktsyd.onion" >> /home/bitcoin/.${network}/${network}.conf
     fi
     sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
