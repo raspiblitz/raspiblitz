@@ -294,20 +294,14 @@ fi
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
 fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
+fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
 fi
-if [ "${pool}" == "on" ]; then
-  OPTIONS+=(POOL "Update Lightning Pool")
-fi
-if [ "${loop}" == "on" ]; then
-  OPTIONS+=(LOOP "Update Lightning Loop")
-fi
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
-fi
-if [ "${sphinxrelay}" == "on" ]; then
-  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
