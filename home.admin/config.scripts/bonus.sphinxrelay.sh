@@ -87,6 +87,26 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
       exit 0
   fi
 
+
+  if [ "${connection}" = "ip2tor&selfsigned" ]; then
+
+    text="\n
+OK you now have an IP2Tor connection running - thats great!\n
+BUT TO MAKE THIS WORK:
+It needs an additional Domain with LetsEncrypt certificate for HTTPS:
+MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+
+    whiptail --title " Warning " \
+    --yes-button "Back" \
+    --no-button "Get LetsEncrypt" \
+    --yesno "${text}" 15 72
+    if [ "$?" != "1" ]; then
+      exit 0
+	  else
+      exit 0
+    fi
+  fi
+
   if [ ${#extraPairInfo} -eq 0 ]; then
     extraPairInfo="The base64 decoded connection string (for debug):\n${connectionCodeClear}"
   fi
