@@ -273,6 +273,16 @@ if [ "$1" = "status" ]; then
     echo "ip2torWarn='Connection String not updated yet. Try again a bit later or check for errors.'"
   fi
 
+  # test connection ... calling the url /app should return INDEX
+  connectionTest="n/a"
+  connectionResponse=$(curl ${publicURL}/app 2>/dev/null)
+  if [ "${connectionResponse}" == "INDEX" ]; then
+    connectionTest="OK"
+  else
+    connectionTest="fail"
+  fi
+  echo "connectionTest='${connectionTest}'"
+  
   exit 0
 fi
 
