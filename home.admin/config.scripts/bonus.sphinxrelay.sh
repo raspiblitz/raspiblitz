@@ -348,6 +348,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo adduser --disabled-password --gecos "" sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndadmin sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndsigner sphinxrelay
+    sudo /usr/sbin/usermod --append --groups lndrouter sphinxrelay
 
     # install needed install packages
     sudo apt install -y sqlite3
