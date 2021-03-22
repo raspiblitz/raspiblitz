@@ -6,6 +6,7 @@
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
 - New: Lightning Terminal 0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - New: Telegraf metrics (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1369)
+- New: Download whitepaper from blockchain [details](https://github.com/rootzoll/raspiblitz/pull/2017)
 - Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
