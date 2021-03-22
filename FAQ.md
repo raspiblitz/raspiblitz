@@ -78,7 +78,7 @@
 
 ## What changed on the single RaspiBlitz updates?
 
-See the [CHANGES.md](CHANGES.md) file for detailes.
+See the [CHANGES.md](CHANGES.md) file for details.
 
 ## How do I update my RaspiBlitz (since 1.2)?
 
