@@ -336,12 +336,6 @@ case $CHOICE in
   PYBLOCK)
     /home/admin/config.scripts/bonus.pyblock.sh update
     ;;
-  POOL)
-    /home/admin/config.scripts/bonus.pool.sh update  
-    ;;
-  LOOP)
-    /home/admin/config.scripts/bonus.loop.sh update  
-    ;;
   TOR)
     sudo /home/admin/config.scripts/internet.tor.sh update  
     ;;
