@@ -64,7 +64,7 @@ port forwarding on router needs to be active & may change port"
 IP2TOR+self-signed-HTTPS: ${publicURL}\n
 IMPORTANT: For this connection to work & be secure it needs a
 additional Domain with LetsEncrypt certificate for HTTPS:
-MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+MAINMENU > SUBSCRIBE & add LetsEncrypt HTTPS Domain"
 
   # When DynDNS
   elif [ ${connection} = "dns&selfsigned" ]; then
