@@ -71,7 +71,8 @@ At the moment your Sphinx Relay Server is just available
 within the local network - without transport encryption.
 Local server for test & debug: ${publicURL}\n
 To enable easy reachability from the outside consider
-adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
+adding a IP2TOR Bridge and reconnect:
+MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
    extraPairInfo="You need to be on the same local network to make this work."
 
   else
@@ -92,8 +93,8 @@ adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE) and reconnect."
 
     text="OK you now have an IP2Tor connection running - thats great!\n
 BUT TO MAKE THIS WORK:\n
-It needs an additional Domain with LetsEncrypt certificate for HTTPS: MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
-(if thats not working cancel the IP2Tor and just use sphinx within local network)"
+It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
+(or cancel the IP2Tor & just use sphinx within local network)"
     whiptail --title " Warning " \
     --msgbox "${text}" 15 72
     exit 0
