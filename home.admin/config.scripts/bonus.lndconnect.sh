@@ -9,7 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # make sure commandline tool is available
-sudo apt-get install -y qrencode 2>/dev/null
+sudo apt-get install -y qrencode 1>/dev/null 2>/dev/null
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
