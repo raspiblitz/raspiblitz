@@ -196,7 +196,7 @@ msg=""
 if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
-if [ ${#usingIP2TOR} -gt 0 ]; then
+if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTOR} -eq 0 ]; then
   msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection.\n\n"
 fi
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <Continue> or <Console QRcode> to see it in this window."
