@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# !! NOTICE: Pool is now prt of the 'bonus.lit.sh' bundle
+# this single install script will still be available for now
+# but main focus for the future development should be on LIT
+
 # https://github.com/lightninglabs/pool/releases/
 pinnedVersion="v0.3.4-alpha"
 
@@ -7,7 +11,7 @@ pinnedVersion="v0.3.4-alpha"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to switch Lightning Pool on, off or update"
  echo "# bonus.pool.sh [on|off|menu|update]"
- echo "# installs Pool $pinnedVersion by default"
+ echo "# DEPRECATED use instead: bonus.lit.sh"
  exit 1
 fi
 
@@ -166,6 +170,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm /etc/systemd/system/poold.service
     # delete user and it's home directory
     sudo userdel -rf pool
+    # remove symlink
+    sudo rm -r /mnt/hdd/app-data/.pool
     echo "# OK, the Pool Service is removed."
   else 
     echo "# Pool is not installed."

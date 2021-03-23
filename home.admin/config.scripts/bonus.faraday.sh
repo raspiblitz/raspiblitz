@@ -1,22 +1,20 @@
 #!/bin/bash
 
+# !! NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
+# this single install script will still be available for now
+# but main focus for the future development should be on LIT
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Bonus App: faraday -> https://github.com/lightninglabs/faraday"
  echo "lnd.faraday.sh [status|on|off]"
+ echo "!! DEPRECATED use instead: bonus.lit.sh"
  exit 1
 fi
 
-echo "## bonus.faraday.sh"
+version="0.2.3-alpha"
+echo "## bonus.faraday.sh ${version}"
 
-# determine version by running lnd version
-lndOldVersion=$(lncli --version | grep -c "v0.10.")
-#echo "# LND is old version: ${lndOldVersion}"
-if [ ${lndOldVersion} -eq 0 ]; then
-  version="0.2.1-alpha"
-else
-  version="0.1.0-alpha"
-fi
 # version and trusted release signer
 PGPkeys="https://keybase.io/carlakirkcohen/pgp_keys.asc"
 PGPcheck="15E7ECF257098A4EF91655EB4CA7FE54A6213C91"
@@ -232,13 +230,19 @@ WantedBy=multi-user.target
     sudo systemctl start faraday
   fi
 
+  echo "# default config path"
+  sudo mkdir /home/faraday/.faraday
+  sudo mkdir /home/faraday/.faraday/${chain}net
+  sudo chown -R faraday:faraday /home/faraday/.faraday
+
   echo "# flag in raspiblitz config"
   if [ ${#faraday} -eq 0 ]; then
     echo "faraday='on'" >> /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
 
-  echo "# OK Faraday  is installed"
+  echo "# OK Faraday is installed"
+  echo "# please 'restart' for clean creation of faraday tls/macaroons"
   exit 1
 
 fi

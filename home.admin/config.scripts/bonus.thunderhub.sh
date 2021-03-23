@@ -1,9 +1,12 @@
 #!/bin/bash
 
+THUBVERSION="v0.12.7"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall ThunderHub"
  echo "bonus.thunderhub.sh [on|off|menu|update]"
+ echo "install $THUBVERSION by default"
  exit 1
 fi
 
@@ -81,7 +84,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub
     # https://github.com/apotdevin/thunderhub/releases
-    sudo -u thunderhub git reset --hard v0.10.4
+    sudo -u thunderhub git reset --hard $THUBVERSION
     echo "Running npm install and run build..."
     sudo -u thunderhub npm install
     if ! [ $? -eq 0 ]; then
@@ -201,8 +204,24 @@ EOF
     ##################
     # SYSTEMD SERVICE
     ##################
-    echo "*** Install ThunderHub systemd for ${network} on ${chain} ***"
-    cat > /home/admin/thunderhub.service <<EOF
+
+    # torify service if Tor is used
+    if [ "${runBehindTor}" = "on" ]; then
+      echo "# Connect to the external APIs through Tor"
+      proxy="torify"
+      echo "# set up torsocks"
+      sudo cp /etc/tor/torsocks.conf /etc/tor/torsocks-thunderhub.conf
+      sudo sed -i "s/^#AllowInbound 1/AllowInbound 1/g" /etc/tor/torsocks-thunderhub.conf
+      sudo sed -i "s/^#AllowOutboundLocalhost 1/AllowOutboundLocalhost 1/g" /etc/tor/torsocks-thunderhub.conf
+      env="Environment=TORSOCKS_CONF_FILE=/etc/tor/torsocks-thunderhub.conf"
+    else
+      echo "# Connect to the external APIs through clearnet"
+      proxy=""
+      env=""
+    fi
+
+    echo "# Install ThunderHub systemd for ${network} on ${chain}"
+    echo "
 # Systemd unit for thunderhub
 # /etc/systemd/system/thunderhub.service
 
@@ -213,7 +232,8 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-ExecStart=/usr/bin/npm run start -- -p 3010
+$env
+ExecStart=$proxy /usr/bin/npm run start -- -p 3010
 User=thunderhub
 Restart=always
 TimeoutSec=120
@@ -223,9 +243,7 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-EOF
-    sudo mv /home/admin/thunderhub.service /etc/systemd/system/thunderhub.service 
-    sudo chown root:root /etc/systemd/system/thunderhub.service
+" | sudo tee /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
     echo "OK - the ThunderHub service is now enabled"
 

@@ -75,9 +75,6 @@ copyHost()
     return
   fi
 
-  echo "# install dependencies ..."
-  sudo apt-get install -y sshpass
-
   sudo rm /root/.ssh/known_hosts 2>/dev/null
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then
@@ -219,7 +216,7 @@ case $CHOICE in
     result=""
     while [ ${#result} -eq 0 ]
     do
-        _temp="/home/admin/download/dialog.$$"
+        _temp=$(mktemp -p /dev/shm/)
         l1="Please enter the new name of your LND node:\n"
         l2="different name is better for a fresh identity\n"
         l3="one word, keep characters basic & not too long"

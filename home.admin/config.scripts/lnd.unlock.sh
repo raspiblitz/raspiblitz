@@ -58,7 +58,7 @@ while [ ${fallback} -eq 0 ]
 
     loopCount=$(($loopCount +1))
     echo "# calling: lncli unlock"
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock --recovery_window=1000 --stdin 2>&1)
+    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock --stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then

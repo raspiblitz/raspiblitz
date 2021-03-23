@@ -11,7 +11,10 @@ from pathlib import Path
 
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig,BlitzError
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
+from exceptions import BlitzError
 
 #####################
 # SCRIPT INFO
@@ -69,8 +72,8 @@ def eprint(*args, **kwargs):
 
 def handleException(e):
     if isinstance(e, BlitzError):
-        eprint(e.errorLong)
-        eprint(e.errorException)
+        #eprint(e.errorLong)
+        #eprint(e.errorException)
         print("error='{0}'".format(e.errorShort))
     else:
         eprint(e)
@@ -612,6 +615,7 @@ This looks not like a valid IP.
         if "SPHINX" in serviceName:
             print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
+            time.sleep(8)
 
         # success dialog
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''

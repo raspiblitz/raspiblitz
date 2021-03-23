@@ -149,11 +149,11 @@ kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
   sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
-  sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^maxmempool=.*/maxmempool=512/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 
 # link and copy HDD content into new OS on sd card
@@ -335,14 +335,15 @@ else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
 
+# deprecated - see: #2031
 # LNDMANAGE
-if [ "${lndmanage}" = "on" ]; then
-  echo "Provisioning lndmanage - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning lndmanage - not active" >> ${logFile}
-fi
+#if [ "${lndmanage}" = "on" ]; then
+#  echo "Provisioning lndmanage - run config script" >> ${logFile}
+#  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
+#  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
+#else
+#  echo "Provisioning lndmanage - not active" >> ${logFile}
+#fi
 
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}

@@ -6,7 +6,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
-if [ ${#loop} -eq 0 ]; then loop="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#specter} -eq 0 ]; then specter="off"; fi
@@ -16,12 +15,12 @@ if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
-if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
 if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
-if [ ${#pool} -eq 0 ]; then pool="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
+if [ ${#lit} -eq 0 ]; then lit="off"; fi
+if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -30,19 +29,17 @@ OPTIONS=()
 OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
 OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
 OPTIONS+=(t 'ThunderHub' ${thunderhub})
+OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
 OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
 OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
 OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
-OPTIONS+=(l 'Lightning Loop' ${loop})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
-OPTIONS+=(f 'Faraday' ${faraday})
-OPTIONS+=(c 'Lightning Pool' ${pool})
-OPTIONS+=(y 'PyBLOCK' ${pyblock})
-OPTIONS+=(m 'lndmanage' ${lndmanage})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+OPTIONS+=(y 'PyBLOCK' ${pyblock})
+OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -62,32 +59,6 @@ fi
 
 needsReboot=0
 anychange=0
-
-# LOOP process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${loop}" != "${choice}" ]; then
-  echo "Loop Setting changed .."
-  anychange=1
-  needsReboot=1 # always reboot so that RTL gets restarted to show/hide support loop
-  /home/admin/config.scripts/bonus.loop.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      # check macaroons and fix missing
-      /home/admin/config.scripts/lnd.credential.sh check
-      sudo systemctl start loopd
-      /home/admin/config.scripts/bonus.loop.sh menu
-    else
-      l1="FAILED to install Lightning LOOP"
-      l2="Try manual install in the terminal with:"
-      l3="/home/admin/config.scripts/bonus.loop.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "Loop Setting unchanged."
-fi
 
 # RTL process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
@@ -266,22 +237,6 @@ else
   echo "lndmanage setting unchanged."
 fi
 
-# FARADAY process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${faraday}" != "${choice}" ]; then
-  echo "faraday Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${faraday}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.faraday.sh menu
-  fi
-else
-  echo "faraday setting unchanged."
-fi
-
-
 # Balance of Satoshis process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -352,19 +307,19 @@ else
   echo "LNbits setting unchanged."
 fi
 
-# Lightning Pool
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+# LIT (Lightning Terminal)
+choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${pool}" != "${choice}" ]; then
-  echo "Pool Setting changed .."
+if [ "${lit}" != "${choice}" ]; then
+  echo "LIT Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.pool.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.lit.sh ${choice}
   if [ "${choice}" =  "on" ]; then
-    sudo systemctl start poold
-    sudo -u admin /home/admin/config.scripts/bonus.pool.sh menu
+    sudo systemctl start lnbits
+    sudo -u admin /home/admin/config.scripts/bonus.lit.sh menu
   fi
 else
-  echo "Pool setting unchanged."
+  echo "LIT setting unchanged."
 fi
 
 # Sphinx Relay
@@ -438,6 +393,21 @@ When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
   fi
 else
   echo "Mempool Explorer Setting unchanged."
+fi
+
+# Whitepaper process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${whitepaper}" != "${choice}" ]; then
+  echo "Whitepaper setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${whitepaper}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh menu
+  fi
+else
+  echo "Whitepaper setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

@@ -12,7 +12,11 @@ from pathlib import Path
 import grpc
 import requests
 import toml
-from blitzpy import RaspiBlitzConfig, BlitzError
+
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
+from exceptions import BlitzError
+
 from lndlibs import rpc_pb2 as lnrpc
 from lndlibs import rpc_pb2_grpc as rpcstub
 
@@ -420,6 +424,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         raise BlitzError("invalid port (key not found)", bridge)
     except ValueError:
         raise BlitzError("invalid port (not a number)", bridge)
+    if bridge_port < 1 or bridge_port > 65535:
+        raise BlitzError("invalid port (not a valid tcp port)", bridge)
 
     print("#### Check if duration delivered is as advertised ...")
     contract_breached = False

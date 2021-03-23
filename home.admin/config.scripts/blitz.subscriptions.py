@@ -11,7 +11,8 @@ import time
 from datetime import datetime
 
 import toml
-from blitzpy import RaspiBlitzConfig
+sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+from config import RaspiBlitzConfig
 from dialog import Dialog
 
 # constants for standard services
@@ -211,6 +212,7 @@ The following additional information is available:
     # trigger restart of relevant services so they can pickup new environment
     print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
     os.system("sudo systemctl restart sphinxrelay")
+    time.sleep(8)
 
     # loop until no more subscriptions or user chooses CANCEL on subscription list
     my_subscriptions()
@@ -416,6 +418,7 @@ def main():
         if service_name == SERVICE_SPHINX:
             print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
+            time.sleep(8)
 
         sys.exit(0)
 

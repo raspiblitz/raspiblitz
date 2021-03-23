@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
-pinnedVersion="1.0.0"
+pinnedVersion="1.2.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -317,7 +317,7 @@ EOF
   if [ "${blockfilterindex}" = "0" ]; then
     sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=1/g" /mnt/hdd/${network}/${network}.conf
     echo "# switching blockfilterindex=1"
-    isBitcoinRunning=$(sudo systemctl is-active ${network}d | grep -c "^active")
+    isBitcoinRunning=$(systemctl is-active ${network}d | grep -c "^active")
     if [ ${isBitcoinRunning} -eq 1 ]; then
       echo "# ${network}d is running - so restarting"
       sudo systemctl restart ${network}d

@@ -32,7 +32,7 @@
 - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
 - [Can I directly connect the RaspiBlitz with my laptop?](#can-i-directly-connect-the-raspiblitz-with-my-laptop)
 - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
-- [How can I build an SD card other then the master branch?](#how-can-i-build-an-sd-card-other-then-the-master-branch)
+- [How can I build an SD card from another branch?](#how-can-i-build-an-sd-card-from-another-branch)
 - [How can I build an SD card from my forked GitHub Repo?](#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 - [How can I checkout a new branch from the RaspiBlitz repo to my forked repo?](#how-can-i-checkout-a-new-branch-from-the-raspiblitz-repo-to-my-forked-repo)
 - [How can I sync a branch of my forked GitHub with my local RaspiBlitz?](#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
@@ -78,7 +78,7 @@
 
 ## What changed on the single RaspiBlitz updates?
 
-See the [CHANGES.md](CHANGES.md) file for detailes.
+See the [CHANGES.md](CHANGES.md) file for details.
 
 ## How do I update my RaspiBlitz (since 1.2)?
 
@@ -399,7 +399,7 @@ Just removing power from the RaspiBlitz can lead to data corruption if the HDD i
 
 But if cannot login with SSH and you need to power off at least remove the LAN cable (network connection)first for sometime (around 10-30 secs - until you can see no more blinking lights on the HDD) and then remove the power cable. This should minimize the risk if data corruption in this situations.
 
-## How can I build an SD card other then the master branch?
+## How can I build an SD card from another branch?
 
 There might be new, but not released features in development that are not yet in the master branch - but you want to try them out.
 
@@ -407,7 +407,7 @@ To build a SD card image from another branch than master, you follow the [Build 
 
 For example if you want to make a build from the 'dev' branch you execute the following command:
 
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh 'dev'`
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh false rootzoll dev true true true`
 
 ## How can I build an SD card from my forked GitHub Repo?
 
@@ -417,7 +417,7 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 
 * The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
 
-`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]
+`wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false [GITHUB-USERNAME] [BRANCH] true true true`
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
 

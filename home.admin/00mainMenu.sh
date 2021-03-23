@@ -68,6 +68,9 @@ fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "BTCPay Server Info")
 fi
+if [ "${lit}" == "on" ]; then
+  OPTIONS+=(LIT "LIT (loop, pool, faraday)")
+fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
@@ -215,6 +218,9 @@ case $CHOICE in
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ;;
+        LIT)
+            /home/admin/config.scripts/bonus.lit.sh menu
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu

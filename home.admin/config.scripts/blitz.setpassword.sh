@@ -17,7 +17,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # tempfile 
-_temp="./dialog.$$"
+_temp=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
@@ -291,20 +291,6 @@ EOF
   if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"
     sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
-  fi
-
-  # Tor
-  if [ "${runBehindTor}" == "on" ]; then
-      echo "# changing the password for Tor"
-
-      hashedPassword=$(sudo -u debian-tor tor --hash-password "${newPassword}")
-      sed -i "s/^HashedControlPassword .*/HashedControlPassword ${hashedPassword}/g" /etc/tor/torrc 2>/dev/null
-
-      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
-      sed -i "s/^torpassword=.*/torpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
-
-      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /mnt/hdd/lnd/lnd.conf 2>/dev/null
-      sed -i "s/^tor.password=.*/tor.password=${newPassword}/g" /home/admin/.lnd/lnd.conf 2>/dev/null
   fi
 
   echo "# OK -> RPC Password B changed"
