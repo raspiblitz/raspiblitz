@@ -30,7 +30,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Channel Tools " --msgbox "\n
-Channel Tools is a command line tool.\n\n
+Channel Tools is a command line tool to rescue locked funds.\n\n
 On terminal use command 'chantools' and follow instructions.\n\n
 Usage: https://github.com/guggero/chantools/blob/master/README.md
 " 11 75
