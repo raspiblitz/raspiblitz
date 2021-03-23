@@ -102,7 +102,7 @@ checkIP2TOR()
   # and the checks from avove showed there is SSH forwarding / dynDNS
   # then ask user if IP2TOR subscription is wanted
   if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
-    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to configure your router or phone to connect to your RaspiBlitz at home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
+    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to connect to your RaspiBlitz when away from home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
   	if [ $? -eq 0 ]; then
   	  echo "# yes-button -> Send To Shop"
 	  port="10009"
