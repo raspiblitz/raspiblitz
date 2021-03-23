@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
 Channel Tools is a command line tool.\n\n
 On terminal use command 'chantools' and follow instructions.\n\n
 Usage: https://github.com/guggero/chantools/blob/master/README.md
-" 10 75
+" 11 75
   clear
   exit 0
 fi
