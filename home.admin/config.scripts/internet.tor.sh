@@ -244,10 +244,18 @@ HiddenServiceDir /mnt/hdd/tor/web80/
 HiddenServiceVersion 3
 HiddenServicePort 80 127.0.0.1:80
 
-# Hidden Service for BITCOIN
+# Hidden Service for BITCOIN RPC
 HiddenServiceDir /mnt/hdd/tor/bitcoin8332/
 HiddenServiceVersion 3
 HiddenServicePort 8332 127.0.0.1:8332
+
+# NOTE: since Bitcoin Core v0.21.0 sets up a v3 Tor service automatically 
+# see /mnt/hdd/bitcoin for the onion private key - delete and restart bitcoind to reset
+
+# Hidden Service for BITCOIN P2P (v2FallBack for Bisq)
+HiddenServiceDir /mnt/hdd/tor/bitcoin8333
+HiddenServiceVersion 2
+HiddenServicePort 8333 127.0.0.1:8333
  
 # Hidden Service for LND (incoming connections)
 HiddenServiceDir /mnt/hdd/tor/lnd9735
@@ -273,8 +281,6 @@ HiddenServicePort 8080 127.0.0.1:8080
 HiddenServiceDir /mnt/hdd/tor/lndrest8080fallback/
 HiddenServiceVersion 2
 HiddenServicePort 8080 127.0.0.1:8080
-
-# NOTE: bitcoind get tor service automatically - see /mnt/hdd/bitcoin for onion key
 EOF
     sudo rm $torrc
     sudo mv ./torrc $torrc
