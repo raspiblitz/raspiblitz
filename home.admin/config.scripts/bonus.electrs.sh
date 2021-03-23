@@ -75,7 +75,7 @@ if [ "$1" = "status" ]; then
       echo "publicIP='${cleanip}'"
     fi
     echo "portTCP='50001'"
-    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50001')
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
 
     publicPortRunning=$(nc -z -w6 ${publicip} 50001 2>/dev/null; echo $?)
@@ -87,7 +87,7 @@ if [ "$1" = "status" ]; then
       echo "publicTCPPortAnswering=0"
     fi
     echo "portHTTP='50002'"
-    localPortRunning=$(sudo netstat -a | grep -c '0.0.0.0:50002')
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
     echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
     if [ "${publicPortRunning}" == "0" ]; then
