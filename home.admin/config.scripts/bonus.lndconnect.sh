@@ -23,41 +23,6 @@ if [ "$2" == "tor" ]; then
   forceTOR=1
 fi
 
-#### MAKE SURE LNDCONNECT IS INSTALLED
-
-# check if it is installed
-# https://github.com/rootzoll/lndconnect
-# using own fork of lndconnet because of this commit to fix for better QR code:
-commit=82d7103bb8c8dd3c8ae8de89e3bc061eef82bb8f
-isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
-if [ $isInstalled -eq 0 ] || [ "$1" == "update" ]; then
-  echo "# Installing lndconnect.."
-  # make sure Go is installed
-  /home/admin/config.scripts/bonus.go.sh on
-  # get Go vars
-  source /etc/profile
-  # Install latest lndconnect from source:
-  go get -d github.com/rootzoll/lndconnect
-  cd $GOPATH/src/github.com/rootzoll/lndconnect
-  git checkout $commit
-  make
-else
-  echo "# lndconnect is already installed" 
-fi
-
-# recheck if install worked
-isInstalled=$(lndconnect -h 2>/dev/null | grep "nocert" -c)
-if [ $isInstalled -eq 0 ]; then
-  echo ""
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  echo "FAIL: Was not able to install/build lndconnect"
-  echo "Retry later or report to developers with logs above."
-  lndconnect -h
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  read key
-  exit 1
-fi
-
 #### CHECK IF IP2TOR BRIDGES ARE AVAILABLE
 ip2torREST_IP=""
 ip2torREST_PORT=""
@@ -79,19 +44,17 @@ fi
 #### ADAPT PARAMETERS BASED TARGETWALLET 
 
 # defaults
-connector=""
 host=""
 port=""
-extraparameter=""
+addcert=1
 supportsTOR=0
 usingIP2TOR=""
 
 if [ "${targetWallet}" = "zap-ios" ]; then
-  connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses REST
     port="8080"
-    extraparameter="--nocert"
+    addcert=0
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -100,13 +63,11 @@ if [ "${targetWallet}" = "zap-ios" ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
     forceTOR=0
-    extraparameter=""
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
   fi  
   
 elif [ "${targetWallet}" = "zap-android" ]; then
-  connector="lndconnect"
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses gRPC
     port="10009"
@@ -117,21 +78,18 @@ elif [ "${targetWallet}" = "zap-android" ]; then
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
-    forceTOR=0
-    extraparameter=""
+    forceTOR=1
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
   fi  
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
-  connector="lndconnect"
   port="8080"
   if [ ${#ip2torREST_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-REST-API"
     forceTOR=0
-    extraparameter=""
     host="${ip2torREST_IP}"
     port="${ip2torREST_PORT}"
   fi  
@@ -142,16 +100,10 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
-  connector="lndconnect"
-  port="8080"
-  if [ ${#ip2torREST_IP} -gt 0 ]; then
-    # when IP2TOR bridge is available - force using that
+    port="8080"
     usingIP2TOR="LND-REST-API"
-    forceTOR=0
-    extraparameter=""
-    host="${ip2torREST_IP}"
-    port="${ip2torREST_PORT}"
-  fi  
+    forceTOR=1
+    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
@@ -159,8 +111,8 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
   if [ ${forceTOR} -eq 1 ]; then
     # echo "error='no tor support'"
     # exit 1
-    #port="8080"
-    #extraparameter="--nocert"
+    # port="8080"
+    # addcert=0
     # deactivate TOR for now, because address is too long QR code is too big to be scanned by
     # app and so just make it possible to use local.
     forceTOR=0
@@ -170,45 +122,10 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
     forceTOR=0
-    extraparameter=""
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
   fi  
 
-elif [ "${targetWallet}" = "shango-ios" ]; then
-
-  connector="shango"
-  port="10009"
-  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
-    # when IP2TOR bridge is available - force using that
-    usingIP2TOR="LND-GRPC-API"
-    forceTOR=0
-    extraparameter=""
-    host="${ip2torGRPC_IP}"
-    port="${ip2torGRPC_PORT}"
-  fi  
-  if [ ${forceTOR} -eq 1 ]; then
-    echo "error='no tor support'"
-    exit 1
-  fi
-
-elif [ "${targetWallet}" = "shango-android" ]; then
-
-  connector="shango"
-  port="10009"
-  if [ ${#ip2torGRPC_IP} -gt 0 ]; then
-    # when IP2TOR bridge is available - force using that
-    usingIP2TOR="LND-GRPC-API"
-    forceTOR=0
-    extraparameter=""
-    host="${ip2torGRPC_IP}"
-    port="${ip2torGRPC_PORT}"
-  fi
-  if [ ${forceTOR} -eq 1 ]; then
-    echo "error='no tor support'"
-    exit 1
-  fi
- 
 else
   echo "error='unknown target wallet'"
   exit 1
@@ -256,44 +173,28 @@ if [ ${#sshtunnel} -gt 0 ]; then
   fi
 fi
 
-# special case: for Zeus android over TOR
-hostscreen="${host}"
-if [ "${targetWallet}" = "zeus-android" ] && [ ${forceTOR} -eq 1 ]; then
-  # show TORv2 address on LCD (to make QR code smaller and scannable by Zeus)
-  host=$(sudo cat /mnt/hdd/tor/lndrest8080fallback/hostname)
-  # show TORv3 address on Screen
-  hostscreen=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-fi
 
 #### RUN LNDCONNECT
 
-imagePath=""
-datastring=""
+# generate data parts
+macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
-if [ "${connector}" == "lndconnect" ]; then
+# generate URI parameters
+macaroonParameter="?macaroon="
+certParameter="&cert=${cert}"
 
-  # get Go vars
-  source /etc/profile
-
-  # write qr code data to an image
-  cd /home/admin
-  lndconnect --host=${host} --port=${port} --image ${extraparameter}
-
-  # display qr code image on LCD
-  /home/admin/config.scripts/blitz.lcd.sh image /home/admin/lndconnect-qr.png
-
-elif [ "${connector}" == "shango" ]; then
-
-  # write qr code data to text file
-  datastring=$(echo -e "${host}:${port},\n$(xxd -p -c2000 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon),\n$(openssl x509 -sha256 -fingerprint -in /home/admin/.lnd/tls.cert -noout)")
-
-  # display qr code on LCD
-  /home/admin/config.scripts/blitz.lcd.sh qr "${datastring}"
-
-else
-  echo "error='unknown connector'"
-  exit 1
+# mute cert parameter (optional)
+if [ ${addcert} -eq 0 ]; then
+  certParameter=""
 fi
+
+# build lndconnect
+# see spec here: https://github.com/LN-Zap/lndconnect/blob/master/lnd_connect_uri.md
+lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
+
+# display qr code image on LCD
+/home/admin/config.scripts/blitz.lcd.sh qr "${lndconnect}"
 
 # show pairing info dialog
 msg=""
@@ -311,19 +212,14 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
-  if [ "${connector}" == "lndconnect" ]; then
-    echo "lndconnect --host=${hostscreen} --port=${port} ${extraparameter}"
-    lndconnect --host=${hostscreen} --port=${port} ${extraparameter}
-    echo "Press ENTER when finished."
-    read key
-  elif [ "${connector}" == "shango" ]; then
-    /home/admin/config.scripts/blitz.lcd.sh qr-console ${datastring}
-  fi
+  echo "qrencode -o - -t ANSIUTF8 -m2  "${lndconnect}""
+  qrencode -o - -t ANSIUTF8 -m2  "${lndconnect}"
+  echo "Press ENTER when finished."
+  read key
 fi
 
 # clean up
 /home/admin/config.scripts/blitz.lcd.sh hide
-shred -u ${imagePath} 2> /dev/null
 
 echo "------------------------------"
 echo "If the connection was not working:"
