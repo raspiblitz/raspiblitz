@@ -184,7 +184,7 @@ macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/a
 cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 # generate URI parameters
-macaroonParameter="?macaroon="
+macaroonParameter="?macaroon=${macaroon}"
 certParameter="&cert=${cert}"
 
 # mute cert parameter (optional)
