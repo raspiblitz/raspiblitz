@@ -117,7 +117,7 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
 if [ "${chantools}" == "on" ]; then
-  OPTIONS+=(CHANTOOLS "Chain Tools (Fund Rescue)")
+  OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
 
 # Basic Options
