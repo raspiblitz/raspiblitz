@@ -8,6 +8,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# make sure commandline tool is available
+sudo apt-get install -y qrencode 2>/dev/null
+
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -177,7 +180,7 @@ fi
 #### RUN LNDCONNECT
 
 # generate data parts
-macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 # generate URI parameters
@@ -212,8 +215,10 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
-  echo "qrencode -o - -t ANSIUTF8 -m2  "${lndconnect}""
-  qrencode -o - -t ANSIUTF8 -m2  "${lndconnect}"
+  echo "##############"
+  echo "qrencode -o - -t ANSIUTF8 -m2 "${lndconnect}""
+  echo "##############"
+  qrencode -o - -t ANSIUTF8 -m2 "${lndconnect}"
   echo "Press ENTER when finished."
   read key
 fi
