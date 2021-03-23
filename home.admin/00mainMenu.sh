@@ -116,6 +116,9 @@ fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
+if [ "${chantools}" == "on" ]; then
+  OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -260,6 +263,9 @@ case $CHOICE in
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+            ;;
+        CHANTOOLS)
+            sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py

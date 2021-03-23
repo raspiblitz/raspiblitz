@@ -167,6 +167,21 @@ function pyblock() {
   fi
 }
 
+# command: chantools
+# switch to the bitcoin user for chantools
+function chantools() {
+  if [ $(grep -c "chantools=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the bitcoin user with the command: 'sudo su - bitcoin'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'chantools' again to start"
+    sudo su - bitcoin
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "chantools is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.chantools.sh on"
+  fi
+}
+
 # command: jm
 # switch to the joinmarket user for the JoininBox menu
 function jm() {
@@ -194,7 +209,6 @@ function faraday() {
     echo "/home/admin/config.scripts/bonus.faraday.sh on"
   fi
 }
-
 
 # command: lit
 # switch to the lit user for the loop, pool & faraday services

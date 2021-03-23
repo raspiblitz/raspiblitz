@@ -21,6 +21,7 @@ if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
+if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -39,6 +40,7 @@ OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
+OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -235,6 +237,21 @@ if [ "${lndmanage}" != "${choice}" ]; then
   fi
 else
   echo "lndmanage setting unchanged."
+fi
+
+# CHANTOOLS process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${chantools}" != "${choice}" ]; then
+  echo "chantools Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.chantools.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${chantools}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.chantools.sh menu
+  fi
+else
+  echo "chantools setting unchanged."
 fi
 
 # Balance of Satoshis process choice
