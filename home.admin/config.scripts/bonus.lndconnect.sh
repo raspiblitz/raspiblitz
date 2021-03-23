@@ -88,18 +88,10 @@ elif [ "${targetWallet}" = "zap-android" ]; then
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
-  port="8080"
-  if [ ${#ip2torREST_IP} -gt 0 ]; then
-    # when IP2TOR bridge is available - force using that
+    port="8080"
     usingIP2TOR="LND-REST-API"
-    forceTOR=0
-    host="${ip2torREST_IP}"
-    port="${ip2torREST_PORT}"
-  fi  
-  if [ ${forceTOR} -eq 1 ]; then
-    echo "error='no tor support'"
-    exit 1
-  fi
+    forceTOR=1
+    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
