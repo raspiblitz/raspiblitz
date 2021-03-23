@@ -184,7 +184,7 @@ fi
 echo "- OK key added"
 
 echo "*** Adding Tor Sources to sources.list ***"
-torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
+torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
 echo "torSourceListAvailable=${torSourceListAvailable}"  
 if [ ${torSourceListAvailable} -eq 0 ]; then
   echo "- adding TOR sources ..."
@@ -593,7 +593,7 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 homeFile=/home/admin/.bashrc
 autostart="automatically start main menu"
-autostartDone=$(cat $homeFile|grep -c "$autostart")
+autostartDone=$(grep -c "$autostart" $homeFile)
 
 if [ ${autostartDone} -eq 0 ]; then
   # bash autostart for admin
@@ -635,7 +635,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
-keyBindingsDone=$(cat $homeFile|grep -c "$keyBindings")
+keyBindingsDone=$(grep -c "$keyBindings" $homeFile)
 
 if [ ${keyBindingsDone} -eq 0 ]; then
   sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
@@ -693,7 +693,7 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
 
   configFile="/boot/config.txt"
   disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(cat $configFile|grep -c "$disableBT")
+  disableBTDone=$(grep -c "$disableBT" $configFile)
 
   if [ ${disableBTDone} -eq 0 ]; then
     # disable bluetooth module
@@ -1024,7 +1024,7 @@ if [ "${lcdInstalled}" != "false" ]; then
      [ "${baseImage}" = "ubuntu" ]; then
     homeFile=/home/pi/.bashrc
     autostart="automatic start the LCD"
-    autostartDone=$(cat $homeFile|grep -c "$autostart")
+    autostartDone=$(grep -c "$autostart" $homeFile)
     if [ ${autostartDone} -eq 0 ]; then
       # bash autostart for pi
       # run as exec to dont allow easy physical access by keyboard
@@ -1041,7 +1041,7 @@ if [ "${lcdInstalled}" != "false" ]; then
   if [ "${baseImage}" = "dietpi" ]; then
     homeFile=/home/dietpi/.bashrc
     startLCD="automatic start the LCD"
-    autostartDone=$(cat $homeFile|grep -c "$startLCD")
+    autostartDone=$(grep -c "$startLCD" $homeFile)
     if [ ${autostartDone} -eq 0 ]; then
       # bash autostart for dietpi
       sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
