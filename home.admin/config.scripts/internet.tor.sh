@@ -238,6 +238,7 @@ ControlPort 9051
 SocksPort 9050
 ExitRelay 0
 CookieAuthentication 1
+CookieAuthFileGroupReadable 1
 
 # Hidden Service for WEB ADMIN INTERFACE
 HiddenServiceDir /mnt/hdd/tor/web80/
