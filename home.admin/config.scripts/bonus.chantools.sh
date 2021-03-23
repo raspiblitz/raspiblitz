@@ -17,7 +17,7 @@ fi
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Channel Tools install script"
- echo "/home/admin/config.scrips/bonus.chantools.sh on|off|menu"
+ echo "/home/admin/config.scripts/bonus.chantools.sh on|off|menu"
  echo "Installs the version $pinnedVersion by default."
  exit 1
 fi
