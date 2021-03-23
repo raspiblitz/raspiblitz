@@ -424,6 +424,8 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         raise BlitzError("invalid port (key not found)", bridge)
     except ValueError:
         raise BlitzError("invalid port (not a number)", bridge)
+    if bridge_port < 1 or bridge_port > 65535:
+        raise BlitzError("invalid port (not a valid tcp port)", bridge)
 
     print("#### Check if duration delivered is as advertised ...")
     contract_breached = False
