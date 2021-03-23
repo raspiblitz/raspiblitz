@@ -29,12 +29,12 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Channel Tools " --msgbox "
-Channel Tools is a command line tool.
-Type: 'sudo su - bitcoin' in the command line to switch to the bitcoin user.
-Then see 'chantools' for the options.
+  dialog --title " Channel Tools " --msgbox "\n
+Channel Tools is a command line tool.\n
+On terminal use command 'chantools' and follow instructions.\n
 Usage: https://github.com/guggero/chantools/blob/master/README.md
 " 10 75
+  clear
   exit 0
 fi
 
