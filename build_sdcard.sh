@@ -124,9 +124,9 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 # ---------------------------------------
 baseImage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isDebian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
+isRaspbian=$(grep -c 'Raspbian' /etc/os-release 2>/dev/null)
+isDebian=$(grep -c 'Debian' /etc/os-release 2>/dev/null)
+isUbuntu=$(grep -c 'Ubuntu' /etc/os-release 2>/dev/null)
 isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
   baseImage="raspbian"
@@ -297,11 +297,11 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
 
   configFile="/boot/config.txt"
   max_usb_current="max_usb_current=1"
-  max_usb_currentDone=$(cat $configFile|grep -c "$max_usb_current")
+  max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
 
   if [ ${max_usb_currentDone} -eq 0 ]; then
-    sudo echo "" >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
+    echo "" | sudo tee -a $configFile
+    echo "# Raspiblitz" | sudo tee -a $configFile
     echo "$max_usb_current" | sudo tee -a $configFile
   else
     echo "$max_usb_current already in $configFile"
@@ -322,8 +322,8 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
   kernelOptionsFile=/boot/cmdline.txt
   fsOption1="fsck.mode=force"
   fsOption2="fsck.repair=yes"
-  fsOption1InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption1})
-  fsOption2InFile=$(cat ${kernelOptionsFile}|grep -c ${fsOption2})
+  fsOption1InFile=$(grep -c ${fsOption1} ${kernelOptionsFile})
+  fsOption2InFile=$(grep -c ${fsOption2} ${kernelOptionsFile})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
     sudo sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
@@ -1001,6 +1001,7 @@ if [ ${#installed} -eq 0 ]; then
   echo "!!! BUILD FAILED --> Was not able to install LND"
   exit 1
 fi
+
 correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
 if [ ${correctVersion} -eq 0 ]; then
   echo ""
