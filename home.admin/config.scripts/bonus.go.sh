@@ -11,7 +11,7 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # set version, check: https://github.com/golang/go/releases 
-  goVersion="1.13.3"
+  goVersion="1.16.2"
 
   # get cpu architecture
   isARM=$(uname -m | grep -c 'arm')

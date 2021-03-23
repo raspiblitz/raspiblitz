@@ -726,12 +726,6 @@ fi
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if [ "${fatpack}" == "true" ]; then
   echo "*** FATPACK ***"
-  echo "* Adding GO Framework ..."
-  sudo /home/admin/config.scripts/bonus.go.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
   echo "* Adding nodeJS Framework ..."
   sudo /home/admin/config.scripts/bonus.nodejs.sh on
   if [ "$?" != "0" ]; then

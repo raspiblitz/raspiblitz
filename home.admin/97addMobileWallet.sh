@@ -175,36 +175,6 @@ case $CHOICE in
       /home/admin/config.scripts/bonus.sphinxrelay.sh menu
 	  exit 1;
 	  ;;
-	SHANGO_IOS)
-	  appstoreLink="https://testflight.apple.com/join/WwCjFnS8"
-	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install Testflight and Shango on your iOS device" \
-	    --yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 10 60
-	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
-	  fi
-	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  checkIP2TOR LND-GRPC-API
-      /home/admin/config.scripts/bonus.lndconnect.sh shango-ios ${connect}
-	  exit 1;
-	  ;;
-	SHANGO_ANDROID)
-	  appstoreLink="https://play.google.com/store/apps/details?id=com.shango"
-	  /home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
-	  whiptail --title "Install Shango on your Android Phone" \
-		--yes-button "continue" \
-		--no-button "link as QR code" \
-		--yesno "At the moment this app is in public beta testing:\n\n${appstoreLink}\n\nEasiest way to install scan QR code on LCD with phone.\n\nWhen installed and started -> continue" 10 60
-	  if [ $? -eq 1 ]; then
-	    /home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
-	  fi
-	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  checkIP2TOR LND-GRPC-API
-	  /home/admin/config.scripts/bonus.lndconnect.sh shango-android ${connect}
-      exit 1;
-      ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       #/home/admin/config.scripts/blitz.lcd.sh qr ${appstoreLink}
@@ -300,8 +270,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		/home/admin/config.scripts/blitz.lcd.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  checkIP2TOR LND-REST-API
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
   	  exit 1;
   	;;
   ZEUS_ANDROID)
@@ -320,11 +289,7 @@ Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.lcd.sh hide
-	  checkIP2TOR LND-REST-API
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
   	  exit 1;
   	;;
   FULLY_NODED)
