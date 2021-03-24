@@ -298,10 +298,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# updating databases"
     sudo -u lnbits ./venv/bin/quart migrate
 
-    # quickfix bug: https://github.com/lnbits/lnbits/issues/99
-    chmod 777 /home/admin/assets/bundle.css
-    sudo -u lnbits cp /home/admin/assets/bundle.css /home/lnbits/lnbits/lnbits/static/bundle.css
-
     # open firewall
     echo
     echo "*** Updating Firewall ***"
