@@ -369,6 +369,14 @@ else
     echo "Provisioning DNS Server - keep default" >> ${logFile}
 fi
 
+# CHANTOOLS
+if [ "${chantools}" == "on" ]; then
+    echo "Provisioning chantools - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/bonus.chantools.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning chantools - keep default" >> ${logFile}
+fi
+
 # ROOT SSH KEYS
 # check if a backup on HDD exists – if so, restore it
 backupRootSSH=$(sudo ls /mnt/hdd/ssh/root_backup 2>/dev/null | grep -c "id_rsa")
