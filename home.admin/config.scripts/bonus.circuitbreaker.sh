@@ -6,7 +6,7 @@ pinnedVersion="v0.2.0"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Config script to switch the circuitbreaker on, off or update to the latest release tag or commit"
-  echo "bonus.circuitbreaker.sh [on|off|update|update commit]"
+  echo "bonus.circuitbreaker.sh [on|off|update|update commit|menu]"
   echo
   echo "Version to be installed by default: $pinnedVersion"
   echo "Source: https://github.com/lightningequipment/circuitbreaker"
@@ -21,11 +21,27 @@ if ! grep -Eq "^circuitbreaker=" /mnt/hdd/raspiblitz.conf; then
   echo "circuitbreaker=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
+isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
+
+# switch on
+if [ "$1" = "menu" ]; then
+  if [ ${isInstalled} -eq 1 ]; then
+    whiptail --title " circuitbreaker " --msgbox "Circuitbreaker is to Lightning what firewalls are to the internet.\n
+Its a service running in the background - use to monitor:
+sudo journalctl -fu circuitbreaker\n
+For more details and further information see:
+https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+" 13 78
+    clear
+  else
+    echo "# Circuit Breaker is not installed."
+  fi
+  exit 0
+fi
+
 # stop services
 echo "# Making sure the service is not running"
 sudo systemctl stop circuitbreaker 2>/dev/null
-
-isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -114,9 +130,7 @@ WantedBy=multi-user.target
     else
       echo "# OK - the circuitbreaker.service is enabled, to start manually use: sudo systemctl start circuitbreaker"
     fi
-    echo 
     echo "# Find more info at https://github.com/lightningequipment/circuitbreaker"
-    echo
     echo "# Monitor with: 'sudo journalctl -fu circuitbreaker'"
   else
     echo "# Failed to install circuitbreaker "
