@@ -310,7 +310,7 @@ else
 fi
 
 # lcd rotate
-choice="0"; check=$(echo "${CHOICES}" | grep -c "c")
+choice="0"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="1"; fi
 if [ "${lcdrotate}" != "${choice}" ]; then
   echo "LCD Rotate Setting changed .."
@@ -337,7 +337,7 @@ else
 fi
 
 # circuitbreaker
-choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${circuitbreaker}" != "${choice}" ]; then
   echo "Circuitbreaker Setting changed .."
