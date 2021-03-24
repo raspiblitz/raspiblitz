@@ -119,6 +119,9 @@ fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
+if [ "${circuitbreaker}" == "on" ]; then
+  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -267,6 +270,9 @@ case $CHOICE in
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
+        CIRCUIT)
+            sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;
