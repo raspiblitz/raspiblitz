@@ -15,6 +15,7 @@ if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
+if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off"
@@ -77,6 +78,7 @@ OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
 OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
 OPTIONS+=(n 'Testnet' ${chainValue})    
+OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
 OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
@@ -307,6 +309,18 @@ else
   echo "LND Autounlock Setting unchanged."
 fi
 
+# lcd rotate
+choice="0"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="1"; fi
+if [ "${lcdrotate}" != "${choice}" ]; then
+  echo "LCD Rotate Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${choice}
+  needsReboot=1
+else
+  echo "LCD Rotate Setting unchanged."
+fi
+
 # touchscreen
 choice="0"; check=$(echo "${CHOICES}" | grep -c "s")
 if [ ${check} -eq 1 ]; then choice="1"; fi
@@ -322,16 +336,15 @@ else
   echo "Touchscreen Setting unchanged."
 fi
 
-# lcd rotate
-choice="0"; check=$(echo "${CHOICES}" | grep -c "r")
-if [ ${check} -eq 1 ]; then choice="1"; fi
-if [ "${lcdrotate}" != "${choice}" ]; then
-  echo "LCD Rotate Setting changed .."
+# circuitbreaker
+choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${circuitbreaker}" != "${choice}" ]; then
+  echo "Circuitbreaker Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${choice}
-  needsReboot=1
+  sudo /home/admin/config.scripts/bonus.circuitbreaker.sh ${choice}
 else
-  echo "LCD Rotate Setting unchanged."
+  echo "Circuitbreaker Setting unchanged."
 fi
 
 # DropBox process choice
