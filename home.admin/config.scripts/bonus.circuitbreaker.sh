@@ -28,7 +28,9 @@ if [ "$1" = "menu" ]; then
   if [ ${isInstalled} -eq 1 ]; then
     dialog --title " circuitbreaker ${pinnedVersion} " --msgbox "\n
 circuitbreaker is to Lightning what firewalls are to the internet.\n\n
-On terminal use command 'circuitbreaker' and follow instructions.\n\n
+Its a service running in the background - use to monitor:\n
+sudo journalctl -fu circuitbreaker\n\n
+For details and further information see:\n
 https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 " 11 78
     clear
@@ -129,9 +131,7 @@ WantedBy=multi-user.target
     else
       echo "# OK - the circuitbreaker.service is enabled, to start manually use: sudo systemctl start circuitbreaker"
     fi
-    echo 
     echo "# Find more info at https://github.com/lightningequipment/circuitbreaker"
-    echo
     echo "# Monitor with: 'sudo journalctl -fu circuitbreaker'"
   else
     echo "# Failed to install circuitbreaker "
