@@ -30,9 +30,9 @@ if [ "$1" = "menu" ]; then
 circuitbreaker is to Lightning what firewalls are to the internet.\n\n
 Its a service running in the background - use to monitor:\n
 sudo journalctl -fu circuitbreaker\n\n
-For details and further information see:\n
+For more details and further information see:\n
 https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
-" 11 78
+" 14 78
     clear
   else
     echo "# Circuit Breaker is not installed."
