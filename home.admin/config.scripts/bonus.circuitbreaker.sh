@@ -25,12 +25,16 @@ isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | g
 
 # switch on
 if [ "$1" = "menu" ]; then
-  dialog --title " circuitbreaker ${pinnedVersion} " --msgbox "\n
+  if [ ${isInstalled} -eq 1 ]; then
+    dialog --title " circuitbreaker ${pinnedVersion} " --msgbox "\n
 circuitbreaker is to Lightning what firewalls are to the internet.\n\n
 On terminal use command 'circuitbreaker' and follow instructions.\n\n
 https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 " 11 78
-  clear
+    clear
+  else
+    echo "# Circuit Breaker is not installed."
+  fi
   exit 0
 fi
 
