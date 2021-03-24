@@ -26,11 +26,10 @@ isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | g
 # switch on
 if [ "$1" = "menu" ]; then
   if [ ${isInstalled} -eq 1 ]; then
-    dialog --title " circuitbreaker " --msgbox "\n
-Circuitbreaker is to Lightning what firewalls are to the internet.\n\n
-Its a service running in the background - use to monitor:\n
-sudo journalctl -fu circuitbreaker\n\n
-For more details and further information see:\n
+    whiptail --title " circuitbreaker " --msgbox "Circuitbreaker is to Lightning what firewalls are to the internet.\n
+Its a service running in the background - use to monitor:
+sudo journalctl -fu circuitbreaker\n
+For more details and further information see:
 https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 " 13 78
     clear
