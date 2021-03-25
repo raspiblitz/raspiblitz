@@ -723,6 +723,15 @@ if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
 
 fi
 
+# *** FALLBACK NODE LIST *** see https://github.com/rootzoll/raspiblitz/issues/1888
+echo "*** FALLBACK NODE LIST ***"
+sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 1024 ]; then 
+  echo "FAIL: downloading FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
+  exit 1
+fi
+
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if [ "${fatpack}" == "true" ]; then
   echo "*** FATPACK ***"
