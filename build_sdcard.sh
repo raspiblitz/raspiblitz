@@ -1098,8 +1098,9 @@ if [ "${lcdInstalled}" != "false" ]; then
       # load module on boot
       cp ./waveshare35a.dtbo /boot/overlays/
       echo "hdmi_force_hotplug=1" >> /boot/config.txt 
-      # don't enable I2C, SPI and UART ports by default
-      # echo "dtparam=i2c_arm=on" >> /boot/config.txt
+      echo "hdmi_safe=1" >> /boot/config.txt
+      echo "dtparam=i2c_arm=on" >> /boot/config.txt
+      # don't enable SPI and UART ports by default
       # echo "dtparam=spi=on" >> /boot/config.txt
       # echo "enable_uart=1" >> /boot/config.txt
       echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
