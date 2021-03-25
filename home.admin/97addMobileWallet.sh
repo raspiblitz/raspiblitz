@@ -132,8 +132,8 @@ checkIP2TOR()
 }
 
 # Options
-OPTIONS=(ZAP_IOS "Zap Wallet (iOS)" \
-        ZAP_ANDROID "Zap Wallet (Android)" \
+OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
+#		ZAP_IOS "Zap Wallet (iOS)" \
         ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)" \
 		SPHINX "Sphinx Chat (Android or iOS)"
