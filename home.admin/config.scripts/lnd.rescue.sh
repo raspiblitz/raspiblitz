@@ -77,7 +77,7 @@ if [ ${mode} = "backup" ]; then
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp -r 'admin@${localip}:/home/admin/lnd-rescue-*.tar.gz' ./"
   echo "ON WINDOWS USE:"
-  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ./"
+  echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ."
   echo ""
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${byteSize} byte"
