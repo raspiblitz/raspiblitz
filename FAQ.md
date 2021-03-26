@@ -518,8 +518,7 @@ Work notes for the process of producing a new SD card image release:
 
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick on the Build Computer (press F12 on startup)
 * Connect to a secure WiFi (hardware switch on) or LAN
-* Download the latest `Raspberry Pi OS With Desktop (without recommended software)` from [raspberrypi.org](https://www.raspberrypi.org/software/operating-systems/)
-* Using the same `Raspberry Pi OS With Desktop (without recommended software)` choice, click on `Show SHA256 file integrity hash` and make note of that info
+* Download the latest RaspiOS-64bit namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
