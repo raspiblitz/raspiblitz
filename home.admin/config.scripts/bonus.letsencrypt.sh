@@ -26,7 +26,7 @@ if [ "${runBehindTor}" == "on" ]; then
   ACME_TORIFY="torify "
 fi
 echo $ACME_TORIFY
-exi 1
+exit 1
 
 ###################
 # FUNCTIONS
