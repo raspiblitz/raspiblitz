@@ -307,28 +307,27 @@ sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 echo "isMounted: $isMounted" >> $logFile
 
-
 # check if UASP is already deactivated (on RaspiOS)
 # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-if [ -f "/boot/cmdline.txt" ] && [ ${#hddAdapter} -gt 0 ]; then 
+cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then 
   echo "Checking for UASP deactivation ..." >> $logFile
   usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
   # check if its maybe other device
-  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapter}:u")
+  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
   if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
     # remove old usb-storage.quirks
     sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
   fi 
   if [ ${usbQuirkDone} -eq 0 ]; then
     # add new usb-storage.quirks
-    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapter}:u /" /boot/cmdline.txt
+    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
     sudo cat /boot/cmdline.txt
     # go into reboot to activate new setting
-    echo "DONE deactivating UASP for ${hddAdapter} ... one more reboot needed ... "
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
     sudo shutdown -r now
     sleep 100
-  fi 
-
+  fi
 fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
