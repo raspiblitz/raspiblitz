@@ -211,7 +211,7 @@ The following additional information is available:
 
     # trigger restart of relevant services so they can pickup new environment
     print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
-    os.system("sudo systemctl restart sphinxrelay")
+    os.system("sudo systemctl restart sphinxrelay 2>/dev/null")
     time.sleep(8)
 
     # loop until no more subscriptions or user chooses CANCEL on subscription list
