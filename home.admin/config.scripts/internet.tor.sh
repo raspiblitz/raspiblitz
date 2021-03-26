@@ -395,7 +395,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
 
   # *** CURL TOR PROXY ***
-  echo "socks5-hostname localhost:9050" > .curlrc.tmp
   sudo rm /root/.curlrc
   sudo rm /home/pi/.curlrc
   sudo rm /home/admin/.curlrc
