@@ -174,14 +174,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# switching Tor ON"
 
   # *** CURL TOR PROXY ***
-  echo "socks5-hostname localhost:9050" > .curlrc.tmp
-  sudo cp ./.curlrc.tmp /root/.curlrc
-  sudo chown root:root /home/admin/.curlrc
-  sudo cp ./.curlrc.tmp /home/pi/.curlrc
-  sudo chown pi:pi /home/pi/.curlrc
-  sudo cp ./.curlrc.tmp /home/admin/.curlrc
-  sudo chown admin:admin /home/admin/.curlrc
-  rm .curlrc.tmp
+  # see https://github.com/rootzoll/raspiblitz/issues/1341
+  #echo "socks5-hostname localhost:9050" > .curlrc.tmp
+  #sudo cp ./.curlrc.tmp /root/.curlrc
+  #sudo chown root:root /home/admin/.curlrc
+  #sudo cp ./.curlrc.tmp /home/pi/.curlrc
+  #sudo chown pi:pi /home/pi/.curlrc
+  #sudo cp ./.curlrc.tmp /home/admin/.curlrc
+  #sudo chown admin:admin /home/admin/.curlrc
+  #rm .curlrc.tmp
 
   # make sure the network was set (by sourcing raspiblitz.conf)
   if [ ${#network} -eq 0 ]; then
@@ -395,9 +396,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
 
   # *** CURL TOR PROXY ***
-  sudo rm /root/.curlrc
-  sudo rm /home/pi/.curlrc
-  sudo rm /home/admin/.curlrc
+  # sudo rm /root/.curlrc
+  # sudo rm /home/pi/.curlrc
+  # sudo rm /home/admin/.curlrc
 
   # disable TOR service
   echo "# *** Disable Tor service ***"
