@@ -25,8 +25,6 @@ ACME_TORIFY=""
 if [ "${runBehindTor}" == "on" ]; then
   ACME_TORIFY="torify "
 fi
-echo $ACME_TORIFY
-exit 1
 
 ###################
 # FUNCTIONS
@@ -280,8 +278,8 @@ elif [ "$1" = "issue-cert" ]; then
 
   # create certicicates
   echo "# creating certs for ${FQDN}"
-  $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
-  success1=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
+  $ACME_TORIFY$ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
+  success1=$($ACME_TORIFY$ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
   success2=$(sudo ls ${ACME_CERT_HOME}/${FQDN}_ecc//fullchain.cer | grep -c "/fullchain.cer")
   if [ ${success1} -eq 0 ] || [ ${success2} -eq 0 ]; then
     sleep 6
@@ -334,7 +332,7 @@ elif [ "$1" = "remove-cert" ]; then
   fi
 
   # remove cert from renewal
-  $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
+  $ACME_TORIFY$ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
 
   # delete cert files
   sudo rm -r  ${ACME_CERT_HOME}/${FQDN}_ecc
