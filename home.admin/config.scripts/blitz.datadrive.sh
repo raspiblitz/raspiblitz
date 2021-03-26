@@ -314,11 +314,8 @@ if [ "$1" = "status" ]; then
 
   # determine UAS string --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
   if [ ${#hdd} -gt 0 ]; then
-    rawdata=$(sudo udevadm test /block/${hdd} 2> /dev/null)
-    vendorID=$(echo "${rawdata}" | grep 'ID_VENDOR_ID' | sed 's/ID_VENDOR_ID=//')
-    modelID=$(echo "${rawdata}" | grep 'ID_MODEL_ID' | sed 's/ID_MODEL_ID=//')
-    echo "hddVendorID=${vendorID}"
-    echo "hddModelID=${modelID}"
+    hddAdapter=$(lsusb | grep "SATA" | head -1 | cut -d " " -f6)
+    echo "hddAdapter=${hddAdapter}"
   fi
 
   echo
