@@ -96,6 +96,7 @@ MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
       exit 0
   fi
 
+  # check that IP2TOR has also a LetsEncrypt Cert
   if [ "${connection}" = "ip2tor&selfsigned" ]; then
     text="OK you now have an IP2Tor connection running - thats great!\n
 BUT TO MAKE THIS WORK:\n
@@ -106,6 +107,7 @@ It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMEN
     exit 0
   fi
 
+  # check that not more than one app is connected
   if [ "${connectionApp}" != "0" ]; then
     text="There is already one app connected to the Sphinx-Relay.
 There CANNOT BE MORE THAN ONE APP connected at the same time.\n
@@ -116,6 +118,13 @@ open the app > PROFILE & under ADVANCED change the SERVER URL to:
 ${publicURL}"
     whiptail --title " Warning " \
     --msgbox "${text}" 15 76
+    exit 0
+  fi
+
+  # check that at least one channel is open
+  openChannels=$(sudo -u bitcoin lncli listchannels | grep -c "channel_point")
+  if [ "${openChannels}" == "0" ]; then
+    whiptail --title " Warning " --msgbox "You need at least one open channel to the lightning network for sphinx to work." 10 32
     exit 0
   fi
 
@@ -294,7 +303,7 @@ if [ "$1" = "status" ]; then
 
   # test connection (accept self-signed certs here) ... calling the url /app should return INDEX
   connectionTest="n/a"
-  connectionResponse=$(curl --insecure ${publicURL}/app 2>/dev/null)
+  connectionResponse=$(wget -qO- ${publicURL}/app 2>/dev/null)
   if [ "${connectionResponse}" == "INDEX" ]; then
     connectionTest="OK"
   else
