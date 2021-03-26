@@ -21,6 +21,11 @@ ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 
 ACME_IS_INSTALLED=0
 
+ACME_TORIFY=""
+if [ "${runBehindTor}" == "on" ]; then
+  ACME_TORIFY="torify "
+fi
+
 ###################
 # FUNCTIONS
 ###################
