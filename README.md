@@ -135,7 +135,7 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 Browser: https://raspiblitz.org/raspiblitz-v1.7RC1-2021-03-27.img.gz
 
-SHA-256: cb845b65726227dfb4d640dc7e778b7cee523f1c6a699760a96bcf560300abc0 or [SIGNATURE]()
+SHA-256: 0969345a31c91fb917bfa7c0bf3706ad16bb040aa852ff9f04093c9af3f8a1c2 or [SIGNATURE]()
 
 * [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
