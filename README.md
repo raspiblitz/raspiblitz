@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.7.0 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
+`Version 1.7.0RC1 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -131,21 +131,13 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.6.2:**
+**Download SD-Card image - Version 1.7.0RC1 (JUST FOR TESTING)**
 
-RELEASE 1.6.2 IS IN PREPERATION AND LAST TESTING
+Browser: https://raspiblitz.org/raspiblitz-v1.7.0RC1-2021-03-27.img.gz
 
-* [What's new in Version 1.6.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-162-of-raspiblitz)
+SHA-256: 6b9925f274f68ca109771b047c0272df31c01dc0a5d2b9e05b582accfa6029ec or [SIGNATURE]()
 
-**Download SD-Card image - Version 1.6.1 (OLD VERSION)**
-
-Browser: https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz
-
-SHA-256: 6b9925f274f68ca109771b047c0272df31c01dc0a5d2b9e05b582accfa6029ec or [SIGNATURE](https://raspiblitz.org/raspiblitz-v1.6.1-2020-10-20.img.gz.sig)
-
-Torrent: [assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.6/home.admin/assets/raspiblitz-v1.6.1-2020-10-20.img.gz.torrent)
-
-* [What's new in Version 1.6 of RaspiBlitz?](CHANGES.md#whats-new-in-version-161-of-raspiblitz)
+* [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 

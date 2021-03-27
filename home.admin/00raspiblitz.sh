@@ -9,7 +9,7 @@ infoFile="/home/admin/raspiblitz.info"
 
 # use blitz.datadrive.sh to analyse HDD situation
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-if [ ${#error} -gt 0 ]; then
+if [ "${error}" != "" ]; then
   echo "# FAIL blitz.datadrive.sh status --> ${error}"
   echo "# Please report issue to the raspiblitz github."
   exit 1
