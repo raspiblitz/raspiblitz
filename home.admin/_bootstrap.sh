@@ -226,8 +226,9 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   # delete the after boot script
   sudo rm /home/admin/setup.sh 
   # reboot again
-  echo "DONE wait 6 secs ... one more reboot needed ... "
-
+  echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
+  echo "DONE wait 10 secs ... one more reboot needed ... "
+  sleep 10
   sudo shutdown -r now
   sleep 100
 fi
@@ -244,6 +245,9 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
+  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
+  echo "Switching HDMI ON ... (reboot) "
+  sleep 10
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
   exit 0
 fi
@@ -274,6 +278,9 @@ if [ ${sshReset} -eq 1 ]; then
   sudo systemctl stop sshd
   sudo rm /mnt/hdd/ssh/ssh_host*
   sudo ssh-keygen -A
+  echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
+  echo "SSH SERVER CERTS RESET ... (reboot) "
+  sleep 10
   sudo /home/admin/XXshutdown.sh reboot
   exit 0
 fi
@@ -425,6 +432,9 @@ if [ ${isMounted} -eq 0 ]; then
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
     sync
+    echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
+    echo "SSH SERVER CERTS RESET ... (reboot) "
+    sleep 10
     sudo shutdown -r -F -t 60
     exit 0
   else 
