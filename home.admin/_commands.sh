@@ -257,7 +257,7 @@ function pool() {
 
 # aliases for lit
 # switch to the pool user for the Pool Service
-if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
   source /mnt/hdd/raspiblitz.conf
   alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
     --tlscertpath=/home/lit/.lit/tls.cert \
