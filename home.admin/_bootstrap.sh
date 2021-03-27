@@ -325,8 +325,8 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then
     sudo cat /boot/cmdline.txt
     # go into reboot to activate new setting
     echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
-    sudo shutdown -r now
-    sleep 100
+    #sudo shutdown -r now
+    #sleep 100
   fi
 fi
 
