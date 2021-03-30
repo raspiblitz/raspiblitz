@@ -227,13 +227,13 @@ case $CHOICE in
             fi
             ;;
         LIGHTNING)
-            /home/admin/00lightningMenu.sh
+            /home/admin/99lightningMenu.sh
             ;;
         CONNECT)
-            /home/admin/00connectMenu.sh
+            /home/admin/99connectMenu.sh
             ;;
         SYSTEM)
-            /home/admin/00connectMenu.sh
+            /home/admin/99systemMenu.sh
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48

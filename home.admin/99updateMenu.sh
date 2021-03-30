@@ -322,6 +322,8 @@ if [ "${runBehindTor}" == "on" ]; then
 fi
 
 CHOICE=$(dialog --clear --title "Update Options" --menu "" \
+          --ok-label "Select" \
+          --cancel-label "Back" \
           $HEIGHT $WIDTH $CHOICE_HEIGHT \
           "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
