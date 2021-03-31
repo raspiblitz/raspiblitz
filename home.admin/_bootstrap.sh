@@ -227,8 +227,6 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
-  echo "DONE wait 10 secs ... one more reboot needed ... "
-  sleep 10
   sudo shutdown -r now
   sleep 100
 fi
@@ -246,8 +244,6 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  echo "Switching HDMI ON ... (reboot) "
-  sleep 10
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
   exit 0
 fi
@@ -279,8 +275,6 @@ if [ ${sshReset} -eq 1 ]; then
   sudo rm /mnt/hdd/ssh/ssh_host*
   sudo ssh-keygen -A
   echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  echo "SSH SERVER CERTS RESET ... (reboot) "
-  sleep 10
   sudo /home/admin/XXshutdown.sh reboot
   exit 0
 fi
@@ -316,26 +310,26 @@ echo "isMounted: $isMounted" >> $logFile
 
 # check if UASP is already deactivated (on RaspiOS)
 # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-# cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
-# if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then 
-#  echo "Checking for UASP deactivation ..." >> $logFile
-#  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
-#  # check if its maybe other device
-#  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
-#  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
-#    # remove old usb-storage.quirks
-#    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
-#  fi 
-#  if [ ${usbQuirkDone} -eq 0 ]; then
-#    # add new usb-storage.quirks
-#    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
-#    sudo cat /boot/cmdline.txt
-#    # go into reboot to activate new setting
-#    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
-#    #sudo shutdown -r now
-#    #sleep 100
-#  fi
-#fi
+cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then 
+  echo "Checking for UASP deactivation ..." >> $logFile
+  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
+  # check if its maybe other device
+  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
+    # remove old usb-storage.quirks
+    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+  fi 
+  if [ ${usbQuirkDone} -eq 0 ]; then
+    # add new usb-storage.quirks
+    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+    sudo cat /boot/cmdline.txt
+    # go into reboot to activate new setting
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
+    sudo shutdown -r now
+    sleep 100
+  fi
+fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 if [ ${isMounted} -eq 0 ]; then
@@ -433,8 +427,6 @@ if [ ${isMounted} -eq 0 ]; then
     cp $logFile /home/admin/raspiblitz.recover.log
     sync
     echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
-    echo "SSH SERVER CERTS RESET ... (reboot) "
-    sleep 10
     sudo shutdown -r -F -t 60
     exit 0
   else 
