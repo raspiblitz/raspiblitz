@@ -114,7 +114,7 @@ case $CHOICE in
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker, 
 cryptoadvance-specter, electrs, lit, lnbits, mempool,
-nbxlorer,nginx, RTL, telegraf, thunderhub, tor@default"
+nbxlorer, nginx, RTL, telegraf, thunderhub, tor@default"
     echo
     echo "Type the name of the service you would like to monitor:"  
     read SERVICE
@@ -130,7 +130,7 @@ nbxlorer,nginx, RTL, telegraf, thunderhub, tor@default"
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker, 
 cryptoadvance-specter, electrs, lit, lnbits, mempool,
-nbxlorer,nginx, RTL, telegraf, thunderhub, tor@default"
+nbxlorer, nginx, RTL, telegraf, thunderhub, tor"
     echo
     echo "Type the name of the service you would like to restart:" 
     read SERVICE
