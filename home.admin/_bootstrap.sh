@@ -78,6 +78,8 @@ source ${infoFile} 2>/dev/null
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
 echo "message=" >> $infoFile
+echo "baseimage=${baseimage}" >> $infoFile
+echo "cpu=${cpu}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
@@ -87,46 +89,6 @@ if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
 sudo chmod 777 ${infoFile}
-
-################################
-# IDENTIFY CPU ARCHITECTURE
-################################
-
-cpu="?"
-isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -gt 0 ]; then
-  cpu="arm"
-elif [ ${isAARCH64} -gt 0 ]; then
-  cpu="aarch64"
-elif [ ${isX86_64} -gt 0 ]; then
-  cpu="x86_64"
-fi
-echo "cpu=${cpu}" >> $infoFile
-
-################################
-# IDENTIFY BASEIMAGE
-################################
-
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-echo "baseimage=${baseImage}" >> $infoFile
 
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log

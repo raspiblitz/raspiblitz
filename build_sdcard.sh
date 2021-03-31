@@ -526,6 +526,12 @@ sudo chsh admin -s /bin/bash
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
+# WRITE BASIC raspiblitz.info to sdcard
+echo "baseimage=${baseimage}" > ./raspiblitz.info
+echo "cpu=${cpu}" > ./raspiblitz.info
+sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
+sudo chmod 777 /home/admin/raspiblitz.info
+
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
 # based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin

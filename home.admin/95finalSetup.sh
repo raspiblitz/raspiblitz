@@ -31,7 +31,7 @@ echo "Setting the Name/Alias/Hostname .."
 sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
 
 # expanding the root of the sd card
-if [ "${baseimage}" = "raspbian" ]; then
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   sudo raspi-config --expand-rootfs
   sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 elif [ "${baseimage}" = "armbian" ]; then

@@ -36,10 +36,6 @@ fi
 # see: https://github.com/rootzoll/raspiblitz/issues/936
 echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
 source ${infoFile}
-isRaspbian=$(echo $baseimage | grep -c 'raspbian')
-isArmbian=$(echo $baseimage | grep -c 'armbian')
-resizeRaspbian="/usr/bin/raspi-config"
-resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
 
 minimumSizeByte=8192000000
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
@@ -48,51 +44,57 @@ rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' '
 echo "rootPartition(${rootPartition})" >> ${logFile}
 echo "rootPartitionBytes(${rootPartitionBytes})" >> ${logFile}
 
-#if [ ${#rootPartition} -gt 0 ]; then
-#   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
-#   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
-#   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
-#   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
-#      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
-#      if [ ${fsexpanded} -eq 1 ]; then
-#         echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
-#         echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
-#         sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-#         sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-#         exit 1
-#      else
-#         echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-#         sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-#         sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-#         sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-#         if [ "${cpu}" == "x86_64"  ]; then
-#            echo "Please expand disk size." >> ${logFile}
-#	          # TODO: Expand disk size on x86_64
-#         elif [ ${isRaspbian} -gt 0 ]; then
-#            if [ -x ${resizeRaspbian} ]; then
-#              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
-#		          sudo $resizeRaspbian --expand-rootfs
-#	          else
-#              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
-#            fi
-#         elif [ ${isArmbian} -gt 0 ]; then
-#            if [ -x ${resizeArmbian} ]; then
-#              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
-#              sudo $resizeArmbian start
-#	          else
-#              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
-#            fi
-#         fi
-#         sleep 6
-#         sudo shutdown -r now
-#	 exit 0
-#      fi
-#   else
-#      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
-#   fi
-#else
-#   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
-#fi
+if [ ${#rootPartition} -gt 0 ]; then
+   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
+   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
+   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
+   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
+      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
+      if [ ${fsexpanded} -eq 1 ]; then
+        echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
+        echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
+        sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+        sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
+        exit 1
+      else
+        echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
+        sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+        sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
+        sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+        sleep 4
+        if [ "${cpu}" == "x86_64"  ]; then
+            echo "Please expand disk size." >> ${logFile}
+	          # TODO: Expand disk size on x86_64
+        elif [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+            resizeRaspbian="/usr/bin/raspi-config"
+            if [ -x ${resizeRaspbian} ]; then
+              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
+		          sudo $resizeRaspbian --expand-rootfs
+              sudo shutdown -r now
+	            exit 0
+	          else
+              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
+            fi
+        elif [ "${baseImage}" = "armbian" ]; then
+            resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
+            if [ -x ${resizeArmbian} ]; then
+              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
+              sudo $resizeArmbian start
+              sudo shutdown -r now
+	            exit 0
+	          else
+              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
+            fi
+        else
+          echo "WARN on provision - Not known system expand-rootfs OS" >> ${logFile}
+        fi
+      fi
+   else
+      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
+   fi
+else
+   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
+fi
 
 # import config values
 sudo chmod 777 ${configFile}
