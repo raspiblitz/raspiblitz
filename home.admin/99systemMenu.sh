@@ -14,8 +14,8 @@ TITLE="System Options"
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
-OPTIONS+=(BITCOINLOG "Monitor the debug.log")
-OPTIONS+=(BITCOINCONF "Edit the bitcoin.conf")
+OPTIONS+=(${network}LOG "Monitor the debug.log")
+OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 OPTIONS+=(LNDLOG "Monitor the LND log")
 OPTIONS+=(LNDCONF "Edit the LND.conf")
 
@@ -25,35 +25,128 @@ if [ "${runBehindTor}" == "on" ]; then
     HEIGHT=$((HEIGHT+2))
     CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))
 fi
-OPTIONS+=(CUSTOM "Monitor a custom service")
-OPTIONS+=(RESTART "Restart a custom service")
+OPTIONS+=(CUSTOMLOG "Monitor a custom service")
+OPTIONS+=(CUSTOMRESTART "Restart a custom service")
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
                 --ok-label "Select" \
-                --cancel-label "Back" \
+                --cancel-label "Main menu" \
                 --menu "$MENU" \
                 $HEIGHT $WIDTH $CHOICE_HEIGHT \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
 case $CHOICE in
-
-        MOBILE)
-            /home/admin/97addMobileWallet.sh
-            ;;
-        LNDCREDS)
-            sudo /home/admin/config.scripts/lnd.credentials.sh
-            ;;
-        BTCPAY)
-            /home/admin/config.scripts/lnd.export.sh btcpay
-            ;;
-        ELECTRS)
-            /home/admin/config.scripts/bonus.electrs.sh menu
-            ;;
-        TORLOG)
-            sudo -u debian-tor nyx
+  ${network}LOG)
+    clear
+    echo
+    echo "Will follow the /mnt/hdd/${network}/debug.log"
+    echo "running: 'sudo tail -n 30 -f /mnt/hdd/${network}/debug.log'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to abort"
+    read key
+    sudo tail -n 30 -f /mnt/hdd/${network}/debug.log;;
+  ${network}CONF)
+    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/${network}/${network}.conf" "root"
+    then
+      whiptail \
+        --title "Restart" --yes-button "Restart" --no-button "Not now" \
+        --yesno "To apply the new settings ${network}d needs to restart.
+        Do you want to restart ${network}d now?" 10 55
+      if [ $? -eq 0 ]; then
+        echo "# Restarting ${network}d"
+        sudo systemctl restart ${network}d
+      else
+        echo "# Continue without restarting."
+      fi
+    else
+      echo "# No change made"
+    fi;;
+  LNDLOG)
+    clear
+    echo
+    echo "Will follow the /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+    echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to abort"
+    read key
+    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
+  LNDCONF)
+    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/lnd/lnd.conf" "root"
+    then
+      whiptail \
+        --title "Restart" --yes-button "Restart" --no-button "Not now" \
+        --yesno "To apply the new settings LND needs to restart.
+        Do you want to restart LND now?" 10 55
+      if [ $? -eq 0 ]; then
+        echo "# Restarting LND"
+        sudo systemctl restart ${network}d
+      else
+        echo "# Continue without restarting."
+      fi
+     else
+      echo "# No change made"
+    fi;;         
+  NYX)
+    sudo -u debian-tor nyx;;
+  TORRC)
+    if /home/admin/config.scripts/blitz.setconf.sh "/etc/tor/torrc" "debian-tor"
+    then
+      whiptail \
+        --title "Restart" --yes-button "Restart" --no-button "Not now" \
+        --yesno "To apply the new settings Tor needs to restart.
+        Do you want to restart Tor now?" 10 55
+      if [ $? -eq 0 ]; then
+        echo "# Restarting tor"
+        sudo systemctl restart tor
+      else
+        echo "# Continue without restarting."
+      fi
+    else
+      echo "# No change made"
+    fi;;
+  CUSTOMLOG)
+    clear
+    echo
+    echo "Example list: 
+btc-rpc-explorer, btcpayserver, circuitbreaker, 
+cryptoadvance-specter, electrs, lit, lnbits, mempool,
+nbxlorer,nginx, RTL, telegraf, thunderhub, tor@default"
+    echo
+    echo "Type the name of the service you would like to monitor:"  
+    read SERVICE
+    echo
+    echo "Will use the command 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to abort"
+    sudo journalctl -n 100 -fu $SERVICE;;
+  CUSTOMRESTART)
+    clear
+    echo
+    echo "Example list: 
+btc-rpc-explorer, btcpayserver, circuitbreaker, 
+cryptoadvance-specter, electrs, lit, lnbits, mempool,
+nbxlorer,nginx, RTL, telegraf, thunderhub, tor@default"
+    echo
+    echo "Type the name of the service you would like to restart:" 
+    read SERVICE
+    echo
+    echo "Will run: 'sudo systemctl restart $SERVICE'"
+    echo
+    echo "Press ENTER to restart $SERVICE or use CTRL+C to abort"
+    read key
+    sudo systemctl restart $SERVICE
+    echo
+    echo "Will show the logs with: 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to abort"
+    sudo journalctl -n 100 -fu $SERVICE;;
 esac
 
-# go into loop - start script from beginning to load config/sate fresh
+# go into loop - start script from beginning to load config/start fresh
 /home/admin/00mainMenu.sh
