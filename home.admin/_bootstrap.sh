@@ -598,7 +598,7 @@ fi
 # STRESSTEST RASPBERRY PI
 ################################
 
-if [ "${baseImage}" = "raspbian" ] ; then
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   # generate stresstest report on every startup (in case hardware has changed)
   sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
   sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
