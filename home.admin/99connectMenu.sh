@@ -9,16 +9,15 @@ source /mnt/hdd/raspiblitz.conf
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=8
+HEIGHT=10
 WIDTH=64
-CHOICE_HEIGHT=2
+CHOICE_HEIGHT=4
 BACKTITLE="RaspiBlitz"
 TITLE="Connect Options"
 MENU=""
 OPTIONS=()
 
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
-OPTIONS+=(LNDCREDS "Manage LND Credentials")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
   HEIGHT=$((HEIGHT+1))
@@ -29,11 +28,15 @@ if [ "${BTCPayServer}" == "on" ]; then
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
+OPTIONS+=(RESET "Recreate LND Macaroons + TLS")
+OPTIONS+=(SYNC "Sync Macaroons + TLS with Apps/Users")
+
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
                 --ok-label "Select" \
-                --cancel-label "Back" \
+                --cancel-label "Main menu" \
                 --menu "$MENU" \
                 $HEIGHT $WIDTH $CHOICE_HEIGHT \
                 "${OPTIONS[@]}" \
@@ -42,18 +45,24 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
 
         MOBILE)
-            /home/admin/97addMobileWallet.sh
-            ;;
-        LNDCREDS)
-            sudo /home/admin/config.scripts/lnd.credentials.sh
-            ;;
-        BTCPAY)
-            /home/admin/config.scripts/lnd.export.sh btcpay
-            ;;
+          /home/admin/97addMobileWallet.sh;;
         ELECTRS)
-            /home/admin/config.scripts/bonus.electrs.sh menu
-            ;;
-
+          /home/admin/config.scripts/bonus.electrs.sh menu;;
+        BTCPAY)
+          /home/admin/config.scripts/lnd.export.sh btcpay;;
+        RESET)
+          sudo /home/admin/config.scripts/lnd.credentials.sh reset
+          echo "Press ENTER to return to main menu."
+          read key
+          exit 0;;
+        SYNC)
+          sudo /home/admin/config.scripts/lnd.credentials.sh sync
+          echo "Press ENTER to return to main menu."
+          read key
+          exit 0;;
+        EXPORT)
+          sudo /home/admin/config.scripts/lnd.export.sh
+          exit 0;;
 esac
 
 # go into loop - start script from beginning to load config/sate fresh
