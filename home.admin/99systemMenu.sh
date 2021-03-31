@@ -16,12 +16,12 @@ OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
 OPTIONS+=(${network}LOG "Monitor the debug.log")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
-OPTIONS+=(LNDLOG "Monitor the LND log")
-OPTIONS+=(LNDCONF "Edit the LND.conf")
+OPTIONS+=(LNDLOG "Monitor the lnd.log")
+OPTIONS+=(LNDCONF "Edit the lnd.conf")
 
 if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(NYX "Monitor the Tor Service")
-  OPTIONS+=(TORRC "Connect Mobile Wallet")
+  OPTIONS+=(TORLOG "Monitor the Tor Service with Nyx")
+  OPTIONS+=(TORRC "Edit the Tor Configuration")
     HEIGHT=$((HEIGHT+2))
     CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))
 fi
@@ -90,7 +90,7 @@ case $CHOICE in
      else
       echo "# No change made"
     fi;;         
-  NYX)
+  TORLOG)
     sudo -u debian-tor nyx;;
   TORRC)
     if /home/admin/config.scripts/blitz.setconf.sh "/etc/tor/torrc" "debian-tor"
