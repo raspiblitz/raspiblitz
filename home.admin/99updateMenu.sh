@@ -280,8 +280,8 @@ HEIGHT=9 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=55
 CHOICE_HEIGHT=3 # 1 line / OPTIONS
 OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery" \
-LND "Interim LND Update Options" \
+RELEASE "RaspiBlitz Release Update/Recovery"
+LND "Interim LND Update Options"
 PATCH "Patch RaspiBlitz v${codeVersion}"
 )
 
@@ -321,13 +321,15 @@ if [ "${runBehindTor}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 
-CHOICE=$(dialog --clear --title "Update Options" --menu "" \
-          --ok-label "Select" \
-          --cancel-label "Main menu" \
+CHOICE=$(dialog --clear \
+                --backtitle "" \
+                --title "Update Options" \
+                --ok-label "Select" \
+                --cancel-label "Main menu" \
+                --menu "" \
           $HEIGHT $WIDTH $CHOICE_HEIGHT \
           "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-clear
 case $CHOICE in
   RELEASE)
     release
