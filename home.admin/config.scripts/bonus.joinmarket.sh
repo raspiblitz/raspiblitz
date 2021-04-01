@@ -121,9 +121,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "s#^        if ! sudo apt-get install \${deb_deps\[@\]}; then#\
         if ! sudo apt-get install -y \${deb_deps\[@\]}; then#g" install.sh
     # don't install PySide2 - using the system-site-package instead 
-    sudo -u joinmarket sed -i "s#^PySide2##g" requirements/gui.txt
+    sudo -u joinmarket sed -i "s#^PySide2.*##g" requirements/gui.txt
     # don't install PyQt5 - using the system package instead 
-    sudo -u joinmarket sed -i "s#^PyQt5==5.14.2##g" requirements/gui.txt
+    sudo -u joinmarket sed -i "s#^PyQt5.*##g" requirements/gui.txt
     sudo -u joinmarket ./install.sh --with-qt
     echo "# installed JoinMarket $JMVERSION"
 
