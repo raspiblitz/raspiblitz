@@ -12,7 +12,7 @@ JBVERSION="v0.3.4"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoinMarket $pinnedVersion with JoininBox $JBVERSION"
+ echo "Installs JoinMarket $JMVERSION with JoininBox $JBVERSION"
  exit 1
 fi
 
@@ -107,7 +107,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket pip install libtool asn1crypto cffi pycparser coincurve
     echo "# installing JoinMarket"
     sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
-    cd joinmarket-clientserver
+    cd joinmarket-clientserver || exit 1
     sudo -u joinmarket git reset --hard $JMVERSION
     # make install.sh set up jmvenv with -- system-site-packages
     # and import the PySide2 armf package from the system
@@ -131,6 +131,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
+    cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
     sudo -u joinmarket git reset --hard $JBVERSION
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
