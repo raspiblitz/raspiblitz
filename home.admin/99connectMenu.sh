@@ -28,11 +28,11 @@ if [ "${BTCPayServer}" == "on" ]; then
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
-OPTIONS+=(BITCOINRPC "Connect Specter Desktop or JoinMarket")
+OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
 OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
-OPTIONS+=(RESET "Recreate LND Macaroons + TLS")
-OPTIONS+=(SYNC "Sync Macaroons + TLS with Apps/Users")
+OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
+OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
@@ -89,6 +89,7 @@ case $CHOICE in
 
       case $CHOICE in
         ADDBISQ)
+          clear
           if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ]
           then
             echo "peerbloomfilters=1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
@@ -127,7 +128,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           echo
           echo "Enter: ${TOR_ADDRESS}:8333 to connect to this node."
           echo
-          echo "Press ENTER to return to main menu."
+          echo "Press ENTER to return to the menu."
           read key
           exit 0;;
         REMOVEBISQ)
@@ -143,15 +144,137 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           echo
           echo "Enter: ${TOR_ADDRESS}:8333 to connect to this node."
           echo
-          echo "Press ENTER to return to main menu."
+          echo "Press ENTER to return to the menu."
           read key;;
       esac
     ;;
-  BITCOINRPC)
-    echo "# Make sure the bitcoind wallet is on"
-    /home/admin/config.scripts/network.wallet.sh on
-    #TODO
-    ;;
+  ${network}RPC)
+    # vars
+    localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
+    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' |\
+    awk -F. '{print $1"."$2"."$3".0/24"}')
+    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
+    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
+    bindIP=$(grep -c "rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    rpcTorService=$(grep -c "HiddenServicePort 8332 127.0.0.1:8332"  < /etc/tor/torrc)
+    TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin8332/hostname)
+    
+    # menu
+    OPTIONS=()
+    if [ $allowIPrange -eq 0 ]&&\
+    [ $bindIP -eq 0 ]&&\
+    [ $rpcTorService -eq 0 ];then
+      OPTIONS+=(ADDRPCLAN "Accept local connections to ${network} RPC")
+      OPTIONS+=(ADDRPCTOR "Add a Hidden Service to connect to ${network} RPC")
+    else
+      OPTIONS+=(CREDENTIALS "Show how to connect to ${network} RPC")
+      OPTIONS+=(REMOVERPC "Close all connections to ${network} RPC")
+      if [ $allowIPrange -eq 0 ]||[ $bindIP -eq 0 ];then
+        OPTIONS+=(ADDRPCLAN "Accept local connections to ${network} RPC")
+      fi
+      if [ $rpcTorService -eq 0 ];then
+        OPTIONS+=(ADDRPCTOR "Add a Hidden Service to connect to ${network} RPC")
+      fi
+    fi
+    CHOICE=$(dialog --clear \
+                --backtitle "" \
+                --title "${network} RPC" \
+                --ok-label "Select" \
+                --cancel-label "Cancel" \
+                --menu "" 9 64 3 \
+                "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+    case $CHOICE in
+      ADDRPCLAN)       
+        echo "# Make sure the bitcoind wallet is on"
+        /home/admin/config.scripts/network.wallet.sh on
+      
+        restartCore=0
+        if [ $allowIPrange -eq 0 ]; then
+          echo "rpcallowip=$localIPrange" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          restartCore=1
+        fi
+        if [ $bindIP -eq 0 ]; then
+          echo "rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          restartCore=1
+        fi
+        if [ $restartCore = 1 ];then
+          echo "# Restarting ${network}d"
+          sudo systemctl restart ${network}d
+        fi
+        echo "# ufw allow from $localIPrange to any port 8332"
+        sudo ufw allow from $localIPrange to any port 8332
+        ;;
+      ADDRPCTOR)
+        echo "# Make sure the bitcoind wallet is on"
+        /home/admin/config.scripts/network.wallet.sh on
+
+        /home/admin/config.scripts/internet.hiddenservice.sh bitcoin8332 8332 8332
+        echo
+        echo "The address of the local node is: $TorRPCaddress"
+        ;;
+
+      CREDENTIALS)
+        clear
+        RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+        RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+        
+        if [ $allowIPrange -gt 0 ]&&[ $bindIP -gt 0 ];then
+          echo $localIP
+        fi
+        if [ $rpcTorService -gt 0 ];then
+          echo $TorRPCaddress
+        fi
+
+        echo "RPC username:"
+        echo "$RPCUSER"
+        echo
+        echo "RPC password:"
+        echo "$RPCPSW"
+        echo
+        if [ $allowIPrange -gt 0 ]&&[ $bindIP -gt 0 ];then
+          echo "Host on the local network (make sure to connect from the same network):"
+          echo $localIP
+        fi
+        if [ $rpcTorService -gt 0 ];then
+          echo "Host via Tor (make sure to connect over Tor):"
+          echo $TorRPCaddress
+        fi
+        echo
+        echo "Port:"
+        echo "8332"
+        echo
+        echo "More documentation at:"
+        echo "https://github.com/openoms/joininbox/blob/master/prepare_remote_node.md"
+        echo          
+        echo
+        echo "Press ENTER to return to the menu."
+        read key
+        ;;
+      REMOVERPC)
+        # remove old entrysudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
+        sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
+        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin8332
+        sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
+
+        sudo ufw deny from $localIPrange to any port 8332
+        restartCore=0
+        if [ $allowIPrange -gt 0 ]; then
+          sed '/rrpcallowip=$localIPrange/d' /mnt/hdd/${network}/${network}.conf
+          restartCore=1
+        fi
+        if [ $bindIP -eq 0 ]; then
+          sed '/rpcbind=$localIP/d' /mnt/hdd/${network}/${network}.conf
+          restartCore=1
+        fi
+        if [ $restartCore = 1 ];then
+          echo "# Restarting ${network}d"
+          sudo systemctl restart ${network}d
+        fi
+        ;;
+    esac
+  ;;
 esac
 
 # go into loop - start script from beginning to load config/start fresh
