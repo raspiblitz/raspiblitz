@@ -6,7 +6,7 @@
 # https://github.com/openoms/joininbox
 
 JMVERSION="v0.8.2"
-JBVERSION="v0.3.2"
+JBVERSION="v0.3.4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
