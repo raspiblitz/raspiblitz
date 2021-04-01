@@ -191,6 +191,7 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
   sudo shutdown -r now
   sleep 100
+  exit 0
 fi
 
 ################################

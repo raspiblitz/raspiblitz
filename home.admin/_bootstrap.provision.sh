@@ -68,7 +68,7 @@ if [ ${#rootPartition} -gt 0 ]; then
         elif [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
             resizeRaspbian="/usr/bin/raspi-config"
             if [ -x ${resizeRaspbian} ]; then
-              echo "RUNNING EXPAND: ${resizeRaspbian}" >> ${logFile}
+              echo "RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}" >> ${logFile}
 		          sudo $resizeRaspbian --expand-rootfs
               sudo shutdown -r now
 	            exit 0
@@ -78,7 +78,7 @@ if [ ${#rootPartition} -gt 0 ]; then
         elif [ "${baseImage}" = "armbian" ]; then
             resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
             if [ -x ${resizeArmbian} ]; then
-              echo "RUNNING EXPAND: ${resizeArmbian}" >> ${logFile}
+              echo "RUNNING EXPAND ARMBIAN: ${resizeArmbian}" >> ${logFile}
               sudo $resizeArmbian start
               sudo shutdown -r now
 	            exit 0
