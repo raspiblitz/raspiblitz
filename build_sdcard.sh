@@ -122,38 +122,38 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-baseImage="?"
+baseimage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(grep -c 'Raspbian' /etc/os-release 2>/dev/null)
 isDebian=$(grep -c 'Debian' /etc/os-release 2>/dev/null)
 isUbuntu=$(grep -c 'Ubuntu' /etc/os-release 2>/dev/null)
 isNvidia=$(uname -a | grep -c 'tegra')
 if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
+  baseimage="raspbian"
 fi
 if [ ${isDebian} -gt 0 ]; then
   if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
-    baseImage="debian_rpi64"
+    baseimage="debian_rpi64"
   elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
-    baseImage="raspios_arm64"
+    baseimage="raspios_arm64"
   elif [ ${isAARCH64} -gt 0 ] || [ ${isARM} -gt 0 ] ; then
-    baseImage="armbian"
+    baseimage="armbian"
   else
-    baseImage="debian"
+    baseimage="debian"
   fi
 fi
 if [ ${isUbuntu} -gt 0 ]; then
-  baseImage="ubuntu"
+  baseimage="ubuntu"
 fi
 if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
+  baseimage="dietpi"
 fi
-if [ "${baseImage}" = "?" ]; then
+if [ "${baseimage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
-echo "X) will use OPERATINGSYSTEM ---> '${baseImage}'"
+echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
 # USER-CONFIRMATION
 echo -n "Do you agree with all parameters above? (yes/no) "
@@ -188,16 +188,16 @@ torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org
 echo "torSourceListAvailable=${torSourceListAvailable}"  
 if [ ${torSourceListAvailable} -eq 0 ]; then
   echo "- adding TOR sources ..."
-  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
+  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
     echo "- using https://deb.torproject.org/torproject.org buster"
     echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
     echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-  elif [ "${baseImage}" = "ubuntu" ]; then
+  elif [ "${baseimage}" = "ubuntu" ]; then
     echo "- using https://deb.torproject.org/torproject.org focal"
     echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
     echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
   else
-    echo "!!! FAIL: No Tor sources for os: ${baseImage}"
+    echo "!!! FAIL: No Tor sources for os: ${baseimage}"
     exit 1
   fi
   echo "- OK sources added"
@@ -213,8 +213,8 @@ echo ""
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
-   [ "${baseImage}" = "raspios_arm64" ]||[ "${baseImage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
+   [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; then
   echo ""
   echo "*** FIXING LOCALES FOR BUILD ***"
 
@@ -223,7 +223,7 @@ if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ] || \
   sudo locale-gen
   export LANGUAGE=en_US.UTF-8
   export LANG=en_US.UTF-8
-  if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
     export LC_ALL=en_US.UTF-8
 
     # https://github.com/rootzoll/raspiblitz/issues/684
@@ -268,7 +268,7 @@ sudo apt update -y
 sudo apt upgrade -f -y
 
 echo ""
-echo "*** PREPARE ${baseImage} ***"
+echo "*** PREPARE ${baseimage} ***"
 
 # make sure the pi user is present
 if [ "$(compgen -u | grep -c dietpi)" -gt 0 ];then
@@ -281,8 +281,8 @@ elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then
 fi
 
 # special prepare when Raspbian
-if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
-   [ "${baseImage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+   [ "${baseimage}" = "debian_rpi64" ]; then
   sudo apt install -y raspi-config 
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
@@ -354,8 +354,8 @@ echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
 if [ "${lcdInstalled}" != "false" ]; then
-   if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
-      [ "${baseImage}" = "debian_rpi64" ]; then
+   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+      [ "${baseimage}" = "debian_rpi64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
       sudo raspi-config nonint do_boot_behaviour B2
@@ -364,14 +364,14 @@ if [ "${lcdInstalled}" != "false" ]; then
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
    fi
 
-   if [ "${baseImage}" = "dietpi" ]; then
+   if [ "${baseimage}" = "dietpi" ]; then
       # set DietPi to boot up automatically with user pi (for the LCD)
       # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
       # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
       sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
    fi
 
-   if [ "${baseImage}" = "ubuntu" ] || [ "${baseImage}" = "armbian" ]; then
+   if [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
       sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
       sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
@@ -477,7 +477,7 @@ sudo apt install -y sysbench
 sudo apt install -y build-essential
 
 # add armbian-config
-if [ "${baseImage}" = "armbian" ]; then
+if [ "${baseimage}" = "armbian" ]; then
   # add armbian config
   sudo apt install armbian-config -y
 fi
@@ -527,8 +527,8 @@ sudo chsh admin -s /bin/bash
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 # WRITE BASIC raspiblitz.info to sdcard
-echo "baseimage=${baseimage}" > ./raspiblitz.info
-echo "cpu=${cpu}" >> ./raspiblitz.info
+echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
+echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 777 /home/admin/raspiblitz.info
 
@@ -686,8 +686,8 @@ echo "Activating CACHE RAM DISK ... "
 sudo /home/admin/config.scripts/blitz.cache.sh on
 
 # *** Wifi & Bluetooth ***
-if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64"  ]||\
-   [ "${baseImage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
+   [ "${baseimage}" = "debian_rpi64" ]; then
    
   if [ "${modeWifi}" == "false" ]; then
     echo ""
@@ -1032,9 +1032,9 @@ echo "*** DISPLAY OPTIONS ***"
 if [ "${lcdInstalled}" != "false" ]; then
 
   # lcd preparations based on os
-  if [ "${baseImage}" = "raspbian" ]||[ "${baseImage}" = "raspios_arm64" ]||\
-     [ "${baseImage}" = "debian_rpi64" ]||[ "${baseImage}" = "armbian" ]||\
-     [ "${baseImage}" = "ubuntu" ]; then
+  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
+     [ "${baseimage}" = "ubuntu" ]; then
     homeFile=/home/pi/.bashrc
     autostart="automatic start the LCD"
     autostartDone=$(grep -c "$autostart" $homeFile)
@@ -1051,7 +1051,7 @@ if [ "${lcdInstalled}" != "false" ]; then
       echo "autostart LCD already in $homeFile"
     fi
   fi
-  if [ "${baseImage}" = "dietpi" ]; then
+  if [ "${baseimage}" = "dietpi" ]; then
     homeFile=/home/dietpi/.bashrc
     startLCD="automatic start the LCD"
     autostartDone=$(grep -c "$startLCD" $homeFile)
@@ -1069,7 +1069,7 @@ if [ "${lcdInstalled}" != "false" ]; then
 
   echo ""
   if [ "${lcdInstalled}" == "GPIO" ]; then
-    if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "dietpi" ]; then
+    if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
       echo "*** 32bit LCD DRIVER ***"
       echo "--> Downloading LCD Driver from Github"
       cd /home/admin/
@@ -1083,7 +1083,7 @@ if [ "${lcdInstalled}" != "false" ]; then
       sudo apt install -y libxi6
       sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
  
-      if [ "${baseImage}" = "dietpi" ]; then
+      if [ "${baseimage}" = "dietpi" ]; then
         echo "--> dietpi preparations"
         sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
         sudo mkdir /etc/X11/xorg.conf.d
@@ -1097,7 +1097,7 @@ if [ "${lcdInstalled}" != "false" ]; then
         # make LCD screen rotation correct
         sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
       fi
-    elif [ "${baseImage}" = "raspios_arm64"  ] || [ "${baseImage}" = "debian_rpi64" ]; then
+    elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
       echo "*** 64bit LCD DRIVER ***"
       echo "--> Downloading LCD Driver from Github"
       cd /home/admin/
@@ -1146,9 +1146,11 @@ echo "SD CARD BUILD DONE"
 echo "**********************************************"
 echo ""
 
+sudo cat /home/admin/raspiblitz.info
+
 if [ "${lcdInstalled}" != "false" ]; then
   echo "Your SD Card Image for RaspiBlitz is almost ready."
-  if [ "${baseImage}" = "raspbian" ]; then
+  if [ "${baseimage}" = "raspbian" ]; then
     echo "Last step is to install LCD drivers. This will reboot your Pi when done."
     echo ""
   fi
@@ -1169,13 +1171,13 @@ echo ""
 if [ "${lcdInstalled}" == "GPIO" ]; then
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
-  if [ "${baseImage}" = "raspbian" ]; then
+  if [ "${baseimage}" = "raspbian" ]; then
     echo "Installing 32-bit LCD drivers ..."
     sudo chmod +x -R /home/admin/LCD-show
     cd /home/admin/LCD-show/
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
-  elif [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ]; then
+  elif [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
     echo "Installing 64-bit LCD drivers ..."
     sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi

@@ -75,7 +75,7 @@ if [ ${#rootPartition} -gt 0 ]; then
 	          else
               echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
             fi
-        elif [ "${baseImage}" = "armbian" ]; then
+        elif [ "${baseimage}" = "armbian" ]; then
             resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
             if [ -x ${resizeArmbian} ]; then
               echo "RUNNING EXPAND ARMBIAN: ${resizeArmbian}" >> ${logFile}
@@ -86,7 +86,7 @@ if [ ${#rootPartition} -gt 0 ]; then
               echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
             fi
         else
-          echo "WARN on provision - Not known system expand-rootfs OS: ${baseImage}" >> ${logFile}
+          echo "WARN on provision - Not known system expand-rootfs OS: ${baseimage}" >> ${logFile}
         fi
       fi
    else
