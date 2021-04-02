@@ -568,8 +568,10 @@ sudo -H python3 -m pip install requests[socks]==2.21.0
 echo ""
 echo "*** SHELL SCRIPTS AND ASSETS ***"
 
-# move files from gitclone
+# copy raspiblitz repo from github
 cd /home/admin/
+sudo -u admin git config --global user.name "${githubUser}"
+sudo -u admin git config --global user.email "johndoe@example.com"
 sudo -u admin rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
