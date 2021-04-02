@@ -528,7 +528,7 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 # WRITE BASIC raspiblitz.info to sdcard
 echo "baseimage=${baseimage}" > ./raspiblitz.info
-echo "cpu=${cpu}" > ./raspiblitz.info
+echo "cpu=${cpu}" >> ./raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 777 /home/admin/raspiblitz.info
 
@@ -1166,11 +1166,13 @@ if [ "${lcdInstalled}" == "GPIO" ]; then
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
   if [ "${baseImage}" = "raspbian" ]; then
+    echo "Installing 32-bit LCD drivers ..."
     sudo chmod +x -R /home/admin/LCD-show
     cd /home/admin/LCD-show/
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
   elif [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ]; then
+    echo "Installing 64-bit LCD drivers ..."
     sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo apt-mark hold raspberrypi-bootloader

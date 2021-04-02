@@ -86,7 +86,7 @@ if [ ${#rootPartition} -gt 0 ]; then
               echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
             fi
         else
-          echo "WARN on provision - Not known system expand-rootfs OS" >> ${logFile}
+          echo "WARN on provision - Not known system expand-rootfs OS: ${baseImage}" >> ${logFile}
         fi
       fi
    else
