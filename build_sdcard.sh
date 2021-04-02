@@ -736,7 +736,7 @@ byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
 if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then 
   echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
   sudo rm /home/admin/fallback.nodes 2>/dev/null
-  sudp cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
+  sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
 fi
 sudo chown admin:admin /home/admin/fallback.nodes
 
