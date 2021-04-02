@@ -320,6 +320,9 @@ if [ "$1" = "status" ]; then
     if [ "${hddAdapter}" == "" ]; then
       hddAdapter=$(lsusb | grep "GC Protronics" | head -1 | cut -d " " -f6)
     fi
+    if [ "${hddAdapter}" == "" ]; then
+      hddAdapter=$(lsusb | grep "ASMedia Technology" | head -1 | cut -d " " -f6)
+    fi
     echo "hddAdapterUSB='${hddAdapter}'"
 
     # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
@@ -328,7 +331,7 @@ if [ "$1" = "status" ]; then
       # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support
       hddAdapterUSAP=1
     fi
-    if [ "${hddAdapter}" == "0825:0001" ]; then
+    if [ "${hddAdapter}" == "0825:0001" ] || [ "${hddAdapter}" == "174c:0825" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
