@@ -274,7 +274,7 @@ echo "isMounted: $isMounted" >> $logFile
 # check if UASP is already deactivated (on RaspiOS)
 # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
 cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
-if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then 
+if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
   echo "Checking for UASP deactivation ..." >> $logFile
   usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
   # check if its maybe other device
@@ -292,6 +292,8 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then
     sudo shutdown -r now
     sleep 100
   fi
+else 
+  echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
 fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)

@@ -312,10 +312,27 @@ if [ "$1" = "status" ]; then
 
   fi
 
-  # determine UAS string --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+  # HDD Adpater UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
   if [ ${#hdd} -gt 0 ]; then
+
+    # determine USB HDD adapter model ID 
     hddAdapter=$(lsusb | grep "SATA" | head -1 | cut -d " " -f6)
+    if [ "${hddAdapter}" == "" ]; then
+      hddAdapter=$(lsusb | grep "GC Protronics" | head -1 | cut -d " " -f6)
+    fi
     echo "hddAdapterUSB='${hddAdapter}'"
+
+    # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
+    hddAdapterUSAP=0
+    if [ "${hddAdapter}" == "174c:55aa" ]; then
+      # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support
+      hddAdapterUSAP=1
+    fi
+    if [ "${hddAdapter}" == "0825:0001" ]; then
+      # SupTronics 2.5" SATA HDD Shield X825 v1.5
+      hddAdapterUSAP=1
+    fi
+    echo "hddAdapterUSAP='${hddAdapterUSAP}'"
   fi
 
   echo
