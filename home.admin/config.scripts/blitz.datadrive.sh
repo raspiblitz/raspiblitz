@@ -246,11 +246,13 @@ if [ "$1" = "status" ]; then
           if [ "${hddFormat}" = "ext4" ]; then
             # check for umbrel
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
-            echo "# isUmbrelHDD(${isUmbrelHDD})"
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
             fi
-            # TODO: check for mynode
+            isMyNodeHDD=$(sudo ls /mnt/storage/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
+            if [ ${isMyNodeHDD} -gt 0 ]; then
+              hddGotMigrationData="mynode"
+            fi
           else
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
           fi
@@ -258,7 +260,6 @@ if [ "$1" = "status" ]; then
 
           # unmount 
           sudo umount /mnt/storage
-
         fi
       else
         # if not ext4 or btrfs - there is no usable data
