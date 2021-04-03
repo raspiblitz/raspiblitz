@@ -48,7 +48,6 @@ if [ "$1" = "status" ]; then
   exit 1
 fi
 
-
 ########################
 # MIGRATION BASICS
 ########################
@@ -108,8 +107,15 @@ migrate_raspiblitz_conf () {
 
 if [ "$1" = "migration-umbrel" ]; then
 
-  # check if the HDD is an umbrel data disk
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  # can olny migrate unmonted data disks
+  if [ "${isMounted}" == "1" ]; then
+    echo "err='cannot migrate mounted drive'"
+    exit 1
+  fi
+  
+  # check if the HDD is an umbrel data disk
   if [ "${hddGotMigrationData}" == "umbrel" ]; then
     echo "# found UMBREL data disk at ${hddPartitionCandidate}"
   else
@@ -166,8 +172,15 @@ fi
 
 if [ "$1" = "migration-mynode" ]; then
 
-  # check if the HDD is an umbrel data disk
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  # can olny migrate unmonted data disks
+  if [ "${isMounted}" == "1" ]; then
+    echo "err='cannot migrate mounted drive'"
+    exit 1
+  fi
+
+  # check if the HDD is an umbrel data disk
   if [ "${hddGotMigrationData}" == "mynode" ]; then
     echo "# found MYNODE data disk at ${hddPartitionCandidate}"
   else
