@@ -2,30 +2,30 @@
 # wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/display.alternatives.sh && sudo bash display.alternatives.sh
 
 echo "Detect Base Image ..." 
-baseImage="?"
+baseimage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
 if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
+  baseimage="raspbian"
 fi
 if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
+  baseimage="armbian"
 fi 
 if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
+baseimage="ubuntu"
 fi
 if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
+  baseimage="dietpi"
 fi
-if [ "${baseImage}" = "?" ]; then
+if [ "${baseimage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
   echo "!!! FAIL !!!"
   echo "Base Image cannot be detected or is not supported."
   exit 1
 else
-  echo "OK running ${baseImage}"
+  echo "OK running ${baseimage}"
 fi
 
 
@@ -50,7 +50,7 @@ if [ "${CHOICE}" = "GPIO" ]; then
   sudo chown -R admin:admin LCD-show
   cd LCD-show/
   
-  if [ "${baseImage}" != "dietpi" ]; then
+  if [ "${baseimage}" != "dietpi" ]; then
     echo "--> LCD DEFAULT"
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
@@ -81,7 +81,7 @@ elif [ "${CHOICE}" = "HDMI" ]; then
   #sudo ./MPI3508-show  
   sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
   
-  if [ "${baseImage}" != "dietpi" ]; then
+  if [ "${baseimage}" != "dietpi" ]; then
     sudo cp -rf ./boot/config-35-480X320.txt /boot/config.txt  
     sudo cp ./usr/cmdline.txt /boot/
   else 
@@ -104,7 +104,7 @@ elif [ "${CHOICE}" = "SWISS" ]; then
   # Download and install the driver
   # based on http://www.raspberrypiwiki.com/index.php/3.5_inch_TFT_800x480@60fps
   echo "--> LCD ALTERNATIVE"
-  if [ "${baseImage}" != "dietpi" ]; then
+  if [ "${baseimage}" != "dietpi" ]; then
     cd /boot
   else
     cd /DietPi

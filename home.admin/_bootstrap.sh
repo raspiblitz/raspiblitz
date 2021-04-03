@@ -78,6 +78,8 @@ source ${infoFile} 2>/dev/null
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
 echo "message=" >> $infoFile
+echo "baseimage=${baseimage}" >> $infoFile
+echo "cpu=${cpu}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
@@ -87,46 +89,6 @@ if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
 sudo chmod 777 ${infoFile}
-
-################################
-# IDENTIFY CPU ARCHITECTURE
-################################
-
-cpu="?"
-isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-isX86_64=$(uname -m | grep -c 'x86_64')
-if [ ${isARM} -gt 0 ]; then
-  cpu="arm"
-elif [ ${isAARCH64} -gt 0 ]; then
-  cpu="aarch64"
-elif [ ${isX86_64} -gt 0 ]; then
-  cpu="x86_64"
-fi
-echo "cpu=${cpu}" >> $infoFile
-
-################################
-# IDENTIFY BASEIMAGE
-################################
-
-baseImage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-isUbuntu=$(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu')
-if [ ${isRaspbian} -gt 0 ]; then
-  baseImage="raspbian"
-fi
-if [ ${isArmbian} -gt 0 ]; then
-  baseImage="armbian"
-fi 
-if [ ${isUbuntu} -gt 0 ]; then
-baseImage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
-  baseImage="dietpi"
-fi
-echo "baseimage=${baseImage}" >> $infoFile
 
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
@@ -227,10 +189,9 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sudo rm /home/admin/setup.sh 
   # reboot again
   echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
-  echo "DONE wait 10 secs ... one more reboot needed ... "
-  sleep 10
   sudo shutdown -r now
   sleep 100
+  exit 0
 fi
 
 ################################
@@ -246,8 +207,6 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  echo "Switching HDMI ON ... (reboot) "
-  sleep 10
   sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
   exit 0
 fi
@@ -279,8 +238,6 @@ if [ ${sshReset} -eq 1 ]; then
   sudo rm /mnt/hdd/ssh/ssh_host*
   sudo ssh-keygen -A
   echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  echo "SSH SERVER CERTS RESET ... (reboot) "
-  sleep 10
   sudo /home/admin/XXshutdown.sh reboot
   exit 0
 fi
@@ -316,26 +273,28 @@ echo "isMounted: $isMounted" >> $logFile
 
 # check if UASP is already deactivated (on RaspiOS)
 # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-# cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
-# if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ]; then 
-#  echo "Checking for UASP deactivation ..." >> $logFile
-#  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
-#  # check if its maybe other device
-#  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
-#  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
-#    # remove old usb-storage.quirks
-#    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
-#  fi 
-#  if [ ${usbQuirkDone} -eq 0 ]; then
-#    # add new usb-storage.quirks
-#    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
-#    sudo cat /boot/cmdline.txt
-#    # go into reboot to activate new setting
-#    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
-#    #sudo shutdown -r now
-#    #sleep 100
-#  fi
-#fi
+cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
+  echo "Checking for UASP deactivation ..." >> $logFile
+  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
+  # check if its maybe other device
+  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
+    # remove old usb-storage.quirks
+    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+  fi 
+  if [ ${usbQuirkDone} -eq 0 ]; then
+    # add new usb-storage.quirks
+    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+    sudo cat /boot/cmdline.txt
+    # go into reboot to activate new setting
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
+    sudo shutdown -r now
+    sleep 100
+  fi
+else 
+  echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
+fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 if [ ${isMounted} -eq 0 ]; then
@@ -433,8 +392,6 @@ if [ ${isMounted} -eq 0 ]; then
     cp $logFile /home/admin/raspiblitz.recover.log
     sync
     echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
-    echo "SSH SERVER CERTS RESET ... (reboot) "
-    sleep 10
     sudo shutdown -r -F -t 60
     exit 0
   else 
@@ -644,7 +601,7 @@ fi
 # STRESSTEST RASPBERRY PI
 ################################
 
-if [ "${baseImage}" = "raspbian" ] ; then
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   # generate stresstest report on every startup (in case hardware has changed)
   sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
   sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
