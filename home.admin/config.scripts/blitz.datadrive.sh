@@ -355,7 +355,7 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
-    echo "hddAdapterUSAP='${hddAdapterUSAP}'"
+    echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
 
   echo
