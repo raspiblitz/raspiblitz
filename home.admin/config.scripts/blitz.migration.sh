@@ -54,10 +54,10 @@ fi
 
 migrate_btc_conf () {
   # keep old conf als backup
-  sudo mv /mnt/hdd/bitcoin/bitcoin.conf.migration
+  sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf.migration
   # start from fresh configuration template 
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-  sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^rpcpassword=.*/rpcpassword=raspibolt/g" /mnt/hdd/bitcoin/bitcoin.conf
 }
 
 migrate_lnd_conf () { 
@@ -69,10 +69,10 @@ migrate_lnd_conf () {
   fi
 
   # keep old conf als backup
-  sudo mv /mnt/hdd/lnd/lnd.conf.migration
+  sudo mv /mnt/hdd/lnd/lnd.conf /mnt/hdd/lnd/lnd.conf.migration
   # start from fresh configuration template (user will set password B on recovery)
   sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^rpcpassword=.*/rpcpassword=raspibolt/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/lnd/lnd.conf
 }
 
 migrate_raspiblitz_conf () {
@@ -164,6 +164,7 @@ if [ "$1" = "migration-umbrel" ]; then
   migrate_raspiblitz_conf ${nameNode}
 
   echo "# OK ... data disk converted to RaspiBlitz - reboot with fresh sd card to recover"
+  exit 0
 fi
 
 ########################
@@ -226,7 +227,8 @@ if [ "$1" = "migration-mynode" ]; then
   # call function for final migration
   migrate_raspiblitz_conf
 
-  echo "# OK ... data disk converted to RaspiBlitz - reboot with fresh sd card to recover"
+  echo "# OK ... data disk converted to RaspiBlitz"
+  exit 0
 fi
 
 #########################
