@@ -9,7 +9,7 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 SCRIPT_DIR=$HOME_DIR/stacking-sats-kraken
 SCRIPT_NAME=stacksats.sh
-SCRIPT_VERSION=0.4.1
+SCRIPT_VERSION=0.4.2
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -60,6 +60,9 @@ KRAKEN_BUY_AMOUNT=21
 
 # Enable this to buy at market price instad of placing a limit order
 # KRAKEN_ORDER_TYPE="market"
+
+# Pay fee in this currency, e.g. buying XBT for USD and paying fee in XBT
+# KRAKEN_FEE_CURRENCY="XBT"
 
 # Set this if you live in Germany and get the EOrder:Trading agreement required error.
 # See https://support.kraken.com/hc/en-us/articles/360000920026
