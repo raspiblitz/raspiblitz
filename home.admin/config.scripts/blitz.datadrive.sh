@@ -249,7 +249,7 @@ if [ "$1" = "status" ]; then
             # BRTS
             hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
-          echo "hddDataFreeKB='${hdd_data_free1Kblocks}'"
+          echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
 
           # check if its another fullnode implementation data disk
           hddGotMigrationData="none"
@@ -341,7 +341,7 @@ if [ "$1" = "status" ]; then
       hddUsedInfo="${datadrive} & ${storageDrive}"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
-    echo "hddDataFreeKB='${hdd_data_free1Kblocks}'"
+    echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
 
   fi
 
