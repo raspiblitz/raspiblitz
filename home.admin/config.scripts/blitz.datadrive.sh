@@ -233,7 +233,6 @@ if [ "$1" = "status" ]; then
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
           hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
-          sudo umount /mnt/storage
           if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
             echo "hddGotBlockchain=1"
           elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
@@ -243,7 +242,6 @@ if [ "$1" = "status" ]; then
           fi
 
           # check if its another fullnode implementation data disk
-          df
           hddGotMigrationData="none"
           if [ "${hddFormat}" = "ext4" ]; then
             # check for umbrel
@@ -257,6 +255,9 @@ if [ "$1" = "status" ]; then
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
           fi
           echo "hddGotMigrationData='${hddGotMigrationData}'"
+
+          # unmount 
+          sudo umount /mnt/storage
 
         fi
       else
