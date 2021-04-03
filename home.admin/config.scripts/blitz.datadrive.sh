@@ -243,6 +243,7 @@ if [ "$1" = "status" ]; then
           fi
 
           # check if its another fullnode implementation data disk
+          df
           hddGotMigrationData="none"
           if [ "${hddFormat}" = "ext4" ]; then
             # check for umbrel
