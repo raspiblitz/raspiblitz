@@ -241,6 +241,16 @@ if [ "$1" = "status" ]; then
             echo "hddGotBlockchain=0"
           fi
 
+          # check free space on data drive
+          if [ ${isBTRFS} -eq 0 ]; then
+            # EXT4
+            hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+          else
+            # BRTS
+            hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+          fi
+          echo "hddDataFreeKB='${hdd_data_free1Kblocks}'"
+
           # check if its another fullnode implementation data disk
           hddGotMigrationData="none"
           if [ "${hddFormat}" = "ext4" ]; then
@@ -319,6 +329,7 @@ if [ "$1" = "status" ]; then
       # EXT4 calculations
       hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
       hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     else
       # BRTS calculations
@@ -326,9 +337,11 @@ if [ "$1" = "status" ]; then
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
       datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
       storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${datadrive} & ${storageDrive}"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
+    echo "hddDataFreeKB='${hdd_data_free1Kblocks}'"
 
   fi
 

@@ -148,6 +148,7 @@ if [ "$1" = "migration-umbrel" ]; then
   # move bitcoin/blockchain & call function to migrate config
   sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
   sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
+  sudo rm /mnt/hdd/bitcoin/.walletlock
   sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
   migrate_btc_conf
 
