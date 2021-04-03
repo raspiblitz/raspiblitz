@@ -227,6 +227,7 @@ if [ "$1" = "status" ]; then
         if [ ${isTempMounted} -eq 0 ]; then
           echo "hddError='storage mount failed'"
         else
+
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
@@ -240,6 +241,19 @@ if [ "$1" = "status" ]; then
           elif [ ${#blockchainType} -gt 0 ]; then
             echo "hddGotBlockchain=0"
           fi
+
+          # check if its another fullnode implementation data disk
+          hddGotMigrationData="none"
+          if [ "${hddFormat}" = "ext4" ]; then
+            # check for umbrel
+            isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
+            if [ ${isUmbrelHDD} -gt 0 ]; then
+              hddGotMigrationData="umbrel"
+            fi
+            # TODO: check for mynode
+          fi
+          echo "hddGotMigrationData='${hddGotMigrationData}'"
+
         fi
       else
         # if not ext4 or btrfs - there is no usable data
