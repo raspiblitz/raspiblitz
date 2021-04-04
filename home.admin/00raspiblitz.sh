@@ -178,33 +178,31 @@ waitUntilChainNetworkIsReady()
     source ${configFile}
     echo "checking ${network}d - please wait .."
     echo "can take longer if device was off or first time"
-    while :
-    do
-      
-      # check for error on network
-      sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
-      clienterror=`cat error.tmp`
-      rm error.tmp
 
-      # check for missing blockchain data
-      if [ "${network}" = "bitcoin" ]; then
-        if [ "${chain}" = "main" ]; then
+    # check for error on network
+    sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
+    clienterror=`cat error.tmp`
+    rm error.tmp
+
+    # check for missing blockchain data
+    if [ "${network}" = "bitcoin" ]; then
+      if [ "${chain}" = "main" ]; then
           minSize=210000000000
-        else
-          minSize=27000000000
-        fi
-      elif [ "${network}" = "litecoin" ]; then
-        if [ "${chain}" = "main" ]; then
-          minSize=20000000000
-        else
-          minSize=27000000000
-        fi
       else
-        minSize=210000000000000
+          minSize=27000000000
       fi
-      isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
-      blockchainsize=$(sudo du -shbc /mnt/hdd/${network}/ 2>/dev/null | head -n1 | awk '{print $1;}')
-      if [ ${#blockchainsize} -gt 0 ]; then
+    elif [ "${network}" = "litecoin" ]; then
+      if [ "${chain}" = "main" ]; then
+          minSize=20000000000
+      else
+          minSize=27000000000
+      fi
+    else
+      minSize=210000000000000
+    fi
+    isSyncing=$(sudo ls -la /mnt/hdd/${network}/blocks/.selfsync 2>/dev/null | grep -c '.selfsync')
+    blockchainsize=$(sudo du -shbc /mnt/hdd/${network}/ 2>/dev/null | head -n1 | awk '{print $1;}')
+    if [ ${#blockchainsize} -gt 0 ]; then
         if [ ${blockchainsize} -lt ${minSize} ]; then
           if [ ${isSyncing} -eq 0 ]; then
             echo "blockchainsize(${blockchainsize})"
@@ -213,9 +211,9 @@ waitUntilChainNetworkIsReady()
             sleep 3
           fi
         fi
-      fi
+    fi
 
-      if [ ${#clienterror} -gt 0 ]; then
+    if [ ${#clienterror} -gt 0 ]; then
         #echo "clienterror(${clienterror})"
 
         # analyse LOGS for possible reindex
@@ -276,10 +274,13 @@ How do you want to continue?
           echo "${network} error: ${clienterror}"
           exit 0
         fi
+    fi
 
-      else
-        locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-        if [ ${locked} -gt 0 ]; then
+    while :
+    do
+      
+      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+      if [ ${locked} -gt 0 ]; then
           uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
           if [ "${autoUnlock}" == "on" ] && [ ${uptime} -lt 300 ]; then
             # give autounlock 5 min after startup to react
@@ -300,17 +301,16 @@ How do you want to continue?
               exit 0
             fi
           fi
-        fi
-        lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-        if [ ${lndSynced} -eq 0 ]; then
+      fi
+      lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+      if [ ${lndSynced} -eq 0 ]; then
           /home/admin/80scanLND.sh
           if [ $? -gt 0 ]; then
             exit 0
           fi
-        else
+      else
           # everything is ready - return from loop
           return
-        fi
       fi
       sleep 5
     done
