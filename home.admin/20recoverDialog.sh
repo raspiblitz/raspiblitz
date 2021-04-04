@@ -27,7 +27,7 @@ else
   # password A + B
   dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
 
-You need to set a new Password A:
+You need to set a new Password A & B:
 A) Master User Password
 B) RPC & APP Password
 
