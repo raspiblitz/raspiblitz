@@ -29,7 +29,7 @@ else
 
 You need to set a new Password A & B:
 A) Main User Password (SSH, WebUI, ..)
-B) RPC & APP Password
+B) RPC & APP Password (Additional Apps, ..)
 
 Passwords C (for your Lightning wallet) stays to the password you set before.
 
