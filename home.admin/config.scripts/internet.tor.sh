@@ -215,6 +215,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt install tor tor-arm torsocks -y
   fi
 
+  # install  proxychains4 nmap for LND Tor selftest
+  sudo apt install proxychains4 nmap -y
+
   # create tor data directory if it not exist
   if [ ! -d "/mnt/hdd/tor" ]; then
     echo "# - creating tor data directory"
