@@ -237,16 +237,17 @@ waitUntilChainNetworkIsReady()
           sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
           sleep 3
 
-          whiptail --title "RaspiBlitz - Repair Script" --yes-button "DELETE+REPAIR" --no-button "Ignore" --yesno "Your blockchain data needs to be repaired.
-This can be due to power problems or a failing HDD.
+          whiptail --title "Blockchain not Complete" --yes-button "DELETE+REPAIR" --no-button "Continue Sync" --yesno "Your blockchain data is not complete (yet).
+
+You can try to sync the chain further but if your stuck
+this can be due to power problems or a failing HDD.
 For more info see: https://raspiblitz.org -> FAQ
 
-Before RaspiBlitz can offer you repair options the old
-corrupted blockchain needs to be deleted while your LND
-funds and channel stay safe (just expect some off-time).
+If you choose to DELETE+REPAIR the old blockchain gets
+deleted but your Lightning funds & channel not be touched.
 
 How do you want to continue?
-" 13 65
+" 15 65
           if [ $? -eq 0 ]; then
             #delete+repair
             clear
