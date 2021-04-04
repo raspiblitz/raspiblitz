@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "Starting the main menu ..."
+echo "For debug logs CTRL+C and: tail -n1000 -f raspiblitz.log"
+echo "or call the command 'debug' to see bigger report."
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
