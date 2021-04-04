@@ -251,6 +251,9 @@ How do you want to continue?
           if [ $? -eq 0 ]; then
             #delete+repair
             clear
+            echo "***********************************************************"
+            echo "DELETE+REPAIR blockchain ..."
+            echo "***********************************************************"
             /home/admin/XXcleanHDD.sh -blockchain -force
             /home/admin/98repairBlockchain.sh
             /home/admin/00raspiblitz.sh
@@ -258,6 +261,9 @@ How do you want to continue?
           else
             # ignore - just delete blockchain logfile
             clear
+            echo "***********************************************************"
+            echo "CONTINUE SYNC blockchain ..."
+            echo "***********************************************************"
           fi
 
         fi
