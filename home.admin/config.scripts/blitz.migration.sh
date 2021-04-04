@@ -57,7 +57,6 @@ migrate_btc_conf () {
   sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf.migration
   # start from fresh configuration template 
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-  sudo sed -i "s/^rpcpassword=.*/rpcpassword=raspibolt/g" /mnt/hdd/bitcoin/bitcoin.conf
 }
 
 migrate_lnd_conf () { 
