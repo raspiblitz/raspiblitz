@@ -213,9 +213,6 @@ fi
 # if started after intial setup - quit here
 if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-  rpcpass=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep 'bitcoind.rpcpass' | cut -d "=" -f2)
-  sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
-  sudo sed -i "s/^rpcpassword=.*/rpcpassword=${rpcpass}/g" /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
   sudo systemctl enable bitcoind
   echo "DONE - rebooting: sudo shutdown -r now"
   sudo shutdown -r now

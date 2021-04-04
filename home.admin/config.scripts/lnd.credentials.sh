@@ -178,14 +178,6 @@ elif [ "$1" = "sync" ]; then
     ln -s /mnt/hdd/app-data/lnd/ /home/admin/.lnd # and create symlink
   fi
 
-  echo "# make sure network (bitcoin/litecoin) RPC password is set correctly in lnd.conf"
-  source <(sudo cat /mnt/hdd/"${network}"/"${network}".conf 2>/dev/null | grep "rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  if [ "${#rpcpassword}" -gt 0 ]; then
-    sudo sed -i 's/^"${network}"d.rpcpass=.*/"${network}"d.rpcpass="${rpcpassword}"/g' /mnt/hdd/lnd/lnd.conf 2>/dev/null
-  else
-    echo "# WARN: could not get value 'rpcpass' from network config (e.g. bitcoin.conf)"
-  fi
-
   echo "# make sure LND conf is readable and symlinked"
   sudo chmod 644 "/mnt/hdd/lnd/lnd.conf"
   sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/lnd.conf"

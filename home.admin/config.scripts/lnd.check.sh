@@ -40,7 +40,7 @@ if [ "$1" == "basic-setup" ]; then
     echo "err='tls.cert is missing for user admin'"
   fi
 
-  # check lnd.conf exits
+  # check lnd.conf exists
   lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c 'lnd.conf')
   if [ ${lndConfExists} -gt 0 ]; then
     echo "config=1"
@@ -141,38 +141,6 @@ if [ "$1" == "basic-setup" ]; then
   else
     echo "wallet=0"
   fi
-
-  # check that RPC USER between Bitcoin and LND is correct
-  rpcusercorrect=0
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}d.rpcuser" | sed 's/^[a-z]*\./lnd/g')
-  source <(sudo cat /mnt/hdd/${lndNetwork}/${lndNetwork}.conf 2>/dev/null | grep "rpcuser" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#lndrpcuser} -eq 0 ]; then
-    echo "err='lnd.conf: missing ${lndNetwork}d.rpcuser (needs to be same as set in ${lndNetwork}.conf)'"
-  elif [ ${#rpcuser} -eq 0 ]; then
-    echo "err='${lndNetwork}.conf: missing rpcuser (needs to be same as set in lnd.conf)'"
-  elif [ "${rpcuser}" != "${lndrpcuser}" ]; then
-    echo "err='${lndNetwork}.conf (${rpcuser}) & lnd.conf (${lndrpcuser}): RPC user missmatch! - LND cannot connect to blockchain RPC'"
-  else
-    # OK looks good
-    rpcusercorrect=1
-  fi
-  echo "rpcusercorrect=${rpcusercorrect}"
-
-  # check that RPC PASSWORD between Bitcoin and LND is correct
-  rpcpasscorrect=0
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}d.rpcpass" | sed 's/^[a-z]*\./lnd/g')
-  source <(sudo cat /mnt/hdd/${lndNetwork}/${lndNetwork}.conf 2>/dev/null | grep "rpcpassword" | sed 's/^[a-z]*\./lnd/g')
-  if [ ${#lndrpcpass} -eq 0 ]; then
-    echo "err='lnd.conf: missing ${lndNetwork}d.rpcpass (needs to be same as set in ${lndNetwork}.conf)'"
-  elif [ ${#rpcpassword} -eq 0 ]; then
-    echo "err='${lndNetwork}.conf: missing rpcpassword (needs to be same as set in lnd.conf)'"
-  elif [ "${rpcpassword}" != "${lndrpcpass}" ]; then
-    echo "err='${lndNetwork}.conf (${rpcpassword}) & lnd.conf (${lndrpcpass}): RPC password missmatch! - should autofix on reboot'"
-  else
-    # OK looks good
-    rpcpasscorrect=1
-  fi
-  echo "rpcpasscorrect=${rpcpasscorrect}"
 
   # check basic LND logs
   torConnectionProblem=$(sudo journalctl -u lnd -b --no-pager -n14 | grep "lnd\[" | grep -c "dial tcp 127.0.0.1:9050: connect: connection refused")
