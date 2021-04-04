@@ -28,15 +28,15 @@ else
   dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
 
 You need to set a new Password A & B:
-A) Master User Password
+A) Main User Password (SSH, WebUI, ..)
 B) RPC & APP Password
 
-Passwords C (Lightning wallet) stays as before.
+Passwords C (for your Lightning wallet) stays to the password you set before.
 
 Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 16 52
+" 17 52
 
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
@@ -84,7 +84,7 @@ to deactivate the Auto-Unlock feature.
   dialog --backtitle "RaspiBlitz" --pause "  FINAL REBOOT IS NEEDED." 8 52 5
 
 else
-  dialog --backtitle "RaspiBlitz" --pause "  OK - SSH password A set.\n  FINAL REBOOT IS NEEDED." 9 52 5
+  dialog --backtitle "RaspiBlitz" --pause "  OK - Passwords set.\n  FINAL REBOOT IS NEEDED." 9 52 5
 fi
 
 sudo /home/admin/XXshutdown.sh reboot
