@@ -183,20 +183,26 @@ elif [ ${walletLocked} -gt 0 ]; then
     title="Auto Unlock"
     infoStr=" Waiting for Wallet Auto-Unlock.\n Please wait up to 5min ..."
   else
-    title="Action Required"
-    infoStr=" LND WALLET IS LOCKED !!!\n"
-    if [ "${rtlWebinterface}" = "on" ]; then
+
+    if [ "$USER" == "admin" ]; then
+      /home/admin/config.scripts/lnd.unlock.sh
+    else
+      title="Action Required"
+      infoStr=" LND WALLET IS LOCKED !!!\n"
+      if [ "${rtlWebinterface}" = "on" ]; then
        height=6
        infoStr="${infoStr} Browser: http://${localip}:3000\n PasswordB=login / PasswordC=unlock"
-    else
+      else
        infoStr="${infoStr} Please use SSH to unlock:"
-    fi
-    if [ ${startcountLightning} -gt 1 ]; then
+      fi
+      if [ ${startcountLightning} -gt 1 ]; then
         width=45
         height=$((height+3))
         infoStr=" LIGHTNING RESTARTED - login for details\n${infoStr}"
         adminStr="${adminStr}\n or choose 'INFO' in main menu\n or type 'raspiblitz' on terminal"
+      fi
     fi
+
   fi
 
 else
