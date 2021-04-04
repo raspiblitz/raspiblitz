@@ -42,9 +42,9 @@ if [ "${hddGotMigrationData}" != "" ] && [ "${hddGotMigrationData}" != "none" ];
   nodenameUpperCase=$(echo "${hddGotMigrationData}" | tr "[a-z]" "[A-Z]")
   whiptail --title " ${nodenameUpperCase} --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Ignore" --yesno "RaspiBlitz found data from ${nodenameUpperCase}
 
-You can migrate your old blockchain & LND data (funds & channels) over to RaspiBlitz.
+You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
-Please make sure to have your ${nodenameUpperCase} seed words & static channel backup file. Also any data of additional apps you had installed on ${nodenameUpperCase} might get lost.
+Please make sure to have your ${nodenameUpperCase} seed words & static channel backup file (just in case). Also any data of additional apps you had installed on ${nodenameUpperCase} might get lost.
 
 Do you want to start migration to RaspiBlitz now?
       " 16 58
