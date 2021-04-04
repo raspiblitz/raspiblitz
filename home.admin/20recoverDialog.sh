@@ -5,9 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # show password info dialog
-
-resetAlsoPasswordB=$(sudo grep -c ".rpcpass=raspibolt" /mnt/hdd/lnd/lnd.conf)
-
+resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "rpcpassword=raspibolt")
 if [ ${resetAlsoPasswordB} -eq 0 ]; then
   # just password A
   dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
