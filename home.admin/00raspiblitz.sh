@@ -37,6 +37,54 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     exit
 fi
 
+# check if HDD is from another fullnode OS and offer migration
+if [ "${hddGotMigrationData}" != "" ] && [ "${hddGotMigrationData}" != "none" ]; then
+  nodenameUpperCase=$(echo "${hddGotMigrationData}" | tr "[a-z]" "[A-Z]")
+  whiptail --title " ${nodenameUpperCase} --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Ignore" --yesno "RaspiBlitz found data from ${nodenameUpperCase}
+
+You can migrate your old blockchain & LND data (funds & channels) over to RaspiBlitz.
+
+Please make sure to have your ${nodenameUpperCase} seed words & static channel backup file. Also any data of additional apps you had installed on ${nodenameUpperCase} might get lost.
+
+Do you want to start migration to RaspiBlitz now?
+      " 16 58
+  if [ $? -eq 0 ]; then
+    err=""
+    echo "**************************************************"
+    echo "MIGRATION FROM ${nodenameUpperCase} TO RASPIBLITZ"
+    echo "**************************************************"
+    echo "- started ..."
+    source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+    if [ "${err}" != "" ]; then
+      echo "MIGRATION FAILED: ${err}"
+      echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup."
+      exit 1
+    fi
+
+    # if free space is lower than 100GB (100000000) delete backup files
+    if [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt 407051412 ]; then
+      echo "- free space of data disk is low ... deleting 'backup_migration'"
+      sudo rm -R /mnt/hdd/backup_migration
+    else
+      echo "- old data of ${nodenameUpperCase} can be found in '/mnt/hdd/backup_migration'"
+    fi
+    sleep 3
+
+    # kick into reboot
+    echo "******************************************************"
+    echo "OK MIGRATION --> will now reboot and update/recover"
+    echo "******************************************************"
+    #sudo shutdown -h -r now
+    #sleep 100
+    exit 0
+	else
+    echo "******************************************************"
+    echo "MIGRATION SKIPPED ... starting fresh RaspiBlitz Setup"
+    echo "******************************************************"
+    sleep 6
+  fi
+fi
+
 # check data from _bootstrap.sh that was running on device setup
 bootstrapInfoExists=$(ls $infoFile | grep -c '.info')
 if [ ${bootstrapInfoExists} -eq 0 ]; then
