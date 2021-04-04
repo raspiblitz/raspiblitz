@@ -233,9 +233,11 @@ waitUntilChainNetworkIsReady()
         fi
         if [ ${reindex} -gt 0 ] || [ "${clienterror}" = "missing blockchain" ]; then
     
-          echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."          
-          sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
-          sleep 3
+          if [ ${reindex} -gt 0 ]; then
+            echo "!! DETECTED NEED FOR RE-INDEX in debug.log ... starting repair options."          
+            sudo sed -i "s/^state=.*/state=repair/g" /home/admin/raspiblitz.info
+            sleep 3
+          fi
 
           whiptail --title "Blockchain not Complete" --yes-button "DELETE+REPAIR" --no-button "Continue Sync" --yesno "Your blockchain data is not complete (yet).
 
