@@ -119,8 +119,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Server Configs
 # -----------
 LOG_LEVEL='debug'
-# HODL_KEY='HODL_HODL_API_KEY'
-# BASE_PATH='/basePath'
+TOR_PROXY_SERVER='socks://127.0.0.1:9050'
 
 # -----------
 # Interface Configs
@@ -131,12 +130,11 @@ CURRENCY='sat'
 # -----------
 # Privacy Configs
 # -----------
-FETCH_PRICES=false
-FETCH_FEES=false
-HODL_HODL=false
-DISABLE_LINKS=true
-NO_CLIENT_ACCOUNTS=true
-NO_VERSION_CHECK=true
+FETCH_PRICES = false
+FETCH_FEES = false
+DISABLE_LINKS = true
+DISABLE_LNMARKETS = true
+NO_VERSION_CHECK = true
 
 # -----------
 # Account Configs
@@ -205,21 +203,6 @@ EOF
     # SYSTEMD SERVICE
     ##################
 
-    # torify service if Tor is used
-    if [ "${runBehindTor}" = "on" ]; then
-      echo "# Connect to the external APIs through Tor"
-      proxy="torify"
-      echo "# set up torsocks"
-      sudo cp /etc/tor/torsocks.conf /etc/tor/torsocks-thunderhub.conf
-      sudo sed -i "s/^#AllowInbound 1/AllowInbound 1/g" /etc/tor/torsocks-thunderhub.conf
-      sudo sed -i "s/^#AllowOutboundLocalhost 1/AllowOutboundLocalhost 1/g" /etc/tor/torsocks-thunderhub.conf
-      env="Environment=TORSOCKS_CONF_FILE=/etc/tor/torsocks-thunderhub.conf"
-    else
-      echo "# Connect to the external APIs through clearnet"
-      proxy=""
-      env=""
-    fi
-
     echo "# Install ThunderHub systemd for ${network} on ${chain}"
     echo "
 # Systemd unit for thunderhub
@@ -232,8 +215,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-$env
-ExecStart=$proxy /usr/bin/npm run start -- -p 3010
+ExecStart=/usr/bin/npm run start -- -p 3010
 User=thunderhub
 Restart=always
 TimeoutSec=120
