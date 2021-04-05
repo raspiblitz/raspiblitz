@@ -227,7 +227,9 @@ if [ "${command}" == "test-lcd-connect" ]; then
     echo "# FAIL: only works on raspiOS 64-bit & RaspberryPi 4"
     echo "# test directly with --> sudo python /home/admin/config.scripts/blitz.gpio.py in 17"
     echo "err='detection not possible'"
+    exit 1
   fi
+   exit 0
 fi
 
 #######################################
