@@ -1040,8 +1040,8 @@ echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)
 echo "Take the chance & look thru the output above if you can spot any errors or warnings."
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "run 'XXprepareRelease.sh' once on this image before making distro copy"
-echo "REMEMBER for login now use --> user:admin password:raspiblitz"
+echo "1. login fresh --> user:admin password:raspiblitz"
+echo "2. run --> ./XXprepareRelease.sh"
 echo ""
 
 # (do last - because might trigger reboot)
