@@ -176,7 +176,12 @@ echo "*** MOUNTED DRIVES ***"
 df -T -h
 echo ""
 
-echo "*** NETWORK Info ***"
+echo ""
+echo "*** DATADRIVE ***"
+sudo /home/admin/config.scripts/blitz.datadrive.sh status
+echo ""
+
+echo "*** NETWORK ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
 echo ""
 

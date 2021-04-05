@@ -227,12 +227,12 @@ if [ "$1" = "status" ]; then
         if [ ${isTempMounted} -eq 0 ]; then
           echo "hddError='storage mount failed'"
         else
+
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
           hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
-          sudo umount /mnt/storage
           if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
             echo "hddGotBlockchain=1"
           elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
@@ -240,6 +240,36 @@ if [ "$1" = "status" ]; then
           elif [ ${#blockchainType} -gt 0 ]; then
             echo "hddGotBlockchain=0"
           fi
+
+          # check free space on data drive
+          if [ ${isBTRFS} -eq 0 ]; then
+            # EXT4
+            hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+          else
+            # BRTS
+            hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+          fi
+          echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+
+          # check if its another fullnode implementation data disk
+          hddGotMigrationData="none"
+          if [ "${hddFormat}" = "ext4" ]; then
+            # check for umbrel
+            isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
+            if [ ${isUmbrelHDD} -gt 0 ]; then
+              hddGotMigrationData="umbrel"
+            fi
+            isMyNodeHDD=$(sudo ls /mnt/storage/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
+            if [ ${isMyNodeHDD} -gt 0 ]; then
+              hddGotMigrationData="mynode"
+            fi
+          else
+            echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
+          fi
+          echo "hddGotMigrationData='${hddGotMigrationData}'"
+
+          # unmount 
+          sudo umount /mnt/storage
         fi
       else
         # if not ext4 or btrfs - there is no usable data
@@ -299,6 +329,7 @@ if [ "$1" = "status" ]; then
       # EXT4 calculations
       hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
       hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     else
       # BRTS calculations
@@ -306,9 +337,11 @@ if [ "$1" = "status" ]; then
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
       datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
       storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${datadrive} & ${storageDrive}"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
+    echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
 
   fi
 
@@ -335,7 +368,7 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
-    echo "hddAdapterUSAP='${hddAdapterUSAP}'"
+    echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
 
   echo
