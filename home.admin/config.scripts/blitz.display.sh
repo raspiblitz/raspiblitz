@@ -397,6 +397,7 @@ function install_headless() {
 
 if [ "${command}" == "set-display" ]; then
 
+  echo "# blitz.display.sh set-display"
   paramDisplayClass=$2
   paramDisplayType=$3
 
@@ -405,8 +406,12 @@ if [ "${command}" == "set-display" ]; then
     exit 1
   elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
     echo "# allready running ${displayClass}"
+    echo "err='no change needed'"
     exit 1
   elif [ "${paramDisplayClass}" == "lcd" ]; then
+
+    # uninstall old state
+    uninstall_$displayClass
 
     ##########################
     # INSTALL GPIO LCD DRIVERS
@@ -416,6 +421,9 @@ if [ "${command}" == "set-display" ]; then
 
   elif [ "${paramDisplayClass}" == "hdmi" ]; then
 
+    # uninstall old state
+    uninstall_$displayClass
+
     ##########################
     # SET BACK TO HDMI DEFAULT
 
@@ -423,6 +431,9 @@ if [ "${command}" == "set-display" ]; then
     exit 1
 
   elif [ "${paramDisplayClass}" == "headless" ]; then
+
+    # uninstall old state
+    uninstall_$displayClass
 
     ##########################
     # SET TO HEADLESS STATE
