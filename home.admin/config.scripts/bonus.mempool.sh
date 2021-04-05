@@ -337,7 +337,6 @@ if [ "$1" = "update" ]; then
   
   cd /home/mempool/mempool
 
-  #localVersion=$(git tag | sort -V | tail -1) 
   localVersion=$(git describe --tag)
   updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
