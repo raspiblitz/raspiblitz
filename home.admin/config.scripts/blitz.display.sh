@@ -38,7 +38,7 @@ lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 # see issue: https://github.com/rootzoll/raspiblitz/issues/681
 ###################
 
-elif [ "${command}" == "rotate" ]; then
+if [ "${command}" == "rotate" ]; then
 
   # TURN ROTATE ON (the new default)
   if [ "$2" = "1" ] || [ "$2" = "on" ]; then
