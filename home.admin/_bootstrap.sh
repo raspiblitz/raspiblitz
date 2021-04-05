@@ -70,9 +70,14 @@ chain=""
 setupStep=0
 fsexpanded=0
 lcd2hdmi="off"
+displayClass="lcd" # could be 'lcd', 'hdmi' or 'headless' .. in the future maybe even 'epaper'
+displayType="" # used to set a specific hardware model to be used as a feature switch - normally set by config
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
+
+# try to load config values if available (config overwrites info)
+source ${configFile} 2>/dev/null
 
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
@@ -84,6 +89,8 @@ echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "lcd2hdmi=${lcd2hdmi}" >> $infoFile
+echo "displayClass=${displayClass}" >> $infoFile
+echo "displayType=${displayType}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
