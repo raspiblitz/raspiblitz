@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# need install --> sudo pip3 install gpiozero
 
 import sys
 import RPi.GPIO as GPIO
