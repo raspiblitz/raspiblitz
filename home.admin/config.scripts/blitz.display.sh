@@ -215,6 +215,7 @@ fi
 ###################
 # TEST LCD CONNECT
 # only tested on RaspiOS 64-bit with RaspberryPi 4
+# https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813660030
 ###################
 
 if [ "${command}" == "test-lcd-connect" ]; then
