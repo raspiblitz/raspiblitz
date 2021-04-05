@@ -3,13 +3,13 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# make changes to the LCD screen"
-  echo "# blitz.lcd.sh check-repair"
-  echo "# blitz.lcd.sh rotate [on|off]"
-  echo "# blitz.lcd.sh image [path]"
-  echo "# blitz.lcd.sh qr [datastring]"
-  echo "# blitz.lcd.sh qr-console [datastring]"
-  echo "# blitz.lcd.sh hide"
-  echo "# blitz.lcd.sh hdmi [on|off]"
+  echo "# blitz.display.sh check-repair"
+  echo "# blitz.display.sh rotate [on|off]"
+  echo "# blitz.display.sh image [path]"
+  echo "# blitz.display.sh qr [datastring]"
+  echo "# blitz.display.sh qr-console [datastring]"
+  echo "# blitz.display.sh hide"
+  echo "# blitz.display.sh hdmi [on|off]"
   exit 1
 fi
 
@@ -43,7 +43,7 @@ lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 ###################
 
 if [ "${command}" == "check-repair" ]; then
-  echo "# blitz.lcd.sh check-repair"
+  echo "# blitz.display.sh check-repair"
   if [ ${oldKernel} -eq 1 ]; then
     echo "# --> old kernel detected - no need to update LCD drivers."
   else
@@ -276,6 +276,209 @@ if [ "${command}" == "hdmi" ]; then
     exit 1
   fi
   exit 0
+
+fi
+
+#######################################
+# DISPLAY TYPED INSTALLS & UN-INSTALLS
+# HDMI is the default - every added
+# displayClass needs a install fuction
+# and a uninstall function back to HDMI
+#######################################
+
+function install_lcd() {
+
+  # lcd preparations based on os
+  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
+     [ "${baseimage}" = "ubuntu" ]; then
+    homeFile=/home/pi/.bashrc
+    autostart="automatic start the LCD"
+    autostartDone=$(grep -c "$autostart" $homeFile)
+    if [ ${autostartDone} -eq 0 ]; then
+      # bash autostart for pi
+      # run as exec to dont allow easy physical access by keyboard
+      # see https://github.com/rootzoll/raspiblitz/issues/54
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+      echo "autostart LCD added to $homeFile"
+    else
+      echo "autostart LCD already in $homeFile"
+    fi
+  fi
+  if [ "${baseimage}" = "dietpi" ]; then
+    homeFile=/home/dietpi/.bashrc
+    startLCD="automatic start the LCD"
+    autostartDone=$(grep -c "$startLCD" $homeFile)
+    if [ ${autostartDone} -eq 0 ]; then
+      # bash autostart for dietpi
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+      echo "autostart LCD added to $homeFile"
+    else
+      echo "autostart LCD already in $homeFile"
+    fi
+  fi
+
+  if [ "${displayClass}" == "lcd" ]; then
+    if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
+      echo "*** 32bit LCD DRIVER ***"
+      echo "--> Downloading LCD Driver from Github"
+      cd /home/admin/
+      sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
+      sudo -u admin chmod -R 755 LCD-show
+      sudo -u admin chown -R admin:admin LCD-show
+      cd LCD-show/
+      sudo -u admin git reset --hard 53dd0bf || exit 1
+      # install xinput calibrator package
+      echo "--> install xinput calibrator package"
+      sudo apt install -y libxi6
+      sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+ 
+      if [ "${baseimage}" = "dietpi" ]; then
+        echo "--> dietpi preparations"
+        sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+        sudo mkdir /etc/X11/xorg.conf.d
+        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+        sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+        sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+        sudo cp ./usr/cmdline.txt /DietPi/
+        sudo cp ./usr/inittab /etc/
+        sudo cp ./boot/config-35.txt /DietPi/config.txt
+        # make LCD screen rotation correct
+        sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
+      fi
+    elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+      echo "*** 64bit LCD DRIVER ***"
+      echo "--> Downloading LCD Driver from Github"
+      cd /home/admin/
+      sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+      sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+      sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+      cd /home/admin/wavesharelcd-64bit-rpi
+      sudo -u admin git reset --hard 5a206a7 || exit 1
+
+      # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+      # prepare X11
+      sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+      sudo mkdir -p /etc/X11/xorg.conf.d
+      sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+      # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+
+      # add waveshare mod
+      sudo cp ./waveshare35a.dtbo /boot/overlays/
+
+      # modify /boot/config.txt 
+      sudo chmod 755 /boot/config.txt
+      sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+      echo "hdmi_force_hotplug=1" >> /boot/config.txt
+      sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+      echo "dtparam=i2c_arm=on" >> /boot/config.txt
+      # don't enable SPI and UART ports by default
+      # echo "dtparam=spi=on" >> /boot/config.txt
+      # echo "enable_uart=1" >> /boot/config.txt
+      sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+      echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+      sudo chmod 755 /boot/config.txt
+
+      # use modified cmdline.txt 
+      sudo cp ./cmdline.txt /boot/
+
+      # touch screen calibration
+      apt-get install -y xserver-xorg-input-evdev
+      cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+      # TODO manual touchscreen calibration option
+      # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+    fi
+  else
+    echo "FAIL: Unknown LCD-DRIVER: ${displayClass}"
+    exit 1
+  fi
+
+if [ "${displayClass}" == "lcd" ]; then
+  # activate LCD and trigger reboot
+  # dont do this on dietpi to allow for automatic build
+  if [ "${baseimage}" = "raspbian" ]; then
+    echo "Installing 32-bit LCD drivers ..."
+    sudo chmod +x -R /home/admin/LCD-show
+    cd /home/admin/LCD-show/
+    sudo apt-mark hold raspberrypi-bootloader
+    sudo ./LCD35-show
+  elif [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
+    echo "Installing 64-bit LCD drivers ..."
+    sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
+    sudo apt-mark hold raspberrypi-bootloader
+    sudo ./install.sh
+  else
+    echo "Use 'sudo reboot' to restart manually."
+  fi
+fi
+
+}
+
+function uninstall_lcd() {
+  echo "# TODO: uninstall LCD"
+}
+
+function install_headless() {
+  echo "# TODO: install HEADLESS"
+}
+
+function install_headless() {
+  echo "# TODO: uninstall HEADLESS"
+}
+
+###################
+# SET DISPLAY TYPE
+###################
+
+# TODO: see build script 356 --> starting pi user or not (headless does not need pi)
+
+if [ "${command}" == "set-display" ]; then
+
+  paramDisplayClass=$2
+  paramDisplayType=$3
+
+  if [ "${paramDisplayClass}" == "" ]; then
+    echo "err='missing parameter'"
+    exit 1
+  elif [ "${paramDisplayClass}" == "lcd" ]; then
+
+    # uninstall old setting
+
+
+    ##########################
+    # INSTALL GPIO LCD DRIVERS
+
+    echo "err='not implemented yet'"
+    exit 1
+
+  elif [ "${paramDisplayClass}" == "hdmi" ]; then
+
+    ##########################
+    # SET BACK TO HDMI DEFAULT
+
+    echo "err='not implemented yet'"
+    exit 1
+
+  elif [ "${paramDisplayClass}" == "headless" ]; then
+
+    ##########################
+    # SET TO HEADLESS STATE
+
+    echo "err='not implemented yet'"
+    exit 1
+
+  else
+    echo "err='unknown parameter'"
+    exit 1
+  fi
 
 fi
 

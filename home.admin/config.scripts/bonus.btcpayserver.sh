@@ -122,7 +122,7 @@ port forwarding on router needs to be active & may change port"
 SHA1 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
 TOR Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
@@ -149,7 +149,7 @@ MAINMENU > LNDCREDS > EXPORT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
   
-  /home/admin/config.scripts/blitz.lcd.sh hide
+  /home/admin/config.scripts/blitz.display.sh hide
   echo "# please wait ..."
   exit 0
 fi

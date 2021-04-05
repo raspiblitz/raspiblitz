@@ -55,7 +55,7 @@ if [ "$chain" = "test" ]; then
 fi
 
 echo "generating QR code ... please wait"
-/home/admin/config.scripts/blitz.lcd.sh qr "$network:${address}"
+/home/admin/config.scripts/blitz.display.sh qr "$network:${address}"
 
 # dialog with instructions while QR code is shown on LCD
 whiptail --backtitle "Fund your on chain wallet" \
@@ -66,11 +66,11 @@ whiptail --backtitle "Fund your on chain wallet" \
 
 # display QR code
 if [ $? -eq 1 ]; then
-  /home/admin/config.scripts/blitz.lcd.sh qr-console "$network:${address}"
+  /home/admin/config.scripts/blitz.display.sh qr-console "$network:${address}"
 fi
 
 # clean up
-/home/admin/config.scripts/blitz.lcd.sh hide
+/home/admin/config.scripts/blitz.display.sh hide
 
 # follow up info
 whiptail --backtitle "Fund your on chain wallet" \

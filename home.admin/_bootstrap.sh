@@ -215,7 +215,7 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  sudo /home/admin/config.scripts/blitz.display.sh hdmi on
   exit 0
 fi
 
@@ -224,7 +224,7 @@ fi
 ################################
 
 if [ "${lcd2hdmi}" != "on" ]; then
-  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
+  sudo /home/admin/config.scripts/blitz.display.sh check-repair >> $logFile
 fi
 
 ################################

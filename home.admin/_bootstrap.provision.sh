@@ -108,7 +108,7 @@ if [ "${lcd2hdmi}" == "on" ]; then
   switchScriptNotRunYet=$(sudo cat /home/admin/raspiblitz.info | grep -c "lcd2hdmi=off")
   if [ ${switchScriptNotRunYet} -eq 1 ]; then
     echo "--> Switching to HDMI video output & rebooting" >> ${logFile}
-    sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+    sudo /home/admin/config.scripts/blitz.display.sh hdmi on
   else
     echo "OK RaspiBlitz was already switched to HDMI output." >> ${logFile}
   fi
@@ -415,7 +415,7 @@ if [ "${#lcdrotate}" -eq 0 ]; then
 fi
 echo "Provisioning LCD rotate - run config script" >> ${logFile}
 sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${lcdrotate} >> ${logFile} 2>&1
+sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then

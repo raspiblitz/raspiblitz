@@ -54,7 +54,7 @@ if [ "$1" = "menu" ]; then
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
@@ -67,7 +67,7 @@ Hidden Service address for TOR Browser (QR see LCD):
 https://${toraddress}
 Unfortunately the camera is currently not usable via Tor, though.
 " 18 74
-    /home/admin/config.scripts/blitz.lcd.sh hide
+    /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain
