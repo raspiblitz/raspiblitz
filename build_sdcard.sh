@@ -9,9 +9,9 @@
 ##########################################################################
 
 echo ""
-echo "*****************************************"
+echo "****************************************."
 echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
-echo "*****************************************"
+echo "****************************************."
 echo "For details on optional parameters - see build script source code:"
 
 # 1st optional paramater: FATPACK
@@ -64,7 +64,7 @@ displayClass="$4"
 if [ ${#displayClass} -eq 0 ] || [ "${displayClass}" == "false" ]; then
   displayClass="hdmi"
 fi
-if [ "${displayClass}" != "false" ] && [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
+if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
   echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
 else
