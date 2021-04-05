@@ -9,6 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# blitz.display.sh qr-console [datastring]"
   echo "# blitz.display.sh hide"
   echo "# blitz.display.sh hdmi [on|off]"
+  echo "# blitz.display.sh test-lcd-connect"
   exit 1
 fi
 
@@ -208,6 +209,25 @@ if [ "${command}" == "hdmi" ]; then
   fi
   exit 0
 
+fi
+
+###################
+# TEST LCD CONNECT
+# only tested on RaspiOS 64-bit with RaspberryPi 4
+###################
+
+if [ "${command}" == "test-lcd-connect" ]; then
+  echo "# IMPORTANT --> just gives correct value first time called after boot"
+  source <(sudo python /home/admin/config.scripts/blitz.gpio.py in 17)
+  if [ "${pinValue}" == "1" ]; then
+    echo "gpioLcdConnected=1"
+  elif [ "${pinValue}" == "0" ]; then
+    echo "gpioLcdConnected=0"
+  else
+    echo "# FAIL: only works on raspiOS 64-bit & RaspberryPi 4"
+    echo "# test directly with --> sudo python /home/admin/config.scripts/blitz.gpio.py in 17"
+    echo "err='detection not possible'"
+  fi
 fi
 
 #######################################
