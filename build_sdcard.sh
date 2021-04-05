@@ -599,24 +599,6 @@ fi
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
-homeFile=/home/admin/.bashrc
-autostart="automatically start main menu"
-autostartDone=$(grep -c "$autostart" $homeFile)
-
-if [ ${autostartDone} -eq 0 ]; then
-  # bash autostart for admin
-  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
-  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
-  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
-  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
-  echo "autostart added to $homeFile"
-else
-  echo "autostart already in $homeFile"
-fi
-
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
 
@@ -638,9 +620,6 @@ sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
 sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
 
-sudo bash -c "echo '' >> /home/admin/.bashrc"
-sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
-
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
 keyBindingsDone=$(grep -c "$keyBindings" $homeFile)
@@ -651,6 +630,27 @@ if [ ${keyBindingsDone} -eq 0 ]; then
 else
   echo "key-bindings already in $homeFile"
 fi
+
+homeFile=/home/admin/.bashrc
+autostart="automatically start main menu"
+autostartDone=$(grep -c "$autostart" $homeFile)
+
+if [ ${autostartDone} -eq 0 ]; then
+  # bash autostart for admin
+  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+  echo "autostart added to $homeFile"
+else
+  echo "autostart already in $homeFile"
+fi
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 echo ""
 echo "*** SWAP FILE ***"
