@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THUBVERSION="v0.12.7"
+THUBVERSION="v0.12.12"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -82,7 +82,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
-    cd /home/thunderhub/thunderhub
+    cd /home/thunderhub/thunderhub || exit 1
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION
     echo "Running npm install and run build..."
@@ -298,7 +298,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# UPDATING THUNDERHUB"
-  cd /home/thunderhub/thunderhub
+  cd /home/thunderhub/thunderhub || exit 1
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u thunderhub git fetch
