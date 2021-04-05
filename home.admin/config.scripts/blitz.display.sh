@@ -404,7 +404,7 @@ if [ "${command}" == "set-display" ]; then
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
     exit 1
-  if [ "${paramDisplayClass}" == "${displayClass}" ]; then
+  elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
     echo "# allready running ${displayClass}"
     echo "err='no change needed'"
     exit 1
