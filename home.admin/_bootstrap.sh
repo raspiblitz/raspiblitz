@@ -70,8 +70,9 @@ chain=""
 setupStep=0
 fsexpanded=0
 lcd2hdmi="off"
-displayClass="lcd" # could be 'lcd', 'hdmi' or 'headless' .. in the future maybe even 'epaper'
-displayType="" # used to set a specific hardware model to be used as a feature switch - normally set by config
+# see https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
+displayClass="lcd"
+displayType=""
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
