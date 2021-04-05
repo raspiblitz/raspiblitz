@@ -227,7 +227,6 @@ StandardError=journal
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
-    echo "OK - the ThunderHub service is now enabled"
 
     # setting value in raspiblitz config
     sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
@@ -236,6 +235,13 @@ WantedBy=multi-user.target
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
+    fi
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
+      sudo systemctl start thunderhub
+    else
+      echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
   fi
   exit 0
