@@ -10,6 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# blitz.display.sh hide"
   echo "# blitz.display.sh hdmi [on|off]"
   echo "# blitz.display.sh test-lcd-connect"
+  echo "# blitz.display.sh set-display [hdmi|lcd|headless]"
   exit 1
 fi
 
