@@ -403,10 +403,10 @@ if [ "${command}" == "set-display" ]; then
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
     exit 1
+  elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
+    echo "# allready running ${displayClass}"
+    exit 1
   elif [ "${paramDisplayClass}" == "lcd" ]; then
-
-    # uninstall old setting
-
 
     ##########################
     # INSTALL GPIO LCD DRIVERS
