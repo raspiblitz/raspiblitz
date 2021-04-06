@@ -297,7 +297,7 @@ function install_lcd() {
     if [ ${containsModification} -eq 0 ]; then
       echo "# adding modification to /boot/cmdline.txt"
       cmdlineContent=$(sudo cat /boot/cmdline.txt)
-      echo "${cmdlineContent} ${modification}" >> /boot/cmdline.txt
+      echo "${cmdlineContent} ${modification}" > /boot/cmdline.txt
     else
       echo "# /boot/cmdline.txt already contains modification"
     fi
@@ -313,6 +313,8 @@ function install_lcd() {
     cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
     # TODO manual touchscreen calibration option
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+
+    echo "# OK install of LCD done ... reboot needed"
 
     else
       echo "err='baseimage not supported'"
