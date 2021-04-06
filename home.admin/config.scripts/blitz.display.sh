@@ -288,10 +288,7 @@ function install_lcd() {
     echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
     sudo chmod 755 /boot/config.txt
 
-    # use modified cmdline.txt 
-    # TODO: the cmdline.txt should not be just overwritten this could interfere with UASP fix etc
-    sudo cp ./cmdline.txt /boot/
-
+    # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
     containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
