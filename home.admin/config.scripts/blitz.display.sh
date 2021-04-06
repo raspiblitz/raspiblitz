@@ -330,8 +330,9 @@ function uninstall_lcd() {
 
     # remove modifications of config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
+    echo "dtoverlay=disable-bt" >> /boot/config.txt
 
     # remove modification of cmdline.txt
     sudo sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
