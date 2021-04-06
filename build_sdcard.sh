@@ -773,10 +773,9 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
   sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
   echo
 
-  # I2C fix
-  # see: https://github.com/rootzoll/raspiblitz/issues/1058
-  echo "dtparam=i2c_arm=on" >> /boot/config.txt
-
+  # I2C fix (make sure dtparam=i2c_arm is not on)
+  # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+  sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
 fi
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
