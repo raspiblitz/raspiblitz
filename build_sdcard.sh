@@ -642,10 +642,10 @@ fi
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
+# script auto-start for admin user
 homeFile=/home/admin/.bashrc
 autostart="automatically start main menu"
 autostartDone=$(grep -c "$autostart" $homeFile)
-
 if [ ${autostartDone} -eq 0 ]; then
   # bash autostart for admin
   sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
