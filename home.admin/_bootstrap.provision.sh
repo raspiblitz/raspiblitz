@@ -73,6 +73,8 @@ if [ ${#rootPartition} -gt 0 ]; then
             if [ -x ${resizeRaspbian} ]; then
               echo "RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}" >> ${logFile}
 		          sudo $resizeRaspbian --expand-rootfs
+              echo "going into reboot" >> ${logFile}
+              sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
 	            exit 0
 	          else
@@ -83,6 +85,8 @@ if [ ${#rootPartition} -gt 0 ]; then
             if [ -x ${resizeArmbian} ]; then
               echo "RUNNING EXPAND ARMBIAN: ${resizeArmbian}" >> ${logFile}
               sudo $resizeArmbian start
+              echo "going into reboot" >> ${logFile}
+              sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
 	            exit 0
 	          else
@@ -109,6 +113,12 @@ source ${configFile}
 
 # check if the raspiblitz config has a different display mode than the build image
 echo "### DISPLAY SETTINGS ###" >> ${logFile}
+
+# OLD: when nothing is set in raspiblitz.conf (<1.7)
+existsDisplayClass=$(sudo cat ${configFile} | grep -c "displayClass=")
+if [ "${existsDisplayClass}" == "0" ]; then
+  displayClass="lcd"
+fi
 
 # OLD: lcd2hdmi (deprecated)
 if [ "${lcd2hdmi}" == "on" ]; then
@@ -140,6 +150,10 @@ if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
   if [ "${infoFileDisplayClass}" != "${displayClass}" ]; then
     echo "Need to update displayClass from (${infoFileDisplayClass}) to (${displayClass})'" >> ${logFile}
     sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass} >> ${logFile}
+    echo "going into reboot" >> ${logFile}
+    sudo cp ${logFile} ${logFile}.display.recover
+    sudo shutdown -r now
+	  exit 0
   else
     echo "Display Setting is correct ... no need for change" >> ${logFile}
   fi
