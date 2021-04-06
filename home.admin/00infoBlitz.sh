@@ -242,7 +242,7 @@ else
   ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
   ln_tor=$(echo "${ln_external}" | grep -c ".onion")
   if [ ${ln_tor} -eq 1 ]; then
-    LNDselfTest=$(proxychains4 nmap -p9735 "$(sudo -u bitcoin /usr/local/bin/lncli getinfo|jq -c .uris|cut -d@ -f2|cut -d: -f1)" 2>/dev/null|grep -c "9735/tcp open")
+    LNDselfTest=$(proxychains4 -f /etc/proxychains.lnd.conf nmap -p9735 "$(sudo -u bitcoin /usr/local/bin/lncli getinfo|jq -c .uris|cut -d@ -f2|cut -d: -f1)" 2>/dev/null|grep -c "9735/tcp open")
     if [ ${LNDselfTest} -eq 1 ];then
       ln_publicColor="${color_green}"
     else
