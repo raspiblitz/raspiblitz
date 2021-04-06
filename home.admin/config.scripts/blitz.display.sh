@@ -442,7 +442,7 @@ function prepareDisplayClassEntryRaspiblitzConf() {
       echo "displayClass=${displayClass}" >> /mnt/hdd/raspiblitz.conf
     fi
   else
-    echo "file does not exists - skip"
+    echo "# /mnt/hdd/raspiblitz.conf does not exists (yet) - change is just part of raspiblitz.info"
   fi
 }
 
