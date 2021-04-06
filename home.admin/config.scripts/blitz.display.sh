@@ -8,7 +8,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# blitz.display.sh qr [datastring]"
   echo "# blitz.display.sh qr-console [datastring]"
   echo "# blitz.display.sh hide"
-  echo "# blitz.display.sh hdmi [on|off]"
+  echo "# blitz.display.sh hdmi [on|off] ---> DEPRECATED use set-display"
   echo "# blitz.display.sh test-lcd-connect"
   echo "# blitz.display.sh set-display [hdmi|lcd|headless]"
   exit 1
@@ -180,39 +180,6 @@ if [ "${command}" == "hide" ]; then
 fi
 
 ###################
-# HDMI
-# see https://github.com/rootzoll/raspiblitz/issues/767
-# see https://www.waveshare.com/wiki/3.5inch_RPi_LCD_%28A%29
-###################
-
-if [ "${command}" == "hdmi" ]; then
-
-  # make sure that the config entry exists
-  
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null| grep -c 'lcd2hdmi=') -eq 0 ]; then
-    echo "lcd2hdmi=off" >> /mnt/hdd/raspiblitz.conf 2>/dev/null
-  fi
-
-  secondParameter=$2
-  if [ "${secondParameter}" == "on" ]; then
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /home/admin/raspiblitz.info 2>/dev/null
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=on/g' /mnt/hdd/raspiblitz.conf 2>/dev/null
-    cd /home/admin/LCD-show
-    ./LCD-hdmi
-  elif [ "${secondParameter}" == "off" ]; then
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /home/admin/raspiblitz.info 2>/dev/null
-    sudo sed -i 's/^lcd2hdmi=.*/lcd2hdmi=off/g' /mnt/hdd/raspiblitz.conf 2>/dev/null
-    cd /home/admin/LCD-show
-    ./LCD35-show
-  else
-    echo "error='unkown second parameter'"
-    exit 1
-  fi
-  exit 0
-
-fi
-
-###################
 # TEST LCD CONNECT
 # only tested on RaspiOS 64-bit with RaspberryPi 4
 # https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813660030
@@ -232,6 +199,22 @@ if [ "${command}" == "test-lcd-connect" ]; then
     exit 1
   fi
    exit 0
+fi
+
+###############################
+# HDMI (deprecated - redirect)
+###############################
+if [ "${command}" == "hdmi" ]; then
+  secondParameter=$2
+  if [ "${secondParameter}" == "on" ]; then
+    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+  elif [ "${secondParameter}" == "off" ]; then
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+  else
+    echo "error='unkown second parameter'"
+    exit 1
+  fi
+  exit 0
 fi
 
 #######################################
@@ -497,13 +480,11 @@ function prepareDisplayClassEntryRaspiblitzConf() {
 # SET DISPLAY TYPE
 ###################
 
-# TODO: see build script 356 --> starting pi user or not (headless does not need pi)
-
 if [ "${command}" == "set-display" ]; then
 
-  echo "# blitz.display.sh set-display"
   paramDisplayClass=$2
   paramDisplayType=$3
+  echo "# blitz.display.sh set-display ${paramDisplayClass} ${paramDisplayType}"
 
   # check if started with sudo
   if [ "$EUID" -ne 0 ]; then 
@@ -515,10 +496,20 @@ if [ "${command}" == "set-display" ]; then
     echo "err='missing parameter'"
     exit 1
   elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
-    echo "# allready running ${displayClass}"
-    echo "err='no change needed'"
-    exit 1
-  elif [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
+
+    # normally dont make any changes here - but it can be the case that this called by recover/update process
+    # where raspiblitz.info (base image) raspiblitz.conf (user config) have different values - check fo this case:
+    confAndInfoValueIsSame=$(sudo cat /home/admin/raspiblitz.info | grep -c "displayClass=${paramDisplayClass}}")
+    if [ "${confAndInfoValueIsSame}" == "0" ]; then
+      echo "# raspiblitz.info is different from raspiblitz.conf --> enforcing ${displayClass} for both"
+      source /home/admin/raspiblitz.info
+      # continue with the raspiblitz.info value of displayClass as actual state (not the overwritten one from raspiblitz.conf)
+    else
+      echo "# raspiblitz.info AND raspiblitz.conf are both already running ${displayClass} - no need for change"
+      exit 1
+    fi
+  fi
+  if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
     # uninstall old state
     uninstall_$displayClass

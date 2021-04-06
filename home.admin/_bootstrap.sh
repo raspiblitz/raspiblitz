@@ -69,7 +69,6 @@ network=""
 chain=""
 setupStep=0
 fsexpanded=0
-lcd2hdmi="off"
 # see https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
 displayClass="lcd"
 displayType=""
@@ -89,7 +88,6 @@ echo "cpu=${cpu}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
-echo "lcd2hdmi=${lcd2hdmi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
@@ -208,7 +206,7 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/config.scripts/blitz.display.sh hdmi on
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
   exit 0
 fi
 
