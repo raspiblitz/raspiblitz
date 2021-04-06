@@ -446,8 +446,8 @@ function install_lcd_legacy() {
 
 function install_headless() {
   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
-    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "--autologin pi")
-    if [ ${modificationExists} -eq 0 ]; then
+    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
+    if [ "${modificationExists}" == "0" ]; then
       echo "# activating auto-login of pi user"
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
@@ -466,8 +466,8 @@ function install_headless() {
 
 function uninstall_headless() {
   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
-    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "--autologin pi")
-    if [ ${modificationExists} -eq 1 ]; then
+    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
+    if [ "${modificationExists}" == "1" ]; then
       echo "# deactivating auto-login of pi user"
       # set Raspi to boot up automatically with user pi (for the LCD)
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
