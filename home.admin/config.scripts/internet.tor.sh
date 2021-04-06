@@ -231,8 +231,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isTorConfigOK=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "BITCOIN")
   if [ ${isTorConfigOK} -eq 0 ]; then
     echo "# - updating Tor config ${torrc}"
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    HASHED_PASSWORD=$(sudo -u debian-tor tor --hash-password "$PASSWORD_B")
     cat > ./torrc <<EOF
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
