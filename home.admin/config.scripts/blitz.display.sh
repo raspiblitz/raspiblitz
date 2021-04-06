@@ -444,13 +444,44 @@ function install_lcd_legacy() {
 }
 
 function install_headless() {
-  echo "# TODO: install HEADLESS"
-  echo "# - deactivate pi user auto-login"
+  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "--autologin pi")
+    if [ ${modificationExists} -eq 0 ]; then
+      echo "# activating auto-login of pi user"
+      # set Raspi to boot up automatically with user pi (for the LCD)
+      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+      sudo raspi-config nonint do_boot_behaviour B2
+      sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+    else
+      echo "# auto-login of pi user already active"
+    fi
+  else
+    echo "err='baseimage not supported'"
+    exit 1
+  fi
 }
 
 function uninstall_headless() {
-  echo "# TODO: uninstall HEADLESS"
-  echo "# - reactivate pi user auto-login"
+  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "--autologin pi")
+    if [ ${modificationExists} -eq 1 ]; then
+      echo "# deactivating auto-login of pi user"
+      # set Raspi to boot up automatically with user pi (for the LCD)
+      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+      sudo raspi-config nonint do_boot_behaviour B1
+      # delete 3 last lines
+      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    else
+      echo "# auto-login of pi user is already deactivated"
+    fi
+  else
+    echo "err='baseimage not supported'"
+    exit 1
+  fi
 }
 
 function prepareDisplayClassEntryRaspiblitzConf() {
