@@ -345,13 +345,14 @@ if [ "$1" = "update" ]; then
       sudo systemctl restart mempool 2>/dev/null
       echo "***  Restarting Mempool  ***"
   else
+      # Preserve Config
+      sudo cp backend/mempool-config.json /home/admin
 
-      sudo -u mempool git checkout $updateVersion
+      sudo -u mempool git fetch --all && sudo -u mempool git reset --hard && sudo -u mempool git pull -p
 
       echo "# npm install for mempool explorer (backend)"
 
-      cd backend/
-      cp mempool-config.json /home/admin
+      cd /home/mempool/mempool/backend/
 
       sudo -u mempool NG_CLI_ANALYTICS=false npm install
       if ! [ $? -eq 0 ]; then
