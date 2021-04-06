@@ -101,7 +101,7 @@ case $CHOICE in
         Do you want to restart Tor now?" 10 55
       if [ $? -eq 0 ]; then
         echo "# Restarting tor"
-        sudo systemctl restart tor
+        sudo systemctl restart tor@default
       else
         echo "# Continue without restarting."
       fi
@@ -112,10 +112,11 @@ case $CHOICE in
     clear
     echo
     echo "Example list: 
-btc-rpc-explorer, btcpayserver, circuitbreaker, 
-cryptoadvance-specter, electrs, lit, lnbits, mempool,
-nbxlorer, nginx, RTL, telegraf, thunderhub, tor@default"
-    echo
+btc-rpc-explorer, btcpayserver, circuitbreaker,
+cryptoadvance-specter, getty@tty1, electrs, lit,
+lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
+thunderhub, tor@default, tor@lnd, tor
+"
     echo "Type the name of the service you would like to monitor:"  
     read SERVICE
     echo
@@ -128,10 +129,11 @@ nbxlorer, nginx, RTL, telegraf, thunderhub, tor@default"
     clear
     echo
     echo "Example list: 
-btc-rpc-explorer, btcpayserver, circuitbreaker, 
-cryptoadvance-specter, electrs, lit, lnbits, mempool,
-nbxlorer, nginx, RTL, telegraf, thunderhub, tor"
-    echo
+btc-rpc-explorer, btcpayserver, circuitbreaker,
+cryptoadvance-specter, getty@tty1, electrs, lit,
+lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
+thunderhub, tor@default, tor@lnd, tor
+"
     echo "Type the name of the service you would like to restart:" 
     read SERVICE
     echo
