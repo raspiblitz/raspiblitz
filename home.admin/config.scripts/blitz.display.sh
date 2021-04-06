@@ -269,7 +269,7 @@ function install_lcd() {
     # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
     sudo mkdir -p /etc/X11/xorg.conf.d
-    sudo mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf
+    sudo mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
     sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
     # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
 
@@ -338,7 +338,7 @@ function uninstall_lcd() {
     sudo sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
 
     # un-prepare X11
-    sudo mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf
+    sudo mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
     sudo rm -rf /etc/X11/xorg.conf.d/99-calibration.conf
 
     # remove github code of LCD drivers
