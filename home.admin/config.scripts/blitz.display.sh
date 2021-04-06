@@ -251,10 +251,14 @@ function uninstall_hdmi() {
 
 function install_lcd() {
 
-    if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
-    echo "# *** 64bit LCD DRIVER ***"
-    echo "# --> Downloading LCD Driver from Github"
+    echo "# INSTALL 64bit LCD DRIVER"
+
+    # hold bootloader
+    sudo apt-mark hold raspberrypi-bootloader
+
+    # Downloading LCD Driver from Github
     cd /home/admin/
     sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
     sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
@@ -262,13 +266,10 @@ function install_lcd() {
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
 
-    # hold bootloader
-    sudo apt-mark hold raspberrypi-bootloader
-
-    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+    # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
-    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
     sudo mkdir -p /etc/X11/xorg.conf.d
+    sudo mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf
     sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
     # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
 
@@ -276,7 +277,6 @@ function install_lcd() {
     sudo cp ./waveshare35a.dtbo /boot/overlays/
 
     # modify /boot/config.txt 
-    sudo chmod 755 /boot/config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
@@ -286,7 +286,6 @@ function install_lcd() {
     # echo "enable_uart=1" >> /boot/config.txt
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
     echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-    sudo chmod 755 /boot/config.txt
 
     # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
@@ -313,19 +312,43 @@ function install_lcd() {
 
     echo "# OK install of LCD done ... reboot needed"
 
-    else
-      echo "err='baseimage not supported'"
-      exit 1
-    fi
+  else
+    echo "err='baseimage not supported'"
+    exit 1
+  fi
 
 }
 
 function uninstall_lcd() {
-  echo "# TODO: uninstall LCD"
-  # TODO: reverse changes to cmdline.txt
-  # TODO: reserve changes to config.txt
-  # TODO: un-prepare X11
-  # TODO: remove github code
+
+  if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+
+    echo "# UNINSTALL 64bit LCD DRIVER"
+
+    # hold bootloader
+    sudo apt-mark hold raspberrypi-bootloader
+
+    # remove modifications of config.txt
+    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+
+    # remove modification of cmdline.txt
+    sudo sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
+
+    # un-prepare X11
+    sudo mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf
+    sudo rm -rf /etc/X11/xorg.conf.d/99-calibration.conf
+
+    # remove github code of LCD drivers
+    sudo rm -r /home/admin/wavesharelcd-64bit-rpi
+
+    echo "# OK uninstall LCD done ... reboot needed"
+
+  else
+    echo "err='baseimage not supported'"
+    exit 1
+  fi
 }
 
 # not being used - can be deleted after mid 2021
@@ -380,7 +403,6 @@ function install_lcd_legacy() {
     sudo cp ./waveshare35a.dtbo /boot/overlays/
 
     # modify /boot/config.txt 
-    sudo chmod 755 /boot/config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
@@ -390,7 +412,6 @@ function install_lcd_legacy() {
     # echo "enable_uart=1" >> /boot/config.txt
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
     echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-    sudo chmod 755 /boot/config.txt
 
     # use modified cmdline.txt 
     sudo cp ./cmdline.txt /boot/
@@ -456,6 +477,12 @@ if [ "${command}" == "set-display" ]; then
   echo "# blitz.display.sh set-display"
   paramDisplayClass=$2
   paramDisplayType=$3
+
+  # check if started with sudo
+  if [ "$EUID" -ne 0 ]; then 
+    echo "error='missing sudo'"
+    exit 1
+  fi
 
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
