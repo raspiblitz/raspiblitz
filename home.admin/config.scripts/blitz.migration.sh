@@ -169,11 +169,15 @@ fi
 
 ########################
 # MIGRATION from myNode
+# see manual steps: https://btc21.de/bitcoin/raspiblitz-migration/
 ########################
 
 if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  echo "IMPORTANT TODO -> take care about lnd wallet password - see: https://btc21.de/bitcoin/raspiblitz-migration/"
+  exit 1
 
   # can olny migrate unmonted data disks
   if [ "${isMounted}" == "1" ]; then
