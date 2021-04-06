@@ -370,7 +370,6 @@ if [ "${displayClass}" != "headless" ]; then
       # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
       # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
       sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
-   fi
    elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
       sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
       sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
@@ -415,6 +414,7 @@ if [ "${displayClass}" != "headless" ]; then
     echo "FAIL: Script Autostart not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
     exit 1
   fi
+
 else
   echo "# running headless ... no auto-login of pi user for display needed"
 fi
