@@ -241,121 +241,168 @@ fi
 # and a uninstall function back to HDMI
 #######################################
 
+function install_hdmi() {
+  echo "# nothing to install - hdmi is the default/clean mode"
+}
+
+function uninstall_hdmi() {
+  echo "# nothing to uninstall - hdmi is the default/clean mode"
+}
+
 function install_lcd() {
 
-  # lcd preparations based on os
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
-     [ "${baseimage}" = "ubuntu" ]; then
-    homeFile=/home/pi/.bashrc
-    autostart="automatic start the LCD"
-    autostartDone=$(grep -c "$autostart" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for pi
-      # run as exec to dont allow easy physical access by keyboard
-      # see https://github.com/rootzoll/raspiblitz/issues/54
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  fi
-  if [ "${baseimage}" = "dietpi" ]; then
-    homeFile=/home/dietpi/.bashrc
-    startLCD="automatic start the LCD"
-    autostartDone=$(grep -c "$startLCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for dietpi
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  fi
+    if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
-  if [ "${displayClass}" == "lcd" ]; then
-    if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
-      echo "*** 32bit LCD DRIVER ***"
-      echo "--> Downloading LCD Driver from Github"
-      cd /home/admin/
-      sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-      sudo -u admin chmod -R 755 LCD-show
-      sudo -u admin chown -R admin:admin LCD-show
-      cd LCD-show/
-      sudo -u admin git reset --hard 53dd0bf || exit 1
-      # install xinput calibrator package
-      echo "--> install xinput calibrator package"
-      sudo apt install -y libxi6
-      sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
+    echo "# *** 64bit LCD DRIVER ***"
+    echo "# --> Downloading LCD Driver from Github"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
+    sudo -u admin git reset --hard 5a206a7 || exit 1
+
+    # hold bootloader
+    sudo apt-mark hold raspberrypi-bootloader
+
+    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+    # prepare X11
+    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+    sudo mkdir -p /etc/X11/xorg.conf.d
+    sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+    # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+
+    # add waveshare mod
+    sudo cp ./waveshare35a.dtbo /boot/overlays/
+
+    # modify /boot/config.txt 
+    sudo chmod 755 /boot/config.txt
+    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    echo "dtparam=i2c_arm=on" >> /boot/config.txt
+    # don't enable SPI and UART ports by default
+    # echo "dtparam=spi=on" >> /boot/config.txt
+    # echo "enable_uart=1" >> /boot/config.txt
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+    sudo chmod 755 /boot/config.txt
+
+    # use modified cmdline.txt 
+    # TODO: the cmdline.txt should not be just overwritten this could interfere with UASP fix etc
+    sudo cp ./cmdline.txt /boot/
+
+    modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
+    containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
+    if [ ${containsModification} -eq 0 ]; then
+      echo "# adding modification to /boot/cmdline.txt"
+      cmdlineContent=$(sudo cat /boot/cmdline.txt)
+      echo "${cmdlineContent} ${modification}" >> /boot/cmdline.txt
+    else
+      echo "# /boot/cmdline.txt already contains modification"
+    fi
+    containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
+    if [ ${containsModification} -eq 0 ]; then
+      echo "# FAIL: was not able to mofify /boot/cmdline.txt"
+      echo "err='ended unclear state'"
+      exit 1
+    fi
+
+    # touch screen calibration
+    apt-get install -y xserver-xorg-input-evdev
+    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+    # TODO manual touchscreen calibration option
+    # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+
+    else
+      echo "err='baseimage not supported'"
+      exit 1
+    fi
+
+}
+
+function uninstall_lcd() {
+  echo "# TODO: uninstall LCD"
+  # TODO: reverse changes to cmdline.txt
+  # TODO: reserve changes to config.txt
+  # TODO: un-prepare X11
+  # TODO: remove github code
+}
+
+# not being used - can be deleted after mid 2021
+function install_lcd_legacy() {
+
+  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
+    echo "*** 32bit LCD DRIVER ***"
+    echo "--> Downloading LCD Driver from Github"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
+    sudo -u admin chmod -R 755 LCD-show
+    sudo -u admin chown -R admin:admin LCD-show
+    cd LCD-show/
+    sudo -u admin git reset --hard 53dd0bf || exit 1
+    # install xinput calibrator package
+    echo "--> install xinput calibrator package"
+    sudo apt install -y libxi6
+    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
  
-      if [ "${baseimage}" = "dietpi" ]; then
-        echo "--> dietpi preparations"
-        sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-        sudo mkdir /etc/X11/xorg.conf.d
-        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-        sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-        sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-        sudo cp ./usr/cmdline.txt /DietPi/
-        sudo cp ./usr/inittab /etc/
-        sudo cp ./boot/config-35.txt /DietPi/config.txt
-        # make LCD screen rotation correct
-        sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-      fi
-    elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
-      echo "*** 64bit LCD DRIVER ***"
-      echo "--> Downloading LCD Driver from Github"
-      cd /home/admin/
-      sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-      sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-      sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
-      cd /home/admin/wavesharelcd-64bit-rpi
-      sudo -u admin git reset --hard 5a206a7 || exit 1
-
-      # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-      # prepare X11
+    if [ "${baseimage}" = "dietpi" ]; then
+      echo "--> dietpi preparations"
       sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-      sudo mkdir -p /etc/X11/xorg.conf.d
-      sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
-      # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-      # add waveshare mod
-      sudo cp ./waveshare35a.dtbo /boot/overlays/
-
-      # modify /boot/config.txt 
-      sudo chmod 755 /boot/config.txt
-      sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-      echo "hdmi_force_hotplug=1" >> /boot/config.txt
-      sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
-      echo "dtparam=i2c_arm=on" >> /boot/config.txt
-      # don't enable SPI and UART ports by default
-      # echo "dtparam=spi=on" >> /boot/config.txt
-      # echo "enable_uart=1" >> /boot/config.txt
-      sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
-      echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-      sudo chmod 755 /boot/config.txt
-
-      # use modified cmdline.txt 
-      sudo cp ./cmdline.txt /boot/
-
-      # touch screen calibration
-      apt-get install -y xserver-xorg-input-evdev
-      cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-      # TODO manual touchscreen calibration option
-      # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
+      sudo mkdir /etc/X11/xorg.conf.d
+      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
+      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
+      sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
+      sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
+      sudo cp ./usr/cmdline.txt /DietPi/
+      sudo cp ./usr/inittab /etc/
+      sudo cp ./boot/config-35.txt /DietPi/config.txt
+      # make LCD screen rotation correct
+      sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
     fi
-  else
-    echo "FAIL: Unknown LCD-DRIVER: ${displayClass}"
-    exit 1
+  elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+    echo "*** 64bit LCD DRIVER ***"
+    echo "--> Downloading LCD Driver from Github"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    cd /home/admin/wavesharelcd-64bit-rpi
+    sudo -u admin git reset --hard 5a206a7 || exit 1
+
+    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+    # prepare X11
+    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+    sudo mkdir -p /etc/X11/xorg.conf.d
+    sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+    # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+
+    # add waveshare mod
+    sudo cp ./waveshare35a.dtbo /boot/overlays/
+
+    # modify /boot/config.txt 
+    sudo chmod 755 /boot/config.txt
+    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    echo "dtparam=i2c_arm=on" >> /boot/config.txt
+    # don't enable SPI and UART ports by default
+    # echo "dtparam=spi=on" >> /boot/config.txt
+    # echo "enable_uart=1" >> /boot/config.txt
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+    sudo chmod 755 /boot/config.txt
+
+    # use modified cmdline.txt 
+    sudo cp ./cmdline.txt /boot/
+
+    # touch screen calibration
+    apt-get install -y xserver-xorg-input-evdev
+    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+    # TODO manual touchscreen calibration option
+    # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
   fi
 
-if [ "${displayClass}" == "lcd" ]; then
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
   if [ "${baseimage}" = "raspbian" ]; then
@@ -373,20 +420,30 @@ if [ "${displayClass}" == "lcd" ]; then
   else
     echo "Use 'sudo reboot' to restart manually."
   fi
-fi
 
-}
-
-function uninstall_lcd() {
-  echo "# TODO: uninstall LCD"
 }
 
 function install_headless() {
   echo "# TODO: install HEADLESS"
+  echo "# - deactivate pi user auto-login"
 }
 
-function install_headless() {
+function uninstall_headless() {
   echo "# TODO: uninstall HEADLESS"
+  echo "# - reactivate pi user auto-login"
+}
+
+function prepareDisplayClassEntryRaspiblitzConf() {
+  # check if file exists / hdd is mounted
+  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+    echo "file does exists"
+    entryExists=$(grep -c "displayClass=" /mnt/hdd/raspiblitz.conf)
+    if [ ${entryExists} -eq 0 ]; then
+      echo "displayClass=${displayClass}" >> /mnt/hdd/raspiblitz.conf
+    fi
+  else
+    echo "file does not exists - skip"
+  fi
 }
 
 ###################
@@ -408,43 +465,24 @@ if [ "${command}" == "set-display" ]; then
     echo "# allready running ${displayClass}"
     echo "err='no change needed'"
     exit 1
-  elif [ "${paramDisplayClass}" == "lcd" ]; then
+  elif [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
     # uninstall old state
     uninstall_$displayClass
 
-    ##########################
-    # INSTALL GPIO LCD DRIVERS
-
-    echo "err='not implemented yet'"
-    exit 1
-
-  elif [ "${paramDisplayClass}" == "hdmi" ]; then
-
-    # uninstall old state
-    uninstall_$displayClass
-
-    ##########################
-    # SET BACK TO HDMI DEFAULT
-
-    echo "err='not implemented yet'"
-    exit 1
-
-  elif [ "${paramDisplayClass}" == "headless" ]; then
-
-    # uninstall old state
-    uninstall_$displayClass
-
-    ##########################
-    # SET TO HEADLESS STATE
-
-    echo "err='not implemented yet'"
-    exit 1
+    # install new state
+    install_$paramDisplayClass
 
   else
     echo "err='unknown parameter'"
     exit 1
   fi
+
+  # mark new display class in configs
+  prepareDisplayClassEntryRaspiblitzConf
+  sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
+  sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /mnt/hdd/raspiblitz.conf 2>/dev/null
+  exit 0
 
 fi
 
