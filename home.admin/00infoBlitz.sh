@@ -235,23 +235,28 @@ fi
 
 wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
 if [ "$wallet_unlocked" -gt 0 ] ; then
- alias_color="${color_red}"
- ln_alias="Wallet Locked"
+  alias_color="${color_red}"
+  ln_alias="Wallet Locked"
 else
- ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
- ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
- ln_tor=$(echo "${ln_external}" | grep -c ".onion")
- if [ ${ln_tor} -eq 1 ]; then
-   ln_publicColor="${color_green}"
- else
-   public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
-    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    ln_publicColor="${color_amber}"
+  ln_getInfo=$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
+  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+  if [ ${ln_tor} -eq 1 ]; then
+    LNDselfTest=$(proxychains4 nmap -p9735 "$(sudo -u bitcoin /usr/local/bin/lncli getinfo|jq -c .uris|cut -d@ -f2|cut -d: -f1)" 2>/dev/null|grep -c "9735/tcp open")
+    if [ ${LNDselfTest} -eq 1 ];then
+      ln_publicColor="${color_green}"
+    else
+      ln_publicColor="${color_red}"
+    fi
   else
-    ln_publicColor="${color_red}"
+    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
+    if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
+      # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+      ln_publicColor="${color_amber}"
+    else
+      ln_publicColor="${color_red}"
+    fi
   fi
- fi
  alias_color="${color_grey}"
  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
  ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
@@ -275,7 +280,7 @@ else
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
+    ln_peersInfo="${ln_publicColor}${ln_peers} ${color_gray}peers"
     ln_dailyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
     ln_weeklyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
     ln_monthlyfees="$(sudo -u bitcoin /usr/local/bin/lncli --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
