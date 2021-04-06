@@ -116,13 +116,18 @@ activateLndOverTOR()
   sudo chown -R _tor-$NODENAME:_tor-$NODENAME /mnt/hdd/tor-$NODENAME
 
   echo "
+### torrc for tor@$NODENAME
+### https://github.com/lightningnetwork/lnd/blob/master/docs/configuring_tor.md
+
 DataDirectory /mnt/hdd/tor-$NODENAME/sys
 PidFile /mnt/hdd/tor-$NODENAME/sys/tor.pid
+
 SocksPort $SOCKSPORT
 ControlPort $CONTROLPORT
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
-SafeLogging 0
+
+SafeLogging 1
 Log notice stdout
 Log notice file /mnt/hdd/tor-$NODENAME/notice.log
 Log info file /mnt/hdd/tor-$NODENAME/info.log
@@ -315,6 +320,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isTorConfigOK} -eq 0 ]; then
     echo "# - updating Tor config ${torrc}"
     cat > ./torrc <<EOF
+### torrc for tor@default
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
 DataDirectory /mnt/hdd/tor/sys
@@ -346,11 +352,10 @@ HiddenServicePort 38332 127.0.0.1:38332
 
 # NOTE: since Bitcoin Core v0.21.0 sets up a v3 Tor service automatically 
 # see /mnt/hdd/bitcoin for the onion private key - delete and restart bitcoind to reset
- 
-# Hidden Service for LND (incoming connections)
-HiddenServiceDir /mnt/hdd/tor/lnd9735
-HiddenServiceVersion 3
-HiddenServicePort 9735 127.0.0.1:9735
+
+# NOTE: LND is using a separate Tor instance: tor@lnd
+# find the torrc at /etc/tor/instances/lnd/torrc
+# onion private key at /mnt/hdd/lnd/v3_onion_private_key
 
 # Hidden Service for LND RPC
 HiddenServiceDir /mnt/hdd/tor/lndrpc10009/
