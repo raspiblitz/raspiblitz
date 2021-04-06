@@ -505,7 +505,7 @@ if [ "${command}" == "set-display" ]; then
       source /home/admin/raspiblitz.info
       # continue with the raspiblitz.info value of displayClass as actual state (not the overwritten one from raspiblitz.conf)
     else
-      echo "# raspiblitz.info AND raspiblitz.conf are both already running ${displayClass} - no need for change"
+      echo "# raspiblitz.info (AND raspiblitz.conf) already running ${displayClass} - no need for change"
       exit 1
     fi
   fi
