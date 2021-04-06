@@ -469,13 +469,8 @@ function uninstall_headless() {
     modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "1" ]; then
       echo "# deactivating auto-login of pi user"
-      # set Raspi to boot up automatically with user pi (for the LCD)
-      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
+      # set Raspi to deactivate auto-login (will delete /etc/systemd/system/getty@tty1.service.d/autologin.conf)
       sudo raspi-config nonint do_boot_behaviour B1
-      # delete 3 last lines
-      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
-      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
-      sudo sed -i '$d' /etc/systemd/system/getty@tty1.service.d/autologin.conf
     else
       echo "# auto-login of pi user is already deactivated"
     fi
