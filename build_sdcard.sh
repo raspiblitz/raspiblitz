@@ -725,7 +725,7 @@ sudo apt install -y --no-install-recommends python3-systemd fail2ban
 echo "Activating CACHE RAM DISK ... "
 sudo /home/admin/config.scripts/blitz.cache.sh on
 
-# *** Wifi & Bluetooth ***
+# *** Wifi, Bluetooth & other configs ***
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
    
@@ -759,15 +759,22 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
 
   # remove bluetooth packages
   sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
-  
   echo
+
+  # disable audio
   echo "*** DISABLE AUDIO (snd_bcm2835) ***"
   sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
   echo
   
+  # disable DRM VC4 V3D
   echo "*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
   sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+  echo
+
+  # I2C fix
+  # see: https://github.com/rootzoll/raspiblitz/issues/1058
+  echo "dtparam=i2c_arm=on" >> /boot/config.txt
 
 fi
 
