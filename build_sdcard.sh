@@ -385,8 +385,7 @@ if [ "${displayClass}" != "headless" ]; then
      [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
      [ "${baseimage}" = "ubuntu" ]; then
     homeFile=/home/pi/.bashrc
-    autostart="automatic start the LCD"
-    autostartDone=$(grep -c "$autostart" $homeFile)
+    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
     if [ ${autostartDone} -eq 0 ]; then
       # bash autostart for pi
       # run as exec to dont allow easy physical access by keyboard
@@ -401,8 +400,7 @@ if [ "${displayClass}" != "headless" ]; then
     fi
   elif [ "${baseimage}" = "dietpi" ]; then
     homeFile=/home/dietpi/.bashrc
-    startLCD="automatic start the LCD"
-    autostartDone=$(grep -c "$startLCD" $homeFile)
+    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
     if [ ${autostartDone} -eq 0 ]; then
       # bash autostart for dietpi
       sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
@@ -644,8 +642,7 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 # script auto-start for admin user
 homeFile=/home/admin/.bashrc
-autostart="automatically start main menu"
-autostartDone=$(grep -c "$autostart" $homeFile)
+autostartDone=$(grep -c "automatically start main menu" $homeFile)
 if [ ${autostartDone} -eq 0 ]; then
   # bash autostart for admin
   sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
