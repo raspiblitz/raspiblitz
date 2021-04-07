@@ -23,6 +23,7 @@
 - Update: JoininBox 0.3.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
 - Update: mempool v2.1.2 [detail](https://github.com/mempool/mempool/releases/tag/v2.1.2)
 - Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v220)
+- Update: stacking-sats-kraken 0.4.2 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?
 
