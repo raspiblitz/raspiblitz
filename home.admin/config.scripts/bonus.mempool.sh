@@ -334,5 +334,89 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
+# update
+if [ "$1" = "update" ]; then
+  echo "*** Checking Mempool Explorer Version ***"
+  
+  cd /home/mempool/mempool
+
+  localVersion=$(git describe --tag)
+  updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+
+  if [ $localVersion = $updateVersion ]; then
+      echo "***  You are up-to-date on version $localVersion ***" 
+      sudo systemctl restart mempool 2>/dev/null
+      echo "***  Restarting Mempool  ***"
+  else
+      # Preserve Config
+      sudo cp backend/mempool-config.json /home/admin
+
+      sudo -u mempool git checkout $updateVersion
+
+      echo "# npm install for mempool explorer (backend)"
+
+      cd /home/mempool/mempool/backend/
+
+      sudo -u mempool NG_CLI_ANALYTICS=false npm install
+      if ! [ $? -eq 0 ]; then
+          echo "FAIL - npm install did not run correctly, aborting"
+          exit 1
+      fi
+      sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+      if ! [ $? -eq 0 ]; then
+          echo "FAIL - npm run build did not run correctly, aborting"
+          exit 1
+      fi
+
+      echo "# npm install for mempool explorer (frontend)"
+
+      cd ../frontend
+      sudo -u mempool NG_CLI_ANALYTICS=false npm install
+      if ! [ $? -eq 0 ]; then
+          echo "FAIL - npm install did not run correctly, aborting"
+          exit 1
+      fi
+      sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+      if ! [ $? -eq 0 ]; then
+          echo "FAIL - npm run build did not run correctly, aborting"
+          exit 1
+      fi
+
+      sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+      sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
+
+
+      # Restore frontend files 
+      cd /home/mempool/mempool/frontend
+      sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
+      sudo chown -R www-data:www-data /var/www/mempool
+
+      cd /home/mempool/mempool
+
+      # Reinstall the mempool configuration for nginx
+      cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
+      sudo systemctl restart nginx
+
+      # Remove useless deps
+      echo "Removing unneccesary modules..."
+      npm prune --production
+
+
+      echo "***  Restarting Mempool  ***"
+      sudo systemctl start mempool
+
+  fi
+
+  # check for error
+  isDead=$(sudo systemctl status mempool | grep -c 'inactive (dead)')
+  if [ ${isDead} -eq 1 ]; then
+    echo "error='Mempool service start failed'"
+    exit 1
+  else
+    echo "***  Mempool version ${updateVersion} now running  ***"
+  fi
+  exit 0
+fi
+
 echo "error='unknown parameter'
 exit 1

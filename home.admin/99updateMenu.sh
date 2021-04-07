@@ -320,6 +320,9 @@ if [ "${runBehindTor}" == "on" ]; then
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+if [ "${mempoolExplorer}" == "on" ]; then
+  OPTIONS+=(MEMPOOL "Update Mempool Explorer")
+fi
 
 CHOICE=$(dialog --clear \
                 --backtitle "" \
@@ -361,5 +364,8 @@ case $CHOICE in
     ;;
   TOR)
     sudo /home/admin/config.scripts/internet.tor.sh update  
+    ;;
+  MEMPOOL)
+    /home/admin/config.scripts/bonus.mempool.sh update 
     ;;
 esac
