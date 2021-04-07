@@ -76,13 +76,19 @@ function github() {
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
 }
 
 # command: lcd
 function lcd() {
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi off
+  sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+}
+
+# command: headless
+function headless() {
+  echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
+  sudo /home/admin/config.scripts/blitz.display.sh set-display headless
 }
 
 # command: manage

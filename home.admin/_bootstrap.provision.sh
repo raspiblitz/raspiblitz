@@ -37,6 +37,9 @@ fi
 echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
 source ${infoFile}
 
+# remember the DisplayClass from info file - before its gets overwritten by raspiblitz.conf to detect change
+infoFileDisplayClass="${displayClass}"
+
 minimumSizeByte=8192000000
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
@@ -70,6 +73,8 @@ if [ ${#rootPartition} -gt 0 ]; then
             if [ -x ${resizeRaspbian} ]; then
               echo "RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}" >> ${logFile}
 		          sudo $resizeRaspbian --expand-rootfs
+              echo "going into reboot" >> ${logFile}
+              sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
 	            exit 0
 	          else
@@ -80,6 +85,8 @@ if [ ${#rootPartition} -gt 0 ]; then
             if [ -x ${resizeArmbian} ]; then
               echo "RUNNING EXPAND ARMBIAN: ${resizeArmbian}" >> ${logFile}
               sudo $resizeArmbian start
+              echo "going into reboot" >> ${logFile}
+              sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
 	            exit 0
 	          else
@@ -100,18 +107,58 @@ fi
 sudo chmod 777 ${configFile}
 source ${configFile}
 
-# check if the system was configured for HDMI and needs switch
-# keep as one of the first so that user can see video output
+##########################
+# DISPLAY SETTINGS
+##########################
+
+# check if the raspiblitz config has a different display mode than the build image
+echo "### DISPLAY SETTINGS ###" >> ${logFile}
+
+# OLD: when nothing is set in raspiblitz.conf (<1.7)
+existsDisplayClass=$(sudo cat ${configFile} | grep -c "displayClass=")
+if [ "${existsDisplayClass}" == "0" ]; then
+  displayClass="lcd"
+fi
+
+# OLD: lcd2hdmi (deprecated)
 if [ "${lcd2hdmi}" == "on" ]; then
-  echo "RaspiBlitz has config to run with HDMI video outout." >> ${logFile}
-  # check that raspiblitz.info shows that confing script was not run yet
-  switchScriptNotRunYet=$(sudo cat /home/admin/raspiblitz.info | grep -c "lcd2hdmi=off")
-  if [ ${switchScriptNotRunYet} -eq 1 ]; then
-    echo "--> Switching to HDMI video output & rebooting" >> ${logFile}
-    sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  echo "Convert lcd2hdmi=on to displayClass='hdmi'" >> ${logFile}
+  sudo sed -i "s/^lcd2hdmi=.*//g" ${configFile}
+  echo "displayClass=hdmi" >> ${configFile}
+  displayClass="hdmi"
+elif [ "${lcd2hdmi}" != "" ]; then
+  echo "Remove old lcd2hdmi pramater from config" >> ${logFile}
+  sudo sed -i "s/^lcd2hdmi=.*//g" ${configFile}
+  displayClass="lcd"
+fi
+
+# OLD: headless (deprecated)
+if [ "${headless}" == "on" ]; then
+  echo "Convert headless=on to displayClass='headless'" >> ${logFile}
+  sudo sed -i "s/^headless=.*//g" ${configFile}
+  echo "displayClass=headless" >> ${configFile}
+  displayClass="headless"
+elif [ "${headless}" != "" ]; then
+  echo "Remove old headless pramater from config" >> ${logFile}
+  sudo sed -i "s/^headless=.*//g" ${configFile}
+  displayClass="lcd"
+fi
+
+# NEW: decide by displayClass 
+echo "raspiblitz.info(${infoFileDisplayClass}) raspiblitz.conf(${displayClass})" >> ${logFile}
+if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
+  if [ "${infoFileDisplayClass}" != "${displayClass}" ]; then
+    echo "Need to update displayClass from (${infoFileDisplayClass}) to (${displayClass})'" >> ${logFile}
+    sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass} >> ${logFile}
+    echo "going into reboot" >> ${logFile}
+    sudo cp ${logFile} ${logFile}.display.recover
+    sudo shutdown -r now
+	  exit 0
   else
-    echo "OK RaspiBlitz was already switched to HDMI output." >> ${logFile}
+    echo "Display Setting is correct ... no need for change" >> ${logFile}
   fi
+else
+  echo "WARN values in raspiblitz info and/or conf file seem broken" >> ${logFile}
 fi
 
 ##########################
@@ -415,7 +462,7 @@ if [ "${#lcdrotate}" -eq 0 ]; then
 fi
 echo "Provisioning LCD rotate - run config script" >> ${logFile}
 sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${lcdrotate} >> ${logFile} 2>&1
+sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then

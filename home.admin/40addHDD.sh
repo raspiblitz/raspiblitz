@@ -100,7 +100,8 @@ else
   echo "network=${network}" >> /home/admin/raspiblitz.conf
   echo "chain=${chain}" >> /home/admin/raspiblitz.conf
   echo "hostname=${hostname}" >> /home/admin/raspiblitz.conf
-  echo "lcd2hdmi=${lcd2hdmi}" >> /home/admin/raspiblitz.conf
+  echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.conf
+  echo "displayType=${displayType}" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
 
   sudo mv /home/admin/raspiblitz.conf $configFile

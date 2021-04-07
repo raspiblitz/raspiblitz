@@ -18,7 +18,7 @@ if [ "${error}" != "" ]; then
 fi
 
 # check if HDD is connected
-if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
+if [ "${isMounted}" == "0" ] && [ ${#hddCandidate} -eq 0 ]; then
     echo "***********************************************************"
     echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
     echo "***********************************************************"

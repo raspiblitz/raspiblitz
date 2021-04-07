@@ -89,7 +89,7 @@ migrate_raspiblitz_conf () {
   echo "network=bitcoin" >> /home/admin/raspiblitz.conf
   echo "chain=main" >> /home/admin/raspiblitz.conf
   echo "hostname=${nodename}" >> /home/admin/raspiblitz.conf
-  echo "lcd2hdmi=on" >> /home/admin/raspiblitz.conf
+  echo "displayClass=hdmi" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
   echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
@@ -169,11 +169,15 @@ fi
 
 ########################
 # MIGRATION from myNode
+# see manual steps: https://btc21.de/bitcoin/raspiblitz-migration/
 ########################
 
 if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  echo "IMPORTANT TODO -> take care about lnd wallet password - see: https://btc21.de/bitcoin/raspiblitz-migration/"
+  exit 1
 
   # can olny migrate unmonted data disks
   if [ "${isMounted}" == "1" ]; then

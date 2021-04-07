@@ -69,10 +69,15 @@ network=""
 chain=""
 setupStep=0
 fsexpanded=0
-lcd2hdmi="off"
+# see https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
+displayClass="lcd"
+displayType=""
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
+
+# try to load config values if available (config overwrites info)
+source ${configFile} 2>/dev/null
 
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
@@ -83,7 +88,8 @@ echo "cpu=${cpu}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
-echo "lcd2hdmi=${lcd2hdmi}" >> $infoFile
+echo "displayClass=${displayClass}" >> $infoFile
+echo "displayType=${displayType}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
@@ -141,14 +147,7 @@ fi
 # see https://github.com/rootzoll/raspiblitz/issues/647
 # see https://github.com/rootzoll/raspiblitz/pull/1580
 randnum=$(shuf -i 0-7 -n 1)
-lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
-if [ ${lcdExists} -eq 1 ] ; then
-   # LCD
-   sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-else
-   # HDMI
-   sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-fi
+/home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
 sudo killall -3 fbi
 
@@ -207,16 +206,8 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
   exit 0
-fi
-
-################################
-# UPDATE LCD DRIVERS IF NEEEDED
-################################
-
-if [ "${lcd2hdmi}" != "on" ]; then
-  sudo /home/admin/config.scripts/blitz.lcd.sh check-repair >> $logFile
 fi
 
 ################################
