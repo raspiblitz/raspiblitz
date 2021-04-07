@@ -351,6 +351,7 @@ if [ "$1" = "update" ]; then
       # Preserve Config
       sudo cp backend/mempool-config.json /home/admin
 
+      sudo -u mempool git fetch
       sudo -u mempool git checkout $updateVersion
 
       echo "# npm install for mempool explorer (backend)"
