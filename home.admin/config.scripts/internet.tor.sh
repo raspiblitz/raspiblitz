@@ -404,6 +404,9 @@ EOF
   if [ "${thunderhub}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
   fi
+  if [ "${homer}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh homer 80 4092 443 4093
+  fi
   if [ "${specter}" = "on" ]; then
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441

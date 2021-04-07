@@ -309,6 +309,9 @@ fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
+if [ "${homer}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Homer")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -350,5 +353,8 @@ case $CHOICE in
     ;;
   TOR)
     sudo /home/admin/config.scripts/internet.tor.sh update  
+    ;;
+  HOMER)
+    /home/admin/config.scripts/bonus.homer.sh update  
     ;;
 esac

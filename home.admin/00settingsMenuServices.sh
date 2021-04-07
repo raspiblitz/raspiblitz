@@ -22,6 +22,7 @@ if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#pool} -eq 0 ]; then pool="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
+if [ ${#homer} -eq 0 ]; then homer="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -43,6 +44,7 @@ OPTIONS+=(c 'Lightning Pool' ${pool})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+OPTIONS+=(x 'Homer' ${homer})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -438,6 +440,24 @@ When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
   fi
 else
   echo "Mempool Explorer Setting unchanged."
+fi
+
+# Homer process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${homer}" != "${choice}" ]; then
+  echo "Homer settings changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.homer.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Homer" --msgbox "\
+Homer was installed.\n
+Use the new 'Homer' entry in Main Menu for more info.\n
+" 10 35
+  fi
+else
+  echo "Homer Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

@@ -113,6 +113,9 @@ fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
+if [ "${homer}" == "on" ]; then
+  OPTIONS+=(HOMER "Homer")
+fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -257,6 +260,9 @@ case $CHOICE in
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
+            ;;
+        HOMER)
+            sudo /home/admin/config.scripts/bonus.homer.sh menu
             ;;
         lnbalance)
             clear
