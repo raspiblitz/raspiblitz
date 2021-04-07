@@ -13,7 +13,7 @@
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
 - Update: Sphinx-Relay 2.0.3 (always latest release tag & improved connection dialog)
-- Update: Thunderhub 0.12.7 [details](https://github.com/apotdevin/thunderhub/blob/master/CHANGELOG.md#0124-2021-01-09)
+- Update: Thunderhub 0.12.12 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.12)
 - Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
 - Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
 - Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)

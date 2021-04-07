@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THUBVERSION="v0.12.7"
+THUBVERSION="v0.12.12"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -82,7 +82,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
-    cd /home/thunderhub/thunderhub
+    cd /home/thunderhub/thunderhub || exit 1
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION
     echo "Running npm install and run build..."
@@ -119,8 +119,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Server Configs
 # -----------
 LOG_LEVEL='debug'
-# HODL_KEY='HODL_HODL_API_KEY'
-# BASE_PATH='/basePath'
+TOR_PROXY_SERVER='socks://127.0.0.1:9050'
 
 # -----------
 # Interface Configs
@@ -131,12 +130,11 @@ CURRENCY='sat'
 # -----------
 # Privacy Configs
 # -----------
-FETCH_PRICES=false
-FETCH_FEES=false
-HODL_HODL=false
-DISABLE_LINKS=true
-NO_CLIENT_ACCOUNTS=true
-NO_VERSION_CHECK=true
+FETCH_PRICES = false
+FETCH_FEES = false
+DISABLE_LINKS = true
+DISABLE_LNMARKETS = true
+NO_VERSION_CHECK = true
 
 # -----------
 # Account Configs
@@ -205,21 +203,6 @@ EOF
     # SYSTEMD SERVICE
     ##################
 
-    # torify service if Tor is used
-    if [ "${runBehindTor}" = "on" ]; then
-      echo "# Connect to the external APIs through Tor"
-      proxy="torify"
-      echo "# set up torsocks"
-      sudo cp /etc/tor/torsocks.conf /etc/tor/torsocks-thunderhub.conf
-      sudo sed -i "s/^#AllowInbound 1/AllowInbound 1/g" /etc/tor/torsocks-thunderhub.conf
-      sudo sed -i "s/^#AllowOutboundLocalhost 1/AllowOutboundLocalhost 1/g" /etc/tor/torsocks-thunderhub.conf
-      env="Environment=TORSOCKS_CONF_FILE=/etc/tor/torsocks-thunderhub.conf"
-    else
-      echo "# Connect to the external APIs through clearnet"
-      proxy=""
-      env=""
-    fi
-
     echo "# Install ThunderHub systemd for ${network} on ${chain}"
     echo "
 # Systemd unit for thunderhub
@@ -232,8 +215,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-$env
-ExecStart=$proxy /usr/bin/npm run start -- -p 3010
+ExecStart=/usr/bin/npm run start -- -p 3010
 User=thunderhub
 Restart=always
 TimeoutSec=120
@@ -245,7 +227,6 @@ StandardError=journal
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/thunderhub.service
     sudo systemctl enable thunderhub
-    echo "OK - the ThunderHub service is now enabled"
 
     # setting value in raspiblitz config
     sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
@@ -254,6 +235,13 @@ WantedBy=multi-user.target
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
+    fi
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
+      sudo systemctl start thunderhub
+    else
+      echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
   fi
   exit 0
@@ -298,7 +286,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# UPDATING THUNDERHUB"
-  cd /home/thunderhub/thunderhub
+  cd /home/thunderhub/thunderhub || exit 1
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u thunderhub git fetch
