@@ -316,6 +316,9 @@ function uninstall_lcd() {
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
 
+    # make sure xinput-calibrator is installed
+    sudo apt-get install -y xinput-calibrator
+
     # remove modifications of config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
