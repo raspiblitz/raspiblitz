@@ -256,13 +256,6 @@ HiddenServiceDir /mnt/hdd/tor/web80/
 HiddenServiceVersion 3
 HiddenServicePort 80 127.0.0.1:80
 
-# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)
-HiddenServiceDir /mnt/hdd/tor/bitcoin8332/
-HiddenServiceVersion 3
-HiddenServicePort 8332 127.0.0.1:8332
-HiddenServicePort 18332 127.0.0.1:18332
-HiddenServicePort 38332 127.0.0.1:38332
-
 # NOTE: since Bitcoin Core v0.21.0 sets up a v3 Tor service automatically 
 # see /mnt/hdd/bitcoin for the onion private key - delete and restart bitcoind to reset
 

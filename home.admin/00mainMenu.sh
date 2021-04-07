@@ -41,9 +41,9 @@ confirmation()
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=17
+HEIGHT=19
 WIDTH=64
-CHOICE_HEIGHT=10
+CHOICE_HEIGHT=12
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
@@ -64,100 +64,119 @@ fi
 # Put Activated Apps on top
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "RTL Web Node Manager")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "BTCPay Server Info")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${LNBits}" == "on" ]; then
   OPTIONS+=(LNBITS "LNbits Server")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Mempool Space")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Cryptoadvance Specter")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JMARKET "JoinMarket")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "ThunderHub")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${zerotier}" == "on" ]; then
   OPTIONS+=(ZEROTIER "ZeroTier")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${pool}" == "on" ]; then
   OPTIONS+=(POOL "Lightning Pool")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
-OPTIONS+=(FUNDING "Fund your LND Wallet")
-OPTIONS+=(CONNECT "Connect to a Peer")
-OPTIONS+=(CHANNEL "Open a Channel with Peer")
-OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
-OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
-if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-  OPTIONS+=(CLOSEALL "Close all open Channels")
-fi
-
-OPTIONS+=(CASHOUT "Remove Funds from LND")
-
-if [ "${chain}" = "main" ]; then
-  OPTIONS+=(lnbalance "Detailed Wallet Balances")
-  OPTIONS+=(lnchannels "Lightning Channel List")
-  OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")
-fi
-
+OPTIONS+=(LIGHTNING "LND Wallet Options")
 OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
+OPTIONS+=(SYSTEM "Monitoring & Configuration")
+OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
 OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
-OPTIONS+=(MOBILE "Connect Mobile Wallet")
-OPTIONS+=(LNDCREDS "Manage LND Credentials")
-OPTIONS+=(NAME "Change Name/Alias of Node")
 OPTIONS+=(PASSWORD "Change Passwords")
-
-if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Monitor TOR Service")
-fi
 
 if [ "${touchscreen}" == "1" ]; then
   OPTIONS+=(SCREEN "Touchscreen Calibration")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 # final Options
@@ -165,11 +184,12 @@ OPTIONS+=(REPAIR "Repair Options")
 OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
 OPTIONS+=(REBOOT "Reboot RaspiBlitz")
 OPTIONS+=(OFF "PowerOff RaspiBlitz")
-OPTIONS+=(X "Console / Terminal")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
+                --ok-label "Select" \
+                --cancel-label "Exit" \
                 --menu "$MENU" \
                 $HEIGHT $WIDTH $CHOICE_HEIGHT \
                 "${OPTIONS[@]}" \
@@ -206,8 +226,14 @@ case $CHOICE in
               exit 0
             fi
             ;;
-        TOR)
-            sudo -u debian-tor nyx
+        LIGHTNING)
+            /home/admin/99lightningMenu.sh
+            ;;
+        CONNECT)
+            /home/admin/99connectMenu.sh
+            ;;
+        SYSTEM)
+            /home/admin/99systemMenu.sh
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
@@ -276,77 +302,11 @@ case $CHOICE in
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;
-        lnbalance)
-            clear
-            echo "*** YOUR SATOSHI BALANCES ***"
-            /home/admin/config.scripts/lnd.balance.sh ${network}
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        lnchannels)
-            clear
-            echo "*** YOUR LIGHTNING CHANNELS ***"
-            echo ""
-            echo "Capacity -> total sats in the channel (their side + your side)"
-            echo "Commit-Fee -> the fee that's charged if either side of the channel closes"
-            echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
-            echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
-            echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
-            echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
-            /home/admin/config.scripts/lnd.channels.sh ${network}
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        lnfwdreport)
-            /home/admin/config.scripts/lnd.fwdreport.sh -menu
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        CONNECT)
-            /home/admin/BBconnectPeer.sh
-            ;;
-        FUNDING)
-            /home/admin/BBfundWallet.sh
-            ;;
-        CASHOUT)
-            /home/admin/BBcashoutWallet.sh
-            ;;
-        CHANNEL)
-            /home/admin/BBopenChannel.sh
-            ;;
-        SEND)
-            /home/admin/BBpayInvoice.sh
-            ;;
-        RECEIVE)
-            /home/admin/BBcreateInvoice.sh
-            ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
             ;;
         SETTINGS)
             /home/admin/00settingsMenuBasics.sh
-            ;;
-        CLOSEALL)
-            /home/admin/BBcloseAllChannels.sh
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        MOBILE)
-            /home/admin/97addMobileWallet.sh
-            ;;
-        LNDCREDS)
-            sudo /home/admin/config.scripts/lnd.credentials.sh
-            ;;
-        NAME)
-            sudo /home/admin/config.scripts/lnd.setname.sh
-            noreboot=$?
-            if [ "${noreboot}" = "0" ]; then
-              sudo -u bitcoin ${network}-cli stop
-              echo "Press ENTER to Reboot."
-              read key
-              sudo /home/admin/XXshutdown.sh reboot
-              exit 0
-            fi
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
@@ -394,21 +354,16 @@ case $CHOICE in
             sudo /home/admin/XXshutdown.sh reboot
             exit 0
             ;;
-        X)
+        *)
             clear
             echo "***********************************"
             echo "* RaspiBlitz Commandline"
             echo "* Here be dragons .. have fun :)"
             echo "***********************************"
-	    echo "Bitcoin command line options: bitcoin-cli help"
+	          echo "Bitcoin command line options: bitcoin-cli help"
             echo "LND command line options: lncli -h"
             echo "Back to main menu use command: raspiblitz"
             echo
-            exit 0
-            ;;
-        *)
-            clear
-            echo "To return to main menu use command: raspiblitz"
             exit 0
 esac
 
