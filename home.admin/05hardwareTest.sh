@@ -170,7 +170,7 @@ fi
 if [ ${showPowerImproveInfo} -eq 0 ] && [ ${showHeatImproveInfo} -eq 0 ]; then
           dialog --backtitle "RaspiBlitz v${codeVersion}" --title " Hardware Check " --msgbox "
 RaspiBlitz hardware setup looks good :)
-Your are ready to continue - have fun.
+You are ready to continue - have fun.
 
 " 8 43
 fi
