@@ -293,6 +293,11 @@ function install_lcd() {
     # TODO manual touchscreen calibration option
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
 
+    # set font that fits the LCD screen
+    # https://github.com/rootzoll/raspiblitz/issues/244#issuecomment-476713706
+    # there can be a different font for different types of LCDs with using the displayType parameter in the future
+    sudo setfont /usr/share/consolefonts/Uni3-TerminusBold16.psf.gz
+
     echo "# OK install of LCD done ... reboot needed"
 
   else
