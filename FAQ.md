@@ -407,7 +407,7 @@ To build a SD card image from another branch than master, you follow the [Build 
 
 For example if you want to make a build from the 'dev' branch you execute the following command:
 
-`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh false rootzoll dev lcd true true`
+`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh false false rootzoll dev lcd true true`
 
 ## How can I build an SD card from my forked GitHub Repo?
 
@@ -417,7 +417,7 @@ If you fork the RaspiBlitz repo (much welcome) and you want to run that code on 
 
 * The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
 
-`wget --no-cache https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false [GITHUB-USERNAME] [BRANCH] lcd true true`
+`wget --no-cache https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false false [GITHUB-USERNAME] [BRANCH] lcd true true`
 
 If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
 
@@ -537,7 +537,7 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh true rootzoll [BRANCH] lcd true true`
+* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false true rootzoll [BRANCH] lcd true true`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown

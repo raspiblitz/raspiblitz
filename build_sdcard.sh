@@ -14,7 +14,14 @@ echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
 echo "****************************************."
 echo "For details on optional parameters - see build script source code:"
 
-# 1st optional paramater: FATPACK
+# 1st optional paramater: NO-INTERACTION
+# ----------------------------------------
+# When 'true' then no questions will be ask on building .. so it can be used in build scripts
+# for containers or as part of other build scripts (default is false)
+
+noInteraction="$1"
+
+# 2nd optional paramater: FATPACK
 # -------------------------------
 # could be 'true' or 'false' (default)
 # When 'true' it will pre-install needed frameworks for additional apps and features
@@ -23,7 +30,7 @@ echo "For details on optional parameters - see build script source code:"
 # install needed frameworks and libraries on demand when activated by user.
 # Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
 
-fatpack="$1"
+fatpack="$2"
 if [ ${#fatpack} -eq 0 ]; then
   fatpack="false"
 fi
@@ -34,33 +41,33 @@ else
   echo "1) will use FATPACK --> '${fatpack}'"
 fi
 
-# 2st optional paramater: GITHUB-USERNAME
+# 3rd optional paramater: GITHUB-USERNAME
 # ---------------------------------------
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
 # The 'raspiblitz' repo of this user is used to provisioning sd card 
 # with raspiblitz assets/scripts later on.
 # If this parameter is set also the branch needs to be given (see next parameter).
-githubUser="$2"
+githubUser="$3"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
 echo "2) will use GITHUB-USERNAME --> '${githubUser}'"
 
-# 3rd optional paramater: GITHUB-BRANCH
+# 4th optional paramater: GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - 'dev' is default
-githubBranch="$3"
+githubBranch="$4"
 if [ ${#githubBranch} -eq 0 ]; then
   githubBranch="dev"
 fi
 echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
 
-# 4rd optional paramater: DISPLAY-CLASS
+# 5th optional paramater: DISPLAY-CLASS
 # ----------------------------------------
 # Could be 'hdmi', 'headless' or 'lcd'
 # On 'false' the standard video output is used (HDMI) by default.
 # https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
-displayClass="$4"
+displayClass="$5"
 if [ ${#displayClass} -eq 0 ] || [ "${displayClass}" == "false" ]; then
   displayClass="hdmi"
 fi
@@ -71,12 +78,12 @@ else
   echo "4) will use DISPLAY-CLASS --> '${displayClass}'"
 fi
 
-# 5rd optional paramater: TWEAK-BOOTDRIVE
+# 6th optional paramater: TWEAK-BOOTDRIVE
 # ---------------------------------------
 # could be 'true' (default) or 'false'
 # If 'true' it will try (based on the base OS) to optimize the boot drive.
 # If 'false' this will skipped.
-tweakBootdrives="$5"
+tweakBootdrives="$6"
 if [ ${#tweakBootdrives} -eq 0 ]; then
   tweakBootdrives="true"
 fi
@@ -87,13 +94,13 @@ else
   echo "5) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
-# 6rd optional paramater: WIFI
+# 7th optional paramater: WIFI
 # ---------------------------------------
 # could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
 # If 'false' WIFI will be deactivated by default
 # If 'true' WIFI will be activated by with default country code 'US'
 # If any valid wifi country code Wifi will be activated with that country code by default
-modeWifi="$6"
+modeWifi="$7"
 if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
   modeWifi="US"
 fi
@@ -156,17 +163,16 @@ fi
 echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
 # USER-CONFIRMATION
-echo -n "Do you agree with all parameters above? (yes/no) "
-read installRaspiblitzAnswer
-if [ "$installRaspiblitzAnswer" == "yes" ] ; then
-  echo ""
-  echo ""
-  echo "Building RaspiBlitz ..."
-  sleep 3
-  echo ""
-else
-  exit 1
+if [ "${noInteraction}" != "true" ]; then
+  echo -n "Do you agree with all parameters above? (yes/no) "
+  read installRaspiblitzAnswer
+  if [ "$installRaspiblitzAnswer" != "yes" ] ; then
+    exit 1
+  fi
 fi
+echo "Building RaspiBlitz ..."
+echo ""
+sleep 3
 
 # INSTALL TOR
 echo "*** INSTALL TOR BY DEFAULT ***"
