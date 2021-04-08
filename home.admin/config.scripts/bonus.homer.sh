@@ -2,14 +2,14 @@
 
 # https://github.com/bastienwirtz/homer
 
+installVersion="v21.03.2"
 remoteVersion=$(curl -s https://api.github.com/repos/bastienwirtz/homer/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
-
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# small config script to switch Homer on or off"
-  echo "# installs the $remoteVersion by default"
-  echo "# bonus.homer.sh [status|on|off]"
+  echo "# installs the $installVersion by default"
+  echo "# bonus.homer.sh [status|on|off|update]"
   exit 1
 fi
 
@@ -71,9 +71,41 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
+# update (quick hack)
+if [ "$1" = "update" ]; then
+
+  cd /home/homer/homer
+  sudo -u homer git fetch
+  sudo -u homer git reset --hard $remoteVersion
+
+  sudo -u homer NG_CLI_ANALYTICS=false npm install --legacy-peer-deps
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+  fi
+  sudo -u homer NG_CLI_ANALYTICS=false npm run build
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting"
+      exit 1
+  fi    
+
+  # remove conf link
+  sudo rm /var/www/homer/assets/config.yml
+
+  # copy new dist over to nginx
+  sudo rsync -av --delete dist/ /var/www/homer/
+  sudo chown -R www-data:www-data /var/www/homer
+
+  # link config again
+  sudo -u www-data ln -s /mnt/hdd/app-data/homer/config.yml /var/www/homer/assets/config.yml
+
+  echo "# OK - Homer should now be serving latest code from Version $remoteVersion"
+
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
   echo "# *** INSTALL Homer ***"
 
   isInstalled=$(sudo ls /var/www/homer/assets/config.yml.dist 2>/dev/null | grep -c 'config.yml.dist')
@@ -86,7 +118,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/homer
     sudo -u homer git clone https://github.com/bastienwirtz/homer.git
     cd homer
-    sudo -u homer git reset --hard $remoteVersion
+    sudo -u homer git reset --hard $installVersion
 
     sudo -u homer NG_CLI_ANALYTICS=false npm install --legacy-peer-deps
     if ! [ $? -eq 0 ]; then
@@ -99,13 +131,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         exit 1
     fi    
 
-    sudo -u homer cp /home/homer/homer/dist/assets/config.yml.dist /home/homer/homer/dist/assets/config.yml
-
     sudo mkdir -p /var/www/homer
     sudo rsync -av --delete dist/ /var/www/homer/
     sudo chown -R www-data:www-data /var/www/homer
 
+    # if no persistent data exists - create data dir & use standard config
+    oldConfigExists=$(ls /mnt/hdd/app-data/homer/config.yml 2>/dev/null | grep -c 'config.yml')
+    if [ "${oldConfigExists}" == "0" ]; then
+      # sudo -u homer cp /home/homer/homer/dist/assets/config.yml.dist /home/homer/homer/dist/assets/config.yml
+      sudo mkdir -p /mnt/hdd/app-data/homer
+      sudo cp /home/homer/homer/dist/assets/config.yml.dist /mnt/hdd/app-data/homer/config.yml
+    fi
 
+    # link config into nginx directory
+    sudo chown www-data:www-data /mnt/hdd/app-data/homer/config.yml
+    sudo -u www-data ln -s /mnt/hdd/app-data/homer/config.yml /var/www/homer/assets/config.yml
 
     ##################
     # NGINX
@@ -143,8 +183,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^homer=.*/homer=on/g" /mnt/hdd/raspiblitz.conf
   
-
-
   # Hidden Service for Mempool if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
