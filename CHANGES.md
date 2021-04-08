@@ -16,7 +16,7 @@
 - Update: Thunderhub 0.12.12 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.12)
 - Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
 - Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
-- Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Specter Desktop 1.3.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Balance of Satoshis 8.0.2 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
 - Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
