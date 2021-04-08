@@ -62,11 +62,7 @@ while [ ${fallback} -eq 0 ]
     recoveryOption=""
     if [ "${fundRecovery}" == "1" ]; then
         recoveryOption="--recovery_window=1000 "
-        echo "# ADDING RECOVERY WINDOW"
-        sleep 10
-    else
-        echo "# NO RECOVERY WINDOW"
-        sleep 3
+        echo "# runnign unlock with ${recoveryOption}"
     fi
     result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
