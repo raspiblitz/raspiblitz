@@ -158,7 +158,7 @@ fi
 echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
 # Distribution
-distribution=$(lsb_release -c | cut -c11-31)
+distribution=$(lsb_release -sc)
 echo "X) will use DISTRIBUTION ---> '${distribution}'"
 
 # USER-CONFIRMATION
