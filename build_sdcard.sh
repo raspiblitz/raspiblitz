@@ -9,9 +9,9 @@
 ##########################################################################
 
 echo ""
-echo "****************************************."
+echo "*****************************************"
 echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
-echo "****************************************."
+echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
 # 1st optional paramater: NO-INTERACTION
