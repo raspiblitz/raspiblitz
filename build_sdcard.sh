@@ -20,6 +20,15 @@ echo "For details on optional parameters - see build script source code:"
 # for containers or as part of other build scripts (default is false)
 
 noInteraction="$1"
+if [ ${#noInteraction} -eq 0 ]; then
+  noInteraction="false"
+fi
+if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
+  echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
+  exit 1
+else
+  echo "1) will use NO-INTERACTION --> '${noInteraction}'"
+fi
 
 # 2nd optional paramater: FATPACK
 # -------------------------------
@@ -38,7 +47,7 @@ if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
   echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "1) will use FATPACK --> '${fatpack}'"
+  echo "2) will use FATPACK --> '${fatpack}'"
 fi
 
 # 3rd optional paramater: GITHUB-USERNAME
@@ -51,7 +60,7 @@ githubUser="$3"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
-echo "2) will use GITHUB-USERNAME --> '${githubUser}'"
+echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional paramater: GITHUB-BRANCH
 # -------------------------------------
@@ -60,7 +69,7 @@ githubBranch="$4"
 if [ ${#githubBranch} -eq 0 ]; then
   githubBranch="dev"
 fi
-echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
+echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional paramater: DISPLAY-CLASS
 # ----------------------------------------
@@ -75,7 +84,7 @@ if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${dis
   echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
 else
-  echo "4) will use DISPLAY-CLASS --> '${displayClass}'"
+  echo "5) will use DISPLAY-CLASS --> '${displayClass}'"
 fi
 
 # 6th optional paramater: TWEAK-BOOTDRIVE
@@ -91,7 +100,7 @@ if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; th
   echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "5) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
+  echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
 # 7th optional paramater: WIFI
@@ -104,7 +113,7 @@ modeWifi="$7"
 if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
   modeWifi="US"
 fi
-echo "6) will use WIFI --> '${modeWifi}'"
+echo "7) will use WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
