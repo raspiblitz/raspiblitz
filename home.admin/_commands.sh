@@ -52,9 +52,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "--help" ] 
   echo "  pyblock      PyBlock"
   echo "  chantools    ChanTools"
   echo "  jm           JoinMarket"
-  echo "  faraday      Faraday"
-  echo "  loop         Loop"
-  echo "  pool         Pool"
   echo ""
   echo " Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
@@ -261,21 +258,6 @@ function jm() {
   fi
 }
 
-# command: faraday
-# switch to the faraday user for the Faraday Service
-function faraday() {
-  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the faraday user with the command: 'sudo su - faraday'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'frcli --help' now to get more info"
-    sudo su - faraday
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Faraday is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.faraday.sh on"
-  fi
-}
-
 # command: lit
 # switch to the lit user for the loop, pool & faraday services
 function lit() {
@@ -288,36 +270,6 @@ function lit() {
   else
     echo "LIT is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.lit.sh on"
-  fi
-}
-
-# command: loop
-# switch to the loop user for the Lightning Loop Service
-function loop() {
-  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the loop user with the command: 'sudo su - loop'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'loop --help' now to get more info"
-    sudo su - loop
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Lightning Loop is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.loop.sh on"
-  fi
-}
-
-# command: pool
-# switch to the pool user for the Pool Service
-function pool() {
-  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
-    echo "# switching to the pool user with the command: 'sudo su - pool'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'pool --help' now to get more info"
-    sudo su - pool
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Pool is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.pool.sh on"
   fi
 }
 
