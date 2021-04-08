@@ -334,6 +334,11 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
   fi
 
+  # make Loop work with RTL if installed (update will run configRTL)
+  if [ ${#rtlWebinterface} -gt 0 ]&&[ ${rtlWebinterface} = on ];then
+    /home/admin/config.scripts/bonus.rtl.sh update
+  fi
+
   exit 0
 fi
 
