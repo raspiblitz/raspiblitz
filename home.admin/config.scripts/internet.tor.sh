@@ -165,16 +165,6 @@ EOF
     sudo systemctl enable tor@$NODENAME
     sudo systemctl start tor@$NODENAME
     
-    # config for lnd self-test
-    echo "
-strict_chain
-proxy_dns 
-tcp_read_time_out 15000
-tcp_connect_time_out 8000
-[ProxyList]
-socks5 	127.0.0.1 $SOCKSPORT
-" | sudo tee /etc/proxychains.$NODENAME.conf
-
     # modify LND service
     echo "# Make sure LND is disabled"
     sudo systemctl disable lnd 2>/dev/null
@@ -298,9 +288,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${packageInstalled} -eq 0 ]; then
     sudo apt install tor tor-arm torsocks -y
   fi
-
-  # install  proxychains4 nmap for LND Tor selftest
-  sudo apt install proxychains4 nmap -y
 
   # create tor data directory if it not exist
   if [ ! -d "/mnt/hdd/tor" ]; then
