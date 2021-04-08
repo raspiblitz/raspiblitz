@@ -100,6 +100,7 @@ if [ "$1" = "update" ]; then
   sudo -u www-data ln -s /mnt/hdd/app-data/homer/config.yml /var/www/homer/assets/config.yml
 
   echo "# OK - Homer should now be serving latest code from Version $remoteVersion"
+  exit 0
 
 fi
 
@@ -232,8 +233,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-
-
-echo "error='unknown parameter'
+echo "error='unknown parameter'"
 exit 1
 
