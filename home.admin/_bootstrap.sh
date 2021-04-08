@@ -72,6 +72,7 @@ fsexpanded=0
 # see https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
 displayClass="lcd"
 displayType=""
+fundRecovery=0
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
@@ -91,6 +92,7 @@ echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
+echo "fundRecovery=${fundRecovery}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi

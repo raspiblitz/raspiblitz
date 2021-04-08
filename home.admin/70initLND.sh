@@ -385,6 +385,9 @@ to protect the seed words. Most users did not set this.
         fi
       fi
 
+      # set fundRecovery=1 in raspiblitz.info
+      sed -i "s/^fundRecovery=.*/fundRecovery=1/g" /home/admin/raspiblitz.info
+
       # user feedback
       if [ ${#err} -eq 0 ]; then
         dialog --title " SUCCESS " --msgbox "

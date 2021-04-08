@@ -6,7 +6,8 @@ if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  exit 1
 fi
 
-# load raspiblitz conf
+# load raspiblitz info & conf
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # 1. parameter
@@ -58,7 +59,16 @@ while [ ${fallback} -eq 0 ]
 
     loopCount=$(($loopCount +1))
     echo "# calling: lncli unlock"
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock --stdin 2>&1)
+    recoveryOption=""
+    if [ "${fundRecovery}" == "1" ]; then
+        recoveryOption="--recovery_window=1000 "
+        echo "# ADDING RECOVERY WINDOW"
+        sleep 10
+    else
+        echo "# NO RECOVERY WINDOW"
+        sleep 3
+    fi
+    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
