@@ -311,6 +311,8 @@ if [ "${sphinxrelay}" == "on" ]; then
 fi
 if [ "${homer}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Homer")
+if [ "${mempoolExplorer}" == "on" ]; then
+  OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -355,6 +357,9 @@ case $CHOICE in
     sudo /home/admin/config.scripts/internet.tor.sh update  
     ;;
   HOMER)
-    /home/admin/config.scripts/bonus.homer.sh update  
+    /home/admin/config.scripts/bonus.homer.sh update
+    ;;
+  MEMPOOL)
+    /home/admin/config.scripts/bonus.mempool.sh update 
     ;;
 esac
