@@ -5,20 +5,44 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # show password info dialog
-dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
+resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "rpcpassword=passwordB")
+if [ ${resetAlsoPasswordB} -eq 0 ]; then
+  # just password A
+  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
 
 You need to set a new Password A:
 A) Master User Password
 
-Passwords B, C & D stay as before.
+Passwords B & C stay as before.
 
 Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 14 52
 
-# call set password a script
-sudo /home/admin/config.scripts/blitz.setpassword.sh a
+  # call set password a script
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a
+
+else
+  # password A + B
+  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
+
+You need to set a new Password A & B:
+A) Main User Password (SSH, WebUI, ..)
+B) RPC & APP Password (Additional Apps, ..)
+
+Passwords C (for your Lightning wallet) stays to the password you set before.
+
+Follow Password Rules: Minimal of 8 chars,
+no spaces and only special characters - or .
+Write them down & store them in a safe place.
+" 17 52
+
+  # call set password a script
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a
+  sudo /home/admin/config.scripts/blitz.setpassword.sh b
+
+fi
 
 # sucess info dialog
 dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
@@ -60,7 +84,7 @@ to deactivate the Auto-Unlock feature.
   dialog --backtitle "RaspiBlitz" --pause "  FINAL REBOOT IS NEEDED." 8 52 5
 
 else
-  dialog --backtitle "RaspiBlitz" --pause "  OK - SSH password A set.\n  FINAL REBOOT IS NEEDED." 9 52 5
+  dialog --backtitle "RaspiBlitz" --pause "  OK - Passwords set.\n  FINAL REBOOT IS NEEDED." 9 52 5
 fi
 
 sudo /home/admin/XXshutdown.sh reboot

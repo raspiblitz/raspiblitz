@@ -200,7 +200,7 @@ Check 'sudo nginx -t' for a detailed error message.
       echo
       echo "To connect through TOR open the Tor Browser and start with the options:" 
       echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
-      /home/admin/config.scripts/blitz.lcd.sh qr "${TORaddress}"
+      /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
@@ -208,7 +208,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo 
     echo "Press ENTER to get back to main menu."
     read key
-    /home/admin/config.scripts/blitz.lcd.sh hide
+    /home/admin/config.scripts/blitz.display.sh hide
     ;;
     STATUS)
     sudo /home/admin/config.scripts/bonus.electrs.sh status

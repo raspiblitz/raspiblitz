@@ -9,9 +9,9 @@
 ##########################################################################
 
 echo ""
-echo "*****************************************"
+echo "****************************************."
 echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
-echo "*****************************************"
+echo "****************************************."
 echo "For details on optional parameters - see build script source code:"
 
 # 1st optional paramater: FATPACK
@@ -55,20 +55,20 @@ if [ ${#githubBranch} -eq 0 ]; then
 fi
 echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
 
-# 4rd optional paramater: LCD-DRIVER
+# 4rd optional paramater: DISPLAY-CLASS
 # ----------------------------------------
-# could be 'false' or 'GPIO' (default)
-# Use 'false' if you want to build an image that runs without a specialized LCD (like the GPIO).
+# Could be 'hdmi', 'headless' or 'lcd'
 # On 'false' the standard video output is used (HDMI) by default.
-lcdInstalled="$4"
-if [ ${#lcdInstalled} -eq 0 ] || [ "${lcdInstalled}" == "true" ]; then
-  lcdInstalled="GPIO"
+# https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
+displayClass="$4"
+if [ ${#displayClass} -eq 0 ] || [ "${displayClass}" == "false" ]; then
+  displayClass="hdmi"
 fi
-if [ "${lcdInstalled}" != "false" ] && [ "${lcdInstalled}" != "GPIO" ]; then
-  echo "ERROR: LCD-DRIVER parameter needs to be either 'false' or 'GPIO'"
+if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
+  echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
 else
-  echo "4) will use LCD-DRIVER --> '${lcdInstalled}'"
+  echo "4) will use DISPLAY-CLASS --> '${displayClass}'"
 fi
 
 # 5rd optional paramater: TWEAK-BOOTDRIVE
@@ -353,7 +353,10 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-if [ "${lcdInstalled}" != "false" ]; then
+# if not headless - make sure pi user is doing auto login to run display
+if [ "${displayClass}" != "headless" ]; then
+
+   # activate auto-login of pi user
    if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
       [ "${baseimage}" = "debian_rpi64" ]; then
       # set Raspi to boot up automatically with user pi (for the LCD)
@@ -362,20 +365,58 @@ if [ "${lcdInstalled}" != "false" ]; then
       sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-   fi
-
-   if [ "${baseimage}" = "dietpi" ]; then
+   elif [ "${baseimage}" = "dietpi" ]; then
       # set DietPi to boot up automatically with user pi (for the LCD)
       # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
       # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
       sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
-   fi
-
-   if [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
+   elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
       sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
       sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+   else
+    echo "FAIL: Autostart pi user not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
+    exit 1
    fi
+
+   # activate auto-start of 00infoLCD.sh script on pi user login
+  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
+     [ "${baseimage}" = "ubuntu" ]; then
+    homeFile=/home/pi/.bashrc
+    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+    if [ ${autostartDone} -eq 0 ]; then
+      # bash autostart for pi
+      # run as exec to dont allow easy physical access by keyboard
+      # see https://github.com/rootzoll/raspiblitz/issues/54
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+      echo "autostart LCD added to $homeFile"
+    else
+      echo "autostart LCD already in $homeFile"
+    fi
+  elif [ "${baseimage}" = "dietpi" ]; then
+    homeFile=/home/dietpi/.bashrc
+    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+    if [ ${autostartDone} -eq 0 ]; then
+      # bash autostart for dietpi
+      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+      echo "autostart LCD added to $homeFile"
+    else
+      echo "autostart LCD already in $homeFile"
+    fi
+  else
+    echo "FAIL: Script Autostart not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
+    exit 1
+  fi
+
+else
+  echo "# running headless ... no auto-login of pi user for display needed"
 fi
 
 # change log rotates
@@ -529,8 +570,9 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # WRITE BASIC raspiblitz.info to sdcard
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
+echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
-sudo chmod 777 /home/admin/raspiblitz.info
+sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
@@ -685,7 +727,7 @@ sudo apt install -y --no-install-recommends python3-systemd fail2ban
 echo "Activating CACHE RAM DISK ... "
 sudo /home/admin/config.scripts/blitz.cache.sh on
 
-# *** Wifi & Bluetooth ***
+# *** Wifi, Bluetooth & other configs ***
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
    
@@ -719,16 +761,22 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
 
   # remove bluetooth packages
   sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
-  
   echo
+
+  # disable audio
   echo "*** DISABLE AUDIO (snd_bcm2835) ***"
   sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
   echo
   
+  # disable DRM VC4 V3D
   echo "*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
   sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+  echo
 
+  # I2C fix (make sure dtparam=i2c_arm is not on)
+  # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+  sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
 fi
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
@@ -1026,164 +1074,26 @@ sudo chown -R admin /home/admin
 echo "- OK install of LND done"
 
 echo ""
-echo "*** DISPLAY OPTIONS ***"
-# (do last - because makes a reboot)
-# based on https://www.elegoo.com/tutorial/Elegoo%203.5%20inch%20Touch%20Screen%20User%20Manual%20V1.00.2017.10.09.zip
-if [ "${lcdInstalled}" != "false" ]; then
-
-  # lcd preparations based on os
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
-     [ "${baseimage}" = "ubuntu" ]; then
-    homeFile=/home/pi/.bashrc
-    autostart="automatic start the LCD"
-    autostartDone=$(grep -c "$autostart" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for pi
-      # run as exec to dont allow easy physical access by keyboard
-      # see https://github.com/rootzoll/raspiblitz/issues/54
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  fi
-  if [ "${baseimage}" = "dietpi" ]; then
-    homeFile=/home/dietpi/.bashrc
-    startLCD="automatic start the LCD"
-    autostartDone=$(grep -c "$startLCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for dietpi
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  fi
-
-  echo ""
-  if [ "${lcdInstalled}" == "GPIO" ]; then
-    if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
-      echo "*** 32bit LCD DRIVER ***"
-      echo "--> Downloading LCD Driver from Github"
-      cd /home/admin/
-      sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-      sudo -u admin chmod -R 755 LCD-show
-      sudo -u admin chown -R admin:admin LCD-show
-      cd LCD-show/
-      sudo -u admin git reset --hard 53dd0bf || exit 1
-      # install xinput calibrator package
-      echo "--> install xinput calibrator package"
-      sudo apt install -y libxi6
-      sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
- 
-      if [ "${baseimage}" = "dietpi" ]; then
-        echo "--> dietpi preparations"
-        sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-        sudo mkdir /etc/X11/xorg.conf.d
-        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-        sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-        sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-        sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-        sudo cp ./usr/cmdline.txt /DietPi/
-        sudo cp ./usr/inittab /etc/
-        sudo cp ./boot/config-35.txt /DietPi/config.txt
-        # make LCD screen rotation correct
-        sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-      fi
-    elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
-      echo "*** 64bit LCD DRIVER ***"
-      echo "--> Downloading LCD Driver from Github"
-      cd /home/admin/
-      sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-      sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-      sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
-      cd /home/admin/wavesharelcd-64bit-rpi
-      sudo -u admin git reset --hard 5a206a7 || exit 1
-
-      # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-      # prepare X11
-      rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-      mkdir -p /etc/X11/xorg.conf.d
-      cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
-      # cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-      # load module on boot
-      cp ./waveshare35a.dtbo /boot/overlays/
-      echo "hdmi_force_hotplug=1" >> /boot/config.txt 
-      echo "dtparam=i2c_arm=on" >> /boot/config.txt
-      # don't enable SPI and UART ports by default
-      # echo "dtparam=spi=on" >> /boot/config.txt
-      # echo "enable_uart=1" >> /boot/config.txt
-      echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-      cp ./cmdline.txt /boot/
-
-      # touch screen calibration
-      apt-get install -y xserver-xorg-input-evdev
-      cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-      # TODO manual touchscreen calibration option
-      # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
-    fi
-  else
-    echo "FAIL: Unknown LCD-DRIVER: ${lcdInstalled}"
-    exit 1
-  fi
-
-else
-  echo "- LCD options are deactivated"
-fi
-
-# *** RASPIBLITZ IMAGE READY ***
-echo ""
-echo "**********************************************"
-echo "SD CARD BUILD DONE"
-echo "**********************************************"
-echo ""
-
+echo "*** raspiblitz.info ***"
 sudo cat /home/admin/raspiblitz.info
 
-if [ "${lcdInstalled}" != "false" ]; then
-  echo "Your SD Card Image for RaspiBlitz is almost ready."
-  if [ "${baseimage}" = "raspbian" ]; then
-    echo "Last step is to install LCD drivers. This will reboot your Pi when done."
-    echo ""
-  fi
-else
-  echo "Your SD Card Image for RaspiBlitz is ready."
-fi
-echo "Take the chance & look thru the output above if you can spot any error."
+# *** RASPIBLITZ IMAGE READY INFO ***
 echo ""
-if [ "${lcdInstalled}" != "false" ]; then
-  echo "After final reboot - your SD Card Image is ready."
-  echo ""
-fi
+echo "**********************************************"
+echo "BASIC SD CARD BUILD DONE"
+echo "**********************************************"
+echo ""
+echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
+echo "Take the chance & look thru the output above if you can spot any errors or warnings."
+echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "login once after reboot without external HDD/SSD and run 'XXprepareRelease.sh'"
-echo "REMEMBER for login now use --> user:admin password:raspiblitz"
+echo "1. login fresh --> user:admin password:raspiblitz"
+echo "2. run --> ./XXprepareRelease.sh"
 echo ""
 
-if [ "${lcdInstalled}" == "GPIO" ]; then
-  # activate LCD and trigger reboot
-  # dont do this on dietpi to allow for automatic build
-  if [ "${baseimage}" = "raspbian" ]; then
-    echo "Installing 32-bit LCD drivers ..."
-    sudo chmod +x -R /home/admin/LCD-show
-    cd /home/admin/LCD-show/
-    sudo apt-mark hold raspberrypi-bootloader
-    sudo ./LCD35-show
-  elif [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
-    echo "Installing 64-bit LCD drivers ..."
-    sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
-    cd /home/admin/wavesharelcd-64bit-rpi
-    sudo apt-mark hold raspberrypi-bootloader
-    sudo ./install.sh
-  else
-    echo "Use 'sudo reboot' to restart manually."
-  fi
+# (do last - because might trigger reboot)
+if [ "${displayClass}" != "hdmi" ]; then
+  echo "*** ADDITIONAL DISPLAY OPTIONS ***"
+  echo "- calling: blitz.display.sh set-display ${displayClass}"
+  sudo blitz.display.sh set-display ${displayClass}
 fi

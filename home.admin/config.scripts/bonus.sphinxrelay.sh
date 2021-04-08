@@ -133,7 +133,7 @@ ${publicURL}"
   fi
 
   # show qr code on LCD & console
-  /home/admin/config.scripts/blitz.lcd.sh qr "${connectionCode}"
+  /home/admin/config.scripts/blitz.display.sh qr "${connectionCode}"
 	whiptail --title " Connect App with Sphinx Relay " \
 	  --yes-button "Done" \
 		--no-button "Show QR Code" \
@@ -149,7 +149,7 @@ ${extraPairInfo}" 16 70
       read key
 	  fi
 
-  /home/admin/config.scripts/blitz.lcd.sh hide
+  /home/admin/config.scripts/blitz.display.sh hide
   exit 0
 fi
 

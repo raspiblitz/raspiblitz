@@ -189,7 +189,7 @@ fi
 lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
 
 # display qr code image on LCD
-/home/admin/config.scripts/blitz.lcd.sh qr "${lndconnect}"
+/home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"
 
 # show pairing info dialog
 msg=""
@@ -216,7 +216,7 @@ if [ $? -eq 1 ]; then
 fi
 
 # clean up
-/home/admin/config.scripts/blitz.lcd.sh hide
+/home/admin/config.scripts/blitz.display.sh hide
 
 echo "------------------------------"
 echo "If the connection was not working:"

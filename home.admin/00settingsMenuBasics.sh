@@ -71,7 +71,13 @@ fi
 # show select dialog
 echo "run dialog ..."
 
+
+# BASIC MENU INFO
+HEIGHT=19 # add 6 to CHOICE_HEIGHT + MENU lines
+WIDTH=45
+CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
+
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
 OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})  
 OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
@@ -90,7 +96,11 @@ if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi 
 
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' 19 45 11  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog \
+          --title ' Node Settings & Options ' \
+          --checklist ' use spacebar to activate/de-activate ' \
+          $HEIGHT $WIDTH $CHOICE_HEIGHT \
+          "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -315,7 +325,7 @@ if [ ${check} -eq 1 ]; then choice="1"; fi
 if [ "${lcdrotate}" != "${choice}" ]; then
   echo "LCD Rotate Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/blitz.lcd.sh rotate ${choice}
+  sudo /home/admin/config.scripts/blitz.display.sh rotate ${choice}
   needsReboot=1
 else
   echo "LCD Rotate Setting unchanged."

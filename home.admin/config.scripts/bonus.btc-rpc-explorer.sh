@@ -38,7 +38,7 @@ This can take multiple hours.
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
-    /home/admin/config.scripts/blitz.lcd.sh qr "${toraddress}"
+    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:3021\n
 SHA1 Thumb/Fingerprint:
@@ -47,7 +47,7 @@ Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.lcd.sh hide
+    /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain

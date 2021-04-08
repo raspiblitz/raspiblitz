@@ -155,8 +155,8 @@ if [ "$1" = "calibrate" ]; then
   # check that touchscreen is on
   if [ "${touchscreen}" == "1" ]; then
     echo "# calibrating touchscreen ..."
-    echo "error='not installed'"
   else
+    echo "error='not installed'"
     exit 1
   fi
 

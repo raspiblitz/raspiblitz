@@ -4,7 +4,7 @@
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
- echo "# blitz.migration.sh [status|export|import|export-gui|import-gui]"
+ echo "# blitz.migration.sh [status|export|import|export-gui|import-gui|migration-umbrel|migration-mynode]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -46,6 +46,193 @@ if [ "$1" = "status" ]; then
   echo "scpDownloadWin=\"${scpDownloadWin}\""
   echo "scpUploadWin=\"${scpUploadWin}\""
   exit 1
+fi
+
+########################
+# MIGRATION BASICS
+########################
+
+migrate_btc_conf () {
+  # keep old conf als backup
+  sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf.migration
+  # start from fresh configuration template 
+  sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+}
+
+migrate_lnd_conf () { 
+
+  # 1st parameter can be an alias to set
+  nodename=$1
+  if [ ${#nodename} -eq 0 ]; then
+    nodename="raspiblitz"
+  fi
+
+  # keep old conf als backup
+  sudo mv /mnt/hdd/lnd/lnd.conf /mnt/hdd/lnd/lnd.conf.migration
+  # start from fresh configuration template (user will set password B on recovery)
+  sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/lnd/lnd.conf
+}
+
+migrate_raspiblitz_conf () {
+
+  # 1st parameter can be an nodename to set
+  nodename=$1
+  if [ ${#nodename} -eq 0 ]; then
+    nodename="raspiblitz"
+  fi
+  
+  # write default raspiblitz config
+  source /home/admin/_version.info
+  echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
+  echo "raspiBlitzVersion='${codeVersion}'" >> /home/admin/raspiblitz.conf
+  echo "network=bitcoin" >> /home/admin/raspiblitz.conf
+  echo "chain=main" >> /home/admin/raspiblitz.conf
+  echo "hostname=${nodename}" >> /home/admin/raspiblitz.conf
+  echo "displayClass=hdmi" >> /home/admin/raspiblitz.conf
+  echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
+  echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
+  sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
+  sudo chown root:root /mnt/hdd/raspiblitz.conf
+  sudo chmod 777 /mnt/hdd/raspiblitz.conf
+
+  # rename ext4 data drive
+  sudo e2label /dev/sda1 BLOCKCHAIN
+}
+
+########################
+# MIGRATION from Umbrel
+########################
+
+if [ "$1" = "migration-umbrel" ]; then
+
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  # can olny migrate unmonted data disks
+  if [ "${isMounted}" == "1" ]; then
+    echo "err='cannot migrate mounted drive'"
+    exit 1
+  fi
+  
+  # check if the HDD is an umbrel data disk
+  if [ "${hddGotMigrationData}" == "umbrel" ]; then
+    echo "# found UMBREL data disk at ${hddPartitionCandidate}"
+  else
+    echo "err='not an umbrel disk'"
+    exit 1
+  fi
+
+  # temp mount the data drive
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  if [ "${isMounted}" == "1" ]; then
+    echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
+  else
+    echo "err='failed temp mounting disk'"
+    exit 1
+  fi
+
+  # checking basic data disk layout
+  if [ -f /mnt/hdd/umbrel/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/umbrel/lnd/lnd.conf ]; then
+    echo "# found bitcoin & lnd data"
+  else
+    echo "err='umbrel data layout changed'"
+    exit 1
+  fi
+
+  echo "# starting to rearrange the data drive for raspiblitz .."
+
+  # extract data
+  nameNode=$(sudo jq -r '.name' /mnt/hdd/umbrel/db/user.json)
+
+  # move bitcoin/blockchain & call function to migrate config
+  sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
+  sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
+  sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+  migrate_btc_conf
+
+  # move lnd & call function to migrate config
+  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+  sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+  migrate_lnd_conf ${nameNode}
+
+  # backup & rename the rest of the data
+  sudo mv /mnt/hdd/umbrel /mnt/hdd/backup_migration
+
+  # call function for final migration
+  migrate_raspiblitz_conf ${nameNode}
+
+  echo "# OK ... data disk converted to RaspiBlitz - reboot with fresh sd card to recover"
+  exit 0
+fi
+
+########################
+# MIGRATION from myNode
+# see manual steps: https://btc21.de/bitcoin/raspiblitz-migration/
+########################
+
+if [ "$1" = "migration-mynode" ]; then
+
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+
+  echo "IMPORTANT TODO -> take care about lnd wallet password - see: https://btc21.de/bitcoin/raspiblitz-migration/"
+  exit 1
+
+  # can olny migrate unmonted data disks
+  if [ "${isMounted}" == "1" ]; then
+    echo "err='cannot migrate mounted drive'"
+    exit 1
+  fi
+
+  # check if the HDD is an umbrel data disk
+  if [ "${hddGotMigrationData}" == "mynode" ]; then
+    echo "# found MYNODE data disk at ${hddPartitionCandidate}"
+  else
+    echo "err='not an mynode disk'"
+    exit 1
+  fi
+
+  # temp mount the data drive
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  if [ "${isMounted}" == "1" ]; then
+    echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
+  else
+    echo "err='failed temp mounting disk'"
+    exit 1
+  fi
+
+  # checking basic data disk layout
+  if [ -f /mnt/hdd/mynode/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/mynode/lnd/lnd.conf ]; then
+    echo "# found bitcoin & lnd data"
+  else
+    echo "err='mynode data layout changed'"
+    exit 1
+  fi
+
+  echo "# starting to rearrange the data drive for raspiblitz .."
+
+  # move bitcoin/blockchain & call function to migrate config
+  sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
+  sudo mv /mnt/hdd/mynode/bitcoin /mnt/hdd/
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+  migrate_btc_conf
+
+  # move lnd & call function to migrate config
+  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+  sudo mv /mnt/hdd/mynode/lnd /mnt/hdd/
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+  migrate_lnd_conf
+
+  # backup & rename the rest of the data
+  sudo mv /mnt/hdd/mynode /mnt/hdd/backup_migration
+  sudo rm 
+
+  # call function for final migration
+  migrate_raspiblitz_conf
+
+  echo "# OK ... data disk converted to RaspiBlitz"
+  exit 0
 fi
 
 #########################
