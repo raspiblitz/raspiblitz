@@ -157,6 +157,10 @@ if [ "${chantools}" == "on" ]; then
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
+if [ "${homer}" == "on" ]; then
+  OPTIONS+=(HOMER "Homer")
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
   HEIGHT=$((HEIGHT+1))
@@ -301,6 +305,9 @@ case $CHOICE in
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
+            ;;
+        HOMER)
+            sudo /home/admin/config.scripts/bonus.homer.sh menu
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh

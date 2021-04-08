@@ -22,6 +22,7 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#homer} -eq 0 ]; then homer="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -42,6 +43,7 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
+OPTIONS+=(h 'Homer' ${homer})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -427,6 +429,24 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# Homer process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${homer}" != "${choice}" ]; then
+  echo "Homer settings changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.homer.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Homer" --msgbox "\
+Homer was installed.\n
+Use the new 'Homer' entry in Main Menu for more info.\n
+" 10 35
+  fi
+else
+  echo "Homer Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
