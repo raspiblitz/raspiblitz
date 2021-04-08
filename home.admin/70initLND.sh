@@ -374,7 +374,6 @@ to protect the seed words. Most users did not set this.
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # trigger wallet recovery
-      source /home/admin/python3-env-lnd/bin/activate
       source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD} 2>/dev/null)
 
       # check if wallet was created for real
