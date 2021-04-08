@@ -290,7 +290,11 @@ HiddenServiceVersion 2
 HiddenServicePort 8080 127.0.0.1:8080
 EOF
     sudo rm $torrc
-    sudo mv ./torrc $torrc
+    sudo touch /etc/tor/bridges
+    sudo cp /etc/tor/bridges ./bridges
+    sudo bash -c 'cat ./bridges ./torrc > ./torrcX'
+    sudo rm ./bridges
+    sudo mv ./torrcX $torrc
     sudo chmod 644 $torrc
     sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
@@ -429,6 +433,11 @@ fi
 
 # update
 if [ "$1" = "update" ]; then
+  # Uncomment deb-src from Tor repo
+  sudo touch /etc/apt/sources.list.d/tor-src.list
+  sudo touch /etc/apt/sources.list.d/tor-src-apttor.list
+  sudo sed -i 's/^.//' /etc/apt/sources.list.d/tor-src.list
+  sudo sed -i 's/^.//' /etc/apt/sources.list.d/tor-src-apttor.list
   # as in https://2019.www.torproject.org/docs/debian#source
   echo "# Install the dependencies"
   sudo apt update
@@ -449,6 +458,9 @@ if [ "$1" = "update" ]; then
   echo "# Starting the tor.service "
   sudo systemctl start tor
   echo "# Installed $(tor --version)"
+  # Comment deb-src from Tor repo to take less time when updating normal packages
+  sudo sed -i 's/^/#/' /etc/apt/sources.list.d/tor-src.list
+  sudo sed -i 's/^/#/' /etc/apt/sources.list.d/tor-src-apttor.list
   exit 0
 fi
 
