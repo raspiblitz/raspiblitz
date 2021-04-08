@@ -9,6 +9,7 @@
 - New: Circuitbreaker LND firewall (settings menu) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - New: Telegraf metrics (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1369)
 - New: Download whitepaper from blockchain [details](https://github.com/rootzoll/raspiblitz/pull/2017)
+- New: Homer Dashboard 21.03.2[details](https://github.com/bastienwirtz/homer/blob/main/README.md)
 - Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
