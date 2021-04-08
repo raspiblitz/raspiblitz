@@ -152,7 +152,7 @@ EOF
         delaycompress
         missingok
         notifempty
-        create 0640 debian-tor debian-tor
+        create 0640 _tor-$NODENAME _tor-$NODENAME
         sharedscripts
         postrotate
                 if invoke-rc.d tor status > /dev/null; then
