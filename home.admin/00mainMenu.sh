@@ -158,7 +158,7 @@ if [ "${chantools}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${homer}" == "on" ]; then
-  OPTIONS+=(HOMER "Homer")
+  OPTIONS+=(HOMER "Homer Dashboard")
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${circuitbreaker}" == "on" ]; then
