@@ -61,7 +61,7 @@ echo "# making sure services are not running"
 sudo systemctl stop RTL 2>/dev/null
 
 function configRTL() {
-  SWAPSERVERPORT=8081
+  SWAPSERVERPORT=8443
   if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then 
     if [ $lit = on ];then
       echo "# Add the rtl user to the lit group"
@@ -76,6 +76,7 @@ function configRTL() {
       echo "# Symlink the loop.macaroon"
       sudo rm -rf "/home/rtl/.loop"                     # delete symlink
       sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
+      SWAPSERVERPORT=8081
     fi
     echo "# Make the loop macaroon group readable"
     sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db

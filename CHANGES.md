@@ -4,6 +4,7 @@
 
 - New: Raspberry Pi OS Base Image 64-bit (August 2020)
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+- New: Improve LND uptime and reliability over Tor [details](https://github.com/rootzoll/raspiblitz/pull/2148)
 - New: Lightning Terminal 0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - New: chantools 0.8.2 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - New: Circuitbreaker LND firewall (settings menu) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
