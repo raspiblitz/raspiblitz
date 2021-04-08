@@ -4,8 +4,10 @@
 # raspios_arm64-2020-08-24
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2020-08-24/
 # SHA256: 6ce59adc2b432f4a6c0a8827041b472b837c4f165ab7751fdc35f2d1c3ac518c
+# Build details https://github.com/rootzoll/raspiblitz/tree/v1.7#build-the-sd-card-image
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
+# wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh
 ##########################################################################
 
 echo ""
@@ -155,6 +157,10 @@ if [ "${baseimage}" = "?" ]; then
 fi
 echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
+# Distribution
+distribution=$(lsb_release -c | cut -c11-31)
+echo "X) will use DISTRIBUTION ---> '${distribution}'"
+
 # USER-CONFIRMATION
 echo -n "Do you agree with all parameters above? (yes/no) "
 read installRaspiblitzAnswer
@@ -168,13 +174,313 @@ else
   exit 1
 fi
 
-# INSTALL TOR
-echo "*** INSTALL TOR BY DEFAULT ***"
+# Ease commenting and uncommenting deb-src.
+echo "*** Separate sources to different files ***"
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.orig
+sudo rm -rf /etc/apt/sources.list
+sudo rm -rf /etc/apt/sources.list.d/*
+sudo touch /etc/apt/sources.list.d/deb.list
+sudo touch /etc/apt/sources.list.d/deb-src.list
+sudo touch /etc/apt/sources.list.d/tor.list
+sudo touch /etc/apt/sources.list.d/tor-src.list
+sudo touch /etc/apt/sources.list.d/tor-apttor.list
+sudo touch /etc/apt/sources.list.d/tor-src-apttor.list
+echo "# Sources are organized now"
 echo ""
-sudo apt install -y dirmngr
+
+echo "# Adding distro Sources to sources.list ***"
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
+  tee -a /etc/apt/sources.list.d/deb.list << EOF
+deb https://deb.debian.org/debian ${distribution} main contrib non-free
+deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
+deb https://deb.debian.org/debian ${distribution}-updates main contrib non-free
+EOF
+  tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+deb-src https://deb.debian.org/debian ${distribution} main contrib non-free
+EOF
+elif [ "${baseImage}" = "ubuntu" ]; then
+  tee -a /etc/apt/sources.list.d/deb.list << EOF
+deb http://archive.ubuntu.com/ubuntu/ ${distribution} main
+deb http://archive.ubuntu.com/ubuntu/ ${distribution}/updates main
+deb http://archive.ubuntu.com/ubuntu/ ${distribution}-updates main
+EOF
+  tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+deb-src http://archive.ubuntu.com/ubuntu/ ${distribution} main
+EOF
+fi
+echo "deb-src for ${baseImage} ${distribution} is available"
+echo ""
+
+echo ""
+echo "*** Update and Upgrade ${baseImage} ${distribution} sources ***"
+sudo apt update
+sudo apt dist-upgrade -f -y
+echo ""
+
+# MASK TOR
+# Tor will just start after user has the possibility to input bridges to mask he is using Tor
+# This is for security reasons if someone is in danger to no appear in the radar.
+echo "*** Mask Tor before installing ***"
+echo "# Preventing Tor from start before user configuration"
+sudo systemctl mask tor@default.service
+isTorMasked=$(sudo systemctl is-enabled tor@default)
+sleep 3
+if [ ${isTorMasked} != "masked" ]; then
+  echo "Failed to mask Tor, open an issue on github"
+  exit 0
+else
+  echo "Tor is masked now"
+fi
+echo ""
+
+# INSTALL TOR
+# Tor will be installed from Distro repo for who dont have acces to www.torproject.org
+# Afraid of gov detecting you use Tor? https://github.com/rootzoll/raspiblitz/issues/592#issuecomment-491826661
+# This will give you the option to use Tor Pluggable Transport Bridges to mask you are using Tor.
+# Tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054
+echo "*** INSTALL TOR BY DEFAULT ***"
+sudo apt install -y dirmngr apt-transport-tor tor torsocks nyx
+echo ""
+
+# INSTALL TOR BRIDGES PACKAGE
+# Doesnt work the repo version. Only works building from source.
+# The last version for Buster (Stable) today (apr/2021) is obfs4proxy 0.0.7-4. https://tracker.debian.org/pkg/obfs4proxy
+# Only works building from source on ARM (32/64 bit).
+# Warnings will appear of not using the newest golang, but will work anyway.
+echo "*** Compile obfs4proxy from source ***" 
+echo ""
+sudo apt update
+mkdir -p obfs4proxy
+cd obfs4proxy/
+sudo apt install -y obfs4proxy
+sudo apt source obfs4proxy
+sudo apt build-dep -y obfs4proxy
+cd obfs4proxy-*
+dpkg-buildpackage -b -uc
+cd ..
+dpkg -i obfs4proxy_*.deb 
+sudo apt update
+sudo apt --only-upgrade install obfs4proxy
+cd ..
+sudo rm -rf obfs4proxy
+cd
+echo "# Installed $(obfs4proxy --version)"
+echo ""
+
+echo "# Commenting deb-src ..."
+sudo sed -i 's/^.//' /etc/apt/sources.list.d/deb-src.list
+echo "deb-src are commented now"
+echo ""
+
+# The security issue here is if the user do know that Tor domain is blocked or if ...
+# the users governement prohibits Tor usage, he can avoid pinging Tor domain
+echo "# Do you want to test if pinging https://www.torproject.org domain is available or blocked?"
+echo "yes ---> If you can access the domain without any problems or your country don't ban Tor usage."
+echo "        Reaching ${torDomainYN} will be made through clearnet, not anonymous."
+echo "no ---> If you are under constant surveillance, censorship. This will prevent leaking to your ISP"
+echo "        or GOV you wanted to reach Tor Project."
+echo "        Reaching ${torDomainYN} will be made through the Tor network, anonimously."
+echo ""
+echo "Test connectivity to torproject.org?"
+while [ "${torDomainYN}" != "yes" ] || [ "${torDomainYN}" != "no" ]; do
+  read -p "(yes/no): " torDomainYN
+  if [ "${torDomainYN}" = "yes" ]; then
+    echo "Testing connection to torproject.org"
+    torDomainStatus=$(sudo ping -c 3 torproject.org | grep -c '3 received')
+    echo "Status=${torDomainStatus}"
+    if [ ${torDomainStatus} -gt 0 ]; then
+      echo "You can reach torproject.org via CLEARNET. But Tor connections could still be blocked, add bridges if you desire."
+    else
+      echo "WARNING: You can NOT reach torproject.org via CLEARNET. Configure bridges below!"
+      echo "Reaching Tor sources will be acquired using apt-transport-tor."
+    fi
+    break
+  elif [ "${torDomainYN}" = "no" ]; then
+    echo "You chose not to ping https://www.torproject.org domain. Reaching Tor sources will be acquired using apt-transport-tor."
+    break	
+  fi
+done
+echo ""
+
+bridgesQuestion()
+{
+echo ""
+echo "#>>>>>>>>>>>>>>>>>>>>>>>>>>"
+echo ""
+echo "*** Configure bridges below ***"
+echo ""
+userHasBridges=$(sudo cat /etc/tor/torrc | grep -c 'UseBridges 1')
+echo "userHasBridges=${userHasBridges}"
+if [ ${userHasBridges} -eq 0 ]; then
+  echo ""
+  echo "Read what are bridges ---> https://support.torproject.org/censorship/censorship-7/"
+  echo ""
+  echo "Bridges are Tor relays that help you circumvent censorship."
+  echo "Means of aquiring bridges"
+  echo "1 ---> Open Tor Browser and access https://bridges.torproject.org/"
+  echo "2 ---> Another way to get bridges is to send an email to bridges@torproject.org. Leave the email subject empty and write 'get transport obfs4' in the email's message body. Please note that you must send the email using an address from one of the following email providers: Riseup or Gmail. "
+  echo ""
+  echo "Bridges are necessary? Depends on your treat model."
+  echo ""
+  echo "# Add Tor bridges?"
+  while [ "${bridgeYN}" != "yes" ] || [ "${bridgeYN}" != "no" ]; do
+    read -p "(yes/no): " bridgeYN
+    if [ "${bridgeYN}" = "no" ]; then
+      break
+    elif [ "${bridgeYN}" = "yes" ]; then
+      echo ""
+      echo "#----------------------------------------------"
+      echo ""
+      echo "Read bridges description ---> https://tb-manual.torproject.org/bridges/"
+      echo ""
+      echo "Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays."
+      echo "Normal ---> This type of bridges dont disquise you are using Tor, but will help you connect to Tor network."
+      echo ""
+      echo "Which one should I choose?"
+      echo "If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges."
+      echo "If your Government blocks Tor traffic or you are under constant surveillance, you should use 'Pluggable' bridges to mask you are using Tor"
+      echo ""
+      echo "# What bridge class you want?" 
+      while [ "${bridgeClass}" != "pluggable" ] || [ "${bridgeClass}" != "normal" ]; do
+        read -p "(pluggable/normal): " bridgeClass
+        if [ "${bridgeClass}" = "pluggable" ]; then
+          echo ""
+          echo "#----------------------------------------------"
+          echo ""
+          echo "Read Tor circumvention techniques ---> https://tb-manual.torproject.org/circumvention/"
+          echo ""
+          echo "Types of pluggable transport."
+          echo "obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described on the beggining of the questions."
+          echo "meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site. You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'"
+          echo ""
+          echo "Which one should I choose?"
+          echo "China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator)."
+          echo "On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridgs are faster (there are thousands of bridges operators)"
+          echo ""
+          echo "# What bride pluggable transport type you want?"
+          while [ "${bridgeType}" != "obfs4" ] || [ "${bridgeType}" != "meek_lite" ]; do
+            read -p "(obfs4/meek_lite): " bridgeType
+            if [ "${bridgeType}" = "obfs4" ] || [ "${bridgeType}" = "meek_lite" ]; then
+              break
+            fi
+          done
+        fi
+        if [ "${bridgeClass}" = "pluggable" ] || [ "${bridgeClass}" = "normal" ]; then
+          echo ""
+          echo "#----------------------------------------------"
+          echo ""
+          echo "Insert bridges in the following format accordingly to the plugglable type you chose:"
+          echo "obfs4 bridges ----> obfs4 ipAdress:port fingerprint cert iat-mode"
+          echo "meek bridges -----> meek_lite ipAdress:port fingerprint url front"
+          echo "normal bridges ---> ipAdress:port fingerprint"
+          echo ""
+          read -p "Insert bridge 1/3: " b1p1 b1p2 b1p3 b1p4 b1p5
+          read -p "Insert bridge 2/3: " b2p1 b2p2 b2p3 b2p4 b2p5
+          read -p "Insert bridge 3/3: " b3p1 b3p2 b3p3 b3p4 b3p5
+          echo ""
+          if [ ! -z "${b1p1}" ] || [ ! -z "${b2p1}" ] || [ ! -z "${b3p1}" ]; then
+            echo "##############################################"
+            echo "UseBridges 1"
+          fi
+          if [ ! -z "${b1p1}" ] || [ ! -z "${b2p1}" ] || [ ! -z "${b3p1}" ] && [ "${bridgeType}" = "obfs4" ] || [ "${bridgeType}" = "meek_lite" ]; then
+            echo "ClientTransportPlugin ${bridgeType} exec /usr/bin/obfs4proxy managed"
+          fi
+          if [ ! -z ${b1p1} ]; then
+            echo "Bridge ${b1p1} ${b1p2} ${b1p3} ${b1p4} ${b1p5}"
+          fi
+          if [ ! -z "${b2p1}" ]; then
+            echo "Bridge ${b2p1} ${b2p2} ${b2p3} ${b2p4} ${b2p5}"
+          fi
+          if [ ! -z "${b3p1}" ]; then
+            echo "Bridge ${b3p1} ${b3p2} ${b3p3} ${b3p4} ${b3p5}"
+          fi
+          echo "##############################################"
+          echo ""
+          echo "Confirm if the information of bridges above is correct."
+          while [ "${bridgeConfirm}" != "yes" ] || [ "${bridgeConfirm}" != "redo" ]; do
+            read -p "(yes/redo)" bridgeConfirm
+            if [ "${bridgeConfirm}" = "yes" ] || [ "${bridgeConfirm}" = "redo" ]; then
+              break
+            fi
+          done
+        fi
+        break
+      done
+    fi
+    break
+  done
+fi
+echo ""
+}
+
+bridgesInsert()
+{
+echo ""
+sudo cp /etc/tor/torrc /etc/tor/torrc.orig
+sudo rm -rf /etc/tor/torrc
+sudo touch /etc/tor/torrc
+if [ ! -z "${b1p1}" ] || [ ! -z "${b2p1}" ] || [ ! -z "${b3p1}" ]; then
+  echo "" | sudo tee -a /etc/tor/torrc
+  echo "UseBridges 1" | sudo tee -a /etc/tor/torrc
+fi
+if [ ! -z "${b1p1}" ] || [ ! -z "${b2p1}" ] || [ ! -z "${b3p1}" ] && [ "${bridgeType}" = "obfs4" ] || [ "${bridgeType}" = "meek_lite" ]; then
+  echo "ClientTransportPlugin ${bridgeType} exec /usr/bin/obfs4proxy managed" | sudo tee -a /etc/tor/torrc
+fi
+if [ ! -z ${b1p1} ]; then
+  echo "Bridge ${b1p1} ${b1p2} ${b1p3} ${b1p4} ${b1p5}" | sudo tee -a /etc/tor/torrc
+fi
+if [ ! -z "${b2p1}" ]; then
+  echo "Bridge ${b2p1} ${b2p2} ${b2p3} ${b2p4} ${b2p5}" | sudo tee -a /etc/tor/torrc
+fi
+if [ ! -z "${b3p1}" ]; then
+  echo "Bridge ${b3p1} ${b3p2} ${b3p3} ${b3p4} ${b3p5}" | sudo tee -a /etc/tor/torrc
+fi
+echo "" | sudo tee -a /etc/tor/torrc
+sudo cp /etc/tor/torrc /etc/tor/bridges
+}
+
+# Give option to redo bridges part in case user typed something wrong.
+# Else the script will exit if torrc configuration is wrong.
+bridgesQuestion
+if [ "${bridgeConfirm}" = "redo" ]; then
+  bridgesQuestion
+else
+  bridgesInsert
+fi
+
+# tor@default vanished from unit file warning if normal. This message will stop after reboot.
+# Doing 'update-rc.d tor enable' will enable Tor on boot after unit vanishing.
+echo "*** Unmask Tor ***"
+sudo systemctl unmask tor@default.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+sudo update-rc.d tor enable
+sudo systemctl start tor@default.service
+## sleep long enough to bootstrap when using bridges (usually have a delay)
+sleep 10
+## Bridges names and IP are displayed on status, and if this log is shared , need to find a way to hide that.
+#sudo systemctl status tor@default.service --no-pager
+sudo systemctl status tor@default | grep running && sudo systemctl status tor@default | grep %
+echo ""
+
+# check if Tor was already installed and is functional
+echo ""
+echo "*** Check if Tor service is functional ***"
+torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
+if [ ${torRunning} -gt 0 ]; then
+  echo "You are all good - Tor is already running.You reached Tor Project via SOCKS5 (Tor)"
+  echo ""
+else
+  echo "!!! FAIL: Tor not running ... exiting now."
+  echo "Correct the file /etc/tor/torrc before running this script again. Debug tor.service and tor@default.service manually."
+  echo ""
+  exit 1
+fi
+
 echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
-wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+# fix for v1.7 tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054#issuecomment-800383278
+torsocks wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
 sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
 torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
 if [ ${torKeyAvailable} -eq 0 ]; then
@@ -182,31 +488,43 @@ if [ ${torKeyAvailable} -eq 0 ]; then
   exit 1
 fi
 echo "- OK key added"
+echo ""
 
-echo "*** Adding Tor Sources to sources.list ***"
-torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
-echo "torSourceListAvailable=${torSourceListAvailable}"  
-if [ ${torSourceListAvailable} -eq 0 ]; then
-  echo "- adding TOR sources ..."
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "- using https://deb.torproject.org/torproject.org buster"
-    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-  elif [ "${baseimage}" = "ubuntu" ]; then
-    echo "- using https://deb.torproject.org/torproject.org focal"
-    echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+# deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
+echo "*** Adding Tor Sources to sources lists ***"
+torDomain="torproject.org"
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
+  if [ "${torDomainStatus}" = "0" ] || [ "${torDomainYN}" = "no" ];then
+    echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
+    tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
+deb tor+https://deb.${torDomain}/${torDomain} ${distribution} main
+EOF
+    echo "- adding 'deb-src tor+https://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
+    tee -a /etc/apt/sources.list.d/tor-src-apttor.list << EOF
+#deb-src tor+https://deb.${torDomain}/${torDomain} ${distribution} main
+EOF
+    echo "OK - Tor sources added"
   else
-    echo "!!! FAIL: No Tor sources for os: ${baseimage}"
-    exit 1
+    echo "- adding 'deb https://' for Tor to /etc/apt/sources.list.d/tor.list"
+    tee -a /etc/apt/sources.list.d/tor.list << EOF
+deb https://deb.${torDomain}/${torDomain} ${distribution} main
+EOF
+    echo "- adding 'deb-src https://' for Tor to /etc/apt/sources.list.d/tor-src.list"
+    tee -a /etc/apt/sources.list.d/tor-src.list << EOF
+#deb-src https://deb.${torDomain}/${torDomain} ${distribution} main
+EOF
+    echo "OK - Tor sources added"
   fi
-  echo "- OK sources added"
 else
-  echo "TOR sources are available"
+  echo "!!! FAIL: No Tor sources for os: ${baseImage}"
+  exit 1
 fi
+echo ""
 
+# Now Tor will be installed in the latest version from Tor Project repo.
 echo "*** Install & Enable Tor ***"
-sudo apt install tor tor-arm torsocks -y
+sudo apt update
+sudo apt install -y tor
 echo ""
 
 # FIXING LOCALES
