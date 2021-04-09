@@ -368,70 +368,39 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-# if not headless - make sure pi user is doing auto login to run display
-if [ "${displayClass}" != "headless" ]; then
-
-   # activate auto-login of pi user
-   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-      [ "${baseimage}" = "debian_rpi64" ]; then
-      # set Raspi to boot up automatically with user pi (for the LCD)
-      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-      sudo raspi-config nonint do_boot_behaviour B2
-      sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-   elif [ "${baseimage}" = "dietpi" ]; then
-      # set DietPi to boot up automatically with user pi (for the LCD)
-      # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
-      # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
-      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
-   elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
-      sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
-      sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
-      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
-   else
-    echo "FAIL: Autostart pi user not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
-    exit 1
-   fi
-
-   # activate auto-start of 00infoLCD.sh script on pi user login
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
-     [ "${baseimage}" = "ubuntu" ]; then
-    homeFile=/home/pi/.bashrc
-    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for pi
-      # run as exec to dont allow easy physical access by keyboard
-      # see https://github.com/rootzoll/raspiblitz/issues/54
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  elif [ "${baseimage}" = "dietpi" ]; then
-    homeFile=/home/dietpi/.bashrc
-    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for dietpi
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
+# prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
+if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+  [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
+  [ "${baseimage}" = "ubuntu" ]; then
+  homeFile=/home/pi/.bashrc
+  autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+  if [ ${autostartDone} -eq 0 ]; then
+    # bash autostart for pi
+    # run as exec to dont allow easy physical access by keyboard
+    # see https://github.com/rootzoll/raspiblitz/issues/54
+    sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+    echo "autostart LCD added to $homeFile"
   else
-    echo "FAIL: Script Autostart not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
-    exit 1
+    echo "autostart LCD already in $homeFile"
   fi
-
+elif [ "${baseimage}" = "dietpi" ]; then
+  homeFile=/home/dietpi/.bashrc
+  autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+  if [ ${autostartDone} -eq 0 ]; then
+    # bash autostart for dietpi
+    sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+    echo "autostart LCD added to $homeFile"
+  else
+    echo "autostart LCD already in $homeFile"
+  fi
 else
-  echo "# running headless ... no auto-login of pi user for display needed"
+  echo "WARN: Script Autostart not available for baseimage(${baseimage}) - may just run on 'headless'"
 fi
 
 # change log rotates

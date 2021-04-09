@@ -518,11 +518,11 @@ Work notes for the process of producing a new SD card image release:
 
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick on the Build Computer (press F12 on startup)
 * Connect to a secure WiFi (hardware switch on) or LAN
-* Download the latest RaspiOS-64bit namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
+* Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
-* Install curl if needed `sudo apt-get update && sudo apt-get install -f curl net-tools`
+* Install curl if needed `sudo apt-get install -f curl net-tools`
 * Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB

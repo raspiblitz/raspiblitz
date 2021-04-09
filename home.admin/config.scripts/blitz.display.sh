@@ -445,6 +445,14 @@ function install_headless() {
     else
       echo "# auto-login of pi user is already deactivated"
     fi
+  elif [ "${baseimage}" = "dietpi" ]; then
+    # TODO make switch between headless & HDMI possible
+    echo "# TODO: reverse HDMI mode if set before"
+    echo "# headless is already the default mode"
+  elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
+    # TODO make switch between headless & HDMI possible
+    echo "# TODO: reverse HDMI mode if set before"
+    echo "# headless is already the default mode"
   else
     echo "err='baseimage not supported'"
     exit 1
@@ -465,6 +473,20 @@ function uninstall_headless() {
     else
       echo "# auto-login of pi user already active"
     fi
+   elif [ "${baseimage}" = "dietpi" ]; then
+      # set DietPi to boot up automatically with user pi (for the LCD)
+      # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
+      # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
+      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+   elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
+      modificationExists=$(sudo cat /lib/systemd/system/getty@.service | grep -c "autologin pi")
+      if [ "${modificationExists}" == "0" ]; then
+        sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
+        sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
+        sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+      else
+        echo "# auto-login of pi user already active"
+      fi
   else
     echo "err='baseimage not supported'"
     exit 1
