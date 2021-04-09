@@ -17,8 +17,8 @@ echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
 # Parameter options:
-# Default options [(1)false] [(2)false] [(3)rootzoll] [(4)v1.7     ] [(5)true     ] [(6)true        ] [(7)true ] [(8)true      ] [(9)false  ]
-# build_sdcard.sh [ blitz  ] [fatpack ] [githubUser ] [githubBranch] [lcdInstalled] [tweakBootdrives] [modeWifi] [testTorDomain] [addBridges]
+# Default options [(1)false     ] [(2)false] [(3)rootzoll] [(4)v1.7     ] [(5)true     ] [(6)true        ] [(7)true ] [(8)true      ] [(9)false  ]
+# build_sdcard.sh [noInteraction] [fatpack ] [githubUser ] [githubBranch] [lcdInstalled] [tweakBootdrives] [modeWifi] [testTorDomain] [addBridges]
 
 # 1st optional paramater: NO-INTERACTION
 # ----------------------------------------
@@ -413,7 +413,7 @@ echo ""
 echo "*** Adding Tor Sources to sources lists ***"
 torDomain="torproject.org"
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
-  if [ "${torDomainStatus}" = "0" ] || [ "${torDomainYN}" = "no" ];then
+  if [ "${torDomainStatus}" = "0" ] || [ "${testTorDomain}" = "false" ];then
     echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
     tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
 deb tor+https://deb.torproject.org/torproject.org ${distribution} main
