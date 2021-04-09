@@ -11,12 +11,28 @@
 ##########################################################################
 
 echo ""
-echo "****************************************."
+echo "*****************************************"
 echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
-echo "****************************************."
+echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
-# 1st optional paramater: FATPACK
+# 1st optional paramater: NO-INTERACTION
+# ----------------------------------------
+# When 'true' then no questions will be ask on building .. so it can be used in build scripts
+# for containers or as part of other build scripts (default is false)
+
+noInteraction="$1"
+if [ ${#noInteraction} -eq 0 ]; then
+  noInteraction="false"
+fi
+if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
+  echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
+  exit 1
+else
+  echo "1) will use NO-INTERACTION --> '${noInteraction}'"
+fi
+
+# 2nd optional paramater: FATPACK
 # -------------------------------
 # could be 'true' or 'false' (default)
 # When 'true' it will pre-install needed frameworks for additional apps and features
@@ -25,7 +41,7 @@ echo "For details on optional parameters - see build script source code:"
 # install needed frameworks and libraries on demand when activated by user.
 # Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
 
-fatpack="$1"
+fatpack="$2"
 if [ ${#fatpack} -eq 0 ]; then
   fatpack="false"
 fi
@@ -33,36 +49,36 @@ if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
   echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "1) will use FATPACK --> '${fatpack}'"
+  echo "2) will use FATPACK --> '${fatpack}'"
 fi
 
-# 2st optional paramater: GITHUB-USERNAME
+# 3rd optional paramater: GITHUB-USERNAME
 # ---------------------------------------
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
 # The 'raspiblitz' repo of this user is used to provisioning sd card 
 # with raspiblitz assets/scripts later on.
 # If this parameter is set also the branch needs to be given (see next parameter).
-githubUser="$2"
+githubUser="$3"
 if [ ${#githubUser} -eq 0 ]; then
   githubUser="rootzoll"
 fi
-echo "2) will use GITHUB-USERNAME --> '${githubUser}'"
+echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
-# 3rd optional paramater: GITHUB-BRANCH
+# 4th optional paramater: GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - 'dev' is default
-githubBranch="$3"
+githubBranch="$4"
 if [ ${#githubBranch} -eq 0 ]; then
   githubBranch="dev"
 fi
-echo "3) will use GITHUB-BRANCH --> '${githubBranch}'"
+echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
-# 4rd optional paramater: DISPLAY-CLASS
+# 5th optional paramater: DISPLAY-CLASS
 # ----------------------------------------
 # Could be 'hdmi', 'headless' or 'lcd'
 # On 'false' the standard video output is used (HDMI) by default.
 # https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
-displayClass="$4"
+displayClass="$5"
 if [ ${#displayClass} -eq 0 ] || [ "${displayClass}" == "false" ]; then
   displayClass="hdmi"
 fi
@@ -70,15 +86,15 @@ if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${dis
   echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
 else
-  echo "4) will use DISPLAY-CLASS --> '${displayClass}'"
+  echo "5) will use DISPLAY-CLASS --> '${displayClass}'"
 fi
 
-# 5rd optional paramater: TWEAK-BOOTDRIVE
+# 6th optional paramater: TWEAK-BOOTDRIVE
 # ---------------------------------------
 # could be 'true' (default) or 'false'
 # If 'true' it will try (based on the base OS) to optimize the boot drive.
 # If 'false' this will skipped.
-tweakBootdrives="$5"
+tweakBootdrives="$6"
 if [ ${#tweakBootdrives} -eq 0 ]; then
   tweakBootdrives="true"
 fi
@@ -86,20 +102,20 @@ if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; th
   echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
   exit 1
 else
-  echo "5) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
+  echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
-# 6rd optional paramater: WIFI
+# 7th optional paramater: WIFI
 # ---------------------------------------
 # could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
 # If 'false' WIFI will be deactivated by default
 # If 'true' WIFI will be activated by with default country code 'US'
 # If any valid wifi country code Wifi will be activated with that country code by default
-modeWifi="$6"
+modeWifi="$7"
 if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
   modeWifi="US"
 fi
-echo "6) will use WIFI --> '${modeWifi}'"
+echo "7) will use WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
@@ -162,17 +178,16 @@ distribution=$(lsb_release -sc)
 echo "X) will use DISTRIBUTION ---> '${distribution}'"
 
 # USER-CONFIRMATION
-echo -n "Do you agree with all parameters above? (yes/no) "
-read installRaspiblitzAnswer
-if [ "$installRaspiblitzAnswer" == "yes" ] ; then
-  echo ""
-  echo ""
-  echo "Building RaspiBlitz ..."
-  sleep 3
-  echo ""
-else
-  exit 1
+if [ "${noInteraction}" != "true" ]; then
+  echo -n "Do you agree with all parameters above? (yes/no) "
+  read installRaspiblitzAnswer
+  if [ "$installRaspiblitzAnswer" != "yes" ] ; then
+    exit 1
+  fi
 fi
+echo "Building RaspiBlitz ..."
+echo ""
+sleep 3
 
 # Ease commenting and uncommenting deb-src.
 echo "*** Separate sources to different files ***"
@@ -671,70 +686,39 @@ echo "*** CONFIG ***"
 echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
-# if not headless - make sure pi user is doing auto login to run display
-if [ "${displayClass}" != "headless" ]; then
-
-   # activate auto-login of pi user
-   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-      [ "${baseimage}" = "debian_rpi64" ]; then
-      # set Raspi to boot up automatically with user pi (for the LCD)
-      # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-      sudo raspi-config nonint do_boot_behaviour B2
-      sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-   elif [ "${baseimage}" = "dietpi" ]; then
-      # set DietPi to boot up automatically with user pi (for the LCD)
-      # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
-      # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
-      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
-   elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
-      sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
-      sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
-      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
-   else
-    echo "FAIL: Autostart pi user not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
-    exit 1
-   fi
-
-   # activate auto-start of 00infoLCD.sh script on pi user login
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
-     [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
-     [ "${baseimage}" = "ubuntu" ]; then
-    homeFile=/home/pi/.bashrc
-    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for pi
-      # run as exec to dont allow easy physical access by keyboard
-      # see https://github.com/rootzoll/raspiblitz/issues/54
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
-  elif [ "${baseimage}" = "dietpi" ]; then
-    homeFile=/home/dietpi/.bashrc
-    autostartDone=$(grep -c "automatic start the LCD" $homeFile)
-    if [ ${autostartDone} -eq 0 ]; then
-      # bash autostart for dietpi
-      sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-      sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
-      echo "autostart LCD added to $homeFile"
-    else
-      echo "autostart LCD already in $homeFile"
-    fi
+# prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
+if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
+  [ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]||\
+  [ "${baseimage}" = "ubuntu" ]; then
+  homeFile=/home/pi/.bashrc
+  autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+  if [ ${autostartDone} -eq 0 ]; then
+    # bash autostart for pi
+    # run as exec to dont allow easy physical access by keyboard
+    # see https://github.com/rootzoll/raspiblitz/issues/54
+    sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
+    sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
+    echo "autostart LCD added to $homeFile"
   else
-    echo "FAIL: Script Autostart not available for baseimage(${baseimage}) - please choose 'headless' on DISPLAY-CLASS"
-    exit 1
+    echo "autostart LCD already in $homeFile"
   fi
-
+elif [ "${baseimage}" = "dietpi" ]; then
+  homeFile=/home/dietpi/.bashrc
+  autostartDone=$(grep -c "automatic start the LCD" $homeFile)
+  if [ ${autostartDone} -eq 0 ]; then
+    # bash autostart for dietpi
+    sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
+    sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
+    echo "autostart LCD added to $homeFile"
+  else
+    echo "autostart LCD already in $homeFile"
+  fi
 else
-  echo "# running headless ... no auto-login of pi user for display needed"
+  echo "WARN: Script Autostart not available for baseimage(${baseimage}) - may just run on 'headless'"
 fi
 
 # change log rotates
@@ -888,7 +872,7 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # WRITE BASIC raspiblitz.info to sdcard
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
-echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
+echo "displayClass=headless" >> /home/admin/raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 755 /home/admin/raspiblitz.info
 
@@ -1410,8 +1394,8 @@ echo "2. run --> ./XXprepareRelease.sh"
 echo ""
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "hdmi" ]; then
+if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${displayClass}"
-  sudo blitz.display.sh set-display ${displayClass}
+  sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
 fi
