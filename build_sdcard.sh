@@ -1107,7 +1107,7 @@ echo "2. run --> ./XXprepareRelease.sh"
 echo ""
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "headless" ]; then
+if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${displayClass}"
   sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
