@@ -461,12 +461,13 @@ function install_headless() {
 
 function uninstall_headless() {
   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+    # activate auto-login
+    sudo raspi-config nonint do_boot_behaviour B2
     modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "0" ]; then
       echo "# activating auto-login of pi user again"
-      # set Raspi to boot up automatically with user pi (for the LCD)
+      # set Raspi to boot up automatically with user pi
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-      sudo raspi-config nonint do_boot_behaviour B2
       sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
@@ -527,6 +528,9 @@ if [ "${command}" == "set-display" ]; then
     echo "err='missing parameter'"
     exit 1
   fi
+
+  echo "# old(${displayClass})"
+  echo "# new(${paramDisplayClass})"
 
   if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
