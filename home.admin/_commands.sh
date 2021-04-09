@@ -44,14 +44,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "--help" ] 
   echo "  balance      your satoshi balance"
   echo "  channels     your lightning channels"
   echo "  fwdreport    show forwarding report"
-  echo "  manage       command line tool for advanced channel management of an LND"
   echo ""
   echo "Users:"
   echo "  bos          Balance of Satoshis"
-  echo "  lit          Lightning Terminal"
-  echo "  pyblock      PyBlock"
   echo "  chantools    ChanTools"
+  echo "  lit          Lightning Terminal"
   echo "  jm           JoinMarket"
+  echo "  pyblock      PyBlock"
   echo ""
   echo " Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
@@ -146,20 +145,6 @@ function lcd() {
 function headless() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
   sudo /home/admin/config.scripts/blitz.display.sh set-display headless
-}
-
-# command: manage
-function manage() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
-    cd /home/admin/lndmanage
-    source venv/bin/activate
-    echo "NOTICE: Needs at least one active channel to run without error."
-    echo "to exit (venv) enter ---> deactivate"
-    lndmanage
-  else
-    echo "lndmanage not installed - to install run:"
-    echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
-  fi
 }
 
 # command: torthistx
