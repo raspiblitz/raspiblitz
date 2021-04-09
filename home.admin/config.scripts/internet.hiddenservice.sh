@@ -35,7 +35,7 @@ if [ "$1" == "off" ]; then
   sudo chown bitcoin:bitcoin /etc/tor/torrc
 
   echo "# OK service is removed - restarting TOR ..."
-  sudo systemctl restart tor
+  sudo systemctl restart tor@default
   sleep 10
   echo "# Done"
   exit 0
@@ -100,7 +100,7 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   echo ""
   echo "Restarting Tor to activate the Hidden Service..."
   sudo chmod 644 /etc/tor/torrc
-  sudo systemctl restart tor
+  sudo systemctl restart tor@default
   sleep 10
 
   # show the Hidden Service address

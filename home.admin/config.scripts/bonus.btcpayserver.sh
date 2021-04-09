@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/releases
 NBXplorerVersion="v2.1.49"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.7.0"
+BTCPayVersion="v1.0.7.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

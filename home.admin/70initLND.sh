@@ -374,7 +374,6 @@ to protect the seed words. Most users did not set this.
     if [ "${CHOICE}" == "SEED+SCB" ] || [ "${CHOICE}" == "ONLYSEED" ]; then
 
       # trigger wallet recovery
-      source /home/admin/python3-env-lnd/bin/activate
       source <(python3 /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${wordstring}" ${passwordD} 2>/dev/null)
 
       # check if wallet was created for real
@@ -384,6 +383,9 @@ to protect the seed words. Most users did not set this.
           err="Was not able to create wallet (unknown error)."
         fi
       fi
+
+      # set fundRecovery=1 in raspiblitz.info
+      sed -i "s/^fundRecovery=.*/fundRecovery=1/g" /home/admin/raspiblitz.info
 
       # user feedback
       if [ ${#err} -eq 0 ]; then
