@@ -585,7 +585,7 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # WRITE BASIC raspiblitz.info to sdcard
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
-echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
+echo "displayClass=headless" >> /home/admin/raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 755 /home/admin/raspiblitz.info
 
@@ -1107,7 +1107,7 @@ echo "2. run --> ./XXprepareRelease.sh"
 echo ""
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "hdmi" ]; then
+if [ "${displayClass}" != "headless" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${displayClass}"
   sudo blitz.display.sh set-display ${displayClass}

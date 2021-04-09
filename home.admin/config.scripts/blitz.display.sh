@@ -500,23 +500,12 @@ if [ "${command}" == "set-display" ]; then
     exit 1
   fi
 
+  # check if display class parameter is given
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
     exit 1
-  elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
-
-    # normally dont make any changes here - but it can be the case that this called by recover/update process
-    # where raspiblitz.info (base image) raspiblitz.conf (user config) have different values - check fo this case:
-    confAndInfoValueIsSame=$(sudo cat /home/admin/raspiblitz.info | grep -c "displayClass=${paramDisplayClass}}")
-    if [ "${confAndInfoValueIsSame}" == "0" ]; then
-      echo "# raspiblitz.info is different from raspiblitz.conf --> enforcing ${displayClass} for both"
-      source /home/admin/raspiblitz.info
-      # continue with the raspiblitz.info value of displayClass as actual state (not the overwritten one from raspiblitz.conf)
-    else
-      echo "# raspiblitz.info (AND raspiblitz.conf) already running ${displayClass} - no need for change"
-      exit 1
-    fi
   fi
+
   if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
     # uninstall old state
