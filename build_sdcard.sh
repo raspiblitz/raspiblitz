@@ -152,6 +152,10 @@ fi
 if [ "${addBridges}" != "true" ] && [ "${addBridges}" != "false" ]; then
   echo "ERROR: ADD-BRIDGES parameter needs to be either 'true' or 'false'"
   exit 1
+elif [ "${addBridges}" = "true" ] && [ ! -f ./torrc ]; then
+  echo "User chose to use bridges but 'torrc' file not found on home folder."
+  echo "Will exit now for the user safety."
+  exit 1
 else
   echo "9) will use ADD-BRIDGES --> '${addBridges}'"
 fi
@@ -225,6 +229,8 @@ if [ "${noInteraction}" != "true" ]; then
   fi
 fi
 echo "Building RaspiBlitz ..."
+# cronometer
+start=$SECONDS
 sleep 3
 echo ""
 
@@ -243,7 +249,7 @@ echo "# Sources are organized now"
 echo ""
 
 echo "# Adding distro Sources to sources.list ***"
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
   tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb https://deb.debian.org/debian ${distribution} main contrib non-free
 deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
@@ -265,7 +271,6 @@ fi
 echo "deb-src for ${baseImage} ${distribution} is available"
 echo ""
 
-echo ""
 echo "*** Update and Upgrade ${baseImage} ${distribution} sources ***"
 sudo apt update
 sudo apt dist-upgrade -f -y
@@ -276,7 +281,6 @@ echo ""
 # The last version for Buster (Stable) today (apr/2021) is obfs4proxy 0.0.7-4. https://tracker.debian.org/pkg/obfs4proxy
 # Warnings will appear of not using the v1.11 golang, but will work anyway.
 echo "*** Compile obfs4proxy from source ***" 
-echo ""
 mkdir -p obfs4proxy
 cd obfs4proxy/
 sudo apt install -y obfs4proxy
@@ -327,16 +331,18 @@ echo ""
 # Test Tor domain. Will add tor:// if he choses to ping but dont can't reach.
 if [ "${testTorDomain}" = "true" ]; then
   echo "Testing connection to torproject.org"
-  torDomainStatus=$(sudo ping -c 3 torproject.org | grep -c '3 received')
-  echo "Status=${torDomainStatus}"
-  if [ ${torDomainStatus} -gt 0 ]; then
+  statusTorDomain=$(sudo ping -c 3 torproject.org | grep -c '3 received')
+  echo "Status=${statusTorDomain}"
+  if [ ${statusTorDomain} -gt 0 ]; then
     echo "You can reach torproject.org via CLEARNET. But Tor connections could still be blocked, add bridges if you desire."
+    echo "Reaching Tor sources will be acquired using apt-transport-https."
   else
-    echo "WARNING: You can NOT reach torproject.org via CLEARNET. You should configure bridges."
+    echo "!!! WARNING: You can NOT reach torproject.org via CLEARNET. You should configure bridges."
     echo "Reaching Tor sources will be acquired using apt-transport-tor."
   fi
 elif [ "${testTorDomain}" = "false" ]; then
-  echo "You chose not to ping https://www.torproject.org domain. Reaching Tor sources will be acquired using apt-transport-tor."
+  echo "You chose not to ping https://www.torproject.org domain."
+  echo "Reaching Tor sources will be acquired using apt-transport-tor."
 fi
 echo ""
 
@@ -368,32 +374,31 @@ echo ""
 
 # tor@default vanished from unit file warning if normal. This message will stop after reboot.
 # Doing 'update-rc.d tor enable' will enable Tor on boot after unit vanishing.
+# systemctl restart because it could be already started from a failed build before, so we can see the right bootstrap logs. Start dont singal to reboot the service. 
 echo "*** Unmask Tor ***"
 sudo systemctl unmask tor@default.service
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
 sudo update-rc.d tor enable
-sudo systemctl start tor@default.service
+sudo systemctl restart tor@default.service
 ## sleep long enough to bootstrap when using bridges (usually has a delay to bootstrap)
 sleep 10
-# Dont show full logs, cause bridges IP and Descriptors are displayed here and cant be hidden by Tor configuration.
-sudo systemctl status tor@default | grep running && sudo systemctl status tor@default | grep %
+# Dont show full logs (systemctl), cause bridges IP and Descriptors are displayed here and cant be hidden by Tor configuration.
+sudo systemctl status tor@default | grep running && sudo systemctl status tor@default | grep Bootstrapped
 echo ""
 
 # check if Tor is functional
-echo ""
 echo "*** Check if Tor service is functional ***"
 torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
 if [ ${torRunning} -gt 0 ]; then
   echo "You are all good - Tor is running. You reached Tor Project."
-  echo ""
 else
   echo "!!! FAIL: Tor is not running ... exiting now."
   echo "Correct the file /etc/tor/torrc manually before running this script again. Debug tor@default.service with 'sudo journalctl -eu tor@default'."
   echo "If you chose to use bridges, correct the 'torrc' file on your home folder."
-  echo ""
   exit 1
 fi
+echo ""
 
 echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
@@ -406,14 +411,13 @@ if [ ${torKeyAvailable} -eq 0 ]; then
   echo "!!! FAIL: Was not able to import deb.torproject.org key"
   exit 1
 fi
-echo "- OK key added"
+echo "OK - key added"
 echo ""
 
 # deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
 echo "*** Adding Tor Sources to sources lists ***"
-torDomain="torproject.org"
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
-  if [ "${torDomainStatus}" = "0" ] || [ "${testTorDomain}" = "false" ];then
+if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
+  if [ ${statusTorDomain} -eq 0 ] || [ "${testTorDomain}" = "false" ];then
     echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
     tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
 deb tor+https://deb.torproject.org/torproject.org ${distribution} main
@@ -1282,6 +1286,13 @@ echo "- OK install of LND done"
 echo ""
 echo "*** raspiblitz.info ***"
 sudo cat /home/admin/raspiblitz.info
+
+echo "*** ABSOLUTE RUNTIME ***"
+duration=$(( SECONDS - start ))
+echo "The script took ${duration} seconds to complete"
+totalTime=$(date -d@${duration} -u +%H:%M:%S)
+echo "Time in H:M:S is ${totalTime}"
+echo ""
 
 # *** RASPIBLITZ IMAGE READY INFO ***
 echo ""
