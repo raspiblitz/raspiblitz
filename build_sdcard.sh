@@ -18,7 +18,7 @@ echo "For details on optional parameters - see build script source code:"
 
 # Parameter options:
 # Default options [(1)false     ] [(2)false] [(3)rootzoll] [(4)v1.7     ] [(5)true     ] [(6)true        ] [(7)true ] [(8)true      ] [(9)false  ]
-# build_sdcard.sh [noInteraction] [fatpack ] [githubUser ] [githubBranch] [lcdInstalled] [tweakBootdrives] [modeWifi] [testTorDomain] [addBridges]
+# build_sdcard.sh [noInteraction] [fatpack ] [githubUser ] [githubBranch] [displayClass] [tweakBootdrives] [modeWifi] [testTorDomain] [addBridges]
 
 # 1st optional paramater: NO-INTERACTION
 # ----------------------------------------
@@ -250,21 +250,21 @@ echo ""
 
 echo "# Adding distro Sources to sources.list ***"
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
-  tee -a /etc/apt/sources.list.d/deb.list << EOF
+  sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb https://deb.debian.org/debian ${distribution} main contrib non-free
 deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
 deb https://deb.debian.org/debian ${distribution}-updates main contrib non-free
 EOF
-  tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+  sudo tee -a /etc/apt/sources.list.d/deb-src.list << EOF
 deb-src https://deb.debian.org/debian ${distribution} main contrib non-free
 EOF
 elif [ "${baseImage}" = "ubuntu" ]; then
-  tee -a /etc/apt/sources.list.d/deb.list << EOF
+  sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb http://archive.ubuntu.com/ubuntu/ ${distribution} main
 deb http://archive.ubuntu.com/ubuntu/ ${distribution}/updates main
 deb http://archive.ubuntu.com/ubuntu/ ${distribution}-updates main
 EOF
-  tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+  sudo tee -a /etc/apt/sources.list.d/deb-src.list << EOF
 deb-src http://archive.ubuntu.com/ubuntu/ ${distribution} main
 EOF
 fi
@@ -419,21 +419,21 @@ echo "*** Adding Tor Sources to sources lists ***"
 if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
   if [ ${statusTorDomain} -eq 0 ] || [ "${testTorDomain}" = "false" ];then
     echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
-    tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
+    sudo tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
 deb tor+https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "- adding 'deb-src tor+https://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
-    tee -a /etc/apt/sources.list.d/tor-src-apttor.list << EOF
+    sudo tee -a /etc/apt/sources.list.d/tor-src-apttor.list << EOF
 #deb-src tor+https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "OK - Tor sources added"
   else
     echo "- adding 'deb https://' for Tor to /etc/apt/sources.list.d/tor.list"
-    tee -a /etc/apt/sources.list.d/tor.list << EOF
+    sudo tee -a /etc/apt/sources.list.d/tor.list << EOF
 deb https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "- adding 'deb-src https://' for Tor to /etc/apt/sources.list.d/tor-src.list"
-    tee -a /etc/apt/sources.list.d/tor-src.list << EOF
+    sudo tee -a /etc/apt/sources.list.d/tor-src.list << EOF
 #deb-src https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "OK - Tor sources added"
