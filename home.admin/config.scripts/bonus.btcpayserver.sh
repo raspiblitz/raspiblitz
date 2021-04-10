@@ -353,7 +353,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcpay || exit 1
     echo "# Download the NBXplorer source code ..."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
-    cd NBXplorer
+    cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     echo "# Build NBXplorer ..."
     # from the build.sh with path
