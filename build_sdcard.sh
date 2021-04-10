@@ -20,6 +20,9 @@ echo "For details on optional parameters - see build script source code:"
 # Default options [(1)false     ] [(2)false] [(3)rootzoll] [(4)v1.7     ] [(5)true     ] [(6)true        ] [(7)true ] [(8)true      ] [(9)false  ]
 # build_sdcard.sh [noInteraction] [fatpack ] [githubUser ] [githubBranch] [displayClass] [tweakBootdrives] [modeWifi] [testTorDomain] [addBridges]
 
+# Hardened (* = any will do)
+# build_sdcard.sh true* false yourUser yourBranch false* true* true* false true
+
 # 1st optional paramater: NO-INTERACTION
 # ----------------------------------------
 # When 'true' then no questions will be ask on building .. so it can be used in build scripts
@@ -245,11 +248,9 @@ sudo touch /etc/apt/sources.list.d/tor.list
 sudo touch /etc/apt/sources.list.d/tor-src.list
 sudo touch /etc/apt/sources.list.d/tor-apttor.list
 sudo touch /etc/apt/sources.list.d/tor-src-apttor.list
-echo "# Sources are organized now"
-echo ""
 
-echo "# Adding distro Sources to sources.list ***"
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
+echo "*** Adding distro Sources to sources.list ***"
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
   sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb https://deb.debian.org/debian ${distribution} main contrib non-free
 deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
@@ -258,7 +259,7 @@ EOF
   sudo tee -a /etc/apt/sources.list.d/deb-src.list << EOF
 deb-src https://deb.debian.org/debian ${distribution} main contrib non-free
 EOF
-elif [ "${baseImage}" = "ubuntu" ]; then
+elif [ "${baseimage}" = "ubuntu" ]; then
   sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb http://archive.ubuntu.com/ubuntu/ ${distribution} main
 deb http://archive.ubuntu.com/ubuntu/ ${distribution}/updates main
@@ -268,10 +269,10 @@ EOF
 deb-src http://archive.ubuntu.com/ubuntu/ ${distribution} main
 EOF
 fi
-echo "deb-src for ${baseImage} ${distribution} is available"
+echo "deb-src for ${baseimage} ${distribution} is available"
 echo ""
 
-echo "*** Update and Upgrade ${baseImage} ${distribution} sources ***"
+echo "*** Update and Upgrade ${baseimage} ${distribution} sources ***"
 sudo apt update
 sudo apt dist-upgrade -f -y
 echo ""
@@ -416,7 +417,7 @@ echo ""
 
 # deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
 echo "*** Adding Tor Sources to sources lists ***"
-if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "raspios_arm64" ] || [ "${baseImage}" = "debian_rpi64" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ] || [ "${baseImage}" = "ubuntu" ]; then
+if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ] || [ "${baseimage}" = "ubuntu" ]; then
   if [ ${statusTorDomain} -eq 0 ] || [ "${testTorDomain}" = "false" ];then
     echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
     sudo tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
@@ -439,7 +440,7 @@ EOF
     echo "OK - Tor sources added"
   fi
 else
-  echo "!!! FAIL: No Tor sources for os: ${baseImage}"
+  echo "!!! FAIL: No Tor sources for OS: ${baseimage}"
   exit 1
 fi
 echo ""
