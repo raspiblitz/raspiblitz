@@ -365,7 +365,7 @@ if [ "${addBridges}" = "true" ]; then
     echo "Adding bridges specified by the user."
     echo "Will use this bridges for 'torrc'"
     echo "-----------------------------------------------"
-    cat "${userRunning}"/torrc
+    cat "${userPath}"/torrc
     echo "-----------------------------------------------"
     echo "" | sudo tee -a "${userPath}"/torrc
     sudo cp /etc/tor/torrc /etc/tor/torrc.orig
@@ -390,8 +390,9 @@ sudo systemctl daemon-reload
 sudo systemctl reset-failed
 sudo update-rc.d tor enable
 sudo systemctl restart tor@default.service
-## sleep long enough to bootstrap when using bridges (usually has a delay to bootstrap)
-sleep 10
+## sleep long enough to bootstrap when using bridges (usually has a delay to bootstrap).
+echo "Sleeping for 40 seconds. Waiting for Tor to fully bootstrap"
+sleep 40
 # Dont show full logs (systemctl), cause bridges IP and Descriptors are displayed here and cant be hidden by Tor configuration.
 sudo systemctl status tor@default | grep running && sudo systemctl status tor@default | grep Bootstrapped
 echo ""
