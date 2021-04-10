@@ -300,7 +300,7 @@ echo "# Installed $(obfs4proxy --version)"
 echo ""
 
 echo "# Commenting deb-src ..."
-sudo sed -i 's/^.//' /etc/apt/sources.list.d/deb-src.list
+sudo sed -i 's/^/#/' /etc/apt/sources.list.d/deb-src.list
 echo "deb-src are commented now"
 echo ""
 
@@ -349,6 +349,7 @@ echo ""
 
 # Add 'torrc' home folder file to /etc/tor/torrc. The user needs to place a torrc named file.
 if [ "${addBridges}" = "true" ]; then
+  cd
   if [ ! -f ./torrc ]; then
     echo "User chose to use bridges but 'torrc' file not found on home folder."
     echo "Will exit now for the user safety."
