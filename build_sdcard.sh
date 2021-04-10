@@ -237,6 +237,14 @@ start=$SECONDS
 sleep 3
 echo ""
 
+# cd goes to /root, it is needed to stay in user logged in.
+echo "*** Save current /home/user path ***"
+userPath=$(pwd)
+userRunning=$(pwd | cut -c7-20)
+echo "User path is: ${userPath}"
+echo "User logged is: ${userRunning}"
+echo ""
+
 # Ease commenting and uncommenting deb-src.
 echo "*** Separate sources to different files ***"
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.orig
@@ -295,7 +303,7 @@ sudo apt update
 sudo apt --only-upgrade install obfs4proxy
 cd ..
 sudo rm -rf obfs4proxy
-cd
+cd ${userPath}
 echo "# Installed $(obfs4proxy --version)"
 echo ""
 
@@ -349,23 +357,22 @@ echo ""
 
 # Add 'torrc' home folder file to /etc/tor/torrc. The user needs to place a torrc named file.
 if [ "${addBridges}" = "true" ]; then
-  cd
-  if [ ! -f ./torrc ]; then
+  if [ ! -f "${userPath}"/torrc ]; then
     echo "User chose to use bridges but 'torrc' file not found on home folder."
     echo "Will exit now for the user safety."
     exit 0
-  elif [ -f ./torrc ]; then
+  elif [ -f "${userPath}"/torrc ]; then
     echo "Adding bridges specified by the user."
     echo "Will use this bridges for 'torrc'"
     echo "-----------------------------------------------"
-    cat ./torrc
+    cat "${userRunning}"/torrc
     echo "-----------------------------------------------"
-    echo "" | sudo tee -a ./torrc
+    echo "" | sudo tee -a "${userPath}"/torrc
     sudo cp /etc/tor/torrc /etc/tor/torrc.orig
     sudo rm /etc/tor/torrc
-    sudo cp ./torrc /etc/tor/torrc
+    sudo cp "${userPath}"/torrc /etc/tor/torrc
     # backup bridges in case something goes wrong
-    sudo cp ./torrc /etc/tor/bridges
+    sudo cp "${userPath}"/torrc /etc/tor/bridges
     sudo chmod 644 /etc/tor/torrc
     sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
   fi
