@@ -131,6 +131,12 @@ Log notice stdout
 Log notice file /mnt/hdd/tor-$NODENAME/notice.log
 Log info file /mnt/hdd/tor-$NODENAME/info.log
 " | sudo tee /etc/tor/instances/$NODENAME/torrc
+    sudo touch /etc/tor/bridges
+    sudo cp /etc/tor/bridges ./bridges
+    sudo cp /etc/tor/instances/$NODENAME/torrc ./$NODENAME.torrc
+    sudo bash -c 'cat ./bridges ./$NODENAME.torrc > ./torrcX'
+    sudo mv ./torrcX /etc/tor/instances/$NODENAME/torrc
+    sudo rm ./bridges ./$NODENAME.torrc
     sudo chmod 644 /etc/tor/instances/$NODENAME/torrc
 
     sudo mkdir -p /etc/systemd/system/tor@$NODENAME.service.d
@@ -350,8 +356,8 @@ EOF
     sudo touch /etc/tor/bridges
     sudo cp /etc/tor/bridges ./bridges
     sudo bash -c 'cat ./bridges ./torrc > ./torrcX'
-    sudo rm ./bridges
     sudo mv ./torrcX $torrc
+    sudo rm ./bridges
     sudo chmod 644 $torrc
     sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
