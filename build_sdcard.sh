@@ -363,10 +363,6 @@ if [ "${addBridges}" = "true" ]; then
     exit 0
   elif [ -f "${userPath}"/torrc ]; then
     echo "Adding bridges specified by the user."
-    echo "Will use this bridges for 'torrc'"
-    echo "-----------------------------------------------"
-    cat "${userPath}"/torrc
-    echo "-----------------------------------------------"
     echo "" | sudo tee -a "${userPath}"/torrc
     sudo cp /etc/tor/torrc /etc/tor/torrc.orig
     sudo rm /etc/tor/torrc
