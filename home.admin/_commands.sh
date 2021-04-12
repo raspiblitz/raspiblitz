@@ -225,7 +225,8 @@ function lit() {
   if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use the commands: 'lncli', 'loop', 'pool' and 'frcli'"
+    echo "# see the prefilled parameters with 'alias'"
+    echo "# use the commands: 'lncli', 'lit-frcli', 'lit-loop', 'lit-pool'"
     sudo su - lit
     echo "# use command 'raspiblitz' to return to menu"
   else
@@ -233,6 +234,21 @@ function lit() {
     echo "/home/admin/config.scripts/bonus.lit.sh on"
   fi
 }
+
+# aliases for lit
+# switch to the pool user for the Pool Service
+if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+  source /mnt/hdd/raspiblitz.conf
+  alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \
+    --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
+  alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
+    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
+  alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
+    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
+fi
 
 # command: loop
 # switch to the loop user for the Lightning Loop Service
@@ -263,21 +279,6 @@ function pool() {
     echo "/home/admin/config.scripts/bonus.pool.sh on"
   fi
 }
-
-# aliases for lit
-# switch to the pool user for the Pool Service
-if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
-  source /mnt/hdd/raspiblitz.conf
-  alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \
-    --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
-  alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
-    --tlscertpath=/home/lit/.lit/tls.cert \\	
-    --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
-  alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \	
-    --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
-fi
 
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
