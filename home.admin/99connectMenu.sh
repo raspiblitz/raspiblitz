@@ -160,6 +160,33 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     rpcTorService=$(grep -c "HiddenServicePort 8332 127.0.0.1:8332"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin8332/hostname)
     
+    function showRPCcredentials() {
+      RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+      RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+      echo
+      echo "RPC username:"
+      echo "$RPCUSER"
+      echo
+      echo "RPC password:"
+      echo "$RPCPSW"
+      if [ $allowIPrange -gt 0 ]&&[ $bindIP -gt 0 ];then
+        echo
+        echo "Host on the local network (make sure to connect from the same network):"
+        echo $localIP
+      fi
+      if [ $rpcTorService -gt 0 ];then
+        echo
+        echo "Host via Tor (Tor needs to run on the client connecting as well):"
+        echo $TorRPCaddress
+      fi
+      echo
+      echo "Port:"
+      echo "8332"
+      echo
+      echo "More documentation at:"
+      echo "https://github.com/openoms/joininbox/blob/master/prepare_remote_node.md"
+    }
+
     # menu
     OPTIONS=()
     if [ $allowIPrange -eq 0 ]&&\
@@ -182,11 +209,12 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
                 --title "${network} RPC" \
                 --ok-label "Select" \
                 --cancel-label "Cancel" \
-                --menu "" 9 64 3 \
+                --menu "" 9 66 3 \
                 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
     case $CHOICE in
-      ADDRPCLAN)       
+      ADDRPCLAN)
+        clear       
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
       
@@ -205,67 +233,45 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         fi
         echo "# ufw allow from $localIPrange to any port 8332"
         sudo ufw allow from $localIPrange to any port 8332
+        echo
+        showRPCcredentials
+        echo "Press ENTER to return to the menu."
+        read key
         ;;
       ADDRPCTOR)
+        clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-
         /home/admin/config.scripts/internet.hiddenservice.sh bitcoin8332 8332 8332
         echo
         echo "The address of the local node is: $TorRPCaddress"
-        ;;
-
-      CREDENTIALS)
-        clear
-        RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-        RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-        
-        if [ $allowIPrange -gt 0 ]&&[ $bindIP -gt 0 ];then
-          echo $localIP
-        fi
-        if [ $rpcTorService -gt 0 ];then
-          echo $TorRPCaddress
-        fi
-
-        echo "RPC username:"
-        echo "$RPCUSER"
         echo
-        echo "RPC password:"
-        echo "$RPCPSW"
-        echo
-        if [ $allowIPrange -gt 0 ]&&[ $bindIP -gt 0 ];then
-          echo "Host on the local network (make sure to connect from the same network):"
-          echo $localIP
-        fi
-        if [ $rpcTorService -gt 0 ];then
-          echo "Host via Tor (make sure to connect over Tor):"
-          echo $TorRPCaddress
-        fi
-        echo
-        echo "Port:"
-        echo "8332"
-        echo
-        echo "More documentation at:"
-        echo "https://github.com/openoms/joininbox/blob/master/prepare_remote_node.md"
-        echo          
+        showRPCcredentials
         echo
         echo "Press ENTER to return to the menu."
         read key
         ;;
-      REMOVERPC)
-        # remove old entrysudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
-        sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
-        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin8332
-        sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
 
+      CREDENTIALS)
+        clear
+        showRPCcredentials
+        echo          
+        echo "Press ENTER to return to the menu."
+        read key
+        ;;
+      REMOVERPC)
+        # remove old entry
+        sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
+        # remove Hidden Service
+        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin8332
         sudo ufw deny from $localIPrange to any port 8332
         restartCore=0
         if [ $allowIPrange -gt 0 ]; then
-          sed '/rrpcallowip=$localIPrange/d' /mnt/hdd/${network}/${network}.conf
+          sudo sed -i "/^rpcallowip=.*/d" /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
-        if [ $bindIP -eq 0 ]; then
-          sed '/rpcbind=$localIP/d' /mnt/hdd/${network}/${network}.conf
+        if [ $bindIP -gt 0 ]; then
+          sudo sed -i "/^rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then
