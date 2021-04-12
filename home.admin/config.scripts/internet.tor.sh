@@ -17,7 +17,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# unify and define bridges and torrc(s) path
+# bridges
+bridgesTor="/etc/tor/bridges"
+# default
 torrc="/etc/tor/torrc"
+# lnd
+torrclnd="/etc/tor/instances/lnd/torrc"
 
 activateBitcoinOverTOR()
 {
@@ -115,6 +121,7 @@ activateLndOverTOR()
     sudo chown -R _tor-$NODENAME:_tor-$NODENAME /mnt/hdd/tor-$NODENAME
 
     echo "
+
 ### torrc for tor@$NODENAME
 ### https://github.com/lightningnetwork/lnd/blob/master/docs/configuring_tor.md
 
@@ -130,14 +137,16 @@ SafeLogging 1
 Log notice stdout
 Log notice file /mnt/hdd/tor-$NODENAME/notice.log
 Log info file /mnt/hdd/tor-$NODENAME/info.log
-" | sudo tee /etc/tor/instances/$NODENAME/torrc
-    sudo touch /etc/tor/bridges
-    sudo cp /etc/tor/bridges ./bridges
-    sudo cp /etc/tor/instances/$NODENAME/torrc ./$NODENAME.torrc
-    sudo bash -c 'cat ./bridges ./$NODENAME.torrc > ./torrcX'
-    sudo mv ./torrcX /etc/tor/instances/$NODENAME/torrc
-    sudo rm ./bridges ./$NODENAME.torrc
-    sudo chmod 644 /etc/tor/instances/$NODENAME/torrc
+
+" | sudo tee $torrclnd
+    if [ -f $bridgesTor ]; then
+      sudo touch $torrclnd
+      sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrclnd
+      sudo mv $torrclnd $torrclnd.tmp
+      sudo bash -c 'cat '$bridgesTor' '$torrclnd'.tmp > '$torrclnd''
+      sudo rm -rf $torrclnd.tmp
+    fi
+    sudo chmod 644 $torrclnd
 
     sudo mkdir -p /etc/systemd/system/tor@$NODENAME.service.d
     sudo tee /etc/systemd/system/tor@$NODENAME.service.d/raspiblitz.conf >/dev/null <<EOF
@@ -312,6 +321,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isTorConfigOK} -eq 0 ]; then
     echo "# - updating Tor config ${torrc}"
     cat > ./torrc <<EOF
+
 ### torrc for tor@default
 ### See 'man tor', or https://www.torproject.org/docs/tor-manual.html
 
@@ -351,13 +361,16 @@ HiddenServicePort 10009 127.0.0.1:10009
 HiddenServiceDir /mnt/hdd/tor/lndrest8080/
 HiddenServiceVersion 3
 HiddenServicePort 8080 127.0.0.1:8080
+
 EOF
     sudo rm $torrc
-    sudo touch /etc/tor/bridges
-    sudo cp /etc/tor/bridges ./bridges
-    sudo bash -c 'cat ./bridges ./torrc > ./torrcX'
-    sudo mv ./torrcX $torrc
-    sudo rm ./bridges
+    if [ -f $bridgesTor ]; then
+      sudo touch $torrc
+      sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrc
+      sudo mv $torrc $torrc.tmp
+      sudo bash -c 'cat '$bridgesTor' '$torrc'.tmp > '$torrc''
+      sudo rm -rf $torrc.tmp
+    fi
     sudo chmod 644 $torrc
     sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
