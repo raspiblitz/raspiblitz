@@ -552,9 +552,9 @@ fi
 bridgeInsert()
 {
 if [ ! -z "${bridge1}" ] || [ ! -z "${bridge2}" ] || [ ! -z "${bridge3}" ]; then
-  sudo touch $torrc
-  sudo cp $torrc $torrc.tmp
-  sudo rm -rf $torrc
+  sudo touch $torrc $torrclnd
+  sudo mv $torrc $torrc.tmp
+  sudo mv $torrclnd $torrclnd.tmp
   sudo rm -rf $bridgesTor
   sudo touch $bridgesTor
   echo "" | sudo tee -a $bridgesTor
@@ -572,8 +572,9 @@ if [ ! -z "${bridge1}" ] || [ ! -z "${bridge2}" ] || [ ! -z "${bridge3}" ]; then
     echo "Bridge ${bridge3}" | sudo tee -a $bridgesTor
   fi
   echo "" | sudo tee -a $bridgesTor
-  sudo bash -c 'cat '$torrc.tmp' '$bridgeTor' > '$torrc''
-  sudo rm -rf $torrc.tmp
+  sudo bash -c 'cat '$bridgesTor' '$torrc.tmp' > '$torrc''
+  sudo bash -c 'cat '$bridgesTor' '$torrclnd.tmp' > '$torrclnd''
+  sudo rm -rf $torrc.tmp $torrclnd.tmp
 fi
 }
 
