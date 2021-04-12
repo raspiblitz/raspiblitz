@@ -25,6 +25,20 @@ torrc="/etc/tor/torrc"
 # lnd
 torrclnd="/etc/tor/instances/lnd/torrc"
 
+# facilitate including bridges in the torrc(s)
+torrcPortable()
+{
+# torrcPble="/path/to/wanted/torrc"
+# declared wanted torrc path before calling this script
+    if [ -f $bridgesTor ]; then
+      sudo touch $torrcPtble
+      sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrcPtble
+      sudo mv $torrcPtble $torrcPtble.tmp
+      sudo bash -c 'cat '$bridgesTor' '$torrcPtble'.tmp > '$torrcPtble''
+      sudo rm -rf $torrcPtble.tmp
+    fi
+}
+
 activateBitcoinOverTOR()
 {
   echo "*** Changing ${network} Config ***"
@@ -139,13 +153,8 @@ Log notice file /mnt/hdd/tor-$NODENAME/notice.log
 Log info file /mnt/hdd/tor-$NODENAME/info.log
 
 " | sudo tee $torrclnd
-    if [ -f $bridgesTor ]; then
-      sudo touch $torrclnd
-      sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrclnd
-      sudo mv $torrclnd $torrclnd.tmp
-      sudo bash -c 'cat '$bridgesTor' '$torrclnd'.tmp > '$torrclnd''
-      sudo rm -rf $torrclnd.tmp
-    fi
+    torrcPtble="${torrclnd}"
+    torrcPortable
     sudo chmod 644 $torrclnd
 
     sudo mkdir -p /etc/systemd/system/tor@$NODENAME.service.d
@@ -364,13 +373,8 @@ HiddenServicePort 8080 127.0.0.1:8080
 
 EOF
     sudo rm $torrc
-    if [ -f $bridgesTor ]; then
-      sudo touch $torrc
-      sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrc
-      sudo mv $torrc $torrc.tmp
-      sudo bash -c 'cat '$bridgesTor' '$torrc'.tmp > '$torrc''
-      sudo rm -rf $torrc.tmp
-    fi
+    torrcPtble="${torrc}"
+    torrcPortable
     sudo chmod 644 $torrc
     sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
     echo ""
