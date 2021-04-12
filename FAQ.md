@@ -945,10 +945,7 @@ Which transport should I choose?
 China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
 On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridgs are faster (there are thousands of bridges operators)
           
-* Insert bridges in the following format accordingly to the plugglable type you chose:
-
-
-* Here is a `torrc` code example:
+* Here is a `torrc` code example (IMPORTANT: Keep bridges information without empty lines between them):
 Uncomment the ClientTransportPlugin accordingly to the transport you chose. If you chose normal bridges, let it commented.
 If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove this part.
 OtherInfo* means that that each bridge type use different info on the remaining parameters, so fill if accordginly.
