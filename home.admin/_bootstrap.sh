@@ -183,13 +183,13 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
-  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
+  echo "Logs in stored to: /home/admin/raspiblitz.log.recover"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.log.recover
+  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.log.recover
   # delete the after boot script
   sudo rm /home/admin/setup.sh 
   # reboot again
-  echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
+  echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.log.recover
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -207,7 +207,7 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
-  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
+  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.log.recover
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
   exit 0
 fi
@@ -230,7 +230,7 @@ if [ ${sshReset} -eq 1 ]; then
   sudo systemctl stop sshd
   sudo rm /mnt/hdd/ssh/ssh_host*
   sudo ssh-keygen -A
-  echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
+  echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.log.recover
   sudo /home/admin/XXshutdown.sh reboot
   exit 0
 fi
@@ -382,9 +382,9 @@ if [ ${isMounted} -eq 0 ]; then
     echo "state=recovered" >> /home/admin/raspiblitz.recover.info
     echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
-    cp $logFile /home/admin/raspiblitz.recover.log
+    cp $logFile /home/admin/raspiblitz.log.recover
     sync
-    echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
+    echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.log.recover
     sudo shutdown -r -F -t 60
     exit 0
   else 
