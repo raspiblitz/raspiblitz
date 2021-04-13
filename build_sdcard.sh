@@ -258,7 +258,7 @@ sudo touch /etc/apt/sources.list.d/tor-apttor.list
 sudo touch /etc/apt/sources.list.d/tor-src-apttor.list
 
 echo "*** Adding distro Sources to sources.list ***"
-if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
+if [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
   sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
 deb https://deb.debian.org/debian ${distribution} main contrib non-free
 deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
@@ -410,7 +410,7 @@ echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
 # fix for v1.7 tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054#issuecomment-800383278
 # will use torsocks anyway, cause Tor needs to be running for whom needs it the most, and it will exit above on the test if not working.
-torsocks wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+torsocks wget -qO- http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
 sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
 torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
 if [ ${torKeyAvailable} -eq 0 ]; then
@@ -422,15 +422,15 @@ echo ""
 
 # deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
 echo "*** Adding Tor Sources to sources lists ***"
-if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ] || [ "${baseimage}" = "ubuntu" ]; then
+if [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ] || [ "${baseimage}" = "ubuntu" ]; then
   if [ ${statusTorDomain} -eq 0 ] || [ "${testTorDomain}" = "false" ];then
-    echo "- adding 'deb tor+https://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
+    echo "- adding 'deb tor://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
     sudo tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
-deb tor+https://deb.torproject.org/torproject.org ${distribution} main
+deb tor://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
 EOF
-    echo "- adding 'deb-src tor+https://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
+    echo "- adding 'deb-src tor://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
     sudo tee -a /etc/apt/sources.list.d/tor-src-apttor.list << EOF
-#deb-src tor+https://deb.torproject.org/torproject.org ${distribution} main
+#deb-src tor://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
 EOF
     echo "OK - Tor sources added"
   else
