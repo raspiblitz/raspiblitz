@@ -208,14 +208,14 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
-  echo "Switching HDMI ON ... (reboot) " >> $logFile
+  echo "Yes HDMI switch found ... activating HDMI display output & reboot" >> $logFile
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
   sudo cp ${logFile} ${logFile}.hdmiswitch
   sudo shutdown -r now
   sleep 100
   exit 0
 else
-  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.log.recover
+  echo "No HDMI switch found. " >> $logFile
 fi
 
 ################################
