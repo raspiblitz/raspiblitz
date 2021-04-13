@@ -66,7 +66,7 @@ if [ "${ElectRS}" = "on" ]; then
 fi
 
 # remove flag that freshly recovered
-sudo rm /home/admin/raspiblitz.recover.info
+sudo rm /home/admin/recover.flag
 
 # when auto-unlock is activated then Password C is needed to be restored on SD card
 if [ "${autoUnlock}" = "on" ]; then

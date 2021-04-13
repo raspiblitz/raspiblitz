@@ -88,6 +88,7 @@ if [ ${#rootPartition} -gt 0 ]; then
               echo "going into reboot" >> ${logFile}
               sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
+              sleep 100
 	            exit 0
 	          else
               echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}

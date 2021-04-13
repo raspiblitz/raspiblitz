@@ -126,7 +126,7 @@ if [ "${copyInProgress}" = "1" ]; then
 fi
 
 # signal that after bootstrap recover user dialog is needed
-recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
+recoveredInfoExists=$(sudo ls /home/admin/recover.flag 2>/dev/null | grep -c '.info')
 if [ ${recoveredInfoExists} -gt 0 ]; then
   echo "System recovered - needs final user settings"
   /home/admin/20recoverDialog.sh 

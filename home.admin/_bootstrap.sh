@@ -184,12 +184,13 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   sudo cat /home/admin/setup.sh
   # execute the after boot script
   echo "Logs in stored to: /home/admin/raspiblitz.log.recover"
-  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.log.recover
-  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.log.recover
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> ${logFile}
+  sudo /home/admin/setup.sh >> ${logFile}
   # delete the after boot script
   sudo rm /home/admin/setup.sh 
   # reboot again
-  echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.log.recover
+  echo "DONE wait 10 secs ... one more reboot needed ... " >> ${logFile}
+  sudo cp ${logFile} ${logFile}.afterboot
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -207,9 +208,14 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
-  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.log.recover
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+  echo "Switching HDMI ON ... (reboot) " >> $logFile
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
+  sudo cp ${logFile} ${logFile}.hdmiswitch
+  sudo shutdown -r now
+  sleep 100
   exit 0
+else
+  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.log.recover
 fi
 
 ################################
@@ -222,16 +228,18 @@ fi
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/ssh.reset*
+  sudo rm /boot/ssh.reset* >> $logFile
   # show info ssh reset
   sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
   sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
   # delete ssh certs
-  sudo systemctl stop sshd
-  sudo rm /mnt/hdd/ssh/ssh_host*
-  sudo ssh-keygen -A
-  echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.log.recover
-  sudo /home/admin/XXshutdown.sh reboot
+  sudo systemctl stop sshd >> $logFile
+  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
+  sudo ssh-keygen -A >> $logFile
+  echo "SSH SERVER CERTS RESET ... (reboot) " >> $logFile
+  sudo cp ${logFile} ${logFile}.sshcerts
+  sudo shutdown -r now
+  sleep 100
   exit 0
 fi
 
@@ -379,12 +387,12 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
-    echo "state=recovered" >> /home/admin/raspiblitz.recover.info
+    echo "state=recovered" >> /home/admin/recover.flag
     echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
-    cp $logFile /home/admin/raspiblitz.log.recover
+    echo "REBOOT FOR SSH CERTS RESET ..." >> $logFile
+    sudo cp ${logFile} ${logFile}.recover
     sync
-    echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.log.recover
     sudo shutdown -r -F -t 60
     exit 0
   else 
@@ -518,7 +526,7 @@ fi
 # DETECT FRESHLY RECOVERED SD
 ################################
 
-recoveredInfoExists=$(ls /home/admin/raspiblitz.recover.info | grep -c '.info')
+recoveredInfoExists=$(ls /home/admin/recover.flag | grep -c '.info')
 if [ ${recoveredInfoExists} -eq 1 ]; then
   sed -i "s/^state=.*/state=recovered/g" ${infoFile}
   sed -i "s/^message=.*/message='login to finish'/g" ${infoFile}
