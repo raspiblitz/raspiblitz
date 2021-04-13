@@ -103,7 +103,7 @@ function debug() {
   cd /home/admin
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
   if [[ $1 = "-l" ]]; then
-    ./XXdebugLogs.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log | nc termbin.com 9999
+    ./XXdebugLogs.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log | torsocks nc termbin.com 9999
   else
     ./XXdebugLogs.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log
   fi
