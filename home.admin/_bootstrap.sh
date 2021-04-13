@@ -151,7 +151,7 @@ fi
 randnum=$(shuf -i 0-7 -n 1)
 /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
-sudo killall -3 fbi
+/home/admin/config.scripts/blitz.display.sh hide
 
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
