@@ -287,9 +287,10 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUS
   if [ ${usbQuirkDone} -eq 0 ]; then
     # add new usb-storage.quirks
     sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
-    sudo cat /boot/cmdline.txt
+    sudo cat /boot/cmdline.txt >> $logFile
     # go into reboot to activate new setting
-    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... " >> $logFile
+    sudo cp ${logFile} ${logFile}.uasp
     sudo shutdown -r now
     sleep 100
   fi
