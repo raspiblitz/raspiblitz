@@ -150,6 +150,15 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     ;;
   ${network}RPC)
     # vars
+    if [ $(${chain}net) = mainnet ];then
+      BITCOINRPCPORT=8332
+    elif [ $(${chain}net) = testnet ];then
+      BITCOINRPCPORT=18332
+    elif [ $(${chain}net) = signet ];then
+      BITCOINRPCPORT=38332
+    fi
+    echo "# Running on ${chain}net"
+    echo
     localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
     grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' |\
     awk -F. '{print $1"."$2"."$3".0/24"}')
@@ -157,9 +166,9 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
     bindIP=$(grep -c "rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
-    rpcTorService=$(grep -c "HiddenServicePort 8332 127.0.0.1:8332"  < /etc/tor/torrc)
-    TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin8332/hostname)
-    
+    rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
+    TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
+
     function showRPCcredentials() {
       RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
       RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
@@ -181,7 +190,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
       fi
       echo
       echo "Port:"
-      echo "8332"
+      echo "${BITCOINRPCPORT}"
       echo
       echo "More documentation at:"
       echo "https://github.com/openoms/joininbox/blob/master/prepare_remote_node.md"
@@ -231,8 +240,8 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           echo "# Restarting ${network}d"
           sudo systemctl restart ${network}d
         fi
-        echo "# ufw allow from $localIPrange to any port 8332"
-        sudo ufw allow from $localIPrange to any port 8332
+        echo "# ufw allow from $localIPrange to any port ${BITCOINRPCPORT}"
+        sudo ufw allow from $localIPrange to any port ${BITCOINRPCPORT}
         echo
         showRPCcredentials
         echo "Press ENTER to return to the menu."
@@ -242,7 +251,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-        /home/admin/config.scripts/internet.hiddenservice.sh bitcoin8332 8332 8332
+        /home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
         echo
         echo "The address of the local node is: $TorRPCaddress"
         echo
@@ -263,8 +272,8 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         # remove old entry
         sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
         # remove Hidden Service
-        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin8332
-        sudo ufw deny from $localIPrange to any port 8332
+        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin${BITCOINRPCPORT}
+        sudo ufw deny from $localIPrange to any port ${BITCOINRPCPORT}
         restartCore=0
         if [ $allowIPrange -gt 0 ]; then
           sudo sed -i "/^rpcallowip=.*/d" /mnt/hdd/${network}/${network}.conf
