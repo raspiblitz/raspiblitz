@@ -81,6 +81,12 @@ function repair() {
   ./98repairMenu.sh
 }
 
+# command: restart
+function restart() {
+  cd /home/admin
+  ./XXshutdown.sh reboot
+}
+
 # command: sourcemode
 function sourcemode() {
   cd /home/admin
@@ -110,12 +116,6 @@ function patch() {
   ./XXsyncScripts.sh -run
 }
 
-# command: restart
-function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
-}
-
 # command: off
 function off() {
   cd /home/admin
@@ -133,18 +133,21 @@ function github() {
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+  restart
 }
 
 # command: lcd
 function lcd() {
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
   sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+  restart
 }
 
 # command: headless
 function headless() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
   sudo /home/admin/config.scripts/blitz.display.sh set-display headless
+  restart
 }
 
 # command: torthistx
@@ -249,7 +252,8 @@ function lit() {
   if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use the commands: 'lncli', 'loop', 'pool' and 'frcli'"
+    echo "# see the prefilled parameters with 'alias'"
+    echo "# use the commands: 'lncli', 'lit-frcli', 'lit-loop', 'lit-pool'"
     sudo su - lit
     echo "# use command 'raspiblitz' to return to menu"
   else

@@ -4,6 +4,7 @@
 
 - New: Raspberry Pi OS Base Image 64-bit (August 2020)
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
+- New: Improve LND uptime and reliability over Tor [details](https://github.com/rootzoll/raspiblitz/pull/2148)
 - New: Lightning Terminal 0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - New: chantools 0.8.2 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - New: Circuitbreaker LND firewall (settings menu) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
@@ -15,14 +16,14 @@
 - Update: Sphinx-Relay 2.0.3 (always latest release tag & improved connection dialog)
 - Update: Thunderhub 0.12.12 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.12)
 - Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
-- Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
-- Update: Specter Desktop 1.2.2 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: BTCPayServer 1.0.7.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.2)
+- Update: Specter Desktop 1.3.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Balance of Satoshis 8.0.2 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
 - Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
 - Update: JoininBox 0.3.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
 - Update: mempool v2.1.2 [detail](https://github.com/mempool/mempool/releases/tag/v2.1.2)
-- Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v220)
+- Update: BTC-RPC-Explorer v3.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v300)
 - Update: stacking-sats-kraken 0.4.2 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 
 ## Whats new in Version 1.6.3 of RaspiBlitz?

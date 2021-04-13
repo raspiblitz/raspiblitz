@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/releases
 NBXplorerVersion="v2.1.49"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.7.0"
+BTCPayVersion="v1.0.7.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -353,7 +353,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcpay || exit 1
     echo "# Download the NBXplorer source code ..."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
-    cd NBXplorer
+    cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     echo "# Build NBXplorer ..."
     # from the build.sh with path
