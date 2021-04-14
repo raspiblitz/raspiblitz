@@ -152,6 +152,22 @@ if [ ${configExists} -eq 1 ]; then
     echo "check issue #950 -> ok test.rpcbind exists" >> ${logFile}
   fi
 
+else
+  echo "WARN: /mnt/hdd/bitcoin/bitcoin.conf not found" >> ${logFile}
+fi
+
+# if old lnd.conf exists ...
+configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
+if [ ${configExists} -eq 1 ]; then
+
+  # remove RPC user & pass from lnd.conf ... since v1.7
+  # https://github.com/rootzoll/raspiblitz/issues/2160
+  echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
+  sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
+
+else
+  echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
 fi
 
 echo "Version Code: ${codeVersion}" >> ${logFile}
@@ -159,8 +175,8 @@ echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
 
 if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
   echo "detected version change ... starting migration script" >> ${logFile}
-  echo "TODO: Update Migration check ... only needed after version 1.0" >> ${logFile}
-  echo "OK Done - Updating version in config ..."
+  # nothing specific here yet
+  echo "OK Done - Updating version in config"
   sudo sed -i "s/^raspiBlitzVersion=.*/raspiBlitzVersion='${codeVersion}'/g" ${configFile}
 else
   echo "OK - version of config data is up to date" >> ${logFile}
