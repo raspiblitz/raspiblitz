@@ -390,6 +390,7 @@ if [ ${isMounted} -eq 0 ]; then
     # set flag that system is freshly recovered and needs setup dialogs
     sudo touch /home/admin/recover.flag
     echo "state=recovered" >> /home/admin/recover.flag
+    sudo chown admin:admin /home/admin/recover.flag
     echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
     echo "REBOOT FOR SSH CERTS RESET ..." >> $logFile
