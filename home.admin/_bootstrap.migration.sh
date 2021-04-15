@@ -183,7 +183,7 @@ if [ ${configExists} -eq 1 ]; then
       echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'ignore-historical-gossip-filters' exists" >> ${logFile}
+      echo " - OK 'ignore-historical-gossip-filters' exists (${configParamExists})" >> ${logFile}
     fi
 
     # Avoid slow startup time
@@ -193,7 +193,7 @@ if [ ${configExists} -eq 1 ]; then
       echo " - ADDING 'sync-freelist'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'sync-freelist' exists" >> ${logFile}
+      echo " - OK 'sync-freelist' exists (${configParamExists})" >> ${logFile}
     fi
 
     # Avoid high startup overhead
@@ -203,7 +203,7 @@ if [ ${configExists} -eq 1 ]; then
       echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'stagger-initial-reconnect' exists" >> ${logFile}
+      echo " - OK 'stagger-initial-reconnect' exists (${configParamExists})" >> ${logFile}
     fi
 
     # Delete and recreate RPC TLS certificate when details change or cert expires
@@ -213,7 +213,7 @@ if [ ${configExists} -eq 1 ]; then
       echo " - ADDING 'tlsautorefresh'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'tlsautorefresh' exists" >> ${logFile}
+      echo " - OK 'tlsautorefresh' exists (${configParamExists})" >> ${logFile}
     fi
 
     # Do not include IPs in the RPC TLS certificate
@@ -223,7 +223,7 @@ if [ ${configExists} -eq 1 ]; then
       echo " - ADDING 'tlsdisableautofill'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'tlsdisableautofill' exists" >> ${logFile}
+      echo " - OK 'tlsdisableautofill' exists (${configParamExists})" >> ${logFile}
     fi
 
   else
