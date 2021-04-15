@@ -70,8 +70,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sed -i -E 's/^(display-setup-script=.*)/#\1/' /etc/lightdm/lightdm.conf
   fi
   
-  #sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
-  #sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
   # remove welcome wizard
   sudo rm -rf /etc/xdg/autostart/piwiz.desktop
@@ -217,8 +217,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # set user pi user for autostart
   # TODO(frennkie/rootzoll) what should happen here? This does the same as "on".
-  #sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
-  #sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
   # move back old LXDE autostart config
   sudo rm -f /etc/xdg/lxsession/LXDE-pi/autostart
