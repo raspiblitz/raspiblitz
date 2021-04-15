@@ -388,6 +388,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
+    sudo touch /home/admin/recover.flag
     echo "state=recovered" >> /home/admin/recover.flag
     echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
