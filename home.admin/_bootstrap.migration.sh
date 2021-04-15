@@ -163,9 +163,13 @@ if [ ${configExists} -eq 1 ]; then
   # remove RPC user & pass from lnd.conf ... since v1.7
   # https://github.com/rootzoll/raspiblitz/issues/2160
   echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
+  sudo sed -i '/^\[Bitcoind\]/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.rpchost=/d' /mnt/hdd/lnd/lnd.conf
   sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
   sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
-
+  sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
+  
 else
   echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
 fi
