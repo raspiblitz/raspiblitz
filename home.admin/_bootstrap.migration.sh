@@ -169,7 +169,67 @@ if [ ${configExists} -eq 1 ]; then
   sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
   sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
   sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
-  
+
+  # make sure additional values are added to [Application Options] since v1.7
+  echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
+  applicationOptionsLineNumber=$(sudo grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
+  if [ "${applicationOptionsLineNumber}" != "" ]; then
+    applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
+
+    # Avoid historical graph data sync
+    # ignore-historical-gossip-filters=1
+    configParamExists=$(sudo grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" != "0" ]; then
+      echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'ignore-historical-gossip-filters' exists" >> ${logFile}
+    fi
+
+    # Avoid slow startup time
+    # sync-freelist=1
+    configParamExists=$(sudo grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" != "0" ]; then
+      echo " - ADDING 'sync-freelist'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'sync-freelist' exists" >> ${logFile}
+    fi
+
+    # Avoid high startup overhead
+    # stagger-initial-reconnect=1
+    configParamExists=$(sudo grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" != "0" ]; then
+      echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'stagger-initial-reconnect' exists" >> ${logFile}
+    fi
+
+    # Delete and recreate RPC TLS certificate when details change or cert expires
+    # tlsautorefresh=1
+    configParamExists=$(sudo grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" != "0" ]; then
+      echo " - ADDING 'tlsautorefresh'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'tlsautorefresh' exists" >> ${logFile}
+    fi
+
+    # Do not include IPs in the RPC TLS certificate
+    # tlsautorefresh=1
+    configParamExists=$(sudo grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" != "0" ]; then
+      echo " - ADDING 'tlsautorefresh'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'tlsautorefresh' exists" >> ${logFile}
+    fi
+
+  else
+    echo " - WARN: section '[Application Options]' not found in lnd.conf" >> ${logFile}
+  fi
+
 else
   echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
 fi
