@@ -1206,6 +1206,11 @@ if [ "$1" = "tempmount" ]; then
 
   if [ "${hddFormat}" = "ext4" ]; then
 
+    if [ "${hddDataPartitionExt4}" == "" ]; then
+      echo "error='parameter is no partition'"
+      exit 1
+    fi
+
     # do EXT4 temp mount
     echo "# temp mount /dev/${hddDataPartitionExt4} --> /mnt/hdd"
     sudo mkdir -p /mnt/hdd 1>/dev/null
