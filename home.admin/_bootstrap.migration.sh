@@ -179,7 +179,7 @@ if [ ${configExists} -eq 1 ]; then
     # Avoid historical graph data sync
     # ignore-historical-gossip-filters=1
     configParamExists=$(sudo grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
-    if [ "${configParamExists}" != "0" ]; then
+    if [ "${configParamExists}" == "0" ]; then
       echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
     else
@@ -189,7 +189,7 @@ if [ ${configExists} -eq 1 ]; then
     # Avoid slow startup time
     # sync-freelist=1
     configParamExists=$(sudo grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
-    if [ "${configParamExists}" != "0" ]; then
+    if [ "${configParamExists}" == "0" ]; then
       echo " - ADDING 'sync-freelist'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
     else
@@ -199,7 +199,7 @@ if [ ${configExists} -eq 1 ]; then
     # Avoid high startup overhead
     # stagger-initial-reconnect=1
     configParamExists=$(sudo grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
-    if [ "${configParamExists}" != "0" ]; then
+    if [ "${configParamExists}" == "0" ]; then
       echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
     else
@@ -209,7 +209,7 @@ if [ ${configExists} -eq 1 ]; then
     # Delete and recreate RPC TLS certificate when details change or cert expires
     # tlsautorefresh=1
     configParamExists=$(sudo grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
-    if [ "${configParamExists}" != "0" ]; then
+    if [ "${configParamExists}" == "0" ]; then
       echo " - ADDING 'tlsautorefresh'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
     else
@@ -217,13 +217,13 @@ if [ ${configExists} -eq 1 ]; then
     fi
 
     # Do not include IPs in the RPC TLS certificate
-    # tlsautorefresh=1
+    # tlsdisableautofill=1
     configParamExists=$(sudo grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
-    if [ "${configParamExists}" != "0" ]; then
-      echo " - ADDING 'tlsautorefresh'" >> ${logFile}
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'tlsdisableautofill'" >> ${logFile}
       sudo sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
     else
-      echo " - OK 'tlsautorefresh' exists" >> ${logFile}
+      echo " - OK 'tlsdisableautofill' exists" >> ${logFile}
     fi
 
   else
