@@ -354,11 +354,13 @@ elif [ "${abcd}" = "c" ]; then
 
   echo "LND needs to be restarted to lock wallet first .. (please wait)"
   sudo systemctl restart lnd
+  sleep 2
 
   err=""
   source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
+    clear
     echo "# FAIL: Was not able to change password"
     exit 1
   fi
