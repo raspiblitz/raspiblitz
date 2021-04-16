@@ -921,6 +921,7 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 First let's take into consideration this questions.
 
 * Read what are bridges ---> https://support.torproject.org/censorship/censorship-7/
+
 Bridges are Tor relays that help you circumvent censorship.
 Means of aquiring bridges
 1 ---> Open Tor Browser and access https://bridges.torproject.org/
@@ -929,25 +930,27 @@ Means of aquiring bridges
 Bridges are necessary? Depends on your treat model.
 
 * Read bridges description ---> https://tb-manual.torproject.org/bridges/
+
 Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
-Normal ---> This type of bridges dont disquise you are using Tor, but will help you connect to Tor network.
+Normal ---> This type of bridges dont disguise you are using Tor, but will help you connect to Tor network.
 
 Which type should I choose?
 If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges.
 If your Government blocks Tor traffic or you are under constant surveillance, you should use 'Pluggable' bridges to mask you are using Tor
 
 * Read Tor circumvention techniques ---> https://tb-manual.torproject.org/circumvention/
+
 Types of pluggable transport.
-obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described on the beggining of the questions.
-meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site. You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
+obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described in the beggining of the questions.
+meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site (Don't worry, microsoft don't have your data, is still Tor obfscuration level of encryption). You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
 
 Which transport should I choose?
 China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
-On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridgs are faster (there are thousands of bridges operators)
+On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridges are faster (there are thousands of bridges operators).
           
 * Here is a `torrc` code example (IMPORTANT: Keep bridges information without empty lines between them):
-Uncomment the ClientTransportPlugin accordingly to the transport you chose. If you chose normal bridges, let it commented.
-If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove this part.
+Uncomment the ClientTransportPlugin accordingly to the transport you chose (obfs4|meek_lite). If you chose normal bridges, let it commented.
+If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove/comment this part.
 OtherInfo* means that that each bridge type use different info on the remaining parameters, so fill if accordginly.
 obfs4 bridges ----> obfs4 ipAdress:port fingerprint cert iat-mode
 meek bridges -----> meek_lite ipAdress:port fingerprint url front
