@@ -89,7 +89,7 @@ migrate_raspiblitz_conf () {
   echo "network=bitcoin" >> /home/admin/raspiblitz.conf
   echo "chain=main" >> /home/admin/raspiblitz.conf
   echo "hostname=${nodename}" >> /home/admin/raspiblitz.conf
-  echo "displayClass=hdmi" >> /home/admin/raspiblitz.conf
+  echo "displayClass=lcd" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
   echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
