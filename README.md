@@ -1114,8 +1114,8 @@ As you can see from the URL, you can find the build script in this Git repo unde
 
 The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. The install dialog of the RaspiBlitz schould automatically start. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitzes, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image.
 
-*Note: If you need Tor bridges to make connections or for security, place a file called `torrc` on the user home folder you are logged on, with the bridges code that will be automatically moved to /etc/tor/torrc by the build_sdcard.sh script.
-Fill it accordingly to the examples on the FAQ: ## How can I use bridges with Tor?.
+**Note: If you need `Tor bridges` to make connections or for security, place a file called `torrc` on the user home folder you are logged on, with the bridges code that will be automatically moved to /etc/tor/torrc by the build_sdcard.sh script.
+Fill it accordingly to the [examples in the FAQ](FAQ.md#how-can-i-use-bridges-with-tor)**
 
 *Note: If you plan to use your self-build sd card as a MASTER copy and distribute it: Use a smaller 8GB card for that. This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
