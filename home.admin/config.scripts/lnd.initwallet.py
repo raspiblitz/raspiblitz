@@ -153,10 +153,13 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
 
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
-        print(code, file=sys.stderr)
-        details = rpc_error_call.details()
-        print("err='RPCError ChangePassword'")
-        print("errMore=\"" + details + "\"")
+        if code == "StatusCode.UNIMPLEMENTED":
+            print("err='wallet needs to be unlocked for password change'")
+        else:
+            print(code, file=sys.stderr)
+            details = rpc_error_call.details()
+            print("err='RPCError ChangePassword'")
+            print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
