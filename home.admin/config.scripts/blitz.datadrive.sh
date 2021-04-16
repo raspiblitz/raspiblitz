@@ -259,7 +259,7 @@ if [ "$1" = "status" ]; then
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
             fi
-            isMyNodeHDD=$(sudo ls /mnt/storage/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
+            isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             fi

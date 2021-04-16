@@ -76,8 +76,8 @@ Do you want to start migration to RaspiBlitz now?
     echo "******************************************************"
     echo "OK MIGRATION --> will now reboot and update/recover"
     echo "******************************************************"
-    #sudo shutdown -h -r now
-    #sleep 100
+    sudo shutdown -h -r now
+    sleep 100
     exit 0
 	else
     echo "******************************************************"
