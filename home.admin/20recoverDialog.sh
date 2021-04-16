@@ -27,7 +27,7 @@ Write them down & store them in a safe place.
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
   sudo /home/admin/config.scripts/blitz.setpassword.sh b
   oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
-  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPassword
+  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPasswordC
   if [ "$?" != "0" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "Please write down your Password C:\n${oldPasswordC}" 10 52
   fi
