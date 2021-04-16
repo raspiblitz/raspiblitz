@@ -302,8 +302,7 @@ elif [ "${abcd}" = "c" ]; then
     clear
     oldPassword=$(whiptail --passwordbox "\nEnter old Password C:\n" 10 52 "" --title "Old Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
-      echo "# exit without change"
-      exit 1
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c
     fi
     echo "OK ... processing"
   fi
@@ -313,41 +312,36 @@ elif [ "${abcd}" = "c" ]; then
     # ask user for new password c
     newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      echo "# exit without change"
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      exit 0
+    fi
+    # check new password does not contain bad characters
+    clearedResult=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+    if [ ${#clearedResult} != ${#newPassword} ] || [ ${#clearedResult} -eq 0 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)" 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      exit 0
+    fi
+    # check new password longer than 8
+    if [ ${#newPassword} -lt 8 ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8" 6 52
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
       exit 1
     fi
     # ask user to retype new password c
     newPassword2=$(whiptail --passwordbox "\nEnter again new Password C:\n" 10 52 "" --title "New Password C (repeat)" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      echo "# exit without change"
-      exit 1
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      exit 0
     fi
     echo "OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match" 6 52
-      exit 1
+      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      exit 0
     fi
     echo "OK ... processing"
-  fi
-
-  # check new password non zero
-  if [ ${#newPassword} -eq 0 ]; then
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty" 6 52
-    exit 1
-  fi
-
-  # check new password does not contain bad characters
-  clearedResult=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
-  if [ ${#clearedResult} != ${#newPassword} ] || [ ${#clearedResult} -eq 0 ]; then
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)" 6 52
-    exit 1
-  fi
-
-  # check new password longer than 8
-  if [ ${#newPassword} -lt 8 ]; then
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8" 6 52
-    exit 1
   fi
 
   echo "oldPassword: ${oldPassword}"
@@ -363,11 +357,9 @@ elif [ "${abcd}" = "c" ]; then
   err=""
   source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
     echo "# FAIL: Was not able to change password"
-    echo "error='${err}'"
-    echo "errorDetail='${errMore}'"
-    sleep 4
-    exit 0
+    exit 1
   fi
 
   # old manual way
