@@ -26,6 +26,11 @@ Write them down & store them in a safe place.
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
   sudo /home/admin/config.scripts/blitz.setpassword.sh b
+  oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPassword
+  if [ "$?" != "0" ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "Please write down your Password C:\n${oldPasswordC}" 10 52
+  fi
 
 elif [ ${resetAlsoPasswordB} -gt 0 ]; then
 
@@ -46,9 +51,6 @@ Write them down & store them in a safe place.
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
   sudo /home/admin/config.scripts/blitz.setpassword.sh b
-  oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
-  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPassword
-
 else
 
   # just password A
