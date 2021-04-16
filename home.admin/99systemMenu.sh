@@ -149,6 +149,3 @@ thunderhub, tor@default, tor@lnd, tor
     echo "use CTRL+C any time to abort"
     sudo journalctl -n 100 -fu $SERVICE;;
 esac
-
-# go into loop - start script from beginning to load config/start fresh
-/home/admin/00mainMenu.sh
