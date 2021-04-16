@@ -308,17 +308,41 @@ elif [ "${abcd}" = "c" ]; then
 
   if [ "${newPassword}" == "" ]; then
     # ask user for new password c
-    newPassword=$(whiptail --passwordbox "\nEnter onew Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
+    newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
       echo "# exit without change"
       exit 1
     fi
     # ask user to retype new password c
-    newPassword=$(whiptail --passwordbox "\nEnter onew Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
+    newPassword2=$(whiptail --passwordbox "\nEnter again new Password C:\n" 10 52 "" --title "New Password C (repeat)" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
       echo "# exit without change"
       exit 1
     fi
+    # check if passwords match
+    if [ "${newPassword}" != "${newPassword2}" ]; then
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      exit 1
+    fi
+  fi
+
+  # check new password non zero
+  if [ ${#newPassword} -eq 0 ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty" 6 52
+    exit 1
+  fi
+
+  # check new password does not contain bad characters
+  clearedResult=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+  if [ ${#clearedResult} != ${#newPassword} ] || [ ${#clearedResult} -eq 0 ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)" 6 52
+    exit 1
+  fi
+
+  # check new password longer than 8
+  if [ ${#newPassword} -lt 8 ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8" 6 52
+    exit 1
   fi
 
   echo "oldPassword: ${oldPassword}"
