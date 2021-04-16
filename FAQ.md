@@ -73,7 +73,7 @@
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
-
+- [How can I use bridges with Tor?](#how-can-i-use-bridges-with-Tor?)
 ---
 
 ## What changed on the single RaspiBlitz updates?
@@ -916,11 +916,55 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
 
+# How can I use bridges with Tor?
+
+First let's take into consideration this questions.
+
+* Read what are bridges ---> https://support.torproject.org/censorship/censorship-7/
+Bridges are Tor relays that help you circumvent censorship.
+Means of aquiring bridges
+1 ---> Open Tor Browser and access https://bridges.torproject.org/
+2 ---> Another way to get bridges is to send an email to bridges@torproject.org. Leave the email subject empty and write 'get transport obfs4' in the email's message body. Please note that you must send the email using an address from one of the following email providers: Riseup or Gmail. 
+
+Bridges are necessary? Depends on your treat model.
+
+* Read bridges description ---> https://tb-manual.torproject.org/bridges/
+Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
+Normal ---> This type of bridges dont disquise you are using Tor, but will help you connect to Tor network.
+
+Which type should I choose?
+If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges.
+If your Government blocks Tor traffic or you are under constant surveillance, you should use 'Pluggable' bridges to mask you are using Tor
+
+* Read Tor circumvention techniques ---> https://tb-manual.torproject.org/circumvention/
+Types of pluggable transport.
+obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described on the beggining of the questions.
+meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site. You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
+
+Which transport should I choose?
+China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
+On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridgs are faster (there are thousands of bridges operators)
+          
+* Here is a `torrc` code example (IMPORTANT: Keep bridges information without empty lines between them):
+Uncomment the ClientTransportPlugin accordingly to the transport you chose. If you chose normal bridges, let it commented.
+If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove this part.
+OtherInfo* means that that each bridge type use different info on the remaining parameters, so fill if accordginly.
+obfs4 bridges ----> obfs4 ipAdress:port fingerprint cert iat-mode
+meek bridges -----> meek_lite ipAdress:port fingerprint url front
+normal bridges ---> ipAdress:port fingerprint
+```
+UseBridges 1
+#ClientTransportPlugin [transport] exec /usr/bin/obfs4proxy managed
+Bridge [transport] ipAddres:port fingerprint otherInfo*
+Bridge [transport] ipAddres:port fingerprint otherInfo*
+Bridge [transport] ipAddres:port fingerprint otherInfo*
+```
+
 # Versioning
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
-* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
-* Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd card is mandatory.
+* Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but reflashing the sd card is still advised.
 
 # GitHub Workflow
 
