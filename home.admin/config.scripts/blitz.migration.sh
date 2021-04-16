@@ -226,7 +226,6 @@ if [ "$1" = "migration-mynode" ]; then
 
   # backup & rename the rest of the data
   sudo mv /mnt/hdd/mynode /mnt/hdd/backup_migration
-  sudo rm 
 
   # call function for final migration
   migrate_raspiblitz_conf
