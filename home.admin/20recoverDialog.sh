@@ -5,27 +5,32 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # show password info dialog
-resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "rpcpassword=passwordB")
-if [ ${resetAlsoPasswordB} -eq 0 ]; then
-  # just password A
-  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
+resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null | grep -c "rpcpassword=passwordB")
+resetAlsoPasswordC=$(sudo ls /mnt/hdd/passwordc.flag 2>/dev/null | grep -c ".flag")
 
-You need to set a new Password A:
-A) Master User Password
+if [ ${resetAlsoPasswordC} -gt 0 ]; then
 
-Passwords B & C stay as before.
+  # password A + B + C
+  dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "Your migration to RaspiBlitz is almost done.
+
+You need to set a new Password A, B & C:
+A) Main User Password (SSH, WebUI, ..)
+B) RPC & APP Password (Additional Apps, ..)
+C) Lightning Wallet Unlock Password
 
 Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 14 52
+" 17 52
 
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
+  sudo /home/admin/config.scripts/blitz.setpassword.sh b
 
-else
+elif [ ${resetAlsoPasswordB} -gt 0 ]; then
+
   # password A + B
-  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
+  dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "Your migration to RaspiBlitz is almost done.
 
 You need to set a new Password A & B:
 A) Main User Password (SSH, WebUI, ..)
@@ -41,6 +46,26 @@ Write them down & store them in a safe place.
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
   sudo /home/admin/config.scripts/blitz.setpassword.sh b
+  oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPassword
+
+else
+
+  # just password A
+  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
+
+You need to set a new Password A:
+A) Master User Password
+
+Passwords B & C stay as before.
+
+Follow Password Rules: Minimal of 8 chars,
+no spaces and only special characters - or .
+Write them down & store them in a safe place.
+" 14 52
+
+  # call set password a script
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a
 
 fi
 

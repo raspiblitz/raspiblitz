@@ -328,6 +328,9 @@ elif [ "${abcd}" = "c" ]; then
   echo "# Make sure Auto-Unlocks off"
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
 
+  echo "LND needs to be restarted to lock wallet first .. (please wait)"
+  sudo systemctl restart lnd
+
   err=""
   source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
@@ -347,8 +350,6 @@ elif [ "${abcd}" = "c" ]; then
   # echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
   # echo "If you had Auto-Unlock active - you need to re-activate after this."
   # echo "****************************************************************************"
-  # echo "LND needs to be restarted to lock wallet first .. (please wait)"
-  # sudo systemctl restart lnd
   # sleep 6
   # let LND-CLI handle the password change
   # sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword

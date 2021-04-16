@@ -148,8 +148,8 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
 
     try:
         response = stub.ChangePassword(request)
-        print("ok")
-        print(response.admin_macaroon)
+        print("# ok - password changed")
+        #print(response.admin_macaroon)
 
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()

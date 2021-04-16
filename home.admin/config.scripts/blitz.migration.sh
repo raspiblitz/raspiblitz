@@ -224,6 +224,9 @@ if [ "$1" = "migration-mynode" ]; then
   sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
   migrate_lnd_conf
 
+  # copy lnd wallet password - so that user can set own on final setup
+  sudo cp /mnt/hdd/mynode/settings/.lndpw /mnt/hdd/passwordc.flag
+
   # backup & rename the rest of the data
   sudo mv /mnt/hdd/mynode /mnt/hdd/backup_migration
   sudo rm 
