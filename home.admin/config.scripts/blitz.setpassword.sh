@@ -299,14 +299,17 @@ elif [ "${abcd}" = "c" ]; then
 
   if [ "${oldPassword}" == "" ]; then
     # ask user for old password c
+    clear
     oldPassword=$(whiptail --passwordbox "\nEnter old Password C:\n" 10 52 "" --title "Old Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
       echo "# exit without change"
       exit 1
     fi
+    echo "OK ... processing"
   fi
 
   if [ "${newPassword}" == "" ]; then
+    clear
     # ask user for new password c
     newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
@@ -319,11 +322,13 @@ elif [ "${abcd}" = "c" ]; then
       echo "# exit without change"
       exit 1
     fi
+    echo "OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
       exit 1
     fi
+    echo "OK ... processing"
   fi
 
   # check new password non zero
