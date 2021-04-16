@@ -320,7 +320,7 @@ function uninstall_lcd() {
     sudo apt-get install -y xinput-calibrator
 
     # remove modifications of config.txt
-    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
