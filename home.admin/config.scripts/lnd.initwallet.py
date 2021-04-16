@@ -145,8 +145,8 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
     print(wallet_password_new)
 
     request = lnrpc.ChangePasswordRequest(
-        current_password=wallet_password,
-        new_password=wallet_password_new
+        current_password=wallet_password.encode(),
+        new_password=wallet_password_new.encode()
     )
 
     try:
