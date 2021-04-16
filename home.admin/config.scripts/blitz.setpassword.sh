@@ -325,7 +325,7 @@ elif [ "${abcd}" = "c" ]; then
     echo "OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
-      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
+      dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match" 6 52
       exit 1
     fi
     echo "OK ... processing"
