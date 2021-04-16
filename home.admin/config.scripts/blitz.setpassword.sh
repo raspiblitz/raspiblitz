@@ -3,7 +3,9 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
- echo "blitz.setpassword.sh [?a|b|c|d] [?newpassword] "
+ echo "blitz.setpassword.sh a [?newpassword] "
+echo "blitz.setpassword.sh b [?newpassword] "
+ echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  echo "exits on 0 = needs reboot"
@@ -29,17 +31,8 @@ if [ ${#chain} -eq 0 ]; then
   chain="main"
 fi
 
-# 1. parameter [?a|b|c|d]
+# 1. parameter [?a|b|c]
 abcd=$1
-
-# 2. parameter [?newpassword]
-newPassword=$2
-
-# 4. parameter [?newpassword]
-emptyAllowed=0
-if [ "$4" == "empty-allowed" ]; then
-  emptyAllowed=1
-fi
 
 # run interactive if no further parameters
 OPTIONS=()
@@ -48,7 +41,6 @@ if [ ${#abcd} -eq 0 ]; then
     OPTIONS+=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
     OPTIONS+=(C "LND Wallet Password")
-    OPTIONS+=(D "LND Seed Password")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Set Password" \
@@ -82,6 +74,8 @@ echo ""
 ############################
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then
+
+  newPassword=$2
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
@@ -157,6 +151,8 @@ if [ "${abcd}" = "a" ]; then
 ############################
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
+
+  newPassword=$2
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
@@ -298,32 +294,64 @@ EOF
 # PASSWORD C
 elif [ "${abcd}" = "c" ]; then
 
-  if [ ${#newPassword} -gt 0 ]; then
-    echo "New password C cannot be set thru paramter .. will start interactive password setting."
-    echo "PRESS ENTER to continue"
-    read key
+  oldPassword=$2
+  newPassword=$3
+
+  if [ "${oldPassword}" == "" ]; then
+    # ask user for old password c
+    oldPassword=$(whiptail --passwordbox "\nEnter old Password C:\n" 10 52 "" --title "Old Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
+      echo "# exit without change"
+      exit 1
+    fi
   fi
 
-  clear
-  echo ""
-  echo "****************************************************************************"
-  echo "Change LND Wallet Password --> lncli --chain=${network} --network=${chain}net changepassword"
-  echo "****************************************************************************"
-  echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
-  echo "If you had Auto-Unlock active - you need to re-activate after this."
-  echo "****************************************************************************"
+  if [ "${newPassword}" == "" ]; then
+    # ask user for new password c
+    newPassword=$(whiptail --passwordbox "\nEnter onew Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
+      echo "# exit without change"
+      exit 1
+    fi
+    # ask user to retype new password c
+    newPassword=$(whiptail --passwordbox "\nEnter onew Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
+      echo "# exit without change"
+      exit 1
+    fi
+  fi
 
-  echo "LND needs to be restarted to lock wallet first .. (please wait)"
-  sudo systemctl restart lnd
-  sleep 6
+  echo "oldPassword: ${oldPassword}"
+  echo "newPassword: ${newPassword}"
+  exit 1
 
-  # let LND-CLI handle the password change
-  sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
-
-  # deactivate AUTO-UNLOCK if activated
-  echo ""
   echo "# Make sure Auto-Unlocks off"
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
+
+  err=""
+  source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password $oldPassword $newPassword)
+  if [ "${err}" != "" ]; then
+    echo "# FAIL: Was not able to change password"
+    echo "error='${err}'"
+    echo "errorDetail='${errMore}'"
+    sleep 4
+    exit 0
+  fi
+
+  # old manual way
+  # clear
+  # echo ""
+  # echo "****************************************************************************"
+  # echo "Change LND Wallet Password --> lncli --chain=${network} --network=${chain}net changepassword"
+  # echo "****************************************************************************"
+  # echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
+  # echo "If you had Auto-Unlock active - you need to re-activate after this."
+  # echo "****************************************************************************"
+  # echo "LND needs to be restarted to lock wallet first .. (please wait)"
+  # sudo systemctl restart lnd
+  # sleep 6
+  # let LND-CLI handle the password change
+  # sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
 
   # final user output
   echo ""
@@ -331,16 +359,13 @@ elif [ "${abcd}" = "c" ]; then
   exit 0
 
 ############################
-# PASSWORD D
-elif [ "${abcd}" = "d" ]; then
-
-  echo "#### NOTICE ####"
-  echo "Sorry - the password D cannot be changed. Its the password you set on creating your wallet to protect your seed (the list of words)."
-  exit 1
-
-############################
 # PASSWORD X
 elif [ "${abcd}" = "x" ]; then
+
+    emptyAllowed=0
+    if [ "$4" == "empty-allowed" ]; then
+      emptyAllowed=1
+    fi
 
     # second parameter is the flexible text
     text=$2
