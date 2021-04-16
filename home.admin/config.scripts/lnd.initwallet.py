@@ -141,9 +141,6 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
 
 def change_password(stub, wallet_password="", wallet_password_new=""):
 
-    print(wallet_password)
-    print(wallet_password_new)
-
     request = lnrpc.ChangePasswordRequest(
         current_password=wallet_password.encode(),
         new_password=wallet_password_new.encode()
@@ -151,6 +148,7 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
 
     try:
         response = stub.ChangePassword(request)
+        print("ok")
         print(response.admin_macaroon)
 
     except grpc.RpcError as rpc_error_call:
@@ -165,26 +163,6 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
         print(e, file=sys.stderr)
         print("err='ChangePassword'")
         sys.exit(1)
-
-    request = lnrpc.InitWalletRequest(
-        wallet_password=wallet_password.encode(),
-        cipher_seed_mnemonic=seed_words
-    )
-    try:
-        response = stub.InitWallet(request)
-    except grpc.RpcError as rpc_error_call:
-        code = rpc_error_call.code()
-        print(code, file=sys.stderr)
-        details = rpc_error_call.details()
-        print("err='RPCError InitWallet'")
-        print("errMore=\"" + details + "\"")
-        sys.exit(1)
-    except:
-        e = sys.exc_info()[0]
-        print(e, file=sys.stderr)
-        print("err='InitWallet'")
-        sys.exit(1)
-
 
 def parse_args():
     wallet_password = ""
