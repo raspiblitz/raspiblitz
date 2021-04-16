@@ -183,13 +183,11 @@ clear
 case $CHOICE in
   HARDWARE)
     sudo /home/admin/05hardwareTest.sh
-    /home/admin/00mainMenu.sh
     ;;
   SOFTWARE)
     sudo /home/admin/XXdebugLogs.sh
     echo "Press ENTER to return to main menu."
     read key
-    /home/admin/00mainMenu.sh
     ;;
   BACKUP-LND)
     sudo /home/admin/config.scripts/lnd.rescue.sh backup
@@ -202,7 +200,6 @@ case $CHOICE in
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
     echo "Press ENTER to return to main menu."
     read key
-    /home/admin/00mainMenu.sh
     ;;
   RESET-CHAIN)
     /home/admin/XXcleanHDD.sh -blockchain
