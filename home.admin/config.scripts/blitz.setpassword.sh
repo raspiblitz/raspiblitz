@@ -309,6 +309,7 @@ elif [ "${abcd}" = "c" ]; then
 
   if [ "${newPassword}" == "" ]; then
     clear
+
     # ask user for new password c
     newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
@@ -328,6 +329,7 @@ elif [ "${abcd}" = "c" ]; then
       sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
       exit 1
     fi
+
     # ask user to retype new password c
     newPassword2=$(whiptail --passwordbox "\nEnter again new Password C:\n" 10 52 "" --title "New Password C (repeat)" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
@@ -344,9 +346,8 @@ elif [ "${abcd}" = "c" ]; then
     echo "OK ... processing"
   fi
 
-  echo "oldPassword: ${oldPassword}"
-  echo "newPassword: ${newPassword}"
-  exit 1
+  #echo "oldPassword: ${oldPassword}"
+  #echo "newPassword: ${newPassword}"
 
   echo "# Make sure Auto-Unlocks off"
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
