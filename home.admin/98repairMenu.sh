@@ -164,8 +164,8 @@ if [ "$1" == "sourcemode" ]; then
 fi
 
 # Basic Options
-OPTIONS=(HARDWARE "Run Hardwaretest" \
-         SOFTWARE "Run Softwaretest (DebugReport)" \
+#OPTIONS=(HARDWARE "Run Hardwaretest" \
+OPTIONS=(SOFTWARE "Run Softwaretest (DebugReport)" \
          BACKUP-LND "Backup your LND data (Rescue-File)" \
          MIGRATION "Migrate Blitz Data to new Hardware" \
          COPY-SOURCE "Copy Blockchain Source Modus" \
@@ -181,9 +181,8 @@ CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS
 
 clear
 case $CHOICE in
-  HARDWARE)
-    sudo /home/admin/05hardwareTest.sh
-    ;;
+#  HARDWARE)
+#    ;;
   SOFTWARE)
     sudo /home/admin/XXdebugLogs.sh
     echo "Press ENTER to return to main menu."
