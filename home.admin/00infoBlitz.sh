@@ -338,11 +338,8 @@ $lastLine
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
 "${hdd}" "${sync_percentage}"
 
-source /home/admin/stresstest.report 2>/dev/null
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
   echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
-elif [ ${#powerFAIL} -gt 0 ] && [ ${powerFAIL} -gt 0 ]; then
-  echo "Weak power supply detected - run 'Hardware Test' in menu"
 elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
   echo "UPS service activated but not running"
 else

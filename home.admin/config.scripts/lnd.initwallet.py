@@ -18,6 +18,7 @@ if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
     print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
     print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
     print("# lnd.initwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("# lnd.initwallet.py change-password [walletpassword-old] [walletpassword-new]")
     print("err='missing parameters'")
     sys.exit(1)
 
@@ -138,9 +139,35 @@ def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb
     print("err='TODO: implement creating from seed/scb'")
     sys.exit(1)
 
+def change_password(stub, wallet_password="", wallet_password_new=""):
+
+    request = lnrpc.ChangePasswordRequest(
+        current_password=wallet_password.encode(),
+        new_password=wallet_password_new.encode()
+    )
+
+    try:
+        response = stub.ChangePassword(request)
+        print("# ok - password changed")
+        #print(response.admin_macaroon)
+
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
+        print("err='RPCError ChangePassword'")
+        print("errMore=\"" + details + "\"")
+        print("# make sure wallet is locked when trying to change password'", file=sys.stderr)
+        sys.exit(1)
+    except:
+        e = sys.exc_info()[0]
+        print(e, file=sys.stderr)
+        print("err='ChangePassword'")
+        sys.exit(1)
 
 def parse_args():
     wallet_password = ""
+    wallet_password_new = ""
     seed_words = ""
     seed_password = ""
     filepath_scb = ""
@@ -152,11 +179,26 @@ def parse_args():
                 print("err='wallet password is too short'")
                 sys.exit(1)
         else:
-            print("err='wallet password is too short'")
+            print("err='missing parameters'")
             sys.exit(1)
 
         if len(sys.argv) > 3:
             seed_password = sys.argv[3]
+
+    elif mode == "change-password":
+
+        if len(sys.argv) > 3:
+            wallet_password = sys.argv[2]
+            if len(wallet_password) < 8:
+                print("err='wallet password is too short'")
+                sys.exit(1)
+            wallet_password_new = sys.argv[3]
+            if len(wallet_password_new ) < 8:
+                print("err='wallet password new is too short'")
+                sys.exit(1)
+        else:
+            print("err='missing parameters'")
+            sys.exit(1)
 
     elif mode == "seed" or mode == "scb":
 
@@ -206,7 +248,7 @@ def parse_args():
         print("err='unknown mode parameter - run without any parameters to see options'")
         sys.exit(1)
 
-    return wallet_password, seed_words, seed_password, filepath_scb
+    return wallet_password, seed_words, seed_password, filepath_scb, wallet_password_new 
 
 
 def main():
@@ -216,7 +258,7 @@ def main():
     channel = grpc.secure_channel('localhost:10009', ssl_creds)
     stub = rpcstub.WalletUnlockerStub(channel)
 
-    wallet_password, seed_words, seed_password, file_path_scb = parse_args()
+    wallet_password, seed_words, seed_password, file_path_scb, wallet_password_new = parse_args()
 
     if mode == "new":
         print("# *** CREATING NEW LND WALLET ***")
@@ -229,6 +271,10 @@ def main():
     elif mode == "scb":
         print("# *** RECOVERING LND WALLET FROM SEED + SCB ***")
         scb(stub, wallet_password, seed_words, seed_password, file_path_scb)
+
+    elif mode == "change-password":
+        print("# *** SETTING NEW PASSWORD FOR WALLET ***")
+        change_password(stub, wallet_password, wallet_password_new)
 
 
 if __name__ == '__main__':

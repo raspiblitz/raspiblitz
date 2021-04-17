@@ -291,6 +291,3 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     esac
   ;;
 esac
-
-# go into loop - start script from beginning to load config/start fresh
-/home/admin/00mainMenu.sh

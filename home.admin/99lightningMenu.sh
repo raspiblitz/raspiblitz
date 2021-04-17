@@ -114,6 +114,3 @@ case $CHOICE in
             read key
             ;;
 esac
-
-# go into loop - start script from beginning to load config/sate fresh
-/home/admin/00mainMenu.sh

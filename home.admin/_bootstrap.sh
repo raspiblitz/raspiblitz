@@ -493,9 +493,8 @@ sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 # FIX BLOCKING FILES (just in case)
 # https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
 # https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
-sudo rm -f /home/bitcoin/.bitcoin/bitcoind.pid 2>/dev/null
+sudo rm -f /mnt/hdd/bitcoin/bitcoind.pid 2>/dev/null
 sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
-
 
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
@@ -598,22 +597,6 @@ else
   echo "CREATE: subscription data directory"
   sudo mkdir /mnt/hdd/app-data/subscriptions
   sudo chown admin:admin /mnt/hdd/app-data/subscriptions
-fi
-
-################################
-# STRESSTEST RASPBERRY PI
-################################
-
-if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
-  # generate stresstest report on every startup (in case hardware has changed)
-  sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
-  sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
-  sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
-  source /home/admin/stresstest.report
-  if [ "${powerWARN}" = "0" ]; then
-    # https://github.com/rootzoll/raspiblitz/issues/576
-    echo "" > /var/log/syslog
-  fi
 fi
 
 # mark that node is ready now
