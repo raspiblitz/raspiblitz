@@ -600,22 +600,6 @@ else
   sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 fi
 
-################################
-# STRESSTEST RASPBERRY PI
-################################
-
-if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
-  # generate stresstest report on every startup (in case hardware has changed)
-  sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
-  sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
-  sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
-  source /home/admin/stresstest.report
-  if [ "${powerWARN}" = "0" ]; then
-    # https://github.com/rootzoll/raspiblitz/issues/576
-    echo "" > /var/log/syslog
-  fi
-fi
-
 # mark that node is ready now
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}

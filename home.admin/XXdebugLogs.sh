@@ -193,21 +193,6 @@ if [ ${#undervoltageReports} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
-if [ -f /home/admin/stresstest.report ]; then
-  sudo cat /home/admin/stresstest.report
-  source /home/admin/stresstest.report
-  if [ ${powerWARN} -gt 0 ]; then
-      showImproveInfo=1
-  fi
-  if [ ${tempWARN} -gt 0 ]; then
-      showImproveInfo=1
-  fi
-fi
-if [ ${showImproveInfo} -gt 0 ]; then
-  echo "IMPORTANT: There are some hardware issues with your setup."
-  echo "'Run Hardwaretest' in main menu or: sudo /home/admin/05hardwareTest.sh"
-fi
-echo ""
 
 echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
 sudo /home/admin/config.scripts/blitz.statusscan.sh
