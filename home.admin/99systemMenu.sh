@@ -113,14 +113,15 @@ case $CHOICE in
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, lit,
+cryptoadvance-specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "
     echo "Type the name of the service you would like to monitor:"  
     read SERVICE
     echo
-    echo "Will use the command 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "Will show the logs with:"
+    echo "'sudo journalctl -n 100 -fu $SERVICE'"
     echo
     echo "Press ENTER to continue"
     echo "use CTRL+C any time to abort"
@@ -130,25 +131,24 @@ thunderhub, tor@default, tor@lnd, tor
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, lit,
+cryptoadvance-specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "
     echo "Type the name of the service you would like to restart:" 
     read SERVICE
     echo
-    echo "Will run: 'sudo systemctl restart $SERVICE'"
+    echo "Will use the command:"
+    echo "'sudo systemctl restart $SERVICE'"
     echo
     echo "Press ENTER to restart $SERVICE or use CTRL+C to abort"
     read key
     sudo systemctl restart $SERVICE
     echo
-    echo "Will show the logs with: 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "Will show the logs with:"
+    echo "'sudo journalctl -n 100 -fu $SERVICE'"
     echo
     echo "Press ENTER to continue"
     echo "use CTRL+C any time to abort"
     sudo journalctl -n 100 -fu $SERVICE;;
 esac
-
-# go into loop - start script from beginning to load config/start fresh
-/home/admin/00mainMenu.sh
