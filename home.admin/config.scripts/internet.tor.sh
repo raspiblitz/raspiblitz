@@ -416,7 +416,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     bridgeAlreadyConfiguredTorrc=$(cat $torrc | grep UseBridge)
     bridgeAlreadyConfiguredTorrclnd=$(cat $torrclnd | grep UseBridge)
     if [ "${bridgeAlreadyConfiguredTorrc}" != "" ] || [ "${bridgeAlreadyConfiguredTorrclnd}" != "" ]; then
-      whiptail --title "Tor Bridges - Setup" --yes-button "DELETE+REPLACE" --no-button "Cancel" --yesno "Bridges configuration found in torrc. Do you wish to replace with new bridges (DELETE+REPLACE) OR maintain the old bridges (Cancel)?\n\n----------------------------------------------------------------------------\n$(cat '$torrc' | grep UseBridges | cat '$torrc' | grep ClientTransportPlugin | cat '$torrc' | grep Bridge)" 25 80 3>&1 1>&2 2>&3
+      whiptail --title "Tor Bridges - Setup" --yes-button "DELETE+REPLACE" --no-button "Cancel" --yesno "https://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-can-i-use-bridges-with-tor\n\nBridges configuration found in torrc. Do you wish to replace with new bridges (DELETE+REPLACE) OR maintain the old bridges (Cancel)?\n\n----------------------------------------------------------------------------\n$(cat '$torrc' | grep UseBridges | cat '$torrc' | grep ClientTransportPlugin | cat '$torrc' | grep Bridge)" 25 80 3>&1 1>&2 2>&3
       if [ $? -eq 0 ]; then
         # delete old bridges lines
         sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrc
