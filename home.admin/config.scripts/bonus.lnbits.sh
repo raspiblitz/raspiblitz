@@ -42,7 +42,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
-SHA1 Fingerprint:
+You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
