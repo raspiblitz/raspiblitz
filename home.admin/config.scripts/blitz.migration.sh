@@ -315,7 +315,7 @@ fi
 if [ "$1" = "export-gui" ]; then
 
   # cleaning old migration files from blitz
-  sudo rm ${defaultZipPath}/*.tar.gz
+  sudo rm ${defaultZipPath}/*.tar.gz 2>/dev/null
 
   # stopping lnd / bitcoin
   echo "--> stopping services ..."
