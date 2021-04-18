@@ -236,7 +236,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Application Options
-httplisten=0.0.0.0:8442
 httpslisten=0.0.0.0:8443
 uipassword=$PASSWORD_B
 #letsencrypt=true
