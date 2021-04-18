@@ -9,6 +9,7 @@ echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
+if [ ${#runBehindTorWithBridges} -eq 0 ]; then runBehindTorWithBridges="off"; fi
 if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -79,6 +80,7 @@ CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
+OPTIONS+=(w 'Run behind Tor with Bridges' ${runBehindTorWithBridges})
 if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
@@ -92,7 +94,7 @@ OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
 OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
-if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
+if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ] || [ ${#runBehindTorWithBridges} -eq 0 ] || [ "${runBehindTorWithBridges}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
   OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
@@ -296,6 +298,36 @@ Please keep in mind that thru your LND node id & your previous IP history with y
   # change TOR
   anychange=1
   sudo /home/admin/config.scripts/internet.tor.sh ${choice}
+  needsReboot=1
+
+else
+  echo "TOR Setting unchanged."
+fi
+
+# TOR with Bridges choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${runBehindTorWithBridges}" != "${choice}" ]; then
+  echo "TOR Setting changed .."
+
+  # special actions if TOR is turned on
+  if [ "${choice}" = "on" ]; then
+
+    # inform user about privacy risk
+    whiptail --title " PRIVACY NOTICE " --msgbox "
+RaspiBlitz will now install/activate TOR with Bridges & after reboot run behind it.
+
+Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind TOR. To unlink you from that IP history its recommended that after the switch/reboot to TOR you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
+" 16 76
+
+    # make sure AutoNAT & UPnP is off
+    /home/admin/config.scripts/lnd.autonat.sh off
+    /home/admin/config.scripts/network.upnp.sh off
+  fi
+
+  # change TOR
+  anychange=1
+  sudo /home/admin/config.scripts/internet.tor.sh ${choice} bridge
   needsReboot=1
 
 else
