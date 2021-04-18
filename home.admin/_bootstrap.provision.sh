@@ -582,7 +582,7 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
-# lit
+# lit (make sure to be installed after RTL)
 if [ "${lit}" = "on" ]; then
   echo "Provisioning LIT - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup LIT'/g" ${infoFile}
