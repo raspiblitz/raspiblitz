@@ -123,11 +123,11 @@ thunderhub, tor@default, tor@lnd, tor
     read SERVICE
     echo
     echo "Will show the logs with:"
-    echo "'sudo journalctl -n 15 -fu $SERVICE'"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
     echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     echo "###############################################################################"
-    sudo journalctl -n 15 -fu $SERVICE;;
+    sudo journalctl -n 10 -fu $SERVICE;;
   CUSTOMRESTART)
     clear
     echo
@@ -148,10 +148,9 @@ thunderhub, tor@default, tor@lnd, tor
     sudo systemctl restart $SERVICE
     echo
     echo "Will show the logs with:"
-    echo "'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "Press ENTER to continue"
     echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     echo "###############################################################################"
-    sudo journalctl -n 100 -fu $SERVICE;;
+    sudo journalctl -n 10 -fu $SERVICE;;
 esac
