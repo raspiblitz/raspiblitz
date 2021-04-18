@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser:
-https://${localip}:3000\n
+http://${localip}:3000\n
 https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
@@ -40,7 +40,7 @@ Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
   else
     # Info without TOR
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3000\n
+http://${localip}:3000\n
 https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
