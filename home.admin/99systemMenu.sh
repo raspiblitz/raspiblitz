@@ -45,7 +45,7 @@ case $CHOICE in
     echo "running: 'sudo tail -n 30 -f /mnt/hdd/${network}/debug.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     read key
     sudo tail -n 30 -f /mnt/hdd/${network}/debug.log;;
   ${network}CONF)
@@ -71,7 +71,7 @@ case $CHOICE in
     echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     read key
     sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
@@ -124,7 +124,7 @@ thunderhub, tor@default, tor@lnd, tor
     echo "'sudo journalctl -n 100 -fu $SERVICE'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     sudo journalctl -n 100 -fu $SERVICE;;
   CUSTOMRESTART)
     clear
@@ -149,6 +149,6 @@ thunderhub, tor@default, tor@lnd, tor
     echo "'sudo journalctl -n 100 -fu $SERVICE'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     sudo journalctl -n 100 -fu $SERVICE;;
 esac
