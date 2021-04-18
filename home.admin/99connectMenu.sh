@@ -153,6 +153,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     ;;
   ${network}RPC)
     # vars
+    BITCOINRPCPORT="n/a"
     if [ $(${chain}net) = mainnet ];then
       BITCOINRPCPORT=8332
     elif [ $(${chain}net) = testnet ];then
