@@ -31,8 +31,8 @@ if [ "$1" = "menu" ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3011\n
-SHA1 Thumb/Fingerprint:
+http://${localip}:3011\n
+https://${localip}:3011 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
@@ -41,7 +41,7 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3011\n
+http://${localip}:3011\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
