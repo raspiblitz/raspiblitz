@@ -582,6 +582,15 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
+# lit
+if [ "${lit}" = "on" ]; then
+  echo "Provisioning LIT - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup LIT'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.lit.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LIT - keep default" >> ${logFile}
+fi
+
 # pool
 if [ "${pool}" = "on" ]; then
   echo "Provisioning Pool - run config script" >> ${logFile}
