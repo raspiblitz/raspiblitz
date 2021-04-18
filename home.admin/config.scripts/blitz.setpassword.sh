@@ -283,7 +283,14 @@ EOF
   # ThunderHub
   if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"
-    sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    sudo sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+  fi
+
+  # LIT
+  if [ "${lit}" == "on" ]; then
+    echo "# changing the password for LIT"
+    sudo sed -i "s/^uipassword=.*/uipassword=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
+    sudo sed -i "s/^faraday.bitcoin.password=.*/faraday.bitcoin.password=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
   fi
 
   echo "# OK -> RPC Password B changed"
