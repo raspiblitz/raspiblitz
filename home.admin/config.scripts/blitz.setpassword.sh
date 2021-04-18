@@ -8,7 +8,6 @@ echo "blitz.setpassword.sh b [?newpassword] "
  echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
- echo "exits on 0 = needs reboot"
  exit 1
 fi
 
@@ -454,8 +453,10 @@ else
   exit 1
 fi
 
-
+# when started with menu ... reboot when done
 if [ "${reboot}" == "1" ]; then
   echo "Now rebooting to activate changes ..."
   sudo /home/admin/XXshutdown.sh reboot
+else
+  echo "..."
 fi
