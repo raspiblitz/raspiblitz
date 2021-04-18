@@ -161,7 +161,7 @@ elif [ "${abcd}" = "b" ]; then
     # ask user for new password B (first time)
     password1=$(whiptail --passwordbox "\nPlease enter your new Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
-      if [ ${emptyAllowed} -eq 0 ]; then
+      if [ "${emptyAllowed}" == "0" ]; then
         echo "CANCEL not possible"
         sleep 2
       else
@@ -172,7 +172,7 @@ elif [ "${abcd}" = "b" ]; then
     # ask user for new password B (second time)
     password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
-      if [ ${emptyAllowed} -eq 0 ]; then
+      if [ "${emptyAllowed}" == "0" ]; then
         echo "CANCEL not possible"
         sleep 2
       else
