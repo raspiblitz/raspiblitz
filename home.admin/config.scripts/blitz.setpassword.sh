@@ -35,8 +35,10 @@ fi
 abcd=$1
 
 # run interactive if no further parameters
+reboot=0;
 OPTIONS=()
 if [ ${#abcd} -eq 0 ]; then
+    reboot=1;
     emptyAllowed=1
     OPTIONS+=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
@@ -146,7 +148,6 @@ if [ "${abcd}" = "a" ]; then
 
   echo ""
   echo "OK - password A changed for user pi, root, admin & bitcoin"
-  exit 0
 
 ############################
 # PASSWORD B
@@ -295,7 +296,6 @@ EOF
 
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
-  exit 0
 
 ############################
 # PASSWORD C
@@ -388,7 +388,6 @@ elif [ "${abcd}" = "c" ]; then
   # final user output
   echo ""
   echo "OK"
-  exit 0
 
 ############################
 # PASSWORD X
@@ -453,4 +452,10 @@ elif [ "${abcd}" = "x" ]; then
 else
   echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
   exit 1
+fi
+
+
+if [ "${reboot}" == "1"]; then
+  echo "Now rebooting to activate changes ..."
+  sudo /home/admin/XXshutdown.sh reboot
 fi
