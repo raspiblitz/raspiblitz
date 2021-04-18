@@ -42,7 +42,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
-https://${localIP}:${httpPort} with Fingerprint
+https://${localIP}:${httpsPort} with Fingerprint
 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
