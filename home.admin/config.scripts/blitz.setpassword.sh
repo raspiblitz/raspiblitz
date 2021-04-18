@@ -455,7 +455,7 @@ else
 fi
 
 
-if [ "${reboot}" == "1"]; then
+if [ "${reboot}" == "1" ]; then
   echo "Now rebooting to activate changes ..."
   sudo /home/admin/XXshutdown.sh reboot
 fi
