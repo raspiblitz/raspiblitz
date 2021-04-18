@@ -45,7 +45,8 @@ case $CHOICE in
     echo "running: 'sudo tail -n 30 -f /mnt/hdd/${network}/debug.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
     read key
     sudo tail -n 30 -f /mnt/hdd/${network}/debug.log;;
   ${network}CONF)
@@ -71,7 +72,8 @@ case $CHOICE in
     echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
     read key
     sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
@@ -121,11 +123,11 @@ thunderhub, tor@default, tor@lnd, tor
     read SERVICE
     echo
     echo "Will show the logs with:"
-    echo "'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
-    sudo journalctl -n 100 -fu $SERVICE;;
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
+    sudo journalctl -n 10 -fu $SERVICE;;
   CUSTOMRESTART)
     clear
     echo
@@ -146,9 +148,9 @@ thunderhub, tor@default, tor@lnd, tor
     sudo systemctl restart $SERVICE
     echo
     echo "Will show the logs with:"
-    echo "'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
-    sudo journalctl -n 100 -fu $SERVICE;;
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
+    sudo journalctl -n 10 -fu $SERVICE;;
 esac

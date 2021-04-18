@@ -213,7 +213,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # make sure hdmi_force_hotplug=1 is added again to config.txt
   sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-  echo "hdmi_force_hotplug=1" >> /boot/config.txt
+  #echo "hdmi_force_hotplug=1" >> /boot/config.txt
 
   # set user pi user for autostart
   # TODO(frennkie/rootzoll) what should happen here? This does the same as "on".

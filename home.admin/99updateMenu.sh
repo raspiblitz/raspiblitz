@@ -281,8 +281,8 @@ WIDTH=55
 CHOICE_HEIGHT=3 # 1 line / OPTIONS
 OPTIONS=(
 RELEASE "RaspiBlitz Release Update/Recovery"
-LND "Interim LND Update Options"
 PATCH "Patch RaspiBlitz v${codeVersion}"
+LND "Interim LND Update Options"
 )
 
 if [ "${bos}" == "on" ]; then

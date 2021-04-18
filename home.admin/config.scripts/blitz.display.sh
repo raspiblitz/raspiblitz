@@ -261,7 +261,7 @@ function install_lcd() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
@@ -396,7 +396,7 @@ function install_lcd_legacy() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     echo "dtparam=i2c_arm=on" >> /boot/config.txt
     # don't enable SPI and UART ports by default
