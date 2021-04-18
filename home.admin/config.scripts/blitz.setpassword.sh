@@ -8,7 +8,6 @@ echo "blitz.setpassword.sh b [?newpassword] "
  echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
- echo "exits on 0 = needs reboot"
  exit 1
 fi
 
@@ -35,8 +34,10 @@ fi
 abcd=$1
 
 # run interactive if no further parameters
+reboot=0;
 OPTIONS=()
 if [ ${#abcd} -eq 0 ]; then
+    reboot=1;
     emptyAllowed=1
     OPTIONS+=(A "Master User Password / SSH")
     OPTIONS+=(B "RPC Password (blockchain/lnd)")
@@ -146,7 +147,6 @@ if [ "${abcd}" = "a" ]; then
 
   echo ""
   echo "OK - password A changed for user pi, root, admin & bitcoin"
-  exit 0
 
 ############################
 # PASSWORD B
@@ -159,9 +159,9 @@ elif [ "${abcd}" = "b" ]; then
     clear
 
     # ask user for new password B (first time)
-    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    password1=$(whiptail --passwordbox "\nPlease enter your new Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
-      if [ ${emptyAllowed} -eq 0 ]; then
+      if [ "${emptyAllowed}" == "0" ]; then
         echo "CANCEL not possible"
         sleep 2
       else
@@ -172,7 +172,7 @@ elif [ "${abcd}" = "b" ]; then
     # ask user for new password B (second time)
     password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
-      if [ ${emptyAllowed} -eq 0 ]; then
+      if [ "${emptyAllowed}" == "0" ]; then
         echo "CANCEL not possible"
         sleep 2
       else
@@ -283,12 +283,18 @@ EOF
   # ThunderHub
   if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"
-    sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    sudo sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+  fi
+
+  # LIT
+  if [ "${lit}" == "on" ]; then
+    echo "# changing the password for LIT"
+    sudo sed -i "s/^uipassword=.*/uipassword=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
+    sudo sed -i "s/^faraday.bitcoin.password=.*/faraday.bitcoin.password=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
   fi
 
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed"
-  exit 0
 
 ############################
 # PASSWORD C
@@ -381,7 +387,6 @@ elif [ "${abcd}" = "c" ]; then
   # final user output
   echo ""
   echo "OK"
-  exit 0
 
 ############################
 # PASSWORD X
@@ -446,4 +451,12 @@ elif [ "${abcd}" = "x" ]; then
 else
   echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
   exit 1
+fi
+
+# when started with menu ... reboot when done
+if [ "${reboot}" == "1" ]; then
+  echo "Now rebooting to activate changes ..."
+  sudo /home/admin/XXshutdown.sh reboot
+else
+  echo "..."
 fi

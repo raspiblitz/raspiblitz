@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: https://${localIP}:${httpsPort}"
+  text="Local Webrowser: http://${localIP}:${httpPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -41,8 +41,9 @@ Public Domain: https://${publicDomain}:${httpsPort}
 port forwarding on router needs to be active & may change port" 
   fi
 
-  text="${text}
-SHA1 ${sslFingerprintIP}" 
+  text="${text}\n
+https://${localIP}:${httpsPort} with Fingerprint
+${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -66,7 +67,7 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  whiptail --title " LNbits " --msgbox "${text}" 15 69
+  whiptail --title " LNbits " --msgbox "${text}" 16 69
   
   /home/admin/config.scripts/blitz.display.sh hide
   echo "please wait ..."
@@ -86,6 +87,7 @@ if [ "$1" = "status" ]; then
 
     localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
+    echo "httpPort='5000'"
     echo "httpsPort='5001'"
     echo "publicIP='${publicIP}'"
 
@@ -301,7 +303,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 5001 comment 'lnbits'
+    sudo ufw allow 5000 comment 'lnbits HTTP'
+    sudo ufw allow 5001 comment 'lnbits HTTPS'
     echo ""
 
     # install service

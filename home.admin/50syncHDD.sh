@@ -32,16 +32,16 @@ if [ "$network" = "bitcoin" ]; then
 fi
 
 # ask if really sync behind TOR
-if [ "${runBehindTor}" = "on" ]; then
-  whiptail --title ' Sync Blockchain from behind TOR? ' --yes-button='Public-Sync' --no-button='TOR-Sync' --yesno "You decided to run your node behind TOR and validate the blockchain with your RaspiBlitz - thats good. But downloading the complete blockchain thru TOR can add some extra time (maybe a day) to the process and adds a heavy load on the TOR network.\n
-Your RaspiBlitz can just run the initial blockchain download with your public IP (Public-Sync) but keep your Lighting node safe behind TOR.
-It would speed up the self-validation while not revealing your Lightning node identity. But for most privacy choose (TOR-Sync).
-  " 15 76
-  if [ $? -eq 0 ]; then
-    # set flag to not run bitcoin behind TOR during IDB
-    echo "ibdBehindTor=off" >> /home/admin/raspiblitz.info
-  fi
-fi
+# if [ "${runBehindTor}" = "on" ]; then
+#  whiptail --title ' Sync Blockchain from behind TOR? ' --yes-button='Public-Sync' --no-button='TOR-Sync' --yesno "You decided to run your node behind TOR and validate the blockchain with your RaspiBlitz - thats good. But downloading the complete blockchain thru TOR can add some extra time (maybe a day) to the process and adds a heavy load on the TOR network.\n
+#Your RaspiBlitz can just run the initial blockchain download with your public IP (Public-Sync) but keep your Lighting node safe behind TOR.
+#It would speed up the self-validation while not revealing your Lightning node identity. But for most privacy choose (TOR-Sync).
+#  " 15 76
+#  if [ $? -eq 0 ]; then
+#    # set flag to not run bitcoin behind TOR during IDB
+#    echo "ibdBehindTor=off" >> /home/admin/raspiblitz.info
+#  fi
+#fi
   
 echo "**********************************"
 echo "Dont Trust, verify - starting sync"

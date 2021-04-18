@@ -121,6 +121,16 @@ else
   echo ""
 fi
 
+if [ "${lit}" = "off" ]; then
+  echo "- LIT is OFF by config"
+else
+  echo ""
+  echo "*** LAST 20 LIT LOGS ***"
+  echo "sudo journalctl -u litd -b --no-pager -n20"
+  sudo journalctl -u litd -b --no-pager -n20
+  echo ""
+fi
+
 if [ "${BTCPayServer}" = "off" ]; then
   echo "- BTCPayServer is OFF by config"
 else
