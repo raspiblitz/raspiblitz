@@ -159,7 +159,7 @@ elif [ "${abcd}" = "b" ]; then
     clear
 
     # ask user for new password B (first time)
-    password1=$(whiptail --passwordbox "\nPlease enter your RPC Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
+    password1=$(whiptail --passwordbox "\nPlease enter your new Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ ${emptyAllowed} -eq 0 ]; then
         echo "CANCEL not possible"
