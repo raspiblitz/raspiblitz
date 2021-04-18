@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: http://${localIP}:${httpPort}"
+  text="Local Webrowser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -42,7 +42,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
-https://${localIP}:${httpsPort} with Fingerprint
+SHA1 Fingerprint:
 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
