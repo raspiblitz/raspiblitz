@@ -52,6 +52,9 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.electrs.sh menu;;
   BTCPAY)
     /home/admin/config.scripts/lnd.export.sh btcpay;;
+    echo "Press ENTER to return to main menu."
+    read key
+    exit 0;;
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset
     echo "Press ENTER to return to main menu."
