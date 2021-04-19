@@ -93,7 +93,7 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="Start the Zeus Wallet --> lndconnect & scan QR code\Activate Tor & Certification verification option.\nSave Node Config"
+    connectInfo="- start the Zeus Wallet --> lndconnect & scan QR coden\- activate Tor & Certification verification option.\n- save Node Config"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
@@ -196,12 +196,12 @@ lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
 # show pairing info dialog
 msg=""
 if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
-  msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone)."
+  msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
 if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTOR} -eq 0 ]; then
-  msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection."
+  msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection.\n\n"
 fi
-msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}\n\n${connectInfo}\n\nScan the QR on the LCD and <Continue> or <Console QRcode> if you dont have an LCD."
+msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}${connectInfo}\n\nScan the QR on the LCD and <Continue> or <Console QRcode> if you dont have an LCD."
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "Continue" \
