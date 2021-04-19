@@ -237,7 +237,12 @@ function install_lcd() {
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# INSTALL 64bit LCD DRIVER"
-    sudo setfont /usr/share/consolefonts/Uni2-TerminusBold16.psf.gz
+
+    # set font
+    sudo sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
+    sudo sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sudo sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
+    sudo sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
