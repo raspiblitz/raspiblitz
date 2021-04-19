@@ -293,7 +293,7 @@ bitcoinUpdate() {
         exit 1
       fi
       whiptail --title "OPTIONAL Bitcoin Core update" --yes-button "Cancel" --no-button "Update" \
-      --yesno "BEWARE on updating to BItcoin Core v${bitcoinUpdateVersion}:
+      --yesno "Info on updating to Bitcoin Core v${bitcoinVersion}:
 
 This Bitcoin Core version was tested on this system.
 Will verify the binary checksum and signature.
