@@ -256,6 +256,24 @@ echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
 /home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
 
+# BITCOIN INTERIMS UPDATE
+if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
+  sudo sed -i "s/^message=.*/message='Provisioning Bitcoin Core update'/g" ${infoFile}
+  if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
+    # recklessly update Bitcoin Core to latest release on GitHub
+    echo "Provisioning BItcoin Core reckless interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.update.sh reckless >> ${logFile}
+  else
+    # when installing the same sd image - this will re-trigger the secure interims update
+    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
+    # because standard Bitcoin Core version is most more up to date
+    echo "Provisioning BItcoin Core tested interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
+  fi
+else
+  echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
+fi
+
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   sudo sed -i "s/^message=.*/message='Provisioning LND update'/g" ${infoFile}
