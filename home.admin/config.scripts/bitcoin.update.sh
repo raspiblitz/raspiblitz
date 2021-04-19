@@ -26,7 +26,6 @@ bitcoinVersion="0.21.0"
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # GATHER DATA
-
 # setting download directory
 downloadDir="/home/admin/download"
 
@@ -89,6 +88,7 @@ if [ "${mode}" = "tested" ]; then
       echo "# OK - update version is matching"
     fi
   fi
+  pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "reckless" ]; then
   # RECKLESS
@@ -97,20 +97,31 @@ elif [ "${mode}" = "reckless" ]; then
   # it will always pick the latest release from the github
   echo "# bitcoin.update.sh reckless"
   bitcoinVersion=${bitcoinLatestVersion}
+  pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "custom" ]; then
+  clear
   echo
   echo "# Update Bitcoin Core to a chosen version."
   echo
   echo "# Input the version you would like to install and press ENTER."
-  echo "# For example:"
+  echo "# Examples:"
+  echo "0.21.1rc1"
   echo "0.21.0"
   echo
   read bitcoinVersion
+  if [ $(echo ${bitcoinVersion} | grep -c "rc") -gt 0 ];then
+    cutVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $1}')
+    rcVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $2}')
+    pathVersion=${cutVersion}/test.r${rcVersion}
+  else
+    pathVersion=${bitcoinVersion}
+  fi
+
   if curl --output /dev/null --silent --head --fail \
-  https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc; then
-    echo "# OK version exists"
-    echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion, CTRL+C to abort."
+  https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc; then
+    echo "# OK version exists at https://bitcoincore.org/bin/bitcoin-core-${pathVersion}"
+    echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion or CTRL+C to abort."
     read key
   else 
     echo "# FAIL $bitcoinVersion does not exist"
@@ -157,7 +168,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   gpg --import ./laanwj-releases.asc
 
   # download signed binary sha256 hash sum file and check
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc
   verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
@@ -181,14 +192,14 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
 
   # download resources
   binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
   if [ ! -f "./${binaryName}" ]
   then
-      echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
-      exit 1
+    echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
+    exit 1
   fi
 
-  # check binary checksum test
+  echo "# Checking binary checksum ..."
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
     echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
@@ -212,7 +223,7 @@ fi
 if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ];then
 
   # install
-  echo "# Stopping bitcoind and lnd"
+  echo "# Stopping bitcoind and lnd ..."
   sudo systemctl stop lnd
   sudo systemctl stop bitcoind
   echo
@@ -234,18 +245,20 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     sudo sed -i "s/^bitcoinInterimsUpdate=.*/bitcoinInterimsUpdate='${bitcoinInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi
 
+  echo "# OK Bitcoin Core ${bitcoinVersion} is installed"
   if [ "${state}" == "ready" ]; then
     sudo systemctl start bitcoind
     sudo systemctl start lnd
+    echo
+    echo "# Restarted LND"
+    echo "# Use: 'lncli unlock' to unlock the LND wallet once Bitcoin Core is synced"
+    echo
+    echo "# Press ENTER to exit to the menu ..."
+    read key
   fi
-
-  echo "# OK Bitcoin Core Installed"
-  echo "# NOTE: RaspiBlitz may need to reboot now"
-  exit 1
+  exit 0
 
 else
-
   echo "# error='parameter not known'"
   exit 1
-
 fi
