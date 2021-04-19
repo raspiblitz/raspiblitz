@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.7.0RC2 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
+`Version 1.7.0RC3 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -133,9 +133,9 @@ Your SD-card needs to contain the RaspiBlitz software. You can take the long roa
 
 **Download SD-Card image - Version 1.7.0RC2 (JUST FOR TESTING)**
 
-Browser: https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC2-2021-04-09.img.gz
+Browser: https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz
 
-SHA-256: 83384b2efe8d93e8bee4130e11770a6c4c1be676df9f9150e78ea42b9d252ed6 or [SIGNATURE]()
+SHA-256: TODO or [SIGNATURE]()
 
 * [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
