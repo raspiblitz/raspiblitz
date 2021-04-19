@@ -237,6 +237,7 @@ function install_lcd() {
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# INSTALL 64bit LCD DRIVER"
+    sudo setfont /usr/share/consolefonts/Uni2-TerminusBold16.psf.gz
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
