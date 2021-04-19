@@ -203,6 +203,7 @@ if [ ${#undervoltageReports} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
+echo ""
 
 echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
 sudo /home/admin/config.scripts/blitz.statusscan.sh

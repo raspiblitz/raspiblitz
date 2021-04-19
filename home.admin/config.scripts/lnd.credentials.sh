@@ -108,6 +108,8 @@ if [ "$1" = "reset" ]; then
     echo "# OK DONE"
   fi
 
+  /home/admin/config.scripts/lnd.credentials.sh sync
+
 ###########################
 # SYNC
 ###########################

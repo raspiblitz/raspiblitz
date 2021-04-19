@@ -85,7 +85,7 @@ case $CHOICE in
         Do you want to restart LND now?" 10 55
       if [ $? -eq 0 ]; then
         echo "# Restarting LND"
-        sudo systemctl restart ${network}d
+        sudo systemctl restart lnd
       else
         echo "# Continue without restarting."
       fi

@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: http://${localIP}:${httpPort}"
+  text="Local Webrowser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -42,7 +42,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
-https://${localIP}:${httpsPort} with Fingerprint
+You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -178,6 +178,7 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
   #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
   echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
+
   exit 0
 fi
 
