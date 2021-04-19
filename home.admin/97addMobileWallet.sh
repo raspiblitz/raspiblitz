@@ -131,10 +131,10 @@ checkIP2TOR()
   fi
 }
 
-# Options
-OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
+# Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
+#OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
 #		ZAP_IOS "Zap Wallet (iOS)" \
-        ZEUS_IOS "Zeus Wallet (iOS)" \
+OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)" \
 		SPHINX "Sphinx Chat (Android or iOS)"
 	)
