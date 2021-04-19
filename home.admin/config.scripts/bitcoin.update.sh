@@ -3,12 +3,13 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Interim optional Bitcoin Core updates between RaspiBlitz releases."
- echo "bitcoin.update.sh [info|tested|reckless]"
+ echo "bitcoin.update.sh [info|tested|reckless|custom]"
  echo "info -> get actual state and possible actions"
- echo "tested -> only do recommended updates by the RaspiBlitz team"
- echo " binary will be checked by signature and checksum"
+ echo "tested -> only do a tested update by the RaspiBlitz team"
  echo "reckless -> the update was not tested by the RaspiBlitz team"
- echo " binary will be checked by signature and checksum"
+ echo "custom -> update to a chosen version"
+ echo " the binary will be checked by signature and checksum in all cases"
+ echo
  exit 1
 fi
 
@@ -44,11 +45,11 @@ fi
 installedVersion=$(sudo -u bitcoin bitcoind --version | head -n1| cut -d" " -f4|cut -c 2-)
 
 # test if the installed version already the tested/recommended update version
-updateInstalled=$(echo "${installedVersion}" | grep -c "${bitcoinVersion}")
+bitcoinUpdateInstalled=$(echo "${installedVersion}" | grep -c "${bitcoinVersion}")
 
 # get latest release from GitHub releases
 gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/releases | jq '.[0]')"
-latestVersion=$(echo "${gitHubLatestReleaseJSON}"|jq -r '.tag_name'|cut -c 2-)
+bitcoinLatestVersion=$(echo "${gitHubLatestReleaseJSON}"|jq -r '.tag_name'|cut -c 2-)
 
 # INFO
 function displayInfo() {
@@ -57,11 +58,11 @@ function displayInfo() {
   echo "bitcoinOSversion='${bitcoinOSversion}'"
 
   echo "# the tested/recommended update option"
-  echo "updateInstalled='${updateInstalled}'"
+  echo "bitcoinUpdateInstalled='${bitcoinUpdateInstalled}'"
   echo "bitcoinVersion='${bitcoinVersion}'"
 
   echo "# reckless update option (latest Bitcoin Core release from GitHub)"
-  echo "latestVersion='${latestVersion}'"
+  echo "bitcoinLatestVersion='${bitcoinLatestVersion}'"
 }
 
 if [ "${mode}" = "info" ]; then
@@ -95,11 +96,33 @@ elif [ "${mode}" = "reckless" ]; then
   # for production nodes. In a update/recovery scenario it will not install a fixed version
   # it will always pick the latest release from the github
   echo "# bitcoin.update.sh reckless"
-  bitcoinVersion=${latestVersion}
+  bitcoinVersion=${bitcoinLatestVersion}
+
+elif [ "${mode}" = "custom" ]; then
+  echo
+  echo "# Update Bitcoin Core to a chosen version."
+  echo
+  echo "# Input the version you would like to install and press ENTER."
+  echo "# For example:"
+  echo "0.21.0"
+  echo
+  read bitcoinVersion
+  if curl --output /dev/null --silent --head --fail \
+  https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc; then
+    echo "# OK version exists"
+    echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion, CTRL+C to abort."
+    read key
+  else 
+    echo "# FAIL $bitcoinVersion does not exist"
+    echo
+    echo "# Press ENTER to return to the main menu"
+    read key
+    exit 0
+  fi
 fi
 
-# JOINED INSTALL (tested & RECKLESS)
-if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ]; then
+# JOINED INSTALL
+if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ]; then
   
   displayInfo
 
@@ -178,7 +201,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ]; then
 
 fi 
 
-if [ "${mode}" = "tested" ]; then
+if [ "${mode}" = "tested" ]||[ "${mode}" = "custom" ]; then
   # note: install will be done the same as reckless further down
   bitcoinInterimsUpdateNew="${bitcoinVersion}"
 elif [ "${mode}" = "reckless" ]; then
@@ -186,7 +209,7 @@ elif [ "${mode}" = "reckless" ]; then
 fi
 
 # JOINED INSTALL (tested & RECKLESS)
-if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ]; then
+if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ];then
 
   # install
   echo "# Stopping bitcoind and lnd"
