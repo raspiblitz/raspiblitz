@@ -72,7 +72,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi  
   
 elif [ "${targetWallet}" = "zap-android" ]; then
-  connectInfo="- start the Zap Wallet --> SETUP WALLET\n  (or choose new Wallet in menu)\n- scan the QR code \n- confirm host address"
+  connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses gRPC
     port="10009"
