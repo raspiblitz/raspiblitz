@@ -268,7 +268,7 @@ if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard Bitcoin Core version is most more up to date
     echo "Provisioning BItcoin Core tested interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
