@@ -2,8 +2,8 @@
 #########################################################################
 # Build your SD card image based on:
 # raspios_arm64-2020-08-24
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2020-08-24/
-# SHA256: 6ce59adc2b432f4a6c0a8827041b472b837c4f165ab7751fdc35f2d1c3ac518c
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-04-09/
+# SHA256: a30a3650c3ef22a69f6f025760c6b04611a5992961a8c2cd44468f1c429d68bb
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
