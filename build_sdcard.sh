@@ -221,6 +221,7 @@ else
 fi
 
 echo "*** Install & Enable Tor ***"
+sudo apt update
 sudo apt install tor tor-arm torsocks -y
 echo ""
 
