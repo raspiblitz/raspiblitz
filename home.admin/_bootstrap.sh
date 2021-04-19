@@ -482,12 +482,17 @@ if [ ${configExists} -eq 1 ]; then
 
 fi
 
+######################################################################
+# MAKE SURE LND RPC/REST ports are standard & open to all connections 
+######################################################################
+sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
+sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
+
 #################################
 # FIX BLOCKCHAINDATA OWNER (just in case)
 # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
-
 
 #################################
 # FIX BLOCKING FILES (just in case)
