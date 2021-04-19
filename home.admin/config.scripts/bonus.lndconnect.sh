@@ -72,9 +72,11 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi  
   
 elif [ "${targetWallet}" = "zap-android" ]; then
+  connectInfo="- start the Zap Wallet --> SETUP WALLET\  (or choose new Wallet in menu)\n- scan the QR code \n- confirm host address"
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses gRPC
     port="10009"
+    connectInfo="${connectInfo}\n- install & connect Orbot App (VPN mode)"
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -85,7 +87,7 @@ elif [ "${targetWallet}" = "zap-android" ]; then
     forceTOR=1
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
+  fi 
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
@@ -101,6 +103,7 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
