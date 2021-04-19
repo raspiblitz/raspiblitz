@@ -201,8 +201,6 @@ fi
 if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTOR} -eq 0 ]; then
   msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection."
 fi
-if [  ] 
-
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}\n\n${connectInfo}\n\nScan the QR on the LCD and <Continue> or <Console QRcode> if you dont have an LCD."
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
