@@ -278,13 +278,19 @@ bitcoinUpdate() {
   if [ ${bitcoinUpdateInstalled} -eq 0 ]; then
     OPTIONS+=(TESTED "Optional Bitcoin Core update to ${bitcoinVersion}")
   fi
-  if [ $installedVersion != $bitcoinLatestVersion ];then
+  if [ $installedVersion != $bitcoinLatestVersion ]&&[ ${bitcoinVersion} != ${bitcoinLatestVersion} ];then
     OPTIONS+=(RECKLESS "Untested Bitcoin Core update to ${bitcoinLatestVersion}")
   fi
   OPTIONS+=(CUSTOM "Update Bitcoin Core to a chosen version")
-  CHOICE=$(whiptail --clear --title "Update Bitcoin Core Options" --menu "" 9 60 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(dialog --clear \
+                --backtitle "" \
+                --title "Bitcoin Core Update Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "" \
+                9 60 3 \
+          "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-  clear
   case $CHOICE in
     TESTED)
       if [ ${bitcoinUpdateInstalled} -eq 1 ]; then
