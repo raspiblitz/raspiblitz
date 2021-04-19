@@ -57,8 +57,8 @@ case $CHOICE in
     exit 0;;
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset
-    echo "Press ENTER to return to main menu."
-    read key
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/XXshutdown.sh reboot
     exit 0;;
   SYNC)
     sudo /home/admin/config.scripts/lnd.credentials.sh sync

@@ -179,9 +179,6 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
   echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
 
-  echo "# restarting LNbits"
-  sudo systemctl restart lnbits
-
   exit 0
 fi
 
