@@ -4,7 +4,7 @@ RTLVERSION="v0.10.1"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to switch the RideTheLightning WebGUI on, off or update"
- echo "# bonus.rtl.sh [on|off|update<commit>|menu]"
+ echo "# bonus.rtl.sh [on|off|update<commit>|menu|config]"
  echo "# installs the version $RTLVERSION by default"
  exit 1
 fi
@@ -275,6 +275,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny 3000
   sudo ufw deny 3001
+  exit 0
+fi
+
+# config
+if [ "$1" = "config" ]; then
+  echo "# CONFIG RTL"
+  configRTL
   exit 0
 fi
 
