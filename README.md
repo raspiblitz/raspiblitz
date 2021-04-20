@@ -131,11 +131,11 @@ In the end your RaspiBlitz should look like this:
 
 Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
 
-**Download SD-Card image - Version 1.7.0RC2 (JUST FOR TESTING)**
+**Download SD-Card image - Version 1.7.0RC3 (JUST FOR TESTING)**
 
 Browser: https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz
 
-SHA-256: TODO or [SIGNATURE]()
+SHA-256: cb12b14a37e9a27b401531678eb13349e1f145228cc7f1cc9080059df1c053dc or [SIGNATURE]() (only for final release)
 
 * [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
