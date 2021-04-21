@@ -285,6 +285,13 @@ function pb() {
     echo "# Use Ctrl + C to end the Jupyter Notebook server"
     echo "# Use command 'jupyter notebook' to start the Jupyter Notebook service at will"
     echo "# Use command 'exit' and then 'raspiblitz' to return to menu"
+    echo ""
+    echo "# To access the Jupyter Notebook from your LAN, start a tunnel from the device connected via LAN."
+    echo "# Something like this:"
+    echo "#    ssh -L 8888:localhost:8888 admin@<Raspiblitz IP>"
+    echo "# Where 'admin' is Raspiblitz's admin, and the IP is the IP of the Raspiblitz."
+    echo "# After successfully running that command, you can access the Jupyter Notebook in the browser via"
+    echo "#    http://localhost:8888 <- plus the token generated in the server (you can see this from the Raspiblitz)"
     echo "# ***"
     echo ""
     sudo su - programmingbitcoin
