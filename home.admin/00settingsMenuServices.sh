@@ -22,6 +22,7 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#programmingbitcoin} -eq 0 ]; then programmingbitcoin="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -42,6 +43,7 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
+OPTIONS+=(p '"Programming Bitcoin" Development Environment' ${programmingbitcoin})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -429,6 +431,21 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# Programming Bitcoin process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${programmingbitcoin}" != "${choice}" ]; then
+  echo "Programming Bitcoin setting changed."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.programmingbitcoin.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${programmingbitcoin}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.programmingbitcoin.sh menu
+  fi
+else
+  echo "Programming Bitcoin setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

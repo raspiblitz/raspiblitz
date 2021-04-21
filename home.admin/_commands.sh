@@ -344,3 +344,17 @@ function whitepaper() {
   cd /home/admin/config.scripts
   ./bonus.whitepaper.sh on
 }
+
+# command: pb
+# switch to the programmingbitcoin user for the 'Programming Bitcoin' environment
+function pb() {
+  if [ $(grep -c "programmingbitcoin=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the programmingbitcoin user with the command: 'sudo su - programmingbitcoin'"
+    echo "# use command 'exit' to switch back to 'admin' user"
+    sudo su - programmingbitcoin
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "ProgrammingBitcoin script is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.programmingbitcoin.sh on"
+  fi
+}

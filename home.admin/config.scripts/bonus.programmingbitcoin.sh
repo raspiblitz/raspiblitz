@@ -53,6 +53,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/programmingbitcoin
     sudo -u programmingbitcoin git clone https://github.com/jimmysong/programmingbitcoin 2>/dev/null
 
+    echo ""
+    echo "# ***"
+    echo "# Installing virtualenv and requirements ..."
+    echo "# ***"
+    echo ""
+    
+    cd /home/programmingbitcoin/programmingbitcoin
+    pip install virtualenv
+    virtualenv -p python3 .venv
+    . .venv/bin/activate
+    pip install -r requirements.txt
+
    # setting value in raspi blitz config
     sudo sed -i "s/^programmingbitcoin=.*/programmingbitcoin=on/g" /mnt/hdd/raspiblitz.conf
    
