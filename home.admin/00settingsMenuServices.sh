@@ -43,7 +43,7 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
-OPTIONS+=(p '"Programming Bitcoin" Development Environment' ${programmingbitcoin})
+OPTIONS+=(v 'Programming Bitcoin Environment' ${programmingbitcoin})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -434,7 +434,7 @@ else
 fi
 
 # Programming Bitcoin process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${programmingbitcoin}" != "${choice}" ]; then
   echo "Programming Bitcoin setting changed."

@@ -30,12 +30,6 @@ function repair() {
   ./98repairMenu.sh
 }
 
-# command: restart
-function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
-}
-
 # command: sourcemode
 function sourcemode() {
   cd /home/admin
@@ -60,6 +54,12 @@ function patch() {
   ./XXsyncScripts.sh -run
 }
 
+# command: restart
+function restart() {
+  cd /home/admin
+  ./XXshutdown.sh reboot
+}
+
 # command: off
 function off() {
   cd /home/admin
@@ -76,22 +76,13 @@ function github() {
 # command: hdmi
 function hdmi() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  restart
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi on
 }
 
 # command: lcd
 function lcd() {
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  restart
-}
-
-# command: headless
-function headless() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display headless
-  restart
+  sudo /home/admin/config.scripts/blitz.lcd.sh hdmi off
 }
 
 # command: manage
@@ -151,10 +142,7 @@ function fwdreport() {
 function bos() {
   if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the bos user with the command: 'sudo su - bos'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'bos --help' to list all possible options"
     sudo su - bos
-    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "Balance of Satoshis is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.bos.sh on"
@@ -166,28 +154,10 @@ function bos() {
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'pyblock' again to start"
     sudo su - pyblock
-    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "PyBlock is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.pyblock.sh on"
-  fi
-}
-
-# command: chantools
-# switch to the bitcoin user for chantools
-function chantools() {
-  if [ $(grep -c "chantools=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the bitcoin user with the command: 'sudo su - bitcoin'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'chantools' again to start"
-    sudo su - bitcoin
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "chantools is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.chantools.sh on"
   fi
 }
 
@@ -212,43 +182,11 @@ function faraday() {
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'frcli --help' now to get more info"
     sudo su - faraday
-    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "Faraday is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.faraday.sh on"
   fi
 }
-
-# command: lit
-# switch to the lit user for the loop, pool & faraday services
-function lit() {
-  if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the lit user with the command: 'sudo su - lit'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# see the prefilled parameters with 'alias'"
-    echo "# use the commands: 'lncli', 'lit-frcli', 'lit-loop', 'lit-pool'"
-    sudo su - lit
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "LIT is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.lit.sh on"
-  fi
-}
-
-# aliases for lit
-# switch to the pool user for the Pool Service
-if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
-  source /mnt/hdd/raspiblitz.conf
-  alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \
-    --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
-  alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
-    --tlscertpath=/home/lit/.lit/tls.cert \\	
-    --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
-  alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \	
-    --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
-fi
 
 # command: loop
 # switch to the loop user for the Lightning Loop Service
@@ -258,7 +196,6 @@ function loop() {
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'loop --help' now to get more info"
     sudo su - loop
-    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "Lightning Loop is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.loop.sh on"
@@ -273,7 +210,6 @@ function pool() {
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'pool --help' now to get more info"
     sudo su - pool
-    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "Pool is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.pool.sh on"
@@ -338,21 +274,21 @@ function notifyme() {
     /home/admin/config.scripts/blitz.notify.sh send "${content}"
 }
 
-# command: whitepaper
-# downloads the whitepaper from the blockchain to /home/admin/bitcoin.pdf
-function whitepaper() {
-  cd /home/admin/config.scripts
-  ./bonus.whitepaper.sh on
-}
 
 # command: pb
 # switch to the programmingbitcoin user for the 'Programming Bitcoin' environment
 function pb() {
   if [ $(grep -c "programmingbitcoin=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the programmingbitcoin user with the command: 'sudo su - programmingbitcoin'"
-    echo "# use command 'exit' to switch back to 'admin' user"
+    echo ""
+    echo "# ***"
+    echo "# Switching to the programmingbitcoin user with the command: 'sudo su - programmingbitcoin'"
+    echo "# Use Ctrl + C to end the Jupyter Notebook server"
+    echo "# Use command 'jupyter notebook' to start the Jupyter Notebook service at will"
+    echo "# Use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# ***"
+    echo ""
     sudo su - programmingbitcoin
-    echo "# use command 'raspiblitz' to return to menu"
+    echo "# Use command 'raspiblitz' to return to menu"
   else
     echo "ProgrammingBitcoin script is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.programmingbitcoin.sh on"

@@ -22,7 +22,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Programming Bitcoin Info" --msgbox "
-This service downloads the exercises of the book Programming Bitcoin by Jimmy Song.
+This service downloads the book and exercises of 'Programming Bitcoin' by Jimmy Song.
 Type 'pb' in the command line to start the environment.
 " 11 78
   exit 0
@@ -34,7 +34,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo ""
     echo "# ***"
-    echo "# Installing the excercises and materials of the book 'Programming Bitcoin' by Jimmy Song ..."
+    echo "# Installing the book, excercises and materials of 'Programming Bitcoin' by Jimmy Song ..."
     echo "# ***"
     echo ""
 
@@ -65,12 +65,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     . .venv/bin/activate
     pip install -r requirements.txt
 
+
+    echo "# setting the autostart script for programmingbitcoin"
+    echo "
+cd /home/programmingbitcoin/programmingbitcoin
+. .venv/bin/activate
+jupyter notebook
+    " | sudo -u programmingbitcoin tee -a /home/programmingbitcoin/.bashrc
+
+
    # setting value in raspi blitz config
     sudo sed -i "s/^programmingbitcoin=.*/programmingbitcoin=on/g" /mnt/hdd/raspiblitz.conf
    
     echo ""
     echo "# ***"
-    echo "# OK - Materials from 'Programming Bitcoin' installed. Type 'pb' in the console to start the environment."
+    echo "# OK - 'Programming Bitcoin' book and materials installed. Type 'pb' in the console to start the environment."
     echo "# ***"
     echo ""
 
