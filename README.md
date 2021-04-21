@@ -30,8 +30,8 @@ There are further Services that can be switched on:
 * **PyBlock**  (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 * **Mempool Explorer** [details](https://github.com/mempool/mempool)
 * **Sphinx Chat Relay Server** [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
-* **Telegraf metrics** [details](https://github.com/rootzoll/raspiblitz/issues/1369)**
-* **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)**
+* **Telegraf metrics** [details](https://github.com/rootzoll/raspiblitz/issues/1369)
+* **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
