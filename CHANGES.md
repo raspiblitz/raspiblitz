@@ -2,7 +2,7 @@
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
-- New: Raspberry Pi OS Base Image 64-bit (August 2020)
+- New: Raspberry Pi OS Base Image 64-bit (April 2021)
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
 - New: Improve LND uptime and reliability over Tor [details](https://github.com/rootzoll/raspiblitz/pull/2148)
 - New: Lightning Terminal v0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
