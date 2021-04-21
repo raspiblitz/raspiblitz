@@ -247,14 +247,16 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
 
   echo "# OK Bitcoin Core ${bitcoinVersion} is installed"
   if [ "${state}" == "ready" ]; then
+    echo "# Starting ..."
     sudo systemctl start bitcoind
+    sleep 10
     sudo systemctl start lnd
+    echo "# Starting LND ..."
+    sleep 10
     echo
-    echo "# Restarted LND"
-    echo "# Use: 'lncli unlock' to unlock the LND wallet once Bitcoin Core is synced"
-    echo
-    echo "# Press ENTER to exit to the menu ..."
+    echo "# Press ENTER to proceed to unlock the LND wallet ..."
     read key
+    sudo /home/admin/config.scripts/lnd.unlock.sh
   fi
   exit 0
 
