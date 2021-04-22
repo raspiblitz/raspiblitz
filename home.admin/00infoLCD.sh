@@ -171,10 +171,6 @@ while :
       elif [ "${state}" = "sdtoosmall" ]; then
           message="SDCARD TOO SMALL - min 16GB"
 
-      # when old data - improve message
-      elif [ "${state}" = "olddata" ]; then
-          message="login for manual migration"
-
       # when no HDD - improve message
       elif [ "${state}" = "noHDD" ]; then
           message="Connect external HDD/SSD"
@@ -211,7 +207,7 @@ while :
     fi
     
     # if freshly recovered 
-    recoveredInfoExists=$(sudo ls /home/admin/raspiblitz.recover.info 2>/dev/null | grep -c '.info')
+    recoveredInfoExists=$(sudo ls /home/admin/recover.flag 2>/dev/null | grep -c '.flag')
     if [ ${recoveredInfoExists} -gt 0 ]; then
       l1="FINAL RECOVER LOGIN NEEDED:\n"
       l2="ssh admin@${localip}\n"

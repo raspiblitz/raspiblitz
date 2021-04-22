@@ -349,6 +349,8 @@ if [ "${sphinxrelay}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
   if [ "${choice}" =  "on" ]; then
+    echo "Giving service 1 minute to start up ... (please wait) ..."
+    sleep 60
     whiptail --title " Installed Sphinx Server" --msgbox "\
 Sphinx Server was installed.\n
 Use the new 'SPHINX' entry in Main Menu for more info.\n

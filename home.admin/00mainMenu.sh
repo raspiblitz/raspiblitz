@@ -316,13 +316,6 @@ case $CHOICE in
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
-            noreboot=$?
-            if [ "${noreboot}" = "0" ]; then
-              echo "Press ENTER to Reboot .."
-              read key
-              sudo /home/admin/XXshutdown.sh reboot
-              exit 0
-            fi
             ;;
         UPDATE)
             /home/admin/99updateMenu.sh

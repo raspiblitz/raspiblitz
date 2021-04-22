@@ -152,6 +152,86 @@ if [ ${configExists} -eq 1 ]; then
     echo "check issue #950 -> ok test.rpcbind exists" >> ${logFile}
   fi
 
+else
+  echo "WARN: /mnt/hdd/bitcoin/bitcoin.conf not found" >> ${logFile}
+fi
+
+# if old lnd.conf exists ...
+configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
+if [ ${configExists} -eq 1 ]; then
+
+  # remove RPC user & pass from lnd.conf ... since v1.7
+  # https://github.com/rootzoll/raspiblitz/issues/2160
+  echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
+  sudo sed -i '/^\[Bitcoind\]/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.rpchost=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
+  sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
+
+  # make sure additional values are added to [Application Options] since v1.7
+  echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
+  applicationOptionsLineNumber=$(sudo grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
+  if [ "${applicationOptionsLineNumber}" != "" ]; then
+    applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
+
+    # Avoid historical graph data sync
+    # ignore-historical-gossip-filters=1
+    configParamExists=$(sudo grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'ignore-historical-gossip-filters' exists (${configParamExists})" >> ${logFile}
+    fi
+
+    # Avoid slow startup time
+    # sync-freelist=1
+    configParamExists=$(sudo grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'sync-freelist'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'sync-freelist' exists (${configParamExists})" >> ${logFile}
+    fi
+
+    # Avoid high startup overhead
+    # stagger-initial-reconnect=1
+    configParamExists=$(sudo grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'stagger-initial-reconnect' exists (${configParamExists})" >> ${logFile}
+    fi
+
+    # Delete and recreate RPC TLS certificate when details change or cert expires
+    # tlsautorefresh=1
+    configParamExists=$(sudo grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'tlsautorefresh'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'tlsautorefresh' exists (${configParamExists})" >> ${logFile}
+    fi
+
+    # Do not include IPs in the RPC TLS certificate
+    # tlsdisableautofill=1
+    configParamExists=$(sudo grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
+    if [ "${configParamExists}" == "0" ]; then
+      echo " - ADDING 'tlsdisableautofill'" >> ${logFile}
+      sudo sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
+    else
+      echo " - OK 'tlsdisableautofill' exists (${configParamExists})" >> ${logFile}
+    fi
+
+  else
+    echo " - WARN: section '[Application Options]' not found in lnd.conf" >> ${logFile}
+  fi
+
+else
+  echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
 fi
 
 echo "Version Code: ${codeVersion}" >> ${logFile}
@@ -159,8 +239,8 @@ echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
 
 if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
   echo "detected version change ... starting migration script" >> ${logFile}
-  echo "TODO: Update Migration check ... only needed after version 1.0" >> ${logFile}
-  echo "OK Done - Updating version in config ..."
+  # nothing specific here yet
+  echo "OK Done - Updating version in config"
   sudo sed -i "s/^raspiBlitzVersion=.*/raspiBlitzVersion='${codeVersion}'/g" ${configFile}
 else
   echo "OK - version of config data is up to date" >> ${logFile}

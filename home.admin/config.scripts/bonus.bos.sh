@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/alexbosworth/balanceofsatoshis/blob/ba7c35b42f1bad0dbb0c9c03d64ee34472665029/package.json#L79
-BOSVERSION="8.0.2"
+BOSVERSION="8.0.5"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -71,6 +71,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  # add cli autocompletion https://www.npmjs.com/package/caporal/v/0.7.0#if-you-are-using-bash
+  sudo -u bos bash -c 'echo "source <(bos completion bash)" >> /home/bos/.bashrc'
 
   # setting value in raspi blitz config
   sudo sed -i "s/^bos=.*/bos=on/g" /mnt/hdd/raspiblitz.conf
@@ -105,4 +107,4 @@ if [ "$1" = "update" ]; then
 fi
 
 echo "FAIL - Unknown Parameter $1"
-exit 1
+exit

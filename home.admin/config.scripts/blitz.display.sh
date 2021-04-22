@@ -238,6 +238,12 @@ function install_lcd() {
 
     echo "# INSTALL 64bit LCD DRIVER"
 
+    # set font
+    sudo sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
+    sudo sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sudo sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
+    sudo sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
+
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
 
@@ -261,7 +267,7 @@ function install_lcd() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
@@ -320,7 +326,7 @@ function uninstall_lcd() {
     sudo apt-get install -y xinput-calibrator
 
     # remove modifications of config.txt
-    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
     sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
@@ -396,7 +402,7 @@ function install_lcd_legacy() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     echo "dtparam=i2c_arm=on" >> /boot/config.txt
     # don't enable SPI and UART ports by default

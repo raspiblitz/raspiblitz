@@ -326,7 +326,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
 
   # create tor config .. if not exists or is old
-  isTorConfigOK=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "BITCOIN")
+  isTorConfigOK=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "Bitcoin")
   if [ ${isTorConfigOK} -eq 0 ]; then
     echo "# - updating Tor config ${torrc}"
     cat > ./torrc <<EOF

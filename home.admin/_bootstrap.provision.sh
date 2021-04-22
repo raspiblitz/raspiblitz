@@ -88,6 +88,7 @@ if [ ${#rootPartition} -gt 0 ]; then
               echo "going into reboot" >> ${logFile}
               sudo cp ${logFile} ${logFile}.fsexpand.recover
               sudo shutdown -r now
+              sleep 100
 	            exit 0
 	          else
               echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
@@ -254,6 +255,24 @@ echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 # BLITZ WEB SERVICE
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
 /home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+
+# BITCOIN INTERIMS UPDATE
+if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
+  sudo sed -i "s/^message=.*/message='Provisioning Bitcoin Core update'/g" ${infoFile}
+  if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
+    # recklessly update Bitcoin Core to latest release on GitHub
+    echo "Provisioning BItcoin Core reckless interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.update.sh reckless >> ${logFile}
+  else
+    # when installing the same sd image - this will re-trigger the secure interims update
+    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
+    # because standard Bitcoin Core version is most more up to date
+    echo "Provisioning BItcoin Core tested interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
+  fi
+else
+  echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
+fi
 
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
@@ -579,6 +598,15 @@ if [ "${stackingSatsKraken}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
+fi
+
+# lit (make sure to be installed after RTL)
+if [ "${lit}" = "on" ]; then
+  echo "Provisioning LIT - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup LIT'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.lit.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LIT - keep default" >> ${logFile}
 fi
 
 # pool

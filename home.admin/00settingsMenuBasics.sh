@@ -79,8 +79,10 @@ CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
-OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})  
-OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
+if [ "${displayClass}" == "lcd" ]; then
+  OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
+  OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
+fi
 OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
 OPTIONS+=(n 'Testnet' ${chainValue})    

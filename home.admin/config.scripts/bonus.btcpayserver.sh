@@ -145,7 +145,7 @@ consider adding a IP2TOR Bridge: MAINMENU > SUBSCRIBE > IP2TOR"
 
 text="${text}\n
 To get the 'Connection String' to activate Lightning Payments:
-MAINMENU > LNDCREDS > EXPORT > BTCPay Server"
+MAINMENU > CONNECT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
   
@@ -353,7 +353,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcpay || exit 1
     echo "# Download the NBXplorer source code ..."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
-    cd NBXplorer
+    cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     echo "# Build NBXplorer ..."
     # from the build.sh with path

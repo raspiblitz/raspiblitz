@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION=v0.8.8
+ELECTRSVERSION=v0.8.9
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

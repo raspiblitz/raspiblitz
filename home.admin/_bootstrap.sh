@@ -151,7 +151,7 @@ fi
 randnum=$(shuf -i 0-7 -n 1)
 /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
-sudo killall -3 fbi
+/home/admin/config.scripts/blitz.display.sh hide
 
 ################################
 # GENERATE UNIQUE SSH PUB KEYS
@@ -183,13 +183,14 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   # echo out script to journal logs
   sudo cat /home/admin/setup.sh
   # execute the after boot script
-  echo "Logs in stored to: /home/admin/raspiblitz.recover.log"
-  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/setup.sh >> /home/admin/raspiblitz.recover.log
+  echo "Logs in stored to: /home/admin/raspiblitz.log.recover"
+  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> ${logFile}
+  sudo /home/admin/setup.sh >> ${logFile}
   # delete the after boot script
   sudo rm /home/admin/setup.sh 
   # reboot again
-  echo "DONE wait 10 secs ... one more reboot needed ... " >> /home/admin/raspiblitz.recover.log
+  echo "DONE wait 10 secs ... one more reboot needed ... " >> ${logFile}
+  sudo cp ${logFile} ${logFile}.afterboot
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -207,9 +208,14 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
-  echo "Switching HDMI ON ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+  echo "Yes HDMI switch found ... activating HDMI display output & reboot" >> $logFile
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
+  sudo cp ${logFile} ${logFile}.hdmiswitch
+  sudo shutdown -r now
+  sleep 100
   exit 0
+else
+  echo "No HDMI switch found. " >> $logFile
 fi
 
 ################################
@@ -222,16 +228,18 @@ fi
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/ssh.reset*
+  sudo rm /boot/ssh.reset* >> $logFile
   # show info ssh reset
   sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
   sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
   # delete ssh certs
-  sudo systemctl stop sshd
-  sudo rm /mnt/hdd/ssh/ssh_host*
-  sudo ssh-keygen -A
-  echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
-  sudo /home/admin/XXshutdown.sh reboot
+  sudo systemctl stop sshd >> $logFile
+  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
+  sudo ssh-keygen -A >> $logFile
+  echo "SSH SERVER CERTS RESET ... (reboot) " >> $logFile
+  sudo cp ${logFile} ${logFile}.sshcerts
+  sudo shutdown -r now
+  sleep 100
   exit 0
 fi
 
@@ -279,9 +287,10 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUS
   if [ ${usbQuirkDone} -eq 0 ]; then
     # add new usb-storage.quirks
     sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
-    sudo cat /boot/cmdline.txt
+    sudo cat /boot/cmdline.txt >> $logFile
     # go into reboot to activate new setting
-    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... "
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... " >> $logFile
+    sudo cp ${logFile} ${logFile}.uasp
     sudo shutdown -r now
     sleep 100
   fi
@@ -379,12 +388,13 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
-    echo "state=recovered" >> /home/admin/raspiblitz.recover.info
+    sudo touch /home/admin/recover.flag
+    echo "state=recovered" >> /home/admin/recover.flag
     echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
-    cp $logFile /home/admin/raspiblitz.recover.log
+    echo "REBOOT FOR SSH CERTS RESET ..." >> $logFile
+    sudo cp ${logFile} ${logFile}.recover
     sync
-    echo "SSH SERVER CERTS RESET ... (reboot) " >> /home/admin/raspiblitz.recover.log
     sudo shutdown -r -F -t 60
     exit 0
   else 
@@ -472,20 +482,24 @@ if [ ${configExists} -eq 1 ]; then
 
 fi
 
+######################################################################
+# MAKE SURE LND RPC/REST ports are standard & open to all connections 
+######################################################################
+sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
+sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
+
 #################################
 # FIX BLOCKCHAINDATA OWNER (just in case)
 # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
-
 #################################
 # FIX BLOCKING FILES (just in case)
 # https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
 # https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
-sudo rm -f /home/bitcoin/.bitcoin/bitcoind.pid 2>/dev/null
+sudo rm -f /mnt/hdd/bitcoin/bitcoind.pid 2>/dev/null
 sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
-
 
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
@@ -518,7 +532,7 @@ fi
 # DETECT FRESHLY RECOVERED SD
 ################################
 
-recoveredInfoExists=$(ls /home/admin/raspiblitz.recover.info | grep -c '.info')
+recoveredInfoExists=$(ls /home/admin/recover.flag | grep -c '.flag')
 if [ ${recoveredInfoExists} -eq 1 ]; then
   sed -i "s/^state=.*/state=recovered/g" ${infoFile}
   sed -i "s/^message=.*/message='login to finish'/g" ${infoFile}
@@ -588,22 +602,6 @@ else
   echo "CREATE: subscription data directory"
   sudo mkdir /mnt/hdd/app-data/subscriptions
   sudo chown admin:admin /mnt/hdd/app-data/subscriptions
-fi
-
-################################
-# STRESSTEST RASPBERRY PI
-################################
-
-if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
-  # generate stresstest report on every startup (in case hardware has changed)
-  sed -i "s/^state=.*/state=stresstest/g" ${infoFile}
-  sed -i "s/^message=.*/message='Testing Hardware 60s'/g" ${infoFile}
-  sudo /home/admin/config.scripts/blitz.stresstest.sh /home/admin/stresstest.report
-  source /home/admin/stresstest.report
-  if [ "${powerWARN}" = "0" ]; then
-    # https://github.com/rootzoll/raspiblitz/issues/576
-    echo "" > /var/log/syslog
-  fi
 fi
 
 # mark that node is ready now

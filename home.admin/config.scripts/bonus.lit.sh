@@ -31,7 +31,7 @@ if [ "$1" = "menu" ]; then
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/lit/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(sudo openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
@@ -334,9 +334,10 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
   fi
 
-  # make Loop work with RTL if installed (update will run configRTL)
+  # make Loop work with RTL if installed
+  # dont call anything that starts RTL service - otherwise update/recover might block
   if [ ${#rtlWebinterface} -gt 0 ]&&[ ${rtlWebinterface} = on ];then
-    /home/admin/config.scripts/bonus.rtl.sh update
+    /home/admin/config.scripts/bonus.rtl.sh config
   fi
 
   exit 0
