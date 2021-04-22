@@ -129,14 +129,19 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-Your SD-card needs to contain the RaspiBlitz software. You can take the long road by [building the SD-card image yourself](#build-the-sd-card-image) or use the already prepared SD-Card image:
+|Method|Build the sd card|Install the image|
+|------|-----------------|-----------------|   
+|Philosophy|Sovereignty|Trust|
+|Difficulty level|Medium|Easy|
+|Pros|You don't need to trust us, build from your own forked repository|Make Blitz accessible to everyone|
+|Cons|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|You have to trust the mantainer image binaries|
+|Instructions|[Build your own sd card image](https://github.com/rootzoll/raspiblitz/tree/master#build-the-sd-card-image)|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|
+|Verify what?|All of the code, don't trust, verify|SHA-256 (below) and/or [Signature](https://github.com/rootzoll/raspiblitz/blob/v1.6/FAQ.md#how-to-verify-the-sd-card-image-after-download)|
 
-**Download SD-Card image - Version 1.7.0RC2 (JUST FOR TESTING)**
+If downloading the mantainer image, the shasum is:
+* SHA-256: 83384b2efe8d93e8bee4130e11770a6c4c1be676df9f9150e78ea42b9d252ed6
 
-Browser: https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC2-2021-04-09.img.gz
-
-SHA-256: 83384b2efe8d93e8bee4130e11770a6c4c1be676df9f9150e78ea42b9d252ed6 or [SIGNATURE]()
-
+Useful info:
 * [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
