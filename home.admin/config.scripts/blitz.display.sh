@@ -267,6 +267,8 @@ function install_lcd() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
@@ -327,7 +329,11 @@ function uninstall_lcd() {
 
     # remove modifications of config.txt
     sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    echo "hdmi_group=1" >> /boot/config.txt
+    echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
 
@@ -400,7 +406,7 @@ function install_lcd_legacy() {
     # add waveshare mod
     sudo cp ./waveshare35a.dtbo /boot/overlays/
 
-    # modify /boot/config.txt 
+    # modify /boot/config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
