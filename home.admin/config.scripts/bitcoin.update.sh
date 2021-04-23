@@ -2,15 +2,15 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "Interim optional Bitcoin Core updates between RaspiBlitz releases."
- echo "bitcoin.update.sh [info|tested|reckless|custom]"
- echo "info -> get actual state and possible actions"
- echo "tested -> only do a tested update by the RaspiBlitz team"
- echo "reckless -> the update was not tested by the RaspiBlitz team"
- echo "custom -> update to a chosen version"
- echo " the binary will be checked by signature and checksum in all cases"
- echo
- exit 1
+  echo "Interim optional Bitcoin Core updates between RaspiBlitz releases."
+  echo "bitcoin.update.sh [info|tested|reckless|custom]"
+  echo "info -> get actual state and possible actions"
+  echo "tested -> only do a tested update by the RaspiBlitz team"
+  echo "reckless -> the update was not tested by the RaspiBlitz team"
+  echo "custom -> update to a chosen version"
+  echo " the binary will be checked by signature and checksum in all cases"
+  echo
+  exit 1
 fi
 
 source /home/admin/raspiblitz.info
@@ -156,9 +156,9 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo "# !!! FAIL !!! Download laanwj-releases.asc not success."
     exit 1
   fi
-  gpg ./laanwj-releases.asc
-  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
-  if [ ${fingerprint} -lt 1 ]; then
+  gpg --import-options show-only --import ./laanwj-releases.asc
+  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep -c "${laanwjPGP}")
+  if [ ${fingerprint} -eq 0 ]; then
     echo
     echo "# !!! BUILD WARNING --> Bitcoin PGP author not as expected"
     echo "# Should contain laanwjPGP: ${laanwjPGP}"
@@ -184,13 +184,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo
   fi
 
-  # get the sha256 value for the corresponding platform from signed hash sum file
-  bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
-
-  echo
-  echo "# BITCOIN v${bitcoinVersion} for ${bitcoinOSversion}"
-
-  # download resources
+  echo "# Downloading Bitcoin Core v${bitcoinVersion} for ${bitcoinOSversion} ..."
   binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
   if [ ! -f "./${binaryName}" ]
@@ -200,26 +194,31 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   fi
 
   echo "# Checking binary checksum ..."
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  checksumTest=$(sha256sum -c --ignore-missing SHA256SUMS.asc ${binaryName} 2>/dev/null \
+                | grep -c "${binaryName}: OK")
+  if [ "${checksumTest}" -eq 0 ]; then
+    # get the sha256 value for the corresponding platform from signed hash sum file
+    bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
+    echo "!!! FAIL !!! Downloaded BITCOIN BINARY CHECKSUM:"
+    echo "$(sha256sum ${binaryName})"
+    echo "NOT matching SHA256 checksum:"
+    echo "${bitcoinSHA256}"
     exit 1
   else
     echo
-    echo "# OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+    echo "# OK --> VERIFIED BITCOIN CHECKSUM IS CORRECT"
     echo
   fi
 
 fi 
 
 if [ "${mode}" = "tested" ]||[ "${mode}" = "custom" ]; then
-  # note: install will be done the same as reckless further down
   bitcoinInterimsUpdateNew="${bitcoinVersion}"
 elif [ "${mode}" = "reckless" ]; then
   bitcoinInterimsUpdateNew="reckless"
 fi
 
-# JOINED INSTALL (tested & RECKLESS)
+# JOINED INSTALL
 if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ];then
 
   # install
@@ -247,14 +246,18 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
 
   echo "# OK Bitcoin Core ${bitcoinVersion} is installed"
   if [ "${state}" == "ready" ]; then
+    echo
+    echo "# Starting ..."
     sudo systemctl start bitcoind
+    sleep 10
+    echo
     sudo systemctl start lnd
+    echo "# Starting LND ..."
+    sleep 10
     echo
-    echo "# Restarted LND"
-    echo "# Use: 'lncli unlock' to unlock the LND wallet once Bitcoin Core is synced"
-    echo
-    echo "# Press ENTER to exit to the menu ..."
+    echo "# Press ENTER to proceed to unlock the LND wallet ..."
     read key
+    sudo /home/admin/config.scripts/lnd.unlock.sh
   fi
   exit 0
 
