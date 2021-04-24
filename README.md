@@ -104,7 +104,7 @@ In the end your RaspiBlitz should look like this:
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
 |Cons|You have to trust the mantainer image binaries|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|
 |Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|SHA-256 (below) and/or [Signature](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.img.gz.sig)|All of the code, don't trust, verify|
+|Verify what?|SHA-256 (below) and/or [Signature](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.sig)|All of the code, don't trust, verify|
 
 If downloading the mantainer image, the shasum is:
 * SHA-256: e6d70ac1662af3e90e57bee8c50e9a7925239431892e1916c2be80e519befc3f
