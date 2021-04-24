@@ -73,6 +73,7 @@
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+- [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 
 ---
 

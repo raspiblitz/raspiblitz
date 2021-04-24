@@ -52,6 +52,8 @@ The RaspiBlitz is optimized for being setup during a workshop at a hackday or co
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
+If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the switch under one hour. Just download the RaspiBlitz sd card image & jump to the migration details. 
+
 ## Hardware Needed
 
 All parts together cost around 180-250 USD - based on shops and location.
@@ -131,6 +133,8 @@ Insert the SD card and connect the power plug.
 * [I connected my HDD, but it still says 'Connect HDD' on the display?](FAQ.md#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
 
 When everything boots up correctly, you should see the local IP address of your RaspiBlitz on the LCD panel.
+
+- [How do I find the IP address when running without a display?](FAQ.md#how-do-i-find-the-ip-address-when-running-without-a-display)
 
 ![LCD0](pictures/lcd0-welcome.png)
 
@@ -941,6 +945,34 @@ You have the two options: [SYNC](README.md#1-sync---selfvalidate-all-blocks) and
 RaspiBlitz will reboot and start the normal recovery process to install all the services defined by the raspiblitz.config from your Migration File.
 
 Then the blockchain needs to sync up and you should be back to normal.
+
+## Make a RaspiBlitz out of your Umbrel or MyNode
+
+Another kind of migration is when you already run an full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels. You basically have all the hardware needed and just need to change software. You dont need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
+
+*NOTE: This migration is still expirimental. You will still use the terminal to setup & manage your RaspiBlitz. If that is too technical for you please wait for the RaspiBlitz v1.8, which will introduce a WebUI for your browser that make the migration to RaspiBlitz familiar like with your old node user experiences.*
+
+Before you start migration:
+* if you have on-chain funds on your old node - make sure to have the backup seed words
+* if you have lightning channels open on your old node - make sure to have downloaded the latest Static Channel Backup file to your laptop
+
+Also be aware that at the moment RaspiBlitz can only transfere your blockchain and LND wallet data (including channels) over to RaspiBlitz. Any data/pairing of additional apps cannot be transfered and may get lost.
+
+Instructions for Migration:
+* shutdown your old node
+* remove the sd card
+* [download the latest Raspiblitz sd card image & flash it to your sd card](#downloading-the-software)
+* if you like to use a HDMI monitor for status & progress, create a empty file called `hdmi` (withot any ending) on the sd card while connected to your laptop 
+* [insert sd card, boot up & login per SSH](#boot-your-raspiblitz)
+
+Now RaspiBlitz should show you that old data from your node was detected and offer you todo the migration.
+
+* If you continue it will prepare the data & reboot.
+* The RaspiBlitz recover/update modus is starting - that will take a while and finally reboot.
+* Login per SSH as before and reset the passwords (`FINAL RECOVERY LOGIN` on LCD). Then a final reboot will happen.
+* Login per SSH with your new password A & unlock LND wallet with password C. Now blockchain needs to catch up and then your RaspiBlitz should be ready and show you (under INFO) your on-chain & channel balance.
+
+If you dont have an LCD or HDMI monitor connectec it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
 
 ## Interface / APIs
 
