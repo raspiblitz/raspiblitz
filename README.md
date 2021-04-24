@@ -101,7 +101,7 @@ In the end your RaspiBlitz should look like this:
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
 |Cons|You have to trust the mantainer image binaries|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|
-|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](https://github.com/rootzoll/raspiblitz/tree/master#build-the-sd-card-image)|
+|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|SHA-256 (below) and/or [Signature](https://github.com/rootzoll/raspiblitz/blob/v1.6/FAQ.md#how-to-verify-the-sd-card-image-after-download)|All of the code, don't trust, verify|
 
 If downloading the mantainer image, the shasum is:
@@ -1055,7 +1055,7 @@ If done successfully, simply put the SD card into the RaspiBlitz and power on ag
 
 A ready-to-use SD card image of RaspiBlitz is provided by us for download, to get everybody started quickly (see above). But if you want to build that image yourself - here is a quick guide:
 
-* Get a fresh RaspiOS 64-bit: [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
+* Get a latest RaspiOS 64-bit: [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
 * Write the image to an SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 * Add a file called `ssh` to the root of the SD card when mounted on your laptop to enable SSH login.
 * Start the card on a Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
