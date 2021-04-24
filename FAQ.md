@@ -931,3 +931,12 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
 
 
+# How do I find the IP address when running without a display?
+
+If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
+
+Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
+
+You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
+
+
