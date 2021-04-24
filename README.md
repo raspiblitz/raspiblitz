@@ -95,14 +95,14 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-|Method|Build the sd card|Install the image|
+|Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
-|Philosophy|Sovereignty|Trust|
-|Difficulty level|Medium|Easy|
-|Pros|You don't need to trust us, build from your own forked repository|Make Blitz accessible to everyone|
-|Cons|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|You have to trust the mantainer image binaries|
-|Instructions|[Build your own sd card image](https://github.com/rootzoll/raspiblitz/tree/master#build-the-sd-card-image)|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|
-|Verify what?|All of the code, don't trust, verify|SHA-256 (below) and/or [Signature](https://github.com/rootzoll/raspiblitz/blob/v1.6/FAQ.md#how-to-verify-the-sd-card-image-after-download)|
+|Philosophy|Trust|Sovereignty|
+|Difficulty level|Easy|Medium|
+|Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
+|Cons|You have to trust the mantainer image binaries|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|
+|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7RC3-2021-04-19.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](https://github.com/rootzoll/raspiblitz/tree/master#build-the-sd-card-image)|
+|Verify what?|SHA-256 (below) and/or [Signature](https://github.com/rootzoll/raspiblitz/blob/v1.6/FAQ.md#how-to-verify-the-sd-card-image-after-download)|All of the code, don't trust, verify|
 
 If downloading the mantainer image, the shasum is:
 * SHA-256: 83384b2efe8d93e8bee4130e11770a6c4c1be676df9f9150e78ea42b9d252ed6
