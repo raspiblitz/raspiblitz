@@ -52,7 +52,7 @@ Ensure that you put quotes around fingerprints containing spaces if importing wi
 * Optional log in through SSH using a hardware wallet.
 * LUKS encryption would be welcome in the future.
 
-# Wallets (on-chain funds)
+# On-chain Funds
 
 Please keep in mind that there can be two different on-chain wallets on the RaspiBlitz.
 
@@ -66,3 +66,8 @@ Beside lightning you have a bitcoin core installed. Normally bitcoin core acts j
 
 Some apps (like Fully Noded or JoinMarket) activate the bitcoin core wallet and use it for their own needs. This on-chain balance will not be reflected in the rest of the RaspiBlitz software and is NOT backuped by the seed words from the RaspiBlitz setup. If you make use of the bitcoin core wallet please take care of these funds. 
 
+# Off-chain Funds (Lightning Channels)
+
+Please note that there is no perfect backup concept for the funds in your lightning channels yet. We recommend strongly to use the `Static Channel Backup` provided by LND and consider off-loctaion backup of that file to have the best chances to recover Lightning funds in a case desaster recovery.
+
+For more practical information on this topic see: [Backup Channel Funds](README.md#backup-for-on-chain---channel-funds)
