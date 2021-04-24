@@ -52,7 +52,7 @@ The RaspiBlitz is optimized for being setup during a workshop at a hackday or co
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
-If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour. 
+If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour. 
 
 ## Hardware Needed
 
