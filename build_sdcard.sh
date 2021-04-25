@@ -115,6 +115,46 @@ if [ ${#modeWifi} -eq 0 ] || [ "${modeWifi}" == "true" ]; then
 fi
 echo "7) will use WIFI --> '${modeWifi}'"
 
+# 8th optional paramater: TESTTORDOMAIN
+# ---------------------------------------
+# could be 'true'(default) or 'false'
+# Avoid pinging Tor domain if the user knows it is blocked.
+# the users governement prohibits Tor usage, he can avoid pinging Tor domain with 'false'.
+# Default is 'true' cause this is a rare ocasion for certain people.
+# If 'true' will ping torproject.org. If there is no response from pinging, will add Tor sources with tor://
+# If 'false' will not ping torproject.org. Will add Tor sources with tor://
+testTorDomain="$8"
+if [ ${#testTorDomain} -eq 0 ]; then
+  testTorDomain="true"
+fi
+if [ "${testTorDomain}" != "true" ] && [ "${testTorDomain}" != "false" ]; then
+  echo "ERROR: TEST-TOR-DOMAIN parameter needs to be either 'true' or 'false'"
+  exit 1
+else
+  echo "8) will use TEST-TOR-DOMAIN --> '${testTorDomain}'"
+fi
+
+# 9th optional paramater: ADDBRIDGES
+# ---------------------------------------
+# could be 'true' or 'false'(default)
+# Default is 'false' cause this is a rare ocasion for certain people.
+# If 'true' will add bridges if there is a 'torrc' file on the 'home' folder.
+# If 'false' will skip adding bridges.
+addBridges="$9"
+if [ ${#addBridges} -eq 0 ]; then
+  addBridges="false"
+fi
+if [ "${addBridges}" != "true" ] && [ "${addBridges}" != "false" ]; then
+  echo "ERROR: ADD-BRIDGES parameter needs to be either 'true' or 'false'"
+  exit 1
+elif [ "${addBridges}" = "true" ] && [ ! -f ./torrc ]; then
+  echo "User chose to use bridges but 'torrc' file not found on home folder."
+  echo "Will exit now for the user safety."
+  exit 1
+else
+  echo "9) will use ADD-BRIDGES --> '${addBridges}'"
+fi
+
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
@@ -136,7 +176,7 @@ else
 fi
 echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
-# AUTO-DETECTION: OPERATINGSYSTEM
+# AUTO-DETECTION: OPERATINGSYSTEM and DISTRIBUTION
 # ---------------------------------------
 baseimage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
@@ -171,58 +211,241 @@ if [ "${baseimage}" = "?" ]; then
 fi
 echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
+distribution=$(lsb_release -sc)
+echo "X) will use DISTRIBUTION ---> '${distribution}'"
+
 # USER-CONFIRMATION
 if [ "${noInteraction}" != "true" ]; then
   echo -n "Do you agree with all parameters above? (yes/no) "
   read installRaspiblitzAnswer
   if [ "$installRaspiblitzAnswer" != "yes" ] ; then
+    echo "Build canceled."
     exit 1
   fi
 fi
 echo "Building RaspiBlitz ..."
-echo ""
+# cronometer
+start=$SECONDS
 sleep 3
+echo ""
+
+# cd goes to /root, it is needed to stay in user logged in.
+echo "*** Save current /home/user path ***"
+userPath=$(pwd)
+userRunning=$(pwd | cut -c7-20)
+echo "User path is: ${userPath}"
+echo "User logged is: ${userRunning}"
+echo ""
+
+# Ease commenting and uncommenting deb-src.
+echo "*** Separate sources to different files ***"
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.orig
+sudo rm -rf /etc/apt/sources.list
+sudo rm -rf /etc/apt/sources.list.d/*
+sudo touch /etc/apt/sources.list.d/deb.list
+sudo touch /etc/apt/sources.list.d/deb-src.list
+sudo touch /etc/apt/sources.list.d/tor.list
+sudo touch /etc/apt/sources.list.d/tor-src.list
+sudo touch /etc/apt/sources.list.d/tor-apttor.list
+sudo touch /etc/apt/sources.list.d/tor-src-apttor.list
+
+echo "*** Adding distro Sources to sources.list ***"
+if [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
+  sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
+deb https://deb.debian.org/debian ${distribution} main contrib non-free
+deb https://deb.debian.org/debian-security/ ${distribution}/updates main contrib non-free
+deb https://deb.debian.org/debian ${distribution}-updates main contrib non-free
+EOF
+  sudo tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+deb-src https://deb.debian.org/debian ${distribution} main contrib non-free
+EOF
+elif [ "${baseimage}" = "ubuntu" ]; then
+  sudo tee -a /etc/apt/sources.list.d/deb.list << EOF
+deb http://archive.ubuntu.com/ubuntu/ ${distribution} main
+deb http://archive.ubuntu.com/ubuntu/ ${distribution}/updates main
+deb http://archive.ubuntu.com/ubuntu/ ${distribution}-updates main
+EOF
+  sudo tee -a /etc/apt/sources.list.d/deb-src.list << EOF
+deb-src http://archive.ubuntu.com/ubuntu/ ${distribution} main
+EOF
+fi
+echo "deb-src for ${baseimage} ${distribution} is available"
+echo ""
+
+echo "*** Update and Upgrade ${baseimage} ${distribution} sources ***"
+sudo apt update
+sudo apt dist-upgrade -f -y
+echo ""
+
+# INSTALL TOR BRIDGES PACKAGE
+# Doesnt work the repo version. Only works building from source on ARM (32/64 bit).
+# The last version for Buster (Stable) today (apr/2021) is obfs4proxy 0.0.7-4. https://tracker.debian.org/pkg/obfs4proxy
+# Warnings will appear of not using the v1.11 golang, but will work anyway.
+echo "*** Compile obfs4proxy from source ***" 
+mkdir -p obfs4proxy
+cd obfs4proxy/
+sudo apt install -y obfs4proxy
+sudo apt source obfs4proxy
+sudo apt build-dep -y obfs4proxy
+cd obfs4proxy-*
+dpkg-buildpackage -b -uc
+cd ..
+dpkg -i obfs4proxy_*.deb 
+sudo apt update
+sudo apt --only-upgrade install obfs4proxy
+cd ..
+sudo rm -rf obfs4proxy
+cd ${userPath}
+echo "# Installed $(obfs4proxy --version)"
+echo ""
+
+echo "# Commenting deb-src ..."
+sudo sed -i 's/^/#/' /etc/apt/sources.list.d/deb-src.list
+echo "deb-src are commented now"
+echo ""
+
+# MASK TOR
+# Tor will just start after user has the possibility to input bridges to mask he is using Tor
+# This is for security reasons if someone is in danger to no appear in the radar.
+echo "*** Mask Tor before installing ***"
+echo "# Preventing Tor from start before user configuration"
+sudo systemctl mask tor@default.service
+isTorMasked=$(sudo systemctl is-enabled tor@default)
+sleep 3
+if [ ${isTorMasked} != "masked" ]; then
+  echo "Failed to mask Tor, open an issue on github"
+  exit 0
+else
+  echo "Tor is masked now"
+fi
+echo ""
 
 # INSTALL TOR
+# Tor will be installed from Distro repo for who dont have acces to www.torproject.org
+# Afraid of gov detecting you use Tor? https://github.com/rootzoll/raspiblitz/issues/592#issuecomment-491826661
+# This will give you the option to use Tor Pluggable Transport Bridges to mask you are using Tor.
+# Tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054
 echo "*** INSTALL TOR BY DEFAULT ***"
+sudo apt install -y dirmngr apt-transport-tor tor torsocks nyx
 echo ""
-sudo apt install -y dirmngr
+
+# Test Tor domain. Will add tor:// if he choses to ping but dont can't reach.
+if [ "${testTorDomain}" = "true" ]; then
+  echo "Testing connection to torproject.org"
+  statusTorDomain=$(sudo ping -c 3 torproject.org | grep -c '3 received')
+  echo "Status=${statusTorDomain}"
+  if [ ${statusTorDomain} -gt 0 ]; then
+    echo "You can reach torproject.org via CLEARNET. But Tor connections could still be blocked, add bridges if you desire."
+    echo "Reaching Tor sources will be acquired using apt-transport-https."
+  else
+    echo "!!! WARNING: You can NOT reach torproject.org via CLEARNET. You should configure bridges."
+    echo "Reaching Tor sources will be acquired using apt-transport-tor."
+  fi
+elif [ "${testTorDomain}" = "false" ]; then
+  echo "You chose not to ping https://www.torproject.org domain."
+  echo "Reaching Tor sources will be acquired using apt-transport-tor."
+fi
+echo ""
+
+# Add 'torrc' home folder file to /etc/tor/torrc. The user needs to place a torrc named file.
+if [ "${addBridges}" = "true" ]; then
+  if [ ! -f "${userPath}"/torrc ]; then
+    echo "User chose to use bridges but 'torrc' file not found on home folder."
+    echo "Will exit now for the user safety."
+    exit 0
+  elif [ -f "${userPath}"/torrc ]; then
+    echo "Adding bridges specified by the user."
+    echo "" | sudo tee -a "${userPath}"/torrc
+    sudo cp /etc/tor/torrc /etc/tor/torrc.orig
+    sudo rm /etc/tor/torrc
+    sudo cp "${userPath}"/torrc /etc/tor/torrc
+    # backup bridges in case something goes wrong
+    sudo cp "${userPath}"/torrc /etc/tor/bridges
+    sudo chmod 644 /etc/tor/torrc
+    sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
+  fi
+else
+  echo "Skipping adding bridges."
+fi
+echo ""
+
+# tor@default vanished from unit file warning if normal. This message will stop after reboot.
+# Doing 'update-rc.d tor enable' will enable Tor on boot after unit vanishing.
+# systemctl restart because it could be already started from a failed build before, so we can see the right bootstrap logs. Start dont singal to reboot the service. 
+echo "*** Unmask Tor ***"
+sudo systemctl unmask tor@default.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+sudo update-rc.d tor enable
+sudo systemctl restart tor@default.service
+## sleep long enough to bootstrap when using bridges (usually has a delay to bootstrap).
+echo "Sleeping for 40 seconds. Waiting for Tor to fully bootstrap"
+sleep 40
+# Dont show full logs (systemctl), cause bridges IP and Descriptors are displayed here and cant be hidden by Tor configuration.
+sudo systemctl status tor@default | grep running && sudo systemctl status tor@default | grep Bootstrapped
+echo ""
+
+# check if Tor is functional
+echo "*** Check if Tor service is functional ***"
+torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
+if [ ${torRunning} -gt 0 ]; then
+  echo "You are all good - Tor is running. You reached Tor Project."
+else
+  echo "!!! FAIL: Tor is not running ... exiting now."
+  echo "Correct the file /etc/tor/torrc manually before running this script again. Debug tor@default.service with 'sudo journalctl -eu tor@default'."
+  echo "If you chose to use bridges, correct the 'torrc' file on your home folder."
+  exit 1
+fi
+echo ""
+
 echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
-wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+# fix for v1.7 tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054#issuecomment-800383278
+# will use torsocks anyway, cause Tor needs to be running for whom needs it the most, and it will exit above on the test if not working.
+torsocks wget -qO- http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
 sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
 torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
 if [ ${torKeyAvailable} -eq 0 ]; then
   echo "!!! FAIL: Was not able to import deb.torproject.org key"
   exit 1
 fi
-echo "- OK key added"
+echo "OK - key added"
+echo ""
 
-echo "*** Adding Tor Sources to sources.list ***"
-torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
-echo "torSourceListAvailable=${torSourceListAvailable}"  
-if [ ${torSourceListAvailable} -eq 0 ]; then
-  echo "- adding TOR sources ..."
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "- using https://deb.torproject.org/torproject.org buster"
-    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-  elif [ "${baseimage}" = "ubuntu" ]; then
-    echo "- using https://deb.torproject.org/torproject.org focal"
-    echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+# deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
+echo "*** Adding Tor Sources to sources lists ***"
+if [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ] || [ "${baseimage}" = "ubuntu" ]; then
+  if [ ${statusTorDomain} -eq 0 ] || [ "${testTorDomain}" = "false" ];then
+    echo "- adding 'deb tor+http://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
+    sudo tee -a /etc/apt/sources.list.d/tor-apttor.list << EOF
+deb tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+EOF
+    echo "- adding 'deb-src tor+http://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
+    sudo tee -a /etc/apt/sources.list.d/tor-src-apttor.list << EOF
+#deb-src tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+EOF
+    echo "OK - Tor sources added"
   else
-    echo "!!! FAIL: No Tor sources for os: ${baseimage}"
-    exit 1
+    echo "- adding 'deb https://' for Tor to /etc/apt/sources.list.d/tor.list"
+    sudo tee -a /etc/apt/sources.list.d/tor.list << EOF
+deb https://deb.torproject.org/torproject.org ${distribution} main
+EOF
+    echo "- adding 'deb-src https://' for Tor to /etc/apt/sources.list.d/tor-src.list"
+    sudo tee -a /etc/apt/sources.list.d/tor-src.list << EOF
+#deb-src https://deb.torproject.org/torproject.org ${distribution} main
+EOF
+    echo "OK - Tor sources added"
   fi
-  echo "- OK sources added"
 else
-  echo "TOR sources are available"
+  echo "!!! FAIL: No Tor sources for OS: ${baseimage}"
+  exit 1
 fi
+echo ""
 
+# Now Tor will be installed in the latest version from Tor Project repo.
 echo "*** Install & Enable Tor ***"
 sudo apt update
-sudo apt install tor tor-arm torsocks -y
+sudo apt install -y tor torsocks nyx
 echo ""
 
 # FIXING LOCALES
@@ -408,15 +631,15 @@ fi
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
 echo "/var/log/syslog" >> ./rsyslog
 echo "{" >> ./rsyslog
-echo "	rotate 7" >> ./rsyslog
-echo "	daily" >> ./rsyslog
-echo "	missingok" >> ./rsyslog
-echo "	notifempty" >> ./rsyslog
-echo "	delaycompress" >> ./rsyslog
-echo "	compress" >> ./rsyslog
-echo "	postrotate" >> ./rsyslog
-echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
-echo "	endscript" >> ./rsyslog
+echo "  rotate 7" >> ./rsyslog
+echo "  daily" >> ./rsyslog
+echo "  missingok" >> ./rsyslog
+echo "  notifempty" >> ./rsyslog
+echo "  delaycompress" >> ./rsyslog
+echo "  compress" >> ./rsyslog
+echo "  postrotate" >> ./rsyslog
+echo "      invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "  endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
 echo "" >> ./rsyslog
 echo "/var/log/mail.info" >> ./rsyslog
@@ -458,16 +681,16 @@ echo "/var/log/cron.log" >> ./rsyslog
 echo "/var/log/debug" >> ./rsyslog
 echo "/var/log/messages" >> ./rsyslog
 echo "{" >> ./rsyslog
-echo "	rotate 4" >> ./rsyslog
-echo "	weekly" >> ./rsyslog
-echo "	missingok" >> ./rsyslog
-echo "	notifempty" >> ./rsyslog
-echo "	compress" >> ./rsyslog
-echo "	delaycompress" >> ./rsyslog
-echo "	sharedscripts" >> ./rsyslog
-echo "	postrotate" >> ./rsyslog
-echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
-echo "	endscript" >> ./rsyslog
+echo "  rotate 4" >> ./rsyslog
+echo "  weekly" >> ./rsyslog
+echo "  missingok" >> ./rsyslog
+echo "  notifempty" >> ./rsyslog
+echo "  compress" >> ./rsyslog
+echo "  delaycompress" >> ./rsyslog
+echo "  sharedscripts" >> ./rsyslog
+echo "  postrotate" >> ./rsyslog
+echo "      invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
+echo "  endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
 sudo mv ./rsyslog /etc/logrotate.d/rsyslog
 sudo chown root:root /etc/logrotate.d/rsyslog
