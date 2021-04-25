@@ -60,18 +60,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
     
     cd /home/programmingbitcoin/programmingbitcoin
-    pip install virtualenv
-    virtualenv -p python3 .venv
+    sudo -u programmingbitcoin pip install virtualenv
+    sudo -u programmingbitcoin virtualenv -p python3 .venv
     . .venv/bin/activate
-    pip install -r requirements.txt
+    sudo -u programmingbitcoin pip install -r requirements.txt
+    sudo -u programmingbitcoin pip install pygments==2.4.1
 
-
-    echo "# setting the autostart script for programmingbitcoin"
+    echo ""
+    echo "# ***"
+    echo "# Setting the autostart script for programmingbitcoin"
+    echo "# ***"
     echo "
 cd /home/programmingbitcoin/programmingbitcoin
-. .venv/bin/activate
+source .venv/bin/activate
 jupyter notebook
-    " | sudo -u programmingbitcoin tee -a /home/programmingbitcoin/.bashrc
+" | sudo -u programmingbitcoin tee -a /home/programmingbitcoin/.bashrc
 
 
    # setting value in raspi blitz config
