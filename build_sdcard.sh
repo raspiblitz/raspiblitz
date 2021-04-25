@@ -453,7 +453,7 @@ echo ""
 # Now Tor will be installed in the latest version from Tor Project repo.
 echo "*** Install & Enable Tor ***"
 sudo apt update
-sudo apt install -y tor tor-arm torsocks
+sudo apt install -y tor torsocks nyx
 echo ""
 
 # FIXING LOCALES
