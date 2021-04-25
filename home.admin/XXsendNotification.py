@@ -11,7 +11,7 @@ try:
 except ImportError:
     raise ImportError("Please install missing package: python3 -m pip install smime")
 
-SSMTP_BIN = "/usr/sbin/ssmtp"
+SMTP_BIN = "/usr/bin/msmtp"
 
 
 def main():
@@ -107,7 +107,7 @@ def mail(recipient: str = None, message: str = None, subject: str = None, cert: 
             'From: {} <{}>'.format(from_name, from_address),
             "Subject: {}".format(subject),
             "",
-            "{}".format(message.encode('utf8'))
+            "{}".format(message)
         ]
 
         with open(cert, 'rb') as pem:
@@ -126,11 +126,11 @@ def mail(recipient: str = None, message: str = None, subject: str = None, cert: 
         msg_to_send = msg.as_bytes()
 
     # send message via e-Mail
-    if not os.path.exists(SSMTP_BIN):
-        raise Exception("File not found: {}".format(SSMTP_BIN))
+    if not os.path.exists(SMTP_BIN):
+        raise Exception("File not found: {}".format(SMTP_BIN))
 
     try:
-        cmd = [SSMTP_BIN, recipient]
+        cmd = [SMTP_BIN, recipient]
         subprocess.run(cmd, input=msg_to_send, stderr=subprocess.STDOUT)
 
     except subprocess.CalledProcessError as err:
