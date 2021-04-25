@@ -30,24 +30,24 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 clear
-echo ""
+echo
 echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
 echo "***************************************************************"
 echo "blitzversion: ${codeVersion}"
 echo "chainnetwork: ${network} / ${chain}"
 uptime
-echo ""
+echo
 
 echo "*** BLOCKCHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
-echo ""
+echo
 
 echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
 cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
-echo ""
+echo
 echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
 pathAdd=""
 if [ "${chain}" = "test" ]; then
@@ -55,149 +55,146 @@ if [ "${chain}" = "test" ]; then
 fi
 echo "sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log"
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
-echo ""
+echo
 
 echo "*** LND SYSTEMD STATUS ***"
 sudo systemctl status lnd -n2 --no-pager
-echo ""
+echo
 
 echo "*** LAST LND ERROR LOGS ***"
 echo "sudo journalctl -u lnd -b --no-pager -n12"
 sudo journalctl -u lnd -b --no-pager -n12
 cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
-echo ""
+echo
 echo "*** LAST 30 LND INFO LOGS ***"
 echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
-echo ""
+echo
 
 echo "*** NGINX SYSTEMD STATUS ***"
 sudo systemctl status nginx -n2 --no-pager
-echo ""
-
+echo
 echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
 echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
-echo ""
+echo
 
-if [ "${touchscreen}" = "0" ]; then
-  echo "- TOUCHSCREEN is OFF by config"
-else
-  echo ""
+if [ "${touchscreen}" = "1" ]; then
+  echo
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
   echo "sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log"
   sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log
-  echo ""
+  echo
+else
+  echo "- TOUCHSCREEN is OFF by config"
 fi
 
-if [ "${loop}" = "off" ]; then
-  echo "- Loop is OFF by config"
-else
-  echo ""
+if [ "${loop}" = "on" ]; then
+  echo
   echo "*** LAST 20 LOOP LOGS ***"
   echo "sudo journalctl -u loopd -b --no-pager -n20"
   sudo journalctl -u loopd -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- Loop is OFF by config"
 fi
 
-if [ "${rtlWebinterface}" = "off" ]; then
-  echo "- RTL is OFF by config"
-else
-  echo ""
+if [ "${rtlWebinterface}" = "on" ]; then
+  echo
   echo "*** LAST 20 RTL LOGS ***"
   echo "sudo journalctl -u RTL -b --no-pager -n20"
   sudo journalctl -u RTL -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- RTL is OFF by config"
 fi
 
-if [ "${ElectRS}" = "off" ]; then
-  echo "- Electrum Rust Server is OFF by config"
-else
-  echo ""
+if [ "${ElectRS}" = "on" ]; then
+  echo
   echo "*** LAST 20 ElectRS LOGS ***"
   echo "sudo journalctl -u electrs -b --no-pager -n20"
   sudo journalctl -u electrs -b --no-pager -n20
-  echo ""
+  echo
   echo "*** ElectRS Status ***"
   sudo /home/admin/config.scripts/bonus.electrs.sh status
-  echo ""
+  echo
+else
+  echo "- Electrum Rust Server is OFF by config"
 fi
 
-if [ "${lit}" = "off" ]; then
-  echo "- LIT is OFF by config"
-else
-  echo ""
+if [ "${lit}" = "on" ]; then
+  echo
   echo "*** LAST 20 LIT LOGS ***"
   echo "sudo journalctl -u litd -b --no-pager -n20"
   sudo journalctl -u litd -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- LIT is OFF by config"
 fi
 
-if [ "${BTCPayServer}" = "off" ]; then
-  echo "- BTCPayServer is OFF by config"
-else
-  echo ""
+if [ "${BTCPayServer}" = "on" ]; then
+  echo
   echo "*** LAST 20 BTCPayServer LOGS ***"
   echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
   sudo journalctl -u btcpayserver -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- BTCPayServer is OFF by config"
 fi
 
-if [ "${LNBits}" = "off" ]; then
-  echo "- LNbits is OFF by config"
-else
-  echo ""
+if [ "${LNBits}" = "on" ]; then
+  echo
   echo "*** LAST 20 LNbits LOGS ***"
   echo "sudo journalctl -u lnbits -b --no-pager -n20"
   sudo journalctl -u lnbits -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- LNbits is OFF by config"
 fi
 
-if [ "${thunderhub}" = "off" ]; then
-  echo "- Thunderhub is OFF by config"
-else
-  echo ""
+if [ "${thunderhub}" = "on" ]; then
+  echo
   echo "*** LAST 20 Thunderhub LOGS ***"
   echo "sudo journalctl -u thunderhub -b --no-pager -n20"
   sudo journalctl -u thunderhub -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- Thunderhub is OFF by config"
 fi
 
-if [ "${specter}" = "off" ]; then
-  echo "- SPECTER is OFF by config"
-else
-  echo ""
+if [ "${specter}" = "on" ]; then
+  echo
   echo "*** LAST 20 SPECTER LOGS ***"
   echo "sudo journalctl -u cryptoadvance-specter -b --no-pager -n20"
   sudo journalctl -u cryptoadvance-specter -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- SPECTER is OFF by config"
 fi
 
-if [ "${sphinxrelay}" = "off" ]; then
-  echo "- SPHINX is OFF by config"
-else
-  echo ""
+if [ "${sphinxrelay}" = "on" ]; then
+  echo
   echo "*** LAST 20 SPHINX LOGS ***"
   echo "sudo journalctl -u sphinxrelay -b --no-pager -n20"
   sudo journalctl -u sphinxrelay -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- SPHINX is OFF by config"
 fi
 
-echo ""
+echo
 echo "*** MOUNTED DRIVES ***"
 df -T -h
-echo ""
+echo
 
-echo ""
 echo "*** DATADRIVE ***"
 sudo /home/admin/config.scripts/blitz.datadrive.sh status
-echo ""
 
 echo "*** NETWORK ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
-echo ""
+echo
 
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
@@ -207,14 +204,14 @@ if [ ${#undervoltageReports} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
-echo ""
+echo
 
 echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
 sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo ""
+echo
 
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"
-echo "/home/admin/XXdebugLogs.sh | nc termbin.com 9999"
-echo ""
+echo "/home/admin/XXdebugLogs.sh | torsocks nc termbin.com 9999"
+echo
