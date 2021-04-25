@@ -19,7 +19,7 @@ There are further Services that can be switched on:
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 * **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
-* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
+* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop)
 * **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
@@ -97,6 +97,8 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
+There are two ways how you can install the RaspiBlitz software on your RaspberryPi:
+
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
 |Philosophy|Trust|Sovereignty|
@@ -106,8 +108,11 @@ In the end your RaspiBlitz should look like this:
 |Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|SHA-256 (below) and/or [Signature](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.sig)|All of the code, don't trust, verify|
 
-If downloading the mantainer image, the shasum is:
+If downloading the mantainer sd card image, the shasum is:
 * SHA-256: e6d70ac1662af3e90e57bee8c50e9a7925239431892e1916c2be80e519befc3f
+
+The mantainer sd card image can also be downloaded via torrent:
+* [assets/raspiblitz-v1.6.3-2021-01-13.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.0-2021-04-25.img.gz.torrent)
 
 Useful info:
 * [What's new in Version 1.7 of RaspiBlitz?](CHANGES.md#whats-new-in-version-170-of-raspiblitz)
@@ -649,6 +654,8 @@ The goal of SpecterDesktop is to make a convenient and user-friendly GUI around 
 
 After install, you will see a new `SPECTER` option in the SSH main menu - it will give you all the information you need to start using it.
 
+As an alternative to runninf Specter on directly on the RaspiBlitz, there is a Specter Desktop version that runs on your laptop. Here is a [guide to connect the specter laptop app] (https://d11n.net/connect-specter-desktor-with-raspiblitz.html) to your RaspiBlitz Bitcoin fullnode.
+
 ##### Mempool Explorer
 
 ![MEMPOOL](pictures/mempool.png)
@@ -760,7 +767,7 @@ Opens an ad-hoc webserver so that you can download the files in your local netwo
 
 *This is the least secure way to transfer those files - everybody in your local network has access to those file during download. Remember with the Admin-Macaroon somebody could takeover your node and spend all your funds. Just use as last fallback.*
 
-####### Hex-String
+###### Hex-String
 
 The Macaroons and TLS.cert files can be copy+pasted as Hex-Strings from RaspiBlitz to any other app that supports that format. If you choose this option, RaspiBlitz will print all the files for you as Hex-String to do so.
 
