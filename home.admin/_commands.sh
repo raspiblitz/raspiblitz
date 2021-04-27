@@ -341,6 +341,6 @@ function notifyme() {
 # command: whitepaper
 # downloads the whitepaper from the blockchain to /home/admin/bitcoin.pdf
 function whitepaper() {
-  cd /home/admin/config.scripts
-  ./bonus.whitepaper.sh on
+  cd /home/admin
+  ./config.scripts/bonus.whitepaper.sh on
 }
