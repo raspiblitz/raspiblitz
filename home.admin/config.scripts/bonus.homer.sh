@@ -76,9 +76,9 @@ if [ "$1" = "update" ]; then
 
   cd /home/homer/homer
   sudo -u homer git fetch
-  sudo -u homer git reset --hard $remoteVersion
+  # sudo -u homer git reset --hard $remoteVersion
 
-  sudo -u homer NG_CLI_ANALYTICS=false npm install --legacy-peer-deps
+  sudo -u homer NG_CLI_ANALYTICS=false npm install
   if ! [ $? -eq 0 ]; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
@@ -119,9 +119,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/homer
     sudo -u homer git clone https://github.com/bastienwirtz/homer.git
     cd homer
-    sudo -u homer git reset --hard $installVersion
+    # sudo -u homer git reset --hard $installVersion
 
-    sudo -u homer NG_CLI_ANALYTICS=false npm install --legacy-peer-deps
+    sudo -u homer NG_CLI_ANALYTICS=false npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
