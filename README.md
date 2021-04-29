@@ -76,6 +76,11 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
 * SSD-case - UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support : [amazon referral link](https://geni.us/raspiblitz-ssd-case)
 * MicroSDCard 32GB - Samsung PRO Endurance 32 GB microSDHC UHS-I U1: [amazon referral link](https://geni.us/raspiblitz-sc-card)
 * LCD - 3.5" RPi Display, GPIO connection, XPT2046 Touch Controller: [amazon referral link](https://geni.us/raspiblitz-touchscreen)
+  - There are different vendors for the screen on Amazon. If the above mentioned screen is sold out you can also use these:
+  - Quimat 3,5'' Zoll Inch Touch
+  - ELEGOO Display 3.5" Zoll TFT LCD
+  - kuman 3.5 Inch Touch Screen TFT Monitor
+  - Waveshare 3.5inch Display for Raspberry Pi 
 * Heatsink Case for RPi4 : [amazon referral link](https://geni.us/heatsink-raspi4)
 
 *You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
