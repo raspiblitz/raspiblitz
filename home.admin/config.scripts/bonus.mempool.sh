@@ -40,9 +40,9 @@ This can take multiple hours.
 
     # TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " Mempool " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4081\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " Mempool " --msgbox "Open in your local web browser:
+http://${localip}:4080\n
+https://${localip}:4081 with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
@@ -51,9 +51,9 @@ ${toraddress}
   else
 
     # IP + Domain
-    whiptail --title " Mempool " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4081\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " Mempool " --msgbox "Open in your local web browser:
+http://${localip}:4080\n
+https://${localip}:4081 with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
@@ -213,6 +213,7 @@ EOF
 
     # open firewall
     echo "# *** Updating Firewall ***"
+    sudo ufw allow 4080 comment 'mempool HTTP'
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
 
@@ -223,10 +224,12 @@ EOF
     # setup nginx symlinks
     sudo cp /home/admin/assets/nginx/snippets/mempool.conf /etc/nginx/snippets/mempool.conf
     sudo cp /home/admin/assets/nginx/snippets/mempool-http.conf /etc/nginx/snippets/mempool-http.conf
+    sudo cp /home/admin/assets/nginx/sites-available/mempool_.conf /etc/nginx/sites-available/mempool_.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_ssl.conf /etc/nginx/sites-available/mempool_ssl.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_tor.conf /etc/nginx/sites-available/mempool_tor.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_tor_ssl.conf /etc/nginx/sites-available/mempool_tor_ssl.conf
 
+    sudo ln -sf /etc/nginx/sites-available/mempool_.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_ssl.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_tor.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_tor_ssl.conf /etc/nginx/sites-enabled/
@@ -306,9 +309,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # remove nginx symlinks
     sudo rm -f /etc/nginx/snippets/mempool.conf
     sudo rm -f /etc/nginx/snippets/mempool-http.conf
+    sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/mempool_.conf
     sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
     sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
     sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
@@ -330,6 +335,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # close ports on firewall
+  sudo ufw deny 4080
   sudo ufw deny 4081
   exit 0
 fi

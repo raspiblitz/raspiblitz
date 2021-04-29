@@ -41,8 +41,9 @@ Public Domain: https://${publicDomain}:${httpsPort}
 port forwarding on router needs to be active & may change port" 
   fi
 
-  text="${text}
-SHA1 ${sslFingerprintIP}" 
+  text="${text}\n
+You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
+${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -66,7 +67,7 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  whiptail --title " LNbits " --msgbox "${text}" 15 69
+  whiptail --title " LNbits " --msgbox "${text}" 16 69
   
   /home/admin/config.scripts/blitz.display.sh hide
   echo "please wait ..."
@@ -86,6 +87,7 @@ if [ "$1" = "status" ]; then
 
     localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
+    echo "httpPort='5000'"
     echo "httpsPort='5001'"
     echo "publicIP='${publicIP}'"
 
@@ -176,6 +178,7 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
   #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
   echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
+
   exit 0
 fi
 
@@ -301,7 +304,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 5001 comment 'lnbits'
+    sudo ufw allow 5000 comment 'lnbits HTTP'
+    sudo ufw allow 5001 comment 'lnbits HTTPS'
     echo ""
 
     # install service

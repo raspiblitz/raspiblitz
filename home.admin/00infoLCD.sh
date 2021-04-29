@@ -171,10 +171,6 @@ while :
       elif [ "${state}" = "sdtoosmall" ]; then
           message="SDCARD TOO SMALL - min 16GB"
 
-      # when old data - improve message
-      elif [ "${state}" = "olddata" ]; then
-          message="login for manual migration"
-
       # when no HDD - improve message
       elif [ "${state}" = "noHDD" ]; then
           message="Connect external HDD/SSD"

@@ -71,6 +71,10 @@ echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
+echo "*** NGINX SYSTEMD STATUS ***"
+sudo systemctl status nginx -n2 --no-pager
+echo ""
+
 echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
@@ -118,6 +122,16 @@ else
   echo ""
   echo "*** ElectRS Status ***"
   sudo /home/admin/config.scripts/bonus.electrs.sh status
+  echo ""
+fi
+
+if [ "${lit}" = "off" ]; then
+  echo "- LIT is OFF by config"
+else
+  echo ""
+  echo "*** LAST 20 LIT LOGS ***"
+  echo "sudo journalctl -u litd -b --no-pager -n20"
+  sudo journalctl -u litd -b --no-pager -n20
   echo ""
 fi
 
@@ -192,20 +206,6 @@ if [ ${#undervoltageReports} -gt 0 ]; then
   if [ ${undervoltageReports} -gt 0 ]; then
     showImproveInfo=1
   fi
-fi
-if [ -f /home/admin/stresstest.report ]; then
-  sudo cat /home/admin/stresstest.report
-  source /home/admin/stresstest.report
-  if [ ${powerWARN} -gt 0 ]; then
-      showImproveInfo=1
-  fi
-  if [ ${tempWARN} -gt 0 ]; then
-      showImproveInfo=1
-  fi
-fi
-if [ ${showImproveInfo} -gt 0 ]; then
-  echo "IMPORTANT: There are some hardware issues with your setup."
-  echo "'Run Hardwaretest' in main menu or: sudo /home/admin/05hardwareTest.sh"
 fi
 echo ""
 

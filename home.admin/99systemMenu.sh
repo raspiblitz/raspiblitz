@@ -45,7 +45,8 @@ case $CHOICE in
     echo "running: 'sudo tail -n 30 -f /mnt/hdd/${network}/debug.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
     read key
     sudo tail -n 30 -f /mnt/hdd/${network}/debug.log;;
   ${network}CONF)
@@ -71,7 +72,8 @@ case $CHOICE in
     echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
     read key
     sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
@@ -83,7 +85,7 @@ case $CHOICE in
         Do you want to restart LND now?" 10 55
       if [ $? -eq 0 ]; then
         echo "# Restarting LND"
-        sudo systemctl restart ${network}d
+        sudo systemctl restart lnd
       else
         echo "# Continue without restarting."
       fi
@@ -113,42 +115,42 @@ case $CHOICE in
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, lit,
+cryptoadvance-specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "
     echo "Type the name of the service you would like to monitor:"  
     read SERVICE
     echo
-    echo "Will use the command 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "Will show the logs with:"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
-    sudo journalctl -n 100 -fu $SERVICE;;
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
+    sudo journalctl -n 10 -fu $SERVICE;;
   CUSTOMRESTART)
     clear
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, lit,
+cryptoadvance-specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "
     echo "Type the name of the service you would like to restart:" 
     read SERVICE
     echo
-    echo "Will run: 'sudo systemctl restart $SERVICE'"
+    echo "Will use the command:"
+    echo "'sudo systemctl restart $SERVICE'"
     echo
     echo "Press ENTER to restart $SERVICE or use CTRL+C to abort"
     read key
     sudo systemctl restart $SERVICE
     echo
-    echo "Will show the logs with: 'sudo journalctl -n 100 -fu $SERVICE'"
+    echo "Will show the logs with:"
+    echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort"
-    sudo journalctl -n 100 -fu $SERVICE;;
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
+    sudo journalctl -n 10 -fu $SERVICE;;
 esac
-
-# go into loop - start script from beginning to load config/start fresh
-/home/admin/00mainMenu.sh

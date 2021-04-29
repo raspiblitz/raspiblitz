@@ -145,7 +145,7 @@ consider adding a IP2TOR Bridge: MAINMENU > SUBSCRIBE > IP2TOR"
 
 text="${text}\n
 To get the 'Connection String' to activate Lightning Payments:
-MAINMENU > LNDCREDS > EXPORT > BTCPay Server"
+MAINMENU > CONNECT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
   

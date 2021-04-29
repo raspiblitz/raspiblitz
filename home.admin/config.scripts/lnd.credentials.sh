@@ -79,7 +79,7 @@ if [ "$1" = "reset" ]; then
     cd || exit
     sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
     sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
-    if [ ${keepOldMacaroons} -eq 0 ]; then
+    if [ "${keepOldMacaroons}" != "1" ]; then
       sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
     fi
   fi
@@ -107,6 +107,8 @@ if [ "$1" = "reset" ]; then
     copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
     echo "# OK DONE"
   fi
+
+  /home/admin/config.scripts/lnd.credentials.sh sync
 
 ###########################
 # SYNC

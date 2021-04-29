@@ -5,8 +5,64 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
 # show password info dialog
-resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "rpcpassword=passwordB")
-if [ ${resetAlsoPasswordB} -eq 0 ]; then
+resetAlsoPasswordB=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null | grep -c "rpcpassword=passwordB")
+resetAlsoPasswordC=$(sudo ls /mnt/hdd/passwordc.flag 2>/dev/null | grep -c ".flag")
+
+if [ ${resetAlsoPasswordC} -gt 0 ]; then
+
+  # password A + B + C
+  dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "Your migration to RaspiBlitz is almost done.
+
+You need to set a new Password A, B & C:
+A) Main User Password (SSH, WebUI, ..)
+B) RPC & APP Password (Additional Apps, ..)
+C) Lightning Wallet Unlock Password
+
+Follow Password Rules: Minimal of 8 chars,
+no spaces and only special characters - or .
+Write them down & store them in a safe place.
+" 17 52
+
+  # call set password a script
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a
+  dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
+
+  sudo /home/admin/config.scripts/blitz.setpassword.sh b
+  dialog --backtitle "RaspiBlitz" --msgbox "OK - password B was set\nit will be used by additional apps you install." 6 52
+
+  oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+  sudo /home/admin/config.scripts/blitz.setpassword.sh c $oldPasswordC
+  if [ "$?" != "0" ]; then
+    dialog --backtitle "RaspiBlitz - Setup" --msgbox "Please write down your Password C:\n${oldPasswordC}" 10 52
+  else
+    dialog --backtitle "RaspiBlitz" --msgbox "OK - password C was set\nuse it to unlock your Lightning Wallet after restarts." 8 52
+  fi
+
+elif [ ${resetAlsoPasswordB} -gt 0 ]; then
+
+  # password A + B
+  dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "Your migration to RaspiBlitz is almost done.
+
+You need to set a new Password A & B:
+A) Main User Password (SSH, WebUI, ..)
+B) RPC & APP Password (Additional Apps, ..)
+
+Passwords C (for your Lightning wallet) stays to the password you set before.
+
+Follow Password Rules: Minimal of 8 chars,
+no spaces and only special characters - or .
+Write them down & store them in a safe place.
+" 17 52
+
+  # call set password a script
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a
+  dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
+
+  sudo /home/admin/config.scripts/blitz.setpassword.sh b
+  dialog --backtitle "RaspiBlitz" --msgbox "OK - password B was set\nit will be used by additional apps you install." 6 52
+
+else
+
   # just password A
   dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
 
@@ -23,29 +79,10 @@ Write them down & store them in a safe place.
   # call set password a script
   sudo /home/admin/config.scripts/blitz.setpassword.sh a
 
-else
-  # password A + B
-  dialog --backtitle "RaspiBlitz - Recover Setup" --msgbox "Your previous RaspiBlitz config was recovered.
-
-You need to set a new Password A & B:
-A) Main User Password (SSH, WebUI, ..)
-B) RPC & APP Password (Additional Apps, ..)
-
-Passwords C (for your Lightning wallet) stays to the password you set before.
-
-Follow Password Rules: Minimal of 8 chars,
-no spaces and only special characters - or .
-Write them down & store them in a safe place.
-" 17 52
-
-  # call set password a script
-  sudo /home/admin/config.scripts/blitz.setpassword.sh a
-  sudo /home/admin/config.scripts/blitz.setpassword.sh b
-
-fi
-
 # sucess info dialog
 dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
+
+fi
 
 # activate lnd & bitcoin service
 echo "Enabling Services"

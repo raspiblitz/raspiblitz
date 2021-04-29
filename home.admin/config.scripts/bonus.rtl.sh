@@ -4,7 +4,7 @@ RTLVERSION="v0.10.1"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to switch the RideTheLightning WebGUI on, off or update"
- echo "# bonus.rtl.sh [on|off|update<commit>|menu]"
+ echo "# bonus.rtl.sh [on|off|update<commit>|menu|config]"
  echo "# installs the version $RTLVERSION by default"
  exit 1
 fi
@@ -29,9 +29,9 @@ if [ "$1" = "menu" ]; then
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3001\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser:
+http://${localip}:3000\n
+https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
@@ -40,8 +40,8 @@ Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
   else
     # Info without TOR
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3001\n
-SHA1 Thumb/Fingerprint:
+http://${localip}:3000\n
+https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
@@ -275,6 +275,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny 3000
   sudo ufw deny 3001
+  exit 0
+fi
+
+# config
+if [ "$1" = "config" ]; then
+  echo "# CONFIG RTL"
+  configRTL
   exit 0
 fi
 

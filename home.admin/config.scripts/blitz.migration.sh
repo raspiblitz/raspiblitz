@@ -89,7 +89,7 @@ migrate_raspiblitz_conf () {
   echo "network=bitcoin" >> /home/admin/raspiblitz.conf
   echo "chain=main" >> /home/admin/raspiblitz.conf
   echo "hostname=${nodename}" >> /home/admin/raspiblitz.conf
-  echo "displayClass=hdmi" >> /home/admin/raspiblitz.conf
+  echo "displayClass=lcd" >> /home/admin/raspiblitz.conf
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
   echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
@@ -141,7 +141,33 @@ if [ "$1" = "migration-umbrel" ]; then
 
   echo "# starting to rearrange the data drive for raspiblitz .."
 
-  # extract data
+  # determine version
+  version=$(sudo cat /mnt/hdd/umbrel/info.json | jq -r '.version')
+  if [ "${version}" == "" ]; then
+    echo "err='not able to get version'"
+    exit 1
+  fi
+  versionMajor=$(echo "${version}" | cut -d "." -f1)
+  versionMiner=$(echo "${version}" | cut -d "." -f2)
+  versionPatch=$(echo "${version}" | cut -d "." -f3)
+  if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
+    echo "err='not able processing version'"
+    exit 1
+  fi
+
+  # since 0.3.9 umbrel uses a fixed/default password for lnd wallet (before it was the user set one)
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -lt 4 ] && [ ${versionPatch} -lt 9 ]; then
+    echo "# umbrel before 0.3.9 --> password c is old user set password"
+  else
+    echo "# umbrel 0.3.9 or higher --> password c is fixed 'moneyprintergobrrr'"
+    # set flag with standard password to be changed on final recovery setup
+    sudo touch /mnt/hdd/passwordc.flag
+    sudo chmod 777 /mnt/hdd/passwordc.flag
+    echo "moneyprintergobrrr" >> /mnt/hdd/passwordc.flag
+    sudo chown admin:admin /mnt/hdd/passwordc.flag
+  fi
+
+  # extract detailed data
   nameNode=$(sudo jq -r '.name' /mnt/hdd/umbrel/db/user.json)
 
   # move bitcoin/blockchain & call function to migrate config
@@ -175,9 +201,6 @@ fi
 if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
-  echo "IMPORTANT TODO -> take care about lnd wallet password - see: https://btc21.de/bitcoin/raspiblitz-migration/"
-  exit 1
 
   # can olny migrate unmonted data disks
   if [ "${isMounted}" == "1" ]; then
@@ -224,9 +247,11 @@ if [ "$1" = "migration-mynode" ]; then
   sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
   migrate_lnd_conf
 
+  # copy lnd wallet password - so that user can set own on final setup
+  sudo cp /mnt/hdd/mynode/settings/.lndpw /mnt/hdd/passwordc.flag
+
   # backup & rename the rest of the data
   sudo mv /mnt/hdd/mynode /mnt/hdd/backup_migration
-  sudo rm 
 
   # call function for final migration
   migrate_raspiblitz_conf
@@ -316,7 +341,7 @@ fi
 if [ "$1" = "export-gui" ]; then
 
   # cleaning old migration files from blitz
-  sudo rm ${defaultZipPath}/*.tar.gz
+  sudo rm ${defaultZipPath}/*.tar.gz 2>/dev/null
 
   # stopping lnd / bitcoin
   echo "--> stopping services ..."

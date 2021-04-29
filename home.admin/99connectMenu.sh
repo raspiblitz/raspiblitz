@@ -51,11 +51,14 @@ case $CHOICE in
   ELECTRS)
     /home/admin/config.scripts/bonus.electrs.sh menu;;
   BTCPAY)
-    /home/admin/config.scripts/lnd.export.sh btcpay;;
-  RESET)
-    sudo /home/admin/config.scripts/lnd.credentials.sh reset
+    /home/admin/config.scripts/lnd.export.sh btcpay
     echo "Press ENTER to return to main menu."
     read key
+    exit 0;;
+  RESET)
+    sudo /home/admin/config.scripts/lnd.credentials.sh reset
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/XXshutdown.sh reboot
     exit 0;;
   SYNC)
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
@@ -150,12 +153,15 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     ;;
   ${network}RPC)
     # vars
-    if [ $(${chain}net) = mainnet ];then
+    if [ "${chain}net" == "mainnet" ]; then
       BITCOINRPCPORT=8332
-    elif [ $(${chain}net) = testnet ];then
+    elif [ "${chain}net" == "testnet" ]; then
       BITCOINRPCPORT=18332
-    elif [ $(${chain}net) = signet ];then
+    elif [ "${chain}net" == "signet" ]; then
       BITCOINRPCPORT=38332
+    else
+      # have this to signal that selection went wrong
+      BITCOINRPCPORT=0
     fi
     echo "# Running on ${chain}net"
     echo
@@ -291,6 +297,3 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     esac
   ;;
 esac
-
-# go into loop - start script from beginning to load config/start fresh
-/home/admin/00mainMenu.sh

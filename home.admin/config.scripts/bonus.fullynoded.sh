@@ -13,16 +13,16 @@ source /mnt/hdd/raspiblitz.conf
 RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
 PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
 
-if [ $(${chain}net) = mainnet ];then
+if [ "${chain}net" == "mainnet" ]; then
   BITCOINRPCPORT=8332
-elif [ $(${chain}net) = testnet ];then
+elif [ "${chain}net" == "testnet" ]; then
   BITCOINRPCPORT=18332
-elif [ $(${chain}net) = signet ];then
+elif [ "${chain}net" == "signet" ]; then
   BITCOINRPCPORT=38332
 fi
 
 # check and set up the HS    
-/home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+/home/admin/config.scripts/internet.hiddenservice.sh bitcoin ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
 hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 

@@ -76,8 +76,8 @@ Do you want to start migration to RaspiBlitz now?
     echo "******************************************************"
     echo "OK MIGRATION --> will now reboot and update/recover"
     echo "******************************************************"
-    #sudo shutdown -h -r now
-    #sleep 100
+    sudo shutdown -h -r now
+    sleep 100
     exit 0
 	else
     echo "******************************************************"
@@ -322,50 +322,24 @@ if [ ${#setupStep} -eq 0 ]; then
 fi
 if [ ${setupStep} -eq 0 ]; then
 
-  # check data from boostrap
-  # TODO: when olddata --> CLEAN OR MANUAL-UPDATE-INFO
-  if [ "${state}" = "olddata" ]; then
 
-    # old data setup
-    BACKTITLE="RaspiBlitz - Manual Update"
-    TITLE="⚡ Found old RaspiBlitz Data on HDD ⚡"
-    MENU="\n         ATTENTION: OLD DATA COULD CONTAIN FUNDS\n"
-    OPTIONS+=(MANUAL "read how to recover your old funds")
-    HEIGHT=11
-
-  else
-    isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
-    if [ ${isRaspbian} -gt 0 ]; then
-      # show hardware test
-      /home/admin/05hardwareTest.sh
-
-      # start setup
-      BACKTITLE="RaspiBlitz - Setup"
-      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-      MENU="\nChoose how you want to setup your RaspiBlitz: \n "
-      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
-                LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" \
-                MIGRATION "Upload a Migration File from old RaspiBlitz" )
-      HEIGHT=12
-    else
-      # start setup
-      BACKTITLE="RaspiBlitz - Setup"
-      TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-      MENU="\nStart to setup your RaspiBlitz: \n "
-      OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning" \
-                MIGRATION "Upload a Migration File from old RaspiBlitz")
-      HEIGHT=11
-    fi
-  fi
+  # start setup
+  BACKTITLE="RaspiBlitz - Setup"
+  TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+  MENU="\nChoose how you want to setup your RaspiBlitz: \n "
+  OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)" \
+            LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)" \
+            MIGRATION "Upload a Migration File from old RaspiBlitz" )
+  HEIGHT=12
 
 elif [ ${setupStep} -lt 100 ]; then
 
-    # continue setup
-    BACKTITLE="${hostname} / ${network} / ${chain}"
-    TITLE="⚡ Welcome to your RaspiBlitz ⚡"
-    MENU="\nThe setup process is not finished yet: \n "
-    OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
-    HEIGHT=10
+  # continue setup
+  BACKTITLE="${hostname} / ${network} / ${chain}"
+  TITLE="⚡ Welcome to your RaspiBlitz ⚡"
+  MENU="\nThe setup process is not finished yet: \n "
+  OPTIONS+=(CONTINUE "Continue Setup of your RaspiBlitz")
+  HEIGHT=10
 
 else
 
