@@ -373,6 +373,7 @@ bridgeWhiptail()
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# switching Tor ON"
+  echo
 
   # *** CURL TOR PROXY ***
   # see https://github.com/rootzoll/raspiblitz/issues/1341
@@ -401,8 +402,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
   if [ ${torRunning} -gt 0 ]; then
     echo "You are all good - Tor is already running."
+    echo "If you still think there is something wrong with Tor, toggle 'off' and 'on' again."
     torWasOn=1
-    if [ "$2" != "bridge" ]; then
+    if [ "$2" = "bridge" ]; then
+    echo "User chose to add bridges, will continue with the script."
+    elif [ "$2" != "bridge" ]; then
       exit 0
     fi
   else
@@ -469,7 +473,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo ""
 
   echo "*** Check if Tor service is functional ***"
-  torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
+  torRunning=$(curl --connect-timeout 15 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
   if [ ${torRunning} -gt 0 ]; then
     echo "You are all good - Tor is already running."
     if [ ${torWasOn} -eq 1 ]; then
