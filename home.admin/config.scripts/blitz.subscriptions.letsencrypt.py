@@ -748,7 +748,7 @@ def subscription_detail():
             except Exception as e:
                 sub['https_response'] = 0
             if sub['https_response']!=200 and len(sub['warning'])==0:
-                sub['warning'] = "Not able to get HTTPS response."
+                sub['warning'] = "Not able to get HTTPS response ({0}).".format(sub['https_response'])
                 
         print(json.dumps(sub, indent=2))
 
