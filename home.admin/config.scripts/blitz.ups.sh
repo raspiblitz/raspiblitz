@@ -26,7 +26,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # see video: https://www.youtube.com/watch?v=6UrknowJ12o
 
     # installs apcupsd.service
-    sudo apt-get install -f apcupsd
+    sudo apt-get install -y apcupsd
 
     # edit config: /etc/apcupsd/apcupsd.conf
     sudo systemctl stop apcupsd
