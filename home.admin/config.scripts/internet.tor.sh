@@ -264,7 +264,7 @@ if [ "$1" != "update" ]; then
   echo "making sure services are not running"
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl stop ${network}d 2>/dev/null
-  sudo systemctl stop tor@default 2>/dev/null
+  #sudo systemctl stop tor@default 2>/dev/null
 fi
 
 
@@ -362,10 +362,8 @@ bridgeWhiptail()
       sudo sed -i "/UseBridge/,/^\s*$/{d}" $torrclnd
       bridgeQuestion
     fi
-  fi
   else
     whiptail --title "Tor Bridges - Setup" --yes-button "INSERT" --no-button "Cancel" --yesno "Find detailed information about bridges relevance in the FAQ\n https://github.com/rootzoll/raspiblitz/blob/v1.7/FAQ.md#how-can-i-use-bridges-with-tor\nDo you wish to insert new bridges OR cancel operation?\n" 11 40 3>&1 1>&2 2>&3
-  fi
     if [ $? -eq 0 ]; then
       bridgeQuestion
     fi
@@ -409,7 +407,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   else
     echo "Tor not running ... proceed with switching to Tor."
-    exit 0
   fi
   echo ""
 
