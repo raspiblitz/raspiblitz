@@ -208,7 +208,7 @@ dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "You will need to set
 RaspiBlitz works with 3 different passwords:
 PASSWORD A) Main User Password (SSH & WebUI, sudo)
 PASSWORD B) APP Password (RPC & Additional Apps)
-PASSWORD C) Lightning Wallet Unlock Password
+PASSWORD C) Lightning Wallet Password for Unlock
 
 You will need to set Password: ${passwordinfo}
 (other passwords might stay like on your old node)
@@ -217,9 +217,9 @@ Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 17 64
-clear
 
 if [ ${setPasswordA} -eq 1 ]; then
+  clear
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordA='${password}'" >> $SETUPFILE
@@ -227,6 +227,7 @@ if [ ${setPasswordA} -eq 1 ]; then
 fi
 
 if [ ${setPasswordB} -eq 1 ]; then
+  clear
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD B - APP Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordB='${password}'" >> $SETUPFILE
@@ -234,6 +235,7 @@ if [ ${setPasswordB} -eq 1 ]; then
 fi
 
 if [ ${setPasswordC} -eq 1 ]; then
+  clear
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordC='${password}'" >> $SETUPFILE
