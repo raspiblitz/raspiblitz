@@ -43,25 +43,9 @@ migrationVersion="$2"
 
 if [ "${migrationOS}" == "raspiblitz" ]; then
 
-  # infodialog
-  whiptail --title " IMPORT MIGRATION FILE " --yes-button "Upload File" --no-button "Shutdown" --yesno "RaspiBlitz found data from UMBREL
-
-You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
-
-Please make sure to have your UMBREL seed words & static channel backup file (just in case). Also any data of additional apps you had installed on UMBREL might get lost.
-
-Do you want to start migration to RaspiBlitz now?
-      " 16 58
-
-  if [ $? -eq 0 ]; then
-    # write migration info
-    echo "migrationOS='${migrationOS}'" >> $SETUPFILE
-    echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
-  else
-    # user cancel - request shutdown
-    echo "shutdown=1" >> $SETUPFILE
-    exit 1
-  fi
+  # write migration info
+  echo "migrationOS='${migrationOS}'" >> $SETUPFILE
+  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
   # get defaultZipPath, localIP, etc
   source <(sudo /home/admin/config.scripts/blitz.migration.sh status)
@@ -111,7 +95,6 @@ Do you want to start migration to RaspiBlitz now?
   fi
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
-
   echo
   echo "OK: Migration data was imported - will now try to recover/restore RaspiBlitz with this data"
   echo "PRESS ENTER TO CONTINUE"
