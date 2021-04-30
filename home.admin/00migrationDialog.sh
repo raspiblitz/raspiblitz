@@ -205,7 +205,7 @@ fi
 # basic information in RaspiBlitz passwords
 dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "You will need to set new passwords.
 
-In general RaspiBlitz works with 3 different passwords:
+RaspiBlitz works with 3 different passwords:
 PASSWORD A) Main User Password (SSH & WebUI, sudo)
 PASSWORD B) APP Password (RPC & Additional Apps)
 PASSWORD C) Lightning Wallet Unlock Password
@@ -216,7 +216,7 @@ You will need to set Password: ${passwordinfo}
 Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 17 52
+" 17 64
 
 if [ ${setPasswordA} -eq 1 ]; then
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
