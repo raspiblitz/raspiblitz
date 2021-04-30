@@ -217,6 +217,7 @@ Follow Password Rules: Minimal of 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 17 64
+clear
 
 if [ ${setPasswordA} -eq 1 ]; then
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
