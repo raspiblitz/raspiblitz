@@ -53,6 +53,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   # make sure that temp directory exists and can be written by admin
   sudo mkdir -p ${defaultZipPath}
   sudo chmod 777 -R ${defaultZipPath}
+  sudo chown admin:admin ${defaultZipPath}
 
   # scp upload info
   clear
