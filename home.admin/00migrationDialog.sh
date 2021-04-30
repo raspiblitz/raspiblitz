@@ -27,7 +27,7 @@ setPasswordC=0
 
 # 1st PARAMATER: [raspiblitz|mynode|umbrel]
 migrationOS="$1"
-if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "raspiblitz" ]; then
+if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ]; then
     echo "parameter1(${migrationOS})"
     echo "error='not supported'"
     exit 1
