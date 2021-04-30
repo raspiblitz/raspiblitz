@@ -16,7 +16,7 @@ source /home/admin/raspiblitz.info
 _temp=$(mktemp -p /dev/shm/)
 
 # prepare the setup file (that constains info just needed for the rest of setup process)
-SETUPFILE="/home/admin/raspiblitz.setup.tmp"
+SETUPFILE="/home/admin/raspiblitz.setup"
 rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP FILE" > $SETUPFILE
 
@@ -241,3 +241,8 @@ if [ ${setPasswordC} -eq 1 ]; then
   echo "passwordC='${password}'" >> $SETUPFILE
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
 fi
+
+clear
+echo "# data from dialogs stored in to be further processed:"
+echo "${SETUPFILE}"
+exit 0
