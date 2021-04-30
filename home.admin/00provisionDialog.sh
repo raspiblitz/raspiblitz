@@ -2,10 +2,10 @@
 _temp=$(mktemp -p /dev/shm/)
 
 ## get basic info
-INFOFILE
 source /home/admin/raspiblitz.info
 
-# CHECK BASICS HDD info and react to no or too small HDD
+# set place where zipped TAR file gets stored on migration dialog
+defaultZipPath="/mnt/hdd/temp"
 
 # prepare the config file (what will later become the raspiblitz.config)
 source /home/admin/_version.info
@@ -34,7 +34,7 @@ CHOICE=$(dialog --clear \
                 2>&1 >/dev/tty)
 clear
 network=""
-migration="raspiblitz"
+migration=""
 case $CHOICE in
         CLOSE)
             # TODO: check if case every comes up
@@ -50,31 +50,77 @@ case $CHOICE in
             echo "network=litecoin" >> $CONFIGFILE
             ;;
         MIGRATION)
-            migration=raspiblitz
+            migration="raspiblitz"
             echo "migration=raspiblitz" >> $SETUPFILE
             ;;
 esac
 
+# IMPORT MIGRATION DIALOG
+# if fails then restart the complete provision dialog
 if [ "${migration}" == "raspiblitz" ]; then
 
+  # make sure that temp directory exists and can be written by admin
+  sudo mkdir -p ${defaultZipPath}
+  sudo chmod 777 -R ${defaultZipPath}
 
+  clear
+  echo
+  echo "*****************************"
+  echo "* UPLOAD THE MIGRATION FILE *"
+  echo "*****************************"
+  echo "If you have a migration file on your laptop you can now"
+  echo "upload it and restore on the new HDD/SSD."
+  echo
+  echo "ON YOUR LAPTOP open a new terminal and change into"
+  echo "the directory where your migration file is and"
+  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
+  echo ""
+  echo "Use password 'raspiblitz' to authenticate file transfer."
+  echo "PRESS ENTER when upload is done."
+  read key
 
+  countZips=$(sudo ls ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
+
+  # in case no upload found
+  if [ ${countZips} -eq 0 ]; then
+    echo
+    echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
+    echo "error='no file found'"
+    sleep 3
+    /home/admin/00provisionDialog.sh
+    exit 1
+  fi
+
+  # in case of multiple files
+  if [ ${countZips} -gt 1 ]; then
+    echo
+    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "error='multiple files'"
+    sleep 3
+    /home/admin/00provisionDialog.sh
+    exit 1
+  fi
+
+  # unzip migration file and check
+  echo
+  echo "OK: Upload found in ${defaultZipPath} - restoring data ... (please wait)"
+  source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
+  if [ ${#error} -gt 0 ]; then
+    echo
+    echo "# FAIL: Was not able to restore data"
+    echo "error='${error}'"
+    sleep 3
+    /home/admin/00provisionDialog.sh
+    exit 1
+  fi
+  
+  echo
+  echo "OK: Migration data was imported - will now recover/restore RaspiBlitz with this data"
+  echo "PRESS ENTER TO CONTINUE"
+  read key
+  exit 0
 fi
-
-
-sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
-# on error clean & repeat
-if [ "$?" = "1" ]; then
-   echo
-  echo "# clean and unmount for next try"
-  sudo rm -f ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null
-  sudo umount /mnt/hdd 2>/dev/null
-  sudo umount /mnt/storage 2>/dev/null
-  sudo umount /mnt/temp 2>/dev/null
-  sleep 2
-  /home/admin/00raspiblitz.sh
-fi
-exit 0
 
 
 ###################
