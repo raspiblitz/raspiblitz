@@ -76,9 +76,8 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # in case no upload found
   if [ ${countZips} -eq 0 ]; then
-    echo
     echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
-    echo "Shutting down ... please make fesh sd card & try again."
+    echo "Shutting down ... please make a fresh sd card & try again."
     sleep 3
     echo "shutdown=1" >> $SETUPFILE
     exit 1
@@ -86,19 +85,16 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
-    echo
     echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
-    echo "Shutting down ... please make fesh sd card & try again."
+    echo "Shutting down ... please make a fresh sd card & try again."
     sleep 3
     echo "shutdown=1" >> $SETUPFILE
     exit 1
   fi
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
-  echo
-  echo "OK: Migration data was imported - will now try to recover/restore RaspiBlitz with this data"
-  echo "PRESS ENTER TO CONTINUE"
-  read key
+  echo "OK: Migration data was imported - will process after password reset"
+  sleep 4
 
   # user needs to reset password A
   setPasswordA=1
