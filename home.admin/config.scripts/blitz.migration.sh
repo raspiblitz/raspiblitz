@@ -26,7 +26,7 @@ isMounted=$(sudo df | grep -c /mnt/hdd)
 isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
 
 # set place where zipped TAR file gets stored
-defaultZipPath="/mnt/hdd/temp"
+defaultZipPath="/mnt/hdd/temp/migration"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
