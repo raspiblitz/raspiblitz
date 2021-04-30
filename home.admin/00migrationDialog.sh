@@ -50,10 +50,10 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   # get defaultZipPath, localIP, etc
   source <(sudo /home/admin/config.scripts/blitz.migration.sh status)
 
-  # make sure that temp directory exists and can be written by admin
-  sudo mkdir -p ${defaultZipPath}
-  sudo chmod 777 -R ${defaultZipPath}
-  sudo chown admin:admin ${defaultZipPath}
+  # make sure that temp directory exists, is clear and can be written by admin
+  sudo mkdir -p ${defaultZipPath} 2>/dev/null
+  sudo rm /mnt/hdd/temp/migration/*
+  sudo chown -R admin:admin ${defaultZipPath}
 
   # scp upload info
   clear
