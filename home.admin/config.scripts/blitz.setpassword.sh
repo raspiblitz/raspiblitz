@@ -69,9 +69,6 @@ if [ ${#abcd} -eq 0 ]; then
     esac
 fi
 
-echo "Changing Password ${abcd} ..."
-echo ""
-
 ############################
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then

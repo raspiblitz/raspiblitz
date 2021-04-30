@@ -222,16 +222,19 @@ if [ ${setPasswordA} -eq 1 ]; then
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordA='${password}'" >> $SETUPFILE
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password A set" 7 20
 fi
 
 if [ ${setPasswordB} -eq 1 ]; then
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD B - APP Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordB='${password}'" >> $SETUPFILE
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password B set" 7 20
 fi
 
 if [ ${setPasswordC} -eq 1 ]; then
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
   password=$(sudo cat $_temp)
   echo "passwordC='${password}'" >> $SETUPFILE
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
 fi
