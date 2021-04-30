@@ -41,6 +41,8 @@ scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "isBTRFS=${isBTRFS}"
+  echo "localip=\"${localip}\""
+  echo "defaultZipPath=\"${defaultZipPath}\""
   echo "scpDownloadUnix=\"${scpDownloadUnix}\""
   echo "scpUploadUnix=\"${scpUploadUnix}\""
   echo "scpDownloadWin=\"${scpDownloadWin}\""
