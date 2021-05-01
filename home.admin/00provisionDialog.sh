@@ -113,37 +113,56 @@ if [ "${CHOICE}" == "NEW" ]; then
 
 elif [ "${CHOICE}" == "OLD" ]; then
 
-  # get more details what kind of old lightning wallet user has
-  OPTIONS=()
-  OPTIONS+=(LNDRESCUE "LND tar.gz-Backupfile (BEST)")
-  OPTIONS+=(SEED+SCB "Seed & channel.backup file (OK)")
-  OPTIONS+=(ONLYSEED "Only Seed Word List (FALLBACK)")
-  CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=""
+  while [ "${CHOICESUB}" == "" ]
+  do
 
-  if [ "${CHOICE}" == "LNDRESCUE" ]; then
+    # get more details what kind of old lightning wallet user has
+    OPTIONS=()
+    OPTIONS+=(LNDRESCUE "LND tar.gz-Backupfile (BEST)")
+    OPTIONS+=(SEED+SCB "Seed & channel.backup file (OK)")
+    OPTIONS+=(ONLYSEED "Only Seed Word List (FALLBACK)")
+    CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-    # just activate LND rescue upload
-    uploadLNDRESCUE=1
+    if [ "${CHOICESUB}" == "LNDRESCUE" ]; then
 
-    # dont set password c anymore later on
-    setPasswordC=0
+      # just activate LND rescue upload
+      uploadLNDRESCUE=1
 
-  elif [ "${CHOICE}" == "SEED+SCB" ]; then
+      # dont set password c anymore later on
+      setPasswordC=0
 
-    # activate SEED input & SCB upload
-    enterSEED=1
-    uploadSCB=1
+    elif [ "${CHOICESUB}" == "SEED+SCB" ]; then
 
-  elif [ "${CHOICE}" == "ONLYSEED" ]; then
+      # activate SEED input & SCB upload
+      enterSEED=1
+      uploadSCB=1
 
-    # activate SEED input & SCB upload
-    enterSEED=1
+    elif [ "${CHOICESUB}" == "ONLYSEED" ]; then
 
-  else
-    echo "# you selected cancel - exited to terminal"
-    echo "# use command 'restart' to reboot & start again"
-    exit 1
-  fi
+      # let people know about the difference between SEED & SEED+SCB
+      whiptail --title "IMPORTANT INFO" --yes-button "JUST SEED" --no-button "Go Back" --yesno "
+Using JUST SEED WORDS will only recover your on-chain funds.
+To also try to recover the open channel funds you need the
+channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
+or having a complete LND rescue-backup from your old node.
+      " 11 65
+      
+      if [ $? -eq 1 ]; then
+        # when user wants to go back
+        CHOICESUB=""
+      else
+        # activate SEED input & SCB upload
+        enterSEED=1
+      fi
+
+    else
+      echo "# you selected cancel - exited to terminal"
+      echo "# use command 'restart' to reboot & start again"
+      exit 1
+    fi
+
+  done
 
 else
   echo "# you selected cancel - exited to terminal"
@@ -153,10 +172,9 @@ fi
 
 # UPLOAD LND RESCUE FILE dialog (if activated by dialogs above)
 if [ ${uploadLNDRESCUE} -eq 1 ]; then
-  echo "TODO: UPLOAD LND RESCUE FILE"
+  /home/admin/config.scripts/lnd.backup.sh lnd-import-gui setup $SETUPFILE
   exit 1
 fi
-
 
 # INPUT LIGHTNING SEED dialog (if activated by dialogs above)
 if [ ${enterSEED} -eq 1 ]; then
@@ -166,8 +184,7 @@ fi
 
 # UPLOAD STATIC CHANNEL BACKUP FILE dialog (if activated by dialogs above)
 if [ ${uploadSCB} -eq 1 ]; then
-  echo "TODO: UPLOAD STATIC CHANNEL BACKUP FILE"
-  exit 1
+  /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $SETUPFILE
 fi
 
 ###################

@@ -234,7 +234,7 @@ If you still can SSH in and HDD is readable, we can try to rescue/export your LN
 To rescue/export your Lightning data from a RaspiBlitz (since v1.1):
 
 * SSH into your RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-export-gui`
 * follow the instructions of the script.
 
 This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfer the lnd-rescue file to your laptop. If the transfer was successful you can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
@@ -242,7 +242,7 @@ This will create a lnd-rescue file (ends on gz.tar) that contains all the data f
 Then to restore your old LND data and to recover your funds and channels:
 
 * SSH into your new RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-import-gui`
 * follow the instructions of the script.
 
 This script will offer you a way to transfer the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND then gets restarted for you, and after some time it should show you the status screen again with your old funds and channels.

@@ -111,8 +111,9 @@ if [ ${action} = "check-upload" ]; then
 
   fi
 
-  # ok looks good - return filename 
+  # ok looks good - return filename & more info
   echo "filename=${filename}"
+  echo "bytesize=${byteSize}"
   exit 0
 fi
 

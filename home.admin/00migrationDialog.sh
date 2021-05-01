@@ -47,13 +47,13 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   echo "migrationOS='${migrationOS}'" >> $SETUPFILE
   echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
-  # get defaultZipPath, localIP, etc
+  # get defaultUploadPath, localIP, etc
   source <(sudo /home/admin/config.scripts/blitz.migration.sh status)
 
   # make sure that temp directory exists, is clear and can be written by user bitcoin
-  sudo mkdir -p ${defaultZipPath} 2>/dev/null
+  sudo mkdir -p ${defaultUploadPath} 2>/dev/null
   sudo rm /mnt/hdd/temp/migration/* 2>/dev/null
-  sudo chown -R bitcoin:bitcoin ${defaultZipPath} 2>/dev/null
+  sudo chown -R bitcoin:bitcoin ${defaultUploadPath} 2>/dev/null
 
   # scp upload info
   clear
@@ -67,17 +67,17 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
   echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-  echo "scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
+  echo "scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."
   echo "PRESS ENTER when upload is done."
   read key
 
-  countZips=$(sudo ls ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
+  countZips=$(sudo ls ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
 
   # in case no upload found
   if [ ${countZips} -eq 0 ]; then
-    echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
+    echo "FAIL: Was not able to detect uploaded file in ${defaultUploadPath}"
     echo "Shutting down ... please make a fresh sd card & try again."
     sleep 3
     echo "shutdown=1" >> $SETUPFILE
@@ -86,7 +86,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
-    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "# FAIL: Multiple possible files detected in ${defaultUploadPath}"
     echo "Shutting down ... please make a fresh sd card & try again."
     sleep 3
     echo "shutdown=1" >> $SETUPFILE
@@ -95,7 +95,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
   echo "OK: Migration data was imported - will process after password reset"
-  echo "migrationFile='${defaultZipPath}'" >> $SETUPFILE
+  echo "migrationFile='${defaultUploadPath}'" >> $SETUPFILE
   sleep 4
 
   # user needs to reset password A

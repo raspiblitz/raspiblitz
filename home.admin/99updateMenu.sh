@@ -38,7 +38,7 @@ Do you want to download LND Data Backup now?
     echo "*************************************"
     echo "please wait .."
     sleep 2
-    /home/admin/config.scripts/lnd.rescue.sh backup
+    /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo
     echo "PRESS ENTER to continue once you're done downloading."
     read key
@@ -49,7 +49,7 @@ Do you want to download LND Data Backup now?
     echo "*************************************"
     echo "please wait .."
     sleep 2
-    /home/admin/config.scripts/lnd.rescue.sh backup no-download
+    /home/admin/config.scripts/lnd.backup.sh lnd-export
   fi
 
   whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.

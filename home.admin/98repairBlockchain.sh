@@ -33,7 +33,7 @@ elif [ "${CHOICE}" = "REINDEX" ]; then
     sudo /home/admin/config.scripts/network.reindex.sh
 
 elif [ "${CHOICE}" = "BACKUP" ]; then
-    sudo /home/admin/config.scripts/lnd.rescue.sh backup
+    sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo "PRESS ENTER to continue."
     read key
 
