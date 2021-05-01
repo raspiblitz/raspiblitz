@@ -511,7 +511,8 @@ wordone wordtweo wordthree ...
 " 16 52
 
 	      if [ $? -eq 1 ]; then
-          # result file is empty on cancel
+          echo "# CANCEL empty results in: /var/cache/raspiblitz/seed-import.results"
+          clear
           exit 1
 	      fi
       fi
