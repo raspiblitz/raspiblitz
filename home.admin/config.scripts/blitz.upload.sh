@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# use to prepare & check scp or web file upload to RaspiBlitz"
  echo "# blitz.upload.sh prepare-upload"
- echo "# blitz.upload.sh check-upload ?[scb|lnd-rescue]"
+ echo "# blitz.upload.sh check-upload ?[scb|lnd-rescue|migration]"
  exit 0
 fi
 
@@ -95,6 +95,29 @@ if [ ${action} = "check-upload" ]; then
       sudo rm ${defaultUploadPath}/* 2>/dev/null
       echo "error='invalid'"
       echo "errorDetail='not lnd-rescue-*.tar.gz'"
+      exit 1
+    fi
+
+    # checksum test
+    md5checksum=$(md5sum ${filename} | head -n1 | cut -d " " -f1)
+    echo "# filename(${md5checksum})"
+    isCorrect=$(echo ${filename} | grep -c ${md5checksum})
+    if [ "${isCorrect}" != "1" ]; then
+      sudo rm ${defaultUploadPath}/* 2>/dev/null
+      echo "error='invalid'"
+      echo "errorDetail='incorrect checksum'"
+      exit 1
+    fi
+
+  # MIGRATION check if file looks valid
+  if [ "${type}" == "migration" ]; then
+
+    # general filename check
+    typeCount=$(sudo ls ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz')
+    if [ "${typeCount}" != "1" ]; then
+      sudo rm ${defaultUploadPath}/* 2>/dev/null
+      echo "error='invalid'"
+      echo "errorDetail='not raspiblitz-*.tar.gz'"
       exit 1
     fi
 
