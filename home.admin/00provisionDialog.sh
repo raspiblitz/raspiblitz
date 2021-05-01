@@ -1,34 +1,39 @@
 #!/bin/bash
-_temp=$(mktemp -p /dev/shm/)
 
-## get basic info
+# get basic info
 source /home/admin/raspiblitz.info
+
+# temp file for dialog results
+_temp=$(mktemp -p /dev/shm/)
 
 # choose blockchain or select migration
 OPTIONS=()
-OPTIONS+=(BITCOIN "Setup BITCOIN and Lightning (DEFAULT)")
-OPTIONS+=(LITECOIN "Setup LITECOIN and Lightning (EXPERIMENTAL)")
+OPTIONS+=(BITCOIN1 "Setup BITCOIN & Lightning Network Daemon (LND)")
+OPTIONS+=(BITCOIN2 "Setup BITCOIN & c-lightning by blockstream")
+OPTIONS+=(LITECOIN "Setup LITECOIN & Lightning Network Daemon (LND)")
 OPTIONS+=(MIGRATION "Upload a Migration File from old RaspiBlitz")
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Welcome to your RaspiBlitz ⚡" \
                 --menu "\nChoose how you want to setup your RaspiBlitz: \n " \
-                12 64 6 \
+                13 64 7 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 clear
 network=""
+lightning=""
 case $CHOICE in
-        CLOSE)
-            # TODO: check if case every comes up
-            echo "CLOSE"
-            exit 1;
-            ;;
-        BITCOIN)
+        BITCOIN1)
             network="bitcoin"
+            lightning="lnd"
+            ;;
+        BITCOIN2)
+            network="bitcoin"
+            lightning="cln"
             ;;
         LITECOIN)
             network="litecoin"
+            lightning="lnd"
             ;;
         MIGRATION)
             # send over to the migration dialogs
@@ -39,7 +44,8 @@ esac
 
 # on cancel - exit to terminal
 if [ "${network}" == "" ]; then
-  echo "# exit to terminal"
+  echo "# you selected cancel - exited to terminal"
+  echo "# use command to reboot --> restart"
   exit 1
 fi
 
@@ -50,6 +56,7 @@ rm $CONFIGFILE 2>/dev/null
 echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
 echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
 echo "lcdrotate=1" >> $CONFIGFILE
+echo "lightning=${lightning}" >> $CONFIGFILE
 echo "network=${network}" >> $CONFIGFILE
 echo "chain=main" >> $CONFIGFILE
 
@@ -57,6 +64,9 @@ echo "chain=main" >> $CONFIGFILE
 SETUPFILE="/home/admin/raspiblitz.setup.tmp"
 rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP FILE" > $SETUPFILE
+
+echo "TODO: continue with further "
+exit 1
 
 ###################
 # ENTER NAME
