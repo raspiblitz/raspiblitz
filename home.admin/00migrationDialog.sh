@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# TODO: use blitz.upload.sh for uploading the migration file
 # TODO: also the migration might need to be adapted to work with an already mounted HDD later
 
 # command info

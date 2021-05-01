@@ -440,14 +440,14 @@ fi
 # SEED WORDS - GUI PARTS
 ####################################
 
- echo "# lnd.backup.sh seed-export-gui [seedwords6x4]"
- echo "# lnd.backup.sh seed-import-gui [resultfile]"
-
 if [ ${mode} = "seed-export-gui" ]; then
 
+  # use text snippet for testing:
+  # 
+
   # 2nd PARAMETER: lnd seed data
-  seedwords=$2
-  if [ "${seedwords}" == "" ]; then
+  seedwords6x4=$2
+  if [ "${seedwords6x4}" == "" ]; then
     echo "error='mising parameter'"
     exit 1 
   fi
@@ -467,6 +467,9 @@ fi
 # Results will be stored on memory cache:
 # /var/cache/raspiblitz/seed-import.results
 if [ ${mode} = "seed-import-gui" ]; then
+
+  # fake seed 24 words for testing input:
+  # eins zwei polizei drei vier great idea fünf sechs alte keks sieben auch gute nacht ja ja ja was ist los was ist das
 
   # prepare seed result file
   sudo rm /var/cache/raspiblitz/seed-import.results 2>/dev/null
@@ -538,8 +541,8 @@ to protect the seed words. Most users did not set this.
   # writing result file data
   clear
   echo "# result of in mem cache: /var/cache/raspiblitz/seed-import.results"
-  echo "seedwords='${wordstring}'" >> /var/cache/raspiblitz/seed-import.results
-  echo "password='${passwordD}'" >> /var/cache/raspiblitz/seed-import.results
+  echo "seedWords='${wordstring}'" >> /var/cache/raspiblitz/seed-import.results
+  echo "seedPassword='${passwordD}'" >> /var/cache/raspiblitz/seed-import.results
   exit 0
 
 fi

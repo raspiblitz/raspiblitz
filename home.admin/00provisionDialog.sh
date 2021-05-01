@@ -178,8 +178,17 @@ fi
 
 # INPUT LIGHTNING SEED dialog (if activated by dialogs above)
 if [ ${enterSEED} -eq 1 ]; then
-  echo "TODO: INPUT LIGHTNING SEED"
-  exit 1
+  /home/admin/config.scripts/lnd.backup.sh seed-import-gui
+  # load results from results file
+  source <(/var/cache/raspiblitz/seed-import.results)
+  # if user canceled the seed input
+  if [ "${seedWords}" == "" ]; then
+    echo "# you selected cancel - exited to terminal"
+    echo "# use command 'restart' to reboot & start again"
+    exit 1
+  fi
+  echo "seedWords='${seedWords}'" >> $SETUPFILE
+  echo "seedPassword='${seedPassword}'" >> $SETUPFILE
 fi
 
 # UPLOAD STATIC CHANNEL BACKUP FILE dialog (if activated by dialogs above)
