@@ -6,6 +6,11 @@ source /home/admin/raspiblitz.info
 # temp file for dialog results
 _temp=$(mktemp -p /dev/shm/)
 
+# flags of what passwords are to set by user
+setPasswordA=1
+setPasswordB=1
+setPasswordC=1
+
 # choose blockchain or select migration
 OPTIONS=()
 OPTIONS+=(BITCOIN1 "Setup BITCOIN & Lightning Network Daemon (LND)")
@@ -45,7 +50,7 @@ esac
 # on cancel - exit to terminal
 if [ "${network}" == "" ]; then
   echo "# you selected cancel - exited to terminal"
-  echo "# use command to reboot --> restart"
+  echo "# use command 'restart' to reboot & start again"
   exit 1
 fi
 
@@ -59,14 +64,12 @@ echo "lcdrotate=1" >> $CONFIGFILE
 echo "lightning=${lightning}" >> $CONFIGFILE
 echo "network=${network}" >> $CONFIGFILE
 echo "chain=main" >> $CONFIGFILE
+echo "runBehindTor=on" >> $CONFIGFILE
 
 # prepare the setup file (that constains info just needed for the rest of setup process)
 SETUPFILE="/home/admin/raspiblitz.setup.tmp"
 rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP FILE" > $SETUPFILE
-
-echo "TODO: continue with further "
-exit 1
 
 ###################
 # ENTER NAME
@@ -84,65 +87,125 @@ while [ ${#result} -eq 0 ]
     echo "processing ..."
     sleep 3
   done
+echo "hostname=${result}" >> $CONFIGFILE
 
-# set lightning alias
-sed -i "s/^alias=.*/alias=${result}/g" /home/admin/assets/lnd.${network}.conf
+###################
+# DECIDE LIGHTNING
+# do this before passwords, because password C not needed if LND rescue file is uploaded
+###################
 
-# store hostname for later - to be set right before the next reboot
-# work around - because without a reboot the hostname seems not updates in the whole system
-valueExistsInInfoFile=$(sudo cat /home/admin/raspiblitz.info | grep -c "hostname=")
-if [ ${valueExistsInInfoFile} -eq 0 ]; then
-  # add
-  echo "hostname=${result}" >> /home/admin/raspiblitz.info
+# flags for sub dialogs after choice
+uploadLNDRESCUE=0
+enterSEED=0
+uploadSCB=0
+
+OPTIONS=()
+OPTIONS+=(NEW "Setup a brand new Lightning Node (DEFAULT)")
+OPTIONS+=(OLD "I had an old Node I want to recover/restore")
+CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+if [ "${CHOICE}" == "NEW" ]; then
+
+  # mark all passwords to be set at the end
+  setPasswordA=1
+  setPasswordB=1
+  setPasswordC=1
+
+elif [ "${CHOICE}" == "OLD" ]; then
+
+  # get more details what kind of old lightning wallet user has
+  OPTIONS=()
+  OPTIONS+=(LNDRESCUE "LND tar.gz-Backupfile (BEST)")
+  OPTIONS+=(SEED+SCB "Seed & channel.backup file (OK)")
+  OPTIONS+=(ONLYSEED "Only Seed Word List (FALLBACK)")
+  CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER LND DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+  if [ "${CHOICE}" == "LNDRESCUE" ]; then
+
+    # just activate LND rescue upload
+    uploadLNDRESCUE=1
+
+    # dont set password c anymore later on
+    setPasswordC=0
+
+  elif [ "${CHOICE}" == "SEED+SCB" ]; then
+
+    # activate SEED input & SCB upload
+    enterSEED=1
+    uploadSCB=1
+
+  elif [ "${CHOICE}" == "ONLYSEED" ]; then
+
+    # activate SEED input & SCB upload
+    enterSEED=1
+
+  else
+    echo "# you selected cancel - exited to terminal"
+    echo "# use command 'restart' to reboot & start again"
+    exit 1
+  fi
+
 else
-  # update
-  sed -i "s/^hostname=.*/hostname=${result}/g" /home/admin/raspiblitz.info
+  echo "# you selected cancel - exited to terminal"
+  echo "# use command 'restart' to reboot & start again"
+  exit 1
+fi
+
+# UPLOAD LND RESCUE FILE dialog (if activated by dialogs above)
+if [ ${uploadLNDRESCUE} -eq 1 ]; then
+  echo "TODO: UPLOAD LND RESCUE FILE"
+  exit 1
+fi
+
+
+# INPUT LIGHTNING SEED dialog (if activated by dialogs above)
+if [ ${enterSEED} -eq 1 ]; then
+  echo "TODO: INPUT LIGHTNING SEED"
+  exit 1
+fi
+
+# UPLOAD STATIC CHANNEL BACKUP FILE dialog (if activated by dialogs above)
+if [ ${uploadSCB} -eq 1 ]; then
+  echo "TODO: UPLOAD STATIC CHANNEL BACKUP FILE"
+  exit 1
 fi
 
 ###################
-# ENTER PASSWORDS 
+# ENTER PASSWORDS ---> combine with migration dialog to reduce code duplication
 ###################
 
 # show password info dialog
-dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --msgbox "RaspiBlitz uses 4 different passwords.
-Referenced as password A, B, C and D.
+dialog --backtitle "RaspiBlitz - Setup" --msgbox "RaspiBlitz uses 3 different passwords.
+Referenced as password A, B & C.
 
-A) Master User Password
-B) Blockchain RPC Password
-C) LND Wallet Password
-D) LND Seed Password
+PASSWORD A) Main User Password (SSH & WebUI, sudo)
+PASSWORD B) APP Password (RPC & Additional Apps)
+PASSWORD C) Lightning Wallet Password for Unlock
 
-Choose now 4 new passwords - all min 8 chars,
+Set now the 3 passwords - all min 8 chars,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
-" 15 52
+" 15 54
 
-# call set password a script
-sudo /home/admin/config.scripts/blitz.setpassword.sh a
+clear
+sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
+password=$(sudo cat $_temp)
+echo "passwordA='${password}'" >> $SETUPFILE
+dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password A set" 7 20
 
-# sucess info dialog
-dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
+clear
+sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD B - APP Password" $_temp
+password=$(sudo cat $_temp)
+echo "passwordB='${password}'" >> $SETUPFILE
+dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password B set" 7 20
 
-# call set password b script
-sudo /home/admin/config.scripts/blitz.setpassword.sh b
+clear
+sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
+password=$(sudo cat $_temp)
+echo "passwordC='${password}'" >> $SETUPFILE
+dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
 
-# success info dialog
-dialog --backtitle "RaspiBlitz" --msgbox "OK - RPC password changed \n\nNow starting the Setup of your RaspiBlitz." 7 52
-
-###################
-# TOR BY DEFAULT 
-# https://github.com/rootzoll/raspiblitz/issues/592
-# 
-###################
-echo "runBehindTor=on" >> /home/admin/raspiblitz.info
-#whiptail --title ' Privacy Level - How do you want to run your node? ' --yes-button='Public IP' --no-button='TOR NETWORK' --yesno "Running your Lightning node with your Public IP is common and faster, but might reveal your personal identity and location.\n
-#You can better protect your privacy with running your lightning node as a TOR Hidden Service from the start, but it can make it harder to connect with other non-TOR nodes and remote mobile apps later on.
-#  " 12 75
-#if [ $? -eq 1 ]; then
-#  echo "runBehindTor=on" >> /home/admin/raspiblitz.info
-#fi
-
-# set SetupState
-sudo sed -i "s/^setupStep=.*/setupStep=20/g" /home/admin/raspiblitz.info
+echo "TODO: continue with further "
+exit 1
 
 clear
