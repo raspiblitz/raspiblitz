@@ -95,6 +95,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
   echo "OK: Migration data was imported - will process after password reset"
+  echo "migrationFile='${defaultZipPath}'" >> $SETUPFILE
   sleep 4
 
   # user needs to reset password A
