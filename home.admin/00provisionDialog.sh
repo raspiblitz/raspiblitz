@@ -26,7 +26,6 @@ case $CHOICE in
             ;;
         BITCOIN)
             network="bitcoin"
-            echo "network=bitcoin" >> $CONFIGFILE
             ;;
         LITECOIN)
             network="litecoin"
