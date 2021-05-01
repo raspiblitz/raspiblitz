@@ -49,54 +49,60 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
   # get defaultUploadPath, localIP, etc
-  source <(sudo /home/admin/config.scripts/blitz.migration.sh status)
+  source <(sudo /home/admin/config.scripts/blitz.upload.sh prepare-upload)
 
-  # make sure that temp directory exists, is clear and can be written by user bitcoin
-  sudo mkdir -p ${defaultUploadPath} 2>/dev/null
-  sudo rm /mnt/hdd/temp/migration/* 2>/dev/null
-  sudo chown -R bitcoin:bitcoin ${defaultUploadPath} 2>/dev/null
+  filename=""
+  while [ "${filename}" == "" ]
+    do
 
-  # scp upload info
-  clear
-  echo
-  echo "*****************************"
-  echo "* UPLOAD THE MIGRATION FILE *"
-  echo "*****************************"
-  echo "If you have a migration file on your laptop you can now"
-  echo "upload it and restore on the new HDD/SSD."
-  echo
-  echo "ON YOUR LAPTOP open a new terminal and change into"
-  echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-  echo "scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
-  echo ""
-  echo "Use password 'raspiblitz' to authenticate file transfer."
-  echo "PRESS ENTER when upload is done."
-  read key
+      clear
+      echo "*****************************"
+      echo "* UPLOAD THE MIGRATION FILE *"
+      echo "*****************************"
+      echo "If you have a migration file on your laptop you can now"
+      echo "upload it and restore on the new HDD/SSD."
+      echo
+      echo "ON YOUR LAPTOP open a new terminal and change into"
+      echo "the directory where your migration file is and"
+      echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+      echo "scp -r ./raspiblitz-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo ""
+      echo "Use password 'raspiblitz' to authenticate file transfer."
+      echo "PRESS ENTER when upload is done."
+      read key
 
-  countZips=$(sudo ls ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
-
-  # in case no upload found
-  if [ ${countZips} -eq 0 ]; then
-    echo "FAIL: Was not able to detect uploaded file in ${defaultUploadPath}"
-    echo "Shutting down ... please make a fresh sd card & try again."
-    sleep 3
-    echo "shutdown=1" >> $SETUPFILE
-    exit 1
-  fi
-
-  # in case of multiple files
-  if [ ${countZips} -gt 1 ]; then
-    echo "# FAIL: Multiple possible files detected in ${defaultUploadPath}"
-    echo "Shutting down ... please make a fresh sd card & try again."
-    sleep 3
-    echo "shutdown=1" >> $SETUPFILE
-    exit 1
-  fi
+      # check upload (will return filename or error)
+      source <(sudo /home/admin/config.scripts/blitz.upload.sh check-upload migration)
+      if [ "${filename}" != "" ]; then
+        echo "OK - File found: ${filename}"
+        echo "PRESS ENTER to continue."
+        read key
+      elif [ "${error}" == "not-found" ]; then
+        echo "!! WARNING !!"
+        echo "There was no upload found in ${defaultUploadPath}"
+        echo "Make sure you upload only one tar.gz-file and start again."
+        echo "PRESS ENTER to continue & retry"
+        read key
+      elif [ "${error}" == "multiple" ]; then
+        echo "!! WARNING !!"
+        echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
+        echo "Make sure you upload only one tar.gz-file and start again."
+        echo "PRESS ENTER to continue & retry"
+        read key
+      elif [ "${error}" == "invalid" ]; then
+        echo "!! WARNING !!"
+        echo "The file uploaded is not a valid (complete upload failed or not correct file)."
+        echo "PRESS ENTER to continue & retry"
+        read key
+      else
+        echo "!! WARNING !! Unknown State (report to devs)"
+        exit 1
+      fi
+  done
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
   echo "OK: Migration data was imported - will process after password reset"
-  echo "migrationFile='${defaultUploadPath}'" >> $SETUPFILE
+  echo "migrationFile='${filename}'" >> $SETUPFILE
   sleep 4
 
   # user needs to reset password A

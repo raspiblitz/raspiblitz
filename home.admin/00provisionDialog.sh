@@ -231,7 +231,7 @@ password=$(sudo cat $_temp)
 echo "passwordC='${password}'" >> $SETUPFILE
 dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
 
-echo "TODO: continue with further "
-exit 1
-
 clear
+echo "# setup dialog done - results in:"
+echo "# $CONFIGFILE"
+echo "# $SETUPFILE"
