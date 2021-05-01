@@ -5,6 +5,8 @@ source /mnt/hdd/raspiblitz.conf
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small rescue script to to backup or restore LND data"
+  echo "# -> basic status:"
+ echo "# lnd.rescue.sh status"
  echo "# -> backup all LND data in a tar.gz file for download:"
  echo "# lnd.rescue.sh backup [?no-download]"
  echo "# -> upload a LND data tar.gz file to replace LND data:"
@@ -16,10 +18,20 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+# get local ip
+source <(/home/admin/config.scripts/internet.sh status local)
+
+defaultUploadDir="/home/admin"
 
 mode="$1"
-if [ ${mode} = "backup" ]; then
+
+if [ ${mode} = "status" ]; then
+
+  echo "localip='${localip}'"
+  echo "defaultUploadDir='${defaultUploadDir}'"
+  exit 0
+
+elif [ ${mode} = "backup" ]; then
 
   ################################
   # BACKUP

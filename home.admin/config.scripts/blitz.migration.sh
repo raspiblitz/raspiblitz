@@ -26,23 +26,23 @@ isMounted=$(sudo df | grep -c /mnt/hdd)
 isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
 
 # set place where zipped TAR file gets stored
-defaultZipPath="/mnt/hdd/temp/migration"
+defaultUploadPath="/mnt/hdd/temp/migration"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # SCP download and upload links
-scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ."
-scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
-scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
+scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
+scpDownloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
+scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "isBTRFS=${isBTRFS}"
   echo "localip=\"${localip}\""
-  echo "defaultZipPath=\"${defaultZipPath}\""
+  echo "defaultUploadPath=\"${defaultUploadPath}\""
   echo "scpDownloadUnix=\"${scpDownloadUnix}\""
   echo "scpUploadUnix=\"${scpUploadUnix}\""
   echo "scpDownloadWin=\"${scpDownloadWin}\""
@@ -312,23 +312,23 @@ if [ "$1" = "export" ]; then
 
   # zip it
   echo "# Building the Export File (this can take some time) .."
-  sudo tar -zcvf ${defaultZipPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
+  sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
   echo "# Building checksum (can take also a while) ..." 
-  md5checksum=$(md5sum ${defaultZipPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
+  md5checksum=$(md5sum ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
   echo "md5checksum=${md5checksum}"
   
   # get byte size
-  bytesize=$(wc -c ${defaultZipPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
+  bytesize=$(wc -c ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
   echo "bytesize=${bytesize}"
 
   # final renaming 
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
-  echo "exportpath='${defaultZipPath}'"
+  echo "exportpath='${defaultUploadPath}'"
   echo "filename='${name}'"
-  sudo mv ${defaultZipPath}/raspiblitz-export-temp.tar.gz ${defaultZipPath}/${name}
-  sudo chown bitcoin:bitcoin ${defaultZipPath}/${name}
+  sudo mv ${defaultUploadPath}/raspiblitz-export-temp.tar.gz ${defaultUploadPath}/${name}
+  sudo chown bitcoin:bitcoin ${defaultUploadPath}/${name}
 
   # delete temp files
   rm ~/.exclude.temp
@@ -343,7 +343,7 @@ fi
 if [ "$1" = "export-gui" ]; then
 
   # cleaning old migration files from blitz
-  sudo rm ${defaultZipPath}/*.tar.gz 2>/dev/null
+  sudo rm ${defaultUploadPath}/*.tar.gz 2>/dev/null
 
   # stopping lnd / bitcoin
   echo "--> stopping services ..."
@@ -394,7 +394,7 @@ fi
 if [ "$1" = "import" ]; then
 
   # check second parameter for path and/or filename of import
-  importFile="${defaultZipPath}/raspiblitz-*.tar.gz"
+  importFile="${defaultUploadPath}/raspiblitz-*.tar.gz"
   if [ ${#2} -gt 0 ]; then
     # check if and/or filename of import
     containsPath=$(echo $2 | grep -c '/')
@@ -421,7 +421,7 @@ if [ "$1" = "import" ]; then
     else
       # is just filename - to use with default path
       echo "# using file from parameter for import"
-      importFile="${defaultZipPath}/${2}"     
+      importFile="${defaultUploadPath}/${2}"     
     fi 
   fi
   
@@ -574,8 +574,8 @@ if [ "$1" = "import-gui" ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # make sure that temp directory exists and can be written by admin
-  sudo mkdir -p ${defaultZipPath}
-  sudo chmod 777 -R ${defaultZipPath}
+  sudo mkdir -p ${defaultUploadPath}
+  sudo chmod 777 -R ${defaultUploadPath}
 
   clear
   echo
@@ -588,18 +588,18 @@ if [ "$1" = "import-gui" ]; then
   echo "ON YOUR LAPTOP open a new terminal and change into"
   echo "the directory where your migration file is and"
   echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
+  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultUploadPath}"
   echo ""
   echo "Use password 'raspiblitz' to authenticate file transfer."
   echo "PRESS ENTER when upload is done."
   read key
 
-  countZips=$(sudo ls ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
+  countZips=$(sudo ls ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
 
   # in case no upload found
   if [ ${countZips} -eq 0 ]; then
     echo
-    echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
+    echo "FAIL: Was not able to detect uploaded file in ${defaultUploadPath}"
     echo "error='no file found'"
     sleep 3
     exit 1
@@ -608,7 +608,7 @@ if [ "$1" = "import-gui" ]; then
   # in case of multiple files
   if [ ${countZips} -gt 1 ]; then
     echo
-    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
+    echo "# FAIL: Multiple possible files detected in ${defaultUploadPath}"
     echo "error='multiple files'"
     sleep 3
     exit 1
@@ -616,7 +616,7 @@ if [ "$1" = "import-gui" ]; then
 
   # restore upload
   echo
-  echo "OK: Upload found in ${defaultZipPath} - restoring data ... (please wait)"
+  echo "OK: Upload found in ${defaultUploadPath} - restoring data ... (please wait)"
   source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
   if [ ${#error} -gt 0 ]; then
     echo
