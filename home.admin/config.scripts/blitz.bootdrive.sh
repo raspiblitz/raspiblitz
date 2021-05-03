@@ -66,7 +66,7 @@ if [ "${action}" == "fsexpand" ]; then
         if [ -x ${resizeRaspbian} ]; then
             echo "# RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}"
 		    sudo $resizeRaspbian --expand-rootfs 1>&2
-            echo "# DONE"
+            echo "# DONE - please reboot"
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeRaspbian}"
             echo "err='expand failed'"
@@ -77,7 +77,7 @@ if [ "${action}" == "fsexpand" ]; then
         if [ -x ${resizeArmbian} ]; then
             echo "# RUNNING EXPAND ARMBIAN: ${resizeArmbian}"
             sudo $resizeArmbian start 1>&2
-            echo "# DONE"
+            echo "# DONE - please reboot"
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeArmbian}"
             echo "err='expand failed'"
