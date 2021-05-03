@@ -80,6 +80,10 @@ if [ "${localip:0:4}" = "169." ]; then
 fi
 
 #############################################
+# check WifiConfig
+configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+
+#############################################
 # check for internet connection
 online=0
 if [ ${#dnsServer} -gt 0 ]; then
@@ -176,6 +180,7 @@ if [ "$1" == "status" ]; then
   echo "localip=${localip}"
   echo "dhcp=${dhcp}"
   echo "network_device=${networkDevice}"
+  echo "configWifiExists='${configWifiExists}'"
   echo "network_rx='${network_rx}'"
   echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
