@@ -15,8 +15,10 @@ if [ "$1" = "on" ]; then
   sudo rm -f lncli describegraph > /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/describegraph.json
   sudo git clone https://github.com/mutatrum/lnd_graph_crawl /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl
   sudo chown -R admin:admin /mnt/hdd/app-storage/lnd-graph-crawl/
+  echo "lnd-graph-crawl installed"
 fi
 
 if [ "$1" = "off" ]; then
   sudo rm -rf /mnt/hdd/app-storage/lnd-graph-crawl/
+  echo "lnd-graph-crawl removed"
 fi
