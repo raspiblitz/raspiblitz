@@ -6,13 +6,18 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
+SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
 # init SETUPFILE
+sudo mkdir /var/cache/raspiblitz/temp
+sudo chown admin:admin /var/cache/raspiblitz/temp
 sudo rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
+
+# init temp directory on mem drive
+
 
 ############################################
 # Basic Setup (Blockchain & Lightning Impl)

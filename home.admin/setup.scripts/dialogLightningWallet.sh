@@ -4,7 +4,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
+SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source $SETUPFILE
 
 # flags for sub dialogs after choice
@@ -119,10 +119,10 @@ fi
 if [ ${uploadLNDRESCUE} -eq 1 ]; then
 
   # run upload dialog and get result
-  _temp="/var/cache/raspiblitz/.temp.tmp"
+  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh lnd-import-gui setup $_temp
   source $_temp 2>/dev/null
-  sudo rm $_temp
+  sudo rm $_temp 2>/dev/null
 
   # if user canceled upload
   if [ "${lndrescue}" == "" ]; then
@@ -144,7 +144,7 @@ if [ ${enterSEED} -eq 1 ]; then
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
   source $_temp 2>/dev/null
-  sudo rm $_temp
+  sudo rm $_temp 2>/dev/null
 
   # if user canceled the seed input
   if [ "${seedWords}" == "" ]; then
@@ -168,7 +168,7 @@ if [ ${uploadSCB} -eq 1 ]; then
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
   source $_temp 2>/dev/null
-  sudo rm $_temp
+  sudo rm $_temp 2>/dev/null
 
   # if user canceled the upload
   if [ "${staticchannelbackup}" == "" ]; then

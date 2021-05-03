@@ -8,7 +8,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
+SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source $SETUPFILE
 
 #########################

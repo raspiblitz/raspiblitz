@@ -6,7 +6,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
+SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source $SETUPFILE
 
 ####################################################
@@ -60,7 +60,7 @@ Write them down & store them in a safe place.
 fi
 
 # temp file for password results
-_temp="/var/cache/raspiblitz/.temp.tmp"
+_temp="/var/cache/raspiblitz/temp/.temp.tmp"
 
 # PASSWORD A
 if [ "${setPasswordA}" == "1" ]; then
