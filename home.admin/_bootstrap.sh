@@ -26,37 +26,7 @@ logFile="/home/admin/raspiblitz.log"
 # used by display and later setup steps
 infoFile="/home/admin/raspiblitz.info"
 
-
-# FUNCTIONS to be used later on in the script
-
-# wait until raspberry pi gets a local IP
-function wait_for_local_network() {
-  gotLocalIP=0
-  until [ ${gotLocalIP} -eq 1 ]
-  do
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-    if [ ${#localip} -eq 0 ]; then
-      configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-      if [ ${configWifiExists} -eq 0 ]; then
-        # display user to connect LAN
-        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
-        sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
-      else
-        # display user that wifi settings are not working
-        sed -i "s/^state=.*/state=noIP/g" ${infoFile}
-        sed -i "s/^message=.*/message='WIFI Settings not working'/g" ${infoFile}
-      fi
-    elif [ "${localip:0:4}" = "169." ]; then
-      # display user waiting for DHCP
-      sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
-      sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
-    else
-      gotLocalIP=1
-    fi
-    sleep 1
-  done
-}
-
+# Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 echo "***********************************************" >> $logFile
@@ -73,6 +43,10 @@ fsexpanded=0
 displayClass="lcd"
 displayType=""
 fundRecovery=0
+
+################################
+# INIT raspiblitz.info
+################################
 
 # try to load old values if available (overwrites defaults)
 source ${infoFile} 2>/dev/null
@@ -97,6 +71,119 @@ if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
 sudo chmod 777 ${infoFile}
+
+######################################
+# SECTION FOR POSSIBLE REBOOT ACTIONS
+systemInitReboot=0
+
+################################
+# FORCED SWITCH TO HDMI
+# if a file called 'hdmi' gets
+# placed onto the boot part of
+# the sd card - switch to hdmi
+################################
+
+forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
+if [ ${forceHDMIoutput} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/hdmi*
+  # switch to HDMI what will trigger reboot
+  echo "HDMI switch found ... activating HDMI display output & reboot" >> $logFile
+  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
+  systemInitReboot=1
+else
+  echo "No HDMI switch found. " >> $logFile
+fi
+
+################################
+# SSH SERVER CERTS RESET
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - delete old ssh data
+################################
+
+sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
+if [ ${sshReset} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/ssh.reset* >> $logFile
+  # delete ssh certs
+  echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
+  sudo systemctl stop sshd >> $logFile
+  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
+  sudo ssh-keygen -A >> $logFile
+  systemInitReboot=1
+else
+  echo "No SSHRESET switch found. " >> $logFile
+fi
+
+################################
+# FS EXPAND
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - delete old ssh data
+################################
+source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
+if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
+  echo "FSEXPAND needed ... starting process" >> $logFile
+  sudo /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
+  sudo /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
+  systemInitReboot=1
+else
+  echo "No FS EXPAND needed. needsExpansion(${needsExpansion}) fsexpanded(${fsexpanded})" >> $logFile
+fi
+
+################################
+# UASP FIX - first try
+# if HDD is connected on start
+################################
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
+if [ "${neededReboot}" == "1" ]; then
+  echo "UASP FIX applied (1st-try) ... reboot needed." >> $logFile
+  systemInitReboot=1
+else
+  echo "No UASP FIX needed (1st-try)." >> $logFile
+fi
+
+######################################
+# CHECK IF REBOOT IS NEEDED
+# from actions above
+
+if [ "${systemInitReboot}" == "1" ]; then
+  sudo cp ${logFile} ${logFile}.systeminit
+  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sudo shutdown -r now
+  sleep 100
+  exit 0
+fi
+
+################################
+# BOOT LOGO
+################################
+
+# display 3 secs logo - try to kickstart LCD
+# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
+# see https://github.com/rootzoll/raspiblitz/issues/647
+# see https://github.com/rootzoll/raspiblitz/pull/1580
+randnum=$(shuf -i 0-7 -n 1)
+/home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
+sleep 5
+/home/admin/config.scripts/blitz.display.sh hide
+
+################################
+# GENERATE UNIQUE SSH PUB KEYS
+# on first boot up
+################################
+
+numberOfPubKeys=$(sudo ls /etc/ssh/ | grep -c 'ssh_host_')
+if [ ${numberOfPubKeys} -eq 0 ]; then
+  echo "*** Generating new SSH PubKeys" >> $logFile
+  sudo dpkg-reconfigure openssh-server
+  echo "OK" >> $logFile
+fi
+
+################################
+# CLEANING BOOT SYSTEM
+################################
 
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
@@ -129,127 +216,15 @@ fi
 echo ""
 
 ###############################
-# RAID data check (BRTFS)
-###############################
-# see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
+# WAIT FOR ALL SERVICES
 
+# get the state of data drive
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-if [ ${isRaid} -eq 1 ]; then
-  echo "TRIGGERING BTRFS RAID DATA CHECK ..."
-  echo "Check status with: sudo btrfs scrub status /mnt/hdd/"
-  sudo btrfs scrub start /mnt/hdd/
-fi
 
 ################################
-# BOOT LOGO
+# WAIT LOOP UNTIL HDD CONNECTED
 ################################
 
-# display 3 secs logo - try to kickstart LCD
-# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-# see https://github.com/rootzoll/raspiblitz/issues/647
-# see https://github.com/rootzoll/raspiblitz/pull/1580
-randnum=$(shuf -i 0-7 -n 1)
-/home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
-sleep 5
-/home/admin/config.scripts/blitz.display.sh hide
-
-################################
-# GENERATE UNIQUE SSH PUB KEYS
-# on first boot up
-################################
-
-numberOfPubKeys=$(sudo ls /etc/ssh/ | grep -c 'ssh_host_')
-if [ ${numberOfPubKeys} -eq 0 ]; then
-  echo "*** Generating new SSH PubKeys" >> $logFile
-  sudo dpkg-reconfigure openssh-server
-  echo "OK" >> $logFile
-fi
-
-################################
-# AFTER BOOT SCRIPT
-# when a process needs to 
-# execute stuff after a reboot
-# it should in file
-# /home/admin/setup.sh
-################################
-
-# check for after boot script
-afterSetupScriptExists=$(ls /home/admin/setup.sh 2>/dev/null | grep -c setup.sh)
-if [ ${afterSetupScriptExists} -eq 1 ]; then
-  echo "*** SETUP SCRIPT DETECTED ***"
-  # LCD info
-  sudo sed -i "s/^state=.*/state=recovering/g" ${infoFile}
-  sudo sed -i "s/^message=.*/message='After Boot Setup (takes time)'/g" ${infoFile}
-  # echo out script to journal logs
-  sudo cat /home/admin/setup.sh
-  # execute the after boot script
-  echo "Logs in stored to: /home/admin/raspiblitz.log.recover"
-  echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> ${logFile}
-  sudo /home/admin/setup.sh >> ${logFile}
-  # delete the after boot script
-  sudo rm /home/admin/setup.sh 
-  # reboot again
-  echo "DONE wait 10 secs ... one more reboot needed ... " >> ${logFile}
-  sudo cp ${logFile} ${logFile}.afterboot
-  sudo shutdown -r now
-  sleep 100
-  exit 0
-fi
-
-################################
-# FORCED SWITCH TO HDMI
-# if a file called 'hdmi' gets
-# placed onto the boot part of
-# the sd card - switch to hdmi
-################################
-
-forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
-if [ ${forceHDMIoutput} -eq 1 ]; then
-  # delete that file (to prevent loop)
-  sudo rm /boot/hdmi*
-  # switch to HDMI what will trigger reboot
-  echo "Yes HDMI switch found ... activating HDMI display output & reboot" >> $logFile
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
-  sudo cp ${logFile} ${logFile}.hdmiswitch
-  sudo shutdown -r now
-  sleep 100
-  exit 0
-else
-  echo "No HDMI switch found. " >> $logFile
-fi
-
-################################
-# SSH SERVER CERTS RESET
-# if a file called 'ssh.reset' gets
-# placed onto the boot part of
-# the sd card - delete old ssh data
-################################
-
-sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
-if [ ${sshReset} -eq 1 ]; then
-  # delete that file (to prevent loop)
-  sudo rm /boot/ssh.reset* >> $logFile
-  # show info ssh reset
-  sed -i "s/^state=.*/state=sshreset/g" ${infoFile}
-  sed -i "s/^message=.*/message='resetting SSH & reboot'/g" ${infoFile}
-  # delete ssh certs
-  sudo systemctl stop sshd >> $logFile
-  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
-  sudo ssh-keygen -A >> $logFile
-  echo "SSH SERVER CERTS RESET ... (reboot) " >> $logFile
-  sudo cp ${logFile} ${logFile}.sshcerts
-  sudo shutdown -r now
-  sleep 100
-  exit 0
-fi
-
-################################
-# HDD CHECK & PRE-INIT
-################################
- 
-# Without LCD message needs to be printed
-# wait loop until HDD is connected
-echo ""
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -264,39 +239,69 @@ do
   sleep 2
 done
 
+####################################
+# WIFI RESTORE from HDD works with
+# mem copy from datadrive inspection
+####################################
+
+# check if there is a WIFI configuration to backup or restore
+/home/admin/config.scripts/internet.wifi.sh backup-restore >> $logFile
+
+################################
+# UASP FIX - second try
+# when HDD gets connected later
+################################
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
+if [ "${neededReboot}" == "1" ]; then
+  echo "UASP FIX applied (2st-try) ... reboot needed." >> $logFile
+  sudo cp ${logFile} ${logFile}.uasp
+  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sudo shutdown -r now
+  sleep 100
+  exit 0
+else
+  echo "No UASP FIX needed (2st-try)." >> $logFile
+fi
+
+gotLocalIP=0
+until [ ${gotLocalIP} -eq 1 ]
+do
+  source <(/home/admin/config.scripts/internet.sh status)
+  if [ ${dhcp} -eq 0 ]; then
+    # display user waiting for DHCP
+    sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
+    sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
+  elif [ ${#localip} -eq 0 ]; then
+    if [ ${configWifiExists} -eq 0 ]; then
+      # display user to connect LAN
+      sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+      sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
+    else
+      # display user that wifi settings are not working
+      sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+      sed -i "s/^message=.*/message='WIFI Settings not working'/g" ${infoFile}
+    fi
+  elif [ ${online} -eq 0 ]; then
+    # display user that wifi settings are not working
+    sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
+    sed -i "s/^message=.*/message='No connection to Internet'/g" ${infoFile}
+  else
+    gotLocalIP=1
+  fi
+  sleep 1
+done
+
 # write info for LCD
 sed -i "s/^state=.*/state=booting/g" ${infoFile}
 sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
+# TODO: REMOVE LATER AGAIN
+echo "DEBUG EXIT BREAK" >> $logFile
+exit 1
+
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 echo "isMounted: $isMounted" >> $logFile
-
-# check if UASP is already deactivated (on RaspiOS)
-# https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
-if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
-  echo "Checking for UASP deactivation ..." >> $logFile
-  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
-  # check if its maybe other device
-  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
-  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
-    # remove old usb-storage.quirks
-    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
-  fi 
-  if [ ${usbQuirkDone} -eq 0 ]; then
-    # add new usb-storage.quirks
-    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
-    sudo cat /boot/cmdline.txt >> $logFile
-    # go into reboot to activate new setting
-    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... " >> $logFile
-    sudo cp ${logFile} ${logFile}.uasp
-    sudo shutdown -r now
-    sleep 100
-  fi
-else 
-  echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
-fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 if [ ${isMounted} -eq 0 ]; then
@@ -336,15 +341,6 @@ if [ ${isMounted} -eq 0 ]; then
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
-
-  # check if there is a WIFI configuration to backup or restore
-  sudo /home/admin/config.scripts/internet.wifi.sh backup-restore
-
-  # make sure at this point local network is connected
-  wait_for_local_network
-
-  # make sure before update/recovery that a internet connection is working
-  wait_for_local_internet
 
   # check if HDD contains already a configuration
   configExists=$(ls ${configFile} | grep -c '.conf')
@@ -410,9 +406,6 @@ if [ ${isMounted} -eq 0 ]; then
   exit 0
 
 fi # END - no automount - after this HDD is mounted
-
-# make sure at this point local network is connected
-wait_for_local_network
 
 # if a WIFI config exists backup to HDD
 configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
@@ -590,6 +583,17 @@ if [ ${#error} -gt 0 ]; then
   echo "FAIL: ${error}" >> $logFile
 else
   echo "OK: Temp cleaned" >> $logFile
+fi
+
+###############################
+# RAID data check (BRTFS)
+###############################
+# see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
+
+if [ ${isRaid} -eq 1 ]; then
+  echo "TRIGGERING BTRFS RAID DATA CHECK ..."
+  echo "Check status with: sudo btrfs scrub status /mnt/hdd/"
+  sudo btrfs scrub start /mnt/hdd/
 fi
 
 ######################################
