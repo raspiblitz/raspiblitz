@@ -45,33 +45,6 @@ if [ "${action}" ="" "check-upload" ]; then
   type=$2
   echo "type='${type}'"
 
-  # check if there to less or to many files in upload directory
-  countFiles=$(ls ${defaultUploadPath} | wc -l 2>/dev/null)
-  if [ ${countFiles} -lt 1 ]; then
-    sudo rm ${defaultUploadPath}/* 2>/dev/null
-    echo "error='not-found'"
-    exit 1
-  fi
-  if [ ${countFiles} -gt 1 ]; then
-    sudo rm ${defaultUploadPath}/* 2>/dev/null
-    echo "error='multiple'"
-    exit 1
-  fi
-
-  # get the file uploaded (full path)
-  filename=$(sudo ls ${defaultUploadPath}/*.*)
-  echo "# filename(${filename})"
-
-  # check of size >0
-  byteSize=$(ls -l ${filename} | awk '{print $5}')
-  echo "# byteSize(${byteSize})"
-  if [ "${byteSize}" == "" ] || [ "${byteSize}" == "0" ]; then
-      sudo rm ${defaultUploadPath}/* 2>/dev/null
-      echo "error='invalid'"
-      echo "errorDetail='invalid byte size: ${byteSize}'"
-      exit 1
-  fi
-
   # testcut
 
   # ok looks good - return filename & more info
