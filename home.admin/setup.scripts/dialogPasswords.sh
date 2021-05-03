@@ -9,6 +9,10 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
 source <($SETUPFILE)
 
+# debug test
+echo "setPasswordA(${setPasswordA})"
+sleep
+
 ####################################################
 # INPUT PASSWORDS (based on flags from raspiblitz.setup)
 
