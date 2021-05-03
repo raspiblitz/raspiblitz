@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  >&2 echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshot]"
+ >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshot|uasp-fix]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -1671,6 +1671,44 @@ if [ "$1" = "clean" ]; then
   fi
 
 fi  
+
+########################################
+# UASP-fix
+########################################
+
+if [ "$1" = "uasp-fix" ]; then
+
+  # get HDD status and if the connected adapter is supports UASP
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+
+  # check if UASP is already deactivated (on RaspiOS)
+  # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+  cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+  if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
+    echo "# Checking for UASP deactivation ..."
+    usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
+    usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+    if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
+      # remove old usb-storage.quirks
+      sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+    fi 
+    if [ ${usbQuirkDone} -eq 0 ]; then
+      # add new usb-storage.quirks
+      sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+      # go into reboot to activate new setting
+      echo "# DONE deactivating UASP for ${hddAdapterUSB} ... reboot needed"
+      echo "neededReboot=1"
+    else
+      echo "# Already UASP deactivated for ${hddAdapterUSB}"
+      echo "neededReboot=0"
+    fi
+  else 
+    echo "# Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})"
+    echo "neededReboot=0"
+  fi
+
+  exit 0
+fi
 
 echo "error='unkown command'"
 exit 1
