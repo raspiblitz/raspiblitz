@@ -9,10 +9,6 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
 source $SETUPFILE
 
-# debug test
-echo "setPasswordA(${setPasswordA})"
-sleep 4
-
 ####################################################
 # INPUT PASSWORDS (based on flags from raspiblitz.setup)
 
@@ -73,7 +69,7 @@ if [ "${setPasswordA}" == "1" ]; then
   password=$(sudo cat $_temp)
   sudo rm $_temp
   echo "passwordA='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password A set" 7 20
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password A accepted.\n\nUse this password for future SSH or Web-Admin logins to your RaspiBlitz & for sudo commands." 11 35
 fi
 
 # PASSWORD B
@@ -83,7 +79,7 @@ if [ "${setPasswordB}" == "1" ]; then
   password=$(sudo cat $_temp)
   sudo rm $_temp
   echo "passwordB='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password B set" 7 20
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditial Apps & API access." 10 34
 fi
 
 # PASSWORD C
@@ -93,7 +89,7 @@ if [ "${setPasswordC}" == "1" ]; then
   password=$(sudo cat $_temp)
   sudo rm $_temp
   echo "passwordC='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password C accepted.\n\nAlways use this password to \nunlock your Lightning Wallet." 10 34
 fi
 
 # debug info
