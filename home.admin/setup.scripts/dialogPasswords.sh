@@ -11,7 +11,7 @@ source <($SETUPFILE)
 
 # debug test
 echo "setPasswordA(${setPasswordA})"
-sleep
+sleep 4
 
 ####################################################
 # INPUT PASSWORDS (based on flags from raspiblitz.setup)
