@@ -240,19 +240,27 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 # WAIT LOOP: HDD CONNECTED
 ################################
 
+echo "Waiting for HDD/SSD ..." >> $logFile
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
+
+  # recheck HDD/SSD
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-  echo "isMounted: $isMounted" >> $logFile
-  echo "hddCandidate: $hddCandidate" >> $logFile
-  message="Connect the Hard Drive"
-  echo $message
+  echo "isMounted: $isMounted"
+  echo "hddCandidate: $hddCandidate"
   if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
-    sed -i "s/^message=.*/message='$message'/g" ${infoFile}
   fi
+
+  # get latest network info & update raspiblitz.info
+  source <(/home/admin/config.scripts/internet.sh status)
+  sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+
+  # wait for next check
   sleep 2
+
 done
+echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
 
 ####################################
 # WIFI RESTORE from HDD works with
@@ -287,10 +295,8 @@ gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
 
-  # get latest network info
+  # get latest network info & update raspiblitz.info
   source <(/home/admin/config.scripts/internet.sh status)
-
-  # update localip in raspiblitz.info
   sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
 
   # check state of network
