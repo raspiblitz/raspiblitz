@@ -50,6 +50,8 @@ if [ "${migrationOS}" != "" ]; then
 
   # on cancel - shutdown system
   if [ "$?" != "0" ]; then
+    clear
+    echo "OK .. no changes done to your hard drive. Shutting down."
     sudo shutdown now
     exit 1
   fi
