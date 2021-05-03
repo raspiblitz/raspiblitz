@@ -106,8 +106,6 @@ or having a complete LND rescue-backup from your old node.
        exit 2
     fi
 
-    sleep 3
-
   done
 
 else
