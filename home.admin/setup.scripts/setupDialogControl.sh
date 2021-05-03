@@ -9,8 +9,10 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
 
 # init SETUPFILE
-rm $SETUPFILE 2>/dev/null
+sudo rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
+sudo chown admin:admin $SETUPFILE
+sudo chmod 777 $SETUPFILE
 
 ############################################
 # Basic Setup (Blockchain & Lightning Impl)
