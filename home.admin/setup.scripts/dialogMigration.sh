@@ -113,7 +113,7 @@ fi
 if [ "${migrationOS}" == "umbrel" ]; then
 
   # infodialog
-  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Shutdown" --yesno "RaspiBlitz found data from UMBREL
+  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from UMBREL
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
@@ -147,7 +147,7 @@ fi
 if [ "${migrationOS}" == "mynode" ]; then
 
   # infodialog
-  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Shutdown" --yesno "RaspiBlitz found data from MYNODE
+  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from MYNODE
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 

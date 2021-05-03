@@ -20,6 +20,7 @@ sudo chmod 777 $SETUPFILE
 # Basic Setup (Blockchain & Lightning Impl)
 # (skip if migration was auto-detected)
 
+# migrationOS is from raspiblitz.info
 if [ "${migrationOS}" == "" ]; then
 
   echo "# Starting basic setup dialog ..."
@@ -37,6 +38,7 @@ fi
 # source setup state fresh - in case manual migration was choosen
 source $SETUPFILE
 
+# migrationOS is from raspiblitz.info but might be overwritten from $SETUPFILE
 if [ "${migrationOS}" != "" ]; then
 
   ###############################################
