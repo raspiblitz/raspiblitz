@@ -71,7 +71,7 @@ if [ "$1" = "status" ]; then
   echo "isMounted=${isMounted}"
   echo "isBTRFS=${isBTRFS}"
 
-  # if HDD is not mounted system is in the pre-setup phase
+  # if HDD is not mounted system then it is in the pre-setup phase
   # deliver all the detailes needed about the data drive
   # and it content for the setup dialogs
   if [ ${isMounted} -eq 0 ]; then
@@ -267,6 +267,14 @@ if [ "$1" = "status" ]; then
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
           fi
           echo "hddGotMigrationData='${hddGotMigrationData}'"
+
+          # check if there is a wifi configuration as backup
+          wifiBackupConfigExists=$(ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+          if [ ${wifiBackupConfigExists} -eq 1 ]; then
+            # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
+            sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
+            echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
+          fi
 
           # unmount 
           sudo umount /mnt/storage
