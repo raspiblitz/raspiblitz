@@ -26,7 +26,7 @@ fi
 # 1st PRAMETER action
 action="$1"
 
-if [ ${action} = "prepare-upload" ]; then
+if [ "${action}" == "prepare-upload" ]; then
 
   # make sure that temp directory exists, is clear and can be written by ${defaultUploadUser}
   sudo mkdir -p ${defaultUploadPath} 2>/dev/null
@@ -39,7 +39,7 @@ if [ ${action} = "prepare-upload" ]; then
   exit 0
 fi
 
-if [ ${action} = "check-upload" ]; then
+if [ "${action}" ="" "check-upload" ]; then
 
   # 2nd PARAMETER is type of upload (optional)
   type=$2
