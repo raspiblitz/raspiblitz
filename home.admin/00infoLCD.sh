@@ -82,29 +82,6 @@ while :
     # CHECK BASIC DATA
     ###########################   
 
-    # get the local network IP to be displayed on the lCD
-    source <(sudo /home/admin/config.scripts/internet.sh status)
-
-    # waiting for IP in general
-    if [ ${#localip} -eq 0 ]; then
-      l1="Waiting for Network ...\n"
-      l2="Not able to get local IP.\n"
-      l3="LAN cable connected? WIFI lost?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
-      sleep 3
-      continue
-    fi
-
-    # waiting for Internet connection
-    if [ ${online} -eq 0 ]; then
-      l1="Waiting for Internet ...\n"
-      l2="Local Network seems OK but no Internet.\n"
-      l3="Is router still online?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 5 45
-      sleep 3
-      continue
-    fi
-
     # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
@@ -136,6 +113,26 @@ while :
       continue
     fi
 
+    # waiting for DHCP in general
+    if [ "${state}" = "noIP" ]; then
+      l1="Waiting for Network ...\n"
+      l2="Not able to get local IP.\n"
+      l3="LAN cable connected? WIFI lost?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
+    fi
+
+    # waiting for DHCP in general
+    if [ "${state}" = "noInternet" ]; then
+      l1="Waiting for Internet ...\n"
+      l2="Local Network seems OK but no Internet.\n"
+      l3="Is router still online?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
+    fi
+
     # if no information available from files - set default
     if [ ${#setupStep} -eq 0 ]; then
      setupStep=0
@@ -144,22 +141,8 @@ while :
     # before setup even started
     if [ ${setupStep} -eq 0 ]; then
 
-      # check for internet connection
-      online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
-      if [ ${online} -eq 0 ]; then
-        # re-test with other server
-        online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
-      fi
-      if [ ${online} -eq 0 ]; then
-        # re-test with other server
-        online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
-      fi
-
-      if [ ${online} -eq 0 ]; then
-        message="no internet connection"
-
       # when in presync - get more info on progress
-      elif [ "${state}" = "presync" ]; then
+      if [ "${state}" = "presync" ]; then
         blockchaininfo="$(sudo -u root bitcoin-cli --conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
         message="starting"
         if [ ${#blockchaininfo} -gt 0 ]; then
