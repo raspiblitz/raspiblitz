@@ -20,13 +20,9 @@ if [ "${setPasswordB}" == "1" ]; then
   passwordinfo="${passwordinfo}, B"
   echo "A1"
 fi
-echo "B"
 if [ "${setPasswordC}" == "1" ]; then
   passwordinfo="${passwordinfo}, C"
-  echo "B1"
 fi
-echo "${passwordinfo}"
-sleep 3
 
 # if passwords are set in a migration situation, use different info text
 if [ "${migrationOS}" == "" ]; then
