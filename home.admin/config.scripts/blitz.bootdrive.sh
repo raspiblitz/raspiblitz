@@ -57,14 +57,16 @@ fi
 
 if [ "${action}" == "fsexpand" ]; then
 
+    echo "# blitz.bootdrive.sh fsexpand"
     echo "# starting expand of file system of sd card"
-    sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
+    sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 
     if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
         resizeRaspbian="/usr/bin/raspi-config"
         if [ -x ${resizeRaspbian} ]; then
             echo "# RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}"
 		    sudo $resizeRaspbian --expand-rootfs 1>&2
+            echo "# DONE"
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeRaspbian}"
             echo "err='expand failed'"
@@ -75,6 +77,7 @@ if [ "${action}" == "fsexpand" ]; then
         if [ -x ${resizeArmbian} ]; then
             echo "# RUNNING EXPAND ARMBIAN: ${resizeArmbian}"
             sudo $resizeArmbian start 1>&2
+            echo "# DONE"
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeArmbian}"
             echo "err='expand failed'"
