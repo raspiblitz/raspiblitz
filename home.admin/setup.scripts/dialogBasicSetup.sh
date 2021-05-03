@@ -7,7 +7,7 @@ source /home/admin/raspiblitz.info
 # SETUPFILE
 # this key/value file contains the state during the setup process
 SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
-source <($SETUPFILE)
+source $SETUPFILE
 
 # choose blockchain or select migration
 OPTIONS=()
