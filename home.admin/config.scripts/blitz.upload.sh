@@ -39,7 +39,7 @@ if [ "${action}" == "prepare-upload" ]; then
   exit 0
 fi
 
-if [ "${action}" = "check-upload" ]; then
+if [ "${action}" == "check-upload" ]; then
 
   # 2nd PARAMETER is type of upload (optional)
   type=$2
