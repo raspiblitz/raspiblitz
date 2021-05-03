@@ -62,6 +62,16 @@ elif [ "${CHOICE}" == "OLD" ]; then
       enterSEED=1
       uploadSCB=1
 
+      # clear setup state from all fomer possible choices (previous loop)
+      sudo sed -i '/^setPasswordA=/d' $SETUPFILE
+      sudo sed -i '/^setPasswordB=/d' $SETUPFILE
+      sudo sed -i '/^setPasswordC=/d' $SETUPFILE
+
+      # mark all passwords to be set at the end
+      echo "setPasswordA=1" >> $SETUPFILE
+      echo "setPasswordB=1" >> $SETUPFILE
+      echo "setPasswordC=1" >> $SETUPFILE
+
     elif [ "${CHOICESUB}" == "ONLYSEED" ]; then
 
       # let people know about the difference between SEED & SEED+SCB
@@ -78,6 +88,17 @@ or having a complete LND rescue-backup from your old node.
       else
         # activate SEED input & SCB upload
         enterSEED=1
+
+        # clear setup state from all fomer possible choices (previous loop)
+        sudo sed -i '/^setPasswordA=/d' $SETUPFILE
+        sudo sed -i '/^setPasswordB=/d' $SETUPFILE
+        sudo sed -i '/^setPasswordC=/d' $SETUPFILE
+
+        # mark all passwords to be set at the end
+        echo "setPasswordA=1" >> $SETUPFILE
+        echo "setPasswordB=1" >> $SETUPFILE
+        echo "setPasswordC=1" >> $SETUPFILE
+
       fi
 
     else
