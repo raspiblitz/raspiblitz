@@ -103,6 +103,9 @@ while :
       continue
     fi
 
+    # make sure no local ip is readable
+    if [ "${localip}" == "" ]; then localip="no-network"; fi
+
     # waiting for DHCP in general
     if [ "${state}" = "noHDD" ]; then
       l1="Waiting for HDD/SSD ...\n"
