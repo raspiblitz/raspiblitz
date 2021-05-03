@@ -54,6 +54,9 @@ source ${infoFile} 2>/dev/null
 # try to load config values if available (config overwrites info)
 source ${configFile} 2>/dev/null
 
+# get first basic network info
+source <(/home/admin/config.scripts/internet.sh status)
+
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
@@ -62,6 +65,8 @@ echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
+echo "localip='${localip}'" >> $infoFile
+echo "online='${online}'" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
@@ -222,7 +227,7 @@ echo ""
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 ################################
-# WAIT LOOP UNTIL HDD CONNECTED
+# WAIT LOOP: HDD CONNECTED
 ################################
 
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
@@ -263,10 +268,22 @@ else
   echo "No UASP FIX needed (2st-try)." >> $logFile
 fi
 
+###################################
+# WAIT LOOP: LOCALNET / INTERNET
+# after HDD > can contain WIFI conf
+###################################
+
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
+
+  # get latest network info
   source <(/home/admin/config.scripts/internet.sh status)
+
+  # update localip in raspiblitz.info
+  sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+
+  # check state of network
   if [ ${dhcp} -eq 0 ]; then
     # display user waiting for DHCP
     sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
