@@ -121,7 +121,7 @@ if [ ${uploadLNDRESCUE} -eq 1 ]; then
   # run upload dialog and get result
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh lnd-import-gui setup $_temp
-  source <($_temp) 2>/dev/null
+  source $_temp 2>/dev/null
   sudo rm $_temp
 
   # if user canceled upload
@@ -143,7 +143,7 @@ if [ ${enterSEED} -eq 1 ]; then
   # start seed input and get results
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
-  source <($_temp) 2>/dev/null
+  source $_temp 2>/dev/null
   sudo rm $_temp
 
   # if user canceled the seed input
@@ -167,7 +167,7 @@ if [ ${uploadSCB} -eq 1 ]; then
   # start seed input and get results
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
-  source <($_temp) 2>/dev/null
+  source $_temp 2>/dev/null
   sudo rm $_temp
 
   # if user canceled the upload
