@@ -71,7 +71,6 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
       elif [ "${error}" == "not-found" ]; then
         echo "!! WARNING !!"
         echo "There was no upload found in ${defaultUploadPath}"
-        echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
