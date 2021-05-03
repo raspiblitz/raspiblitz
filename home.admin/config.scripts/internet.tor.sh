@@ -363,7 +363,7 @@ bridgeWhiptail()
       bridgeQuestion
     fi
   else
-    whiptail --title "Tor Bridges - Setup" --yes-button "INSERT" --no-button "Cancel" --yesno "Find detailed information about bridges relevance in the FAQ\n https://github.com/rootzoll/raspiblitz/blob/v1.7/FAQ.md#how-can-i-use-bridges-with-tor\nDo you wish to insert new bridges OR cancel operation?\n" 11 40 3>&1 1>&2 2>&3
+    whiptail --title "Tor Bridges - Setup" --yes-button "INSERT" --no-button "Cancel" --yesno "Find detailed information about bridges relevance in the FAQ\nhttps://github.com/rootzoll/raspiblitz/blob/master/FAQ.md#how-can-i-use-bridges-with-tor\n\nDo you wish to insert new bridges OR cancel operation?\n" 15 60 3>&1 1>&2 2>&3
     if [ $? -eq 0 ]; then
       bridgeQuestion
     fi
