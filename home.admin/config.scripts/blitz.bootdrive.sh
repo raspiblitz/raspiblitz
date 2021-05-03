@@ -8,7 +8,7 @@
 source /home/admin/raspiblitz.info </dev/null
 
 # command info
-if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tools for the boot drive / sd card"
  echo "blitz.sdcard.sh status"
  echo "blitz.sdcard.sh expand"
