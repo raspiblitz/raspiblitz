@@ -180,7 +180,7 @@ if [ "$1" == "status" ]; then
   echo "localip=${localip}"
   echo "dhcp=${dhcp}"
   echo "network_device=${networkDevice}"
-  echo "configWifiExists='${configWifiExists}'"
+  echo "configWifiExists=${configWifiExists}"
   echo "network_rx='${network_rx}'"
   echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
