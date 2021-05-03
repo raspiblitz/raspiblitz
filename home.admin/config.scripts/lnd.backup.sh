@@ -190,7 +190,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
       echo "* UPLOAD THE RESCUE FILE *"
       echo "**************************"
       echo "If you have a lnd-rescue backup file on your laptop you can now"
-      echo "upload it and restore the your latest LND state."
+      echo "upload it and restore your latest LND state."
       echo
       echo "CAUTION: Dont restore old LND states - risk of loosing funds!"
       echo
