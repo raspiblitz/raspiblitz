@@ -105,11 +105,18 @@ if [ "${migrationOS}" == "" ]; then
 
   echo "# CREATING raspiblitz.conf from your setup choices"
 
-  # prepare the config file (what will later become the raspiblitz.config)
+  # prepate config file
+  CONFIGFILE="/mnt/hdd/raspiblitz.conf.tmp"
+  sudo rm $CONFIGFILE 2>/dev/null
+  sudo chown admin:admin $CONFIGFILE
+  sudo chmod 777 $CONFIGFILE
+
+  # source the raspiblitz version
   source /home/admin/_version.info
 
-  CONFIGFILE="/mnt/hdd/raspiblitz.config"
-  rm $CONFIGFILE 2>/dev/null
+  # source the setup state fresh
+  source $SETUPFILE
+
   echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
   echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
   echo "lcdrotate=1" >> $CONFIGFILE
@@ -123,6 +130,9 @@ else
   ############################################
   # Process Migration
   # TODO: move this part later outside of dialog controller and combine with data from WebUI
+
+  # source the setup state fresh
+  source $SETUPFILE
 
   echo "TODO: Process Migration"
   exit 1
