@@ -21,6 +21,12 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# 1st PARAMETER: action
+action=$1
+
+#########################
+# STATUS
+
 # gather data on sd card
 minimumSizeByte=8192000000
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
@@ -45,6 +51,9 @@ if [ "${action}" == "status" ]; then
     echo "tooSmall=${tooSmall}"
     exit 0
 fi
+
+###########################
+# EXPAND FILE SYSTEM OF SD
 
 if [ "${action}" == "fsexpand" ]; then
 
