@@ -485,7 +485,7 @@ if [ ${mode} = "seed-import-gui" ]; then
   # eins zwei polizei drei vier great idea fünf sechs alte keks sieben auch gute nacht ja ja ja was ist los was ist das
 
   # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
-  RESULTFILE=$3
+  RESULTFILE=$2
   if [ "${RESULTFILE}" == "" ]; then
     echo "error='mising parameter'"
     exit 1
