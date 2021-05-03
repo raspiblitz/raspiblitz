@@ -9,9 +9,9 @@ source /home/admin/raspiblitz.info </dev/null
 
 # command info
 if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "tools for the boot drive / sd card"
- echo "blitz.sdcard.sh status"
- echo "blitz.sdcard.sh expand"
+ echo "# tools for the boot drive / sd card"
+ echo "# blitz.sdcard.sh status"
+ echo "# blitz.sdcard.sh expand"
  exit 1
 fi
 
@@ -64,7 +64,7 @@ if [ "${action}" == "fsexpand" ]; then
         resizeRaspbian="/usr/bin/raspi-config"
         if [ -x ${resizeRaspbian} ]; then
             echo "# RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}"
-		    sudo $resizeRaspbian --expand-rootfs
+		    sudo $resizeRaspbian --expand-rootfs 1>&2
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeRaspbian}"
             echo "err='expand failed'"
@@ -74,7 +74,7 @@ if [ "${action}" == "fsexpand" ]; then
         resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
         if [ -x ${resizeArmbian} ]; then
             echo "# RUNNING EXPAND ARMBIAN: ${resizeArmbian}"
-            sudo $resizeArmbian start
+            sudo $resizeArmbian start 1>&2
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeArmbian}"
             echo "err='expand failed'"
