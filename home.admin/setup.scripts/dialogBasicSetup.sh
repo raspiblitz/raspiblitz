@@ -50,7 +50,7 @@ if [ "${network}" == "" ] && [ "${migrationOS}" == "" ]; then
 fi
 
 # write results to setup sate
-echo "migrationOS=${migrationOS}" >> $SETUPFILE
+echo "migrationOS='${migrationOS}'" >> $SETUPFILE
 echo "migrationVersion=''" >> $SETUPFILE
 echo "lightning=${lightning}" >> $SETUPFILE
 echo "network=${network}" >> $SETUPFILE
