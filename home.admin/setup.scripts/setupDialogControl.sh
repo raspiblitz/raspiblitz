@@ -55,7 +55,7 @@ else
   # Setting Name for Node
 
   echo "# Starting basic setup dialog ..."
-  /home/admin/setup.scripts/dialogPasswords.sh
+  /home/admin/setup.scripts/dialogName.sh
 
   ############################################
   # Lightning Wallet (new or restore) do this before passwords
@@ -71,6 +71,14 @@ else
     # only if dialog exited clean end loop
     if [ "$?" == "0" ]; then
       lightningWalletDone=1
+    fi
+
+    # allow user to cancel to terminal on dialog main menu
+    # all other cancels have other exit codes
+    if [ "$?" == "1" ]; then
+      echo "# you selected cancel - exited to terminal"
+      echo "# to re-start setup use command --> setup"
+      exit 1
     fi
 
   done

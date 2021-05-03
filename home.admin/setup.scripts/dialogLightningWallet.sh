@@ -81,16 +81,14 @@ or having a complete LND rescue-backup from your old node.
       fi
 
     else
-      echo "# you selected cancel - exited to terminal"
-      echo "# use command 'restart' to reboot & start again"
-      exit 1
+       # user cancel - signal to outside app by exit code (2 = submenu)
+       exit 2
     fi
 
   done
 
 else
-  echo "# you selected cancel - exited to terminal"
-  echo "# use command 'restart' to reboot & start again"
+  # user cancel - signal to outside app by exit code (1 = mainmenu)
   exit 1
 fi
 
@@ -105,8 +103,8 @@ if [ ${uploadLNDRESCUE} -eq 1 ]; then
 
   # if user canceled upload
   if [ "${lndrescue}" == "" ]; then
-    # signal cancel to the calling script by exit code
-    exit 1
+    # signal cancel to the calling script by exit code (3 = exit on lndrescue)
+    exit 3
   fi
 
   # clear setup state from all fomer possible choices (previous loop)
@@ -127,8 +125,8 @@ if [ ${enterSEED} -eq 1 ]; then
 
   # if user canceled the seed input
   if [ "${seedWords}" == "" ]; then
-    # signal cancel to the calling script by exit code
-    exit 1
+    # signal cancel to the calling script by exit code (4 = exit on seedwords)
+    exit 4
   fi
 
   # clear setup state from all fomer possible choices (previous loop)
@@ -151,8 +149,8 @@ if [ ${uploadSCB} -eq 1 ]; then
 
   # if user canceled the upload
   if [ "${staticchannelbackup}" == "" ]; then
-    # signal cancel to the calling script by exit code
-    exit 1
+    # signal cancel to the calling script by exit code (5 = exit on scb)
+    exit 5
   fi
 
   # clear setup state from all fomer possible choices (previous loop)
