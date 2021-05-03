@@ -416,6 +416,29 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # BRIDGE
   if [ "$2" = "bridge" ]; then
+  
+    # BUILD BRIDGES
+    echo deb https://deb.debian.org/debian buster main contrib non-free | sudo tee -a /etc/apt/sources.list.d/temp.list
+    sudo apt update
+    echo "*** Compile obfs4proxy from source ***" 
+    mkdir -p obfs4proxy
+    cd obfs4proxy/
+    sudo apt install -y obfs4proxy
+    sudo apt source obfs4proxy
+    sudo apt build-dep -y obfs4proxy
+    cd obfs4proxy-*
+    dpkg-buildpackage -b -uc
+    cd ..
+    dpkg -i obfs4proxy_*.deb 
+    sudo apt update
+    sudo apt --only-upgrade install obfs4proxy
+    cd ..
+    sudo rm -rf obfs4proxy
+    cd
+    echo "# Installed $(obfs4proxy --version)"
+    echo ""
+    sudo rm -f /etc/apt/sources.list.d/temp.list
+  
     # MASK TOR
     # Tor is installed in the build_sdcard.sh, if the user was using Public IP, give him a chance to add bridges
     # Tor will just start after user has the possibility to input bridges to mask he is using Tor
@@ -451,8 +474,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo update-rc.d tor enable
     sudo systemctl restart tor@default.service
     ## sleep long enough to bootstrap when using bridges (usually has a delay to bootstrap).
-    echo "Sleeping for 40 seconds. Waiting for Tor to fully bootstrap"
-    sleep 40
+    echo "Sleeping for 30 seconds. Waiting for Tor to fully bootstrap"
+    sleep 30
     # Don't show full logs (systemctl), cause bridges IP and Descriptors are displayed here and cant be hidden by Tor configuration.
     sudo systemctl status tor@default | grep Active && sudo systemctl status tor@default | grep Bootstrapped
     #sudo systemctl status tor@default | grep -v 'bridge\|Bridge'
@@ -468,7 +491,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo apt install -y tor nyx torsocks apt-transport-tor
     fi
     sudo systemctl restart tor@default
-    sleep 10
+    echo "Sleeping for 30 seconds. Waiting for Tor to fully bootstrap"
+    sleep 30
   fi
   echo ""
 
@@ -487,6 +511,52 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 0
   fi
   echo ""
+  
+  echo "*** Adding KEYS deb.torproject.org ***"
+  # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
+  # fix for v1.7 tor domain blocked https://github.com/rootzoll/raspiblitz/issues/2054#issuecomment-800383278
+  # will use torsocks anyway, cause Tor needs to be running for whom needs it the most, and it will exit above on the test if not working.
+  torsocks wget -qO- http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+  sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+  torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
+  if [ ${torKeyAvailable} -eq 0 ]; then
+    echo "!!! FAIL: Was not able to import deb.torproject.org key"
+    exit 1
+  fi
+  echo "OK - key added"
+  echo ""
+    
+  # deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
+  echo "*** Adding Tor Sources to sources lists ***"
+  distribution=$(lsb_release -sc)
+  if [ "$2" = "bridge" ]; then
+    echo "- adding 'deb tor://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
+    sudo tee /etc/apt/sources.list.d/tor-apttor.list << EOF
+deb tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+EOF
+    echo "- adding 'deb-src tor://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
+    sudo tee /etc/apt/sources.list.d/tor-src-apttor.list << EOF
+#deb-src tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+EOF
+    echo "OK - Tor sources added"
+  else
+    echo "- adding 'deb https://' for Tor to /etc/apt/sources.list.d/tor.list"
+    sudo tee /etc/apt/sources.list.d/tor.list << EOF
+deb https://deb.torproject.org/torproject.org ${distribution} main
+EOF
+    echo "- adding 'deb-src https://' for Tor to /etc/apt/sources.list.d/tor-src.list"
+    sudo tee /etc/apt/sources.list.d/tor-src.list << EOF
+#deb-src https://deb.torproject.org/torproject.org ${distribution} main
+EOF
+    echo "OK - Tor sources added"
+  fi
+  echo ""
+
+  # Now Tor will be installed in the latest version from Tor Project repo.
+  echo "*** Install & Enable Tor ***"
+  sudo apt update
+  sudo apt install -y tor torsocks nyx
+  echo ""  
 
   # create tor data directory if it not exist
   if [ ! -d "/mnt/hdd/tor" ]; then
