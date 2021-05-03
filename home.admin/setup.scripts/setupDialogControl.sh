@@ -48,10 +48,9 @@ if [ "${migrationOS}" != "" ]; then
   echo "# Starting migration dialog ..."
   /home/admin/setup.scripts/dialogMigration.sh
 
-  # on cancel - let user exit to terminal
+  # on cancel - shutdown system
   if [ "$?" != "0" ]; then
-    echo "# you selected cancel - exited to terminal"
-    echo "# to re-start setup use command --> setup"
+    sudo shutdown now
     exit 1
   fi
 
