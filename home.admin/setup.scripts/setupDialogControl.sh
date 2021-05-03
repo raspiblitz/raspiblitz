@@ -8,16 +8,13 @@ source /home/admin/raspiblitz.info
 # this key/value file contains the state during the setup process
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
-# init SETUPFILE
+# init SETUPFILE & temp dir on mem drive
 sudo mkdir /var/cache/raspiblitz/temp
 sudo chown admin:admin /var/cache/raspiblitz/temp
 sudo rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
-
-# init temp directory on mem drive
-
 
 ############################################
 # Basic Setup (Blockchain & Lightning Impl)
@@ -36,6 +33,9 @@ if [ "${migrationOS}" == "" ]; then
   fi
 
 fi
+
+# source setup state fresh - in case manual migration was choosen
+source $SETUPFILE
 
 if [ "${migrationOS}" != "" ]; then
 
