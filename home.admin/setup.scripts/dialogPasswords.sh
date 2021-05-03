@@ -17,12 +17,12 @@ source $SETUPFILE
 passwordinfo="A"
 echo "A"
 if [ "${setPasswordB}" == "1" ]; then
-  passwordinfo = "${passwordinfo}, B"
+  passwordinfo="${passwordinfo}, B"
   echo "A1"
 fi
 echo "B"
 if [ "${setPasswordC}" == "1" ]; then
-  passwordinfo = "${passwordinfo}, C"
+  passwordinfo="${passwordinfo}, C"
   echo "B1"
 fi
 echo "${passwordinfo}"
