@@ -72,21 +72,28 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
         echo "!! WARNING !!"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
-        echo "PRESS ENTER to continue & retry"
-        read key
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
       elif [ "${error}" == "multiple" ]; then
         echo "!! WARNING !!"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
-        echo "PRESS ENTER to continue & retry"
-        read key
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
       elif [ "${error}" == "invalid" ]; then
         echo "!! WARNING !!"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
-        echo "PRESS ENTER to continue & retry"
-        read key
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
       else
+        # create no result file and exit
         echo "!! WARNING !! Unknown State (report to devs) error(${error})"
+        exit 1
+      fi
+
+      if [ "${keyRetry}" == "x" ] || [ "${keyRetry}" == "X" ] || [ "${keyRetry}" == "'x'" ]; then
+        # create no result file and exit
+        echo "# USER CANCEL"
         exit 1
       fi
   done
