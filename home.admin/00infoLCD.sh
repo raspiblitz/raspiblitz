@@ -104,6 +104,16 @@ while :
     fi
 
     # waiting for DHCP in general
+    if [ "${state}" = "noHDD" ]; then
+      l1="Waiting for HDD/SSD ...\n"
+      l2="Please connect a >500GB\n"
+      l3="HDD or SSD to the device.\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
+    fi
+
+    # waiting for DHCP in general
     if [ "${state}" = "noDHCP" ]; then
       l1="Waiting for DHCP ...\n"
       l2="Not able to get local IP.\n"
@@ -133,6 +143,26 @@ while :
       continue
     fi
 
+    # waiting for Intrenet
+    if [ "${state}" = "noInternet" ]; then
+      l1="Waiting for Internet ...\n"
+      l2="Local Network seems OK but no Internet.\n"
+      l3="Is router still online?\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
+    fi
+
+    # waiting for DHCP in general
+    if [ "${state}" = "sdtoosmall" ]; then
+      l1="SD card is too small.\n"
+      l2="Please use 16GB or bigger.\n"
+      l3="Its safe to cut power now.\n"
+      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      sleep 1
+      continue
+    fi
+
     # if no information available from files - set default
     if [ ${#setupStep} -eq 0 ]; then
      setupStep=0
@@ -149,14 +179,6 @@ while :
           message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
           message=$(echo $message | awk '{printf( "%.2f%%", 100 * $1)}')
         fi
-
-      # when old data - improve message
-      elif [ "${state}" = "sdtoosmall" ]; then
-          message="SDCARD TOO SMALL - min 16GB"
-
-      # when no HDD - improve message
-      elif [ "${state}" = "noHDD" ]; then
-          message="Connect external HDD/SSD"
       fi
       
       # setup process has not started yet

@@ -133,6 +133,16 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   sudo /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
   sudo /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
   systemInitReboot=1
+elif [ "${tooSmall}" == "1" ]; then
+  echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
+  echo "SDCARD TOO SMALL 16G minimum" >> $logFile
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
+  sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
+  echo "System stopped. Please cut power." >> $logFile
+  sleep 6000
+  sudo shutdown -r now
+  slepp 100
+  exit 1
 else
   echo "No FS EXPAND needed. needsExpansion(${needsExpansion}) fsexpanded(${fsexpanded})" >> $logFile
 fi
