@@ -28,4 +28,5 @@ while [ ${#result} -eq 0 ]
   done
 
 # store name in setup state
+sudo sed -i '/^hostname=/d' $SETUPFILE
 echo "hostname=${result}" >> $SETUPFILE
