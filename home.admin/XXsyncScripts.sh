@@ -158,12 +158,9 @@ fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"
 sudo rm -r /home/admin/config.scripts
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/assets /home/admin
-sudo -u admin chmod +x /home/admin/*.sh
-sudo -u admin chmod +x /home/admin/*.py
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-sudo -u admin chmod +x /home/admin/config.scripts/*.py
+sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/* /home/admin
+sudo -u admin chmod -R +x /home/admin/config.scripts
+sudo -u admin chmod -R +x /home/admin/setup.scripts
 echo "# ******************************************"
 
 echo "# Checking if the content of BlitzPy changed .."

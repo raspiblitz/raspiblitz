@@ -1,41 +1,36 @@
 #!/bin/bash
 
-# TODO: use blitz.upload.sh for uploading the migration file
-# TODO: also the migration might need to be adapted to work with an already mounted HDD later
+# TODO: also the raspiblitz-migration & other-node-migration might need to be adapted to work with an already mounted HDD later
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "# dialog to get all data needed for migration-setup"
- echo "# 00migrationDialog.sh [raspiblitz|mynode|umbrel]"
- exit 1
-fi
-
-## get basic info
+# get basic system information
+# these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/raspiblitz.info
 
-# tempfile for result of dialogs
-_temp=$(mktemp -p /dev/shm/)
+# SETUPFILE
+# this key/value file contains the state during the setup process
+SETUPFILE="/var/cache/raspiblitz/raspiblitz.setup"
+source <($SETUPFILE)
 
-# prepare the setup file (that constains info just needed for the rest of setup process)
-SETUPFILE="/home/admin/raspiblitz.setup"
-rm $SETUPFILE 2>/dev/null
-echo "# RASPIBLITZ SETUP FILE" > $SETUPFILE
+#########################
+# Parameters
+# this is useful for testing the dialog outside of the setup process
+# normally migrationOS & migrationVersion are provided by raspiblitz.info or raspiblitz.setup
 
-# flags of what passwords are to set by user
-setPasswordA=1
-setPasswordB=0
-setPasswordC=0
-
-# 1st PARAMATER: [raspiblitz|mynode|umbrel]
-migrationOS="$1"
-if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ]; then
-    echo "parameter1(${migrationOS})"
-    echo "error='not supported'"
-    exit 1
-fi
+# 1st PARAMATER (optional): [raspiblitz|mynode|umbrel]
+if [ "${migrationOS}" == "" ]; then
+  migrationOS="$1"
+fi  
 
 # 2nd PARAMATER (optional): the version of the former fullnode OS if available
-migrationVersion="$2"
+if [ "${migrationVersion}" == "" ]; then
+  migrationVersion="$2"
+fi
+
+# check parameter values
+if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ]; then
+    echo "# FAIL: the given migrationOS '${migrationOS}' is not supported yet"
+    exit 1
+fi
 
 ####################################################
 # RASPIBLITZ
@@ -43,10 +38,6 @@ migrationVersion="$2"
 ####################################################
 
 if [ "${migrationOS}" == "raspiblitz" ]; then
-
-  # write migration info
-  echo "migrationOS='${migrationOS}'" >> $SETUPFILE
-  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
   # get defaultUploadPath, localIP, etc
   source <(sudo /home/admin/config.scripts/blitz.upload.sh prepare-upload)
@@ -95,18 +86,19 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
         echo "PRESS ENTER to continue & retry"
         read key
       else
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "!! WARNING !! Unknown State (report to devs) error(${error})"
         exit 1
       fi
   done
 
   # further checks and unpacking will be done when migration is processed (not part of dialog)
-  echo "OK: Migration data was imported - will process after password reset"
-  echo "migrationFile='${filename}'" >> $SETUPFILE
+  echo "OK: Migration file was imported - will process after password reset"
   sleep 4
-
+  # migration OS & Version were already set earlier in setup process - now add migration filename
+  echo "migrationFile='${filename}'" >> $SETUPFILE
   # user needs to reset password A
-  setPasswordA=1
+  echo "setPasswordA=1" >> $SETUPFILE
+  exit 0
 
 fi
 
@@ -127,20 +119,20 @@ Please make sure to have your UMBREL seed words & static channel backup file (ju
 Do you want to start migration to RaspiBlitz now?
       " 16 58
 
-  if [ $? -eq 0 ]; then
-    # write migration info
-    echo "migrationOS='umbrel'" >> $SETUPFILE
-    echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
-  else
-    # user cancel - request shutdown
-    echo "shutdown=1" >> $SETUPFILE
+  if [ "$?" != "0" ]; then
+    # user cancel - signal by exit code
     exit 1
   fi
 
-  # user needs to reset password A
-  setPasswordA=1
-  setPasswordB=1
-  setPasswordC=1
+  # write migration info
+  echo "migrationOS='umbrel'" >> $SETUPFILE
+  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
+
+  # user needs to reset password A, B & C
+  echo "setPasswordA=1" >> $SETUPFILE
+  echo "setPasswordB=1" >> $SETUPFILE
+  echo "setPasswordC=1" >> $SETUPFILE
+  exit 0
 
 fi
 
@@ -161,76 +153,21 @@ Please make sure to have your MYNODE seed words & static channel backup file (ju
 Do you want to start migration to RaspiBlitz now?
       " 16 58
 
-  if [ $? -eq 0 ]; then
-    # write migration info
-    echo "migrationOS='mynode'" >> $SETUPFILE
-    echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
-  else
-    # user cancel - request shutdown
-    echo "shutdown=1" >> $SETUPFILE
+  if [ "$?" != "0" ]; then
+    # user cancel - signal by exit code
     exit 1
   fi
+  # write migration info
+  echo "migrationOS='mynode'" >> $SETUPFILE
+  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
   # user needs to reset password A
-  setPasswordA=1
-  setPasswordB=1
-  setPasswordC=1
+  echo "setPasswordA=1" >> $SETUPFILE
+  echo "setPasswordB=1" >> $SETUPFILE
+  echo "setPasswordC=1" >> $SETUPFILE
+  exit 0
 
 fi
 
-####################################################
-# INPUT PASSWORDS (based on flags above set)
-
-# dynamic info string on what passwords need to be changed
-passwordinfo="A" # always so far
-if [ ${setPasswordB} -eq 1 ]; then
-  passwordinfo = "${passwordinfo}, B"
-fi
-if [ ${setPasswordC} -eq 1 ]; then
-  passwordinfo = "${passwordinfo}, C"
-fi
-
-# basic information in RaspiBlitz passwords
-dialog --backtitle "RaspiBlitz - Migration Setup" --msgbox "You will need to set new passwords.
-
-RaspiBlitz works with 3 different passwords:
-PASSWORD A) Main User Password (SSH & WebUI, sudo)
-PASSWORD B) APP Password (RPC & Additional Apps)
-PASSWORD C) Lightning Wallet Password for Unlock
-
-You will need to set Password: ${passwordinfo}
-(other passwords might stay like on your old node)
-
-Follow Password Rules: Minimal of 8 chars,
-no spaces and only special characters - or .
-Write them down & store them in a safe place.
-" 17 64
-
-if [ ${setPasswordA} -eq 1 ]; then
-  clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
-  password=$(sudo cat $_temp)
-  echo "passwordA='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password A set" 7 20
-fi
-
-if [ ${setPasswordB} -eq 1 ]; then
-  clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD B - APP Password" $_temp
-  password=$(sudo cat $_temp)
-  echo "passwordB='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password B set" 7 20
-fi
-
-if [ ${setPasswordC} -eq 1 ]; then
-  clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
-  password=$(sudo cat $_temp)
-  echo "passwordC='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\n Password C set" 7 20
-fi
-
-clear
-echo "# data from dialogs stored in to be further processed:"
-echo "${SETUPFILE}"
-exit 0
+echo "FAIL: Exited in unknown state from migration dialog."
+exit 1

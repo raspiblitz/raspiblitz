@@ -8,19 +8,19 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# lnd.backup.sh lnd-export"
  echo "# lnd.backup.sh lnd-export-gui"
  echo "# lnd.backup.sh lnd-import [file]"
- echo "# lnd.backup.sh lnd-import-gui [setup|production]"
+ echo "# lnd.backup.sh lnd-import-gui [setup|production] [?resultfile]"
  echo "# ---------------------------------------------------"
  echo "# STATIC CHANNEL BACKUP"
  echo "# ---------------------------------------------------"
  echo "# lnd.backup.sh scb-export"
  echo "# lnd.backup.sh scb-export-gui"
  echo "# lnd.backup.sh scb-import [file]"
- echo "# lnd.backup.sh scb-import-gui [setup|production]"
+ echo "# lnd.backup.sh scb-import-gui [setup|production] [?resultfile]"
  echo "# ---------------------------------------------------"
  echo "# SEED WORDS"
  echo "# ---------------------------------------------------"
  echo "# lnd.backup.sh seed-export-gui [lndseeddata]"
- echo "# lnd.backup.sh seed-import-gui"
+ echo "# lnd.backup.sh seed-import-gui [resultfile]"
  exit 1
 fi
 
@@ -163,10 +163,10 @@ if [ ${mode} = "lnd-import-gui" ]; then
     exit 1
   fi
 
-  # scenario setup needs a 3rd parameter - the SETUPFILE to store results in
+  # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
   if [ "${scenario}" == "setup" ]; then
-    SETUPFILE=$3
-    if [ "${SETUPFILE}" == "" ]; then
+    RESULTFILE=$3
+    if [ "${RESULTFILE}" == "" ]; then
       echo "error='mising parameter'"
       exit 1 
     fi
@@ -235,8 +235,8 @@ if [ ${mode} = "lnd-import-gui" ]; then
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
     # just add lndrescue filename to give file
-    echo "lndrescue='${filename}'" >> $SETUPFILE
-    echo ""
+    echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
+    echo "lndrescue='${filename}'" >> $RESULTFILE
     exit 0
   fi
 
@@ -349,10 +349,10 @@ if [ ${mode} = "scb-import-gui" ]; then
     exit 1
   fi
 
-  # scenario setup needs a 3rd parameter - the SETUPFILE to store results in
+  # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
   if [ "${scenario}" == "setup" ]; then
-    SETUPFILE=$3
-    if [ "${SETUPFILE}" == "" ]; then
+    RESULTFILE=$3
+    if [ "${RESULTFILE}" == "" ]; then
       echo "error='mising parameter'"
       exit 1 
     fi
@@ -421,8 +421,8 @@ if [ ${mode} = "scb-import-gui" ]; then
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
     # just add staticchannelbackup filename to give file
-    echo "staticchannelbackup='${filename}'" >> $SETUPFILE
-    echo ""
+    echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
+    echo "staticchannelbackup='${filename}'" >> $RESULTFILE
     exit 0
   fi
 
@@ -471,6 +471,13 @@ if [ ${mode} = "seed-import-gui" ]; then
   # fake seed 24 words for testing input:
   # eins zwei polizei drei vier great idea fünf sechs alte keks sieben auch gute nacht ja ja ja was ist los was ist das
 
+  # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
+  RESULTFILE=$3
+  if [ "${RESULTFILE}" == "" ]; then
+    echo "error='mising parameter'"
+    exit 1
+  fi
+
   # prepare seed result file
   sudo rm /var/cache/raspiblitz/seed-import.results 2>/dev/null
   sudo touch /var/cache/raspiblitz/seed-import.results
@@ -515,7 +522,7 @@ wordone wordtweo wordthree ...
 
 	      if [ $? -eq 1 ]; then
           clear
-          echo "# CANCEL empty results in: /var/cache/raspiblitz/seed-import.results"
+          echo "# CANCEL empty results in: ${RESULTFILE}"
           exit 1
 	      fi
       fi
@@ -540,9 +547,9 @@ to protect the seed words. Most users did not set this.
 
   # writing result file data
   clear
-  echo "# result of in mem cache: /var/cache/raspiblitz/seed-import.results"
-  echo "seedWords='${wordstring}'" >> /var/cache/raspiblitz/seed-import.results
-  echo "seedPassword='${passwordD}'" >> /var/cache/raspiblitz/seed-import.results
+  echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
+  echo "seedWords='${wordstring}'" >> $RESULTFILE
+  echo "seedPassword='${passwordD}'" >> $RESULTFILE
   exit 0
 
 fi
