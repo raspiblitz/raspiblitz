@@ -18,6 +18,7 @@ echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 
 if [ "${migrationOS}" == "" ]; then
 
+  echo "# Starting basic setup dialog ..."
   /home/admin/setup.scripts/dialogBasicSetup.sh
 
   # on cancel - let user exit to terminal
@@ -36,7 +37,6 @@ if [ "${migrationOS}" != "" ]; then
   # other fullnodesOS or RaspiBlitz migration file
 
   echo "# Starting migration dialog ..."
-
   /home/admin/setup.scripts/dialogMigration.sh
 
   # on cancel - let user exit to terminal
@@ -51,18 +51,29 @@ else
   ###############################################
   # FRESH SETUP
 
-  echo "# Starting all dialogs for fresh setup ..."
-
   ############################################
   # Setting Name for Node
 
+  echo "# Starting basic setup dialog ..."
   /home/admin/setup.scripts/dialogPasswords.sh
 
   ############################################
   # Lightning Wallet (new or restore) do this before passwords
   # because password C not needed if LND rescue file is uploaded
 
-  while loop
+  lightningWalletDone=0
+  while [ "${lightningWalletDone}" == "0" ]
+  do
+
+    echo "# Starting lightning wallet dialog ..."
+    /home/admin/setup.scripts/dialogLightningWallet.sh
+
+    # only if dialog exited clean end loop
+    if [ "$?" == "0" ]; then
+      lightningWalletDone=1
+    fi
+
+  done
 
 fi
 
@@ -70,6 +81,7 @@ fi
 # Enter Passwords
 # for fresh setup & migration
 
+echo "# Starting passwords dialog ..."
 /home/admin/setup.scripts/dialogPasswords.sh
 
 ############################################
