@@ -18,7 +18,7 @@ echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 
 if [ "${migrationOS}" == "" ]; then
 
-  /home/admin/setup/dialogBasicSetup.sh
+  /home/admin/setup.scripts/dialogBasicSetup.sh
 
   # on cancel - let user exit to terminal
   if [ "$?" != "0" ]; then
@@ -37,7 +37,7 @@ if [ "${migrationOS}" != "" ]; then
 
   echo "# Starting migration dialog ..."
 
-  /home/admin/setup/dialogMigration.sh
+  /home/admin/setup.scripts/dialogMigration.sh
 
   # on cancel - let user exit to terminal
   if [ "$?" != "0" ]; then
@@ -56,7 +56,7 @@ else
   ############################################
   # Setting Name for Node
 
-  /home/admin/setup/dialogPasswords.sh
+  /home/admin/setup.scripts/dialogPasswords.sh
 
   ############################################
   # Lightning Wallet (new or restore) do this before passwords
@@ -70,7 +70,7 @@ fi
 # Enter Passwords
 # for fresh setup & migration
 
-/home/admin/setup/dialogPasswords.sh
+/home/admin/setup.scripts/dialogPasswords.sh
 
 ############################################
 # PROCESS SETUP CHOICES
