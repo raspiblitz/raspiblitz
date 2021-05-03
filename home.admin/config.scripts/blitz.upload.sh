@@ -83,7 +83,6 @@ if [ "${action}" ="" "check-upload" ]; then
       echo "errorDetail='not *.backup'"
       exit 1
     fi
-
   fi
 
   # LND-RESCUE check if file looks valid
@@ -108,6 +107,7 @@ if [ "${action}" ="" "check-upload" ]; then
       echo "errorDetail='incorrect checksum'"
       exit 1
     fi
+  fi
 
   # MIGRATION check if file looks valid
   if [ "${type}" == "migration" ]; then
@@ -131,7 +131,6 @@ if [ "${action}" ="" "check-upload" ]; then
       echo "errorDetail='incorrect checksum'"
       exit 1
     fi
-
   fi
 
   # ok looks good - return filename & more info
