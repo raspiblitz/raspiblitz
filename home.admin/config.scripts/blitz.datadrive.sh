@@ -205,15 +205,27 @@ if [ "$1" = "status" ]; then
           #####################################
           # Pre-Setup Invetigation of DATA-PART
 
-          # DEBUG remove later
-          df
-
           # check for recoverable RaspiBlitz data (if config file exists) and raid 
           hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
           isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
           echo "hddRaspiData=${hddRaspiData}"
+          hddRaspiVersion=""
+          if [ ${hddRaspiData} -eq 1 ]; then
+            source /mnt/hdd${subVolumeDir}/raspiblitz.conf
+            hddRaspiVersion="${raspiBlitzVersion}"
+          fi
+          echo "hddRaspiVersion=${hddRaspiVersion}"
 
-          # sudo umount /mnt/hdd
+          # check if there is a wifi configuration as backup
+          hddGotWifiConf=$(ls /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+          if [ ${hddGotWifiConf} -eq 1 ]; then
+            # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
+            sudo cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
+            echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
+          fi
+
+          # comment this line out if case to study the contect of the data section
+          sudo umount /mnt/hdd
         fi
 
         # temp storage data drive
@@ -233,9 +245,6 @@ if [ "$1" = "status" ]; then
 
           ########################################
           # Pre-Setup Invetigation of STORAGE-PART
-
-          # DEBUG remove later
-          df
 
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
@@ -277,16 +286,8 @@ if [ "$1" = "status" ]; then
           fi
           echo "hddGotMigrationData='${hddGotMigrationData}'"
 
-          # check if there is a wifi configuration as backup
-          hddGotWifiConf=$(ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
-          if [ ${hddGotWifiConf} -eq 1 ]; then
-            # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
-            sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
-            echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
-          fi
-
-          # unmount 
-          # sudo umount /mnt/storage
+          # comment this line out if case to study the contect of the storage section
+          sudo umount /mnt/storage
         fi
       else
         # if not ext4 or btrfs - there is no usable data
