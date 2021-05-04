@@ -151,6 +151,16 @@ do
 
 done
 echo "# mainmenu signaled exit code '${exitMenuLoop}' --> exit to terminal"
+echo "***********************************"
+echo "* RaspiBlitz Commandline"
+echo "* Here be dragons .. have fun :)"
+echo "***********************************"
+if [ "${setupPhase}" == "done" ]
+  echo "Bitcoin command line options: bitcoin-cli help"
+  echo "LND command line options: lncli -h"
+fi
+echo "Back to menus use command: raspiblitz"
+echo
 exit 0
 
 ################# TODO: MOVE PARTS BELOW TO APROPIATE NEW PLACE

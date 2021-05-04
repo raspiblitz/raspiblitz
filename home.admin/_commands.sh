@@ -23,13 +23,6 @@ function menu() {
   ./00mainMenu.sh
 }
 
-# command: setup
-# calls the setup process
-function setup() {
-  cd /home/admin
-  ./setup.scripts/setupDialogControl.sh
-}
-
 # command: repair
 # calls directly the repair menu
 function repair() {
