@@ -284,14 +284,14 @@ echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
 ################################
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
-  echo "UASP FIX applied (2st-try) ... reboot needed." >> $logFile
+  echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
   sudo cp ${logFile} ${logFile}.uasp
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
   sudo shutdown -r now
   sleep 100
   exit 0
 else
-  echo "No UASP FIX needed (2st-try)." >> $logFile
+  echo "No UASP FIX needed (2nd-try)." >> $logFile
 fi
 
 ###################################

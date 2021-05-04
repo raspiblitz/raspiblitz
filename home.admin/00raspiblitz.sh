@@ -148,7 +148,7 @@ do
   sleep 3
 
 done
-echo "# menu loop signaled exit code '${exitMenuLoop}' --> exit to terminal"
+echo "# menu loop received exit code ${exitMenuLoop} --> exit to terminal"
 echo "***********************************"
 echo "* RaspiBlitz Commandline"
 echo "* Here be dragons .. have fun :)"
@@ -158,7 +158,7 @@ if [ "${setupPhase}" == "done" ]; then
   echo "LND command line options: lncli -h"
 else
   echo "Your setup is not finished."
-  echo "For debug logs CTRL+C and: tail -n1000 -f raspiblitz.log"
+  echo "For setup logs: tail -n1000 -f raspiblitz.log"
   echo "or call the command 'debug' to see bigger report."
 fi
 echo "Back to menus use command: raspiblitz"
