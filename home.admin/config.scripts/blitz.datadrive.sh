@@ -270,7 +270,7 @@ if [ "$1" = "status" ]; then
           echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
 
           # check if its another fullnode implementation data disk
-          hddGotMigrationData="''"
+          hddGotMigrationData=""
           if [ "${hddFormat}" = "ext4" ]; then
             # check for umbrel
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
