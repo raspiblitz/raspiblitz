@@ -79,10 +79,10 @@ if [ "$1" = "status" ]; then
     echo "# SETUP INFO"
 
     # find the HDD (biggest single partition)
+    # will then be used to offer formatting and permanent mounting
     hdd=""
     sizeDataPartition=0
     OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
-
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
 
@@ -141,14 +141,17 @@ if [ "$1" = "status" ]; then
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
+    # display possible warnings from hdd partition detection
     if [ "${hddPartitionCandidate}" != "" ] && [ ${#hddDataPartition} -lt 4 ]; then
       echo "# WARNING: found invalid partition (${hddDataPartition}) - redacting"
       hddDataPartition=""
     fi
 
+    # try to detect if its an SSD 
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
+    # display results from hdd & partition detection
     echo "hddCandidate='${hdd}'"
     hddBytes=0
     hddGigaBytes=0
@@ -158,9 +161,9 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
-
     echo "hddPartitionCandidate='${hddDataPartition}'"
     
+    # if positive deliver more data
     if [ ${#hddDataPartition} -gt 0 ]; then
 
       # check partition size in bytes and GBs
@@ -168,13 +171,6 @@ if [ "$1" = "status" ]; then
       hddDataPartitionGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
       echo "hddPartitionGigaBytes=${hddDataPartitionGigaBytes}"
   
-      # check if single drive with that size
-      hddCount=0
-      if [ ${#hddDataPartition} -gt 0 ]; then
-         hddCount=1
-      fi
-      echo "hddCount=${hddCount}"
-
       # check format of devices partition
       hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
       echo "hddFormat='${hddFormat}'"
@@ -182,7 +178,7 @@ if [ "$1" = "status" ]; then
       # if 'ext4' or 'btrfs' then temp mount and investigate content
       if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
 
-        # BTRFS is working with subvolumnes for snapshots / ext4 has no SubVolumes
+        # BTRFS is working with subvolumes for snapshots / ext4 has no SubVolumes
         subVolumeDir=""
         if [ "${hddFormat}" = "btrfs" ]; then
           subVolumeDir="/WORKINGDIR"
@@ -228,6 +224,12 @@ if [ "$1" = "status" ]; then
           echo "hddError='storage mount failed'"
         else
 
+          ###############################
+          # Pre-Setup Invetigation of HDD
+
+          # DEBUG remove later
+          df
+
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
@@ -252,7 +254,7 @@ if [ "$1" = "status" ]; then
           echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
 
           # check if its another fullnode implementation data disk
-          hddGotMigrationData="none"
+          hddGotMigrationData="''"
           if [ "${hddFormat}" = "ext4" ]; then
             # check for umbrel
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
@@ -269,8 +271,8 @@ if [ "$1" = "status" ]; then
           echo "hddGotMigrationData='${hddGotMigrationData}'"
 
           # check if there is a wifi configuration as backup
-          wifiBackupConfigExists=$(ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
-          if [ ${wifiBackupConfigExists} -eq 1 ]; then
+          hddGotWifiConf=$(ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+          if [ ${hddGotWifiConf} -eq 1 ]; then
             # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
             sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
             echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
@@ -354,6 +356,7 @@ if [ "$1" = "status" ]; then
   fi
 
   # HDD Adpater UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+  # in both cases (if mounted or not - using the hdd selection from both cases)
   if [ ${#hdd} -gt 0 ]; then
 
     # determine USB HDD adapter model ID 
