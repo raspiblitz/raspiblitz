@@ -310,7 +310,7 @@ case $CHOICE in
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
-            # exit code 1 -> main menu to break loop and also exit with 
+            ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
             ;;
