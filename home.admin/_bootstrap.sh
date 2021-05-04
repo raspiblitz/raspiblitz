@@ -38,6 +38,7 @@ echo "***********************************************" >> $logFile
 network=""
 chain=""
 setupStep=0
+setupPhase='boot'
 fsexpanded=0
 # see https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
 displayClass="lcd"
@@ -71,6 +72,7 @@ echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
+echo "setupPhase=${setupPhase}" >> $infoFile
 echo "fundRecovery=${fundRecovery}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
@@ -345,18 +347,23 @@ if [ ${isMounted} -eq 0 ]; then
 
   # determine correct info message
   infoMessage="Please Login for Setup"
+  setupPhase="setup"
   if [ "${hddRaspiData}" == "1" ]; then
     infoMessage="Please Login for Update"
+    setupPhase="update"
   elif [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
+    setupPhase="migration"
   elif [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
     infoMessage="Login for presynced Setup"
+    setupPhase="presync"
   fi
 
-  # signal "WAIT LOOP: SETUP" to outside
+  # signal "WAIT LOOP: SETUP" to LCD, SSH & WEBAPI
   echo "Displaying Info Message: ${infoMessage}" >> $logFile
   sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
   sed -i "s/^message=.*/message='${infoMessage}'/g" ${infoFile}
+  sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" ${infoFile}
 
   #############################################
   # WAIT LOOP: USER SETUP/UPDATE/MIGRATION
@@ -459,6 +466,8 @@ done
   exit 0
 
 fi # END - no automount - after this HDD is mounted
+
+sed -i "s/^setupPhase=.*/setupPhase='starting'/g" ${infoFile}
 
 # if a WIFI config exists backup to HDD
 configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
@@ -667,6 +676,8 @@ sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
 
 # make sure that bitcoin service is active
 sudo systemctl enable ${network}d
+
+sed -i "s/^setupPhase=.*/setupPhase='final'/g" ${infoFile}
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
