@@ -265,6 +265,9 @@ else
   echo "blitzTUIRestarts=0"
 fi
 
+# check if runnig in vagrant
+vagrant=$(df | grep -c "/vagrant")
+echo "vagrant=${vagrant}"
 
 # check if online if problem with other stuff 
 

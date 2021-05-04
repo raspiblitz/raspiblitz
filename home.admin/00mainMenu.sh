@@ -357,6 +357,10 @@ case $CHOICE in
             exit 0
 esac
 
-echo "exit code of last submenu: $?"
-
-# exit with not 0 to signal that main menu wants to be looped
+# forward exit code of submenu to outside loop
+# 0 = continue loop / everything else = break loop and exit to terminal
+exitCodeOfSubmenu=$?
+if [ "${exitCodeOfSubmenu}" != "0" ]; then
+  echo "# submenu signaled exit code '${exitCodeOfSubmenu}' --> forward to outside loop"
+fi
+exit ${exitCodeOfSubmenu}

@@ -525,7 +525,7 @@ if [ ${configExists} -eq 1 ]; then
         echo "# (loop) waiting for internet ... " >> $logFile
         sed -i "s/^state=.*/state=nointernet/g" ${infoFile}
         sed -i "s/^message=.*/message='Waiting for Internet'/g" ${infoFile}
-        sleep 4
+        sleep 3
       else
         echo "# OK internet detected ... continue" >> $logFile
         waitForPublicIP=0
@@ -677,7 +677,7 @@ sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
 # make sure that bitcoin service is active
 sudo systemctl enable ${network}d
 
-sed -i "s/^setupPhase=.*/setupPhase='final'/g" ${infoFile}
+sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

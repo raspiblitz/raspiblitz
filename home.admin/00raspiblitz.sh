@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "For debug logs CTRL+C and: tail -n1000 -f raspiblitz.log"
 echo "or call the command 'debug' to see bigger report."
-echo "Starting the main menu ..."
+echo "Starting SSH user interface ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -9,35 +9,135 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 
-# use blitz.datadrive.sh to analyse HDD situation
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-if [ "${error}" != "" ]; then
-  echo "# FAIL blitz.datadrive.sh status --> ${error}"
-  echo "# Please report issue to the raspiblitz github."
+# check if raspiblitz.info exists
+systemInfoExists=$(ls ${infoFile} | grep -c "${infoFile}")
+if [ "${systemInfoExists}" != "1" ]; then
+  echo "systemInfoExists(${systemInfoExists})"
+  echo "FAIL: ${infoFile} does not exist .. which it should at this point."
+  echo "Check logs & bootstrap.service for errors and report to devs."
   exit 1
 fi
 
-# check if HDD is connected
-if [ "${isMounted}" == "0" ] && [ ${#hddCandidate} -eq 0 ]; then
-    echo "***********************************************************"
-    echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
-    echo "***********************************************************"
-    vagrant=$(df | grep -c "/vagrant")
-    if [ ${vagrant} -gt 0 ]; then
-      echo "To connect a HDD data disk to your VagrantVM:"
-      echo "- shutdown VM with command: off"
-      echo "- open your VirtualBox GUI and select RaspiBlitzVM"
-      echo "- change the 'mass storage' settings"
-      echo "- add a second 'Primary Slave' drive to the already existing controller"
-      echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
-      echo "***********************************************************"
-      echo "You can either create a new dynamic VDI with around 900GB or download"
-      echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
-      echo "space on your laptop you can store the VDI file on an external drive."
-      echo "***********************************************************"
-    fi
-    exit
+# get system state information raspiblitz.info
+source ${infoFile}
+
+# check that basic system phase/state information is available
+if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
+  echo "setupPhase(${setupPhase}) state(${state})"
+  echo "FAIL: ${infoFile} does not contain important state information."
+  echo "Check logs & bootstrap.service for errors and report to devs."
+  exit 1
 fi
+
+#####################################
+# REDIRECT: Main Menu
+#####################################
+
+# if setup is done & state is ready .. jump to main menu
+if [ "${setupPhase}" == "done" ] || [ "${state}" == "ready" ]; then
+  # push user to main menu
+  /home/admin/00mainMenu.sh
+  exit 0
+fi
+
+#####################################
+# SSH MENU LOOP
+#####################################
+
+# prepare status file
+# TODO: this is to be replaced and unified together with raspiblitz.info
+# when we move to a background monitoring thread & redis for WebUI with v1.8
+sudo touch /var/cache/raspiblitz/raspiblitz.status
+sudo chown admin:admin /var/cache/raspiblitz/raspiblitz.status
+sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
+
+exitMenuLoop=0
+while [ ${exitMenuLoop} -eq 0 ]
+do
+
+  #####################################
+  # MAIN SSH MENU
+  #####################################
+
+  # if setup is done & state is ready .. jump to main menu
+  if [ "${setupPhase}" == "done" ] || [ "${state}" == "ready" ]; then
+    # push user to main menu
+    /home/admin/00mainMenu.sh
+    # use the exit code from main menu als signal if menu loop should exited
+    # 0 = continue loop / everything else = break loop and exit to terminal
+    exitMenuLoop=$?
+    if [ "${exitMenuLoop}" != "0" ] break
+  fi
+
+  #####################################
+  # Access fresh system info
+
+  # refresh system state information
+  source ${infoFile}
+
+  # gather fresh status scan and store results in memory
+  sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
+  source /var/cache/raspiblitz/raspiblitz.status
+
+  #####################################
+  # DURING SETUP: Handle System States 
+  #####################################
+
+  if [ "${setupPhase}" != "done" ]; then
+
+    echo "# DURING SETUP: Handle System States "
+
+    # check if HDD is connected
+    if [ "${isMounted}" == "0" ] && [ ${#hddCandidate} -eq 0 ]; then
+      echo "***********************************************************"
+      echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
+      echo "***********************************************************"
+      if [ ${vagrant} -gt 0 ]; then
+        echo "To connect a HDD data disk to your VagrantVM:"
+        echo "- shutdown VM with command: off"
+        echo "- open your VirtualBox GUI and select RaspiBlitzVM"
+        echo "- change the 'mass storage' settings"
+        echo "- add a second 'Primary Slave' drive to the already existing controller"
+        echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
+        echo "***********************************************************"
+        echo "You can either create a new dynamic VDI with around 900GB or download"
+        echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
+        echo "space on your laptop you can store the VDI file on an external drive."
+        echo "***********************************************************"
+      fi
+    fi
+
+  fi
+
+  #####################################
+  # ALWAYS: Handle System States 
+  #####################################
+
+  ############################
+  # LND Wallet Unlock
+
+  echo "walletLocked(${walletLocked})"
+  if [ "${walletLocked}" == "1" ]; then
+    /home/admin/config.scripts/lnd.unlock.sh
+  fi
+
+  #####################################
+  # AFTER SETUP: Handle System States 
+  #####################################
+
+  if [ "${setupPhase}" == "done" ]; then
+
+    echo "# AFTER SETUP: Handle System States "
+
+  fi
+
+  # debug wait
+  echo "uptime(${uptime})"
+  sleep 3
+
+done
+echo "# mainmenu signaled exit code '${exitMenuLoop}' --> exit to terminal"
+
 
 # check if HDD is from another fullnode OS and offer migration
 if [ "${hddGotMigrationData}" != "" ] && [ "${hddGotMigrationData}" != "none" ]; then
@@ -354,50 +454,7 @@ else
   # wait all is synced and ready
   waitUntilChainNetworkIsReady
 
-  # check if there is a channel.backup to activate
-  gotSCB=$(ls /home/admin/channel.backup 2>/dev/null | grep -c 'channel.backup')
-  if [ ${gotSCB} -eq 1 ]; then
 
-    echo "*** channel.backup Recovery ***"
-    lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
-    error=`cat /home/admin/.error.tmp`
-    rm /home/admin/.error.tmp 2>/dev/null
-
-    if [ ${#error} -gt 0 ]; then
-
-      # output error message
-      echo ""
-      echo "!!! FAIL !!! SOMETHING WENT WRONG:"
-      echo "${error}"
-
-      # check if its possible to give background info on the error
-      notMachtingSeed=$(echo $error | grep -c 'unable to unpack chan backup')
-      if [ ${notMachtingSeed} -gt 0 ]; then
-        echo "--> ERROR BACKGROUND:"
-        echo "The WORD SEED is not matching the channel.backup file."
-        echo "Either there was an error in the word seed list or"
-        echo "or the channel.backup file is from another RaspiBlitz."
-        echo 
-      fi
-
-      # basic info on error
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo 
-      echo "You can try after full setup to restore channel.backup file again with:"
-      echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
-      echo
-      echo "Press ENTER to continue for now ..."
-      read key
-    else
-      mv /home/admin/channel.backup /home/admin/channel.backup.done
-      dialog --title " OK channel.backup IMPORT " --msgbox "
-LND accepted the channel.backup file you uploaded. 
-It will now take around a hour until you can see,
-if LND was able to recover funds from your channels.
-     " 9 56
-    fi
-  
-  fi
 
   # check if DNS is working (if not it will trigger dialog)
   sudo /home/admin/config.scripts/internet.dns.sh test
