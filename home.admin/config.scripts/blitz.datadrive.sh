@@ -214,7 +214,7 @@ if [ "$1" = "status" ]; then
             source /mnt/hdd${subVolumeDir}/raspiblitz.conf
             hddRaspiVersion="${raspiBlitzVersion}"
           fi
-          echo "hddRaspiVersion=${hddRaspiVersion}"
+          echo "hddRaspiVersion='${hddRaspiVersion}'"
 
           # check if there is a wifi configuration as backup
           hddGotWifiConf=$(ls /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
