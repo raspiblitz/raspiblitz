@@ -148,7 +148,7 @@ do
   sleep 3
 
 done
-echo "# mainmenu signaled exit code '${exitMenuLoop}' --> exit to terminal"
+echo "# menu loop signaled exit code '${exitMenuLoop}' --> exit to terminal"
 echo "***********************************"
 echo "* RaspiBlitz Commandline"
 echo "* Here be dragons .. have fun :)"

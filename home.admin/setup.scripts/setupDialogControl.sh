@@ -28,8 +28,7 @@ if [ "${migrationOS}" == "" ]; then
 
   # on cancel - let user exit to terminal
   if [ "$?" != "0" ]; then
-    echo "# you selected cancel - exited to terminal"
-    echo "# to re-start setup use command --> setup"
+    echo "# you selected cancel - sending exit code 1"
     exit 1
   fi
 
@@ -86,8 +85,7 @@ else
     # allow user to cancel to terminal on dialog main menu
     # all other cancels have other exit codes
     if [ "$?" == "1" ]; then
-      echo "# you selected cancel - exited to terminal"
-      echo "# to re-start setup use command --> setup"
+      echo "# you selected cancel - sending exit code 1"
       exit 1
     fi
 
