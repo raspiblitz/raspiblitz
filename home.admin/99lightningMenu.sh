@@ -107,6 +107,7 @@ case $CHOICE in
               sudo /home/admin/XXshutdown.sh reboot
               exit 0
             fi
+            exit 1
             ;;
         CLOSEALL)
             /home/admin/BBcloseAllChannels.sh
