@@ -381,6 +381,16 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
     sleep 1
 
+    # get fresh info about data drive (just in case user disconnects)
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+    if [ ${#hddError} -gt 0 ] || [ ${#hddCandidate} -eq 0 ]; then
+      sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
+      sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
+      sudo shutdown -r now
+      sleep 100
+      exit 0
+    fi
+
 done
 
 
