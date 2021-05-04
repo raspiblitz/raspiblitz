@@ -340,7 +340,7 @@ sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
-echo "isMounted: $isMounted" >> $logFile
+echo "HDD already part of system: $isMounted" >> $logFile
 if [ ${isMounted} -eq 0 ]; then
 
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile

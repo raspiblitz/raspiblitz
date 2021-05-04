@@ -158,7 +158,7 @@ if [ "${setupPhase}" == "done" ]; then
   echo "LND command line options: lncli -h"
 else
   echo "Your setup is not finished."
-  echo "For setup logs: tail -n1000 -f raspiblitz.log"
+  echo "For setup logs: cat raspiblitz.log"
   echo "or call the command 'debug' to see bigger report."
 fi
 echo "Back to menus use command: raspiblitz"
