@@ -28,17 +28,6 @@ if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
 fi
 
 #####################################
-# REDIRECT: Main Menu
-#####################################
-
-# if setup is done & state is ready .. jump to main menu
-if [ "${setupPhase}" == "done" ] || [ "${state}" == "ready" ]; then
-  # push user to main menu
-  /home/admin/00mainMenu.sh
-  exit 0
-fi
-
-#####################################
 # SSH MENU LOOP
 #####################################
 
