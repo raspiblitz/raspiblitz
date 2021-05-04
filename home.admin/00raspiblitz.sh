@@ -66,7 +66,7 @@ do
     # use the exit code from main menu als signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
     exitMenuLoop=$?
-    if [ "${exitMenuLoop}" != "0" ] break
+    if [ "${exitMenuLoop}" != "0" ]; then break; fi
   fi
 
   #####################################
