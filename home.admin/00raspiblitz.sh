@@ -1,6 +1,4 @@
 #!/bin/bash
-echo "For debug logs CTRL+C and: tail -n1000 -f raspiblitz.log"
-echo "or call the command 'debug' to see bigger report."
 echo "Starting SSH user interface ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -62,7 +60,6 @@ do
   # if setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
-    sleep 4
     /home/admin/setup.scripts/setupDialogControl.sh
     # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
@@ -159,6 +156,10 @@ echo "***********************************"
 if [ "${setupPhase}" == "done" ]; then
   echo "Bitcoin command line options: bitcoin-cli help"
   echo "LND command line options: lncli -h"
+else
+  echo "Your setup is not finished."
+  echo "For debug logs CTRL+C and: tail -n1000 -f raspiblitz.log"
+  echo "or call the command 'debug' to see bigger report."
 fi
 echo "Back to menus use command: raspiblitz"
 echo
