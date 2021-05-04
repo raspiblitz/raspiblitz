@@ -248,11 +248,17 @@ do
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   echo "isMounted: $isMounted"
   echo "hddCandidate: $hddCandidate"
-  if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
+
+  # in case of HDD analyse ERROR
+  if [ ${#hddError} -gt 0 ]; then
+    echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
+    sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
+    sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
+  elif [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
   fi
 
-  # get latest network info & update raspiblitz.info
+  # get latest network info & update raspiblitz.info (in case network changes)
   source <(/home/admin/config.scripts/internet.sh status)
   sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
 
@@ -328,34 +334,48 @@ done
 sed -i "s/^state=.*/state=booting/g" ${infoFile}
 sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
-# TODO: REMOVE LATER AGAIN
-echo "DEBUG EXIT BREAK" >> $logFile
-exit 1
-
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-echo "isMounted: $isMounted" >> $logFile
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
+echo "isMounted: $isMounted" >> $logFile
 if [ ${isMounted} -eq 0 ]; then
 
-  echo "HDD is there but not AutoMounted yet - checking Setup" >> $logFile
+  echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 
-  # when format is not EXT4 or BTRFS - stop bootstrap and await user setup
-  if [ "${hddFormat}" != "ext4" ] && [ "${hddFormat}" != "btrfs" ]; then
-    echo "HDD is NOT formatted in ${hddFormat} .. awaiting user setup." >> $logFile
-    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='HDD needs SetUp (1)'/g" ${infoFile}
-    exit 0
+  # determine correct info message
+  infoMessage="Please Login for Setup"
+  if [ "${hddRaspiData}" == "1" ]; then
+    infoMessage="Please Login for Update"
+  elif [ "${hddGotMigrationData}" != "" ]; then
+    infoMessage="Please Login for Migration"
+  elif [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
+    infoMessage="Login for presynced Setup"
   fi
 
-  # when error on analysing HDD - stop bootstrap and await user setup
-  if [ ${#hddError} -gt 0 ]; then
-    echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
-    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
-    exit 0
-  fi
+  # signal "WAIT LOOP: SETUP" to outside
+  echo "Displaying Info Message: ${infoMessage}" >> $logFile
+  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
+  sed -i "s/^message=.*/message='${infoMessage}'/g" ${infoFile}
+
+  #############################################
+  # WAIT LOOP: USER SETUP/UPDATE/MIGRATION
+  # until SSH or WEBUI setup data is available
+  #############################################
+
+  gotUserSetupInfo=0
+  until [ ${gotUserSetupInfo} -eq 1 ]
+  do
+
+    # TODO: DETECT WHEN USER SETUP IS DONE
+
+    # get latest network info & update raspiblitz.info (in case network changes)
+    source <(/home/admin/config.scripts/internet.sh status)
+    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+    sleep 1
+
+done
+
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
