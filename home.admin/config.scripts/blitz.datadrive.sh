@@ -202,11 +202,18 @@ if [ "$1" = "status" ]; then
           echo "hddError='data mount failed'"
         else
 
-            # check for recoverable RaspiBlitz data (if config file exists) and raid 
-            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
-            isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
-            echo "hddRaspiData=${hddRaspiData}"
-            sudo umount /mnt/hdd
+          #####################################
+          # Pre-Setup Invetigation of DATA-PART
+
+          # DEBUG remove later
+          df
+
+          # check for recoverable RaspiBlitz data (if config file exists) and raid 
+          hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
+          isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+          echo "hddRaspiData=${hddRaspiData}"
+
+          # sudo umount /mnt/hdd
         fi
 
         # temp storage data drive
@@ -224,8 +231,8 @@ if [ "$1" = "status" ]; then
           echo "hddError='storage mount failed'"
         else
 
-          ###############################
-          # Pre-Setup Invetigation of HDD
+          ########################################
+          # Pre-Setup Invetigation of STORAGE-PART
 
           # DEBUG remove later
           df
@@ -279,7 +286,7 @@ if [ "$1" = "status" ]; then
           fi
 
           # unmount 
-          sudo umount /mnt/storage
+          # sudo umount /mnt/storage
         fi
       else
         # if not ext4 or btrfs - there is no usable data
