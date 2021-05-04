@@ -60,10 +60,24 @@ do
   #####################################
 
   # if setup is done & state is ready .. jump to main menu
-  if [ "${setupPhase}" == "done" ] || [ "${state}" == "ready" ]; then
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     # push user to main menu
     /home/admin/00mainMenu.sh
-    # use the exit code from main menu als signal if menu loop should exited
+    # use the exit code from main menu as signal if menu loop should exited
+    # 0 = continue loop / everything else = break loop and exit to terminal
+    exitMenuLoop=$?
+    if [ "${exitMenuLoop}" != "0" ]; then break; fi
+  fi
+
+  #####################################
+  # SETUP SSH MENU
+  #####################################
+
+  # if setup is done & state is ready .. jump to main menu
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
+    # push user to main menu
+    /home/admin/setup.scripts/setupDialogControl.sh
+    # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
     exitMenuLoop=$?
     if [ "${exitMenuLoop}" != "0" ]; then break; fi
@@ -137,7 +151,9 @@ do
 
 done
 echo "# mainmenu signaled exit code '${exitMenuLoop}' --> exit to terminal"
+exit 0
 
+################# TODO: MOVE PARTS BELOW TO APROPIATE NEW PLACE
 
 # check if HDD is from another fullnode OS and offer migration
 if [ "${hddGotMigrationData}" != "" ] && [ "${hddGotMigrationData}" != "none" ]; then
