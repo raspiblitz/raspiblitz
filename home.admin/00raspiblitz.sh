@@ -155,7 +155,7 @@ echo "***********************************"
 echo "* RaspiBlitz Commandline"
 echo "* Here be dragons .. have fun :)"
 echo "***********************************"
-if [ "${setupPhase}" == "done" ]
+if [ "${setupPhase}" == "done" ]; then
   echo "Bitcoin command line options: bitcoin-cli help"
   echo "LND command line options: lncli -h"
 fi
