@@ -56,6 +56,21 @@ while [ ${exitMenuLoop} -eq 0 ]
 do
 
   #####################################
+  # SETUP SSH MENU
+  #####################################
+
+  # if setup is done & state is ready .. jump to main menu
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
+    # push user to main menu
+    sleep 4
+    /home/admin/setup.scripts/setupDialogControl.sh
+    # use the exit code from setup menu as signal if menu loop should exited
+    # 0 = continue loop / everything else = break loop and exit to terminal
+    exitMenuLoop=$?
+    if [ "${exitMenuLoop}" != "0" ]; then break; fi
+  fi
+
+  #####################################
   # MAIN SSH MENU
   #####################################
 
@@ -64,20 +79,6 @@ do
     # push user to main menu
     /home/admin/00mainMenu.sh
     # use the exit code from main menu as signal if menu loop should exited
-    # 0 = continue loop / everything else = break loop and exit to terminal
-    exitMenuLoop=$?
-    if [ "${exitMenuLoop}" != "0" ]; then break; fi
-  fi
-
-  #####################################
-  # SETUP SSH MENU
-  #####################################
-
-  # if setup is done & state is ready .. jump to main menu
-  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
-    # push user to main menu
-    /home/admin/setup.scripts/setupDialogControl.sh
-    # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
     exitMenuLoop=$?
     if [ "${exitMenuLoop}" != "0" ]; then break; fi
