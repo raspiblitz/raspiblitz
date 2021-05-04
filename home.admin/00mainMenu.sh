@@ -310,10 +310,7 @@ case $CHOICE in
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
-            if [ $? -eq 99 ]; then
-              exit 1
-            fi
-            ;;
+            # exit code 1 -> main menu to break loop and also exit with 
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
             ;;
@@ -360,5 +357,6 @@ case $CHOICE in
             exit 0
 esac
 
-# go into loop - start script from beginning to load config/sate fresh
-/home/admin/00mainMenu.sh
+echo "exit code of last submenu: $?"
+
+# exit with not 0 to signal that main menu wants to be looped
