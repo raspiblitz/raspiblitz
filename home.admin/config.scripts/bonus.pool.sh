@@ -5,7 +5,7 @@
 # but main focus for the future development should be on LIT
 
 # https://github.com/lightninglabs/pool/releases/
-pinnedVersion="v0.3.4-alpha"
+pinnedVersion="v0.4.1-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
