@@ -89,6 +89,7 @@ do
     echo "# DURING SETUP: Handle System States "
 
     # check if HDD is connected
+    echo "isMounted(${isMounted}) hddCandidate(${hddCandidate})"
     if [ "${isMounted}" == "0" ] && [ ${#hddCandidate} -eq 0 ]; then
       echo "***********************************************************"
       echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
@@ -106,6 +107,7 @@ do
         echo "space on your laptop you can store the VDI file on an external drive."
         echo "***********************************************************"
       fi
+      exit 1
     fi
 
   fi
