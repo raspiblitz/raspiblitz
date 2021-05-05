@@ -270,6 +270,10 @@ do
 done
 echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
 
+# write info for LCD
+sed -i "s/^state=.*/state=system-init/g" ${infoFile}
+sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
+
 ####################################
 # WIFI RESTORE from HDD works with
 # mem copy from datadrive inspection
@@ -282,6 +286,7 @@ echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
 # UASP FIX - second try
 # when HDD gets connected later
 ################################
+sed -i "s/^message=.*/message='checking HDD'/g" ${infoFile}
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
@@ -333,7 +338,7 @@ do
 done
 
 # write info for LCD
-sed -i "s/^state=.*/state=booting/g" ${infoFile}
+sed -i "s/^state=.*/state=inspect-hdd/g" ${infoFile}
 sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 
 # get fresh info about data drive to continue
@@ -375,6 +380,7 @@ if [ ${isMounted} -eq 0 ]; then
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE
+    echo "TODO: DETECT WHEN USER SETUP IS DONE" >> $logFile
 
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
@@ -394,6 +400,10 @@ if [ ${isMounted} -eq 0 ]; then
     fi
 
 done
+
+############################### TODO: RE-ARRANGE THE PARTS BELOW
+echo "TODO: RE-ARRANGE THE PARTS BELOW" >> $logFile
+exit 0
 
 
   # temp mount the HDD
