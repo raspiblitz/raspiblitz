@@ -120,8 +120,7 @@ do
 
   ############################
   # LND Wallet Unlock
-
-  echo "walletLocked(${walletLocked})"
+  
   if [ "${walletLocked}" == "1" ]; then
     /home/admin/config.scripts/lnd.unlock.sh
   fi
