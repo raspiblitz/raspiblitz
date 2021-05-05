@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.7.1 of RaspiBlitz?
+
+- Fix: Prevent Pool dataloss on SDcard update [details](https://github.com/rootzoll/raspiblitz/issues/2266)
+
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
 - New: Raspberry Pi OS Base Image 64-bit (April 2021)
