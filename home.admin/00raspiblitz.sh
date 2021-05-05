@@ -108,7 +108,7 @@ do
     else
 
         # every other state just push as event to SSH frontend
-        /home/admin/setup.scripts/eventInfoWait.sh ${state}
+        /home/admin/setup.scripts/eventInfoWait.sh "c-${state}" "${message}"
 
     fi
 
@@ -137,7 +137,6 @@ do
   fi
 
   # debug wait
-  echo "uptime(${uptime})"
   sleep 3
 
 done
