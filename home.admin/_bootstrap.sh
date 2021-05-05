@@ -380,7 +380,7 @@ if [ ${isMounted} -eq 0 ]; then
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE
-    echo "TODO: DETECT WHEN USER SETUP IS DONE" >> $logFile
+    echo "TODO: DETECT WHEN USER SETUP IS DONE hddError(${hddError}) hddCandidate(${hddCandidate})" >> $logFile
 
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
