@@ -1,5 +1,7 @@
 # CHANGES between Releases
 
+- Update: Balance of Satoshis 8.0.10 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
 - New: Raspberry Pi OS Base Image 64-bit (April 2021)
