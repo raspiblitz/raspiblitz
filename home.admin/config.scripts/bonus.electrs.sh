@@ -263,10 +263,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Installing Rust"
     echo
-    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-
+    # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
+    #sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
     sudo apt update
-    sudo apt install -y clang cmake  # for building 'rust-rocksdb'
+    sudo apt install -y cargo
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
 
     echo
     echo "# Downloading and building electrs. This will take ~30 minutes" # ~22 min on an Odroid XU4
