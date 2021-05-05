@@ -387,7 +387,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
     sleep 1
 
-    # get fresh info about data drive (just in case user disconnects)
+    # get fresh info about data drive (in case the hdd gets disconnected)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${hddCandidate}" == "" ]; then
       echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> $logFile
