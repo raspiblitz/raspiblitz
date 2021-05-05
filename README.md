@@ -827,12 +827,6 @@ The `REPAIR` menu gives you options to check and reset your RaspiBlitz.
 
 The options are explained in detail below:
 
-##### HARDWARE: Run Hardware Test
-
-This will start the hardware test to identify if your RaspiBlitz is in good shape and can provide a stable service.
-
-Use this option if you see under-voltage reports on your LCD display or you think your RaspiBlitz gets very hot.
-
 ##### SOFTWARE: Run Software Tests (DebugReport)
 
 This will print out a lot of information that can be used to find software problems.
