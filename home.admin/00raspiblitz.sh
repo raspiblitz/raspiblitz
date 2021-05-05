@@ -90,27 +90,25 @@ do
 
     # when no HDD on Vagrant - just print info & exit (admin info)
     if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
-        echo "***********************************************************"
-        echo "VAGRANT INFO"
-        echo "***********************************************************"
-        echo "To connect a HDD data disk to your VagrantVM:"
-        echo "- shutdown VM with command: off"
-        echo "- open your VirtualBox GUI and select RaspiBlitzVM"
-        echo "- change the 'mass storage' settings"
-        echo "- add a second 'Primary Slave' drive to the already existing controller"
-        echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
-        echo "***********************************************************"
-        echo "You can either create a new dynamic VDI with around 900GB or download"
-        echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
-        echo "space on your laptop you can store the VDI file on an external drive."
-        echo "***********************************************************"
-        exit 1
-      else
+      echo "***********************************************************"
+      echo "VAGRANT INFO"
+      echo "***********************************************************"
+      echo "To connect a HDD data disk to your VagrantVM:"
+      echo "- shutdown VM with command: off"
+      echo "- open your VirtualBox GUI and select RaspiBlitzVM"
+      echo "- change the 'mass storage' settings"
+      echo "- add a second 'Primary Slave' drive to the already existing controller"
+      echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
+      echo "***********************************************************"
+      echo "You can either create a new dynamic VDI with around 900GB or download"
+      echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
+      echo "space on your laptop you can store the VDI file on an external drive."
+      echo "***********************************************************"
+      exit 1
+    else
 
         # every other state just push as event to SSH frontend
         /home/admin/setup.scripts/eventInfoWait.sh ${state}
-
-      fi
 
     fi
 
