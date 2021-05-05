@@ -108,7 +108,7 @@ do
     else
 
         # every other state just push as event to SSH frontend
-        /home/admin/setup.scripts/eventInfoWait.sh "c-${state}" "${message}"
+        /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
 
     fi
 
@@ -120,7 +120,7 @@ do
 
   ############################
   # LND Wallet Unlock
-  
+
   if [ "${walletLocked}" == "1" ]; then
     /home/admin/config.scripts/lnd.unlock.sh
   fi
