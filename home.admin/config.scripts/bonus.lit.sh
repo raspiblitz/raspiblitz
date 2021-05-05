@@ -238,9 +238,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # Application Options
 httpslisten=0.0.0.0:8443
 uipassword=$PASSWORD_B
-#letsencrypt=true
-#letsencrypthost=loop.merchant.com
-lit-dir=/home/lit/.lit
 
 # Remote options
 remote.lit-debuglevel=debug
