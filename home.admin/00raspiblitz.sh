@@ -86,15 +86,13 @@ do
 
   if [ "${setupPhase}" != "done" ]; then
 
-    echo "# DURING SETUP: Handle System States "
+    echo "# DURING SETUP: Handle System State (${state})"
 
-    # check if HDD is connected
-    echo "isMounted(${isMounted}) hddCandidate(${hddCandidate})"
-    if [ "${isMounted}" == "0" ] && [ ${#hddCandidate} -eq 0 ]; then
-      echo "***********************************************************"
-      echo "WARNING: NO HDD FOUND -> Shutdown, connect HDD and restart."
-      echo "***********************************************************"
-      if [ ${vagrant} -gt 0 ]; then
+    # when no HDD on Vagrant - just print info & exit (admin info)
+    if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
+        echo "***********************************************************"
+        echo "VAGRANT INFO"
+        echo "***********************************************************"
         echo "To connect a HDD data disk to your VagrantVM:"
         echo "- shutdown VM with command: off"
         echo "- open your VirtualBox GUI and select RaspiBlitzVM"
@@ -106,8 +104,14 @@ do
         echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
         echo "space on your laptop you can store the VDI file on an external drive."
         echo "***********************************************************"
+        exit 1
+      else
+
+        # every other state just push as event to SSH frontend
+        /home/admin/setup.scripts/eventInfoWait.sh ${state}
+
       fi
-      exit 1
+
     fi
 
   fi
