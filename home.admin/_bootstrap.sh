@@ -389,7 +389,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # get fresh info about data drive (just in case user disconnects)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ "${hddError}" != "" ] || [ "${hddCandidate}" == "" ]; then
+    if [ "${hddCandidate}" == "" ]; then
       echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> $logFile
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
