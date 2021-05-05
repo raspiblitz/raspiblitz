@@ -22,7 +22,7 @@ contentWords=($2)
 contentString=$2
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${locialip} / ${tempCelsius}°C"
+backtitle="RaspiBlitz ${codeVersion} / ${localip}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
