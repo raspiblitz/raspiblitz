@@ -385,7 +385,6 @@ if [ ${isMounted} -eq 0 ]; then
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
     sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
-    sleep 1
 
     # get fresh info about data drive (in case the hdd gets disconnected)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -399,6 +398,9 @@ if [ ${isMounted} -eq 0 ]; then
       sleep 100
       exit 0
     fi
+
+    # give the loop a little bed time
+    sleep 4
 
 done
 
