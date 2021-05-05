@@ -29,6 +29,9 @@ Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
   exit 0
 fi
 
+
+
+
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
@@ -45,6 +48,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # create bos user
   sudo adduser --disabled-password --gecos "" bos
   
+  echo "# Create data folder on the disk"
+  # move old data if present
+  sudo mv /home/bos/.bos /mnt/hdd/app-data/ 2>/dev/null
+  echo "# make sure the data directory exists"
+  sudo mkdir -p /mnt/hdd/app-data/.bos
+  echo "# symlink"
+  sudo rm -rf /home/bos/.bos # not a symlink.. delete it silently
+  sudo ln -s /mnt/hdd/app-data/.bos/ /home/bos/.bos
+  sudo chown bos:bos -R /mnt/hdd/app-data/.bos
+
   # set up npm-global
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
