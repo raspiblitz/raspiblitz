@@ -252,11 +252,11 @@ do
   echo "hddCandidate: $hddCandidate"
 
   # in case of HDD analyse ERROR
-  if [ ${#hddError} -gt 0 ]; then
+  if [ "${hddError}" != "" ]; then
     echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
     sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
     sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
-  elif [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
+  elif [ "${isMounted}" == "0" ] && [ "${hddCandidate}" == "" ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
   fi
 
@@ -383,7 +383,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # get fresh info about data drive (just in case user disconnects)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ ${#hddError} -gt 0 ] || [ ${#hddCandidate} -eq 0 ]; then
+    if [ "${hddError}" != "" ] || [ "${hddCandidate}" == "" ]; then
       echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> $logFile
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
