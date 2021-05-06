@@ -35,6 +35,12 @@ Starting RaspiBlitz
 Please wait ...
 " 6 24
 
+elif [ "${eventID}" == "reboot" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Shutting down for reboot.
+" 5 30
+
 elif [ "${eventID}" == "noHDD" ]; then
 
     # contentWords[0] --> size string (for example '1TB')

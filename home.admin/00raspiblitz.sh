@@ -89,7 +89,7 @@ do
 
     echo "# DURING SETUP: Handle System State (${state})"
 
-    # when no HDD on Vagrant - just print info & exit (admin info)
+    # when no HDD on Vagrant - just print info & exit (admin info & exit)
     if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
       echo "***********************************************************"
       echo "VAGRANT INFO"
@@ -105,6 +105,19 @@ do
       echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
       echo "space on your laptop you can store the VDI file on an external drive."
       echo "***********************************************************"
+      exit 1
+
+    # for all critical errors (admin info & exit)
+    if [ "${state}" == "errorHDD" ]; then
+      echo "***********************************************************"
+      echo "SETUP ERROR - please report to development team"
+      echo "***********************************************************"
+      echo "state(${state}) message(${message})"
+      if [ "${state}" == "errorHDD" ]; then
+        # print some debug detail info on HDD/SSD error
+        sudo /home/admin/config.scripts/blitz.datadrive.sh status
+      fi
+      echo "command to shutdown --> off"
       exit 1
     else
 
