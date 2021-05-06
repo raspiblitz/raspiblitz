@@ -28,7 +28,7 @@ backtitle="RaspiBlitz ${codeVersion} / ${localip}"
 # 1) WELL DEFINED EVENTS
 ################################################
 
-if [ "${eventID}" == "starting" ]; then
+if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Starting RaspiBlitz
@@ -40,6 +40,7 @@ elif [ "${eventID}" == "reboot" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Shutting down for reboot.
 " 5 30
+
 
 elif [ "${eventID}" == "noHDD" ]; then
 
