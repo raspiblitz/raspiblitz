@@ -459,7 +459,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install package just in case it was deinstalled
     packageInstalled=$(dpkg -s tor | grep -c 'Status: install ok')
     if [ ${packageInstalled} -eq 0 ]; then
-      sudo apt install -y tor nyx torsocks apt-transport-tor
+      sudo apt install -y tor nyx torsocks apt-transport-tor deb.torproject.org-keyring
     fi
 
     # BRIDGE QUESTIONS
@@ -488,7 +488,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Installing latest tor packages version"
     packageInstalled=$(dpkg -s tor | grep -c 'Status: install ok')
     if [ ${packageInstalled} -eq 0 ]; then
-      sudo apt install -y tor nyx torsocks apt-transport-tor
+      sudo apt install -y tor nyx torsocks apt-transport-tor deb.torproject.org-keyring
     fi
     sudo systemctl restart tor@default
     echo "Sleeping for 30 seconds. Waiting for Tor to fully bootstrap"
@@ -526,27 +526,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "OK - key added"
   echo ""
     
-  # deb-src from Tor repo will be uncommented on internet.tor.sh to build it from source when calling the Update option in that script.
+  # deb-src from Tor repo will be uncommented with the Update option.
   echo "*** Adding Tor Sources to sources lists ***"
   distribution=$(lsb_release -sc)
   if [ "$2" = "bridge" ]; then
     echo "- adding 'deb tor://' for Tor to /etc/apt/sources.list.d/tor-apttor.list"
     sudo tee /etc/apt/sources.list.d/tor-apttor.list << EOF
-deb tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+deb [arch=amd64,arm64] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
 EOF
     echo "- adding 'deb-src tor://' for Tor to /etc/apt/sources.list.d/tor-src-apttor.list"
     sudo tee /etc/apt/sources.list.d/tor-src-apttor.list << EOF
-#deb-src tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
+#deb-src [arch=amd64,arm64] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
 EOF
     echo "OK - Tor sources added"
   else
     echo "- adding 'deb https://' for Tor to /etc/apt/sources.list.d/tor.list"
     sudo tee /etc/apt/sources.list.d/tor.list << EOF
-deb https://deb.torproject.org/torproject.org ${distribution} main
+deb [arch=amd64,arm64] https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "- adding 'deb-src https://' for Tor to /etc/apt/sources.list.d/tor-src.list"
     sudo tee /etc/apt/sources.list.d/tor-src.list << EOF
-#deb-src https://deb.torproject.org/torproject.org ${distribution} main
+#deb-src [arch=amd64,arm64] https://deb.torproject.org/torproject.org ${distribution} main
 EOF
     echo "OK - Tor sources added"
   fi
