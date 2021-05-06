@@ -77,6 +77,7 @@ do
   source ${infoFile}
 
   # gather fresh status scan and store results in memory
+  # TODO: move this into background loop and unify with redis data storage later
   sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
   source /var/cache/raspiblitz/raspiblitz.status
 
