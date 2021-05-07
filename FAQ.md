@@ -924,15 +924,15 @@ First let's take into consideration this questions.
 
 Bridges are Tor relays that help you circumvent censorship.
 Means of aquiring bridges
-1 ---> Open Tor Browser and access https://bridges.torproject.org/
-2 ---> Another way to get bridges is to send an email to bridges@torproject.org. Leave the email subject empty and write 'get transport obfs4' in the email's message body. Please note that you must send the email using an address from one of the following email providers: Riseup or Gmail. 
+1. ---> Open Tor Browser and access https://bridges.torproject.org/
+2. ---> Another way to get bridges is to send an email to bridges@torproject.org. Leave the email subject empty and write 'get transport obfs4' in the email's message body. Please note that you must send the email using an address from one of the following email providers: Riseup or Gmail. 
 
 Bridges are necessary? Depends on your treat model.
 
 * Read bridges description ---> https://tb-manual.torproject.org/bridges/
 
-Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
-Normal ---> This type of bridges dont disguise you are using Tor, but will help you connect to Tor network.
+1. Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
+1. Normal ---> This type of bridges dont disguise you are using Tor, but will help you connect to Tor network.
 
 Which type should I choose?
 If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges.
@@ -941,8 +941,8 @@ If your Government blocks Tor traffic or you are under constant surveillance, yo
 * Read Tor circumvention techniques ---> https://tb-manual.torproject.org/circumvention/
 
 Types of pluggable transport.
-obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described in the beggining of the questions.
-meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site (Don't worry, microsoft don't have your data, is still Tor obfscuration level of encryption). You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
+1. obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described in the beggining of the questions.
+1. meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site (Don't worry, microsoft don't have your data, is still Tor obfscuration level of encryption). You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
 
 Which transport should I choose?
 China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
