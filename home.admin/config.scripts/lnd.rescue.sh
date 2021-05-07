@@ -80,6 +80,10 @@ if [ ${mode} = "backup" ]; then
   echo "scp -r admin@${localip}:/home/admin/lnd-rescue-*.tar.gz ."
   echo ""
   echo "Use password A to authenticate file transfer."
+  echo
+  echo "Type the following command into the new terminal:"
+  echo "stat lnd-rescue-*.tar.gz"
+  echo
   echo "Check for correct file size after transfer: ${byteSize} byte"
   echo
   echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
