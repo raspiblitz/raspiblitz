@@ -18,8 +18,10 @@ fi
 # prefix for parallel services
 if [ ${testnetwork} = testnet ];then
   prefix="t"
+  portprefix=1
 elif [ ${testnetwork} = signet ];then
   prefix="s"
+  portprefix=3
 fi 
 
 function removeParallelService() {
@@ -62,8 +64,10 @@ User=bitcoin
 Group=bitcoin
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-ExecStart=/usr/local/bin/bitcoind -${testnetwork} -daemon \
- -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
+ExecStart=/usr/local/bin/bitcoind -${testnetwork} -daemon\
+ -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid\
+ -zmqpubrawblock=tcp://127.0.0.1:${portprefix}8332\
+ -zmqpubrawtx=tcp://127.0.0.1:${portprefix}8333
 KillMode=process
 Restart=always
 TimeoutSec=120
