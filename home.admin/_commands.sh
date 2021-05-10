@@ -348,13 +348,15 @@ function whitepaper() {
 # command: graphcrawl
 # Find suitable lightning nodes to connect, based on distance, channels, capacity, bos score and liveliness
 function lndgraphcrawl() {
-    clear
+   clear
    echo "Do you want to use a third party bos score list? Any character to 'yes' and press enter to 'skip'"
     read bos
     if [ "$bos" != "" ]; then
       echo "Downloading bos score list..."
       wget https://bos.lightning.jorijn.com/data/export.json /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/export.json 2>/dev/null
       echo "Bos score list downloaded"
+    else
+      echo "Skipped downloading bos list"
     fi
     echo
     echo "node lnd_graph_crawl.js ALIAS|PUB_KEY [min_channels (5)] [min_capacity_btc (0.1)] [active_days (7)] [lnd describegraph.json] [bos score file export.json]"
@@ -370,8 +372,10 @@ function lndgraphcrawl() {
     echo "Example: MUTATRUM 10 5 14 describegraph.json export.json"
     read op1 op2 op3 op4 op5 op6
     echo "Crawling data...."
+    lncli describegraph > /tmp/describegraph.json /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/describegraph.json
+    sudo mv /tmp/describegraph.json 
     node /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/lnd_graph_crawl.js $op1 $op2 $op3 $op4 $op5 $op6
     echo
-    sudo rm -f lncli describegraph > /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/describegraph.json
-    sudo rm -f lncli describegraph > /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/export.json
+    sudo rm -f /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/describegraph.json
+    sudo rm -f /mnt/hdd/app-storage/lnd-graph-crawl/lnd-graph-crawl/export.json
 }
