@@ -73,8 +73,14 @@ WantedBy=multi-user.target
 
   # add aliases
   if [ $(alias | grep -c ${parallelService}) -eq 0 ];then 
-    bash -c "echo 'alias ${parallelService}-cli=\"/usr/local/bin/bitcoin-cli -${parallelService}\"' >> /home/admin/_aliases.sh"
-    bash -c "echo 'alias ${parallelService}d=\"/usr/local/bin/bitcoind -${parallelService}\"' >> /home/admin/_aliases.sh"
+    bash -c "echo 'alias ${parallelService}-cli=\"/usr/local/bin/bitcoin-cli\
+ -${parallelService}\
+ -conf=/home/bitcoin/.bitcoin/${parallelService}.conf\"' \
+    >> /home/admin/_aliases.sh"
+    bash -c "echo 'alias ${parallelService}d=\"/usr/local/bin/bitcoind\
+ -${parallelService}\
+ -conf=/home/bitcoin/.bitcoin/${parallelService}.conf\"' \
+    >> /home/admin/_aliases.sh"
   fi
 
   source /home/admin/raspiblitz.info
@@ -92,8 +98,8 @@ WantedBy=multi-user.target
     echo "# Monitor the ${parallelService} bitcoind with:"
     if [ ${parallelService} = signet ]; then
       echo "# 'sudo tail -f /mnt/hdd/bitcoin/signet/debug.log'"
-    if [ ${parallelService} = testnet ]; then
-      echo "# 'sudo tail -f /mnt/hdd/bitcoin/testnet3/debug.log'"`
+    elif [ ${parallelService} = testnet ]; then
+      echo "# 'sudo tail -f /mnt/hdd/bitcoin/testnet3/debug.log'"
     fi
     echo
   else
