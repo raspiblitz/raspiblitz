@@ -170,7 +170,6 @@ User=bitcoin
 Group=bitcoin
 Type=simple
 ExecStart=/usr/local/bin/lightningd\
- --lightning-dir=\"/home/bitcoin/.lightning/\"\
  --conf=\"/home/bitcoin/.lightning/${prefix}config\"
 KillMode=process
 Restart=always
@@ -193,11 +192,9 @@ WantedBy=multi-user.target
   echo "# Adding aliases"
   echo "\
 alias ${prefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${prefix}config\
- --lightning-dir=/home/bitcoin/.lightning \"
+ --conf=/home/bitcoin/.lightning/${prefix}config
 alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${prefix}config\
- --lightning-dir=/home/bitcoin/.lightning \"\
 " | sudo tee -a /home/admin/_aliases.sh
 
   echo
