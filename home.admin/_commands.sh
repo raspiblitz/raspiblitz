@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# SHORTCUT COMMANDS you can call as user 'admin' from terminal
 # source aliases from /home/admin/_aliases.sh
 source /home/admin/_aliases.sh
+
+# SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: raspiblitz
 # calls the the raspiblitz mainmenu (legacy)
