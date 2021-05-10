@@ -51,6 +51,11 @@ datadir=/mnt/hdd/bitcoin
 " | sudo -u bitcoin tee /home/bitcoin/.bitcoin/bitcoin.conf
   else
     echo "# /home/bitcoin/.bitcoin/bitcoin.conf is present"
+    # make sure rpcbind is correctly configured
+    bindIP=$(grep -c "^rpcbind=" <  /mnt/hdd/${network}/${network}.conf)
+    if [ $bindIP -gt 0 ];then
+      sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+    fi
   fi
 
   removeParallelService
