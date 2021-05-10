@@ -3,7 +3,7 @@
 # command info
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Install a parallel testnet or signet service"
-  echo "bitcoin.testnetwork.sh [on|off] [signet|testnet]"
+  echo "bitcoin.testnetworks.sh [on|off] [signet|testnet]"
   exit 1
 fi
 
