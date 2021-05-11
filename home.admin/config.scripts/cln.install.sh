@@ -159,8 +159,10 @@ always-use-proxy=true
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
   # systemd service
-  sudo systemctl stop lightningd
-  echo "# Create /etc/systemd/system/lightningd.service"
+  /usr/local/bin/lightning-cli --$NETWORK stop
+  sudo systemctl stop ${prefix}lightningd
+  sudo systemctl disable ${prefix}lightningd
+  echo "# Create /etc/systemd/system/${prefix}lightningd.service"
   echo "
 [Unit]
 Description=c-lightning daemon on $NETWORK
@@ -206,7 +208,7 @@ alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
   echo "sudo journalctl -fu ${prefix}lightningd"
   echo "sudo systemctl status ${prefix}lightningd"
   echo "# logs:"
-  echo "sudo tail -f /home/bitcoin/.lightning/${testnetwork}/cl.log"
+  echo "sudo tail -f /home/bitcoin/.lightning/${NETWORK}/cl.log"
   echo "# for the command line options use"
   echo "${prefix}lightning-cli help"
   echo
