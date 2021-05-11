@@ -141,7 +141,7 @@ WantedBy=multi-user.target
   echo "# Adding aliases"
   echo "\
 alias ${prefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
- --rpcserver localhost:1${portprefix}009\"\
+ -n=${CHAIN} --rpcserver localhost:1${portprefix}009\"\
 " | sudo tee -a /home/admin/_aliases.sh
 
   echo
