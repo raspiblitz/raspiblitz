@@ -21,13 +21,16 @@ fi
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
   prefix="t"
-  portprefix=1
+  bitcoinprefix=test
+  zmqprefix=21
 elif [ ${CHAIN} = signet ];then
   prefix="s"
-  portprefix=3
+  bitcoinprefix=signet
+  zmqprefix=23
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
-  portprefix=""
+  bitcoinprefix=main
+  zmqprefix=28
 fi
 
 function removeParallelService() {
@@ -54,6 +57,8 @@ function installParallelService() {
 # Connection settings
 rpcuser=raspiblitz
 rpcpassword=$randomRPCpass
+${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
 
 onlynet=onion
 proxy=127.0.0.1:9050
@@ -66,6 +71,14 @@ datadir=/mnt/hdd/bitcoin
     bindIP=$(grep -c "^rpcbind=" <  /mnt/hdd/${network}/${network}.conf)
     if [ $bindIP -gt 0 ];then
       sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+    fi
+    # correct zmq entry
+    sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
+    if [ $(grep -c "{bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
+      sudo tee -a /mnt/hdd/${network}/${network}.conf
     fi
   fi
 
@@ -84,9 +97,7 @@ Group=bitcoin
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon\
- -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid\
- -zmqpubrawblock=tcp://127.0.0.1:${portprefix}8332\
- -zmqpubrawtx=tcp://127.0.0.1:${portprefix}8333
+ -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 KillMode=process
 Restart=always
 TimeoutSec=120
