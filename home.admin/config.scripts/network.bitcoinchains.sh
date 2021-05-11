@@ -2,33 +2,44 @@
 
 # command info
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
-  echo "Install a parallel testnet or signet service"
-  echo "bitcoin.testnetworks.sh [on|off] [signet|testnet]"
+  echo
+  echo "Install or remove parallel chains for Bitcoin Core"
+  echo "network.bitcoinchains.sh [on|off] [signet|testnet|mainnet]"
+  echo
   exit 1
 fi
 
-testnetwork=$2
-if [ ${testnetwork} = signet ] || [ ${testnetwork} = testnet ];then
-  echo "# Installing Bitcoin Core instance on ${testnetwork}"
+# CHAIN is signet | testnet | mainnet
+CHAIN=$2
+if [ ${CHAIN} = signet ]||[ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
+  echo "# Installing Bitcoin Core instance on ${CHAIN}"
 else
-  echo "# ${testnetwork} is not supported"
+  echo "# ${CHAIN} is not supported"
   exit 1
 fi
 
 # prefix for parallel services
-if [ ${testnetwork} = testnet ];then
+if [ ${CHAIN} = testnet ];then
   prefix="t"
   portprefix=1
-elif [ ${testnetwork} = signet ];then
+elif [ ${CHAIN} = signet ];then
   prefix="s"
   portprefix=3
-fi 
+elif [ ${CHAIN} = mainnet ];then
+  prefix=""
+  portprefix=""
+fi
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ];then
+    if [ ${CHAIN} != mainnet ];then
+      /usr/local/bin/bitcoin-cli -${CHAIN} stop
+    else
+      /usr/local/bin/bitcoin-cli stop
+    fi
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
-    echo "# Bitcoin Core on ${testnetwork} service is stopped and disabled"
+    echo "# Bitcoin Core on ${CHAIN} service is stopped and disabled"
     echo
   fi
 }
@@ -38,7 +49,7 @@ function installParallelService() {
   if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
     randomRPCpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)
     echo "
-# bitcoind configuration for ${testnetwork}
+# bitcoind configuration for ${CHAIN}
 
 # Connection settings
 rpcuser=raspiblitz
@@ -59,17 +70,20 @@ datadir=/mnt/hdd/bitcoin
   fi
 
   removeParallelService
-  # /etc/systemd/system/${prefix}bitcoind.service
-  echo "
+  if [ ${CHAIN} = mainnet ];then
+    sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+  else 
+    # /etc/systemd/system/${prefix}bitcoind.service
+    echo "
 [Unit]
-Description=Bitcoin daemon on ${testnetwork}
+Description=Bitcoin daemon on ${CHAIN}
 
 [Service]
 User=bitcoin
 Group=bitcoin
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-ExecStart=/usr/local/bin/bitcoind -${testnetwork} -daemon\
+ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon\
  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid\
  -zmqpubrawblock=tcp://127.0.0.1:${portprefix}8332\
  -zmqpubrawtx=tcp://127.0.0.1:${portprefix}8333
@@ -83,17 +97,21 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${prefix}bitcoind.service
+    fi
+  sudo systemctl daemon-reload
   sudo systemctl enable ${prefix}bitcoind
-  echo "# OK - the bitcoin daemon on ${testnetwork} service is now enabled"
+  echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
 
   # add aliases
-  if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
-    bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
- -${testnetwork}\"' \
-    >> /home/admin/_aliases.sh"
-    bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
- -${testnetwork}\"' \
-    >> /home/admin/_aliases.sh"
+  if [ ${CHAIN} != mainnet ];then
+    if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
+      bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
+ -${CHAIN}\"' \
+      >> /home/admin/_aliases.sh"
+      bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
+ -${CHAIN}\"' \
+      >> /home/admin/_aliases.sh"
+    fi
   fi
 
   source /home/admin/raspiblitz.info
@@ -110,10 +128,12 @@ WantedBy=multi-user.target
     echo "# Installed $(bitcoind --version | grep version) ${prefix}bitcoind.service"
     echo 
     echo "# Monitor the ${prefix}bitcoind with:"
-    if [ ${testnetwork} = signet ]; then
+    if [ ${CHAIN} = signet ]; then
       echo "sudo tail -f /mnt/hdd/bitcoin/signet/debug.log"
-    elif [ ${testnetwork} = testnet ]; then
+    elif [ ${CHAIN} = testnet ]; then
       echo "sudo tail -f /mnt/hdd/bitcoin/testnet3/debug.log"
+    elif [ ${CHAIN} = mainnet ]; then
+      echo "sudo tail -f /mnt/hdd/bitcoin/debug.log"      
     fi
     echo
   else
@@ -125,23 +145,23 @@ WantedBy=multi-user.target
 source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${testnetwork}=" /mnt/hdd/raspiblitz.conf; then
-  echo "${testnetwork}=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
+  echo "${CHAIN}=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   installParallelService
   # setting value in raspi blitz config
-  sudo sed -i "s/^${testnetwork}=.*/${testnetwork}=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=on/g" /mnt/hdd/raspiblitz.conf
   exit 0
 fi
 
 # switch off
-if [ "$1" = "0sudo " ] || [ "$1" = "off" ]; then
+if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeParallelService
   # setting value in raspi blitz config
-  sudo sed -i "s/^${testnetwork}=.*/${testnetwork}=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=off/g" /mnt/hdd/raspiblitz.conf
   exit 0
 fi
 
