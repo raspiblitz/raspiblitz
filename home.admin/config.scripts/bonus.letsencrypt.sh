@@ -140,12 +140,17 @@ function refresh_certs_with_nginx() {
     fi
 
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    echo "# certsDirectories(${certsDirectories})"
     directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
     for i in "${directoryArray[@]}"; do
       FQDN=$(echo "${i}" | cut -d "_" -f1)
+      echo "# i(${i})"
+      echo "# FQDN(${FQDN})"
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ ${#details} -gt 10 ]; then
+
+        echo "# details(${details})"
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
