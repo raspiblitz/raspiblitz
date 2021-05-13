@@ -22,16 +22,17 @@ ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 ACME_IS_INSTALLED=0
 
 # if Tor is on test that CURL is by default running over Tor
-if [ "${runBehindTor}" == "on" ]; then
-  echo "# checking if Tor proxy for CURL is working ..."
-  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
-  if [ ${checkTor} -eq 0 ]; then
-    echo "err='curl tor proxy not working'"
-    exit 1
-  else
-    echo "# OK Tor proxy for CURL"
-  fi
-fi
+# TODO: issue https://github.com/rootzoll/raspiblitz/issues/1341
+#if [ "${runBehindTor}" == "on" ]; then
+#  echo "# checking if Tor proxy for CURL is working ..."
+#  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
+#  if [ ${checkTor} -eq 0 ]; then
+#    echo "err='curl tor proxy not working'"
+#    exit 1
+#  else
+#    echo "# OK Tor proxy for CURL"
+#  fi
+#fi
 
 ###################
 # FUNCTIONS
