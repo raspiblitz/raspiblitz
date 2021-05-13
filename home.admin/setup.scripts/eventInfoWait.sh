@@ -41,15 +41,50 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
+elif [ "${eventID}" == "noDHCP" ]; then
 
-elif [ "${eventID}" == "noHDD" ]; then
-
-    # contentWords[0] --> size string (for example '1TB')
+    # this event is mostly for LCD/HDMI display
+    # because if device gets no local IP
+    # SSH & WEBUI would not have connected yet
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Waiting for HDD/SSD
-Please connect minimum ${contentWords[0]}
-HDD or SSD to the the device.
-" 7 34
+Waiting for local IP address ...
+If this takes too long please check
+your connection to internet router.
+" 7 41
+
+elif [ "${eventID}" = "noIP-LAN" ] || [ "${eventID}" = "noIP-WIFI" ]; then
+
+    # this event is mostly for LCD/HDMI display
+    # because if device gets no local IP
+    # SSH & WEBUI would not have connected yet
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Waiting for Network ...
+Not able to get local IP.
+LAN cable connected? WIFI lost?
+" 7 41
+
+elif [ "${eventID}" = "noInternet" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Waiting for Internet ...
+Local Network seems OK but no Internet.
+Is your router still online?
+" 7 43
+
+elif [ "${eventID}" = "noInternet" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Waiting for Internet ...
+Local Network seems OK but no Internet.
+Is your router still online?
+" 7 43
+
+elif [ "${eventID}" == "inspect-hdd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Checking HDD/SSD ...
+Please wait.
+" 6 26
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
 

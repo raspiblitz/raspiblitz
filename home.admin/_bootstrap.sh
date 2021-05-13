@@ -316,16 +316,16 @@ do
   # check state of network
   if [ ${dhcp} -eq 0 ]; then
     # display user waiting for DHCP
-    sed -i "s/^state=.*/state=noDCHP/g" ${infoFile}
+    sed -i "s/^state=.*/state=noDHCP/g" ${infoFile}
     sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
   elif [ ${#localip} -eq 0 ]; then
     if [ ${configWifiExists} -eq 0 ]; then
       # display user to connect LAN
-      sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+      sed -i "s/^state=.*/state=noIP-LAN/g" ${infoFile}
       sed -i "s/^message=.*/message='Connect the LAN/WAN'/g" ${infoFile}
     else
       # display user that wifi settings are not working
-      sed -i "s/^state=.*/state=noIP/g" ${infoFile}
+      sed -i "s/^state=.*/state=noIP-WIFI/g" ${infoFile}
       sed -i "s/^message=.*/message='WIFI Settings not working'/g" ${infoFile}
     fi
   elif [ ${online} -eq 0 ]; then

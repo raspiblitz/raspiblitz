@@ -126,8 +126,8 @@ while :
       continue
     fi
 
-    # waiting for DHCP in general
-    if [ "${state}" = "noIP" ]; then
+    # waiting for local IP 
+    if [ "${state}" = "noIP-LAN" ] || [ "${state}" = "noIP-WIFI" ]; then
       l1="Waiting for Network ...\n"
       l2="Not able to get local IP.\n"
       l3="LAN cable connected? WIFI lost?\n"
@@ -136,7 +136,7 @@ while :
       continue
     fi
 
-    # waiting for DHCP in general
+    # waiting for Internet
     if [ "${state}" = "noInternet" ]; then
       l1="Waiting for Internet ...\n"
       l2="Local Network seems OK but no Internet.\n"
