@@ -22,16 +22,17 @@ ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 ACME_IS_INSTALLED=0
 
 # if Tor is on test that CURL is by default running over Tor
-if [ "${runBehindTor}" == "on" ]; then
-  echo "# checking if Tor proxy for CURL is working ..."
-  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
-  if [ ${checkTor} -eq 0 ]; then
-    echo "err='curl tor proxy not working'"
-    exit 1
-  else
-    echo "# OK Tor proxy for CURL"
-  fi
-fi
+# TODO: issue https://github.com/rootzoll/raspiblitz/issues/1341
+#if [ "${runBehindTor}" == "on" ]; then
+#  echo "# checking if Tor proxy for CURL is working ..."
+#  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
+#  if [ ${checkTor} -eq 0 ]; then
+#    echo "err='curl tor proxy not working'"
+#    exit 1
+#  else
+#    echo "# OK Tor proxy for CURL"
+#  fi
+#fi
 
 ###################
 # FUNCTIONS
@@ -139,12 +140,17 @@ function refresh_certs_with_nginx() {
     fi
 
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    echo "# certsDirectories(${certsDirectories})"
     directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
     for i in "${directoryArray[@]}"; do
       FQDN=$(echo "${i}" | cut -d "_" -f1)
+      echo "# i(${i})"
+      echo "# FQDN(${FQDN})"
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ ${#details} -gt 10 ]; then
+
+        echo "# details(${details})"
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
