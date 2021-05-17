@@ -22,15 +22,18 @@ fi
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   bitcoinprefix=test
-  zmqprefix=21
+  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
+  rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
   bitcoinprefix=signet
   zmqprefix=23
+  rpcprefix=3
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
   bitcoinprefix=main
   zmqprefix=28
+  rpcprefix=""
 fi
 
 function removeParallelService() {
@@ -68,13 +71,18 @@ datadir=/mnt/hdd/bitcoin
   else
     echo "# /home/bitcoin/.bitcoin/bitcoin.conf is present"
     # make sure rpcbind is correctly configured
-    bindIP=$(grep -c "^rpcbind=" <  /mnt/hdd/${network}/${network}.conf)
-    if [ $bindIP -gt 0 ];then
-      sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
-    fi
+    sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+
+    # correct rpcport entry
+    sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
+    if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
+      sudo tee -a /mnt/hdd/${network}/${network}.conf
+    fi   
     # correct zmq entry
     sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
-    if [ $(grep -c "{bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
       echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
@@ -149,6 +157,8 @@ WantedBy=multi-user.target
     echo
   else
     echo "# Installation failed"
+    echo "# See:"
+    echo "# sudo journalctl -fu ${prefix}bitcoind"
     exit 1
   fi
 }
