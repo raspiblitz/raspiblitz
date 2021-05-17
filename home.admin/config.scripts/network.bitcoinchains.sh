@@ -22,15 +22,18 @@ fi
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   bitcoinprefix=test
-  zmqprefix=21
+  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
+  rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
   bitcoinprefix=signet
   zmqprefix=23
+  rpcprefix=3
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
   bitcoinprefix=main
   zmqprefix=28
+  rpcprefix=""
 fi
 
 function removeParallelService() {
@@ -50,6 +53,7 @@ function removeParallelService() {
 function installParallelService() {
   # bitcoin.conf
   if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
+    # add minimal config
     randomRPCpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)
     echo "
 # bitcoind configuration for ${CHAIN}
@@ -67,17 +71,40 @@ datadir=/mnt/hdd/bitcoin
 " | sudo -u bitcoin tee /home/bitcoin/.bitcoin/bitcoin.conf
   else
     echo "# /home/bitcoin/.bitcoin/bitcoin.conf is present"
-    # make sure rpcbind is correctly configured
-    bindIP=$(grep -c "^rpcbind=" <  /mnt/hdd/${network}/${network}.conf)
-    if [ $bindIP -gt 0 ];then
-      sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
-    fi
-    # correct zmq entry
-    sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
-    if [ $(grep -c "{bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
-      echo "\
+  fi
+  
+  # make sure rpcbind is correctly configured
+  sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+
+  # correct rpcport entry
+  sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    echo "\
+${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
+    sudo tee -a /mnt/hdd/${network}/${network}.conf
+  fi
+
+  # correct zmq entry
+  sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
+    sudo tee -a /mnt/hdd/${network}/${network}.conf
+  fi
+
+  # addnode
+  if [ ${bitcoinprefix} = signet ];then
+    if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+signet.addnode=g7fyzp4rgxlrcg73jmrwrzhjnfpsuavjvopurvfq7nrl5x2tif3gx6qd.onion:38333
+signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
+signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
+signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
+signet.addnode=4j6owtnrkgfty2ehbyuwz72k32fyos7co7jnnktxwg7rfrgnqk3obkid.onion:38333
+signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
+signet.addnode=u2d5lofh73k275q3zm76r5bob5pjbff35goubg5hwr2xpgj365ei7cyd.onion:38333
+signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
       sudo tee -a /mnt/hdd/${network}/${network}.conf
     fi
   fi
@@ -149,6 +176,8 @@ WantedBy=multi-user.target
     echo
   else
     echo "# Installation failed"
+    echo "# See:"
+    echo "# sudo journalctl -fu ${prefix}bitcoind"
     exit 1
   fi
 }
