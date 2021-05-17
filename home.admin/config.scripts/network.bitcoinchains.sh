@@ -53,6 +53,7 @@ function removeParallelService() {
 function installParallelService() {
   # bitcoin.conf
   if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
+    # add minimal config
     randomRPCpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)
     echo "
 # bitcoind configuration for ${CHAIN}
@@ -70,22 +71,40 @@ datadir=/mnt/hdd/bitcoin
 " | sudo -u bitcoin tee /home/bitcoin/.bitcoin/bitcoin.conf
   else
     echo "# /home/bitcoin/.bitcoin/bitcoin.conf is present"
-    # make sure rpcbind is correctly configured
-    sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+  fi
+  
+  # make sure rpcbind is correctly configured
+  sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
 
-    # correct rpcport entry
-    sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
-    if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
-      echo "\
+  # correct rpcport entry
+  sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    echo "\
 ${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
-      sudo tee -a /mnt/hdd/${network}/${network}.conf
-    fi   
-    # correct zmq entry
-    sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
-    if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
-      echo "\
+    sudo tee -a /mnt/hdd/${network}/${network}.conf
+  fi
+
+  # correct zmq entry
+  sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
+    sudo tee -a /mnt/hdd/${network}/${network}.conf
+  fi
+
+  # addnode
+  if [ ${bitcoinprefix} = signet ];then
+    if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+signet.addnode=g7fyzp4rgxlrcg73jmrwrzhjnfpsuavjvopurvfq7nrl5x2tif3gx6qd.onion:38333
+signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
+signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
+signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
+signet.addnode=4j6owtnrkgfty2ehbyuwz72k32fyos7co7jnnktxwg7rfrgnqk3obkid.onion:38333
+signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
+signet.addnode=u2d5lofh73k275q3zm76r5bob5pjbff35goubg5hwr2xpgj365ei7cyd.onion:38333
+signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
       sudo tee -a /mnt/hdd/${network}/${network}.conf
     fi
   fi
