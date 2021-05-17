@@ -194,9 +194,9 @@ WantedBy=multi-user.target
   echo "# Adding aliases"
   echo "\
 alias ${prefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${prefix}config
+ --conf=/home/bitcoin/.lightning/${prefix}config\"
 alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${prefix}config\
+ --conf=/home/bitcoin/.lightning/${prefix}config\"
 " | sudo tee -a /home/admin/_aliases.sh
 
   echo
