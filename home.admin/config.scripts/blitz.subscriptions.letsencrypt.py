@@ -613,7 +613,7 @@ This looks not like a valid IP.
 
         # restart certain services to update urls
         if "SPHINX" in serviceName:
-            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 
