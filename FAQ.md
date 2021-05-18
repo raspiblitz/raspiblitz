@@ -56,6 +56,7 @@
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
 - [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
+- [How to SSH over Tor?](#how-to-ssh-over-tor)
 - [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
 - [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
 - [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
@@ -712,6 +713,21 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 - Some Routers have `IP Isolation` switched on - not allowing two devices to connect
 
 If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+
+## How to SSH over Tor?
+
+SSH is already encrypted, why would I want to use it with Tor?
+* Remote access when away from LAN.
+* Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
+
+Create Hidden Service:
+`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+
+SSH over Tor:
+`torsocks ssh admin@HiddenServiceAddress.onion`
+
+Get the address:
+`sudo cat /mnt/hdd/tor/ssh/hostname`
 
 ## How to setup port-forwarding with a SSH tunnel?
 
