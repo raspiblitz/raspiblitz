@@ -965,7 +965,7 @@ Before you start migration:
 * if you have on-chain funds on your old node - make sure to have the backup seed words
 * if you have lightning channels open on your old node - make sure to have downloaded the latest Static Channel Backup file to your laptop
 
-Also be aware that at the moment RaspiBlitz can only transfere your blockchain and LND wallet data (including channels) over to RaspiBlitz. Any data/pairing of additional apps cannot be transfered and may get lost.
+Also be aware that at the moment RaspiBlitz can only transfer your blockchain and LND wallet data (including channels) over to RaspiBlitz. Any data/pairing of additional apps cannot be transfered and may get lost.
 
 Instructions for Migration:
 * shutdown your old node
@@ -981,7 +981,7 @@ Now RaspiBlitz should show you that old data from your node was detected and off
 * Login per SSH as before and reset the passwords (`FINAL RECOVERY LOGIN` on LCD). Then a final reboot will happen.
 * Login per SSH with your new password A & unlock LND wallet with password C. Now blockchain needs to catch up and then your RaspiBlitz should be ready and show you (under INFO) your on-chain & channel balance.
 
-If you dont have an LCD or HDMI monitor connectec it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
+If you dont have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
 
 ## Interface / APIs
 
