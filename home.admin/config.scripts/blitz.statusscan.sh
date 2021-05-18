@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
