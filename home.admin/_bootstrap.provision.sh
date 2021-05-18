@@ -666,7 +666,7 @@ fi
 echo "" >> ${logFile}
 
 # repair Bitcoin conf if needed
-echo "*** Repair Bitcioin Conf (if needed)" >> ${logFile}
+echo "*** Repair Bitcoin Conf (if needed)" >> ${logFile}
 confExists="$(sudo ls /mnt/hdd/${network} | grep -c "${network}.conf")"
 if [ ${confExists} -eq 0 ]; then
   echo "Doing init of ${network}.conf" >> ${logFile}
