@@ -106,6 +106,7 @@ do
       echo "space on your laptop you can store the VDI file on an external drive."
       echo "***********************************************************"
       exit 1
+    fi
 
     # for all critical errors (admin info & exit)
     if [ "${state}" == "errorHDD" ]; then
@@ -120,10 +121,8 @@ do
       echo "command to shutdown --> off"
       exit 1
     else
-
         # every other state just push as event to SSH frontend
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
-
     fi
 
   fi
@@ -144,15 +143,14 @@ do
   #####################################
 
   if [ "${setupPhase}" == "done" ]; then
-
     echo "# AFTER SETUP: Handle System States "
-
   fi
 
   # debug wait
   sleep 3
 
 done
+
 echo "# menu loop received exit code ${exitMenuLoop} --> exit to terminal"
 echo "***********************************"
 echo "* RaspiBlitz Commandline"
