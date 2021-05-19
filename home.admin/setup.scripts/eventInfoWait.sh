@@ -93,16 +93,16 @@ elif [ "${eventID}" == "noHDD" ]; then
 Waiting for HDD/SSD ...
 Please connect a ${contentWords[0]}
 HDD or SSD to the device.
-" 8 35
+" 7 35
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
     # contentWords[1] --> size string (for example '16GB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PROBLEM: SD CARD IS TOO SMALL 
-Minimum of ${contentWords[1]} needed
+Minimum of ${contentWords[0]} needed
 Cut power & create fresh sd card
-" 8 40
+" 7 40
 
 ################################################
 # 2) GENERIC EVENT
