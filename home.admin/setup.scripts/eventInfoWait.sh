@@ -90,9 +90,10 @@ elif [ "${eventID}" == "noHDD" ]; then
 
     # contentWords[1] --> size string (for example '1TB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Please connect a HDD/SSD.
-Minimum of ${contentWords[0]} needed.
-" 6 35
+Waiting for HDD/SSD ...
+Please connect a ${contentWords[0]}
+HDD or SSD to the device.
+" 8 35
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
