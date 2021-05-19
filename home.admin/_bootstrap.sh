@@ -365,9 +365,6 @@ if [ ${isMounted} -eq 0 ]; then
   elif [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
-  elif [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
-    infoMessage="Login for presynced Setup"
-    setupPhase="presync"
   fi
 
   # signal "WAIT LOOP: SETUP" to LCD, SSH & WEBAPI
