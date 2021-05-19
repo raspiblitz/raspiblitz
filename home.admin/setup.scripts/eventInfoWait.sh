@@ -22,7 +22,7 @@ contentWords=($2)
 contentString=$2
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${localip}"
+backtitle="RaspiBlitz ${codeVersion} / ${localip} / ${eventID}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
@@ -91,7 +91,7 @@ elif [ "${eventID}" == "noHDD" ]; then
     # contentWords[1] --> size string (for example '1TB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Please connect a HDD/SSD.
-Minimum of ${contentWords[1]} needed.
+Minimum of ${contentWords[0]} needed.
 " 7 40
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
