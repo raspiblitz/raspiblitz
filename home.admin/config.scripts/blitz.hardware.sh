@@ -22,7 +22,7 @@ fi
 ramMB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 1024 )}' /proc/meminfo)
 
 # get how many RAM (in GB - approx)
-ramGB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 9500000 )}' /proc/meminfo)
+ramGB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 950000 )}' /proc/meminfo)
 
 ########################
 # OUTPUT HARDWARE INFO
