@@ -21,6 +21,16 @@ fi
 contentWords=($2)
 contentString=$2
 
+# 3rd PARAMETER (optional): Place of display - could be "lcd" or "ssh" (defalt)
+displayMode=$3
+if [ "${displayMode}" == "" ]; then
+    displayMode="ssh"
+fi
+if  && [ "${displayMode}" != "lcd" ] && [ "${displayMode}" != "ssh" ]; then
+    echo "error='unknown 3rd parameter value'"
+    exit 1
+fi
+
 # default backtitle for dialog
 backtitle="RaspiBlitz ${codeVersion} / ${localip} / ${eventID}"
 
@@ -40,6 +50,12 @@ elif [ "${eventID}" == "reboot" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Shutting down for reboot.
 " 5 30
+
+elif [ "${eventID}" == "shutdown" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Shutting down - please wait.
+" 5 35
 
 elif [ "${eventID}" == "noDHCP" ]; then
 
@@ -88,16 +104,25 @@ Please wait.
 
 elif [ "${eventID}" == "noHDD" ]; then
 
-    # contentWords[1] --> size string (for example '1TB')
+    # contentWords[0] --> size string (for example '1TB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Waiting for HDD/SSD ...
 Please connect a ${contentWords[0]}
 HDD or SSD to the device.
 " 7 35
 
+elif [ "${eventID}" == "erroHDD" ]; then
+
+    # contentString --> detail error message
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+PROBLEM: FAILED HDD/SSD
+Detailed Error Message:
+${contentString}
+" 7 35
+
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
-    # contentWords[1] --> size string (for example '16GB')
+    # contentWords[0] --> size string (for example '16GB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PROBLEM: SD CARD IS TOO SMALL 
 Minimum of ${contentWords[0]} needed
