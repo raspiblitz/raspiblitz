@@ -21,6 +21,8 @@ fi
 # get how many RAM (in MB)
 ramMB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 1024 )}' /proc/meminfo)
 
+# get how many RAM (in GB - approx)
+ramGB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 9500000 )}' /proc/meminfo)
 
 ########################
 # OUTPUT HARDWARE INFO
@@ -29,4 +31,5 @@ ramMB=$(awk '/MemTotal/ {printf( "%d\n", $2 / 1024 )}' /proc/meminfo)
 if [ "$1" = "status" ]; then
     echo "board='${board}'"
     echo "ramMB=${ramMB}"
+    echo "ramGB=${ramGB}"
 fi
