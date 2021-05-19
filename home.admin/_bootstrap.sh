@@ -263,7 +263,7 @@ do
     sed -i "s/^message=.*/message='${hddError}'/g" ${infoFile}
   elif [ "${isMounted}" == "0" ] && [ "${hddCandidate}" == "" ]; then
     sed -i "s/^state=.*/state=noHDD/g" ${infoFile}
-    sed -i "s/^message=.*/message='1TB'/g" ${infoFile}
+    sed -i "s/^message=.*/message='>500GB'/g" ${infoFile}
   fi
 
   # get latest network info & update raspiblitz.info (in case network changes)

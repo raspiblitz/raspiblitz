@@ -92,7 +92,7 @@ elif [ "${eventID}" == "noHDD" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Please connect a HDD/SSD.
 Minimum of ${contentWords[0]} needed.
-" 7 40
+" 6 35
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
