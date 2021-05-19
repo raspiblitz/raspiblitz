@@ -58,12 +58,17 @@ source ${configFile} 2>/dev/null
 # get first basic network info
 source <(/home/admin/config.scripts/internet.sh status)
 
+# get basic hardware info
+source <(/home/admin/config.scripts/internet.sh status)
+
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
 echo "state=starting" > $infoFile
 echo "message=" >> $infoFile
 echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "board=${board}" >> $infoFile
+echo "ramMB=${ramMB}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "localip='${localip}'" >> $infoFile
