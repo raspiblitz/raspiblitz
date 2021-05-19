@@ -86,12 +86,20 @@ Checking HDD/SSD ...
 Please wait.
 " 6 26
 
+elif [ "${eventID}" == "noHDD" ]; then
+
+    # contentWords[1] --> size string (for example '1TB')
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Please connect a HDD/SSD.
+Minimum of ${contentWords[1]} needed.
+" 7 40
+
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
     # contentWords[1] --> size string (for example '16GB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PROBLEM: SD CARD IS TOO SMALL 
-Minumum of ${contentWords[1]} needed
+Minimum of ${contentWords[1]} needed
 Cut power & create fresh sd card
 " 8 40
 
