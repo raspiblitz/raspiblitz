@@ -22,11 +22,11 @@ contentWords=($2)
 contentString=$2
 
 # 3rd PARAMETER (optional): Place of display - could be "lcd" or "ssh" (defalt)
-displayMode=$3
-if [ "${displayMode}" == "" ]; then
-    displayMode="ssh"
+mode=$3
+if [ "${mode}" == "" ]; then
+    mode="ssh"
 fi
-if [ "${displayMode}" != "lcd" ] && [ "${displayMode}" != "ssh" ]; then
+if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
     echo "error='unknown 3rd parameter value'"
     exit 1
 fi
@@ -109,6 +109,13 @@ Waiting for local IP address ...
 If this takes too long please check
 your connection to internet router.
 " 7 41
+
+elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "ssh" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Preparing Setup
+Please wait ...
+" 6 24
 
 elif [ "${eventID}" = "noIP-LAN" ] || [ "${eventID}" = "noIP-WIFI" ]; then
 
