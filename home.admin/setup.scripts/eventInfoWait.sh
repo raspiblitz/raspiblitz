@@ -51,6 +51,48 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
+elif [ "${eventID}" == "recovering" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Upgrade/Recover/Provision
+---> ${contentString}
+Please keep running until reboot.
+" 6 24
+
+elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Repair-Mode - Login for Details:
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
+
+    if [ "${setupPhase}" == "setup"] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "migration" ]; then
+
+        # show default login help info
+        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Login to your RaspiBlitz with:
+ssh admin@${localip}
+Use password: raspiblitz
+" 7 41
+
+    else
+
+        # on all other cases (add info message)
+        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Login for Maintenance:
+---> ${contentString}
+ssh admin@${localip}
+Use password: raspiblitz
+" 8 41
+    fi
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Shutting down for reboot.
+" 5 30
+
 elif [ "${eventID}" == "shutdown" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
