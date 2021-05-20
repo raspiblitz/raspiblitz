@@ -26,7 +26,7 @@ displayMode=$3
 if [ "${displayMode}" == "" ]; then
     displayMode="ssh"
 fi
-if  && [ "${displayMode}" != "lcd" ] && [ "${displayMode}" != "ssh" ]; then
+if [ "${displayMode}" != "lcd" ] && [ "${displayMode}" != "ssh" ]; then
     echo "error='unknown 3rd parameter value'"
     exit 1
 fi
