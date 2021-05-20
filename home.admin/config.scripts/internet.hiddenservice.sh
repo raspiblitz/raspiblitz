@@ -8,10 +8,96 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to configure a Tor Hidden Service"
  echo "internet.hiddenservice.sh [service] [toPort] [fromPort] [optional-toPort2] [optional-fromPort2]"
  echo "internet.hiddenservice.sh off [service]"
+ echo "internet.hiddenservice.sh auth on [service]"
+ echo "internet.hiddenservice.sh auth off [service]"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
+
+if [ "${runBehindTor}" != "on" ]; then
+  echo "Tor is not active on settings"
+  echo "Activate Tor in Menu->Services before running this script again"
+  echo "bash /home/admin/config.scripts/internet.tor.sh on"
+  exit 0
+fi
+
+if [ "$1" == "auth" ]; then
+  authStatus="$2"
+  if [ ${#authStatus} -eq 0 ]; then
+    echo "ERROR: status is missing (on/off)"
+    exit 0
+  fi
+  service="$3"
+  if [ ${#service} -eq 0 ]; then
+    echo "ERROR: service name is missing"
+    exit 0
+  fi
+  serviceExists=$(sudo -u debian-tor cat /mnt/hdd/tor/${service}/hostname | grep -c ".onion")
+  if [ ${serviceExists} -eq 0 ]; then
+    echo "Create the desired service first"
+    echo "bash /home/admin/config.scripts/internet.hiddenservice.sh -h"
+    exit 0
+  else
+    if [ ${authStatus} == "on" ]; then
+      # Install basez if not installed
+      echo "# Generating keys to access onion service (Client Authorization) ..."
+      isInstalledBasez(){
+      dpkg -l basez | grep -q ^ii && return 1
+      echo
+      echo "Installing necessary packages ..."
+      sudo apt install -y basez
+      echo
+      return 0
+      }
+      isInstalledBasez basez
+      # Set permissions and owner
+      sudo mkdir -p /mnt/hdd/tor/${service}/authorized_clients/ 
+      sudo chmod -R 700 /mnt/hdd/tor
+      sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+      # Generate pem and derive pub and priv keys
+      openssl genpkey -algorithm x25519 -out /tmp/k1.prv.pem
+      cat /tmp/k1.prv.pem | grep -v " PRIVATE KEY" | base64pem -d | tail --bytes=32 | base32 | sed 's/=//g' > /tmp/k1.prv.key
+      openssl pkey -in /tmp/k1.prv.pem -pubout | grep -v " PUBLIC KEY" | base64pem -d | tail --bytes=32 | base32 | sed 's/=//g' > /tmp/k1.pub.key
+      # Server side configuration
+      echo "descriptor:x25519:`cat /tmp/k1.pub.key`" | sudo tee /mnt/hdd/tor/${service}/authorized_clients/me.auth >/dev/null
+      # Client side configuration
+      echo "Save the information below (encrypted is recommended), it will not be shown to you again (creating new keys overwrites the previous one):"
+      echo "------------------------------------"
+      echo "Client authorization for service --> ${service}:"
+      echo
+      echo "GUI service [eg.: SPECTER with Tor Browser], use the key below:"
+      cat /tmp/k1.prv.key
+      echo
+      echo "Headless service [eg.: SSH with Tor Daemon], use the key below:"
+      echo "`sudo -u debian-tor cat /mnt/hdd/tor/${service}/hostname | cut -c1-56`:descriptor:x25519:`cat /tmp/k1.prv.key`"
+      echo "------------------------------------"
+      echo
+      echo "If using Tor Daemon:"
+      echo "On your remote desktop, create the file: '<TorDatDir>/<ClientOnionAuthDir>/blitz-${service}.auth_private'."
+      echo "Code example to run on your remote machine (example using default paths):"
+      echo
+      echo "ClientOnionAuthDir /var/lib/tor/onion_auth/ | sudo tee -a /etc/tor/torrc && sudo chmod 644 /etc/tor/torrc"
+      echo "sudo mkdir -p /var/lib/tor/onion_auth && sudo chown -R debian-tor:debian-tor /var/lib/tor"
+      echo "echo 'serviceAddress(without .onion):descriptor:x25519:privKey' | sudo tee /var/lib/tor/onion_auth/blitz-${service}.auth_private"
+      echo
+      # Finish
+      rm -f /tmp/k1.pub.key /tmp/k1.prv.key /tmp/k1.prv.pem
+      sudo systemctl restart tor@default
+      exit 1
+    elif [ ${authStatus} == "off" ]; then
+      echo "Removing auth for ${service}"
+      sudo rm -f /mnt/hdd/tor/${service}/authorized_clients/*.auth
+      sudo systemctl restart tor@default
+      echo "Client authorization deleted, you can access your service without being asked for a key now"
+      exit 1
+    else
+      echo "ERROR: invalid status: ${authStatus}"
+      echo "Options are on/off"
+      exit 0
+    fi
+  fi
+fi
 
 # delete a hidden service
 if [ "$1" == "off" ]; then
