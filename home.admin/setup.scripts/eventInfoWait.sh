@@ -89,10 +89,6 @@ Use password: raspiblitz
 " 8 41
     fi
 
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Shutting down for reboot.
-" 5 30
-
 elif [ "${eventID}" == "shutdown" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
