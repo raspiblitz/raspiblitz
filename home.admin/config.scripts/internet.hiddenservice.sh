@@ -79,7 +79,7 @@ if [ "$1" == "auth" ]; then
       echo
       echo "ClientOnionAuthDir /var/lib/tor/onion_auth/ | sudo tee -a /etc/tor/torrc && sudo chmod 644 /etc/tor/torrc"
       echo "sudo mkdir -p /var/lib/tor/onion_auth && sudo chown -R debian-tor:debian-tor /var/lib/tor"
-      echo "echo 'serviceAddress(without .onion):descriptor:x25519:privKey' | sudo tee /var/lib/tor/onion_auth/blitz-${service}.auth_private"
+      echo "echo '<onion-addr-without-.onion>:descriptor:x25519:<priv-key-in-base32>' | sudo tee /var/lib/tor/onion_auth/blitz-${service}.auth_private"
       echo
       # Finish
       rm -f /tmp/k1.pub.key /tmp/k1.prv.key /tmp/k1.prv.pem
