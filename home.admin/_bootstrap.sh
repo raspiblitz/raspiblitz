@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # This script runs on every start called by boostrap.service
-# It makes sure that the system is configured like the
-# default values or as in the config.
+# see logs with --> tail -n 100 /home/admin/raspiblitz.log
 
 ################################
 # BASIC SETTINGS
@@ -352,6 +351,12 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 echo "HDD already part of system: $isMounted" >> $logFile
+
+############################
+############################
+# WHEN SETUP IS NEEDED  
+############################
+
 if [ ${isMounted} -eq 0 ]; then
 
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
@@ -408,12 +413,10 @@ if [ ${isMounted} -eq 0 ]; then
     # especially the state for checking loop
     source ${infoFile}
 
-done
+  done
 
-############################### TODO: RE-ARRANGE THE PARTS BELOW
-echo "TODO: RE-ARRANGE THE PARTS BELOW" >> $logFile
-exit 0
-
+  echo "DEBUG ls /mnt/hdd/raspiblitz.conf" >> $logFile
+  ls /mnt/hdd/raspiblitz.conf >> $logFile
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
@@ -422,81 +425,48 @@ exit 0
   else
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
-  if [ ${#error} -gt 0 ]; then
-    echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
-    sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-    sed -i "s/^message=.*/message='${error}'/g" ${infoFile}
-    exit 0
-  fi
 
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
-  # check if HDD contains already a configuration
-  configExists=$(ls ${configFile} | grep -c '.conf')
-  echo "HDD contains already a configuration: ${configExists}" >> $logFile
-  if [ ${configExists} -eq 1 ]; then
-    echo "Found existing configuration" >> $logFile
-    source ${configFile}
-    # check if config files contains basic: version
-    if [ ${#raspiBlitzVersion} -eq 0 ]; then
-      echo "Invalid Config: missing raspiBlitzVersion in (${configFile})!" >> ${logFile}
-      configExists=0
-    fi
-    # check if config files contains basic: network
-    if [ ${#network} -eq 0 ]; then
-      echo "Invalid Config: missing network in (${configFile})!" >> ${logFile}
-      configExists=0
-    fi
-    # check if config files contains basic: chain
-    if [ ${#chain} -eq 0 ]; then
-      echo "Invalid Config: missing chain in (${configFile})!" >> ${logFile}
-      configExists=0
-    fi
-    if [ ${configExists} -eq 0 ]; then
-      echo "Moving invalid config to raspiblitz.invalid.conf" >> ${logFile}
-      sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf 2>/dev/null
-    fi
-  fi
-  
-  # UPDATE MIGRATION & CONFIG PROVISIONING 
-  if [ ${configExists} -eq 1 ]; then
-    echo "Found valid configuration" >> $logFile
-    sed -i "s/^state=.*/state=recovering/g" ${infoFile}
-    sed -i "s/^message=.*/message='Starting Recover'/g" ${infoFile}
-    sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
-    sed -i "s/^network=.*/network=${network}/g" ${infoFile}
-    echo "Calling Data Migration .." >> $logFile
-    sudo /home/admin/_bootstrap.migration.sh
-    echo "Calling Provisioning .." >> $logFile
-    sudo /home/admin/_bootstrap.provision.sh
-    sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-    sed -i "s/^message=.*/message='Done Recover'/g" ${infoFile}
-    echo "rebooting" >> $logFile
-    # set flag that system is freshly recovered and needs setup dialogs
-    sudo touch /home/admin/recover.flag
-    echo "state=recovered" >> /home/admin/recover.flag
-    echo "shutdown in 1min" >> $logFile
-    # save log file for inspection before reboot
-    echo "REBOOT FOR SSH CERTS RESET ..." >> $logFile
-    sudo cp ${logFile} ${logFile}.recover
-    sync
-    sudo shutdown -r -F -t 60
-    exit 0
-  else 
-    echo "OK - No config file found: ${configFile}" >> $logFile
-  fi
+  # kick-off provision process
+  sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+  sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
+  #sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+  #sed -i "s/^network=.*/network=${network}/g" ${infoFile}
+  echo "Calling Data Migration .." >> $logFile
+  sudo /home/admin/_bootstrap.migration.sh
+  echo "Calling Provisioning .." >> $logFile
+  sudo /home/admin/_bootstrap.provision.sh
+  sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sed -i "s/^message=.*/message='Done Provision'/g" ${infoFile}
 
-  # if it got until here: HDD is empty ext4
-  echo "Waiting for SetUp." >> $logFile
-  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-  sed -i "s/^message=.*/message='HDD needs SetUp (2)'/g" ${infoFile}
-  # unmount HDD to be ready for auto-mount during setup
-  sudo umount -l /mnt/hdd
+  # PROCESS raspiblitz.setup
+  echo "TODO: After Provision Handling .." >> $logFile
+
+  # handle possible errors
+  # set passwords
+  # show seed words
+
   exit 0
 
-fi # END - no automount - after this HDD is mounted
+
+  echo "rebooting" >> $logFile
+  echo "state=recovered" >> /home/admin/recover.flag
+  echo "shutdown in 1min" >> $logFile
+  # save log file for inspection before reboot
+  sudo cp ${logFile} ${logFile}.recover
+  sync
+  sudo shutdown -r -F -t 60
+  exit 0
+
+fi
+
+############################
+############################
+# NORMAL START BOOTSTRAP
+############################
 
 sed -i "s/^setupPhase=.*/setupPhase='starting'/g" ${infoFile}
 
@@ -507,66 +477,26 @@ if [ ${configWifiExists} -eq 1 ]; then
   sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
 fi
 
-# config should exist now
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
-  sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
-  sed -i "s/^message=.*/message='no config'/g" ${infoFile}
-  exit 0
+# make sure lndAddress & lndPort exist in cofigfile
+valueExists=$(cat ${configFile} | grep -c 'lndPort=')
+if [ ${valueExists} -eq 0 ]; then
+  lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+  if [ ${#lndPort} -eq 0 ]; then
+    lndPort="9735"
+  fi
+  echo "lndPort='${lndPort}'" >> ${configFile}
+fi
+valueExists=$(cat ${configFile} | grep -c 'lndAddress=')
+if [ ${valueExists} -eq 0 ]; then
+  echo "lndAddress=''" >> ${configFile}
 fi
 
-#####################################
-# UPDATE HDD CONFIG FILE (if exists)
-# needs to be done before starting LND
-# so that environment info is fresh
-#####################################
+# load data from config file fresh
+echo "load configfile data" >> $logFile
+source ${configFile}
 
-echo "Check if HDD contains configuration .." >> $logFile
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 1 ]; then
-
-  # make sure lndAddress & lndPort exist
-  valueExists=$(cat ${configFile} | grep -c 'lndPort=')
-  if [ ${valueExists} -eq 0 ]; then
-    lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
-    if [ ${#lndPort} -eq 0 ]; then
-      lndPort="9735"
-    fi
-    echo "lndPort='${lndPort}'" >> ${configFile}
-  fi
-  valueExists=$(cat ${configFile} | grep -c 'lndAddress=')
-  if [ ${valueExists} -eq 0 ]; then
-      echo "lndAddress=''" >> ${configFile}
-  fi
-
-  # load values
-  echo "load and update publicIP" >> $logFile
-  source ${configFile}
-
-  # if not running TOR before starting LND internet connection with a valid public IP is needed
-  waitForPublicIP=1
-  if [ "${runBehindTor}" = "on" ] || [ "${runBehindTor}" = "1" ]; then
-    echo "# no need to wait for internet - public Tor address already known" >> $logFile
-    waitForPublicIP=0
-  fi
-  while [ ${waitForPublicIP} -eq 1 ]
-    do
-      source <(/home/admin/config.scripts/internet.sh status)
-      if [ ${online} -eq 0 ]; then
-        echo "# (loop) waiting for internet ... " >> $logFile
-        sed -i "s/^state=.*/state=nointernet/g" ${infoFile}
-        sed -i "s/^message=.*/message='Waiting for Internet'/g" ${infoFile}
-        sleep 3
-      else
-        echo "# OK internet detected ... continue" >> $logFile
-        waitForPublicIP=0
-      fi
-    done
-  
-  # update public IP on boot - set to domain is available
-  /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
-
-fi
+# update public IP on boot - set to domain if available
+/home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
 
 ######################################################################
 # MAKE SURE LND RPC/REST ports are standard & open to all connections 
@@ -615,44 +545,12 @@ else
 fi
 
 ################################
-# DETECT FRESHLY RECOVERED SD
-################################
-
-recoveredInfoExists=$(ls /home/admin/recover.flag | grep -c '.flag')
-if [ ${recoveredInfoExists} -eq 1 ]; then
-  sed -i "s/^state=.*/state=recovered/g" ${infoFile}
-  sed -i "s/^message=.*/message='login to finish'/g" ${infoFile}
-  exit 0
-fi
-
-################################
 # SD INFOFILE BASICS
 ################################
 
 # state info
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
-
-# determine network and chain from system
-
-# check for BITCOIN
-loaded=$(sudo systemctl status bitcoind | grep -c 'loaded')
-if [ ${loaded} -gt 0 ]; then
-  sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
-  source /mnt/hdd/bitcoin/bitcoin.conf >/dev/null 2>&1
-  if [ ${testnet} -gt 0 ]; then
-    sed -i "s/^chain=.*/chain=test/g" ${infoFile}
-  else
-    sed -i "s/^chain=.*/chain=main/g" ${infoFile}
-  fi
-fi
-
-# check for LITECOIN
-loaded=$(sudo systemctl status litecoind | grep -c 'loaded')
-if [ ${loaded} -gt 0 ]; then
-  sed -i "s/^network=.*/network=litecoin/g" ${infoFile}
-  sed -i "s/^chain=.*/chain=main/g" ${infoFile}
-fi
 
 ################################
 # DELETE LOG & LOCK FILES

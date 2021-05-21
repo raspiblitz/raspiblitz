@@ -112,7 +112,7 @@ if [ "${migrationOS}" == "" ]; then
   echo "# CREATING raspiblitz.conf from your setup choices"
 
   # prepate config file
-  CONFIGFILE="/mnt/hdd/raspiblitz.conf.tmp"
+  CONFIGFILE="/mnt/hdd/raspiblitz.conf"
   sudo rm $CONFIGFILE 2>/dev/null
   sudo chown admin:admin $CONFIGFILE
   sudo chmod 777 $CONFIGFILE
