@@ -35,7 +35,7 @@ fi
 # QuickOption: Recovery
 if [ "${setupPhase}" == "recovery" ]; then
 
-  echo "TODO: Update"
+  echo "TODO: RECOVERY"
   exit 1
 
   # on cancel - default to normal setup
