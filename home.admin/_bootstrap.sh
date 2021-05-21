@@ -378,8 +378,7 @@ if [ ${isMounted} -eq 0 ]; then
   # until SSH or WEBUI setup data is available
   #############################################
 
-  gotUserSetupInfo=0
-  until [ ${gotUserSetupInfo} -eq 1 ]
+  until [ "${state}" == "waitprovision" ]
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE
@@ -404,6 +403,10 @@ if [ ${isMounted} -eq 0 ]; then
 
     # give the loop a little bed time
     sleep 4
+
+    # check info file for updated values
+    # especially the state for checking loop
+    source ${infoFile}
 
 done
 

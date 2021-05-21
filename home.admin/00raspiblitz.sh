@@ -1,4 +1,10 @@
 #!/bin/bash
+
+#######################################
+# SSH USER INTERFACE
+# gets called when user logins per SSH
+# or calls 'raspiblitz' on the terminal
+#######################################
 echo "Starting SSH user interface ..."
 
 # CONFIGFILE - configuration of RaspiBlitz
@@ -27,10 +33,6 @@ if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
   exit 1
 fi
 
-#####################################
-# SSH MENU LOOP
-#####################################
-
 # prepare status file
 # TODO: this is to be replaced and unified together with raspiblitz.info
 # when we move to a background monitoring thread & redis for WebUI with v1.8
@@ -38,15 +40,32 @@ sudo touch /var/cache/raspiblitz/raspiblitz.status
 sudo chown admin:admin /var/cache/raspiblitz/raspiblitz.status
 sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
 
+#####################################
+# SSH MENU LOOP
+# this loop runs until user exits or
+# an error drops user to terminal
+#####################################
+
 exitMenuLoop=0
 while [ ${exitMenuLoop} -eq 0 ]
 do
 
   #####################################
-  # SETUP SSH MENU
+  # Access fresh system info on every loop
+
+  # refresh system state information
+  source ${infoFile}
+
+  # gather fresh status scan and store results in memory
+  # TODO: move this into background loop and unify with redis data storage later
+  sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
+  source /var/cache/raspiblitz/raspiblitz.status
+
+  #####################################
+  # SETUP MENU
   #####################################
 
-  # if setup is done & state is ready .. jump to main menu
+  # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
     /home/admin/setup.scripts/setupDialogControl.sh
@@ -57,10 +76,10 @@ do
   fi
 
   #####################################
-  # MAIN SSH MENU
+  # MAIN MENU
   #####################################
 
-  # if setup is done & state is ready .. jump to main menu
+  # when setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     # push user to main menu
     /home/admin/00mainMenu.sh
@@ -69,17 +88,6 @@ do
     exitMenuLoop=$?
     if [ "${exitMenuLoop}" != "0" ]; then break; fi
   fi
-
-  #####################################
-  # Access fresh system info
-
-  # refresh system state information
-  source ${infoFile}
-
-  # gather fresh status scan and store results in memory
-  # TODO: move this into background loop and unify with redis data storage later
-  sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
-  source /var/cache/raspiblitz/raspiblitz.status
 
   #####################################
   # DURING SETUP: Handle System States 

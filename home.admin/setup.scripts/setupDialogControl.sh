@@ -123,6 +123,7 @@ if [ "${migrationOS}" == "" ]; then
   # source the setup state fresh
   source $SETUPFILE
 
+  # write basic config file data
   echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
   echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
   echo "lcdrotate=1" >> $CONFIGFILE
@@ -131,6 +132,9 @@ if [ "${migrationOS}" == "" ]; then
   echo "chain=main" >> $CONFIGFILE
   echo "runBehindTor=on" >> $CONFIGFILE
 
+  # set flag for bootstrap process to kick-off provision process
+  sudo sed -i "s/^state=.*/state=waitprovision/g" /home/admin/raspiblitz.info
+  
 else
 
   ############################################
