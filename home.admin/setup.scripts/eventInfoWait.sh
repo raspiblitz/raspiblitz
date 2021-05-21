@@ -113,7 +113,7 @@ Preparing Setup
 Please wait ...
 " 6 24
 
-elif [ "${eventID}" == "waitprovision" ] && [ "${mode}" == "ssh" ]; then
+elif [ "${eventID}" == "waitprovision" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Preparing Provision
