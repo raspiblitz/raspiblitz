@@ -82,7 +82,7 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
 echo ""
 
-if [ "${touchscreen}" = "0" ]; then
+if [ "${touchscreen}" = "" ] || [ "${touchscreen}" = "0" ]; then
   echo "- TOUCHSCREEN is OFF by config"
 else
   echo ""
@@ -92,7 +92,7 @@ else
   echo ""
 fi
 
-if [ "${loop}" = "off" ]; then
+if [ "${loop}" = "" ] || [ "${loop}" = "off" ]; then
   echo "- Loop is OFF by config"
 else
   echo ""
@@ -102,7 +102,7 @@ else
   echo ""
 fi
 
-if [ "${rtlWebinterface}" = "off" ]; then
+if [ "${rtlWebinterface}" = "" ] || [ "${rtlWebinterface}" = "off" ]; then
   echo "- RTL is OFF by config"
 else
   echo ""
@@ -112,7 +112,7 @@ else
   echo ""
 fi
 
-if [ "${ElectRS}" = "off" ]; then
+if [ "${ElectRS}" = "" ] || [ "${ElectRS}" = "off" ]; then
   echo "- Electrum Rust Server is OFF by config"
 else
   echo ""
@@ -125,7 +125,7 @@ else
   echo ""
 fi
 
-if [ "${lit}" = "off" ]; then
+if [ "${lit}" = "" ] || [ "${lit}" = "off" ]; then
   echo "- LIT is OFF by config"
 else
   echo ""
@@ -135,7 +135,7 @@ else
   echo ""
 fi
 
-if [ "${BTCPayServer}" = "off" ]; then
+if [ "${BTCPayServer}" = "" ] || [ "${BTCPayServer}" = "off" ]; then
   echo "- BTCPayServer is OFF by config"
 else
   echo ""
@@ -145,7 +145,7 @@ else
   echo ""
 fi
 
-if [ "${LNBits}" = "off" ]; then
+if [ "${LNBits}" = "" ] || [ "${LNBits}" = "off" ]; then
   echo "- LNbits is OFF by config"
 else
   echo ""
@@ -155,7 +155,7 @@ else
   echo ""
 fi
 
-if [ "${thunderhub}" = "off" ]; then
+if [ "${thunderhub}" = "" ] || [ "${thunderhub}" = "off" ]; then
   echo "- Thunderhub is OFF by config"
 else
   echo ""
@@ -165,7 +165,7 @@ else
   echo ""
 fi
 
-if [ "${specter}" = "off" ]; then
+if [ "${specter}" = "" ] || [ "${specter}" = "off" ]; then
   echo "- SPECTER is OFF by config"
 else
   echo ""
@@ -175,7 +175,7 @@ else
   echo ""
 fi
 
-if [ "${sphinxrelay}" = "off" ]; then
+if [ "${sphinxrelay}" = "" ] || [ "${sphinxrelay}" = "off" ]; then
   echo "- SPHINX is OFF by config"
 else
   echo ""

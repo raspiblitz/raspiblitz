@@ -20,8 +20,8 @@ dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " 
     Press OK for a final reboot.
 " 10 42
 
-# let migration/init script do the rest
-/home/admin/_bootstrap.migration.sh
+# let update script do the rest
+/home/admin/_bootstrap.update.sh
 
 # copy logfile to analyse setup
 cp $logFile /home/admin/raspiblitz.setup.log

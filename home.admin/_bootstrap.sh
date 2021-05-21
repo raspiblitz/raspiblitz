@@ -25,6 +25,10 @@ logFile="/home/admin/raspiblitz.log"
 # used by display and later setup steps
 infoFile="/home/admin/raspiblitz.info"
 
+# SETUPFILE
+# this key/value file contains the state during the setup process
+setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
@@ -359,17 +363,29 @@ echo "HDD already part of system: $isMounted" >> $logFile
 
 if [ ${isMounted} -eq 0 ]; then
 
+  # write data needed for setup process into raspiblitz.info
+  echo "hddBlocksBitcoin=${hddBlocksBitcoin}">> ${infoFile}
+  echo "hddBlocksLitecoin=${hddBlocksLitecoin}">> ${infoFile}
+
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 
-  # determine correct info message
+  # determine correct setup phase
   infoMessage="Please Login for Setup"
   setupPhase="setup"
-  if [ "${hddRaspiData}" == "1" ]; then
-    infoMessage="Please Login for Update"
-    setupPhase="update"
-  elif [ "${hddGotMigrationData}" != "" ]; then
+  if [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
+  elif [ "${hddRaspiData}" == "1" ]; then
+    # determine if this is a recovery or an update
+    # TODO: improve version/update detetion later
+    isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
+    if [ "${isRecovery}" == "1" ]; then
+      infoMessage="Please Login for Recovery"
+      setupPhase="recovery"
+    else
+      infoMessage="Please Login for Update"
+      setupPhase="update"
+    fi
   fi
 
   # signal "WAIT LOOP: SETUP" to LCD, SSH & WEBAPI
@@ -415,9 +431,6 @@ if [ ${isMounted} -eq 0 ]; then
 
   done
 
-  echo "DEBUG ls /mnt/hdd/raspiblitz.conf" >> $logFile
-  ls /mnt/hdd/raspiblitz.conf >> $logFile
-
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
   if [ "${hddFormat}" != "btrfs" ]; then
@@ -431,12 +444,12 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # kick-off provision process
-  sed -i "s/^state=.*/state=recovering/g" ${infoFile}
+  sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
   #sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
   #sed -i "s/^network=.*/network=${network}/g" ${infoFile}
   echo "Calling Data Migration .." >> $logFile
-  sudo /home/admin/_bootstrap.migration.sh
+  sudo /home/admin/_bootstrap.update.sh
   echo "Calling Provisioning .." >> $logFile
   sudo /home/admin/_bootstrap.provision.sh
   sed -i "s/^state=.*/state=reboot/g" ${infoFile}

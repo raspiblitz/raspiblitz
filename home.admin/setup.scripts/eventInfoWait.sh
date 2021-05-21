@@ -51,13 +51,13 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
-elif [ "${eventID}" == "recovering" ] && [ "${mode}" == "lcd" ]; then
+elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Upgrade/Recover/Provision
 ---> ${contentString}
 Please keep running until reboot.
-" 6 24
+" 7 40
 
 elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then
 
@@ -69,7 +69,15 @@ Use your Password A
 
 elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
-    if [ "${setupPhase}" == "setup"] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "migration" ]; then
+    if [ "${setupPhase}" == "setup"] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
+
+        # custom backtitle for this dialog
+        backtitle="RaspiBlitz ${codeVersion} / ${setupPhase}"
+
+        # display if HDD conatains blockhain or not
+        if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
+            backtitle="${backtitle} / (pre-synced)"
+        fi
 
         # show default login help info
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "

@@ -17,48 +17,69 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 ############################################
-# Basic Setup (Blockchain & Lightning Impl)
-# (skip if migration was auto-detected)
+# QuickOption: Update
+if [ "${setupPhase}" == "update" ]; then
 
-# migrationOS is from raspiblitz.info
-if [ "${migrationOS}" == "" ]; then
+  echo "TODO: Update"
+  exit 1
+
+  # on cancel - default to normal setup
+  if [ "$?" != "0" ]; then
+    setupPhase="setup"
+    echo "# you refused update option - defaulting to normal setup"
+    exit 1
+  fi
+fi
+
+############################################
+# QuickOption: Recovery
+if [ "${setupPhase}" == "recovery" ]; then
+
+  echo "TODO: Update"
+  exit 1
+
+  # on cancel - default to normal setup
+  if [ "$?" != "0" ]; then
+    setupPhase="setup"
+    echo "# you refused recovery option - defaulting to normal setup"
+    exit 1
+  fi
+fi
+
+############################################
+# QuickOption: Migration from other node
+if [ "${setupPhase}" == "migration" ]; then
+
+  echo "# Starting migration dialog ..."
+  /home/admin/setup.scripts/dialogMigration.sh ${migrationOS}
+
+  # on cancel - default to normal setup
+  if [ "$?" != "0" ]; then
+    setupPhase="setup"
+    echo "# you refused node migration option - defaulting to normal setup"
+    exit 1
+  fi
+
+fi
+
+############################################
+# DEFAULT: Fresh Setup
+# user might default to from quick options
+if [ "${setupPhase}" == "setup" ]; then
 
   echo "# Starting basic setup dialog ..."
   /home/admin/setup.scripts/dialogBasicSetup.sh
+
+  result=$?
+  echo "result(${result})"
+  exit 1
+
 
   # on cancel - let user exit to terminal
   if [ "$?" != "0" ]; then
     echo "# you selected cancel - sending exit code 1"
     exit 1
   fi
-
-fi
-
-# source setup state fresh - in case manual migration was choosen
-source $SETUPFILE
-
-# migrationOS is from raspiblitz.info but might be overwritten from $SETUPFILE
-if [ "${migrationOS}" != "" ]; then
-
-  ###############################################
-  # MIGRATION 
-  # other fullnodesOS or RaspiBlitz migration file
-
-  echo "# Starting migration dialog ..."
-  /home/admin/setup.scripts/dialogMigration.sh
-
-  # on cancel - shutdown system
-  if [ "$?" != "0" ]; then
-    clear
-    echo "OK .. no changes done to your hard drive. Shutting down."
-    sudo shutdown now
-    exit 1
-  fi
-
-else
-
-  ###############################################
-  # FRESH SETUP
 
   ############################################
   # Setting Name for Node
@@ -91,27 +112,9 @@ else
 
   done
 
-fi
-
-############################################
-# Enter Passwords
-# for fresh setup & migration
-
-echo "# Starting passwords dialog ..."
-/home/admin/setup.scripts/dialogPasswords.sh
-
-############################################
-# PROCESS SETUP CHOICES
-# TODO: move this part later outside of dialog controller and combine with data from WebUI
-
-if [ "${migrationOS}" == "" ]; then
-
-  ############################################
-  # Normal Setup
-
   echo "# CREATING raspiblitz.conf from your setup choices"
 
-  # prepate config file
+  # prepare config file
   CONFIGFILE="/mnt/hdd/raspiblitz.conf"
   sudo rm $CONFIGFILE 2>/dev/null
   sudo chown admin:admin $CONFIGFILE
@@ -132,23 +135,18 @@ if [ "${migrationOS}" == "" ]; then
   echo "chain=main" >> $CONFIGFILE
   echo "runBehindTor=on" >> $CONFIGFILE
 
-  # set flag for bootstrap process to kick-off provision process
-  sudo sed -i "s/^state=.*/state=waitprovision/g" /home/admin/raspiblitz.info
-  
-else
-
-  ############################################
-  # Process Migration
-  # TODO: move this part later outside of dialog controller and combine with data from WebUI
-
-  # source the setup state fresh
-  source $SETUPFILE
-
-  echo "TODO: Process Migration"
-  exit 1
-
 fi
 
+############################################
+# Enter Passwords
+# for fresh setup & migration
+
+echo "# Starting passwords dialog ..."
+/home/admin/setup.scripts/dialogPasswords.sh
+
+# set flag for bootstrap process to kick-off provision process
+sudo sed -i "s/^state=.*/state=waitprovision/g" /home/admin/raspiblitz.info
+  
 clear
 echo "# setup dialog done - results in:"
 echo "# $SETUPFILE"
