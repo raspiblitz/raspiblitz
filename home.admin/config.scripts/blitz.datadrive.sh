@@ -207,7 +207,7 @@ if [ "$1" = "status" ]; then
 
           # check for recoverable RaspiBlitz data (if config file exists) and raid 
           hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
-          isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+          #isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
           echo "hddRaspiData=${hddRaspiData}"
           hddRaspiVersion=""
           if [ ${hddRaspiData} -eq 1 ]; then
@@ -316,6 +316,12 @@ if [ "$1" = "status" ]; then
     fi
     hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
     echo "hddRaspiData=${hddRaspiData}"
+    hddRaspiVersion=""
+    if [ ${hddRaspiData} -eq 1 ]; then
+      source /mnt/hdd/raspiblitz.conf
+      hddRaspiVersion="${raspiBlitzVersion}"
+    fi
+    echo "hddRaspiVersion='${hddRaspiVersion}'"
 
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
