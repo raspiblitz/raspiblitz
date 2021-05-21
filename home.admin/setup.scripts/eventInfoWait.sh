@@ -113,6 +113,13 @@ Preparing Setup
 Please wait ...
 " 6 24
 
+elif [ "${eventID}" == "waitprovision" ] && [ "${mode}" == "ssh" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Preparing Provision
+Please wait ...
+" 6 24
+
 elif [ "${eventID}" = "noIP-LAN" ] || [ "${eventID}" = "noIP-WIFI" ]; then
 
     # this event is mostly for LCD/HDMI display
