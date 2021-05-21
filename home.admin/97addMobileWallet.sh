@@ -131,12 +131,120 @@ checkIP2TOR()
   fi
 }
 
+# needs parameter: #1 Title, #2 yes-buttom, #3 no-button, #4 message-body, #5 "appstoreLink", 6 height, 7 width
+promptAppstoreLink()
+{
+	height=14
+	width=65
+
+	if [ $# -gt 5 ]; then
+		height=$6
+	fi
+
+	if [ $# -eq 7 ]; then
+		width=$7
+	fi
+	
+	whiptail --title "$1" \
+			 --yes-button "$2" \
+			 --no-button "$3" \
+			 --yesno "$4" "$height" "$width"
+
+	if [ $? -eq 1 ]; then
+		/home/admin/config.scripts/blitz.display.sh qr $5
+		/home/admin/config.scripts/blitz.display.sh qr-console $5
+	fi
+}
+
+checkIfElectrumRustServerIsInstalled()
+{
+	if [ "${ElectRS}" != "on" ]; then
+		whiptail --title "Electrum Rust Server not installed" \
+			 	 --yes-button "Continue" \
+			 	 --no-button "Cancel" \
+			 	 --yesno "To install Electrum Rust Server, got to MENU -> SERVICES and switch to on." 8 65
+
+		echo "Returning to main menu."
+		sleep 2
+		exit 0
+	fi
+}
+
+promptBlueWalletElectrumConnectInstructions()
+{
+	whiptail --title "Connect to Electrum" \
+			 --yes-button "Continue" \
+			 --no-button "Cancel" \
+			 --yesno "In Blue Wallet, tap on the ellipsies (three dots on the top right corner) -> Network -> Electrum Server -> Scan or import a file. Scan the QR in the next menu. -> continue" 9 65
+	
+	if [ $? -eq 1 ]; then
+		echo "Returning to main menu."
+		sleep 2
+		exit 0
+	fi
+}
+
+promptBlueWalletTorSetupInstructions()
+{
+	whiptail --title "Setup Tor" \
+			 --yes-button "Continue" \
+			 --no-button "Cancel" \
+			 --yesno "In Blue Wallet, tap on the ellipsies (three dots on the top right corner) -> Network -> Tor Settings -> Start. Wait until status shows done." 9 65
+	
+	if [ $? -eq 1 ]; then
+		echo "Returning to main menu."
+		sleep 2
+		exit 0
+	fi
+}
+
+displayElectrumIP()
+{
+	choose_IP_or_TOR
+	  
+	ip_address=""
+	
+	if [ $connect = "tor" ]; then
+		promptBlueWalletTorSetupInstructions
+		promptBlueWalletElectrumConnectInstructions
+		ip_address=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+	else
+		promptBlueWalletElectrumConnectInstructions
+		source <(/home/admin/config.scripts/internet.sh status local)
+		ip_address=${localip}
+	fi
+
+	/home/admin/config.scripts/blitz.display.sh qr ${ip_address}
+	/home/admin/config.scripts/blitz.display.sh qr-console ${ip_address}
+
+	message=""
+
+	if [ $connect = "tor" ]; then
+		message="Set the TCP port to 50001. Make sure the SSL port is empty."
+	else
+		message="Make sure the TCP port is empty. Set the SSL port to 50002."
+	fi
+
+	whiptail --title "Port" \
+			 --yes-button "Continue" \
+			 --no-button "Cancel" \
+			 --yesno "${message}" 8 65
+	
+	if [ $? -eq 1 ]; then
+		echo "Returning to main menu."
+		sleep 2
+		exit 0
+	fi
+}
+
 # Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
 #OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
 #		ZAP_IOS "Zap Wallet (iOS)" \
 OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
         ZEUS_ANDROID "Zeus Wallet (Android)" \
-		SPHINX "Sphinx Chat (Android or iOS)"
+		SPHINX "Sphinx Chat (Android or iOS)" \
+		BLUE_WALLET_IOS "Blue Wallet (iOS)" \
+		BLUE_WALLET_ANDROID "Blue Wallet (Android)"
 	)
 
 # add SEND MANY APP
@@ -272,6 +380,19 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
   	  exit 1;
+  	;;
+  BLUE_WALLET_IOS)
+    #   /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/blue_wallet.png TODO:
+	checkIfElectrumRustServerIsInstalled
+	promptAppstoreLink "Install Blue Wallet on your iOS device" "Continue" "Store link as QR Code" "When Blue Wallet is installed and started --> Continue." "https://itunes.apple.com/app/bluewallet-bitcoin-wallet/id1376878040" 7 65
+	displayElectrumIP
+  	  exit 1;
+  	;;
+  BLUE_WALLET_ANDROID)
+    #   /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/blue_wallet.png TODO:
+	promptAppstoreLink "Install Blue Wallet on your Android device" "Continue" "Store link as QR Code" "When Blue Wallet is installed and started --> Continue." "https://play.google.com/store/apps/details?id=io.bluewallet.bluewallet" 7 65
+	displayElectrumIP
+  	exit 1;
   	;;
   ZEUS_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
