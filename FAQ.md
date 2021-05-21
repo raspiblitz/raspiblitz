@@ -933,7 +933,7 @@ Bridges are necessary? Depends on your treat model.
 
 ### Bridges types
 
-[Pluggable and Norma](https://tb-manual.torproject.org/bridges/)
+[Pluggable and Normal](https://tb-manual.torproject.org/bridges/)
 
 1. Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
 1. Normal ---> This type of bridges dont disguise you are using Tor, but will help you connect to Tor network.
