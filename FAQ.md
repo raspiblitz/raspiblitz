@@ -916,41 +916,57 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
 
-# How can I use bridges with Tor?
+# How can I use Tor bridges?
 
 First let's take into consideration this questions.
 
-* Read what are bridges ---> https://support.torproject.org/censorship/censorship-7/
+## Informational material:
 
-Bridges are Tor relays that help you circumvent censorship.
-Means of aquiring bridges
+### [What are bridges
+
+[Bridges are Tor relays that help you circumvent censorship](https://support.torproject.org/censorship/censorship-7/)
+Means of aquiring bridges:
 1. ---> Open Tor Browser and access https://bridges.torproject.org/
 2. ---> Another way to get bridges is to send an email to bridges@torproject.org. Leave the email subject empty and write 'get transport obfs4' in the email's message body. Please note that you must send the email using an address from one of the following email providers: Riseup or Gmail. 
 
 Bridges are necessary? Depends on your treat model.
 
-* Read bridges description ---> https://tb-manual.torproject.org/bridges/
+### Bridges types
+
+[Pluggable and Norma](https://tb-manual.torproject.org/bridges/)
 
 1. Pluggable ---> Using bridges in combination with pluggable transports helps to disguise the fact that you are using Tor, but may slow down the connection compared to using ordinary Tor relays.
 1. Normal ---> This type of bridges dont disguise you are using Tor, but will help you connect to Tor network.
 
 Which type should I choose?
-If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges.
-If your Government blocks Tor traffic or you are under constant surveillance, you should use 'Pluggable' bridges to mask you are using Tor
+* If your Internet Service Provider blocks torproject.org domain, you can use 'Normal' bridges.
+* If your Government blocks Tor traffic or you are under constant surveillance, you should use 'Pluggable' bridges to mask you are using Tor
 
-* Read Tor circumvention techniques ---> https://tb-manual.torproject.org/circumvention/
+### Tor circumvention techniques
 
-Types of pluggable transport.
+[Types of pluggable transport](https://tb-manual.torproject.org/circumvention/)
 1. obfs4 ---> Makes Tor traffic look random, and also prevents censors from finding bridges by Internet scanning. You can obtain 'obfs4' bridges as described in the beggining of the questions.
 1. meek ---> Makes it look like you are browsing a major web site instead of using Tor. meek-azure makes it look like you are using a Microsoft web site (Don't worry, microsoft don't have your data, is still Tor obfscuration level of encryption). You can acquire meek bridge by opening Tor Browser and select use 'Use a bridge > Built-in bridge > meek-azure'. Restart Tor Browser, type 'about:config' and search for 'meek'
 
-Which transport should I choose?
-China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
-On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridges are faster (there are thousands of bridges operators).
-          
-* Here is a `torrc` code example (IMPORTANT: Keep bridges information without empty lines between them):
-Uncomment the ClientTransportPlugin accordingly to the transport you chose (obfs4|meek_lite). If you chose normal bridges, let it commented.
-If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove/comment this part.
+##### Which transport should I choose?
+* China and similar countries blocks 'obfs4', so in these areas your should use 'meek'. 'Meek' bridge is slower (there is only one bridge operator).
+* On other regions you can use 'obfs4', as it will give the same level of protection. 'Obfs4' bridges are faster (there are thousands of bridges operators).
+
+## Configure bridges:
+
+**Choose only one method:**
+
+### Menu input
+
+Menu > Services > Tor with Bridges
+
+### Manual input
+
+**Here is a `torrc` code example**
+* IMPORTANT: Keep bridges information without empty lines between them:
+* Uncomment the ClientTransportPlugin accordingly to the transport you chose (obfs4|meek_lite). If you chose normal bridges, let it commented.
+* If you are using pluggable transport, substitute [transport] with `obfs4` or `meek_lite`. If you chose normal bridges, remove/comment this part.
+
 OtherInfo* means that that each bridge type use different info on the remaining parameters, so fill if accordginly.
 obfs4 bridges ----> obfs4 ipAdress:port fingerprint cert iat-mode
 meek bridges -----> meek_lite ipAdress:port fingerprint url front
