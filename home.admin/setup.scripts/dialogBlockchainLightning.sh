@@ -53,7 +53,7 @@ if [ "${network}" == "bitcoin" ]; then
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Lightning ⚡" \
                 --menu "\nChoose your Lightning Client: \n " \
-                13 64 7 \
+                12 64 6 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
     clear
