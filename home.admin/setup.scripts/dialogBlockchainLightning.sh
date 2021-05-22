@@ -57,7 +57,7 @@ if [ "${network}" == "bitcoin" ]; then
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
     clear
-case $CHOICE in
+    case $CHOICE in
         LND)
             lightning="lnd"
             ;;
@@ -71,7 +71,8 @@ case $CHOICE in
             clear
             echo "User Cancel"
             exit 1
-esac
+    esac
+fi
 
 # write results to setup sate
 echo "lightning=${lightning}" >> $SETUPFILE
