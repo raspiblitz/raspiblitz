@@ -144,7 +144,7 @@ WantedBy=multi-user.target
   if [ ${CHAIN} != mainnet ];then
     if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
       bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
- -${CHAIN}\"' \
+ -rpcport=${rpcprefix}8332\"' \
       >> /home/admin/_aliases.sh"
       bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
  -${CHAIN}\"' \
