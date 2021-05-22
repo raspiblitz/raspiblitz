@@ -118,7 +118,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "ssh" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Please wait ...
-" 5 24
+" 5 22
 
 elif [ "${eventID}" == "waitprovision" ]; then
 
