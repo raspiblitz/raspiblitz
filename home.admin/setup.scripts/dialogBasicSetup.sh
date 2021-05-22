@@ -13,7 +13,7 @@ CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Welcome to your RaspiBlitz ⚡" \
                 --menu "\nChoose how you want to setup your RaspiBlitz: \n " \
-                13 64 7 \
+                12 64 6 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 clear
@@ -28,6 +28,9 @@ case $CHOICE in
             ;;
         SHUTDOWN)
             # 2 --> SHUTDOWN
+            clear
+            echo "Shutting down without changes ..."
+            echo "Cut power when you see no status LED action anymore."
             exit 2
             ;;
         *)

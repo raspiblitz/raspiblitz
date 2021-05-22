@@ -82,7 +82,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
   # exit to terminal
   if [ "${menuresult}" == "3" ]; then
-    exit 0
+    exit 1
   fi
 
   # shutdown without changes
@@ -95,8 +95,7 @@ if [ "${setupPhase}" == "setup" ]; then
   if [ "${menuresult}" == "1" ]; then
     /home/admin/setup.scripts/dialogMigration.sh raspiblitz
     if [ "$?" == "1" ]; then
-      echo "Upload did not worked ... doing shutdown. Restart for new try."
-      sudo shutdown now
+      # upload did not worked .. exit with 0 to restart process from outside loop
       exit 0
     fi
     # user needs to reset password A
@@ -113,8 +112,7 @@ if [ "${setupPhase}" == "setup" ]; then
     echo "# Starting Blockchain & Lightning selection ..."
     /home/admin/setup.scripts/dialogBlockchainLightning.sh
     if [ "$?" == "1" ]; then
-      echo "Shutting down ... Restart for new try."
-      sudo shutdown now
+      # exit with 0 to restart process from outside loop
       exit 0
     fi
 
