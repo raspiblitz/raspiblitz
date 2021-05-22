@@ -8,6 +8,9 @@ source /home/admin/raspiblitz.info
 # this key/value file contains the state during the setup process
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
+# remember original setupphase
+orgSetupPhase="${setupPhase}"
+
 # init SETUPFILE & temp dir on mem drive
 sudo mkdir /var/cache/raspiblitz/temp
 sudo chown admin:admin /var/cache/raspiblitz/temp
@@ -105,6 +108,15 @@ if [ "${setupPhase}" == "setup" ]; then
   ############################################
   # FRESH SETUP
   if [ "${menuresult}" == "0" ]; then
+
+    # if other data is on HDD/SSD from migration/recover warn on formatting drive
+    if [ "${orgSetupPhase}" != "${setupPhase}" ]; then
+      /home/admin/setup.scripts/dialogDeleteData.sh
+      if [ "$?" == "1" ]; then
+        # exit with 0 to restart process from outside loop
+        exit 0
+      fi
+    fi
 
     ############################################
     # Choosing Blockchain & Lightning
