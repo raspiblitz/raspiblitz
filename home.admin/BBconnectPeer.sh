@@ -12,6 +12,43 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=lnd
+fi
+
+# CHAIN is signet | testnet | mainnet
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+else
+  CHAIN=${chain}net
+fi
+
+if [ ${chain} = test ];then
+  netprefix="t"
+  L1rpcportmod=1
+  L2rpcportmod=1
+elif [ ${chain} = sig ];then
+  netprefix="s"
+  L1rpcportmod=3
+  L2rpcportmod=3
+elif [ ${chain} = main ];then
+  netprefix=""
+  L1rpcportmod=""
+  L2rpcportmod=0
+fi
+
+lncli_alias="sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009"
+bitcoincli_alias="/usr/local/bin/${network}-cli -rpcport=${L1rpcportmod}8332"
+lightningcli_alias="sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config"
+shopt -s expand_aliases
+alias lncli_alias="$lncli_alias"
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lightningcli_alias="$lightningcli_alias"
+
 # set ntwork map info
 networkMap="https://lnmainnet.gaben.win"
 if [ "$network" = "litecoin" ]; then
@@ -22,9 +59,14 @@ if [ "$chain" = "test" ]; then
 fi
 
 # let user enter a <pubkey>@host
+
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
-l3="node directory -> 1ml.com"
+if [ "$chain" = "main" ]; then
+  l3="node directory -> 1ml.com"
+elif [ "$chain" = "test" ]; then
+    l3="node directory -> 1ml.com/testnet"
+fi
 dialog --title "Open a Connection to a Peer" \
 --backtitle "Lightning ( ${network} | ${chain} )" \
 --inputbox "$l1\n$l2\n$l3" 10 60 2>$_temp
@@ -38,18 +80,26 @@ if [ ${#_input} -eq 0 ]; then
   exit 1
 fi
 
+pubkey=$(echo $_input|cut -d@ -f1)
+address=$(echo ${_input}|cut -d@ -f2|cut -d: -f1)
+port=$(echo ${_input}|cut -d: -f2)
 # build command
-command="lncli --chain=${network} --network=${chain}net connect ${_input}"
+if [ $LNTYPE = cln ];then
+  # connect id [host port]
+  command="$lightningcli_alias connect $pubkey $address $port"
+elif [ $LNTYPE = lnd ];then
+  command="$lncli_alias connect ${pubkey}@${address}:${port}"
+fi
 
 # info output
 clear
 echo "******************************"
 echo "Connect to A Lightning Node"
 echo "******************************"
-echo ""
+echo
 echo "COMMAND LINE: "
 echo $command
-echo ""
+echo
 echo "RESULT (might have to wait for timeout):"
 
 win=1
@@ -82,13 +132,13 @@ if [ ${#result} -eq 0 ]; then
   info="No return value. Error not known."
 
   # try to get error output
-  result=`cat ${_error}`
+  result=$(cat "${_error}")
   echo "$result"
 
   # basic cli error
   cliError=$(echo "${result}" | grep "[lncli]" -c )
   if [ ${cliError} -gt 0 ]; then
-    info="Its possible that LND daemon is not running, not configured correct or not connected to the lncli."
+    info="It's possible that the lightning daemon is not running, not configured correct or not connected to the cli."
   fi
 
 else
@@ -97,8 +147,11 @@ else
   echo "$result"
 
   # check if the node is now in peer list
-  pubkey=$(echo $_input | cut -d '@' -f1)
-  isPeer=$(lncli --chain=${network} --network=${chain}net listpeers 2>/dev/null| grep "${pubkey}" -c)
+  if [ $LNTYPE = cln ];then
+    isPeer=$(lightningcli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
+  elif [ $LNTYPE = lnd ];then
+    isPeer=$(lncli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
+  fi
   if [ ${isPeer} -eq 0 ]; then
 
     # basic error message
@@ -114,14 +167,14 @@ else
 fi
 
 # output info
-echo ""
+echo
 if [ ${win} -eq 1 ]; then
   echo "******************************"
   echo "WIN"
   echo "******************************"
   echo "${info}"
-  echo ""
-  echo "Whats next? --> Open a channel with that node."
+  echo
+  echo "What's next? --> Open a channel with that node."
 else
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "FAIL"
@@ -129,6 +182,6 @@ else
   echo "${info}"
 fi
 
-echo ""
+echo
 echo "Press ENTER to return to main menu."
 read key
