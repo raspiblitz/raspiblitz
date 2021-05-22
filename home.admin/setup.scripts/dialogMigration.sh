@@ -99,8 +99,6 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # migration OS & Version were already set earlier in setup process - now add migration filename
   echo "migrationFile='${filename}'" >> $SETUPFILE
-  # user needs to reset password A
-  echo "setPasswordA=1" >> $SETUPFILE
   exit 0
 
 fi
@@ -126,15 +124,8 @@ Do you want to start migration to RaspiBlitz now?
     # user cancel - signal by exit code
     exit 1
   fi
-
-  # write migration info
-  echo "migrationOS='umbrel'" >> $SETUPFILE
-  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
-
-  # user needs to reset password A, B & C
-  echo "setPasswordA=1" >> $SETUPFILE
-  echo "setPasswordB=1" >> $SETUPFILE
-  echo "setPasswordC=1" >> $SETUPFILE
+  
+  # signal that user wants to proceed with migration
   exit 0
 
 fi
@@ -160,14 +151,8 @@ Do you want to start migration to RaspiBlitz now?
     # user cancel - signal by exit code
     exit 1
   fi
-  # write migration info
-  echo "migrationOS='mynode'" >> $SETUPFILE
-  echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
 
-  # user needs to reset password A
-  echo "setPasswordA=1" >> $SETUPFILE
-  echo "setPasswordB=1" >> $SETUPFILE
-  echo "setPasswordC=1" >> $SETUPFILE
+  # signal that user wants to proceed with migration
   exit 0
 
 fi

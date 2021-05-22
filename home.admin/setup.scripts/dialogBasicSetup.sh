@@ -2,19 +2,13 @@
 
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
-source /home/admin/raspiblitz.info
+source /home/admin/_version.info
 
-# SETUPFILE
-# this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
-source $SETUPFILE
-
-# choose blockchain or select migration
+# chose how to setup node (fresh or from a upload backup)
 OPTIONS=()
-OPTIONS+=(BITCOIN1 "Setup BITCOIN & Lightning Network Daemon (LND)")
-OPTIONS+=(BITCOIN2 "Setup BITCOIN & c-lightning by blockstream")
-OPTIONS+=(LITECOIN "Setup LITECOIN & Lightning Network Daemon (LND)")
-OPTIONS+=(MIGRATION "Upload a Migration File from old RaspiBlitz")
+OPTIONS+=(FRESHSETUP "Setup a new RaspiBlitz")
+OPTIONS+=(FROMBACKUP "Upload Migration Backup")
+OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Welcome to your RaspiBlitz ⚡" \
@@ -23,36 +17,23 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 clear
-network=""
-lightning=""
-migrationOS=""
 case $CHOICE in
-        BITCOIN1)
-            network="bitcoin"
-            lightning="lnd"
+        FRESHSETUP)
+            # 0 --> FRESH SETUP 
+            exit 0;
             ;;
-        BITCOIN2)
-            network="bitcoin"
-            lightning="cln"
+        FROMBACKUP)
+            # 1 --> UPLOAD MIGRATION BACKUP
+            exit 1
             ;;
-        LITECOIN)
-            network="litecoin"
-            lightning="lnd"
+        SHUTDOWN)
+            # 2 --> SHUTDOWN
+            exit 2
             ;;
-        MIGRATION)
-            migrationOS="raspiblitz"
-            ;;
+        *)
+            # 3 --> ESC/CANCEL = EXIT TO TERMINAL
+            clear
+            echo "Exit to Terminal from RaspiBlitz Setup ..."
+            echo "Command to return to Setup --> raspiblitz"
+            exit  3
 esac
-
-# on cancel - exit with 1
-if [ "${network}" == "" ] && [ "${migrationOS}" == "" ]; then
-  exit 1
-fi
-
-# write results to setup sate
-echo "migrationOS='${migrationOS}'" >> $SETUPFILE
-echo "migrationVersion=''" >> $SETUPFILE
-echo "lightning=${lightning}" >> $SETUPFILE
-echo "network=${network}" >> $SETUPFILE
-
-exit 0

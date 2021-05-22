@@ -19,42 +19,51 @@ sudo chmod 777 $SETUPFILE
 ############################################
 # QuickOption: Update
 if [ "${setupPhase}" == "update" ]; then
-
-  echo "TODO: Update"
-  exit 1
-
-  # on cancel - default to normal setup
-  if [ "$?" != "0" ]; then
+  # show update dialog
+  /home/admin/setup.scripts/dialogUpdate.sh
+  if [ "$?" == "0" ]; then
+    # proceed with provision (mark Password A to be set)
+    echo "# OK update process starting .."
+    echo "setPasswordA=1" >> $SETUPFILE
+  else
+    # default to normal setup options
     setupPhase="setup"
-    echo "# you refused update option - defaulting to normal setup"
-    exit 1
+    echo "# you refused recovery option - defaulting to normal setup"
   fi
 fi
 
 ############################################
 # QuickOption: Recovery
 if [ "${setupPhase}" == "recovery" ]; then
-
-  echo "TODO: RECOVERY"
-  exit 1
-
-  # on cancel - default to normal setup
-  if [ "$?" != "0" ]; then
+  # show recovery dialog
+  /home/admin/setup.scripts/dialogRecovery.sh
+  if [ "$?" == "0" ]; then
+    # proceed with provision (mark Password A to be set)
+    echo "# OK recover process starting .."
+    echo "setPasswordA=1" >> $SETUPFILE
+  else
+    # default to normal setup options
     setupPhase="setup"
     echo "# you refused recovery option - defaulting to normal setup"
-    exit 1
   fi
 fi
 
 ############################################
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
-
+  # show recovery dialog
   echo "# Starting migration dialog ..."
   /home/admin/setup.scripts/dialogMigration.sh ${migrationOS}
-
-  # on cancel - default to normal setup
-  if [ "$?" != "0" ]; then
+  if [ "$?" == "0" ]; then
+    # mark migration to happen on provision
+    echo "migrationOS='umbrel'" >> $SETUPFILE
+    echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
+    # user needs to reset password A, B & C
+    echo "setPasswordA=1" >> $SETUPFILE
+    echo "setPasswordB=1" >> $SETUPFILE
+    echo "setPasswordC=1" >> $SETUPFILE
+  else
+    # on cancel - default to normal setup
     setupPhase="setup"
     echo "# you refused node migration option - defaulting to normal setup"
     exit 1
@@ -63,77 +72,111 @@ if [ "${setupPhase}" == "migration" ]; then
 fi
 
 ############################################
-# DEFAULT: Fresh Setup
+# DEFAULT: Basic Setup menu
 # user might default to from quick options
 if [ "${setupPhase}" == "setup" ]; then
 
   echo "# Starting basic setup dialog ..."
   /home/admin/setup.scripts/dialogBasicSetup.sh
+  menuresult=$?
 
-  result=$?
-  echo "result(${result})"
-  exit 1
+  # exit to terminal
+  if [ "${menuresult}" == "3" ]; then
+    exit 0
+  fi
 
+  # shutdown without changes
+  if [ "${menuresult}" == "2" ]; then
+    sudo shutdown now
+    exit 0
+  fi
 
-  # on cancel - let user exit to terminal
-  if [ "$?" != "0" ]; then
-    echo "# you selected cancel - sending exit code 1"
-    exit 1
+  # uplaod and setup from migration backup
+  if [ "${menuresult}" == "1" ]; then
+    /home/admin/setup.scripts/dialogMigration.sh raspiblitz
+    if [ "$?" == "1" ]; then
+      echo "Upload did not worked ... doing shutdown. Restart for new try."
+      sudo shutdown now
+      exit 0
+    fi
+    # user needs to reset password A
+    echo "setPasswordA=1" >> $SETUPFILE
   fi
 
   ############################################
-  # Setting Name for Node
+  # FRESH SETUP
+  if [ "${menuresult}" == "0" ]; then
 
-  echo "# Starting basic setup dialog ..."
-  /home/admin/setup.scripts/dialogName.sh
+    ############################################
+    # Choosing Blockchain & Lightning
 
-  ############################################
-  # Lightning Wallet (new or restore) do this before passwords
-  # because password C not needed if LND rescue file is uploaded
-
-  lightningWalletDone=0
-  while [ "${lightningWalletDone}" == "0" ]
-  do
-
-    echo "# Starting lightning wallet dialog ..."
-    /home/admin/setup.scripts/dialogLightningWallet.sh
-
-    # only if dialog exited clean end loop
-    if [ "$?" == "0" ]; then
-      lightningWalletDone=1
-    fi
-
-    # allow user to cancel to terminal on dialog main menu
-    # all other cancels have other exit codes
+    echo "# Starting Blockchain & Lightning selection ..."
+    /home/admin/setup.scripts/dialogBlockchainLightning.sh
     if [ "$?" == "1" ]; then
-      echo "# you selected cancel - sending exit code 1"
-      exit 1
+      echo "Shutting down ... Restart for new try."
+      sudo shutdown now
+      exit 0
     fi
 
-  done
+    ############################################
+    # Setting Name for Node
 
-  echo "# CREATING raspiblitz.conf from your setup choices"
+    echo "# Starting name dialog ..."
+    /home/admin/setup.scripts/dialogName.sh
 
-  # prepare config file
-  CONFIGFILE="/mnt/hdd/raspiblitz.conf"
-  sudo rm $CONFIGFILE 2>/dev/null
-  sudo chown admin:admin $CONFIGFILE
-  sudo chmod 777 $CONFIGFILE
+    ############################################
+    # Lightning Wallet (new or restore) do this before passwords
+    # because password C not needed if LND rescue file is uploaded
 
-  # source the raspiblitz version
-  source /home/admin/_version.info
+    lightningWalletDone=0
+    while [ "${lightningWalletDone}" == "0" ]
+    do
 
-  # source the setup state fresh
-  source $SETUPFILE
+      echo "# Starting lightning wallet dialog ..."
+      /home/admin/setup.scripts/dialogLightningWallet.sh
 
-  # write basic config file data
-  echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
-  echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
-  echo "lcdrotate=1" >> $CONFIGFILE
-  echo "lightning=${lightning}" >> $CONFIGFILE
-  echo "network=${network}" >> $CONFIGFILE
-  echo "chain=main" >> $CONFIGFILE
-  echo "runBehindTor=on" >> $CONFIGFILE
+      # only if dialog exited clean end loop
+      if [ "$?" == "0" ]; then
+        lightningWalletDone=1
+      fi
+
+      # allow user to cancel to terminal on dialog main menu
+      # all other cancels have other exit codes
+      if [ "$?" == "1" ]; then
+        echo "# you selected cancel - sending exit code 1"
+        exit 1
+      fi
+
+    done
+
+    echo "# CREATING raspiblitz.conf from your setup choices"
+
+    # source the raspiblitz version
+    source /home/admin/_version.info
+
+    # source the setup state fresh
+    source $SETUPFILE
+
+    # prepare config file
+    CONFIGFILE="/mnt/hdd/raspiblitz.conf"
+    sudo rm $CONFIGFILE 2>/dev/null
+    sudo chown admin:admin $CONFIGFILE
+    sudo chmod 777 $CONFIGFILE
+
+    # write basic config file data
+    echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
+    echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
+    echo "lcdrotate=1" >> $CONFIGFILE
+    echo "lightning=${lightning}" >> $CONFIGFILE
+    echo "network=${network}" >> $CONFIGFILE
+    echo "chain=main" >> $CONFIGFILE
+    echo "runBehindTor=on" >> $CONFIGFILE
+  
+    # user needs to set all passwords
+    echo "setPasswordA=1" >> $SETUPFILE
+    echo "setPasswordB=1" >> $SETUPFILE
+    echo "setPasswordC=1" >> $SETUPFILE
+  fi
 
 fi
 
