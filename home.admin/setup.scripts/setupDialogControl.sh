@@ -114,9 +114,27 @@ if [ "${setupPhase}" == "setup" ]; then
     if [ "${userChoice}" == "1" ]; then
 
       # FORMAT DATA DRIVE
-      echo "TODO: Format HDD/SSD"
+      filesystem="ext4"
+
+      # check if there is a flag set on sd card boot section to format as btrfs (experimental)
+      flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+      if [ "${flagBTRFS}" != "0" ]; then
+        echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem"
+        filesystem="btrfs"
+        sleep 5
+      fi
+
+      # run formatting
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
+      if [ "${error}" != "" ]; then
+        echo "FAIL ON FORMATTING THE DRIVE:"
+        echo "${error}"
+        echo "Please report as issue on the raspiblitz github."
+        exit 1
+      fi
 
       # DEBUG EXIT
+      echo "OK Format done"
       exit 1
     
     elif [ "${userChoice}" == "2" ]; then
@@ -125,13 +143,31 @@ if [ "${setupPhase}" == "setup" ]; then
       
       # when blockchain comes from another node migrate data first
       if [ "${hddGotMigrationData}" != "" ]; then
-        echo "TODO: Migrate data from '{hddGotMigrationData}'"
+          clear
+          echo "Migrating Blockchain of ${hddGotMigrationData}'"
+          source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+          if [ "${err}" != "" ]; then
+            echo "MIGRATION OF BLOCKHAIN FAILED: ${err}"
+            echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup."
+            exit 1
+          fi
       fi
 
       # delete everything but blockchain
-      echo "TODO: Delete everything but blockchain"
+      echo "Deleting everything on HDD/SSD while keeping blockchain ..."
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+      if [ "${hddFormat}" != "btrfs" ]; then
+        source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+      else
+        source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+      fi
+      sudo ./config.scripts/blitz.datadrive.sh tempmount sda1
+      sudo ./config.scripts/blitz.datadrive.sh clean -keepblockchain
+      sudo umount /mnt/hdd
+      sleep 2
 
       # by keeping that blockchain - user choosed already the blockchain type
+      echo "Selecting as blockchain network automatically .."
       if [ "${hddBlocksLitecoin}" == "1" ]; then
         echo "network=litecoin" >> $SETUPFILE
       else
