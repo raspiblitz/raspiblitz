@@ -48,7 +48,6 @@ alias lncli_alias="$lncli_alias"
 alias bitcoincli_alias="$bitcoincli_alias"
 alias lightningcli_alias="$lightningcli_alias"
 
-
 # PRECHECK) check if chain is in sync
 if [ $LNTYPE = cln ];then
   BLOCKHEIGHT=$(bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
@@ -58,7 +57,7 @@ if [ $LNTYPE = cln ];then
   else
     chainOutSync=1
   fi
-else
+elif [ $LNTYPE = lnd ];then
   chainOutSync=$(lncli_alias getinfo | grep '"synced_to_chain": false' -c)
 fi
 if [ ${chainOutSync} -eq 1 ]; then
@@ -78,7 +77,7 @@ fi
 # execute command
 if [ $LNTYPE = cln ];then
   command="$lightningcli_alias newaddr bech32"
-else
+elif [ $LNTYPE = lnd ];then
   command="$lncli_alias newaddress p2wkh"
 fi
 echo "# Calling:"
@@ -134,7 +133,7 @@ fi
 # follow up info
 if [ $LNTYPE = cln ];then
   string="Wait for confirmations."
-else
+elif [ $LNTYPE = lnd ];then
   string="Wait for confirmations. \n\nYou can use info on LCD to check if funds have arrived. \n\nIf you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
 fi
 whiptail --backtitle "Fund your onchain wallet" \

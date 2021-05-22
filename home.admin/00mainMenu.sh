@@ -171,8 +171,14 @@ if [ "${circuitbreaker}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
-if [ "${testnet}" == "on" ]; then
+if [ "${testnet}" == "on" ]&&[ ${chain} != test ];then
   OPTIONS+=(TESTNET "Testnet Service Options")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
+
+if [ "${mainnet}" == "on" ]&&[ ${chain} != main ];then
+  OPTIONS+=(MAINNET "Mainnet Service Options")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
@@ -180,11 +186,13 @@ fi
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 OPTIONS+=(LND "LND Wallet Options")
-if [ "${${netprefix}cln}" == "on" ]; then
+
+if [ "$cln" == "on" ]||[ $chain = test ]&&[ "$tcln" == "on" ]; then
   OPTIONS+=(CLN "C-lightning Wallet Options")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
+
 OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
@@ -323,6 +331,9 @@ case $CHOICE in
             ;;
         TESTNET)
             /home/admin/00chainMenu.sh testnet
+            ;;    
+        MAINNET)
+            /home/admin/00chainMenu.sh mainnet
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py

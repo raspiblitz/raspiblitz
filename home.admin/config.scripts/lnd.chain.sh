@@ -26,7 +26,7 @@ fi
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   portprefix=1
-  rpcportprefix=1
+  rpcportmod=1
   zmqprefix=21
 elif [ ${CHAIN} = signet ];then
   prefix="s"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# 00chainMenu.sh <testnet|mainnets|ignet> <lnd|cln>
+# 00testnetMenu.sh <testnet|signet|mainnet> <lnd|cln>
 
 source /home/admin/raspiblitz.info
 # add default value to raspi config if needed
@@ -21,17 +21,6 @@ else
   nonDefaultChain=0
   CHAIN=${chain}net
 fi
-# prefix for parallel services
-if [ ${CHAIN} = testnet ];then
-  chainprefix="t"
-  portprefix=1
-elif [ ${CHAIN} = signet ];then
-  chainprefix="s"
-  portprefix=3
-elif [ ${CHAIN} = mainnet ];then
-  chainprefix=""
-  portprefix=""
-fi
 
 # LNTYPE is lnd | cln
 if [ $# -gt 1 ]&&[ $2 != $LNdefault ];then
@@ -40,11 +29,6 @@ if [ $# -gt 1 ]&&[ $2 != $LNdefault ];then
 else
   nonDefaultLNtype=0
   LNTYPE=$LNdefault
-fi
-
-if [ ${LNTYPE} != lnd ]&&[ ${LNTYPE} != cln ];then
-  echo "# ${LNTYPE} is not a supported LNTYPE"
-  exit 1
 fi
 
 # get the local network IP to be displayed on the LCD
@@ -69,26 +53,34 @@ fi
 BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}${plus}"
 
 # Put Activated Apps on top
-if [ "${chainprefix}rtlWebinterface}" == "on" ]; then
+if [ $chain = test ]&&[ "$trtlWebinterface" = "on" ]||\
+   [ $chain = sig ]&& [ "$srtlWebinterface" = "on" ]||\
+   [ $chain = main ]&&[ "$rtlWebinterface" = "on" ]; then
   OPTIONS+=(RTL "RTL Web Node Manager for LND ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
-if [ "${chainprefix}lnd" == "on" ]; then
+if [ $chain = test ]&&[ "$tlnd" = "on" ]||\
+   [ $chain = sig ]&& [ "$slnd" = "on" ]||\
+   [ $chain = main ]&&[ "$lnd" = "on" ]; then
   #TODO OPTIONS+=(LND "LND options for ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
-if [ "${chainprefix}crtlWebinterface}" == "on" ]; then
+if [ "$chain" = "test" ]&&[ "$tcrtlWebinterface" = "on" ]||\
+   [ "$chain" = "sig" ]&& [ "$scrtlWebinterface" = "on" ]||\
+   [ "$chain" = "main" ]&&[ "$crtlWebinterface" = "on" ]; then
   OPTIONS+=(cRTL "RTL Web Node Manager for C-lightning ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
-if [ "${chainprefix}cln" == "on" ]; then
-  #TODO OPTIONS+=(CLN "C-lightning options for ${CHAIN}")
+if [ "$chain" = "test" ]&&[ "$tcln" = "on" ]||\
+   [ "$chain" = "sig" ]&& [ "$scln" = "on" ]||\
+   [ "$chain" = "main" ]&&[ "$cln" = "on" ]; then
+  OPTIONS+=(CLN "C-lightning options for ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
@@ -153,7 +145,7 @@ case $CHOICE in
    #   exit 0
    # fi
    /home/admin/00infoBlitz.sh $CHAIN
-  ;;
+    ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
     ;;
@@ -162,23 +154,18 @@ case $CHOICE in
     ;;
   LND)
     /home/admin/99lndMenu.sh $CHAIN
-    # TODO
     ;;
   CLN)
-    /home/admin/99CLNmenu.sh $CHAIN
-    # TODO
+    /home/admin/99clnMenu.sh $CHAIN
     ;;
   SERVICES)
     /home/admin/00testnetServices.sh $CHAIN
-    # TODO
     ;;
   SYSTEM)
     /home/admin/99systemMenu.sh $CHAIN
-    # TODO
     ;;
   CONNECT)
     /home/admin/99connectMenu.sh $CHAIN
-    # TODO
     ;;
   SWITCHLN)
     # setting value in raspi blitz config
