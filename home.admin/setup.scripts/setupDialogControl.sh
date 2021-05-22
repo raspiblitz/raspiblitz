@@ -118,8 +118,8 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # DEBUG EXIT
       exit 1
-
-    if [ "${userChoice}" == "2" ]; then
+    
+    elif [ "${userChoice}" == "2" ]; then
 
       # KEEP BLOCKCHAIN + DLETE ALL THE REST
       
