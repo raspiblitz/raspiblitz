@@ -16,7 +16,7 @@ lightning=""
 # chose blockchain
 OPTIONS=()
 OPTIONS+=(BITCOIN "Setup BITCOIN Blockchain (BitcoinCore)")
-OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain"))
+OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain")
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Blockchain ⚡" \
