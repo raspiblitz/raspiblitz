@@ -53,6 +53,12 @@ fi
 echo "# Running: 'cln.install.sh $*'"
 echo "# Using the settings for: ${NETWORK} "
 
+# add default value to raspi config if needed
+if ! grep -Eq "^${prefix}cln=" /mnt/hdd/raspiblitz.conf; then
+  echo "${prefix}cln=off" >> /mnt/hdd/raspiblitz.conf
+fi
+source /mnt/hdd/raspiblitz.conf
+
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
   if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
     # dependencies
@@ -159,7 +165,6 @@ always-use-proxy=true
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
   # systemd service
-  /usr/local/bin/lightning-cli --$NETWORK stop
   sudo systemctl stop ${prefix}lightningd
   sudo systemctl disable ${prefix}lightningd
   echo "# Create /etc/systemd/system/${prefix}lightningd.service"
@@ -212,6 +217,11 @@ alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
   echo "# for the command line options use"
   echo "${prefix}lightning-cli help"
   echo
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^${prefix}cln=.*/${prefix}cln=on/g" /mnt/hdd/raspiblitz.conf
+
+  exit 0
 fi
 
 if [ "$1" = "off" ];then
@@ -226,4 +236,6 @@ if [ "$1" = "off" ];then
     sudo rm -f /usr/local/bin/lightningd
     sudo rm -f /usr/local/bin/lightning-cli
   fi
+  # setting value in raspi blitz config
+  sudo sed -i "s/^${prefix}cln=.*/${prefix}cln=off/g" /mnt/hdd/raspiblitz.conf
 fi
