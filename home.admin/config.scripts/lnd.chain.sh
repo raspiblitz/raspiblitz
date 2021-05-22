@@ -26,21 +26,24 @@ fi
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   portprefix=1
+  rpcportprefix=1
   zmqprefix=21
 elif [ ${CHAIN} = signet ];then
   prefix="s"
   portprefix=3
+  rpcportmod=3
   zmqprefix=23
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
   portprefix=""
+  rpcportmod=0
   zmqprefix=28
 fi
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ];then
     sudo -u bitcoin /usr/local/bin/lncli\
-     --rpcserver localhost:1${portprefix}009 stop
+     --rpcserver localhost:1${rpcportmod}009 stop
     sudo systemctl stop ${prefix}lnd
     sudo systemctl disable ${prefix}lnd
     echo "# ${prefix}lnd.service on ${CHAIN} is stopped and disabled"
@@ -49,7 +52,13 @@ function removeParallelService() {
 }
 
 source /home/admin/raspiblitz.info
+# add default value to raspi config if needed
+if ! grep -Eq "^${prefix}lnd=" /mnt/hdd/raspiblitz.conf; then
+  echo "${prefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
+fi
 source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf
+
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -79,7 +88,7 @@ bitcoin.${CHAIN}=1
 # alias=ALIAS # up to 32 UTF-8 characters
 # color=COLOR # choose from: https://www.color-hex.com/
 listen=0.0.0.0:${portprefix}9735
-rpclisten=0.0.0.0:1${portprefix}009
+rpclisten=0.0.0.0:1${rpcportmod}009
 restlisten=0.0.0.0:${portprefix}8080
 accept-keysend=true
 nat=false
@@ -154,7 +163,7 @@ WantedBy=multi-user.target
   echo "# Adding aliases"
   echo "\
 alias ${prefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
- -n=${CHAIN} --rpcserver localhost:1${portprefix}009\"\
+ -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases.sh
 
   echo
@@ -171,12 +180,19 @@ alias ${prefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   echo "${prefix}lncli help"
   echo
 
+  # setting value in raspi blitz config
+  sudo sed -i "s/^${prefix}lnd=.*/${prefix}lnd=on/g" /mnt/hdd/raspiblitz.conf
+
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeParallelService
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^${prefix}lnd=.*/${prefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
+
   exit 0
 fi
 
