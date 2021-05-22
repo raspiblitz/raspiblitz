@@ -109,13 +109,51 @@ if [ "${setupPhase}" == "setup" ]; then
   # FRESH SETUP
   if [ "${menuresult}" == "0" ]; then
 
+    ############################################
+    # Format HDD/SSD - Keep Blockchain
+    formatNeeded=1
+
+    # check if there is a blockchain to use (so HDD is already formatted)
+    # thats also true if the node is coming from another nodeOS
+    if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
+      /home/admin/setup.scripts/dialogDeleteData.sh keepblockchain
+      if [ "$?" == "1" ]; then
+
+        # dont format HDD later - reuse data and clean up
+        formatNeeded=0
+
+        # when blockchain comes from another node migrate data first
+        if [ "${hddGotMigrationData}" != "" ]; then
+          echo "TODO: Migrate data from '{hddGotMigrationData}'"
+        fi
+
+        # delete everything but blockchain
+        echo "TODO: Delete everything but blockchain"
+
+        # by keeping that blockchain - user choosed already the blockchain type
+        if [ "${hddBlocksLitecoin}" == "1" ]; then
+          echo "network=litecoin" >> $SETUPFILE
+        else
+          echo "network=bitcoin" >> $SETUPFILE
+        fi
+
+        # exit with 0 to restart process from outside loop
+        exit 1
+      fi
+    fi
+
     # if other data is on HDD/SSD from migration/recover warn on formatting drive
-    if [ "${orgSetupPhase}" != "${setupPhase}" ]; then
+    if [ "${formatNeeded}" == "1" ]; then
       /home/admin/setup.scripts/dialogDeleteData.sh
       if [ "$?" == "1" ]; then
         # exit with 0 to restart process from outside loop
         exit 0
       fi
+
+      # delete everything but blockchain
+      echo "TODO: Format HDD/SSD"
+      exit 1
+
     fi
 
     ############################################

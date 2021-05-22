@@ -5,7 +5,7 @@ if [ "$1" == "format" ]; then
     whiptail --title " FORMATTING DATA DRVE " --yes-button "DELETE DATA" --no-button "STOP SETUP" --yesno "Your data drive will now be formatted. This will delete all data on your connected HDD/SSD. Make sure that there is no important data or old funds on that data drive.
 
 Are you sure to format the HDD/SSD and DELETE ALL DATA on it?
-      " 14 65
+      " 12 65
 
     if [ "$?" == "0" ]; then
         # 0 --> delete data

@@ -9,23 +9,25 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source $SETUPFILE
 
-# values to determine by dialogs
-network=""
-lightning=""
 
-# chose blockchain
-OPTIONS=()
-OPTIONS+=(BITCOIN "Setup BITCOIN Blockchain (BitcoinCore)")
-OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain (experimental)")
-CHOICE=$(dialog --clear \
+#################################
+# SELECT BLOCKCHAIN
+# when not already set by setupfile
+
+if [ "${network}" == "" ]; then
+
+    OPTIONS=()
+    OPTIONS+=(BITCOIN "Setup BITCOIN Blockchain (BitcoinCore)")
+    OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain (experimental)")
+    CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Blockchain ⚡" \
                 --menu "\nChoose which Blockchain to run: \n " \
                 11 64 5 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
-clear
-case $CHOICE in
+    clear
+    case $CHOICE in
         BITCOIN)
             # bitcoin core
             network="bitcoin"
@@ -40,7 +42,13 @@ case $CHOICE in
             clear
             echo "User Cancel"
             exit 1
-esac
+    esac
+fi
+
+
+#################################
+# SELECT LIGHTNING
+# only possible when network is bitcoin
 
 if [ "${network}" == "bitcoin" ]; then
 
