@@ -21,7 +21,7 @@ CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Blockchain ⚡" \
                 --menu "\nChoose which Blockchain to run: \n " \
-                13 64 7 \
+                11 64 5 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 clear
