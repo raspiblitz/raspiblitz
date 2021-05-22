@@ -431,6 +431,10 @@ EOF
 }
 EOF
 
+  # make sure its the correct owner before last Tor restart
+  sudo chmod -R 700 /mnt/hdd/tor
+  sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+
   sudo systemctl restart tor@default
 
   echo "OK - Tor is now ON"
