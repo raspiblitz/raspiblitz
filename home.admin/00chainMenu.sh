@@ -161,7 +161,7 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.rtl.sh menu cln $CHAIN
     ;;
   LND)
-    /home/admin/99lightningMenu.sh $CHAIN
+    /home/admin/99lndMenu.sh $CHAIN
     # TODO
     ;;
   CLN)
