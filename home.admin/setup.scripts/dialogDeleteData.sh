@@ -1,44 +1,57 @@
 #!/bin/bash
 
-if [ "$1" == "format" ]; then 
+# FIRST PARAMETER can be the name of the blockchain data that is available in the HDD/SS
+# if set the user will be given to option to DELETE ALL DATA but KEEP BLOCKCHAIN
+blockchainName=$1
 
+keepBlockchain=0
+if [ ${blockchainName} != "" ]; then
+
+    whiptail --title " BLOCKCHAIN DATA FOUND " --yes-button "USE BLOCKCHAIN" --no-button "DELETE" --yesno "We found ${blockchainName} blockchain data on your HDD/SSD.
+
+Using existing blockchain data can reduce your setup/sync time. But if you didnt validated that blockchain yourself there is a level of trust involved.
+
+Do you want to use that blockchain data and run ${blockchainName}? 
+      " 10 65
+
+    if [ "$?" == "0" ]; then
+        # 0 --> use blockchain & delete all other data
+        keepBlockchain=1
+    fi
+fi
+
+# normally when the the HDD will get formatted and the user will get asked about that
+# if before the user decided to keep the blockchain instead if formatting just "ALL OTHER DATA" wil get deleted
+
+if [ "${keepBlockchain}" == "1" ]; then
+
+    # deleting all data around blockchain security question
+    whiptail --title " DELETING ALL OTHER DATA " --yes-button "DELETE DATA" --no-button "STOP SETUP" --yesno "OK we will keep the blockchain data - but all other data on your HDD/SSD will get deleted on setup. Make sure that there is no important data or old funds on that data drive.
+
+Are you sure to DELETE ALL OTHER DATA on the HDD/SSD?
+      " 12 65
+
+    if [ "$?" == "0" ]; then
+        # 0 --> keep blockchain + delete all other data
+        exit 2
+    else
+        # 1 --> cancel / stop
+        exit 0
+    fi
+
+else
+
+    # normal formatting data drive security question
     whiptail --title " FORMATTING DATA DRVE " --yes-button "DELETE DATA" --no-button "STOP SETUP" --yesno "Your data drive will now be formatted. This will delete all data on your connected HDD/SSD. Make sure that there is no important data or old funds on that data drive.
 
 Are you sure to format the HDD/SSD and DELETE ALL DATA on it?
       " 12 65
 
     if [ "$?" == "0" ]; then
-        # 0 --> delete data
-        exit 0
-    else
-        # 1 --> cancel
+        # 0 --> format drive
         exit 1
+    else
+        # 1 --> cancel / stop
+        exit 0
     fi
 fi
-
-if [ "$1" == "keepblockchain" ]; then
-
-    blockchainName=$2
-    if [ "${blockchainName}" == "" ]; then
-        blockchainName="BITCOIN"
-    fi
-
-    whiptail --title " BLOCKCHAIN DATA FOUND " --yes-button "KEEP BLOCKCHAIN" --no-button "NO" --yesno "We found on the data drive ${blockchainName} blockchain data.
-
-This can reduce your setup/sync time but if you didnt validated that blockchain yourself there is a level of trust involved.
-
-Do you want to use that blockchain & its data and DELETE ALL OTHER DATA?
-      " 10 65
-
-    if [ "$?" == "0" ]; then
-        # 0 --> use blockchain & delete all other data
-        exit 0
-    else
-        # 1 --> cancel
-        exit 1
-    fi
-
-fi
-
-echo "err='unkown parameter'" 
-exit 1

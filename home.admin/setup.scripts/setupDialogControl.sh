@@ -94,11 +94,70 @@ if [ "${setupPhase}" == "setup" ]; then
     exit 0
   fi
 
-  # uplaod and setup from migration backup
+  ###############################################
+  # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD 
+  if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1" ]; then
+
+    # check if there is a blockchain to use (so HDD is already formatted)
+    # thats also true if the node is coming from another nodeOS
+    existingBlockchain=""
+    if [ "${hddBlocksLitecoin}" == "1" ]; then
+      existingBlockchain="LITECOIN"
+    fi
+    if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
+      existingBlockchain="BITCOIN"
+    fi
+
+    # ask user about possible existing blockchain and formatting HDD
+    /home/admin/setup.scripts/dialogDeleteData.sh "${existingBlockchain}"
+    userChoice=$?
+    if [ "${userChoice}" == "1" ]; then
+
+      # FORMAT DATA DRIVE
+      echo "TODO: Format HDD/SSD"
+
+      # DEBUG EXIT
+      exit 1
+
+    if [ "${userChoice}" == "2" ]; then
+
+      # KEEP BLOCKCHAIN + DLETE ALL THE REST
+      
+      # when blockchain comes from another node migrate data first
+      if [ "${hddGotMigrationData}" != "" ]; then
+        echo "TODO: Migrate data from '{hddGotMigrationData}'"
+      fi
+
+      # delete everything but blockchain
+      echo "TODO: Delete everything but blockchain"
+
+      # by keeping that blockchain - user choosed already the blockchain type
+      if [ "${hddBlocksLitecoin}" == "1" ]; then
+        echo "network=litecoin" >> $SETUPFILE
+      else
+        echo "network=bitcoin" >> $SETUPFILE
+      fi
+
+      # DEBUG EXIT
+      exit 1
+
+    else
+
+      # STOP SETUP  - loop back to setup menu start
+      exit 0
+
+    fi
+
+  fi
+
+  ############################################
+  # UPLOAD MIGRATION
   if [ "${menuresult}" == "1" ]; then
     /home/admin/setup.scripts/dialogMigration.sh raspiblitz
     if [ "$?" == "1" ]; then
       # upload did not worked .. exit with 0 to restart process from outside loop
+      echo "Upload failed ... return to menu"
+      sleep 2
       exit 0
     fi
     # user needs to reset password A
@@ -108,53 +167,6 @@ if [ "${setupPhase}" == "setup" ]; then
   ############################################
   # FRESH SETUP
   if [ "${menuresult}" == "0" ]; then
-
-    ############################################
-    # Format HDD/SSD - Keep Blockchain
-    formatNeeded=1
-
-    # check if there is a blockchain to use (so HDD is already formatted)
-    # thats also true if the node is coming from another nodeOS
-    if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
-      /home/admin/setup.scripts/dialogDeleteData.sh keepblockchain
-      if [ "$?" == "1" ]; then
-
-        # dont format HDD later - reuse data and clean up
-        formatNeeded=0
-
-        # when blockchain comes from another node migrate data first
-        if [ "${hddGotMigrationData}" != "" ]; then
-          echo "TODO: Migrate data from '{hddGotMigrationData}'"
-        fi
-
-        # delete everything but blockchain
-        echo "TODO: Delete everything but blockchain"
-
-        # by keeping that blockchain - user choosed already the blockchain type
-        if [ "${hddBlocksLitecoin}" == "1" ]; then
-          echo "network=litecoin" >> $SETUPFILE
-        else
-          echo "network=bitcoin" >> $SETUPFILE
-        fi
-
-        # exit with 0 to restart process from outside loop
-        exit 1
-      fi
-    fi
-
-    # if other data is on HDD/SSD from migration/recover warn on formatting drive
-    if [ "${formatNeeded}" == "1" ]; then
-      /home/admin/setup.scripts/dialogDeleteData.sh
-      if [ "$?" == "1" ]; then
-        # exit with 0 to restart process from outside loop
-        exit 0
-      fi
-
-      # delete everything but blockchain
-      echo "TODO: Format HDD/SSD"
-      exit 1
-
-    fi
 
     ############################################
     # Choosing Blockchain & Lightning
