@@ -37,6 +37,5 @@ case $CHOICE in
             # 3 --> ESC/CANCEL = EXIT TO TERMINAL
             clear
             echo "Exit to Terminal from RaspiBlitz Setup ..."
-            echo "Command to return to Setup --> raspiblitz"
             exit  3
 esac
