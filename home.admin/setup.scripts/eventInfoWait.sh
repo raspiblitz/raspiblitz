@@ -117,9 +117,8 @@ your connection to internet router.
 elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "ssh" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Preparing Setup
 Please wait ...
-" 6 24
+" 5 24
 
 elif [ "${eventID}" == "waitprovision" ]; then
 
