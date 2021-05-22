@@ -163,6 +163,12 @@ if [ "${circuitbreaker}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
+if [ "${testnet}" == "on" ]; then
+  OPTIONS+=(TESTNET "Testnet Service Options")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
+
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 OPTIONS+=(LIGHTNING "LND Wallet Options")
@@ -298,6 +304,9 @@ case $CHOICE in
             ;;
         CIRCUIT)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        TESTNET)
+            /home/admin/00chainMenu.sh testnet
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
