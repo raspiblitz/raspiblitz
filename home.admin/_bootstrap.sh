@@ -364,8 +364,10 @@ echo "HDD already part of system: $isMounted" >> $logFile
 if [ ${isMounted} -eq 0 ]; then
 
   # write data needed for setup process into raspiblitz.info
-  echo "hddBlocksBitcoin=${hddBlocksBitcoin}">> ${infoFile}
-  echo "hddBlocksLitecoin=${hddBlocksLitecoin}">> ${infoFile}
+  echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
+  echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
+  echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
+  echo ""
 
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 
