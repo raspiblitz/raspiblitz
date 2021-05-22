@@ -25,7 +25,7 @@ OPTIONS=()
 
 OPTIONS+=(FUNDING "Fund your C-Lightning Wallet")
 OPTIONS+=(PEERING "Connect to a Peer")
-#TODO OPTIONS+=(CHANNEL "Open a Channel with Peer")
+OPTIONS+=(CHANNEL "Open a Channel with Peer")
 #TODO OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 #TODO OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
 
@@ -95,7 +95,7 @@ case $CHOICE in
             /home/admin/BBcashoutWallet.sh
             ;;
         CHANNEL)
-            /home/admin/BBopenChannel.sh
+            /home/admin/BBopenChannel.sh cln $NETWORK
             ;;
         SEND)
             /home/admin/BBpayInvoice.sh

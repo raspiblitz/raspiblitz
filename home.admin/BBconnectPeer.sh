@@ -63,9 +63,9 @@ fi
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
 if [ "$chain" = "main" ]; then
-  l3="node directory -> 1ml.com"
+  l3="node directory -> https://1ml.com"
 elif [ "$chain" = "test" ]; then
-    l3="node directory -> 1ml.com/testnet"
+    l3="node directory -> https://1ml.com/testnet"
 fi
 dialog --title "Open a Connection to a Peer" \
 --backtitle "Lightning ( ${network} | ${chain} )" \
