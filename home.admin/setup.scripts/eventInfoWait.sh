@@ -51,7 +51,7 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
-elif [ "${eventID}" == "error" ]; then
+elif [ "${eventID}" == "error" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 SYSTEM RAN INTO AN ERROR:
@@ -60,6 +60,17 @@ ${contentString}
 Use terminal command to login:
 ssh admin@${localip}
 " 9 41
+
+elif [ "${eventID}" == "error" ] && [ "${mode}" == "ssh" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+SYSTEM RAN INTO AN ERROR:
+${contentString}
+
+Please report to the Raspiblitz GitHub
+Use CTRL+C to exit to terminal.
+For shutdown use command: off
+" 9 50
 
 elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 
