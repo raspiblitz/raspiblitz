@@ -2,7 +2,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "monitor and troubleshot the bitcoin network"
+ echo "monitor and troubleshoot the bitcoin network"
  echo "network.monitor.sh peer-status"
  echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
  echo "network.monitor.sh peer-disconnectall"
@@ -12,6 +12,10 @@ fi
 source /mnt/hdd/raspiblitz.conf
 source /home/admin/raspiblitz.info
 
+source /home/admin/config.scripts/_functions.lightning.sh
+getLNvars lnd ${chain}net
+getLNaliases
+
 ###################
 # STATUS
 ###################
@@ -19,7 +23,7 @@ if [ "$1" = "peer-status" ]; then
   echo "#network.monitor.sh peer-status"
 
   # number of peers connected
-  peerNum=$(${network}-cli getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
+  peerNum=$($bitcoincli_alias getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
   echo "peers=${peerNum}"
 
   exit 0
@@ -111,7 +115,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "newpeer='${nodeAddress}"
 
   # kick start node with 
-  sudo -u admin ${network}-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
+  bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
   exit 0
@@ -131,15 +135,15 @@ if [ "$1" = "peer-disconnectall" ]; then
   fi
 
   # get all peer id and disconnect them
-  sudo -u admin ${network}-cli getpeerinfo | grep '"addr": "' | while read line 
+  bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line 
   do
     peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"
-    sudo -u admin ${network}-cli disconnectnode ${peerID}
+    bitcoincli_alias disconnectnode ${peerID}
   done
 
-  echo "#### FINAL PEER INFO FORM BITCOIND"
-  sudo -u admin ${network}-cli getpeerinfo
+  echo "#### FINAL PEER INFO FROM BITCOIND"
+  bitcoincli_alias getpeerinfo
   exit 0
 fi
 

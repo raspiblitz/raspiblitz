@@ -110,6 +110,9 @@ while :
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
+      source /home/admin/config.scripts/_functions.lightning.sh
+      getLNvars lnd ${chain}net
+      getLNaliases
     fi
 
     # reboot info
@@ -294,7 +297,7 @@ while :
     fi
 
     # if LND is syncing or scanning
-    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
       /home/admin/80scanLND.sh
       sleep 20

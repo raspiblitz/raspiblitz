@@ -21,8 +21,8 @@ getLNaliases
 # check if chain is in sync
 if [ $LNTYPE = cln ];then
   lncommand="lightning-cli"
-  BLOCKHEIGHT=$(bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
-  CLHEIGHT=$(lightningcli_alias getinfo | jq .blockheight)
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
     cmdChainInSync=1
   else
@@ -48,9 +48,9 @@ done
 # check number of connected peers
 echo "check for open channels"
 if [ $LNTYPE = cln ];then
-  openChannels=$(lightningcli_alias listpeers | grep -c '"CHANNELD_NORMAL:Funding transaction locked. Channel announced."')
+  openChannels=$($lightningcli_alias listpeers | grep -c '"CHANNELD_NORMAL:Funding transaction locked. Channel announced."')
 elif [ $LNTYPE = lnd ];then
-  openChannels=$(lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
+  openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
 fi
 if [ ${openChannels} -eq 0 ]; then
   echo 

@@ -3,6 +3,17 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 
 
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=lnd
+fi
+
+source /home/admin/config.scripts/_functions.lightning.sh
+getLNvars $LNTYPE ${chain}net
+getLNaliases
+
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# script to scan the state of the system after setup"
@@ -45,7 +56,7 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
+  bitcoincli_alias getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
   # check if error on request
   blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
@@ -120,15 +131,15 @@ startcountLightning=$(cat /home/admin/systemd.lightning.log 2>/dev/null | grep -
 echo "startcountLightning=${startcountLightning}"
 
 # is LND running
-lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
+lndRunning=$(systemctl status ${netprefix}lnd.service 2>/dev/null | grep -c running)
 echo "lndActive=${lndRunning}"
 
 if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
   lndRPCReady=1
-  lndinfo=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>/mnt/hdd/temp/.lnd.error)
-
+  lndinfo=$($lncli_alias getinfo 2>/mnt/hdd/temp/.lnd.error)
+  
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
   lndErrorShort=''

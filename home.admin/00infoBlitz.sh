@@ -18,19 +18,9 @@ if [ $# -gt 0 ];then
   CHAIN=$1
   chain=${CHAIN::-3}
 fi
-if [ ${chain} = test ];then
-  L1rpcportmod=1
-  L2rpcportmod=1
-elif [ ${chain} = sig ];then
-  L1rpcportmod=3
-  L2rpcportmod=3
-elif [ ${chain} = main ];then
-  L1rpcportmod=""
-  L2rpcportmod=0
-fi
-shopt -s expand_aliases
-alias lncli_alias="sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009"
-alias bitcoincli_alias="/usr/local/bin/${network}-cli -rpcport=${L1rpcportmod}8332"
+source /home/admin/config.scripts/_functions.lightning.sh
+getLNvars lnd ${chain}net
+getLNaliases
 
 ## get HDD/SSD info
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -80,7 +70,6 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 # set datadir
-bitcoin_dir="/home/bitcoin/.${network}"
 lnd_dir="/home/bitcoin/.lnd"
 lnd_macaroon_dir="/home/bitcoin/.lnd/data/chain/${network}/${chain}net"
 
@@ -110,12 +99,12 @@ btc_path=$(command -v bitcoin-cli)
 blockInfo="-"
 if [ -n "${btc_path}" ]; then
   btc_title=$network
-  blockchaininfo="$(bitcoincli_alias -datadir=${bitcoin_dir} getblockchaininfo 2>/dev/null)"
+  blockchaininfo="$($bitcoincli_alias getblockchaininfo 2>/dev/null)"
   if [ ${#blockchaininfo} -gt 0 ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    block_chain="$(bitcoincli_alias -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
+    block_chain="$($bitcoincli_alias getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
     block_diff=$(expr ${block_chain} - ${block_verified})
     blockInfo="${block_verified}/${block_chain}"
@@ -142,13 +131,13 @@ if [ -n "${btc_path}" ]; then
     fi
 
     # get last known block
-    last_block="$(bitcoincli_alias -datadir=${bitcoin_dir} getblockcount 2>/dev/null)"
+    last_block="$($bitcoincli_alias getblockcount 2>/dev/null)"
     if [ ! -z "${last_block}" ]; then
       btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
     fi
 
     # get mem pool transactions
-    mempool="$(bitcoincli_alias -datadir=${bitcoin_dir} getmempoolinfo 2>/dev/null | jq -r '.size')"
+    mempool="$($bitcoincli_alias getmempoolinfo 2>/dev/null | jq -r '.size')"
 
   else
     btc_line2="${color_red}NOT RUNNING\t\t"
@@ -156,7 +145,7 @@ if [ -n "${btc_path}" ]; then
 fi
 
 # get IP address & port
-networkInfo=$(bitcoincli_alias -datadir=${bitcoin_dir} getnetworkinfo 2>/dev/null)
+networkInfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
 local_ip="${localip}" # from internet.sh
 public_ip="${cleanip}"
 public_port="$(echo ${networkInfo} | jq -r '.localaddresses [0] .port')"
@@ -180,9 +169,9 @@ public_addr_pre="Public "
 public_addr="??"
 torInfo=""
 # Version
-networkVersion=$(bitcoincli_alias -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
+networkVersion=$($bitcoincli_alias -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
-networkInfo=$(bitcoincli_alias -datadir=${bitcoin_dir} getnetworkinfo)
+networkInfo=$($bitcoincli_alias getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
@@ -256,7 +245,7 @@ if [ "$wallet_unlocked" -gt 0 ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else
- ln_getInfo=$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
+ ln_getInfo=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
  if [ ${ln_tor} -eq 1 ]; then
@@ -280,23 +269,23 @@ else
       ln_baseInfo="${color_amber} Waiting for Chain Sync"
     fi
   else
-    ln_walletbalance="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-    ln_walletbalance_wait="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
+    ln_walletbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+    ln_walletbalance_wait="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
     if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
     if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
-    ln_channelbalance="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
-    ln_channelbalance_pending="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
+    ln_channelbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+    ln_channelbalance_pending="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
     if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
     if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-    ln_channels_total="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+    ln_channels_total="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
     ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
-    ln_dailyfees="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
-    ln_weeklyfees="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
-    ln_monthlyfees="$(lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
+    ln_dailyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
+    ln_weeklyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
+    ln_monthlyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
     ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
   fi
 fi

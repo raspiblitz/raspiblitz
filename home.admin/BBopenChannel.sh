@@ -21,15 +21,15 @@ echo "*** Precheck ***"
 
 # PRECHECK) check if chain is in sync
 if [ $LNTYPE = cln ];then
-  BLOCKHEIGHT=$(bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
-  CLHEIGHT=$(lightningcli_alias getinfo | jq .blockheight)
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
     chainOutSync=0
   else
     chainOutSync=1
   fi
 elif [ $LNTYPE = lnd ];then
-  chainOutSync=$(lncli_alias getinfo | grep '"synced_to_chain": false' -c)
+  chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
 fi
 if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cln ];then
@@ -47,11 +47,11 @@ fi
 
 # check available funding
 if [ $LNTYPE = cln ];then
-  for i in $(lightningcli_alias listfunds | jq .outputs | grep value | awk '{print $2}' | cut -d, -f1);do
+  for i in $($lightningcli_alias listfunds | jq .outputs | grep value | awk '{print $2}' | cut -d, -f1);do
     confirmedBalance=$((confirmedBalance+i))
   done
 elif [ $LNTYPE = lnd ];then
-  confirmedBalance=$(lncli_alias walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+  confirmedBalance=$($lncli_alias walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
 fi
 
 if [ ${confirmedBalance} -eq 0 ]; then
@@ -65,9 +65,9 @@ fi
 
 # check number of connected peers
 if [ $LNTYPE = cln ];then
-  numConnectedPeers=$(lightningcli_alias listpeers | grep -c '"id":')
+  numConnectedPeers=$($lightningcli_alias listpeers | grep -c '"id":')
 elif [ $LNTYPE = lnd ];then
-  numConnectedPeers=$(lncli_alias listpeers | grep pub_key -c)
+  numConnectedPeers=$($lncli_alias listpeers | grep pub_key -c)
 fi
 
 if [ ${numConnectedPeers} -eq 0 ]; then
@@ -163,7 +163,7 @@ fi
 # build command
 if [ $LNTYPE = cln ];then
   # fundchannel id amount [feerate] [announce] [minconf] [utxos] [push_msat] [close_to]
-  feerate=$(bitcoincli_alias estimatesmartfee $conf_target |grep feerate|awk '{print $2}'|cut -c 5-7|bc)
+  feerate=$($bitcoincli_alias estimatesmartfee $conf_target |grep feerate|awk '{print $2}'|cut -c 5-7|bc)
   command="lightningcli_alias fundchannel ${pubKey} ${amount} $feerate"
 elif [ $LNTYPE = lnd ];then
   command="lncli_alias openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"

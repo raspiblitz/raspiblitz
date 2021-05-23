@@ -17,15 +17,15 @@ getLNaliases
 
 # PRECHECK) check if chain is in sync
 if [ $LNTYPE = cln ];then
-  BLOCKHEIGHT=$(bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
-  CLHEIGHT=$(lightningcli_alias getinfo | jq .blockheight)
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
     chainOutSync=0
   else
     chainOutSync=1
   fi
 elif [ $LNTYPE = lnd ];then
-  chainOutSync=$(lncli_alias getinfo | grep '"synced_to_chain": false' -c)
+  chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
 fi
 if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cln ];then

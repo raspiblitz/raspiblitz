@@ -32,8 +32,12 @@ function getLNvars {
 
 # getLNaliases <vars set by getLNvars>
 function getLNaliases {
+#TODO ALL
+# instead of all
+# sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
 lncli_alias="sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009"
-bitcoincli_alias="/usr/local/bin/${network}-cli -rpcport=${L1rpcportmod}8332"
+# sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
+bitcoincli_alias="/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332"
 lightningcli_alias="sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config"
 shopt -s expand_aliases
 alias lncli_alias="$lncli_alias"

@@ -115,9 +115,9 @@ else
 
   # check if the node is now in peer list
   if [ $LNTYPE = cln ];then
-    isPeer=$(lightningcli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
+    isPeer=$($lightningcli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
   elif [ $LNTYPE = lnd ];then
-    isPeer=$(lncli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
+    isPeer=$($lncli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
   fi
   if [ ${isPeer} -eq 0 ]; then
 
