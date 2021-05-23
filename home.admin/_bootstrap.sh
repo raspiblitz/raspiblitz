@@ -449,27 +449,27 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
+  # copy over the raspiblitz.conf created from setup to HDD
+  sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf 
+
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
   #sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
   #sed -i "s/^network=.*/network=${network}/g" ${infoFile}
+  
+  # errors from this process will be refelcted ins state / message of raspiblitz.info
   echo "Calling Data Migration for possible updates .." >> $logFile
   sudo /home/admin/_bootstrap.update.sh
   echo "Calling Provisioning .." >> $logFile
   sudo /home/admin/_bootstrap.provision.sh
-  sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
-  sed -i "s/^message=.*/message='Done Provision'/g" ${infoFile}
-
-  # PROCESS raspiblitz.setup
-  echo "TODO: After Provision Handling .." >> $logFile
 
   ###################################################
   # WAIT LOOP: AFTER FRESH SETUP, MIFGRATION OR ERROR
   # successfull update & recover can skip this
   ###################################################
 
-  until [ "${state}" == "waitfinal" ]
+  until [ "${state}" != "ready" ]
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE

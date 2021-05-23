@@ -251,7 +251,7 @@ if [ "${setupPhase}" == "setup" ]; then
     source $SETUPFILE
 
     # prepare config file
-    CONFIGFILE="/mnt/hdd/raspiblitz.conf"
+    CONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
     sudo rm $CONFIGFILE 2>/dev/null
     sudo chown admin:admin $CONFIGFILE
     sudo chmod 777 $CONFIGFILE
