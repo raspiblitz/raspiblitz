@@ -174,9 +174,6 @@ if [ "${setupPhase}" == "setup" ]; then
         echo "network=bitcoin" >> $SETUPFILE
       fi
 
-      # DEBUG EXIT
-      exit 1
-
     else
 
       # STOP SETUP  - loop back to setup menu start
