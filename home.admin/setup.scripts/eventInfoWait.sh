@@ -102,6 +102,9 @@ password: raspiblitz
 
     else
 
+        # custom backtitle for this dialog
+        backtitle="RaspiBlitz ${codeVersion} / ${setupPhase}"
+
         # on all other cases (add info message)
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Login for Maintenance:
