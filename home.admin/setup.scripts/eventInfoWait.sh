@@ -69,7 +69,7 @@ Use your Password A
 
 elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
-    if [ "${setupPhase}" == "setup"] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
+    if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
 
         # custom backtitle for this dialog
         backtitle="RaspiBlitz ${codeVersion} / ${setupPhase}"
