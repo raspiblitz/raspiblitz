@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  >&2 echo "# managing the data drive(s) with old EXT4 or new BTRFS"
- >&2 echo "# blitz.datadrive.sh [status|tempmount|format|fstab|raid|link|swap|clean|snapshot|uasp-fix]"
+ >&2 echo "# blitz.datadrive.sh [status|tempmount|unmount|format|fstab|raid|link|swap|clean|snapshot|uasp-fix]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -1204,12 +1204,20 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  # get device to temp mount
+  # get device to temp mount from parameter (optional)
   hdd=$2
-  if [ ${#hdd} -eq 0 ]; then
-    >&2 echo "# FAIL which device should be temp mounted (e.g. sda)"
-    >&2 echo "# run 'status' to see device candidates"
-    echo "error='missing second parameter'"
+  # automount if no parameter the hddcandinate
+  if [ "${hdd}" == "" ]; then
+    if [ "${hddFormat}" != "btrfs" ]; then
+      hdd="${hddPartitionCandidate}"
+    else
+      hdd="${hddCandidate}"
+    fi
+  fi
+  # if still no hdd .. throw error
+  if [ "${hdd}" == "" ]; then
+    >&2 echo "# FAIL there is no detected hdd candidate to tempmount"
+    echo "error='hdd not found'"
     exit 1
   fi
 
@@ -1287,6 +1295,14 @@ if [ "$1" = "tempmount" ]; then
   echo "isBTRFS=${isBTRFS}"
   exit 1
 
+fi
+
+if [ "$1" = "unmount" ]; then
+  sudo umount /mnt/hdd 2>/dev/null
+  sudo umount /mnt/storage 2>/dev/null
+  sudo umount /mnt/temp 2>/dev/null
+  echo "# OK done unmount"
+  exit 1 
 fi
 
 ########################################
