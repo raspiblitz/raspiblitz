@@ -155,15 +155,21 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # delete everything but blockchain
       echo "Deleting everything on HDD/SSD while keeping blockchain ..."
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-      if [ "${hddFormat}" != "btrfs" ]; then
-        source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
-      else
-        source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
+      if [ "${error}" != "" ]; then
+        echo "TEMPMOUNT FAILED:"
+        echo "${error}"
+        echo "Please report as issue on the raspiblitz github."
+        exit 1
       fi
-      sudo ./config.scripts/blitz.datadrive.sh tempmount sda1
-      sudo ./config.scripts/blitz.datadrive.sh clean -keepblockchain
-      sudo umount /mnt/hdd
+      sudo ./config.scripts/blitz.datadrive.sh clean all -keepblockchain
+      if [ "${error}" != "" ]; then
+        echo "CLEANING HDD FAILED:"
+        echo "${error}"
+        echo "Please report as issue on the raspiblitz github."
+        exit 1
+      fi
+      sudo /home/admin/config.scripts/blitz.datadrive.sh umount
       sleep 2
 
       # by keeping that blockchain - user choosed already the blockchain type
