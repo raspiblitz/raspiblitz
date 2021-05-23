@@ -155,14 +155,8 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # delete everything but blockchain
       echo "Deleting everything on HDD/SSD while keeping blockchain ..."
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
-      if [ "${error}" != "" ]; then
-        echo "TEMPMOUNT FAILED:"
-        echo "${error}"
-        echo "Please report as issue on the raspiblitz github."
-        exit 1
-      fi
-      sudo ./config.scripts/blitz.datadrive.sh clean all -keepblockchain
+      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount
+      sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain
       if [ "${error}" != "" ]; then
         echo "CLEANING HDD FAILED:"
         echo "${error}"
