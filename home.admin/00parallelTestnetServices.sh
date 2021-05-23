@@ -5,25 +5,7 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# CHAIN is signet | testnet | mainnet
-if [ $# -gt 0 ] && [ $1 != ${chain}net ];then
-  nonDefaultChain=1
-  CHAIN=$1
-else
-  nonDefaultChain=0
-  CHAIN=${chain}net
-fi
-# prefix for parallel services
-if [ ${CHAIN} = testnet ];then
-  chainprefix="t"
-  portprefix=1
-elif [ ${CHAIN} = signet ];then
-  chainprefix="s"
-  portprefix=3
-elif [ ${CHAIN} = mainnet ];then
-  chainprefix=""
-  portprefix=""
-fi
+CHAIN=testnet
 
 # for testnet
 echo "services default values"
@@ -31,7 +13,6 @@ if [ ${#trtlWebinterface} -eq 0 ]; then trtlWebinterface="off"; fi
 if [ ${#tlnd} -eq 0 ]; then tlnd="off"; fi
 if [ ${#tcrtlWebinterface} -eq 0 ]; then tcrtlWebinterface="off"; fi
 if [ ${#tcln} -eq 0 ]; then tcln="off"; fi
-
 
 # show select dialog
 echo "run dialog ..."
@@ -117,7 +98,7 @@ if [ "${trtlWebinterface}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start ${chainprefix}RTL
+      sudo systemctl start tRTL
       echo "# waiting 10 secs .."
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
@@ -135,14 +116,14 @@ fi
 # ctRTL process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${ctrtlWebinterface}" != "${choice}" ]; then
+if [ "${tcrtlWebinterface}" != "${choice}" ]; then
   echo "RTL for CLN $CHAIN Setting changed .."
   anychange=1
   /home/admin/config.scripts/bonus.rtl.sh ${choice} cln $CHAIN
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start ${chainprefix}cRTL
+      sudo systemctl start tcRTL
       echo "waiting 10 secs .."
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN

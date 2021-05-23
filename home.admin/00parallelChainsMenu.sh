@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# 00testnetMenu.sh <testnet|signet|mainnet> <lnd|cln>
+# 00parallelChainsMenu.sh <testnet|signet|mainnet> <lnd|cln>
 
 source /home/admin/raspiblitz.info
 # add default value to raspi config if needed
@@ -159,7 +159,11 @@ case $CHOICE in
     /home/admin/99clnMenu.sh $CHAIN
     ;;
   SERVICES)
-    /home/admin/00testnetServices.sh $CHAIN
+    if [ $CHAIN = testnet ];then
+      /home/admin/00parallelTestnetServices.sh
+    elif [ $CHAIN = mainnet ];then
+      /home/admin/00parallelMainnetServices.sh $CHAIN
+    fi
     ;;
   SYSTEM)
     /home/admin/99systemMenu.sh $CHAIN
@@ -179,6 +183,7 @@ case $CHOICE in
     newchain=${CHAIN::-3}
     sudo sed -i "s/^chain=.*/chain=${newchain}/g" /mnt/hdd/raspiblitz.conf
     echo "# OK - Set chain=${newchain} in /mnt/hdd/raspiblitz.conf"
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync
     echo
     echo "Press ENTER to return to main menu."
     read key

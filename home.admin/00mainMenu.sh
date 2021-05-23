@@ -330,10 +330,10 @@ case $CHOICE in
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
             ;;
         TESTNET)
-            /home/admin/00chainMenu.sh testnet
+            /home/admin/00parallelChainsMenu.sh testnet
             ;;    
         MAINNET)
-            /home/admin/00chainMenu.sh mainnet
+            /home/admin/00parallelChainsMenu.sh mainnet
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
