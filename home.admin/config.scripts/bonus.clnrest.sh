@@ -79,6 +79,12 @@ Restart=always
 TimeoutSec=120
 RestartSec=30
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/clnrest.service
