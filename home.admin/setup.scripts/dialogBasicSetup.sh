@@ -30,7 +30,7 @@ case $CHOICE in
             # 2 --> SHUTDOWN
             clear
             echo "Shutting down without changes ..."
-            echo "Cut power when you see no status LED action anymore."
+            echo "Cut power when you see no status LED blinking anymore."
             exit 2
             ;;
         *)

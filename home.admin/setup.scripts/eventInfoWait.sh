@@ -79,12 +79,26 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
             backtitle="${backtitle} / (pre-synced)"
         fi
 
+        # custom welcomeline for this dialog
+        welcomeline="Your RaspiBlitz is ready for Setup"
+        if [ "${setupPhase}" == "update" ]; then
+            welcomeline="RaspiBlitz is ready for Update"
+        fi
+        if [ "${setupPhase}" == "recovery" ]; then
+            welcomeline="RaspiBlitz is ready for Recovery"
+        fi
+        if [ "${setupPhase}" == "migration" ]; then
+            welcomeline="Ready for migration to RaspiBlitz"
+        fi
+
         # show default login help info
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Login to your RaspiBlitz with:
+${welcomeline}
+------------------------------------
+Use terminal command to login:
 ssh admin@${localip}
-Use password: raspiblitz
-" 7 41
+password: raspiblitz
+" 9 41
 
     else
 
@@ -96,6 +110,14 @@ ssh admin@${localip}
 Use password: raspiblitz
 " 8 41
     fi
+
+elif [ "${eventID}" == "waitfinal" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Setup-Done - Login for Details:
+ssh admin@${localip}
+Use your Password A
+" 7 41
 
 elif [ "${eventID}" == "shutdown" ]; then
 

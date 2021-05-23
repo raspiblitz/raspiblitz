@@ -433,6 +433,10 @@ if [ ${isMounted} -eq 0 ]; then
 
   done
 
+  #############################################
+  # PROVISION PROCESS
+  #############################################
+
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
   if [ "${hddFormat}" != "btrfs" ]; then
@@ -450,22 +454,45 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
   #sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
   #sed -i "s/^network=.*/network=${network}/g" ${infoFile}
-  echo "Calling Data Migration .." >> $logFile
+  echo "Calling Data Migration for possible updates .." >> $logFile
   sudo /home/admin/_bootstrap.update.sh
   echo "Calling Provisioning .." >> $logFile
   sudo /home/admin/_bootstrap.provision.sh
-  sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
   sed -i "s/^message=.*/message='Done Provision'/g" ${infoFile}
 
   # PROCESS raspiblitz.setup
   echo "TODO: After Provision Handling .." >> $logFile
 
-  # handle possible errors
-  # set passwords
-  # show seed words
+  ###################################################
+  # WAIT LOOP: AFTER FRESH SETUP, MIFGRATION OR ERROR
+  # successfull update & recover can skip this
+  ###################################################
+
+  until [ "${state}" == "waitfinal" ]
+  do
+
+    # TODO: DETECT WHEN USER SETUP IS DONE
+    echo "TODO: DETECT WHEN USER FINAL DIALOG IS DONE" >> $logFile
+  
+    # handle possible errors
+    # set passwords
+    # show seed words
+
+    # get latest network info & update raspiblitz.info (in case network changes)
+    source <(/home/admin/config.scripts/internet.sh status)
+    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+
+    # give the loop a little bed time
+    sleep 4
+
+    # check info file for updated values
+    # especially the state for checking loop
+    source ${infoFile}
+
+  done
 
   exit 0
-
 
   echo "rebooting" >> $logFile
   echo "state=recovered" >> /home/admin/recover.flag
