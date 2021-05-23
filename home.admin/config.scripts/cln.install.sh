@@ -160,6 +160,7 @@ always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${prefix}config
   else
     echo "# The file /home/bitcoin/.lightning/${prefix}config is already present"
+    #TODO look for pluging configs and clear or install
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  

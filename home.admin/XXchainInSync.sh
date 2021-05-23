@@ -48,7 +48,7 @@ done
 # check number of connected peers
 echo "check for open channels"
 if [ $LNTYPE = cln ];then
-  openChannels=$($lightningcli_alias listpeers | grep -c '"CHANNELD_NORMAL:Funding transaction locked. Channel announced."')
+  openChannels=$($lightningcli_alias listpeers | grep -c "CHANNELD_NORMAL")
 elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
 fi
