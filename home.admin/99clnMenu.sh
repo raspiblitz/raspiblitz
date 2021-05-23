@@ -26,8 +26,8 @@ OPTIONS=()
 OPTIONS+=(FUNDING "Fund your C-Lightning Wallet")
 OPTIONS+=(PEERING "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
-#TODO OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
-#TODO OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
+OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
+OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
 
 if [ "${chain}" = "main" ]; then
 #TODO OPTIONS+=(lnbalance "Detailed Wallet Balances")
@@ -98,10 +98,10 @@ case $CHOICE in
             /home/admin/BBopenChannel.sh cln $NETWORK
             ;;
         SEND)
-            /home/admin/BBpayInvoice.sh
+            /home/admin/BBpayInvoice.sh cln $NETWORK
             ;;
         RECEIVE)
-            /home/admin/BBcreateInvoice.sh
+            /home/admin/BBcreateInvoice.sh cln $NETWORK
             ;;
         NAME)
             sudo /home/admin/config.scripts/lnd.setname.sh

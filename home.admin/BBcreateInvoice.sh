@@ -14,16 +14,50 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=lnd
+fi
+# CHAIN is signet | testnet | mainnet
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+else
+  CHAIN=${chain}net
+fi
+if [ ${chain} = test ];then
+  netprefix="t"
+  L1rpcportmod=1
+  L2rpcportmod=1
+elif [ ${chain} = sig ];then
+  netprefix="s"
+  L1rpcportmod=3
+  L2rpcportmod=3
+elif [ ${chain} = main ];then
+  netprefix=""
+  L1rpcportmod=""
+  L2rpcportmod=0
+fi
+lncli_alias="sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009"
+bitcoincli_alias="/usr/local/bin/${network}-cli -rpcport=${L1rpcportmod}8332"
+lightningcli_alias="sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config"
+shopt -s expand_aliases
+alias lncli_alias="$lncli_alias"
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lightningcli_alias="$lightningcli_alias"
+
 # Check if ready (chain in sync and channels open)
-./XXchainInSync.sh $network $chain
+./XXchainInSync.sh $network $chain $LNTYPE
 if [ $? != 0 ]; then
   exit 1
 fi
 
 # let user enter the invoice
-l1="Enter the AMOUNT IN SATOSHI of the invoice:"
+l1="Enter the AMOUNT IN SATOSHIS to invoice:"
 l2="1 ${network} = 100 000 000 SAT"
-dialog --title "Pay thru Lightning Network" \
+dialog --title "Request payment through Lightning" \
 --inputbox "$l1\n$l2" 9 50 2>$_temp
 amount=$(cat $_temp | xargs | tr -dc '0-9')
 shred -u $_temp
@@ -38,23 +72,30 @@ fi
 # TODO let user enter a description
 
 # build command
-command="lncli --chain=${network} --network=${chain}net addinvoice ${amount}"
+if [ $LNTYPE = cln ];then
+  label=$(date +%s) # seconds since 1970-01-01 00:00:00 UTC
+  # invoice msatoshi label description [expiry] [fallbacks] [preimage] [exposeprivatechannels] [cltv]
+  command="$lightningcli_alias invoice ${amount}sat $label ''"
+  # TODO warn about insufficient liquidity
+elif [ $LNTYPE = lnd ];then
+  command="$lncli_alias addinvoice ${amount}"
+fi
 
 # info output
 clear
 echo "******************************"
 echo "Create Invoice / Payment Request"
 echo "******************************"
-echo ""
+echo
 echo "COMMAND LINE: "
 echo $command
-echo ""
+echo
 echo "RESULT:"
 sleep 2
 
 # execute command
 result=$($command 2>$_error)
-error=`cat ${_error} 2>/dev/null`
+error=$(cat ${_error} 2>/dev/null)
 
 #echo "result(${result})"
 #echo "error(${error})"
@@ -65,9 +106,12 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-
-  rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
-  payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
+  if [ $LNTYPE = cln ];then
+    payReq=$(echo "$result" | grep bolt11 | cut -d '"' -f4)
+  elif [ $LNTYPE = lnd ];then
+    rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
+    payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
+  fi
   /home/admin/config.scripts/blitz.display.sh qr "${payReq}"
 
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
@@ -86,19 +130,27 @@ else
   echo "${payReq}"
   echo
   echo "Monitoring the Incoming Payment with:"
-  echo "lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash}"
+  if [ $LNTYPE = cln ];then
+    echo "$lightningcli_alias waitinvoice $label"
+  elif [ $LNTYPE = lnd ];then
+    echo "$lncli_alias lookupinvoice ${rhash}"
+  fi
   echo "Press x and hold to skip to menu."
 
   while :
     do
-
-    result=$(lncli --chain=${network} --network=${chain}net lookupinvoice ${rhash})
-    wasPayed=$(echo $result | grep -c '"settled": true')
+    if [ $LNTYPE = cln ];then
+      result=$($lightningcli_alias waitinvoice $label)
+      wasPayed=$(echo $result | grep -c 'paid')
+    elif [ $LNTYPE = lnd ];then
+      result=$($lncli_alias lookupinvoice ${rhash})
+      wasPayed=$(echo $result | grep -c '"settled": true')
+    fi
     if [ ${wasPayed} -gt 0 ]; then
       echo 
       echo $result
       echo
-      echo "Returning to menu - OK Invoice payed."
+      echo "OK the Invoice was paid - returning to menu."
       /home/admin/config.scripts/blitz.display.sh hide
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/ok.png
       sleep 2

@@ -14,8 +14,42 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=lnd
+fi
+# CHAIN is signet | testnet | mainnet
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+else
+  CHAIN=${chain}net
+fi
+if [ ${chain} = test ];then
+  netprefix="t"
+  L1rpcportmod=1
+  L2rpcportmod=1
+elif [ ${chain} = sig ];then
+  netprefix="s"
+  L1rpcportmod=3
+  L2rpcportmod=3
+elif [ ${chain} = main ];then
+  netprefix=""
+  L1rpcportmod=""
+  L2rpcportmod=0
+fi
+lncli_alias="sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009"
+bitcoincli_alias="/usr/local/bin/${network}-cli -rpcport=${L1rpcportmod}8332"
+lightningcli_alias="sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config"
+shopt -s expand_aliases
+alias lncli_alias="$lncli_alias"
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lightningcli_alias="$lightningcli_alias"
+
 # Check if ready (chain in sync and channels open)
-./XXchainInSync.sh $network $chain
+./XXchainInSync.sh $network $chain $LNTYPE
 if [ $? != 0 ]; then
     exit 1
 fi
@@ -36,7 +70,7 @@ if [ "${network}" = "bitcoin" ]; then
   if [ "${chain}" = "main" ]; then
     testSite="https://satoshis.place"
   else
-    testSite="https://testnet.satoshis.place"
+    testSite="https://starblocks.acinq.co/"
   fi
 elif [ "${network}" = "litecoin" ]; then
     testSite="https://millionlitecoinhomepage.net"
@@ -46,7 +80,7 @@ fi
 l1="Copy the LightningInvoice/PaymentRequest into here:"
 l2="Its a long string starting with '${paymentRequestStart}'"
 l3="To try it out go to: ${testSite}"
-dialog --title "Pay thru Lightning Network" \
+dialog --title "Pay through the Lightning Network" \
 --inputbox "$l1\n$l2\n$l3" 10 70 2>$_temp
 invoice=$(cat $_temp | xargs)
 shred -u $_temp
@@ -61,7 +95,12 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-command="lncli --chain=${network} --network=${chain}net sendpayment --force --pay_req=${invoice}"
+if [ $LNTYPE = cln ];then
+  # pay bolt11 [msatoshi] [label] [riskfactor] [maxfeepercent] [retry_for] [maxdelay] [exemptfee]
+  command="$lightningcli_alias pay ${invoice}"
+elif [ $LNTYPE = lnd ];then
+  command="$lncli_alias sendpayment --force --pay_req=${invoice}"
+fi
 
 # info output
 clear
@@ -70,20 +109,24 @@ echo "Pay Invoice / Payment Request"
 echo "This script is as an example how to use the lncli interface."
 echo "Its not optimized for performance or error handling."
 echo "************************************************************"
-echo ""
+echo 
 echo "COMMAND LINE: "
 echo $command
-echo ""
+echo
 echo "RESULT (may wait in case of timeout):"
 
 # execute command
 result=$($command 2>$_error)
-error=`cat ${_error}`
+error=$(cat ${_error})
 
 #echo "result(${result})"
 #echo "error(${error})"
 
-resultIsError=$(echo "${result}" | grep -c "payment_error")
+if [ $LNTYPE = cln ];then
+  resultIsError=$(echo "${result}" | grep -c '"code":')
+elif [ $LNTYPE = lnd ];then
+  resultIsError=$(echo "${result}" | grep -c "payment_error")
+fi
 if [ ${resultIsError} -gt 0 ]; then
   error="${result}"
 fi
@@ -99,8 +142,8 @@ else
   echo "******************************"
   echo "WIN"
   echo "******************************"
-  echo "It worked :) - check out the service you were paying."
+  echo "It worked :) - check the service you were paying."
 fi
-echo ""
+echo
 echo "Press ENTER to return to main menu."
 read key
