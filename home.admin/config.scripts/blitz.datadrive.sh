@@ -49,7 +49,7 @@ fi
 isMounted=$(sudo df | grep -c /mnt/hdd)
 isBTRFS=$(sudo btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
-isSSD="Unknown"
+isSSD="0"
 
 # determine if swap is external on or not
 externalSwapPath="/mnt/hdd/swapfile"
@@ -1526,6 +1526,9 @@ if [ "$1" = "clean" ]; then
 
   >&2 echo "# RASPIBLITZ DATA DRIVES - CLEANING"
 
+  # get HDD status
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+
   if [ ${isMounted} -eq 0 ]; then
     >&2 echo "# FAIL: cannot clean - the drive is not mounted'"
     echo "error='not mounted'"
@@ -1536,9 +1539,9 @@ if [ "$1" = "clean" ]; then
   sudo apt-get install -y secure-delete 1>/dev/null
 
   >&2 echo
-  >&2 echo "# IMPORTANT: There is no 100% guarantee that sensitive data is completely deleted!"
-  >&2 echo "# see: https://www.davescomputers.com/securely-deleting-files-solid-state-drive/"
-  >&2 echo "# see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
+  >&2 echo "# IMPORTANT: No 100% guarantee that sensitive data is completely deleted!"
+  # see: https://www.davescomputers.com/securely-deleting-files-solid-state-drive/"
+  # see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
   >&2 echo "# --> Dont resell or gift data drive. Destroy physically if needed."
   >&2 echo  
 
@@ -1581,7 +1584,7 @@ if [ "$1" = "clean" ]; then
           fi
           # on SSDs never shredd
           # https://www.davescomputers.com/securely-deleting-files-solid-state-drive/
-          if [ ${isSSD} -eq 1 ]; then
+          if [ "${isSSD}" == "1" ]; then
             whenDeleteSchredd=0
           fi
 
