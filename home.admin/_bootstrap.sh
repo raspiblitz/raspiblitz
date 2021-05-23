@@ -461,8 +461,10 @@ if [ ${isMounted} -eq 0 ]; then
   # errors from this process will be refelcted ins state / message of raspiblitz.info
   echo "Calling Data Migration for possible updates .." >> $logFile
   sudo /home/admin/_bootstrap.update.sh
-  echo "Calling Provisioning .." >> $logFile
-  sudo /home/admin/_bootstrap.provision.sh
+  if [ "$?" == "0" ]; then
+    echo "Calling Provisioning .." >> $logFile
+    sudo /home/admin/_bootstrap.provision.sh
+  fi
 
   ###################################################
   # WAIT LOOP: AFTER FRESH SETUP, MIFGRATION OR ERROR
