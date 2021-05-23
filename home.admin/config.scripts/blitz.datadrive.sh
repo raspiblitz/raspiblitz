@@ -1199,6 +1199,9 @@ fi
 
 if [ "$1" = "tempmount" ]; then
 
+  # get HDD status and candidates
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+
   if [ ${isMounted} -eq 1 ]; then
     echo "error='already mounted'"
     exit 1
