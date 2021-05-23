@@ -11,8 +11,9 @@ CHAIN=mainnet
 echo "services default values"
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
 if [ ${#lnd} -eq 0 ]; then lnd="off"; fi
-if [ ${#crtlWebinterface} -eq 0 ]; then crtlWebinterface="off"; fi
 if [ ${#cln} -eq 0 ]; then cln="off"; fi
+if [ ${#crtlWebinterface} -eq 0 ]; then crtlWebinterface="off"; fi
+if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -22,6 +23,7 @@ OPTIONS+=(l "LND on $CHAIN" ${lnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${rtlWebinterface})
 OPTIONS+=(c "C-lightning on $CHAIN" ${cln})
 OPTIONS+=(t "RTL for CLN on $CHAIN" ${crtlWebinterface})
+OPTIONS+=(s "Sparko for CLN on $CHAIN" ${sparko})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -88,7 +90,7 @@ else
   echo "# CLN on $CHAIN Setting unchanged."
 fi
 
-# tRTL process choice
+# RTL process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
@@ -113,7 +115,7 @@ else
   echo "# RTL for LND $CHAIN Setting unchanged."
 fi
 
-# ctRTL process choice
+# cRTL process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
@@ -136,6 +138,28 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
   fi
 else
   echo "RTL for CLN $CHAIN Setting unchanged."
+fi
+
+# sparko process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${sparko}" != "${choice}" ]; then
+  echo "# Sparko on $CHAIN Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cln.sparko.sh ${choice} $CHAIN
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cln.sparko.sh menu $CHAIN
+    else
+      l1="# !!! FAIL on Sparko on $CHAIN install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cln.sparko.sh on $CHAIN"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Sparko on $CHAIN Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

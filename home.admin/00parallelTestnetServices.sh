@@ -13,6 +13,7 @@ if [ ${#trtlWebinterface} -eq 0 ]; then trtlWebinterface="off"; fi
 if [ ${#tlnd} -eq 0 ]; then tlnd="off"; fi
 if [ ${#tcrtlWebinterface} -eq 0 ]; then tcrtlWebinterface="off"; fi
 if [ ${#tcln} -eq 0 ]; then tcln="off"; fi
+if [ ${#tsparko} -eq 0 ]; then tsparko="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -22,6 +23,7 @@ OPTIONS+=(l "LND on $CHAIN" ${tlnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${trtlWebinterface})
 OPTIONS+=(c "C-lightning on $CHAIN" ${tcln})
 OPTIONS+=(t "RTL for CLN on $CHAIN" ${tcrtlWebinterface})
+OPTIONS+=(s "Sparko for CLN on $CHAIN" ${tsparko})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -137,6 +139,30 @@ if [ "${tcrtlWebinterface}" != "${choice}" ]; then
 else
   echo "RTL for CLN $CHAIN Setting unchanged."
 fi
+
+# tsparko process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tsparko}" != "${choice}" ]; then
+  echo "# Sparko on $CHAIN Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cln.sparko.sh ${choice} $CHAIN
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cln.sparko.sh menu $CHAIN
+    else
+      l1="# !!! FAIL on Sparko on $CHAIN install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cln.sparko.sh on $CHAIN"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Sparko on $CHAIN Setting unchanged."
+fi
+
+
 
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
