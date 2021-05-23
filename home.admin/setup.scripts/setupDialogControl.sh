@@ -169,7 +169,7 @@ if [ "${setupPhase}" == "setup" ]; then
         echo "Please report as issue on the raspiblitz github."
         exit 1
       fi
-      sudo /home/admin/config.scripts/blitz.datadrive.sh umount
+      sudo /home/admin/config.scripts/blitz.datadrive.sh unmount
       sleep 2
 
       # by keeping that blockchain - user choosed already the blockchain type
