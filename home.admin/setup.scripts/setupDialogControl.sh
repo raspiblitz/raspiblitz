@@ -263,6 +263,7 @@ if [ "${setupPhase}" == "setup" ]; then
     echo "lightning=${lightning}" >> $CONFIGFILE
     echo "network=${network}" >> $CONFIGFILE
     echo "chain=main" >> $CONFIGFILE
+    echo "hostname='${hostname}'" >> $CONFIGFILE
     echo "runBehindTor=on" >> $CONFIGFILE
   
     # user needs to set all passwords
