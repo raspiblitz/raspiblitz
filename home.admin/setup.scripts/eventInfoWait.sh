@@ -51,6 +51,16 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
+elif [ "${eventID}" == "error" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+SYSTEM RAN INTO AN ERROR:
+${contentString}
+------------------------------------
+Use terminal command to login:
+ssh admin@${localip}
+" 9 41
+
 elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
@@ -195,7 +205,7 @@ Please connect a ${contentWords[0]}
 HDD or SSD to the device.
 " 7 35
 
-elif [ "${eventID}" == "erroHDD" ]; then
+elif [ "${eventID}" == "errorHDD" ]; then
 
     # contentString --> detail error message
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
