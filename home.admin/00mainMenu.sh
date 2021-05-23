@@ -177,7 +177,7 @@ if [ "${testnet}" == "on" ]&&[ ${chain} != test ];then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
-if [ "${mainnet}" == "on" ]&&[ ${chain} != main ];then
+if [ ${chain} != main ];then
   OPTIONS+=(MAINNET "Mainnet Service Options")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))

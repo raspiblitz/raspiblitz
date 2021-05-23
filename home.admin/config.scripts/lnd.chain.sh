@@ -12,7 +12,7 @@ fi
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
 if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
-  echo "# Installing the LND instance on ${CHAIN}"
+  echo "# Configuring the LND instance on ${CHAIN}"
 elif [ ${CHAIN} = signet ]; then
   echo "# Signet is not yet supported in LND"
   echo "# see https://github.com/lightningnetwork/lnd/issues/5018"

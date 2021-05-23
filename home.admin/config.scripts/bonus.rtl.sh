@@ -373,7 +373,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/${chainprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${chainprefix}${typeprefix}RTL.service")
   if [ ${isInstalled} -eq 1 ]; then
-  echo "# Removing the RTL for ${LNTYPE} ${CHAIN}"
+  echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
     sudo systemctl disable ${chainprefix}${typeprefix}RTL
     sudo rm /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
     if [ $LNTYPE = cln ];then

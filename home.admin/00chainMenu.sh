@@ -88,7 +88,7 @@ fi
 OPTIONS+=(INFO "RaspiBlitz Status Screen for ${CHAIN}")
 
 if [ "$testnet" == "on" ]; then
-OPTIONS+=(SERVICES "Additional Apps & Services on testnet")
+OPTIONS+=(SERVICES "Additional Apps & Services on ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
