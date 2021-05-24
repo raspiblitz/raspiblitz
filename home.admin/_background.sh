@@ -408,7 +408,7 @@ do
   recheckIBD=$((($counter % 60)+1))
   if [ ${recheckIBD} -eq 1 ]; then
     # check if flag exists (got created on 50syncHDD.sh)
-    flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+    flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
       finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then

@@ -437,6 +437,9 @@ if [ ${isMounted} -eq 0 ]; then
   # PROVISION PROCESS
   #############################################
 
+  # refresh data from info file
+  source ${infoFile}
+
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
   if [ "${hddFormat}" != "btrfs" ]; then
@@ -455,15 +458,42 @@ if [ ${isMounted} -eq 0 ]; then
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
-  #sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
-  #sed -i "s/^network=.*/network=${network}/g" ${infoFile}
   
-  # errors from this process will be refelcted ins state / message of raspiblitz.info
-  echo "Calling Data Migration for possible updates .." >> $logFile
-  sudo /home/admin/_bootstrap.update.sh
-  if [ "$?" == "0" ]; then
-    echo "Calling Provisioning .." >> $logFile
-    sudo /home/admin/_bootstrap.provision.sh
+  # if setup - run provision setup first
+  if [ "${setupPhase}" == "setup" ]; then
+    echo "Calling _bootstrap.setup.sh for basic setup tasks .." >> $logFile
+    sudo /home/admin/_provision.setup.sh
+    if [ "$?" != "0" ]; then
+      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      exit 1
+    fi
+  fi
+
+  # if update - run provision update migration first
+  if [ "${setupPhase}" == "update" ]; then
+    echo "Calling _bootstrap.update.sh for possible update migrations .." >> $logFile
+    sudo /home/admin/_provision.update.sh
+    if [ "$?" != "0" ]; then
+      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      exit 1
+    fi
+  fi
+
+  # if update - run provision update migration first
+  if [ "${setupPhase}" == "migration" ]; then
+    echo "Calling _bootstrap.migration.sh for possible update migrations .." >> $logFile
+    sudo /home/admin/_provision.migration.sh
+    if [ "$?" != "0" ]; then
+      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      exit 1
+    fi
+  fi
+
+  echo "Calling _bootstrap.provision.sh for general system provisioning .." >> $logFile
+  sudo /home/admin/_provision_.sh
+  if [ "$?" != "0" ]; then
+    echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+    exit 1
   fi
 
   ###################################################
@@ -477,8 +507,8 @@ if [ ${isMounted} -eq 0 ]; then
     # TODO: DETECT WHEN USER SETUP IS DONE
     echo "TODO: DETECT WHEN USER FINAL DIALOG IS DONE" >> $logFile
   
+    # offer option to COPY BLOCKHCAIN (see 50copyHDD.sh)
     # handle possible errors
-    # set passwords
     # show seed words
 
     # get latest network info & update raspiblitz.info (in case network changes)

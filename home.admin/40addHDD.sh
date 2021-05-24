@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: should be good to be deleted - it now done in _provision.setup.sh or _provision_.sh
+# ---> the experimental "adding RAID drive" section for BRTFS gets dropped here
+
 ## get basic info
 source /home/admin/raspiblitz.info
 

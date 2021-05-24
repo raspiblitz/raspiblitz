@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: should be good to be deleted - it now done in _provision.setup.sh
+
 ## get basic info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf

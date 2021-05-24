@@ -1,6 +1,8 @@
 #!/bin/bash
 echo ""
 
+# TODO: should be good to be deleted - it now done in _provision.setup.sh and setup dialogs
+
 # load setup config
 source /home/admin/raspiblitz.info
 

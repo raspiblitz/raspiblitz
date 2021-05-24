@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: CHECK IF IS NOW REPLACED BY NEW EVENT WAIT DIALOGS
+
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 

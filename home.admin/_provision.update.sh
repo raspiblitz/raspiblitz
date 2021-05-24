@@ -9,6 +9,9 @@ infoFile="/home/admin/raspiblitz.info"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
+# SETUPFILE - configuration of RaspiBlitz
+setupFile="/mnt/hdd/raspiblitz.conf"
+
 # debug info
 echo "STARTED Update/Init --> see logs in ${logFile}"
 echo "STARTED Update/Init" >> ${logFile}

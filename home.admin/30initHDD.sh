@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: should be good to be deleted - its now done in bootstrap and setupcontroller
+
 ## get basic info
 source /home/admin/raspiblitz.info
 
