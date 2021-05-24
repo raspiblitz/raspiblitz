@@ -387,7 +387,7 @@ This is the screen that gets displayed on the LCD/display. It's useful to call i
 
 #### LIGHTNING (Basic Node Management)
 
-Under `LIGHTNING` you find some basic steps to manage your Lightning node. Those are very simplyfied in the RaspiBlitz SSH menu for the reason of learning. For more advanced management of your Lightning node see addtional apps under 'SERVICES'.
+Under `LIGHTNING` you find some basic steps to manage your Lightning node. Those are very simplified in the RaspiBlitz SSH menu for the reason of learning. For more advanced management of your Lightning node see additional apps under 'SERVICES'.
 
 ##### FUNDING: Fund your on-chain Wallet
 
@@ -439,7 +439,7 @@ Create an invoice to send to someone for a service to be paid through lightning.
 
 If you connected your node well within the Lightning Network you can become a "Routing Node". Other users might select your Node as part of a Lightning Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
 
-Beware - earning fees as a routing node does not come automatic. It's a bit of hard work of building the right channels to be attractive for other people to route thru. Check the internet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
+Beware - earning fees as a routing node does not come automatic. It's a bit of hard work of building the right channels to be attractive for other people to route through. Check the internet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
 
 ##### NAME: Change name of your Node
 
@@ -753,7 +753,7 @@ If apps need access to the Bitcoin RPC service you can find this here.
 
 ##### BISQ: Use your node with BISQ
 
-Here you can activate a hidden service for your bitcoin node so that it can be used for the decentral exchange called BISQ.
+Here you can activate a hidden service for your bitcoin node so that it can be used for the decentralized exchange called BISQ.
 
 ##### EXPORT: Macaroons and TLS.cert
 
@@ -777,7 +777,7 @@ This method is recommended to export to:
 
 Opens an ad-hoc webserver so that you can download the files in your local network through the browser.
 
-*This is the least secure way to transfer those files - everybody in your local network has access to those file during download. Remember with the Admin-Macaroon somebody could takeover your node and spend all your funds. Just use as last fallback.*
+*This is the least secure way to transfer those files - everybody in your local network has access to those file during download. Remember with the Admin-Macaroon somebody could take over your node and spend all your funds. Just use as last fallback.*
 
 ###### Hex-String
 
@@ -798,7 +798,7 @@ At the moment, the following subscription services are available:
 
 ##### IP2TOR (paid)
 
-IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP thru which you can make services of your RaspiBlitz easy reachable for everybody on the internet. You don't need to care about your local router or firewall settings. You can pay this service also directly thru Lightning from your RaspiBlitz as subscription.
+IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP through which you can make services of your RaspiBlitz easy reachable for everybody on the internet. You don't need to care about your local router or firewall settings. You can pay this service also directly through Lightning from your RaspiBlitz as subscription.
 
 At first you select what service of your RaspiBlitz you like to tunnel thru a IP2TOR bridge. 
 
@@ -901,11 +901,11 @@ The options are explained in detail:
 
 ##### RELEASE: Update RaspiBlitz to a new Version
 
-This is common way to update your RaspiBlitz. Choose this option to prepare your RaspiBlitz for a new SD card image containing the new version release.
+This is a common way to update your RaspiBlitz. Choose this option to prepare your RaspiBlitz for a new SD card image containing the new version release.
 
 ##### PATCH: Patch RaspiBlitz code
 
-With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHub Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people who want to develolp on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
+With Patching you have now an easy way to sync your RaspiBlitz code/scripts with the official RaspiBlitz GitHub Repo or even your own forked GitHub Repo. This is an option for people that report bugs and we like to offer them a quick script update (patch) between RaspiBlitz releases or for people who want to develop on the RaspiBlitz and sync code between their IDE, forked GitHub and their RaspiBlitz.
 
 ##### LND: Interim LND Update
 
@@ -915,7 +915,7 @@ If you choose this you get the option to do this `VERIFIED` that means it offers
 
 ##### BITCOIN: Interim Bitcoin Update
 
-Like with LND you have the possiblity to upadte the bitcoin core version here.
+Like with LND you have the possibility to update the bitcoin core version here.
 
 #### REBOOT: Reboot RaspiBlitz
 
@@ -961,7 +961,7 @@ Then the blockchain needs to sync up and you should be back to normal.
 
 ## Make a RaspiBlitz out of your Umbrel or MyNode
 
-Another kind of migration is when you already run an full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels. You basically have all the hardware needed and just need to change software. You dont need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
+Another kind of migration is when you already run a full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels. You basically have all the hardware needed and just need to change software. You don't need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
 
 *NOTE: This migration is still experimental. You will still use the terminal to setup & manage your RaspiBlitz. If that is too technical for you please wait for the RaspiBlitz v1.8, which will introduce a WebUI for your browser that make the migration to RaspiBlitz familiar like with your old node user experiences.*
 
@@ -975,7 +975,7 @@ Instructions for Migration:
 * shutdown your old node
 * remove the sd card
 * [download the latest Raspiblitz sd card image & flash it to your sd card](#downloading-the-software)
-* if you like to use a HDMI monitor for status & progress, create a empty file called `hdmi` (withot any ending) on the sd card while connected to your laptop 
+* if you like to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the sd card while connected to your laptop 
 * [insert sd card, boot up & login per SSH](#boot-your-raspiblitz)
 
 Now RaspiBlitz should show you that old data from your node was detected and offer you todo the migration.
@@ -985,7 +985,7 @@ Now RaspiBlitz should show you that old data from your node was detected and off
 * Login per SSH as before and reset the passwords (`FINAL RECOVERY LOGIN` on LCD). Then a final reboot will happen.
 * Login per SSH with your new password A & unlock LND wallet with password C. Now blockchain needs to catch up and then your RaspiBlitz should be ready and show you (under INFO) your on-chain & channel balance.
 
-If you dont have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
+If you don't have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
 
 ## Interface / APIs
 
@@ -1044,7 +1044,7 @@ Go to your web browser, do the following:
 
     ![Dropbox API 2](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-2.png)
 
-    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Dont forget to `Submit` the change before continue.
+    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Don't forget to `Submit` the change before continue.
 
 1. Generate **OAUth2 Token**.
 
@@ -1060,7 +1060,7 @@ To test it, try opening or closing a channel, and then check if you can find a c
 
 In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature. On that remote server the public key of the RaspiBlitz root user needs to be part of the authorized keys - so that no password is needed for the background script to make the backup.
 
-The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on initalization (init); it will show and transfer ssh-pubkey to a remote server.
+The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on initialization (init); it will show and transfer ssh-pubkey to a remote server.
 
 To test it, try opening or closing a channel, and then check if you can find a copy of `channel.backup` on your remote server. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
@@ -1068,7 +1068,7 @@ To test it, try opening or closing a channel, and then check if you can find a c
 
 *You can also backup the SCB to another local drive, e.g. a USB stick:*
 
-You can use a small USB thumb drive (everything over 120MB is fine). Please don't use a second HDD/SSD for this because that might drain too much power and could hurt the security of your data more then it helps.
+You can use a small USB thumb drive (everything over 120MB is fine). Please don't use a second HDD/SSD for this because that might drain too much power and could hurt the security of your data more than it helps.
 
 To activate this feature, go to `MAINMENU` > `SETTINGS` > `StaticChannelBackup on USB Drive` and follow the instructions.
 
@@ -1092,7 +1092,7 @@ Now download the new RaspiBlitz SD card image and write it to your SD card. Yes,
 
 *If you have done manual changes to the system (installed packages, added scripts, etc), you might need to do some preparations before overwriting your SD card - see [FAQ](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).*
 
-If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and don't worry, you don't need to re-download the blockchain again. It is worth noting here that your SSH password will be reset to `raspiblitz`. You will be promted to change this once the update is finished.
+If done successfully, simply put the SD card into the RaspiBlitz and power on again. Then follow the instructions on the display ... and don't worry, you don't need to re-download the blockchain again. It is worth noting here that your SSH password will be reset to `raspiblitz`. You will be prompted to change this once the update is finished.
 
 * [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
 
@@ -1111,7 +1111,7 @@ Now you are ready to start the SD card build script (check the code to see if th
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`. You can check what gets installed and configured in detail. Feel free to post improvements as pull requests.
 
-The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. The install dialog of the RaspiBlitz schould automatically start. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitzes, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image.
+The whole build process takes a while. At the end the LCD drivers get installed and a reboot is needed. A user `admin` is created during the process. Remember the default password is now `raspiblitz`. You can login per SSH again - this time use admin: `ssh admin@[IP-OF-YOUR-RASPI]`. The install dialog of the RaspiBlitz should automatically start. If you do not want to continue with the installation at this moment and use this sd card as a template for setting up multiple RaspiBlitzes, click `Cancel` and run `/home/admin/XXprepareRelease.sh`. Once you see the LCD going white and the activity LED of the pi starts going dark, you can unplug power and remove the SD card. You have now built your own RaspiBlitz SD card image.
 
 *Note: If you plan to use your self-build sd card as a MASTER copy and distribute it: Use a smaller 8GB card for that. This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
