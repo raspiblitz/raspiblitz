@@ -14,9 +14,11 @@ infoFile="/home/admin/raspiblitz.info"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
-# debug info
-echo "STARTED Provisioning --> see logs in ${logFile}"
-echo "STARTED Provisioning from preset config file" >> ${logFile}
+# log header
+echo "" >> ${logFile}
+echo "###################################" >> ${logFile}
+echo "# _provision_.sh" >> ${logFile}
+echo "###################################" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Provisioning from Config'/g" ${infoFile}
 
 # check if there is a config file

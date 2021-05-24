@@ -15,10 +15,11 @@ source ${setupFile}
 configFile="/mnt/hdd/raspiblitz.conf"
 source ${configFile}
 
-# load old or init raspiblitz config
-# debug info
-echo "STARTED Setup --> see logs in ${logFile}"
-echo "STARTED Setup" >> ${logFile}
+# log header
+echo "" >> ${logFile}
+echo "###################################" >> ${logFile}
+echo "# _provision.setup.sh" >> ${logFile}
+echo "###################################" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
 
 ###################################

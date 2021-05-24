@@ -12,10 +12,12 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # SETUPFILE - configuration of RaspiBlitz
 setupFile="/mnt/hdd/raspiblitz.conf"
 
-# debug info
-echo "STARTED Update/Init --> see logs in ${logFile}"
-echo "STARTED Update/Init" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Running Data Migration'/g" ${infoFile}
+# log header
+echo "" >> ${logFile}
+echo "###################################" >> ${logFile}
+echo "# _provision.update.sh" >> ${logFile}
+echo "###################################" >> ${logFile}
+sudo sed -i "s/^message=.*/message='Running Data Update'/g" ${infoFile}
 
 # HDD BTRFS RAID REPAIR IF NEEDED
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)

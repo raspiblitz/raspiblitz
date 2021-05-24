@@ -10,10 +10,11 @@ source ${infoFile}
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
-# load old or init raspiblitz config
-# debug info
-echo "STARTED Migration --> see logs in ${logFile}"
-echo "STARTED Migration" >> ${logFile}
+# log header
+echo "" >> ${logFile}
+echo "###################################" >> ${logFile}
+echo "# _provision.migration.sh" >> ${logFile}
+echo "###################################" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Provision Migration'/g" ${infoFile}
 
 if [ "${hddGotMigrationData}" == "" ]; then
