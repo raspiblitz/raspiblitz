@@ -401,11 +401,9 @@ if [ ${isMounted} -eq 0 ]; then
   # until SSH or WEBUI setup data is available
   #############################################
 
+  echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> $logFile
   until [ "${state}" == "waitprovision" ]
   do
-
-    # TODO: DETECT WHEN USER SETUP IS DONE
-    echo "TODO: DETECT WHEN USER SETUP IS DONE hddError(${hddError}) hddCandidate(${hddCandidate})" >> $logFile
 
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
@@ -439,6 +437,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # refresh data from info file
   source ${infoFile}
+  echo "# PROVISION PROCESS with setupPhase(${setupPhase})"
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
@@ -458,7 +457,7 @@ if [ ${isMounted} -eq 0 ]; then
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
-  
+
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _bootstrap.setup.sh for basic setup tasks .." >> $logFile
