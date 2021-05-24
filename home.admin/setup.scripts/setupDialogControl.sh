@@ -31,6 +31,7 @@ if [ "${setupPhase}" == "update" ]; then
   else
     # default to normal setup options
     setupPhase="setup"
+    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
     echo "# you refused recovery option - defaulting to normal setup"
   fi
 fi
@@ -47,7 +48,7 @@ if [ "${setupPhase}" == "recovery" ]; then
   else
     # default to normal setup options
     setupPhase="setup"
-    sudo sed -i "s/^=setupPhase.*/state=setupPhase/g" /home/admin/raspiblitz.info
+    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
     echo "# you refused recovery option - defaulting to normal setup"
   fi
 fi
@@ -69,7 +70,7 @@ if [ "${setupPhase}" == "migration" ]; then
   else
     # on cancel - default to normal setup
     setupPhase="setup"
-    sudo sed -i "s/^=setupPhase.*/state=setupPhase/g" /home/admin/raspiblitz.info
+    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
     echo "# you refused node migration option - defaulting to normal setup"
     exit 1
   fi

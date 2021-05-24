@@ -488,7 +488,7 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
-  echo "Calling _bootstrap.provision.sh for general system provisioning .." >> $logFile
+  echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sudo /home/admin/_provision_.sh
   if [ "$?" != "0" ]; then
     echo "EXIT BECAUSE OF ERROR STATE" >> $logFile

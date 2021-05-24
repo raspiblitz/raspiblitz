@@ -35,7 +35,6 @@ if [ ${parameterExists} -eq 0 ]; then
 fi
 
 # import config values
-sudo chmod 777 ${configFile}
 source ${configFile}
 
 ##########################
@@ -124,11 +123,10 @@ fi
 #sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
 #sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
-# optimze if RAM >1GB
+# optimze mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 if [ ${kbSizeRAM} -gt 3500000 ]; then
