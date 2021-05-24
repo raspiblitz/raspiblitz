@@ -18,9 +18,11 @@ if [ $# -gt 0 ];then
   CHAIN=$1
   chain=${CHAIN::-3}
 fi
-source /home/admin/config.scripts/_functions.lightning.sh
-getLNvars lnd ${chain}net
-getLNaliases
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+shopt -s expand_aliases
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lncli_alias="$lncli_alias"
+alias lightningcli_alias="$lightningcli_alias"
 
 ## get HDD/SSD info
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)

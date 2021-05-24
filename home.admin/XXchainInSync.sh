@@ -14,9 +14,11 @@ else
   LNTYPE=lnd
 fi
 
-source /home/admin/config.scripts/_functions.lightning.sh
-getLNvars $LNTYPE ${chain}net
-getLNaliases
+source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
+shopt -s expand_aliases
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lncli_alias="$lncli_alias"
+alias lightningcli_alias="$lightningcli_alias"
 
 # check if chain is in sync
 if [ $LNTYPE = cln ];then

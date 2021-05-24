@@ -14,9 +14,11 @@ if [ ${#chain} -eq 0 ]; then
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
-source /home/admin/config.scripts/_functions.lightning.sh
-getLNvars $1 $2
-getLNaliases
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
+shopt -s expand_aliases
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lncli_alias="$lncli_alias"
+alias lightningcli_alias="$lightningcli_alias"
 
 # Check if ready (chain in sync and channels open)
 ./XXchainInSync.sh $network $chain $LNTYPE

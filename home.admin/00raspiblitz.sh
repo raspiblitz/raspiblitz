@@ -154,9 +154,11 @@ if [ "${state}" = "ready" ]; then
   if [ ${configExists} -eq 1 ]; then
     echo "loading config data"
     source ${configFile}
-    source /home/admin/config.scripts/_functions.lightning.sh
-    getLNvars lnd ${chain}net
-    getLNaliases
+    source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+    shopt -s expand_aliases
+    alias bitcoincli_alias="$bitcoincli_alias"
+    alias lncli_alias="$lncli_alias"
+    alias lightningcli_alias="$lightningcli_alias"
   else
     echo "setup still in progress - setupStep(${setupStep})"
   fi
