@@ -140,6 +140,7 @@ echo "OK ${network} startup successfull " >> ${logFile}
 
 ###################################
 # Prepare Lightning
+echo "Prepare Lightning (${lightning})" >> ${logFile}
 
 if [ "${lightning}" == "lnd" ]; then 
 
@@ -253,7 +254,7 @@ if [ "${lightning}" == "lnd" ]; then
   fi
 
   # WALLET --> SEED + SCB 
-  if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; the
+  if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py scb ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
@@ -268,7 +269,7 @@ if [ "${lightning}" == "lnd" ]; then
     fi
 
   # WALLET --> SEED
-  elif [ "${seedWords}" != "" ] 
+  elif [ "${seedWords}" != "" ]; then
     
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${seedWords}" ${seedPassword}
@@ -340,7 +341,6 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${err}" != "" ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='setup: lnd wallet SEED failed'/g" ${infoFile}
-    echo "FAIL see ${logFile}"
     echo "FAIL: setup: lnd wallet SEED failed" >> ${logFile}
     echo "${err}" >> ${logFile}
     exit 1

@@ -478,7 +478,7 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _bootstrap.setup.sh for basic setup tasks .." >> $logFile
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
       exit 1
     fi
   fi
@@ -488,7 +488,7 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _bootstrap.update.sh for possible update migrations .." >> $logFile
     sudo /home/admin/_provision.update.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
       exit 1
     fi
   fi
