@@ -27,19 +27,21 @@ if [ "${setupPhase}" == "setup" ];
   clear
   echo "Hooray :) Everything is Setup!"
   echo "PRESS ENTER"
-  read key
+  read key2
 
 # when coming from migration from other node
 elif [ "${setupPhase}" == "migration" ]; then
   clear
   echo "Hooray :) Your Migration to RaspiBlitz is Done!"
   echo "PRESS ENTER"
-  read key
+  read key2
 
 # just in case then from another phase
 else
   clear
   echo "Missing Final Done Dialog for: ${setupPhase}"
   echo "PRESS ENTER"
-  read key
+  read key2
 fi
+
+sleep 2
