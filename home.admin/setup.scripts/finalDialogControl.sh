@@ -23,6 +23,9 @@ if [ "${setupPhase}" == "setup" ]; then
     done
 fi
 
+echo "test(${setupPhase})"
+sleep 2
+
 ############################################
 # SETUP DONE CONFIRMATION (Konfetti Moment)
 
@@ -31,21 +34,22 @@ if [ "${setupPhase}" == "setup" ];
   clear
   echo "Hooray :) Everything is Setup!"
   echo "PRESS ENTER"
-  read key2
+  read key
 
 # when coming from migration from other node
 elif [ "${setupPhase}" == "migration" ]; then
   clear
   echo "Hooray :) Your Migration to RaspiBlitz is Done!"
   echo "PRESS ENTER"
-  read key2
+  read key
 
 # just in case then from another phase
 else
   clear
   echo "Missing Final Done Dialog for: ${setupPhase}"
   echo "PRESS ENTER"
-  read key2
+  read key
 fi
 
+echo "test"
 sleep 2
