@@ -30,7 +30,7 @@ sleep 2
 # SETUP DONE CONFIRMATION (Konfetti Moment)
 
 # when coming from fresh setup
-if [ "${setupPhase}" == "setup" ]; 
+if [ "${setupPhase}" == "setup" ]; then
   clear
   echo "Hooray :) Everything is Setup!"
   echo "PRESS ENTER"
