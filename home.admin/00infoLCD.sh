@@ -87,7 +87,7 @@ while :
     # get config info if already available (with state value)
     source ${infoFile}
 
-    if [ "${setupPhase}" != "ready" ]; then
+    if [ "${setupPhase}" != "done" ]; then
 
       # show status info during boot & setup & repair on LCD
       /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd

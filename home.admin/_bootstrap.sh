@@ -562,17 +562,11 @@ if [ ${isMounted} -eq 0 ]; then
   # delete provision in progress flag
   sudo rm /home/admin/provision.flag
 
+  # delete setup data from RAM
+  sudo rm ${setupFile}
+
   # signal that setup phas is over
   sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
-
-  #echo "rebooting" >> $logFile
-  #echo "state=recovered" >> /home/admin/recover.flag
-  #echo "shutdown in 1min" >> $logFile
-  # save log file for inspection before reboot
-  #sudo cp ${logFile} ${logFile}.recover
-  #sync
-  #sudo shutdown -r -F -t 60
-  #exit 0
 
 else
 
