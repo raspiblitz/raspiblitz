@@ -49,7 +49,8 @@ fi
 
 # check available funding
 if [ $LNTYPE = cln ];then
-  for i in $($lightningcli_alias listfunds | jq .outputs | grep value | awk '{print $2}' | cut -d, -f1);do
+  for i in $($lightningcli_alias \
+  listfunds|jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
     confirmedBalance=$((confirmedBalance+i))
   done
 elif [ $LNTYPE = lnd ];then
