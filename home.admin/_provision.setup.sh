@@ -310,7 +310,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # make sure wallet is unlocked
   sleep 3
-  /home/admin/config.scripts/lnd.unlock.sh "${passwordC}"
+  /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
   sleep 3
 
   # check if macaroon exists now - if not fail
@@ -318,22 +318,21 @@ if [ "${lightning}" == "lnd" ]; then
   if [ ${macaroonExists} -eq 0 ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: lnd no macaroons'/g" ${infoFile}
-      echo "FAIL see ${logFile}"
       echo "FAIL: setup: lnd no macaroons" >> ${logFile}
       exit 1
   fi
 
   # now sync macaroons & TLS zo other users
-  sudo /home/admin/config.scripts/lnd.credentials.sh sync
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
 
   # unlock Wallet (if needed)
-  echo "*** Check Wallet Lock ***"
+  echo "*** Check Wallet Lock ***" >> ${logFile}
   locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
   if [ ${locked} -gt 0 ]; then
-    echo "OK - Wallet is locked ... starting unlocking dialog"
-    /home/admin/config.scripts/lnd.unlock.sh
+    echo "OK - Wallet is locked ... starting unlocking dialog" >> ${logFile}
+    /home/admin/config.scripts/lnd.unlock.sh >> ${logFile}
   else
-    echo "OK - Wallet is already unlocked"
+    echo "OK - Wallet is already unlocked" >> ${logFile}
   fi
 
   # make a final lnd check
