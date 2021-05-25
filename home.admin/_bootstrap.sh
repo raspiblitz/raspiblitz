@@ -479,6 +479,7 @@ if [ ${isMounted} -eq 0 ]; then
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "This can also happen if _provision.setup.sh has syntax errros" >> $logFile
       exit 1
     fi
   fi
@@ -489,6 +490,7 @@ if [ ${isMounted} -eq 0 ]; then
     sudo /home/admin/_provision.update.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
       exit 1
     fi
   fi
@@ -498,7 +500,8 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _bootstrap.migration.sh for possible update migrations .." >> $logFile
     sudo /home/admin/_provision.migration.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
       exit 1
     fi
   fi
