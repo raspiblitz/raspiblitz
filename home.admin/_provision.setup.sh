@@ -299,7 +299,7 @@ if [ "${lightning}" == "lnd" ]; then
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
-    echo "'seedwordsNEW='${seedwords}'" >> ${setupFile}
+    echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 
   fi
