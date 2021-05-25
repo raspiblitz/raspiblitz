@@ -23,9 +23,6 @@ if [ "${setupPhase}" == "setup" ]; then
     done
 fi
 
-echo "test(${setupPhase})"
-sleep 2
-
 ############################################
 # SETUP DONE CONFIRMATION (Konfetti Moment)
 
@@ -51,5 +48,5 @@ else
   read key
 fi
 
-echo "test"
-sleep 2
+# signal to backend that all is good and it can continue
+sudo sed -i "s/^state=.*/state='starting'/g" /home/admin/raspiblitz.info 
