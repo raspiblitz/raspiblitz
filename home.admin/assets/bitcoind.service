@@ -1,5 +1,7 @@
 # RaspiBlitz: systemd unit for bitcoind
-# wants & after will be set after intial setup
+# edit final Wants/After when provision is done
+Wants=network.target
+After=network.target
 
 [Unit]
 Description=Bitcoin-Daemon

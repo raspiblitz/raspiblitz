@@ -59,7 +59,7 @@ ${contentString}
 ------------------------------------
 Use terminal command to login:
 ssh admin@${localip}
-" 9 41
+" 10 41
 
 elif [ "${eventID}" == "error" ] && [ "${mode}" == "ssh" ]; then
 
@@ -70,7 +70,7 @@ ${contentString}
 Please report to the Raspiblitz GitHub
 Use CTRL+C to exit to terminal.
 For shutdown use command: off
-" 9 50
+" 10 50
 
 elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 
