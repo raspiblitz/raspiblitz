@@ -24,37 +24,37 @@ fi
 
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
-  prefix="t"
+  netprefix"t"
   portprefix=1
   rpcportmod=1
   zmqprefix=21
 elif [ ${CHAIN} = signet ];then
-  prefix="s"
+  netprefix"s"
   portprefix=3
   rpcportmod=3
   zmqprefix=23
 elif [ ${CHAIN} = mainnet ];then
-  prefix=""
+  netprefix""
   portprefix=""
   rpcportmod=0
   zmqprefix=28
 fi
 
 function removeParallelService() {
-  if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ];then
+  if [ -f "/etc/systemd/system/${netprefix}bitcoind.service" ];then
     sudo -u bitcoin /usr/local/bin/lncli\
      --rpcserver localhost:1${rpcportmod}009 stop
-    sudo systemctl stop ${prefix}lnd
-    sudo systemctl disable ${prefix}lnd
-    echo "# ${prefix}lnd.service on ${CHAIN} is stopped and disabled"
+    sudo systemctl stop ${netprefix}lnd
+    sudo systemctl disable ${netprefix}lnd
+    echo "# ${netprefix}lnd.service on ${CHAIN} is stopped and disabled"
     echo
   fi
 }
 
 source /home/admin/raspiblitz.info
 # add default value to raspi config if needed
-if ! grep -Eq "^${prefix}lnd=" /mnt/hdd/raspiblitz.conf; then
-  echo "${prefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 source /mnt/hdd/raspiblitz.conf
@@ -78,8 +78,8 @@ bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333
 " | sudo tee -a /mnt/hdd/lnd/lnd.conf
   fi
 
-  echo "# Create /home/bitcoin/.lnd/${prefix}lnd.conf"
-  if [ ! -f /home/bitcoin/.lnd/${prefix}lnd.conf ];then
+  echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
+  if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
     echo "
 # LND configuration
 bitcoin.${CHAIN}=1
@@ -124,9 +124,10 @@ wtclient.active=1
 tor.active=true
 tor.streamisolation=true
 tor.v3=true
-" | sudo -u bitcoin tee /home/bitcoin/.lnd/${prefix}lnd.conf
+tor.privatekeypath=/mnt/hdd/lnd/${netprefix}v3_onion_private_key
+" | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
   else
-    echo "# The file /home/bitcoin/.lnd/${prefix}lnd.conf is already present"
+    echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
   fi
 
   # systemd service  
@@ -141,7 +142,7 @@ User=bitcoin
 Group=bitcoin
 Type=simple
 ExecStart=/usr/local/bin/lnd\
- --configfile=/home/bitcoin/.lnd/${prefix}lnd.conf
+ --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
 KillMode=process
 Restart=always
 TimeoutSec=120
@@ -157,18 +158,18 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${prefix}lnd.service
-  sudo systemctl enable ${prefix}lnd 
-  echo "# Enabled the ${prefix}lnd.service"
+" | sudo tee /etc/systemd/system/${netprefix}lnd.service
+  sudo systemctl enable ${netprefix}lnd 
+  echo "# Enabled the ${netprefix}lnd.service"
   if [ "${state}" == "ready" ]; then
-    sudo systemctl start ${prefix}lnd
-    echo "# Started the ${prefix}lnd.service"
+    sudo systemctl start ${netprefix}lnd
+    echo "# Started the ${netprefix}lnd.service"
   fi
 
   echo
   echo "# Adding aliases"
   echo "\
-alias ${prefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
+alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases.sh
 
@@ -177,17 +178,17 @@ alias ${prefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   echo   
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases.sh"
-  echo "# Monitor the ${prefix}lnd with:"
-  echo "sudo journalctl -fu ${prefix}lnd"
-  echo "sudo systemctl status ${prefix}lnd"
+  echo "# Monitor the ${netprefix}lnd with:"
+  echo "sudo journalctl -fu ${netprefix}lnd"
+  echo "sudo systemctl status ${netprefix}lnd"
   echo "# logs:"
   echo "sudo tail -f /home/bitcoin/.lnd/logs/bitcoin/${CHAIN}/lnd.log"
   echo "# for the command line options use"
-  echo "${prefix}lncli help"
+  echo "${netprefix}lncli help"
   echo
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${prefix}lnd=.*/${prefix}lnd=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=on/g" /mnt/hdd/raspiblitz.conf
 
   exit 0
 fi
@@ -197,7 +198,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeParallelService
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${prefix}lnd=.*/${prefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
 
   exit 0
 fi
