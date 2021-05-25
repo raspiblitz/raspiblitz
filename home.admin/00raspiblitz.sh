@@ -62,6 +62,17 @@ do
   source /var/cache/raspiblitz/raspiblitz.status
 
   #####################################
+  # ALWAYS: Handle System States 
+  #####################################
+
+  ############################
+  # LND Wallet Unlock
+
+  if [ "${walletLocked}" == "1" ]; then
+    /home/admin/config.scripts/lnd.unlock.sh
+  fi
+
+  #####################################
   # SETUP MENU
   #####################################
 
@@ -144,17 +155,6 @@ do
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
 
-  fi
-
-  #####################################
-  # ALWAYS: Handle System States 
-  #####################################
-
-  ############################
-  # LND Wallet Unlock
-
-  if [ "${walletLocked}" == "1" ]; then
-    /home/admin/config.scripts/lnd.unlock.sh
   fi
 
   #####################################
