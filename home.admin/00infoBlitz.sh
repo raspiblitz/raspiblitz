@@ -18,7 +18,7 @@ if [ $# -gt 0 ];then
   CHAIN=$1
   chain=${CHAIN::-3}
 fi
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 shopt -s expand_aliases
 alias bitcoincli_alias="$bitcoincli_alias"
 alias lncli_alias="$lncli_alias"
@@ -55,7 +55,7 @@ if [ ${#network} -eq 0 ]; then
   if [ ${litecoinActive} -eq 1 ]; then
     network="litecoin"
   else
-    network=`sudo cat /home/admin/.network 2>/dev/null`
+    network=$(sudo cat /home/admin/.network 2>/dev/null)
   fi
   if [ ${#network} -eq 0 ]; then
     network="bitcoin"
@@ -83,9 +83,13 @@ cpu=0
 if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
   cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
 fi
-tempC=$((cpu/1000))
-tempF=$(((tempC * 18 + 325) / 10))
-
+if [ $cpu = 0 ];then
+  tempC=""
+  tempF=""
+else
+  tempC=$((cpu/1000))
+  tempF=$(((tempC * 18 + 325) / 10))
+fi
 # get memory
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
 ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
@@ -161,9 +165,14 @@ fi
 
 # check if RTL web interface is installed
 webinterfaceInfo=""
-runningRTL=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+runningRTL=$(systemctl status ${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c active)
 if [ ${runningRTL} -eq 1 ]; then
-  webinterfaceInfo="Web admin --> ${color_green}http://${local_ip}:3000"
+  if [ ${LNTYPE} = "cln" ]; then
+    RTLHTTP=${portprefix}7000
+  elif [ ${LNTYPE} = "lnd" ];then
+    RTLHTTP=${portprefix}3000
+  fi
+  webinterfaceInfo="Web admin --> ${color_green}http://${local_ip}:${RTLHTTP}"
 fi
 
 # CHAIN NETWORK
@@ -231,69 +240,167 @@ else
 fi
 
 # LIGHTNING NETWORK
-
-ln_baseInfo="-"
-ln_channelInfo="\n"
-ln_external="\n"
-ln_alias="${hostname}"
-ln_publicColor=""
-ln_port=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
-if [ ${#ln_port} -eq 0 ]; then
-  ln_port="9735"
-fi
-
-wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
-if [ "$wallet_unlocked" -gt 0 ] ; then
- alias_color="${color_red}"
- ln_alias="Wallet Locked"
-else
- ln_getInfo=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
- ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
- ln_tor=$(echo "${ln_external}" | grep -c ".onion")
- if [ ${ln_tor} -eq 1 ]; then
-   ln_publicColor="${color_green}"
- else
-   public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
-  if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
-    # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
-    ln_publicColor="${color_amber}"
-  else
-    ln_publicColor="${color_red}"
-  fi
+if [ ${LNTYPE} = "cln" ]; then
+ ln_baseInfo="-"
+ ln_channelInfo="\n"
+ ln_external="\n"
+ ln_alias="$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^alias=*" | cut -f2 -d=)"
+ if [ ${#ln_alias} -eq 0 ];then
+  ln_alias=$(lightningcli_alias getinfo | grep '"alias":' | cut -d '"' -f4)
  fi
- alias_color="${color_grey}"
- ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
- ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
- if [ ${ln_sync} -eq 0 ]; then
-    if [ ${#ln_getInfo} -eq 0 ]; then
-      ln_baseInfo="${color_red} Not Started | Not Ready Yet"
-    else
-      ln_baseInfo="${color_amber} Waiting for Chain Sync"
-    fi
+ if [ ${#ln_alias} -eq 0 ];then
+  ln_alias=${hostname}
+ fi
+ ln_publicColor=""
+ ln_port=$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^bind-addr=*" | cut -f2 -d':')
+ if [ ${#ln_port} -eq 0 ]; then
+   ln_port=$(lightningcli_alias getinfo | grep '"port":' | cut -d: -f2 | tail -1 | bc)
+ fi
+ wallet_unlocked=0 #TODO
+ if [ "$wallet_unlocked" -gt 0 ] ; then
+  alias_color="${color_red}"
+  ln_alias="Wallet Locked"
+ else
+  ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
+  pubkey=$(echo "${ln_getInfo}" | grep '"id":' | cut -d '"' -f4)
+  address=$(echo "${ln_getInfo}" | grep '.onion' | cut -d '"' -f4)
+ if [ ${#address} -eq 0 ];then
+  address=$(echo "${ln_getInfo}" | grep '"ipv4"' -A 1 | tail -1 | cut -d '"' -f4)
+ fi
+  ln_external="${pubkey}@${address}"
+  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+  if [ ${ln_tor} -eq 1 ]; then
+    ln_publicColor="${color_green}"
   else
-    ln_walletbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-    ln_walletbalance_wait="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
-    if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
-    if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
-    ln_channelbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
-    ln_channelbalance_pending="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
-    if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
-    if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
-    ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-    ln_channels_total="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-    ln_baseInfo="${color_gray}wallet ${ln_walletbalance} sat ${ln_walletbalance_wait}"
-    ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
-    ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} sat${ln_channelbalance_pending}"
-    ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
-    ln_dailyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
-    ln_weeklyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
-    ln_monthlyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
-    ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
+    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
+   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
+     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+     ln_publicColor="${color_amber}"
+   else
+     ln_publicColor="${color_red}"
+   fi
   fi
+  alias_color="${color_grey}"
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
+  if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
+    ln_sync=1
+  else
+    ln_sync=0
+  fi
+  ln_version=$(lightningcli_alias -V)
+  if [ ${ln_sync} -eq 0 ]; then
+     if [ ${#ln_getInfo} -eq 0 ]; then
+       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
+     else
+       ln_baseInfo="${color_amber} Waiting for Chain Sync"
+     fi
+   else
+     ln_walletbalance=0
+     for i in $($lightningcli_alias \
+      listfunds|jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
+       ln_walletbalance=$((ln_walletbalance+i))
+     done
+     for i in $($lightningcli_alias \
+      listfunds|jq .outputs[]|jq 'select(.status=="unconfirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
+       ln_walletbalance_wait=$((ln_walletbalance_wait+i))
+     done
+     if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
+     if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
+     ln_channelbalance=0
+     for i in $($lightningcli_alias \
+      listfunds|jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+       ln_channelbalance=$((ln_channelbalance+i))
+     done
+     if [ ${#ln_channelbalance} -eq 0 ];then
+      ln_channelbalance=0
+     fi
+     for i in $($lightningcli_alias \
+      listfunds|jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+       ln_channelbalance_all=$((ln_channelbalance_all+i))
+     done
+     ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance))
+     if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
+     if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
+     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+     ln_channels_total="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
+     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
+     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
+     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
+     ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
+     #ln_dailyfees="$($lncli_alias  feereport | jq -r '.day_fee_sum')" 2>/dev/null
+     #ln_weeklyfees="$($lncli_alias  feereport | jq -r '.week_fee_sum')" 2>/dev/null
+     #ln_monthlyfees="$($lncli_alias  feereport | jq -r '.month_fee_sum')" 2>/dev/null
+     #ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
+     ln_feeReport="$(lightningcli_alias -H summary | grep fees_collected)"
+   fi
+ fi
+ 
+elif [ ${LNTYPE} = "lnd" ];then
+ ln_baseInfo="-"
+ ln_channelInfo="\n"
+ ln_external="\n"
+ ln_alias="$(sudo cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep "^alias=*" | cut -f2 -d=)"
+ if [ ${#ln_alias} -eq 0 ];then
+  ln_alias=${hostname}
+ fi
+ ln_publicColor=""
+ ln_port=$(sudo cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep "^listen=*" | cut -f2 -d':')
+ if [ ${#ln_port} -eq 0 ]; then
+   ln_port="9735"
+ fi
+ wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
+ if [ "$wallet_unlocked" -gt 0 ] ; then
+   alias_color="${color_red}"
+   ln_alias="Wallet Locked"
+ else
+  ln_getInfo=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
+  ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+  ln_tor=$(echo "${ln_external}" | grep -c ".onion")
+  if [ ${ln_tor} -eq 1 ]; then
+    ln_publicColor="${color_green}"
+  else
+    public_check=$(nc -z -w6 ${public_ip} ${ln_port} 2>/dev/null; echo $?)
+   if [ $public_check = "0" ] || [ "${ipv6}" == "on" ]; then
+     # only set yellow/normal because netcat can only say that the port is open - not that it points to this device for sure
+     ln_publicColor="${color_amber}"
+   else
+     ln_publicColor="${color_red}"
+   fi
+  fi
+  alias_color="${color_grey}"
+  ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
+  ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
+  if [ ${ln_sync} -eq 0 ]; then
+     if [ ${#ln_getInfo} -eq 0 ]; then
+       ln_baseInfo="${color_red} Not Started | Not Ready Yet"
+     else
+       ln_baseInfo="${color_amber} Waiting for Chain Sync"
+     fi
+   else
+     ln_walletbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
+     ln_walletbalance_wait="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
+     if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
+     if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
+     ln_channelbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
+     ln_channelbalance_pending="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
+     if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
+     if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
+     ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+     ln_channels_total="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
+     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
+     ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
+     ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
+     ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
+     ln_dailyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
+     ln_weeklyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
+     ln_monthlyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
+     ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
+   fi
+ fi
 fi
 
 # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
-
 source /home/joinmarket/joinin.conf 2>/dev/null
 if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
   JMstats=$(mktemp 2>/dev/null)
@@ -314,6 +421,17 @@ ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
   fi
 
+if [ $LNTYPE = "cln" ];then
+  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
+elif [ $LNTYPE = "lnd" ];then
+  LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
+fi
+
+if [ $cpu = 0 ];then
+  templine="on $(uname -m) VM%s%s"
+else
+  templine="temp %s°C %s°F"
+fi
 sleep 5
 
 ## get uptime and current date & time
@@ -329,14 +447,14 @@ ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsI
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
-${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}    ,' /       ${color_gray}%s, ${templine}
 ${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
 ${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
 ${color_yellow}   /'          ${color_gray}
-${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}               ${color_gray}${LNline}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
