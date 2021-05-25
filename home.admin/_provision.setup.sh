@@ -131,11 +131,11 @@ do
   if [ ${loopcount} -gt 200 ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='setup: failed ${network}'/g" ${infoFile}
-    echo "FAIL see ${logFile}"
     echo "FAIL: setup: failed ${network}" >> ${logFile}
     exit 1
   fi
 done
+echo "OK ${network} startup successfull " >> ${logFile}
 
 
 ###################################
