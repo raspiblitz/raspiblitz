@@ -124,7 +124,7 @@ loopcount=0
 while [ ${bitcoinRunning} -eq 0 ]
 do
   >&2 echo "# (${loopcount}/200) checking if ${network}d is running ... " >> ${logFile}
-  bitcoinRunning=$(${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
+  bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
   sleep 2
   sync
   loopcount=$(($loopcount +1))
