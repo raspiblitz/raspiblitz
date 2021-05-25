@@ -81,6 +81,8 @@ do
 
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
+    echo "TESTER"
+    sleep 3
     # push to final setup gui dialogs
     /home/admin/setup.scripts/finalDialogControl.sh
     state="starting"

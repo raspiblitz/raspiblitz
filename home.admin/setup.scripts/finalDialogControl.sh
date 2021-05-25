@@ -9,6 +9,11 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source ${SETUPFILE}
 
+
+clear
+echo "TEST"
+sleep 3
+
 ############################################
 # SHOW SEED WORDS AFTER SETUP
 if [ "${setupPhase}" == "setup" ]; then
