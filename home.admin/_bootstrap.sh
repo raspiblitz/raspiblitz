@@ -495,10 +495,6 @@ if [ ${isMounted} -eq 0 ]; then
     exit 1
   fi
 
-  # TODO:
-  echo "TODO: add wants/after to systemd if blockchain service at the end" >> $logFile
-  exit 1
-
   ###################################################
   # WAIT LOOP: AFTER FRESH SETUP, MIFGRATION OR ERROR
   # successfull update & recover can skip this
@@ -526,6 +522,10 @@ if [ ${isMounted} -eq 0 ]; then
     source ${infoFile}
 
   done
+
+  # TODO:
+  echo "TODO: add wants/after to systemd if blockchain service at the end" >> $logFile
+  exit 1
 
   exit 0
 
