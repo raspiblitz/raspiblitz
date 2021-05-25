@@ -265,7 +265,7 @@ EOF
   elif [ $LNTYPE = cln ];then
 
     # clnrest
-    /home/admin/config.scripts/bonus.clnrest.sh on ${CHAIN}
+    /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
 
     echo "
 # Systemd unit for ${netprefix}${typeprefix}RTL
@@ -377,7 +377,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable ${netprefix}${typeprefix}RTL
     sudo rm /etc/systemd/system/${netprefix}${typeprefix}RTL.service
     if [ $LNTYPE = cln ];then
-      /home/admin/config.scripts/bonus.clnrest.sh off ${CHAIN}
+      /home/admin/config.scripts/cln.rest.sh off ${CHAIN}
     fi
     if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
       echo "# Removing the binaries"

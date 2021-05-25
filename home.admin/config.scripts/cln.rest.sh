@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
 CLRESTVERSION="v0.4.4"
 
 # help
@@ -11,8 +12,8 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "mainnet / signet / testnet instances cannot run parallel"
   echo
   echo "usage:"
-  echo "bonus.clnrest.sh on  <signet|testnet>"
-  echo "bonus.clnrest.sh off"
+  echo "cln.rest.sh on  <signet|testnet>"
+  echo "cln.rest.sh off"
   echo
   exit 1
 fi
@@ -47,10 +48,13 @@ else
   exit 1
 fi
 
-echo "# Running 'bonus.clnrest.sh $*'"
+echo "# Running 'cln.rest.sh $*'"
 
 if [ $1 = on ];then
   echo "# Setting up c-lightning-REST for $NETWORK"
+
+  sudo systemctl stop clnrest
+  sudo systemctl disable clnrest
 
   cd /home/bitcoin || exit 1
   sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
