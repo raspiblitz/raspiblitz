@@ -514,11 +514,22 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   ###################################################
-  # WAIT LOOP: AFTER FRESH SETUP, MIFGRATION OR ERROR
+  # WAIT LOOP: AFTER FRESH SETUP, MIGRATION
   # successfull update & recover can skip this
   ###################################################
 
-  until [ "${state}" != "ready" ]
+  if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "migration" ]; then
+    echo "# Go into WAIT LOOP for final setup dialog ..." >> $logFile
+    sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
+    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
+  else
+    echo "# Skip WAIT LOOP boot directly into main menu ..." >> $logFile
+    sed -i "s/^state=.*/state=finalready/g" ${infoFile}
+    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
+  fi
+
+  source ${infoFile}
+  until [ "${state}" == "finalready" ]
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE
@@ -544,30 +555,70 @@ if [ ${isMounted} -eq 0 ]; then
   ########################################
   # AFTER FINAL SETUP TASKS
 
+  # make sure for future starts that blockchain service gets started after boostrap
+  sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
+  sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
+
   # delete provision in progress flag
   sudo rm /home/admin/provision.flag
 
-  # TODO:
-  echo "TODO: add wants/after to systemd if blockchain service at the end" >> $logFile
-  exit 1
+  # signal that setup phas is over
+  sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
 
-  exit 0
-
-  echo "rebooting" >> $logFile
-  echo "state=recovered" >> /home/admin/recover.flag
-  echo "shutdown in 1min" >> $logFile
+  #echo "rebooting" >> $logFile
+  #echo "state=recovered" >> /home/admin/recover.flag
+  #echo "shutdown in 1min" >> $logFile
   # save log file for inspection before reboot
-  sudo cp ${logFile} ${logFile}.recover
-  sync
-  sudo shutdown -r -F -t 60
-  exit 0
+  #sudo cp ${logFile} ${logFile}.recover
+  #sync
+  #sudo shutdown -r -F -t 60
+  #exit 0
+
+else
+
+  ############################
+  ############################
+  # NORMAL START BOOTSTRAP (not executed after setup)
+  # Blockchain & Lightning not running
+  ############################
+
+  ######################################################################
+  # MAKE SURE LND RPC/REST ports are standard & open to all connections 
+  ######################################################################
+  sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
+
+  #################################
+  # FIX BLOCKCHAINDATA OWNER (just in case)
+  # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
+  #################################
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
+
+  #################################
+  # FIX BLOCKING FILES (just in case)
+  # https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
+  # https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
+  sudo rm -f /mnt/hdd/bitcoin/bitcoind.pid 2>/dev/null
+  sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
+
+  ################################
+  # DELETE LOG & LOCK FILES
+  ################################
+  # LND and Blockchain Errors will be still in systemd journals
+
+  # /mnt/hdd/bitcoin/debug.log
+  sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
+  # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
+  sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+  # https://github.com/rootzoll/raspiblitz/issues/1700
+  sudo rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
 fi
 
-############################
-############################
-# NORMAL START BOOTSTRAP
-############################
+##############################
+##############################
+# BOOSTRAP IN EVERY SITUATION
+##############################
 
 sed -i "s/^setupPhase=.*/setupPhase='starting'/g" ${infoFile}
 
@@ -598,25 +649,6 @@ source ${configFile}
 
 # update public IP on boot - set to domain if available
 /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
-
-######################################################################
-# MAKE SURE LND RPC/REST ports are standard & open to all connections 
-######################################################################
-sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
-sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-
-#################################
-# FIX BLOCKCHAINDATA OWNER (just in case)
-# https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
-#################################
-sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
-
-#################################
-# FIX BLOCKING FILES (just in case)
-# https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
-# https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
-sudo rm -f /mnt/hdd/bitcoin/bitcoind.pid 2>/dev/null
-sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
 
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
@@ -652,18 +684,6 @@ fi
 # state info
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
-
-################################
-# DELETE LOG & LOCK FILES
-################################
-# LND and Blockchain Errors will be still in systemd journals
-
-# /mnt/hdd/bitcoin/debug.log
-sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
-# /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
-sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
-# https://github.com/rootzoll/raspiblitz/issues/1700
-sudo rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
 #####################################
 # CLEAN HDD TEMP

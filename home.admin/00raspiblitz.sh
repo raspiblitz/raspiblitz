@@ -76,6 +76,16 @@ do
   fi
 
   #####################################
+  # SETUP DONE DIALOGS
+  #####################################
+
+  # when is needed & bootstrap process signals that it waits for user dialog 
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
+    # push to final setup gui dialogs
+    /home/admin/setup.scripts/finalDialogControl.sh
+  fi  
+
+  #####################################
   # MAIN MENU
   #####################################
 
