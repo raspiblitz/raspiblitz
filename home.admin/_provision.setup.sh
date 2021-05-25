@@ -39,6 +39,7 @@ sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFi
 # Preserve SSH keys
 # just copy dont link anymore
 # see: https://github.com/rootzoll/raspiblitz/issues/1798
+sudo sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
 
 # link ssh directory from SD card to HDD
 echo "# --> SSH key settings" >> ${logFile}
@@ -48,6 +49,7 @@ echo "# OK" >> ${logFile}
 
 ###################################
 # Prepare Blockchain Service
+sudo sed -i "s/^message=.*/message='Blockchain Setup'/g" ${infoFile}
 
 if [ "${network}" == "" ]; then
   sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -108,6 +110,7 @@ fi
 # start network service
 echo ""
 echo "*** Start ${network} ***" >> ${logFile}
+sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
 #sudo chmod +x /etc/systemd/system/${network}d.service
@@ -142,6 +145,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   ###################################
   # LND
+  sudo sed -i "s/^message=.*/message='LND Setup'/g" ${infoFile}
 
   if [ "${passwordC}" == "" ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -184,6 +188,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # Init LND service & start
   echo "*** Init LND Service & Start ***" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='LND Testrun'/g" ${infoFile}
 
   # just in case
   sudo systemctl stop lnd 2>/dev/null
@@ -250,6 +255,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> SEED + SCB 
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; the
 
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py scb ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -264,6 +270,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> SEED
   elif [ "${seedWords}" != "" ] 
     
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -278,6 +285,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> NEW
   else
 
+    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${passwordC})
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -297,6 +305,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # sync macaroons & TLS to other users
   echo "*** Copy LND Macaroons to user admin ***" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='LND Credentials'/g" ${infoFile}    
 
   # make sure wallet is unlocked
   sleep 3
@@ -343,6 +352,7 @@ if [ "${lightning}" == "cln" ]; then
 
   ###################################
   # c-lightning
+  sudo sed -i "s/^message=.*/message='c-lightning Setup'/g" ${infoFile}
 
   sed -i "s/^state=.*/state=error/g" ${infoFile}
   sed -i "s/^message=.*/message='TODO: install c-lightning'/g" ${infoFile}
@@ -351,6 +361,7 @@ if [ "${lightning}" == "cln" ]; then
   exit 1
 fi
 
+sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
 echo "END Setup"  >> ${logFile}
 exit 0
 
