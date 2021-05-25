@@ -49,4 +49,4 @@ else
 fi
 
 # signal to backend that all is good and it can continue
-sudo sed -i "s/^state=.*/state='starting'/g" /home/admin/raspiblitz.info 
+sudo sed -i "s/^state=.*/state='finalready'/g" /home/admin/raspiblitz.info 
