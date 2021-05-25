@@ -538,6 +538,12 @@ if [ ${isMounted} -eq 0 ]; then
 
   done
 
+  ########################################
+  # AFTER FINAL SETUP TASKS
+
+  # delete provision in progress flag
+  sudo rm /home/admin/provision.flag
+
   # TODO:
   echo "TODO: add wants/after to systemd if blockchain service at the end" >> $logFile
   exit 1
