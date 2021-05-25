@@ -63,23 +63,25 @@ if [ "$1" == "auth" ]; then
       echo "descriptor:x25519:`cat /tmp/k1.pub.key`" | sudo tee /mnt/hdd/tor/${service}/authorized_clients/me.auth >/dev/null
       # Client side configuration
       echo "Save the information below (encrypted is recommended), it will not be shown to you again (creating new keys overwrites the previous one):"
-      echo "------------------------------------"
+      echo "====================================="
       echo "Client authorization for service --> ${service}:"
+      echo "-------------------------------------"
       echo
-      echo "GUI service [eg.: SPECTER with Tor Browser], use the key below:"
+      echo "Tor Browser with GUI service [i.e.: Blitz WebUI], use the key below:"
       cat /tmp/k1.prv.key
       echo
-      echo "Headless service [eg.: SSH with Tor Daemon], use the key below:"
-      echo "`sudo -u debian-tor cat /mnt/hdd/tor/${service}/hostname | cut -c1-56`:descriptor:x25519:`cat /tmp/k1.prv.key`"
-      echo "------------------------------------"
-      echo
-      echo "If using Tor Daemon:"
-      echo "On your remote desktop, create the file: '<TorDatDir>/<ClientOnionAuthDir>/blitz-${service}.auth_private'."
-      echo "Code example to run on your remote machine (example using default paths):"
+      echo "-------------------------------------"
+      echo "Tor Daemon with Headless service [i.e.: SSH], run the commands with the key below (example using default debian Tor dir paths):"
       echo
       echo "ClientOnionAuthDir /var/lib/tor/onion_auth/ | sudo tee -a /etc/tor/torrc && sudo chmod 644 /etc/tor/torrc"
-      echo "sudo mkdir -p /var/lib/tor/onion_auth && sudo chown -R debian-tor:debian-tor /var/lib/tor"
-      echo "echo '<onion-addr-without-.onion>:descriptor:x25519:<priv-key-in-base32>' | sudo tee /var/lib/tor/onion_auth/blitz-${service}.auth_private"
+      echo
+      echo "sudo mkdir -p /var/lib/tor/onion_auth"
+      echo
+      echo "echo `sudo -u debian-tor cat /mnt/hdd/tor/${service}/hostname | cut -c1-56`:descriptor:x25519:`cat /tmp/k1.prv.key` | sudo tee /var/lib/tor/onion_auth/blitz-${service}.auth_private"
+      echo
+      echo "sudo chown -R debian-tor:debian-tor /var/lib/tor"
+      echo
+      echo "====================================="
       echo
       # Finish
       rm -f /tmp/k1.pub.key /tmp/k1.prv.key /tmp/k1.prv.pem
