@@ -671,14 +671,6 @@ else
   echo "No additional backup device was configured." >> $logFile
 fi
 
-################################
-# SD INFOFILE BASICS
-################################
-
-# state info
-sed -i "s/^state=.*/state=ready/g" ${infoFile}
-sed -i "s/^message=.*/message='waiting login'/g" ${infoFile}
-
 #####################################
 # CLEAN HDD TEMP
 #####################################
@@ -722,6 +714,7 @@ sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
 sudo systemctl enable ${network}d
 
 sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
+sed -i "s/^state=.*/state=ready/g" ${infoFile}
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0
