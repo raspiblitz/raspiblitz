@@ -83,6 +83,7 @@ do
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
     /home/admin/setup.scripts/finalDialogControl.sh
+    state="starting"
   fi  
 
   #####################################
