@@ -157,7 +157,7 @@ sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFil
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "*** Make backup of LND directory" >> ${logFile}
-sudo rm -r  /mnt/hdd/backup_lnd
+sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
 sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
 numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
 if [ ${numOfDiffers} -gt 0 ]; then
