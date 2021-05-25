@@ -15,7 +15,7 @@ if [ "${setupPhase}" == "setup" ]; then
     ack=0
     while [ ${ack} -eq 0 ]
     do
-      whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "LND Wallet got created. Store these numbered words in a safe location:\n\n${seedwords6x4}" 12 76
+      whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "LND Wallet got created. Store these numbered words in a safe location:\n\n${seedwords6x4NEW}" 12 76
       whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
       if [ $? -eq 1 ]; then
         ack=1
