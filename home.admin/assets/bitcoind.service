@@ -2,7 +2,7 @@
 # wants & after will be set after intial setup
 
 [Unit]
-Description=Bitcoin daemon
+Description=Bitcoin-Daemon
 
 # for use with sendmail alert
 #OnFailure=systemd-sendmail@%n

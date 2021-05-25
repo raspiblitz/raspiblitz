@@ -1,7 +1,8 @@
+# RaspiBlitz: systemd unit for bitcoind
+# wants & after will be set after intial setup
+
 [Unit]
-Description=Litecoin daemon
-Wants=bootstrap.service
-After=bootstrap.service
+Description=Litecoin-Daemon
 
 # for use with sendmail alert (coming soon)
 #OnFailure=systemd-sendmail@%n
