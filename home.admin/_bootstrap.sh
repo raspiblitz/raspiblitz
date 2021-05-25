@@ -88,6 +88,18 @@ fi
 sudo chmod 777 ${infoFile}
 
 ######################################
+# CHECK SD CARD INCONSISTENT STATE
+
+# when the provision did not ran thru without error (ask user for fresh sd card)
+provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
+if [ "${provisionFlagExists}" == "1" ]; then
+  sed -i "s/^state=.*/state=inconsistentsystem/g" ${infoFile}
+  sed -i "s/^message=.*/message='provision did not ran thru'/g" ${infoFile}
+  echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}
+  exit 1
+fi
+
+######################################
 # SECTION FOR POSSIBLE REBOOT ACTIONS
 systemInitReboot=0
 
@@ -438,6 +450,9 @@ if [ ${isMounted} -eq 0 ]; then
   # refresh data from info file
   source ${infoFile}
   echo "# PROVISION PROCESS with setupPhase(${setupPhase})"
+
+  # mark system on sd card as in setup process
+  echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile

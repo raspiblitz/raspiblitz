@@ -88,6 +88,15 @@ ssh admin@${localip}
 Use your Password A
 " 7 41
 
+elif [ "${eventID}" == "inconsistentsystem" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+PLEASE START WITH A FRESH SD CARD IMAGE
+---------------------------------------
+Cut power & remove sd card and then
+flash a fresh RaspiBlitz image on it.
+" 8 45
+
 elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
     if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
