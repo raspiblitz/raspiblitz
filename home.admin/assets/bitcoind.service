@@ -1,11 +1,10 @@
 # RaspiBlitz: systemd unit for bitcoind
+# wants & after will be set after intial setup
 
 [Unit]
 Description=Bitcoin daemon
-Wants=bootstrap.service
-After=bootstrap.service
 
-# for use with sendmail alert (coming soon)
+# for use with sendmail alert
 #OnFailure=systemd-sendmail@%n
 
 [Service]
