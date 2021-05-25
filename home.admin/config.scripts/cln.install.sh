@@ -40,13 +40,13 @@ fi
 
 # prefix for parallel testnetwork services
 if [ $NETWORK = testnet ];then
-  prefix="t"
+  netprefix="t"
   portprefix=1
 elif [ $NETWORK = signet ];then
-  prefix="s"
+  netprefix="s"
   portprefix=3
 else
-  prefix=""
+  netprefix=""
   portprefix=""
 fi
 
@@ -54,8 +54,8 @@ echo "# Running: 'cln.install.sh $*'"
 echo "# Using the settings for: ${NETWORK} "
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${prefix}cln=" /mnt/hdd/raspiblitz.conf; then
-  echo "${prefix}cln=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}cln=off" >> /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 
@@ -142,8 +142,8 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
-  echo "# Create /home/bitcoin/.lightning/${prefix}config"
-  if [ ! -f /home/bitcoin/.lightning/${prefix}config ];then
+  echo "# Create /home/bitcoin/.lightning/${netprefix}config"
+  if [ ! -f /home/bitcoin/.lightning/${netprefix}config ];then
     echo "
 # lightningd configuration for $NETWORK
 
@@ -157,18 +157,18 @@ proxy=127.0.0.1:9050
 bind-addr=127.0.0.1:${portprefix}9736
 addr=statictor:127.0.0.1:9051
 always-use-proxy=true
-" | sudo tee /home/bitcoin/.lightning/${prefix}config
+" | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
-    echo "# The file /home/bitcoin/.lightning/${prefix}config is already present"
+    echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
     #TODO look for pluging configs and clear or install
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
   # systemd service
-  sudo systemctl stop ${prefix}lightningd
-  sudo systemctl disable ${prefix}lightningd
-  echo "# Create /etc/systemd/system/${prefix}lightningd.service"
+  sudo systemctl stop ${netprefix}lightningd
+  sudo systemctl disable ${netprefix}lightningd
+  echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
   echo "
 [Unit]
 Description=c-lightning daemon on $NETWORK
@@ -178,7 +178,7 @@ User=bitcoin
 Group=bitcoin
 Type=simple
 ExecStart=/usr/local/bin/lightningd\
- --conf=\"/home/bitcoin/.lightning/${prefix}config\"
+ --conf=\"/home/bitcoin/.lightning/${netprefix}config\"
 KillMode=process
 Restart=always
 TimeoutSec=120
@@ -194,21 +194,21 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${prefix}lightningd.service
+" | sudo tee /etc/systemd/system/${netprefix}lightningd.service
   sudo systemctl daemon-reload
-  sudo systemctl enable ${prefix}lightningd
-  echo "# Enabled the ${prefix}lightningd.service"
+  sudo systemctl enable ${netprefix}lightningd
+  echo "# Enabled the ${netprefix}lightningd.service"
   if [ "${state}" == "ready" ]; then
-    sudo systemctl start ${prefix}lightningd
-    echo "# Started the ${prefix}lightningd.service"
+    sudo systemctl start ${netprefix}lightningd
+    echo "# Started the ${netprefix}lightningd.service"
   fi
   echo
   echo "# Adding aliases"
   echo "\
-alias ${prefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${prefix}config\"
-alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${prefix}config\"
+alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
+ --conf=/home/bitcoin/.lightning/${netprefix}config\"
+alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
+ --conf=/home/bitcoin/.lightning/${netprefix}config\"
 " | sudo tee -a /home/admin/_aliases.sh
 
   echo
@@ -216,33 +216,33 @@ alias ${prefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
   echo   
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases.sh"
-  echo "# Monitor the ${prefix}lightningd with:"
-  echo "sudo journalctl -fu ${prefix}lightningd"
-  echo "sudo systemctl status ${prefix}lightningd"
+  echo "# Monitor the ${netprefix}lightningd with:"
+  echo "sudo journalctl -fu ${netprefix}lightningd"
+  echo "sudo systemctl status ${netprefix}lightningd"
   echo "# logs:"
   echo "sudo tail -f /home/bitcoin/.lightning/${NETWORK}/cl.log"
   echo "# for the command line options use"
-  echo "${prefix}lightning-cli help"
+  echo "${netprefix}lightning-cli help"
   echo
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${prefix}cln=.*/${prefix}cln=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=on/g" /mnt/hdd/raspiblitz.conf
 
   exit 0
 fi
 
 if [ "$1" = "off" ];then
-  echo "# Removing the ${prefix}lightningd.service"
-  sudo systemctl disable ${prefix}lightningd
-  sudo systemctl stop ${prefix}lightningd
+  echo "# Removing the ${netprefix}lightningd.service"
+  sudo systemctl disable ${netprefix}lightningd
+  sudo systemctl stop ${netprefix}lightningd
   echo "# Removing the aliases"
-  sudo sed -i "/${prefix}lightning-cli/d" /home/admin/_aliases.sh
-  sudo sed -i "/${prefix}cl/d" /home/admin/_aliases.sh
+  sudo sed -i "/${netprefix}lightning-cli/d" /home/admin/_aliases.sh
+  sudo sed -i "/${netprefix}cl/d" /home/admin/_aliases.sh
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Removing the binaries"
     sudo rm -f /usr/local/bin/lightningd
     sudo rm -f /usr/local/bin/lightning-cli
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^${prefix}cln=.*/${prefix}cln=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=off/g" /mnt/hdd/raspiblitz.conf
 fi

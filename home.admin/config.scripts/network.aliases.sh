@@ -13,8 +13,19 @@ if [ $1 = getvars ];then
   if [ $# -gt 1 ];then
     LNTYPE=$2
   else
-    LNTYPE=lnd
+    if [ ${#LNdefault} -gt 0 ];then
+      LNTYPE=${LNdefault}
+    else
+      LNTYPE=lnd
+    fi
   fi
+  echo "LNTYPE=${LNTYPE}"
+  if [ $LNTYPE = cln ];then
+    echo "typeprefix=c"
+  elif [ $LNTYPE = lnd ];then
+    echo "typeprefix=''"
+  fi
+
   # CHAIN is signet | testnet | mainnet
   if [ $# -gt 2 ];then
     CHAIN=$3
@@ -22,21 +33,26 @@ if [ $1 = getvars ];then
   else
     CHAIN=${chain}net
   fi
-  if [ ${chain} = test ];then
+  echo "CHAIN=${chain}net"
+  echo "chain=${chain}"
+  if [ ${chain} = "test" ];then
     netprefix="t"
     echo "netprefix=t"
     L1rpcportmod=1
     L2rpcportmod=1
-  elif [ ${chain} = sig ];then
+    echo "portprefix=1"
+  elif [ ${chain} = "sig" ];then
     netprefix="s"
     echo "netprefix=s"
     L1rpcportmod=3
     L2rpcportmod=3
-  elif [ ${chain} = main ];then
+    echo "portprefix=3"
+  elif [ ${chain} = "main" ];then
     netprefix=""
     echo "netprefix=''"
     L1rpcportmod=""
     L2rpcportmod=0
+    echo "portprefix=''"
   fi
 
   #TODO ALL
@@ -47,3 +63,6 @@ if [ $1 = getvars ];then
   echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
   echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config\""
 fi
+
+#TODO
+#change all /lnd.conf to /${netprefix}lnd.conf

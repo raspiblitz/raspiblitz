@@ -52,13 +52,13 @@ fi
 
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
-  chainprefix="t"
+  netprefix="t"
   portprefix=1
 elif [ ${CHAIN} = signet ];then
-  chainprefix="s"
+  netprefix="s"
   portprefix=3
 elif [ ${CHAIN} = mainnet ];then
-  chainprefix=""
+  netprefix=""
   portprefix=""
 fi
 
@@ -104,13 +104,13 @@ Activate TOR to access the web interface from outside your local network.
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${chainprefix}${typeprefix}rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
-  echo "${chainprefix}${typeprefix}rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^${netprefix}${typeprefix}rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}${typeprefix}rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
 echo "# making sure services are not running"
-sudo systemctl stop ${chainprefix}${typeprefix}RTL 2>/dev/null
+sudo systemctl stop ${netprefix}${typeprefix}RTL 2>/dev/null
 
 function configRTL() {
 
@@ -175,9 +175,9 @@ EOF
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing the RTL for ${LNTYPE} ${CHAIN}"
 
-  isInstalled=$(sudo ls /etc/systemd/system/${chainprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${chainprefix}${typeprefix}RTL.service")
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${netprefix}${typeprefix}RTL.service")
   if ! [ ${isInstalled} -eq 0 ]; then
-    echo "# OK, the ${chainprefix}${typeprefix}RTL.service is already installed."
+    echo "# OK, the ${netprefix}${typeprefix}RTL.service is already installed."
   else
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
@@ -230,19 +230,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# Updating Firewall"
-    sudo ufw allow ${RTLHTTP} comment "${chainprefix}${typeprefix}RTL HTTP"
-    sudo ufw allow $((RTLHTTP+1)) comment "${chainprefix}${typeprefix}RTL HTTPS"
+    sudo ufw allow ${RTLHTTP} comment "${netprefix}${typeprefix}RTL HTTP"
+    sudo ufw allow $((RTLHTTP+1)) comment "${netprefix}${typeprefix}RTL HTTPS"
     echo
 
   if [ $LNTYPE = lnd ];then
     echo "# Install service"
     echo "# Install RTL systemd for ${network} on ${chain}"
-    cat > /home/admin/${chainprefix}${typeprefix}RTL.service <<EOF
-# Systemd unit for ${chainprefix}${typeprefix}RTL
-# /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
+    cat > /home/admin/${netprefix}${typeprefix}RTL.service <<EOF
+# Systemd unit for ${netprefix}${typeprefix}RTL
+# /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
 [Unit]
-Description=${chainprefix}${typeprefix}RTL daemon
+Description=${netprefix}${typeprefix}RTL daemon
 Wants=lnd.service
 After=lnd.service
 
@@ -258,9 +258,9 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 EOF
-      sudo mv /home/admin/${chainprefix}${typeprefix}RTL.service /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
-      sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${CHAIN}|" /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
-      sudo chown root:root /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
+      sudo mv /home/admin/${netprefix}${typeprefix}RTL.service /etc/systemd/system/${netprefix}${typeprefix}RTL.service
+      sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${CHAIN}|" /etc/systemd/system/${netprefix}${typeprefix}RTL.service
+      sudo chown root:root /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
   elif [ $LNTYPE = cln ];then
 
@@ -268,19 +268,19 @@ EOF
     /home/admin/config.scripts/bonus.clnrest.sh on ${CHAIN}
 
     echo "
-# Systemd unit for ${chainprefix}${typeprefix}RTL
-# /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
+# Systemd unit for ${netprefix}${typeprefix}RTL
+# /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
 [Unit]
-Description=${chainprefix}${typeprefix}RTL daemon
-Wants=${chainprefix}lightning.service
-After=${chainprefix}lightning.service
+Description=${netprefix}${typeprefix}RTL daemon
+Wants=${netprefix}lightning.service
+After=${netprefix}lightning.service
 
 [Service]
 Environment=\"PORT=$RTLHTTP\"
 Environment=\"LN_IMPLEMENTATION=CLT\"
 Environment=\"LN_SERVER_URL=https://localhost:${portprefix}6100\"
-Environment=\"CONFIG_PATH=/home/bitcoin/.lightning/${chainprefix}config\"
+Environment=\"CONFIG_PATH=/home/bitcoin/.lightning/${netprefix}config\"
 Environment=\"MACAROON_PATH=/home/bitcoin/c-lightning-REST/certs\"
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
@@ -292,58 +292,58 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
+" | sudo tee /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
     fi
   fi
 
   echo "# Setup nginx symlinks"
-  if ! [ -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf
+  if ! [ -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
   fi
-  if ! [ -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf
+  if ! [ -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
   fi
-  if ! [ -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf
+  if ! [ -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf ]; then
+     sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
   fi
 
   echo "# Set ports for Nginx"
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf
-  sudo sed -i "s/3001/$((RTLHTTP+1))/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf
+  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
+  sudo sed -i "s/3001/$((RTLHTTP+1))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
 
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf
-  sudo sed -i "s/3002/$((RTLHTTP+2))/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf
+  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
+  sudo sed -i "s/3002/$((RTLHTTP+2))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
 
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo sed -i "s/3003/$((RTLHTTP+3))/g" /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf
+  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
+  sudo sed -i "s/3003/$((RTLHTTP+3))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
 
-  sudo ln -sf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf /etc/nginx/sites-enabled/
   sudo nginx -t
   sudo systemctl reload nginx
 
   configRTL
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${chainprefix}${typeprefix}rtlWebinterface=.*/${chainprefix}${typeprefix}rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}${typeprefix}rtlWebinterface=.*/${netprefix}${typeprefix}rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh ${chainprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
   fi
 
-  sudo systemctl enable ${chainprefix}${typeprefix}RTL
-  echo "# OK - the ${chainprefix}${typeprefix}RTL.service is now enabled"
+  sudo systemctl enable ${netprefix}${typeprefix}RTL
+  echo "# OK - the ${netprefix}${typeprefix}RTL.service is now enabled"
 
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
     echo "# OK - system is ready so starting service"
-    sudo systemctl start ${chainprefix}${typeprefix}RTL
+    sudo systemctl start ${netprefix}${typeprefix}RTL
     echo "# Monitor with:"
-    echo "sudo journalctl -f -u ${chainprefix}${typeprefix}RTL"
+    echo "sudo journalctl -f -u ${netprefix}${typeprefix}RTL"
   else
     echo "# OK - To start manually use: 'sudo systemctl start RTL'"
   fi
@@ -354,28 +354,28 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${chainprefix}${typeprefix}rtlWebinterface=.*/${chainprefix}${typeprefix}rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}${typeprefix}rtlWebinterface=.*/${netprefix}${typeprefix}rtlWebinterface=off/g" /mnt/hdd/raspiblitz.conf
 
   # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/${chainprefix}${typeprefix}rtl_ssl.conf
-  sudo rm -f /etc/nginx/sites-enabled/${chainprefix}${typeprefix}rtl_tor.conf
-  sudo rm -f /etc/nginx/sites-enabled/${chainprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor.conf
-  sudo rm -f /etc/nginx/sites-available/${chainprefix}${typeprefix}rtl_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
+  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off ${chainprefix}${typeprefix}RTL
+    /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}${typeprefix}RTL
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/${chainprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${chainprefix}${typeprefix}RTL.service")
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${netprefix}${typeprefix}RTL.service")
   if [ ${isInstalled} -eq 1 ]; then
   echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
-    sudo systemctl disable ${chainprefix}${typeprefix}RTL
-    sudo rm /etc/systemd/system/${chainprefix}${typeprefix}RTL.service
+    sudo systemctl disable ${netprefix}${typeprefix}RTL
+    sudo rm /etc/systemd/system/${netprefix}${typeprefix}RTL.service
     if [ $LNTYPE = cln ];then
       /home/admin/config.scripts/bonus.clnrest.sh off ${CHAIN}
     fi
@@ -385,9 +385,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       sudo userdel -rf rtl
     fi
 
-    echo "# OK ${chainprefix}${typeprefix}RTL removed."
+    echo "# OK ${netprefix}${typeprefix}RTL removed."
   else
-    echo "# ${chainprefix}${typeprefix}RTL is not installed."
+    echo "# ${netprefix}${typeprefix}RTL is not installed."
   fi
 
   # close ports on firewall
