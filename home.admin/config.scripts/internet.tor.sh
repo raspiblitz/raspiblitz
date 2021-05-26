@@ -183,6 +183,11 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
 
+torRunning=$(sudo systemctl --no-pager status tor@default | grep -c "Active: active")
+torFunctional=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
+if [ "${torFunctional}" == "" ]; then torFunctional=0; fi
+if [ ${torFunctional} -gt 1 ]; then torFunctional=1; fi
+
 # if started with status
 if [ "$1" = "status" ]; then
   # is Tor activated
@@ -191,7 +196,8 @@ if [ "$1" = "status" ]; then
   else
     echo "activated=0"
   fi
-
+  echo "torRunning=${torRunning}"
+  echo "torFunctional=${torFunctional}"
   echo "config='${torrc}'"
   exit 0
 fi
@@ -257,21 +263,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
-
-  # check if Tor was already installed and is funtional
-  echo ""
-  echo "# *** Check if Tor service is functional ***"
-  sudo systemctl --no-pager status tor@default
-  torRunningTest=$(sudo systemctl --no-pager status tor@default | grep -c "Active: active")
-  #torRunningTest=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
-  if [ "${torRunningTest}" == "0" ]; then
-    echo "# Tor not running (${torRunningTest})... proceed with switching to Tor."
-    echo ""
-  else
-    echo "# You are all good - Tor is already running."
-    echo ""
-    exit 0
-  fi
 
   # install package just in case it was deinstalled
   packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
