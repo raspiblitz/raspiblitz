@@ -29,11 +29,8 @@ activateBitcoinOverTOR()
     # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
     deactivateBitcoinOverTOR
 
-    echo "# Make sure the user bitcoin is in the debian-tor group"
-    sudo usermod -a -G debian-tor bitcoin
     sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
     echo "Adding Tor config to the the ${network}.conf ..."
-    # deprecate 'torpassword='
     sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
     echo "onlynet=onion" >> /home/bitcoin/.${network}/${network}.conf
     echo "proxy=127.0.0.1:9050" >> /home/bitcoin/.${network}/${network}.conf
@@ -41,15 +38,7 @@ activateBitcoinOverTOR()
     echo "test.bind=127.0.0.1" >> /home/bitcoin/.${network}/${network}.conf
     echo "dnsseed=0" >> /home/bitcoin/.${network}/${network}.conf
     echo "dns=0" >> /home/bitcoin/.${network}/${network}.conf
-    if [ "${network}" = "bitcoin" ]; then
-      # adding some bitcoin onion nodes to connect to to make connection easier
-      echo "main.addnode=ira7kqcbff52wofoong2dieh2xlvmw4e7ya3znsqn7wivn6armetvrqd.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=xlpi353v7ia5b73msynr7tmddgxoco7n2r2bljt5txpv6bpzzphkreyd.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=ccjrb6va3j6re4lg2lerlt6wyvlb4tod7qbe7rwiouuapb7etvterxyd.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=s7m4mnd6bokujhywsocxibispktruormushdroeaeqeb3imvztfs3vid.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=ldvhlpsrvspquqnl3gutz7grfu5lb3m2dgnezpl3tlkxgpoiw2g5mzid.onion" >> /home/bitcoin/.${network}/${network}.conf
-      echo "main.addnode=gliovxxzyy2rkwaoz25khf6oa64c3csqzjn3t6dodsjuf34w6a6ktsyd.onion" >> /home/bitcoin/.${network}/${network}.conf
-    fi
+
     # remove empty lines
     sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
     sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
@@ -272,7 +261,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if Tor was already installed and is funtional
   echo ""
   echo "*** Check if Tor service is functional ***"
-  torRunningTest=$(curl --connect-timeout 30 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
+  torRunningTest=$(sudo systemctl status tor@default | grep -c "Active: active")
+  #torRunningTest=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
   if [ "${torRunningTest}" == "0" ]; then
     echo "Tor not running (${torRunningTest})... proceed with switching to Tor."
     echo ""

@@ -199,6 +199,8 @@ if [ "${lightning}" == "lnd" ]; then
   sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
   sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
+
+  # make sure LND starts with Tor by default
   sudo /home/admin/config.scripts/internet.tor.sh lndconf-on >> ${logFile}
 
   # start lnd up

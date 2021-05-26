@@ -104,6 +104,9 @@ if [ "${network}" = "litecoin" ]; then
   /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
 fi
 
+echo "# Make sure the user bitcoin is in the debian-tor group"
+sudo usermod -a -G debian-tor bitcoin
+
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
 sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
