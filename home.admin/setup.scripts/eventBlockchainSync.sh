@@ -14,7 +14,7 @@ fi
 
 # 2nd PARAMETER (optional): -loop-until-synced
 loopUntilSynced=0
-if [ "$2" == "-loop-until-synced" ]; then
+if [ "$2" == "loop" ]; then
     loopUntilSynced=1
 fi
 
