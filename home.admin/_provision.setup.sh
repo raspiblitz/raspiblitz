@@ -360,11 +360,18 @@ if [ "${lightning}" == "cln" ]; then
   # c-lightning
   sudo sed -i "s/^message=.*/message='c-lightning Setup'/g" ${infoFile}
 
+  # TODO: implement
   sed -i "s/^state=.*/state=error/g" ${infoFile}
   sed -i "s/^message=.*/message='TODO: install c-lightning'/g" ${infoFile}
   echo "FAIL see ${logFile}"
   echo "TODO: install c-lightning!" >> ${logFile}
   exit 1
+
+  # these vars are available from the setup process for cln loaded from setupfile
+  # seedWords --> if entered on old seed
+  # clnrescue --> if user uploaded a rescue file
+  # setPasswordC --> for any new wallet encryption
+
 fi
 
 sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
