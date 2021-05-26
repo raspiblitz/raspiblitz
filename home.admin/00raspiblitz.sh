@@ -106,11 +106,10 @@ do
     echo "Gathering Info ... (please wait)"
     source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
     if [ "${syncedToChain}" == "0" ]; then
-      
+      /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
     fi
     doneIBD=1
   fi
-
 
   #####################################
   # MAIN MENU or BLOCKCHAIN SYNC
