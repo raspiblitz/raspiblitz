@@ -26,7 +26,7 @@ fi
 ############################################
 # BLOCKCHAIN INFO & OPTIONS
 
-if [ ${syncProgress} -lt 99 ]; then
+if [ ${syncProgress} -lt 75 ]; then
   clear
   echo "Your Blockchain is at ${syncProgress}% - this might take multiple days to validate."
   echo "TODO: Option COPY OVER LAN IF BITCOIN"
@@ -59,6 +59,8 @@ else
   echo "PRESS ENTER"
   read key
 fi
+
+echo "Starting ..."
 
 # signal to backend that all is good and it can continue
 sudo sed -i "s/^state=.*/state='finalready'/g" /home/admin/raspiblitz.info 
