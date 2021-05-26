@@ -3,7 +3,7 @@
 # explanation on paths https://github.com/ElementsProject/lightning/issues/4223
 # built-in path dir: /usr/local/libexec/c-lightning/plugins/
 
-SPARKOVERSION="v2.5"
+SPARKOVERSION="v2.7"
 
 # command info
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -54,7 +54,8 @@ if [ $1 = on ];then
   fi
   
   # download binary
-  sudo wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO} -O /usr/local/libexec/c-lightning/plugins/sparko
+  sudo wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
+   -O /usr/local/libexec/c-lightning/plugins/sparko
   # make executable
   sudo chmod +x /usr/local/libexec/c-lightning/plugins/sparko
   
@@ -67,11 +68,13 @@ if [ $1 = on ];then
   keythatcanlistentoallevents=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c20)
   echo "
 sparko-host=0.0.0.0
-sparko-port=${portprefix}9737
-sparko-tls-path=/mnt/hdd/app-data/nginx/tls.cert
-sparko-login=raspiblitz:$PASSWORD_B
+sparko-port=${portprefix}9000
+#sparko-tls-path=
+sparko-login=blitz:$PASSWORD_B
 sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}: getinfo, listchannels, listnodes; ${verysecretkeythatcanpayinvoices}: pay; ${keythatcanlistentoallevents}: stream
 " | sudo tee -a /home/bitcoin/.lightning/${netprefix}config
+
+  #TODO self signed cert https://github.com/fiatjaf/sparko#how-to-use
 
   echo "# Editing /etc/systemd/system/${netprefix}lightningd.service"
   sudo sed -i "s#^ExecStart=.*#ExecStart=/usr/local/bin/lightningd\
@@ -85,8 +88,15 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
     sudo systemctl restart ${netprefix}lightningd
   fi
 
+  echo "# Allowing port ${portprefix}9000 through the firewall"
+  sudo ufw allow "${portprefix}9000" comment "${netprefix}sparko"
+
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
+
+  sleep 5
+  sudo cat /home/bitcoin/.lightning/${clnetwork}/cl.log | grep sparko
+  netstat -tulpn | grep "${portprefix}9000"
 
   echo "# Sparko was installed"
   echo "# Monitor with:"
@@ -95,10 +105,10 @@ fi
 
 if [ $1 = off ];then
   echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
-  sudo sed -i "s/^sparko*/d" /home/bitcoin/.lightning/${netprefix}config
+  sudo sed -i "/^sparko/d" /home/bitcoin/.lightning/${netprefix}config
 
   echo "# Editing /etc/systemd/system/${netprefix}lightningd.service"
-  sed -i "s#^ExecStart=*#ExecStart=/usr/local/bin/lightningd\
+  sudo sed -i "s#^ExecStart=*#ExecStart=/usr/local/bin/lightningd\
  --conf=/home/bitcoin/.lightning/${netprefix}config#"\
   /etc/systemd/system/${netprefix}lightningd.service
   sudo systemctl daemon-reload
@@ -106,10 +116,12 @@ if [ $1 = off ];then
   if [ "${state}" == "ready" ]; then
     sudo systemctl restart ${netprefix}lightningd
   fi
+  echo "# Deny port ${portprefix}9000 through the firewall"
+  sudo ufw deny "${portprefix}9000"
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Delete plugin"
-    sudo rm /usr/local/libexec/c-lightning/plugins/sparko
+    sudo rm /usr/local/libexec/c-lightning/plugins/${netprefix}sparko
   fi
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf
