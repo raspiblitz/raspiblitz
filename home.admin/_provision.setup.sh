@@ -33,6 +33,7 @@ if [ "${passwordA}" == "" ]; then
   exit 1
 fi
 
+echo "SETTING PASSWORD A" >> ${logFile}
 sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
 ###################################
@@ -86,6 +87,10 @@ sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
 sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
 sudo mkdir /home/admin/.${network} 2>/dev/null
 sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
+
+# set password B as RPC password
+echo "SETTING PASSWORD B" >> ${logFile}
+sudo /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
