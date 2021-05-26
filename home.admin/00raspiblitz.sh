@@ -117,26 +117,12 @@ do
 
   # when setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
-
-    # TODO: move data gathering into background and get thru raspiblitz.info/redis
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-    if [ "${initialSync}" == "1" ] && [ "${syncedToChain}" == "0" ]; then
-
-      # BLOCKCHAIN SYNC SCREEN
-      echo "Sync: ${syncProgress}"
-      sleep 4
-
-    else
-
-      # MAIN MENU
-      /home/admin/00mainMenu.sh
-      # use the exit code from main menu as signal if menu loop should exited
-      # 0 = continue loop / everything else = break loop and exit to terminal
-      exitMenuLoop=$?
-      if [ "${exitMenuLoop}" != "0" ]; then break; fi
-
-    fi
-
+    # MAIN MENU
+    /home/admin/00mainMenu.sh
+    # use the exit code from main menu as signal if menu loop should exited
+    # 0 = continue loop / everything else = break loop and exit to terminal
+    exitMenuLoop=$?
+    if [ "${exitMenuLoop}" != "0" ]; then break; fi
   fi
 
   #####################################
