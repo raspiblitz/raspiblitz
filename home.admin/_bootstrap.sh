@@ -144,6 +144,23 @@ else
 fi
 
 ################################
+# BACKGROUND TASK RUN FROM BEGINNING
+# on 1.7 sd card build background task runs after boostrap
+# but bootstrap already needs background task running now
+# REMOVE ON v1.8 release #2328
+################################
+
+backgroundNeedsEdit=$(sudo cat /etc/systemd/system/background.service 2>/dev/null | grep -c 'Wants=bootstrap.service')
+if [ ${backgroundNeedsEdit} -eq 1 ]; then
+  echo "BACKGROUND EDIT needed ..." >> $logFile
+  sudo sed -i "s/^Wants=.*/Wants=network.target/g" /etc/systemd/system/background.service
+  sudo sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/background.service
+  systemInitReboot=1
+else
+  echo "BACKGROUND EDIT already done. " >> $logFile
+fi
+
+################################
 # FS EXPAND
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
@@ -281,10 +298,6 @@ do
     sed -i "s/^message=.*/message='>=1TB'/g" ${infoFile}
   fi
 
-  # get latest network info & update raspiblitz.info (in case network changes)
-  source <(/home/admin/config.scripts/internet.sh status)
-  sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
-
   # wait for next check
   sleep 2
 
@@ -416,10 +429,6 @@ if [ ${isMounted} -eq 0 ]; then
   echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> $logFile
   until [ "${state}" == "waitprovision" ]
   do
-
-    # get latest network info & update raspiblitz.info (in case network changes)
-    source <(/home/admin/config.scripts/internet.sh status)
-    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
 
     # get fresh info about data drive (in case the hdd gets disconnected)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)

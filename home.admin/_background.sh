@@ -39,15 +39,47 @@ do
   # count up
   counter=$(($counter+1))
 
+  # limit counter to max seconds per week:
+  # 604800 = 60sec * 60min * 24hours * 7days
+  if [ ${counter} -gt 604800 ]; then
+    counter=0
+    echo "counter zero reset"
+  fi
+
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
-  # prevent restart if COPY OVER LAN is running
-  # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
-  source ${infoFile}
-  if [ "${state}" == "copysource" ]; then 
-    echo "copysource mode: skipping background loop"
-    sleep 10
+  # source info file fresh on every loop
+  source ${infoFile} 2>/dev/null
+
+  ####################################################
+  # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
+  # https://github.com/rootzoll/raspiblitz/issues/160
+  ####################################################
+
+  if [ "${state}" == "" ] || [ "${state}" == "copysource" ]; then
+    echo "skipping background loop (${counter}) - state(${state})"
+    sleep 1
+    continue
+  fi
+
+  ####################################################
+  # CHECK IF LOCAL IP CHANGED
+  ####################################################
+  oldLocalIP="${localip}";
+  source <(/home/admin/config.scripts/internet.sh status)
+  if [ "${oldLocalIP}" != "${localip}" ]; then
+    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in raspiblitz.info"
+    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+  fi
+
+  ####################################################
+  # SKIP REST OF THE TASKS IF STILL IN SETUP PHASE
+  ####################################################
+
+  if [ "${setupPhase}" != "done" ]; then
+    echo "skipping rest of tasks because still in setupPhase(${setupPhase})"
+    sleep 1
     continue
   fi
 
@@ -356,7 +388,6 @@ do
 
   fi
 
-
   ###############################
   # LND AUTO-UNLOCK
   ###############################
@@ -464,13 +495,6 @@ do
 
   # sleep 1 sec
   sleep 1
-
-  # limit counter to max seconds per week:
-  # 604800 = 60sec * 60min * 24hours * 7days
-  if [ ${counter} -gt 604800 ]; then
-    counter=0
-    echo "counter zero reset"
-  fi
 
 done
 
