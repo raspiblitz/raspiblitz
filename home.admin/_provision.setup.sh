@@ -337,7 +337,7 @@ if [ "${lightning}" == "lnd" ]; then
   locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
   if [ ${locked} -gt 0 ]; then
     echo "OK - Wallet is locked ... starting unlocking dialog" >> ${logFile}
-    /home/admin/config.scripts/lnd.unlock.sh >> ${logFile}
+    /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
   else
     echo "OK - Wallet is already unlocked" >> ${logFile}
   fi
