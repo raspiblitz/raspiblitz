@@ -38,9 +38,9 @@ do
             syncProgress="${startcountBlockchain} restarts"
         fi
     elif [ ${#syncProgress} -lt 6 ]; then
-        syncProgress=" ${syncProgress} % ${peers} peers"
+        syncProgress=" ${syncProgress} % ${blockchainPeers} peers"
     else
-        syncProgress="${syncProgress} % ${peers} peers"
+        syncProgress="${syncProgress} % ${blockchainPeers} peers"
     fi
 
     # formatting LIGHTNING SCAN PROGRESS  
