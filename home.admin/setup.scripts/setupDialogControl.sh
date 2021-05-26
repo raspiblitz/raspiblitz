@@ -225,20 +225,37 @@ if [ "${setupPhase}" == "setup" ]; then
     # because password C not needed if LND rescue file is uploaded
 
     lightningWalletDone=0
+    source ${SETUPFILE}
+    if [ "${lightning}" == "" ]; then lightningWalletDone=1; fi 
     while [ "${lightningWalletDone}" == "0" ]
     do
 
-      echo "# Starting lightning wallet dialog ..."
-      /home/admin/setup.scripts/dialogLightningWallet.sh
+      if [ "${lightning}" == "lnd" ]; then
 
-      # only if dialog exited clean end loop
-      if [ "$?" == "0" ]; then
+        echo "# Starting lightning wallet dialog for LND ..."
+        /home/admin/setup.scripts/dialogLightningWallet-lnd.sh
+        dialogResult=$?
+
+      elif [ "${lightning}" == "cln" ]; then
+
+        echo "# Starting lightning wallet dialog for C-LIGHTNING ..."
+        /home/admin/setup.scripts/dialogLightningWallet-cln.sh
+        dialogResult=$?
+
+      else
+        echo "FAIL: unkown lightning implementation (${lightning})"
+        lightningWalletDone=1
+        sleep 8
+      fi
+
+      # break loop only if a clean exit
+      if [ "${dialogResult}" == "0" ]; then
         lightningWalletDone=1
       fi
 
       # allow user to cancel to terminal on dialog main menu
       # all other cancels have other exit codes
-      if [ "$?" == "1" ]; then
+      if [ "${dialogResult}" == "1" ]; then
         echo "# you selected cancel - sending exit code 1"
         exit 1
       fi
