@@ -272,9 +272,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if Tor was already installed and is funtional
   echo ""
   echo "*** Check if Tor service is functional ***"
-  torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
+  torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
   if [ "${torRunning}" == "0" ]; then
-    echo "Tor not running ... proceed with switching to Tor."
+    echo "Tor not running (${torRunning})... proceed with switching to Tor."
     echo ""
   else
     echo "You are all good - Tor is already running."
