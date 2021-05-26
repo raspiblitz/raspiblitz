@@ -606,6 +606,11 @@ if [ ${confExists} -eq 0 ]; then
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
 fi
 
+# make sure basic info id in raspiblitz.info
+sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
+sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
+
 # singal setup done
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
