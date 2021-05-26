@@ -5,7 +5,7 @@
 # gets called when user logins per SSH
 # or calls 'raspiblitz' on the terminal
 #######################################
-echo "Starting SSH user interface ..."
+echo "Starting SSH user interface ... (please wait)"
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -47,6 +47,7 @@ sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
 #####################################
 
 exitMenuLoop=0
+doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
 do
 
@@ -96,6 +97,20 @@ do
     /home/admin/setup.scripts/finalDialogControl.sh
     state="starting"
   fi  
+
+  #####################################
+  # INITIAL BLOCKCHAIN SYNC
+  #####################################
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ ${doneIBD} -eq 0 ]; then
+    # check if initial Blockchain sync is in progress
+    echo "Gathering Info ... (please wait)"
+    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+    if [ "${syncedToChain}" == "0" ]; then
+      
+    fi
+    doneIBD=1
+  fi
+
 
   #####################################
   # MAIN MENU or BLOCKCHAIN SYNC
