@@ -79,5 +79,6 @@ do
     if [ ${loopUntilSynced} -eq 1 ] && [ "${syncedToChain}" == "0" ]; then
         # loop until synced to chain
         loop=1
+        sleep 3
     fi
 done
