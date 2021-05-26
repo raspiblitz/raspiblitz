@@ -57,6 +57,13 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
 
+    ###################################
+    # Get data from blockchain network
+    ###################################
+
+    source <(sudo -u bitcoin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "blockchainPeers=${peers}"
+
     ##############################
     # Get data from blockchaininfo
     ##############################
