@@ -261,6 +261,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if Tor was already installed and is funtional
   echo ""
   echo "# *** Check if Tor service is functional ***"
+  sudo systemctl --no-pager status tor@default
   torRunningTest=$(sudo systemctl --no-pager status tor@default | grep -c "Active: active")
   #torRunningTest=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
   if [ "${torRunningTest}" == "0" ]; then
