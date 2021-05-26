@@ -452,7 +452,7 @@ if [ "${testnet}" != "${choice}" ]; then
     else
       l1="# !!! FAIL on Testnet install !!!"
       l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/network.bitcoinchains.sh on testnet"
+      l3="/home/admin/config.scripts/bitcoin.chains.sh on testnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
