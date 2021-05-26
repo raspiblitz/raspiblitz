@@ -24,6 +24,18 @@ if [ "${setupPhase}" == "setup" ]; then
 fi
 
 ############################################
+# BLOCKCHAIN INFO & OPTIONS
+
+if [ ${syncProgress} -lt 99 ]; then
+  clear
+  echo "Your Blockchain is at ${syncProgress}% - this might take multiple days to validate."
+  echo "TODO: Option COPY OVER LAN IF BITCOIN"
+  echo "TODO: MAKE SURE THAT background.service is running from beginng!"
+  echo "PRESS ENTER"
+  read key
+fi
+
+############################################
 # SETUP DONE CONFIRMATION (Konfetti Moment)
 
 # when coming from fresh setup

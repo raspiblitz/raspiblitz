@@ -95,20 +95,15 @@ do
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
     /home/admin/setup.scripts/finalDialogControl.sh
-    state="starting"
+    continue
   fi  
 
   #####################################
-  # INITIAL BLOCKCHAIN SYNC
+  # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
   #####################################
-  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ ${doneIBD} -eq 0 ]; then
-    # check if initial Blockchain sync is in progress
-    echo "Gathering Info ... (please wait)"
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-    if [ "${syncedToChain}" == "0" ]; then
-      /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
-    fi
-    doneIBD=1
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${initialSync}" == "1" ]; then
+    /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
+    continue
   fi
 
   #####################################
