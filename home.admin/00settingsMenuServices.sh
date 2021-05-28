@@ -442,7 +442,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${testnet}" != "${choice}" ]; then
   echo "# Testnet Setting changed .."
   anychange=1
-  /home/admin/config.scripts/cln.install.sh ${choice} testnet
+  /home/admin/config.scripts/bitcoin.chains.sh ${choice} testnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
