@@ -99,7 +99,7 @@ else
 fi
 
 # Bitcoin blockchain
-btc_path=$(command -v bitcoin-cli)
+btc_path=$(command -v ${network}-cli)
 blockInfo="-"
 if [ -n "${btc_path}" ]; then
   btc_title=$network
