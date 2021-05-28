@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 00infoBlitz.sh <cln|lnd> <testnet|mainnet|signet>
+
 # load code software version
 source /home/admin/_version.info
 
@@ -14,10 +16,6 @@ color_gray='\033[0;37m'
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-if [ $# -gt 0 ];then
-  CHAIN=$1
-  chain=${CHAIN::-3}
-fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 shopt -s expand_aliases
 alias bitcoincli_alias="$bitcoincli_alias"

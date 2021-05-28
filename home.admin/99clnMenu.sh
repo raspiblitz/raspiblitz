@@ -45,6 +45,11 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
+  OPTIONS+=(SWITCHLN  "Use C-lightning as default")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi  
 
 #TODO OPTIONS+=(CASHOUT "Remove Funds from LND")
 
@@ -59,64 +64,74 @@ CHOICE=$(dialog --clear \
                 2>&1 >/dev/tty)
 
 case $CHOICE in
-        lnbalance)
-            clear
-            echo "*** YOUR SATOSHI BALANCES ***"
-            /home/admin/config.scripts/lnd.balance.sh ${network}
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        lnchannels)
-            clear
-            echo "*** YOUR LIGHTNING CHANNELS ***"
-            echo ""
-            echo "Capacity -> total sats in the channel (their side + your side)"
-            echo "Commit-Fee -> the fee that's charged if either side of the channel closes"
-            echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
-            echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
-            echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
-            echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
-            /home/admin/config.scripts/lnd.channels.sh ${network}
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        lnfwdreport)
-            /home/admin/config.scripts/lnd.fwdreport.sh -menu
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
-        PEERING)
-            /home/admin/BBconnectPeer.sh cln $NETWORK
-            ;;
-        FUNDING)
-            /home/admin/BBfundWallet.sh cln $NETWORK
-            ;;
-        CASHOUT)
-            /home/admin/BBcashoutWallet.sh
-            ;;
-        CHANNEL)
-            /home/admin/BBopenChannel.sh cln $NETWORK
-            ;;
-        SEND)
-            /home/admin/BBpayInvoice.sh cln $NETWORK
-            ;;
-        RECEIVE)
-            /home/admin/BBcreateInvoice.sh cln $NETWORK
-            ;;
-        NAME)
-            sudo /home/admin/config.scripts/lnd.setname.sh
-            noreboot=$?
-            if [ "${noreboot}" = "0" ]; then
-              sudo -u bitcoin ${network}-cli stop
-              echo "Press ENTER to Reboot."
-              read key
-              sudo /home/admin/XXshutdown.sh reboot
-              exit 0
-            fi
-            ;;
-        CLOSEALL)
-            /home/admin/BBcloseAllChannels.sh
-            echo "Press ENTER to return to main menu."
-            read key
-            ;;
+  lnbalance)
+      clear
+      echo "*** YOUR SATOSHI BALANCES ***"
+      /home/admin/config.scripts/lnd.balance.sh ${network}
+      echo "Press ENTER to return to main menu."
+      read key
+      ;;
+  lnchannels)
+      clear
+      echo "*** YOUR LIGHTNING CHANNELS ***"
+      echo ""
+      echo "Capacity -> total sats in the channel (their side + your side)"
+      echo "Commit-Fee -> the fee that's charged if either side of the channel closes"
+      echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
+      echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
+      echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
+      echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
+      /home/admin/config.scripts/lnd.channels.sh ${network}
+      echo "Press ENTER to return to main menu."
+      read key
+      ;;
+  lnfwdreport)
+      /home/admin/config.scripts/lnd.fwdreport.sh -menu
+      echo "Press ENTER to return to main menu."
+      read key
+      ;;
+  PEERING)
+      /home/admin/BBconnectPeer.sh cln $NETWORK
+      ;;
+  FUNDING)
+      /home/admin/BBfundWallet.sh cln $NETWORK
+      ;;
+  CASHOUT)
+      /home/admin/BBcashoutWallet.sh
+      ;;
+  CHANNEL)
+      /home/admin/BBopenChannel.sh cln $NETWORK
+      ;;
+  SEND)
+      /home/admin/BBpayInvoice.sh cln $NETWORK
+      ;;
+  RECEIVE)
+      /home/admin/BBcreateInvoice.sh cln $NETWORK
+      ;;
+  NAME)
+      sudo /home/admin/config.scripts/lnd.setname.sh
+      noreboot=$?
+      if [ "${noreboot}" = "0" ]; then
+        sudo -u bitcoin ${network}-cli stop
+        echo "Press ENTER to Reboot."
+        read key
+        sudo /home/admin/XXshutdown.sh reboot
+        exit 0
+      fi
+      ;;
+  CLOSEALL)
+      /home/admin/BBcloseAllChannels.sh
+      echo "Press ENTER to return to main menu."
+      read key
+      ;;
+  SWITCHLN)
+      clear 
+      echo
+      # setting value in raspi blitz config
+      sudo sed -i "s/^LNdefault=.*/LNdefault=cln/g" /mnt/hdd/raspiblitz.conf
+      echo "# OK - LNdefault=cln is set in /mnt/hdd/raspiblitz.conf"
+      echo
+      echo "Press ENTER to return to main menu."
+      read key
+      ;;
 esac

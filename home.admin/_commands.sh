@@ -129,6 +129,7 @@ function status() {
   while :
   do
     # show the same info as on LCD screen
+    # 00infoBlitz.sh <cln|lnd> <testnet|mainnet|signet>
     /home/admin/00infoBlitz.sh $1 $2
     # wait 6 seconds for user exiting loop
     #echo
