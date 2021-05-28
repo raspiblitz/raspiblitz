@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# source aliases from /home/admin/_aliases.sh
+source /home/admin/_aliases.sh
+
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: raspiblitz
@@ -123,7 +126,24 @@ function torthistx() {
 # start the status screen in the terminal
 function status() {
   echo "Gathering data - please wait a moment..."
-  sudo -u pi /home/admin/00infoLCD.sh --pause 0
+  while :
+  do
+    # show the same info as on LCD screen
+    # 00infoBlitz.sh <cln|lnd> <testnet|mainnet|signet>
+    /home/admin/00infoBlitz.sh $1 $2
+    # wait 6 seconds for user exiting loop
+    #echo
+    #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+    read -n 1 -t 6 keyPressed
+    #echo -en "\rGathering information to update info ... please wait.                \n"  
+    # check if user wants to abort session
+    if [ "${keyPressed}" = "x" ]; then
+      echo
+      echo "Returning to menu ....."
+      sleep 4
+      break
+    fi
+  done
 }
 
 # command: lnbalance

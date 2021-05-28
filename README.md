@@ -103,6 +103,7 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
+
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
 |Philosophy|Trust|Sovereignty|

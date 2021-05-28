@@ -86,6 +86,15 @@ while :
 
     # get config info if already available (with state value)
     source ${infoFile}
+    configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
+    if [ ${configExists} -eq 1 ]; then
+      source ${configFile}
+      source <(/home/admin/config.scripts/network.aliases.sh getvars)
+      shopt -s expand_aliases
+      alias bitcoincli_alias="$bitcoincli_alias"
+      alias lncli_alias="$lncli_alias"
+      alias lightningcli_alias="$lightningcli_alias"
+    fi
 
     if [ "${setupPhase}" != "done" ]; then
 
@@ -98,7 +107,7 @@ while :
 
     # TODO: ALSO SEPERATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
     # if LND is syncing or scanning
-    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
       /home/admin/80scanLND.sh
       sleep 20

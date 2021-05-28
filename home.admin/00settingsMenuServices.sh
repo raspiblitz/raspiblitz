@@ -23,6 +23,8 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#testnet} -eq 0 ]; then testnet="off"; fi
+if [ ${#cln} -eq 0 ]; then cln="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -43,10 +45,12 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
+OPTIONS+=(n 'Parallel Testnet services' ${testnet})
+OPTIONS+=(c 'C-lightning' ${cln})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          22 45 15  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          24 45 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -430,6 +434,56 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# testnet process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${testnet}" != "${choice}" ]; then
+  echo "# Testnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bitcoin.chains.sh ${choice} testnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      echo "# Successfully installed Testnet"
+      echo
+      echo "# Press ENTER to continue ..."
+      read key
+    else
+      l1="# !!! FAIL on Testnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bitcoin.chains.sh on testnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Testnet Setting unchanged."
+fi
+
+# cln process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${cln}" != "${choice}" ]; then
+  echo "# C-lightning Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cln.install.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      echo "# Successfully installed C-lightning"
+      echo
+      echo "# Press ENTER to continue ..."
+      read key
+    else
+      l1="# !!! FAIL on C-lightning install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cln.install.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# C-lightning Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

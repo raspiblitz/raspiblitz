@@ -40,6 +40,14 @@ confirmation()
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
 
+if [ ${chain} = test ];then
+  netprefix="t"
+elif [ ${chain} = sig ];then
+  netprefix="s"
+elif [ ${chain} = main ];then
+  netprefix=""
+fi
+
 # BASIC MENU INFO
 HEIGHT=19
 WIDTH=64
@@ -163,9 +171,28 @@ if [ "${circuitbreaker}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
+if [ "${testnet}" == "on" ]&&[ ${chain} != test ];then
+  OPTIONS+=(TESTNET "Testnet Service Options")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
+
+if [ ${chain} != main ];then
+  OPTIONS+=(MAINNET "Mainnet Service Options")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
+
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
-OPTIONS+=(LIGHTNING "LND Wallet Options")
+OPTIONS+=(LND "LND Wallet Options")
+
+if [ "$cln" == "on" ]||[ $chain = test ]&&[ "$tcln" == "on" ]; then
+  OPTIONS+=(CLN "C-lightning Wallet Options")
+  HEIGHT=$((HEIGHT+1))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
+
 OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
@@ -226,8 +253,11 @@ case $CHOICE in
               exit 0
             fi
             ;;
-        LIGHTNING)
-            /home/admin/99lightningMenu.sh
+        LND)
+            /home/admin/99lndMenu.sh
+            ;;
+        CLN)
+            /home/admin/99clnMenu.sh ${chain}net
             ;;
         CONNECT)
             /home/admin/99connectMenu.sh
@@ -298,6 +328,12 @@ case $CHOICE in
             ;;
         CIRCUIT)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        TESTNET)
+            /home/admin/00parallelChainsMenu.sh testnet
+            ;;    
+        MAINNET)
+            /home/admin/00parallelChainsMenu.sh mainnet
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py

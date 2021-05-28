@@ -313,6 +313,11 @@ if [ "${state}" = "ready" ]; then
   if [ ${configExists} -eq 1 ]; then
     echo "loading config data"
     source ${configFile}
+    source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+    shopt -s expand_aliases
+    alias bitcoincli_alias="$bitcoincli_alias"
+    alias lncli_alias="$lncli_alias"
+    alias lightningcli_alias="$lightningcli_alias"
   else
     echo "setup still in progress - setupStep(${setupStep})"
   fi
@@ -339,8 +344,8 @@ waitUntilChainNetworkIsReady()
     echo "can take longer if device was off or first time"
 
     # check for error on network
-    sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/dev/null 2>error.tmp
-    clienterror=`cat error.tmp`
+    bitcoincli_alias getblockchaininfo 1>/dev/null 2>error.tmp
+    clienterror=$(cat error.tmp)
     rm error.tmp
 
     # check for missing blockchain data
@@ -438,7 +443,7 @@ How do you want to continue?
     while :
     do
       
-      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+      locked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
       if [ ${locked} -gt 0 ]; then
           uptime=$(awk '{printf("%d\n",$1 + 0.5)}' /proc/uptime)
           if [ "${autoUnlock}" == "on" ] && [ ${uptime} -lt 300 ]; then
@@ -461,7 +466,7 @@ How do you want to continue?
             fi
           fi
       fi
-      lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+      lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
       if [ ${lndSynced} -eq 0 ]; then
           /home/admin/80scanLND.sh
           if [ $? -gt 0 ]; then
