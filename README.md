@@ -2,7 +2,7 @@
 
 *Build your own Lightning Node on a RaspberryPi with a nice Display.*
 
-`Version 1.7.0 with lnd 0.12.1 and bitcoin 0.21.0 (or litecoin 0.18.1)`
+`Version 1.7.0 with lnd 0.12.1 (or c-lightning 0.10.0) and bitcoin 0.21.0 (or litecoin 0.18.1)`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -19,7 +19,7 @@ There are further Services that can be switched on:
 * **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
 * **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
 * **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
-* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop)
+* **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
 * **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
@@ -103,7 +103,6 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-There are two ways how you can install the RaspiBlitz software on your RaspberryPi:
 
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
@@ -111,11 +110,16 @@ There are two ways how you can install the RaspiBlitz software on your Raspberry
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
 |Cons|You have to trust the mantainer image binaries|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|
-|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz) and [Flash the sd card](https://github.com/rootzoll/raspiblitz/tree/master#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|SHA-256 (below) and/or [Signature](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.sig)|All of the code, don't trust, verify|
+|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
-If downloading the mantainer sd card image, the shasum is:
+If downloading the mantainer sd card image:
+* GPG 64-bit: 1C73 060C 7C17 6461
 * SHA-256: e6d70ac1662af3e90e57bee8c50e9a7925239431892e1916c2be80e519befc3f
+
+Which verification method should I used: Hash or Signature?
+* Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
+* Hash function checks file integrity. (Secure)
 
 The mantainer sd card image can also be downloaded via torrent:
 * [assets/raspiblitz-v1.7.0-2021-04-25.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.0-2021-04-25.img.gz.torrent)
@@ -661,8 +665,6 @@ The goal of SpecterDesktop is to make a convenient and user-friendly GUI around 
 
 After install, you will see a new `SPECTER` option in the SSH main menu - it will give you all the information you need to start using it.
 
-As an alternative to runninf Specter on directly on the RaspiBlitz, there is a Specter Desktop version that runs on your laptop. Here is a [guide to connect the specter laptop app] (https://d11n.net/connect-specter-desktor-with-raspiblitz.html) to your RaspiBlitz Bitcoin fullnode.
-
 ##### Mempool Explorer
 
 ![MEMPOOL](pictures/mempool.png)
@@ -774,7 +776,7 @@ Opens an ad-hoc webserver so that you can download the files in your local netwo
 
 *This is the least secure way to transfer those files - everybody in your local network has access to those file during download. Remember with the Admin-Macaroon somebody could takeover your node and spend all your funds. Just use as last fallback.*
 
-###### Hex-String
+####### Hex-String
 
 The Macaroons and TLS.cert files can be copy+pasted as Hex-Strings from RaspiBlitz to any other app that supports that format. If you choose this option, RaspiBlitz will print all the files for you as Hex-String to do so.
 
@@ -826,12 +828,6 @@ The `REPAIR` menu gives you options to check and reset your RaspiBlitz.
 ![RepairMenu](pictures/repairmenu.png)
 
 The options are explained in detail below:
-
-##### HARDWARE: Run Hardware Test
-
-This will start the hardware test to identify if your RaspiBlitz is in good shape and can provide a stable service.
-
-Use this option if you see under-voltage reports on your LCD display or you think your RaspiBlitz gets very hot.
 
 ##### SOFTWARE: Run Software Tests (DebugReport)
 
@@ -970,7 +966,7 @@ Before you start migration:
 * if you have on-chain funds on your old node - make sure to have the backup seed words
 * if you have lightning channels open on your old node - make sure to have downloaded the latest Static Channel Backup file to your laptop
 
-Also be aware that at the moment RaspiBlitz can only transfere your blockchain and LND wallet data (including channels) over to RaspiBlitz. Any data/pairing of additional apps cannot be transfered and may get lost.
+Also be aware that at the moment RaspiBlitz can only transfer your blockchain and LND wallet data (including channels) over to RaspiBlitz. Any data/pairing of additional apps cannot be transfered and may get lost.
 
 Instructions for Migration:
 * shutdown your old node
@@ -986,7 +982,7 @@ Now RaspiBlitz should show you that old data from your node was detected and off
 * Login per SSH as before and reset the passwords (`FINAL RECOVERY LOGIN` on LCD). Then a final reboot will happen.
 * Login per SSH with your new password A & unlock LND wallet with password C. Now blockchain needs to catch up and then your RaspiBlitz should be ready and show you (under INFO) your on-chain & channel balance.
 
-If you dont have an LCD or HDMI monitor connectec it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
+If you dont have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
 
 ## Interface / APIs
 

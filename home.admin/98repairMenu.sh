@@ -20,7 +20,7 @@ Download LND Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
-      /home/admin/config.scripts/lnd.rescue.sh backup
+      /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
       echo
       echo "PRESS ENTER to continue once you are done downloading."
       read key
@@ -31,7 +31,7 @@ Download LND Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
-      /home/admin/config.scripts/lnd.rescue.sh backup no-download
+      /home/admin/config.scripts/lnd.backup.sh lnd-export
     fi
 }
 
@@ -189,7 +189,7 @@ case $CHOICE in
     read key
     ;;
   BACKUP-LND)
-    sudo /home/admin/config.scripts/lnd.rescue.sh backup
+    sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key

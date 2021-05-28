@@ -46,8 +46,8 @@ cfg.reload()
 
 # todo: make sure that also ACME script uses TOR if activated
 session = requests.session()
-if cfg.run_behind_tor.value:
-    session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
+# if cfg.run_behind_tor.value:
+#    session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
 
 
 #####################
@@ -613,7 +613,7 @@ This looks not like a valid IP.
 
         # restart certain services to update urls
         if "SPHINX" in serviceName:
-            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 

@@ -1,4 +1,6 @@
 
+# TODO: COPY OVER COMPLETLY INTO _provison_.sh
+
 mkdir /home/admin/tmpScriptDL
 cd /home/admin/tmpScriptDL
 echo "installing bash completion for bitcoin-cli and lncli"

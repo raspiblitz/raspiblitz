@@ -14,9 +14,11 @@ infoFile="/home/admin/raspiblitz.info"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
-# debug info
-echo "STARTED Provisioning --> see logs in ${logFile}"
-echo "STARTED Provisioning from preset config file" >> ${logFile}
+# log header
+echo "" >> ${logFile}
+echo "###################################" >> ${logFile}
+echo "# _provision_.sh" >> ${logFile}
+echo "###################################" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Provisioning from Config'/g" ${infoFile}
 
 # check if there is a config file
@@ -32,80 +34,7 @@ if [ ${parameterExists} -eq 0 ]; then
   echo "lndExtraParameter=''" >> ${configFile}
 fi
 
-# check if file system was expanded to full capacity and sd card is bigger than 8GB
-# see: https://github.com/rootzoll/raspiblitz/issues/936
-echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
-source ${infoFile}
-
-# remember the DisplayClass from info file - before its gets overwritten by raspiblitz.conf to detect change
-infoFileDisplayClass="${displayClass}"
-
-minimumSizeByte=8192000000
-rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
-rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
-
-echo "rootPartition(${rootPartition})" >> ${logFile}
-echo "rootPartitionBytes(${rootPartitionBytes})" >> ${logFile}
-
-if [ ${#rootPartition} -gt 0 ]; then
-   echo "### CHECKING ROOT PARTITION SIZE ###" >> ${logFile}
-   sudo sed -i "s/^message=.*/message='Checking Disk size'/g" ${infoFile}
-   echo "Size in Bytes is: ${rootPartitionBytes} bytes on ($rootPartition)" >> ${logFile}
-   if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
-      echo "Disk filesystem is smaller than ${minimumSizeByte} byte." >> ${logFile}
-      if [ ${fsexpanded} -eq 1 ]; then
-        echo "There was already an attempt to expand the fs, but still not bigger than 8GB." >> ${logFile}
-        echo "SD card seems to small - at least a 16GB disk is needed. Display on LCD to user." >> ${logFile}
-        sudo sed -i "s/^state=.*/state=sdtoosmall/g" ${infoFile}
-        sudo sed -i "s/^message=.*/message='Min 16GB SD card needed'/g" ${infoFile}
-        exit 1
-      else
-        echo "Try to expand SD card FS, display info and reboot." >> ${logFile}
-        sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-        sudo sed -i "s/^message=.*/message='Expanding SD Card'/g" ${infoFile}
-        sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" ${infoFile}
-        sleep 4
-        if [ "${cpu}" == "x86_64"  ]; then
-            echo "Please expand disk size." >> ${logFile}
-	          # TODO: Expand disk size on x86_64
-        elif [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
-            resizeRaspbian="/usr/bin/raspi-config"
-            if [ -x ${resizeRaspbian} ]; then
-              echo "RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}" >> ${logFile}
-		          sudo $resizeRaspbian --expand-rootfs
-              echo "going into reboot" >> ${logFile}
-              sudo cp ${logFile} ${logFile}.fsexpand.recover
-              sudo shutdown -r now
-	            exit 0
-	          else
-              echo "FAIL to execute: ${resizeRaspbian}" >> ${logFile}
-            fi
-        elif [ "${baseimage}" = "armbian" ]; then
-            resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
-            if [ -x ${resizeArmbian} ]; then
-              echo "RUNNING EXPAND ARMBIAN: ${resizeArmbian}" >> ${logFile}
-              sudo $resizeArmbian start
-              echo "going into reboot" >> ${logFile}
-              sudo cp ${logFile} ${logFile}.fsexpand.recover
-              sudo shutdown -r now
-              sleep 100
-	            exit 0
-	          else
-              echo "FAIL to execute: ${resizeArmbian}" >> ${logFile}
-            fi
-        else
-          echo "WARN on provision - Not known system expand-rootfs OS: ${baseimage}" >> ${logFile}
-        fi
-      fi
-   else
-      echo "Size looks good. Bigger than ${minimumSizeByte} byte disk is used." >> ${logFile}
-   fi
-else
-   echo "Disk of root partition ('$rootPartition') not detected, skipping the size check." >> ${logFile}
-fi
-
 # import config values
-sudo chmod 777 ${configFile}
 source ${configFile}
 
 ##########################
@@ -175,6 +104,9 @@ if [ "${network}" = "litecoin" ]; then
   /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
 fi
 
+echo "# Make sure the user bitcoin is in the debian-tor group"
+sudo usermod -a -G debian-tor bitcoin
+
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
 sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
@@ -194,11 +126,10 @@ fi
 #sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
 #sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
-# optimze if RAM >1GB
+# optimze mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 if [ ${kbSizeRAM} -gt 3500000 ]; then
@@ -229,7 +160,7 @@ sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFil
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "*** Make backup of LND directory" >> ${logFile}
-sudo rm -r  /mnt/hdd/backup_lnd
+sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
 sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
 numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
 if [ ${numOfDiffers} -gt 0 ]; then
@@ -302,7 +233,8 @@ else
 fi
 
 # TOR
-if [ "${runBehindTor}" = "on" ]; then
+source <(/home/admin/config.scripts/internet.tor.sh status)
+if [ "${runBehindTor}" == "on" ] && [ "${torRunning}" == "0" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
@@ -392,13 +324,7 @@ if [ "${BTCPayServer}" = "on" ]; then
   echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
-
-  #echo "Provisioning BTCPAYSERVER on TOR - run on after bootup script" >> ${logFile}
-  # because BTCPAY server freezes during recovery .. it will get installed after reboot
-  #echo "sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on" >> /home/admin/setup.sh
-  #sudo chmod +x /home/admin/setup.sh >> ${logFile}
-  #sudo ls -la /home/admin/setup.sh >> ${logFile}
-
+  
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
@@ -672,13 +598,18 @@ fi
 echo "" >> ${logFile}
 
 # repair Bitcoin conf if needed
-echo "*** Repair Bitcioin Conf (if needed)" >> ${logFile}
+echo "*** Repair Bitcoin Conf (if needed)" >> ${logFile}
 confExists="$(sudo ls /mnt/hdd/${network} | grep -c "${network}.conf")"
 if [ ${confExists} -eq 0 ]; then
   echo "Doing init of ${network}.conf" >> ${logFile}
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
 fi
+
+# make sure basic info id in raspiblitz.info
+sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
+sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
 
 # singal setup done
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}

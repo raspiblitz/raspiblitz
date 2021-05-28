@@ -56,6 +56,7 @@
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
 - [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
+- [How to SSH over Tor?](#how-to-ssh-over-tor)
 - [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
 - [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
 - [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
@@ -234,7 +235,7 @@ If you still can SSH in and HDD is readable, we can try to rescue/export your LN
 To rescue/export your Lightning data from a RaspiBlitz (since v1.1):
 
 * SSH into your RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-export-gui`
 * follow the instructions of the script.
 
 This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfer the lnd-rescue file to your laptop. If the transfer was successful you can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
@@ -242,7 +243,7 @@ This will create a lnd-rescue file (ends on gz.tar) that contains all the data f
 Then to restore your old LND data and to recover your funds and channels:
 
 * SSH into your new RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-import-gui`
 * follow the instructions of the script.
 
 This script will offer you a way to transfer the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND then gets restarted for you, and after some time it should show you the status screen again with your old funds and channels.
@@ -712,6 +713,21 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 - Some Routers have `IP Isolation` switched on - not allowing two devices to connect
 
 If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+
+## How to SSH over Tor?
+
+SSH is already encrypted, why would I want to use it with Tor?
+* Remote access when away from LAN.
+* Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
+
+Create Hidden Service:
+`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+
+SSH over Tor:
+`torsocks ssh admin@HiddenServiceAddress.onion`
+
+Get the address:
+`sudo cat /mnt/hdd/tor/ssh/hostname`
 
 ## How to setup port-forwarding with a SSH tunnel?
 

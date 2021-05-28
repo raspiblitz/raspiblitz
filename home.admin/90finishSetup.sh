@@ -1,6 +1,8 @@
 #!/bin/bash
 echo ""
 
+# TODO: COPY OVER COMPLETLY INTO _provison_.sh
+
 # add bonus scripts (auto install deactivated to reduce third party repos)
 /home/admin/91addBonus.sh
 

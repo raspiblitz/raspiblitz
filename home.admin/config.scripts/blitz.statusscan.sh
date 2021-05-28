@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # LNTYPE is lnd | cln
 if [ $# -gt 0 ];then
@@ -69,6 +69,13 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     bitcoinErrorFull=$(echo ${bitcoinError} | tr -d "'")
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
+
+    ###################################
+    # Get data from blockchain network
+    ###################################
+
+    source <(sudo -u bitcoin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "blockchainPeers=${peers}"
 
     ##############################
     # Get data from blockchaininfo
@@ -278,6 +285,9 @@ else
   echo "blitzTUIRestarts=0"
 fi
 
+# check if runnig in vagrant
+vagrant=$(df | grep -c "/vagrant")
+echo "vagrant=${vagrant}"
 
 # check if online if problem with other stuff 
 

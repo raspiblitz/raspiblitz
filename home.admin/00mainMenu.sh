@@ -346,9 +346,6 @@ case $CHOICE in
             ;;
         REPAIR)
             /home/admin/98repairMenu.sh
-            if [ $? -eq 99 ]; then
-              exit 1
-            fi
             ;;
         PASSWORD)
             sudo /home/admin/config.scripts/blitz.setpassword.sh
@@ -357,44 +354,41 @@ case $CHOICE in
             /home/admin/99updateMenu.sh
             ;;
         REBOOT)
-	    clear
-	    confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
-	    confirmationReboot=$?
-	    if [ $confirmationReboot -eq 0 ]; then
+	          clear
+	          confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
+	          confirmationReboot=$?
+	          if [ $confirmationReboot -eq 0 ]; then
                clear
                echo ""
                sudo /home/admin/XXshutdown.sh reboot
-               exit 0
-	    fi
+               exit 1
+	          fi
             ;;
         OFF)
-	    clear
-	    confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
-	    confirmationShutdown=$?
-	    if [ $confirmationShutdown -eq 0 ]; then
+	          clear
+	          confirmation "Are you sure?" "PowerOff" "Cancel" true 7 40
+	          confirmationShutdown=$?
+	          if [ $confirmationShutdown -eq 0 ]; then
                clear
                echo ""
                sudo /home/admin/XXshutdown.sh
-               exit 0
-	    fi
+               exit 1
+	          fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh
             sudo /home/admin/XXshutdown.sh reboot
-            exit 0
+            exit 1
             ;;
         *)
             clear
-            echo "***********************************"
-            echo "* RaspiBlitz Commandline"
-            echo "* Here be dragons .. have fun :)"
-            echo "***********************************"
-	          echo "Bitcoin command line options: bitcoin-cli help"
-            echo "LND command line options: lncli -h"
-            echo "Back to main menu use command: raspiblitz"
-            echo
-            exit 0
+            exit 1
 esac
 
-# go into loop - start script from beginning to load config/sate fresh
-/home/admin/00mainMenu.sh
+# forward exit code of submenu to outside loop
+# 0 = continue loop / everything else = break loop and exit to terminal
+exitCodeOfSubmenu=$?
+if [ "${exitCodeOfSubmenu}" != "0" ]; then
+  echo "# submenu signaled exit code '${exitCodeOfSubmenu}' --> forward to outside loop"
+fi
+exit ${exitCodeOfSubmenu}

@@ -1,6 +1,8 @@
 #!/bin/bash
 echo ""
 
+# TODO: should be good to be deleted - it now done in _provision.setup.sh and setup dialogs
+
 # load setup config
 source /home/admin/raspiblitz.info
 
@@ -20,8 +22,8 @@ dialog --backtitle "RaspiBlitz - Setup" --title " RaspiBlitz Setup is done :) " 
     Press OK for a final reboot.
 " 10 42
 
-# let migration/init script do the rest
-/home/admin/_bootstrap.migration.sh
+# let update script do the rest
+/home/admin/_bootstrap.update.sh
 
 # copy logfile to analyse setup
 cp $logFile /home/admin/raspiblitz.setup.log

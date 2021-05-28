@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: should be good to be deleted - it now done in _provision.setup.sh
+# --- BUT check how its used in repair script
+
 ## get basic info
 source /home/admin/raspiblitz.info
 
