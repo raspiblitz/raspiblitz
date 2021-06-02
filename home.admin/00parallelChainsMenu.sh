@@ -184,6 +184,10 @@ case $CHOICE in
     sudo sed -i "s/^chain=.*/chain=${newchain}/g" /mnt/hdd/raspiblitz.conf
     echo "# OK - Set chain=${newchain} in /mnt/hdd/raspiblitz.conf"
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    if grep -Eq "^specter=on" /mnt/hdd/raspiblitz.conf; then
+      echo "# Restart Specter on $CHAIN"
+      sudo systemctl restart cryptoadvance-specter.service
+    fi
     echo
     echo "Press ENTER to return to main menu."
     read key
