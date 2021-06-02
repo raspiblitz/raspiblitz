@@ -106,6 +106,12 @@ TimeoutSec=60
 Restart=always
 RestartSec=60
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 " | sudo tee -a /etc/systemd/system/circuitbreaker.service

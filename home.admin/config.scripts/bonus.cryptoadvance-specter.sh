@@ -289,6 +289,12 @@ RestartSec=30
 StandardOutput=null
 StandardError=journal
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 EOF

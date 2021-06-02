@@ -379,6 +379,7 @@ Type=simple
 PIDFile=/run/nbxplorer/nbxplorer.pid
 Restart=on-failure
 
+# Hardening measures
 PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
@@ -460,6 +461,12 @@ Group=btcpay
 Type=simple
 PIDFile=/run/btcpayserver/btcpayserver.pid
 Restart=on-failure
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
