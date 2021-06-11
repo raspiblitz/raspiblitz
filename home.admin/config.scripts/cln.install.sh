@@ -160,7 +160,10 @@ always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
-    #TODO look for pluging configs and clear or install
+    #TODO look for plugin configs and clear or install
+    if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
+      cln.sparko.sh on $NETWORK
+    fi
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
