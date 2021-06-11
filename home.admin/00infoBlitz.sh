@@ -300,9 +300,16 @@ if [ ${LNTYPE} = "cln" ]; then
       |jq .outputs[]|jq 'select(.status=="unconfirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
        ln_walletbalance_wait=$((ln_walletbalance_wait+i))
      done
-     if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
-     if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
-     ln_channelbalance=0
+     # ln_closedchannelbalance: "state": "ONCHAIN" funds in channels
+     for i in $(echo "$cln_listfunds" \
+      |jq .channels[]|jq 'select(.state=="ONCHAIN")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+       ln_closedchannelbalance=$((ln_closedchannelbalance+i))
+     done
+     # ln_pendingonchain: waiting onchain + waiting closed channel funds
+     ln_pendingonchain=$((ln_walletbalance_wait+ln_closedchannelbalance))
+     if [ "${ln_pendingonchain}" = "0" ]; then ln_pendingonchain=""; fi
+     if [ ${#ln_pendingonchain} -gt 0 ]; then ln_pendingonchain="(+${ln_pendingonchain})"; fi
+     # ln_channelbalance: "state": "CHANNELD_NORMAL" funds in channels
      for i in $(echo "$cln_listfunds" \
       |jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
        ln_channelbalance=$((ln_channelbalance+i))
@@ -310,11 +317,12 @@ if [ ${LNTYPE} = "cln" ]; then
      if [ ${#ln_channelbalance} -eq 0 ];then
       ln_channelbalance=0
      fi
+     # ln_channelbalance_all: all funds in channels
      for i in $(echo "$cln_listfunds" \
       |jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
        ln_channelbalance_all=$((ln_channelbalance_all+i))
      done
-     ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance))
+     ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance-ln_closedchannelbalance))
      if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
      if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
      # - **num_peers** (u32): The total count of peers, connected or with channels
@@ -322,9 +330,10 @@ if [ ${LNTYPE} = "cln" ]; then
      # - **num_active_channels** (u32): The total count of channels in normal state
      # - **num_inactive_channels** (u32): The total count of channels waiting for opening or closing 
      ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+     cln_num_pending_channels="$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')" 2>/dev/null
      cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
-     ln_channels_total=$((ln_channels_online+cln_num_inactive_channels))
-     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
+     ln_channels_total=$((ln_channels_online+cln_num_pending_channels+cln_num_inactive_channels))
+     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
