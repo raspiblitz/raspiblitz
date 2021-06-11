@@ -11,6 +11,8 @@ else
   NETWORK=${chain}net
 fi
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
+
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
 
@@ -39,9 +41,13 @@ fi
 
 #TODO OPTIONS+=(NAME "Change Name/Alias of Node")
 
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
+ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
+ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
+openChannels=$((ln_channels_online+cln_num_inactive_channels))
+
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-#TODO   OPTIONS+=(CLOSEALL "Close all open Channels")
+OPTIONS+=(CLOSEALL "Close all open Channels")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
@@ -120,7 +126,7 @@ case $CHOICE in
       fi
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh
+      /home/admin/BBcloseAllChannels.sh cln $NETWORK
       echo "Press ENTER to return to main menu."
       read key
       ;;
