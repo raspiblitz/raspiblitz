@@ -63,7 +63,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   SUMMARY)
-      /home/admin/config.scripts/cln.summary.sh $NETWORK
+      /home/admin/config.scripts/cln-plugin.summary.sh $NETWORK
       ;;
   PEERING)
       /home/admin/BBconnectPeer.sh cln $NETWORK

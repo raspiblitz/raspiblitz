@@ -11,7 +11,7 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Install, remove, connect or get info about the Sparko plugin for C-lightning"
   echo "version: $SPARKOVERSION"
   echo "Usage:"
-  echo "cln.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]"
+  echo "cln-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]"
   echo
   exit 1
 fi
