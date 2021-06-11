@@ -49,15 +49,15 @@ if [ ${#_input} -eq 0 ]; then
   exit 1
 fi
 
-pubkey=$(echo $_input|cut -d@ -f1)
-address=$(echo ${_input}|cut -d@ -f2|cut -d: -f1)
-port=$(echo ${_input}|cut -d: -f2)
+pubkey=$(echo "${_input}"|cut -d@ -f1)
+# address=$(echo "${_input}"|cut -d@ -f2|cut -d: -f1)
+# port=$(echo "${_input}"|cut -d: -f2)
 # build command
 if [ $LNTYPE = cln ];then
   # connect id [host port]
-  command="$lightningcli_alias connect $pubkey $address $port"
+  command="$lightningcli_alias connect ${_input}"
 elif [ $LNTYPE = lnd ];then
-  command="$lncli_alias connect ${pubkey}@${address}:${port}"
+  command="$lncli_alias connect ${_input}"
 fi
 
 # info output
