@@ -5,7 +5,7 @@ _error=$(mktemp -p /dev/shm/)
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
 if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
@@ -18,10 +18,8 @@ alias bitcoincli_alias="$bitcoincli_alias"
 alias lncli_alias="$lncli_alias"
 alias lightningcli_alias="$lightningcli_alias"
 
-echo ""
-echo "*** Precheck ***"
-
-# PRECHECK) check if chain is in sync
+echo
+echo "# Precheck" # PRECHECK) check if chain is in sync
 if [ $LNTYPE = cln ];then
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
@@ -35,9 +33,9 @@ elif [ $LNTYPE = lnd ];then
 fi
 if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cln ];then
-    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
-  else
     echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
+  elif [ $LNTYPE = lnd ];then
+    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
   fi
   echo 
   echo "# PRESS ENTER to return to menu"

@@ -11,9 +11,7 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = signet ]||[ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
-  echo "# Installing Bitcoin Core instance on ${CHAIN}"
-else
+if [ "${CHAIN}" != signet ]&&[ "${CHAIN}" != testnet ]&&[ "${CHAIN}" != mainnet ];then
   echo "# ${CHAIN} is not supported"
   exit 1
 fi
@@ -21,17 +19,17 @@ fi
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
   prefix="t"
-  bitcoinprefix=test
+  bitcoinprefix="test"
   zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
   rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
-  bitcoinprefix=signet
+  bitcoinprefix="signet"
   zmqprefix=23
   rpcprefix=3
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
-  bitcoinprefix=main
+  bitcoinprefix="main"
   zmqprefix=28
   rpcprefix=""
 fi
@@ -46,11 +44,11 @@ function removeParallelService() {
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
     echo "# Bitcoin Core on ${CHAIN} service is stopped and disabled"
-    echo
   fi
 }
 
 function installParallelService() {
+  echo "# Installing Bitcoin Core instance on ${CHAIN}"
   # bitcoin.conf
   if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
     # add minimal config
@@ -169,7 +167,7 @@ WantedBy=multi-user.target
 
   isInstalled=$(systemctl status ${prefix}bitcoind | grep -c active)
   if [ $isInstalled -gt 0 ];then 
-    echo "# Installed $(bitcoind --version | grep version) ${prefix}bitcoind.service"
+    echo "# Installed $(bitcoind --version | grep version)"
     echo 
     echo "# Monitor the ${prefix}bitcoind with:"
     if [ ${CHAIN} = signet ]; then
@@ -205,6 +203,7 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  echo "# Uninstall Bitcoin Core instance on ${CHAIN}"
   removeParallelService
   # setting value in raspi blitz config
   sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=off/g" /mnt/hdd/raspiblitz.conf

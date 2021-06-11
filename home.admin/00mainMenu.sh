@@ -358,10 +358,10 @@ case $CHOICE in
 	          confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
 	          confirmationReboot=$?
 	          if [ $confirmationReboot -eq 0 ]; then
-               clear
-               echo ""
-               sudo /home/admin/XXshutdown.sh reboot
-               exit 1
+              clear
+              echo ""
+              sudo /home/admin/XXshutdown.sh reboot
+              exit 1
 	          fi
             ;;
         OFF)

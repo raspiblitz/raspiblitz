@@ -333,7 +333,7 @@ if [ ${LNTYPE} = "cln" ]; then
      #ln_weeklyfees="$($lncli_alias  feereport | jq -r '.week_fee_sum')" 2>/dev/null
      #ln_monthlyfees="$($lncli_alias  feereport | jq -r '.month_fee_sum')" 2>/dev/null
      #ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
-     ln_feeReport="Total routing fees collected: $(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')"
+     ln_feeReport="Fees collected: $(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')"
    fi
  fi
  
