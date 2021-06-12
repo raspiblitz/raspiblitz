@@ -18,17 +18,7 @@ alias bitcoincli_alias="$bitcoincli_alias"
 alias lncli_alias="$lncli_alias"
 alias lightningcli_alias="$lightningcli_alias"
 
-# set network map info
-networkMap="https://lnmainnet.gaben.win"
-if [ "$network" = "litecoin" ]; then
-  networkMap="https://lnexplorer.hcwong.me"
-fi
-if [ "$chain" = "test" ]; then
-  networkMap="https://explorer.acinq.co"
-fi
-
 # let user enter a <pubkey>@host
-
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
 if [ "$chain" = "main" ]; then
@@ -130,6 +120,7 @@ else
     # TODO: try to find out more details from cli output
 
   else
+    win=0
     info="Perfect - a connection to that node got established :)"
   fi
 
