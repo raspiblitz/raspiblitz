@@ -19,7 +19,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "usage:"
   echo "cln.install.sh on  <signet|testnet>"
   echo "cln.install.sh off <signet|testnet> <purge>"
-  echo "cln.install.sh [update<version>|commit|testPR<PRnumber>]"
+  echo "cln.install.sh [update <version>|experimental|testPR <PRnumber>]"
   echo
   exit 1
 fi
@@ -59,8 +59,8 @@ if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
 fi
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
+if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
     # dependencies
     echo "# apt update"
     echo
@@ -75,10 +75,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
 
     # download and compile from source
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "commit" ]; then
+    if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "experimental" ]; then
       echo
       echo "# Deleting the old source code"
-      echo
       sudo rm -rf lightning
     fi
     echo
@@ -92,12 +91,12 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
       echo
       echo "# Using the PR:"
       echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
-      echo
       sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
       sudo -u bitcoin git checkout pr$PRnumber || exit 1
       echo "# Building with EXPERIMENTAL_FEATURES enabled"
+      echo
       sudo -u bitcoin ./configure --enable-experimental-features
-    elif [ "$1" = "commit" ]; then
+    elif [ "$1" = "experimental" ]; then
       echo
       echo "# Updating to the latest commit in:"
       echo "# https://github.com/ElementsProject/lightning"
@@ -162,7 +161,7 @@ always-use-proxy=true
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
     #TODO look for plugin configs and clear or install
     if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
-      cln-plugin.sparko.sh on $NETWORK
+      /home/admin/config.scripts/cln-plugin.sparko.sh on $NETWORK
     fi
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning

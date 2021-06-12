@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install and show the output if the summay plugin for C-lightning"
+  echo "Install and show the output if the summary plugin for C-lightning"
   echo "Usage:"
   echo "cln-plugin.summary.sh [testnet|mainnet|signet] [runonce]"
   echo
