@@ -287,7 +287,8 @@ if [ ${LNTYPE} = "cln" ]; then
      if [ ${#ln_getInfo} -eq 0 ]; then
        ln_baseInfo="${color_red} Not Started | Not Ready Yet"
      else
-       ln_baseInfo="${color_amber} Waiting for Chain Sync"
+       ln_baseInfo="
+               ${color_amber}Scanning blocks: ${CLHEIGHT}/${BLOCKHEIGHT}"
      fi
    else
      ln_walletbalance=0
