@@ -68,7 +68,7 @@ info=""
 if [ ${#_input} -lt 10 ]; then
   win=0
   info="node pubkey@host info is too short"
-else
+elif [ $LNTYPE = lnd ];then
   gotAt=$(echo $_input | grep '@' -c)
   if [ ${gotAt} -eq 0 ]; then
     win=0
