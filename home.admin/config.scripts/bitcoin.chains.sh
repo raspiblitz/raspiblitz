@@ -73,6 +73,13 @@ datadir=/mnt/hdd/bitcoin
   
   # make sure rpcbind is correctly configured
   sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "rpcallowip" < /mnt/hdd/${network}/${network}.conf) -gt 0 ];then
+    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+${bitcoinprefix}.rpcbind=127.0.0.1"|\
+      sudo tee -a /mnt/hdd/${network}/${network}.conf
+    fi
+  fi
 
   # correct rpcport entry
   sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
@@ -95,13 +102,10 @@ ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
   if [ ${bitcoinprefix} = signet ];then
     if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
       echo "\
-signet.addnode=g7fyzp4rgxlrcg73jmrwrzhjnfpsuavjvopurvfq7nrl5x2tif3gx6qd.onion:38333
 signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
 signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
 signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
-signet.addnode=4j6owtnrkgfty2ehbyuwz72k32fyos7co7jnnktxwg7rfrgnqk3obkid.onion:38333
 signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
-signet.addnode=u2d5lofh73k275q3zm76r5bob5pjbff35goubg5hwr2xpgj365ei7cyd.onion:38333
 signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
       sudo tee -a /mnt/hdd/${network}/${network}.conf
     fi
