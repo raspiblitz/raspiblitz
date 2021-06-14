@@ -108,10 +108,10 @@ if [ -n "${btc_path}" ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    block_chain="$($bitcoincli_alias getblockcount 2>/dev/null)"
+    last_block="$($bitcoincli_alias getblockcount 2>/dev/null)"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
-    block_diff=$(expr ${block_chain} - ${block_verified})
-    blockInfo="${block_verified}/${block_chain}"
+    block_diff=$(expr ${last_block} - ${block_verified})
+    blockInfo="${block_verified}/${last_block}"
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
@@ -135,7 +135,6 @@ if [ -n "${btc_path}" ]; then
     fi
 
     # get last known block
-    last_block="$($bitcoincli_alias getblockcount 2>/dev/null)"
     if [ ! -z "${last_block}" ]; then
       btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
     fi
@@ -180,7 +179,6 @@ torInfo=""
 # Version
 networkVersion=$($bitcoincli_alias -version 2>/dev/null | cut -d ' ' -f6)
 # TOR or IP
-networkInfo=$($bitcoincli_alias getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
@@ -239,12 +237,13 @@ fi
 
 # LIGHTNING NETWORK
 if [ ${LNTYPE} = "cln" ]; then
+ ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
  ln_baseInfo="-"
  ln_channelInfo="\n"
  ln_external="\n"
  ln_alias="$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^alias=*" | cut -f2 -d=)"
  if [ ${#ln_alias} -eq 0 ];then
-  ln_alias=$(lightningcli_alias getinfo | grep '"alias":' | cut -d '"' -f4)
+  ln_alias=$(echo "${ln_getInfo}" | grep '"alias":' | cut -d '"' -f4)
  fi
  if [ ${#ln_alias} -eq 0 ];then
   ln_alias=${hostname}
@@ -252,14 +251,12 @@ if [ ${LNTYPE} = "cln" ]; then
  ln_publicColor=""
  ln_port=$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^bind-addr=*" | cut -f2 -d':')
  if [ ${#ln_port} -eq 0 ]; then
-   ln_port=$(lightningcli_alias getinfo | grep '"port":' | cut -d: -f2 | tail -1 | bc)
+   ln_port=$(echo "${ln_getInfo}" | grep '"port":' | cut -d: -f2 | tail -1 | bc)
  fi
  wallet_unlocked=0 #TODO
  if [ "$wallet_unlocked" -gt 0 ] ; then
-  alias_color="${color_red}"
   ln_alias="Wallet Locked"
  else
-  ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
   pubkey=$(echo "${ln_getInfo}" | grep '"id":' | cut -d '"' -f4)
   address=$(echo "${ln_getInfo}" | grep '.onion' | cut -d '"' -f4)
  if [ ${#address} -eq 0 ];then
@@ -278,9 +275,8 @@ if [ ${LNTYPE} = "cln" ]; then
      ln_publicColor="${color_red}"
    fi
   fi
-  alias_color="${color_grey}"
-  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
-  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
+  BLOCKHEIGHT=$(echo "$blockchaininfo"|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$(echo "${ln_getInfo}" | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
     ln_sync=1
   else
@@ -295,42 +291,49 @@ if [ ${LNTYPE} = "cln" ]; then
      fi
    else
      ln_walletbalance=0
-     for i in $($lightningcli_alias \
-      listfunds|jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
+     cln_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
+     for i in $(echo "$cln_listfunds" \
+      |jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
        ln_walletbalance=$((ln_walletbalance+i))
      done
-     for i in $($lightningcli_alias \
-      listfunds|jq .outputs[]|jq 'select(.status=="unconfirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
+     for i in $(echo "$cln_listfunds" \
+      |jq .outputs[]|jq 'select(.status=="unconfirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
        ln_walletbalance_wait=$((ln_walletbalance_wait+i))
      done
      if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
      if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
      ln_channelbalance=0
-     for i in $($lightningcli_alias \
-      listfunds|jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+     for i in $(echo "$cln_listfunds" \
+      |jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
        ln_channelbalance=$((ln_channelbalance+i))
      done
      if [ ${#ln_channelbalance} -eq 0 ];then
       ln_channelbalance=0
      fi
-     for i in $($lightningcli_alias \
-      listfunds|jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+     for i in $(echo "$cln_listfunds" \
+      |jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
        ln_channelbalance_all=$((ln_channelbalance_all+i))
      done
      ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance))
      if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
      if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
+     # - **num_peers** (u32): The total count of peers, connected or with channels
+     # - **num_pending_channels** (u32): The total count of channels being opened
+     # - **num_active_channels** (u32): The total count of channels in normal state
+     # - **num_inactive_channels** (u32): The total count of channels waiting for opening or closing 
      ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-     ln_channels_total="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
+     cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
+     ln_channels_total=$((ln_channels_online+cln_num_inactive_channels))
      ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
+     # - **fees_collected_msat** (msat): Total routing fees collected by this node
      #ln_dailyfees="$($lncli_alias  feereport | jq -r '.day_fee_sum')" 2>/dev/null
      #ln_weeklyfees="$($lncli_alias  feereport | jq -r '.week_fee_sum')" 2>/dev/null
      #ln_monthlyfees="$($lncli_alias  feereport | jq -r '.month_fee_sum')" 2>/dev/null
      #ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
-     ln_feeReport="$(lightningcli_alias -H summary | grep fees_collected)"
+     ln_feeReport="Total routing fees collected: $(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')"
    fi
  fi
  
@@ -349,7 +352,6 @@ elif [ ${LNTYPE} = "lnd" ];then
  fi
  wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
  if [ "$wallet_unlocked" -gt 0 ] ; then
-   alias_color="${color_red}"
    ln_alias="Wallet Locked"
  else
   ln_getInfo=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
@@ -366,7 +368,6 @@ elif [ ${LNTYPE} = "lnd" ];then
      ln_publicColor="${color_red}"
    fi
   fi
-  alias_color="${color_grey}"
   ln_sync=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
   ln_version=$(echo "${ln_getInfo}" | jq -r '.version' | cut -d' ' -f1)
   if [ ${ln_sync} -eq 0 ]; then
@@ -376,12 +377,14 @@ elif [ ${LNTYPE} = "lnd" ];then
        ln_baseInfo="${color_amber} Waiting for Chain Sync"
      fi
    else
-     ln_walletbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.confirmed_balance')" 2>/dev/null
-     ln_walletbalance_wait="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance | jq -r '.unconfirmed_balance')" 2>/dev/null
+     lnd_walletbalance=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert walletbalance 2>/dev/null)
+     ln_walletbalance="$(echo "$lnd_walletbalance" | jq -r '.confirmed_balance')" 2>/dev/null
+     ln_walletbalance_wait="$(echo "$lnd_walletbalance" | jq -r '.unconfirmed_balance')" 2>/dev/null
      if [ "${ln_walletbalance_wait}" = "0" ]; then ln_walletbalance_wait=""; fi
      if [ ${#ln_walletbalance_wait} -gt 0 ]; then ln_walletbalance_wait="(+${ln_walletbalance_wait})"; fi
-     ln_channelbalance="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.balance')" 2>/dev/null
-     ln_channelbalance_pending="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance | jq -r '.pending_open_balance')" 2>/dev/null
+     lnd_channelbalance=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert channelbalance 2>/dev/null)
+     ln_channelbalance="$(echo "$lnd_channelbalance" | jq -r '.balance')" 2>/dev/null
+     ln_channelbalance_pending="$(echo "$lnd_channelbalance" | jq -r '.pending_open_balance')" 2>/dev/null
      if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
      if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
      ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
@@ -390,9 +393,10 @@ elif [ ${LNTYPE} = "lnd" ];then
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
-     ln_dailyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.day_fee_sum')" 2>/dev/null
-     ln_weeklyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.week_fee_sum')" 2>/dev/null
-     ln_monthlyfees="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport | jq -r '.month_fee_sum')" 2>/dev/null
+     lnd_feereport=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert feereport 2>/dev/null)
+     ln_dailyfees="$(echo "$lnd_feereport" | jq -r '.day_fee_sum')" 2>/dev/null
+     ln_weeklyfees="$(echo "$lnd_feereport" | jq -r '.week_fee_sum')" 2>/dev/null
+     ln_monthlyfees="$(echo "$lnd_feereport" | jq -r '.month_fee_sum')" 2>/dev/null
      ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
    fi
  fi

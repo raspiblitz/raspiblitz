@@ -24,17 +24,17 @@ fi
 
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
-  netprefix"t"
+  netprefix="t"
   portprefix=1
   rpcportmod=1
   zmqprefix=21
 elif [ ${CHAIN} = signet ];then
-  netprefix"s"
+  netprefix="s"
   portprefix=3
   rpcportmod=3
   zmqprefix=23
 elif [ ${CHAIN} = mainnet ];then
-  netprefix""
+  netprefix=""
   portprefix=""
   rpcportmod=0
   zmqprefix=28
