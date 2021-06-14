@@ -43,6 +43,14 @@ function removeParallelService() {
     fi
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
+    if [ ${bitcoinprefix} = signet ];then
+      # check for signet service set up by joininbox  
+      if [ -f "/etc/systemd/system/signetd.service" ];then
+        sudo systemctl stop signetd
+        sudo systemctl disable signetd
+        echo "# The signetd.service is stopped and disabled"
+      fi
+    fi
     echo "# Bitcoin Core on ${CHAIN} service is stopped and disabled"
   fi
 }
