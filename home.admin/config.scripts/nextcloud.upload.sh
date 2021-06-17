@@ -75,15 +75,33 @@ elif test $MODE = "upload"; then
     exit 1
   fi
 
-  sudo curl "$nextcloudBackupServer/remote.php/dav/files/$nextcloudBackupUser/" \
+  REMOTE_DIR_URL="$nextcloudBackupServer/remote.php/dav/files/$nextcloudBackupUser/raspiblitz/"
+
+  # checking if remote directory exists
+  RESPONSE=$(curl $REMOTE_DIR_URL \
     --user "$nextcloudBackupUser:$nextcloudBackupPassword" \
-    --upload-file $FILEPATH
+    --request PROPFIND \
+    --silent)
+
+  # if remote directory doesn't exist, we need to create it
+  if [[ $RESPONSE = *DAV\\Exception\\NotFound* ]]; then
+    curl "$REMOTE_DIR_URL" \
+      --user "$nextcloudBackupUser:$nextcloudBackupPassword" \
+      --request MKCOL \
+      --silent
+  fi
+
+  sudo curl "$REMOTE_DIR_URL" \
+    --user "$nextcloudBackupUser:$nextcloudBackupPassword" \
+    --upload-file $FILEPATH \
+    --silent
 
   if test $? = 0; then
     echo "# Great success!"
     echo "upload=1"
   else
     echo "err='file upload failed'"
+    echo "upload=0"
     exit 1
   fi
 
