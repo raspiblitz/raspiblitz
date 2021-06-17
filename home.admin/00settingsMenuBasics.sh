@@ -93,6 +93,7 @@ OPTIONS+=(n 'Testnet' ${chainValue})
 OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+OPTIONS+=(x 'StaticChannelBackup on Nextcloud' ${NextcloudBackup})
 OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
