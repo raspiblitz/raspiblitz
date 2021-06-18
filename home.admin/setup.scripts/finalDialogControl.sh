@@ -41,6 +41,7 @@ fi
 # when coming from fresh setup
 if [ "${setupPhase}" == "setup" ]; then
   clear
+  whiptail --title "Setup Done" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
   echo "Hooray :) Everything is Setup!"
   echo "PRESS ENTER"
   read key
