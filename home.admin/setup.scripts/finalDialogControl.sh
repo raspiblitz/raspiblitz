@@ -33,7 +33,7 @@ if [ ${syncProgress} -lt 99 ] && [ "${network}" == "bitcoin" ]; then
   OPTIONS=()
   OPTIONS+=(VALIDATE "Run full self sync/validation (takes long)")
   OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (~6h)")
-  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title "Blockchain Sync/Validation" --menu "Your Blockchain sync is at ${syncProgress}% - this might take multiple days to validate.\n\nHow do you want to proceed:" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain sync is at ${syncProgress}% - the validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 60 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   echo "CHOICESUB: ${CHOICESUB}"
   read key
