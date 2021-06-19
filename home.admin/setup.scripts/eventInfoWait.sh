@@ -88,6 +88,22 @@ ssh admin@${localip}
 Use your Password A
 " 7 41
 
+elif [ "${eventID}" == "copysource" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Repair-Mode - Providing Blockchain
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "copytarget" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Receiving Blockchain over LAN
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
 elif [ "${eventID}" == "inconsistentsystem" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

@@ -57,7 +57,7 @@ do
   # https://github.com/rootzoll/raspiblitz/issues/160
   ####################################################
 
-  if [ "${state}" == "" ] || [ "${state}" == "copysource" ]; then
+  if [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
     echo "skipping background loop (${counter}) - state(${state})"
     sleep 1
     continue

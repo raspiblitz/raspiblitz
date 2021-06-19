@@ -27,8 +27,8 @@ case $CHOICE in
 esac
 
 # setting copy state
-sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
-sed -i "s/^message=.*/message='LAN-COPY Blockchain'/g" /home/admin/raspiblitz.info
+sed -i "s/^state=.*/state=copytarget/g" /home/admin/raspiblitz.info
+sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
 
 echo "stopping services ..."
 sudo systemctl stop lnd 
@@ -207,7 +207,7 @@ if [ ${quickCheckOK} -eq 0 ]; then
   response=$?
   echo "response(${response})"
   if [ "${response}" == "0" ]; then
-    /home/admin/50copyHDD.sh
+    /home/admin/config.scripts/blitz.copychain.sh
     exit 0
   fi
 
