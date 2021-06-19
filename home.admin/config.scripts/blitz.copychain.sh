@@ -233,4 +233,4 @@ sleep 10
 
 # setting copy state
 sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
-sed -i "s/^message=.*/message='Node Running'/g" $/home/admin/raspiblitz.info
+sed -i "s/^message=.*/message='Node Running'/g" /home/admin/raspiblitz.info
