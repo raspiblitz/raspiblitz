@@ -47,6 +47,7 @@ fi
 
 dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
 response=$?
+clear
 echo "response(${response})"
 if [ "${response}" = "1" ]; then
     echo "OK - keep old blockchain - just try to repair by copying over it"
