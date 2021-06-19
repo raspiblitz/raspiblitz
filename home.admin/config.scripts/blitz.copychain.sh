@@ -27,8 +27,8 @@ case $CHOICE in
 esac
 
 # setting copy state
-sed -i "s/^state=.*/state=copysource/g" ${infoFile}
-sed -i "s/^message=.*/message='LAN-COPY Blockchain'/g" ${infoFile}
+sed -i "s/^state=.*/state=copysource/g" /home/admin/raspiblitz.info
+sed -i "s/^message=.*/message='LAN-COPY Blockchain'/g" /home/admin/raspiblitz.info
 
 echo "stopping services ..."
 sudo systemctl stop lnd 
@@ -231,5 +231,5 @@ sudo systemctl start lnd
 sleep 10
 
 # setting copy state
-sed -i "s/^state=.*/state=ready/g" ${infoFile}
-sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
+sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
+sed -i "s/^message=.*/message='Node Running'/g" $/home/admin/raspiblitz.info
