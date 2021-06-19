@@ -34,7 +34,7 @@ if [ ${syncProgress} -lt 99 ] && [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (±6h)")
   CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain sync is just at ${syncProgress}%\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 63 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-  if [ "${CHOICESUB}" == "VALIDATE" ]; then
+  if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh
   fi
 
