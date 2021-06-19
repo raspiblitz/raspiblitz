@@ -31,7 +31,6 @@ sed -i "s/^state=.*/state=copytarget/g" /home/admin/raspiblitz.info
 sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
 
 echo "stopping services ..."
-sudo systemctl stop lnd 
 sudo systemctl stop bitcoind <2 /dev/null
 
 # check if old blockchain data exists
@@ -228,7 +227,6 @@ fi
 
 echo "restarting services ... (please wait)"
 sudo systemctl start bitcoind 
-sudo systemctl start lnd 
 sleep 10
 
 # setting copy state
