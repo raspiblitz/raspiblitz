@@ -26,7 +26,7 @@ fi
 ############################################
 # BLOCKCHAIN INFO & OPTIONS
 
-if [ ${syncProgress} -lt 99 ] && [ "${network}" == "bitcoin" ]; then
+if [ "${syncProgress}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgress} -lt 75 ]; then
 
   # offer choice to copy blockchain over LAN
   OPTIONS=()
