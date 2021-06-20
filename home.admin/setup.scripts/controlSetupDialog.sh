@@ -143,10 +143,6 @@ if [ "${setupPhase}" == "setup" ]; then
         exit 1
       fi
 
-      # DEBUG EXIT
-      echo "OK Format done"
-      exit 1
-    
     elif [ "${userChoice}" == "2" ]; then
 
       # KEEP BLOCKCHAIN + DLETE ALL THE REST

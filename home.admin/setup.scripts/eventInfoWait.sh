@@ -77,7 +77,7 @@ elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Upgrade/Recover/Provision
 ---> ${contentString}
-Please keep running until reboot.
+Please keep running until done.
 " 7 40
 
 elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then

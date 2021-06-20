@@ -724,6 +724,11 @@ else
   sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
 fi
 
+# MAKE SURE SERVICES ARE RUNNING
+echo "Make sure main services are running .." >> ${logFile}
+sudo systemctl start ${network}d
+sudo systemctl start lnd
+
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5
 
