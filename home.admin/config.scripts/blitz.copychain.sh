@@ -45,7 +45,7 @@ fi
 
 # output status data & exit
 if [ "$1" = "status" ]; then
-  echo "# blitz.copyblockchain.sh"
+  echo "# blitz.copychain.sh"
   echo "copyInProgress=${copyInProgress}"
   echo "copyBeginTime=${copyBeginTime}"
   echo "copyEndTime=${copyEndTime}"

@@ -45,7 +45,7 @@ if [ "${state}" = "copysource" ]; then
 fi
 
 # special state: copytarget
-source <(/home/admin/config.scripts/blitz.copyblockchain.sh status)
+source <(/home/admin/config.scripts/blitz.copychain.sh status)
 if [ "${copyInProgress}" = "1" ]; then
   echo "Detected interrupted COPY blochain process ..."
   /home/admin/config.scripts/blitz.copychain.sh target
