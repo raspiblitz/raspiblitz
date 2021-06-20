@@ -114,7 +114,7 @@ do
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
-    /home/admin/setup.scripts/setupDialogControl.sh
+    /home/admin/setup.scripts/controlSetupDialog.sh
     # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
     exitMenuLoop=$?
@@ -128,7 +128,7 @@ do
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
-    /home/admin/setup.scripts/finalDialogControl.sh
+    /home/admin/setup.scripts/controlFinalDialog.sh
     continue
   fi  
 
