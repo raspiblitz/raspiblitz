@@ -134,6 +134,7 @@ if [ "${setupPhase}" == "setup" ]; then
       fi
 
       # run formatting
+      echo "Running Format: (${filesystem}) (${hddCandidate})"
       source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
       if [ "${error}" != "" ]; then
         echo "FAIL ON FORMATTING THE DRIVE:"
