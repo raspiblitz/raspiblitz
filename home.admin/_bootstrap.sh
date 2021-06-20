@@ -62,7 +62,10 @@ source ${configFile} 2>/dev/null
 source <(/home/admin/config.scripts/internet.sh status)
 
 # get basic hardware info
-source <(/home/admin/config.scripts/internet.sh status)
+source <(/home/admin/config.scripts/.sh status)
+
+# get basic dns info
+source <(sudo /home/admin/config.scripts/internet.dns.sh test nodialog)
 
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
@@ -76,6 +79,7 @@ echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "localip='${localip}'" >> $infoFile
 echo "online='${online}'" >> $infoFile
+echo "dnsworking=${dnsworking}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile

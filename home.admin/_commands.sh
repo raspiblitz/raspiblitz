@@ -38,8 +38,7 @@ function restart() {
 
 # command: sourcemode
 function sourcemode() {
-  cd /home/admin
-  ./98repairMenu.sh sourcemode
+  /home/admin/config.scripts/blitz.copychain.sh source
 }
 
 # command: check

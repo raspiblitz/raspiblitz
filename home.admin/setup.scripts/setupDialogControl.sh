@@ -20,6 +20,12 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 ############################################
+# PRESETUP: SET DNS (just if needed)
+if [ "${dnsworking}" == "0" ]; then
+  sudo /home/admin/config.scripts/internet.dns.sh test
+fi
+
+############################################
 # QuickOption: Update
 if [ "${setupPhase}" == "update" ]; then
   # show update dialog
