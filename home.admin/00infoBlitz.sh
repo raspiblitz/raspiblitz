@@ -326,6 +326,11 @@ ${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${
 ${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
+${color_yellow}   /'          ${color_gray}
+${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
+${color_yellow}               ${color_gray}${ln_feeReport}
+$lastLine
 " \
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
