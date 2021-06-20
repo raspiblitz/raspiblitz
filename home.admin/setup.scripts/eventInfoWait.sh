@@ -217,14 +217,6 @@ Local Network seems OK but no Internet.
 Is your router still online?
 " 7 43
 
-elif [ "${eventID}" = "noInternet" ]; then
-
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Waiting for Internet ...
-Local Network seems OK but no Internet.
-Is your router still online?
-" 7 43
-
 elif [ "${eventID}" == "inspect-hdd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

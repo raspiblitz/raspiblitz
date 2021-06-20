@@ -86,7 +86,7 @@ configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null|
 #############################################
 # check for internet connection
 online=0
-if [ ${#dnsServer} -gt 0 ]; then
+if [ "${dnsServer}" != "" ]; then
   # re-test with user set dns server
   online=$(ping ${dnsServer} -c 1 -W 2 | grep -c '1 received')
 fi
