@@ -323,7 +323,7 @@ ${color_yellow}      ,'/      ${color_gray}Refreshed: ${datetime}
 ${color_yellow}    ,' /       ${color_gray}CPU load${load##up*,  }, temp ${tempC}°C ${tempF}°F
 ${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}${hdd}${color_gray}
 ${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-%s" "${lastline}"
+%s" "${lastLine}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
   echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
