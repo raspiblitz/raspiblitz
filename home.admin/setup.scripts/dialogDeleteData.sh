@@ -5,7 +5,7 @@
 blockchainName=$1
 
 keepBlockchain=0
-if [ ${blockchainName} != "" ]; then
+if [ "${blockchainName}" != "" ]; then
 
     whiptail --title " BLOCKCHAIN DATA FOUND " --yes-button "USE BLOCKCHAIN" --no-button "DELETE" --yesno "We found ${blockchainName} blockchain data on your HDD/SSD.
 
