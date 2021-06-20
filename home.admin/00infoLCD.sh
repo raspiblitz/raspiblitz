@@ -106,6 +106,7 @@ while :
     fi
 
     # no special case - show status display
+    date
     /home/admin/00infoBlitz.sh
     sleep 5
 
