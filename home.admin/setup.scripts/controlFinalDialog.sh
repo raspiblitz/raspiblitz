@@ -118,7 +118,7 @@ else
   read key
 fi
 
-echo "Starting ..."
+echo "Starting ... (please wait)"
 
 # signal to backend that all is good and it can continue
 sudo sed -i "s/^state=.*/state='finalready'/g" /home/admin/raspiblitz.info 

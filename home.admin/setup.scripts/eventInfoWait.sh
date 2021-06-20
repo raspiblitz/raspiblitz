@@ -38,7 +38,7 @@ backtitle="RaspiBlitz ${codeVersion} / ${localip} / ${eventID}"
 # 1) WELL DEFINED EVENTS
 ################################################
 
-if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ]; then
+if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ] || [ "${eventID}" == "ready" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Starting RaspiBlitz
@@ -160,7 +160,7 @@ Use password: raspiblitz
 " 8 41
     fi
 
-elif [ "${eventID}" == "waitfinal" ]; then
+elif [ "${eventID}" == "waitfinal" ] || [ "${eventID}" == "finalready" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Setup-Done - Login for Details:
