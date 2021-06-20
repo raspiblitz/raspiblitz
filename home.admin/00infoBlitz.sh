@@ -319,18 +319,6 @@ ${color_yellow}
 ${color_yellow}               ${color_amber}RaspiBlitz v${codeVersion} ${color_green} ${ln_alias} ${upsInfo}
 ${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}-------------------------------------------
-${color_yellow}      ,'/      ${color_gray}Refreshed: ${datetime}
-${color_yellow}    ,' /       ${color_gray}CPU load${load##up*,  }, temp ${tempC}°C ${tempF}°F
-${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}${hdd}${color_gray}
-${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
-${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} ${sync_percentage}
-${color_yellow}   /'          ${color_gray}
-${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
-${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
-${color_yellow}               ${color_gray}${ln_feeReport}
-$lastLine
 "
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
@@ -422,3 +410,25 @@ EOF
 
 fi
 # EOF
+
+exit 0
+printf "
+${color_yellow}
+${color_yellow}
+${color_yellow}
+${color_yellow}               ${color_amber}RaspiBlitz v${codeVersion} ${color_green} ${ln_alias} ${upsInfo}
+${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
+${color_yellow}        ,/     ${color_yellow}-------------------------------------------
+${color_yellow}      ,'/      ${color_gray}Refreshed: ${datetime}
+${color_yellow}    ,' /       ${color_gray}CPU load${load##up*,  }, temp ${tempC}°C ${tempF}°F
+${color_yellow}  ,'  /_____,  ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}${hdd}${color_gray}
+${color_yellow} .'____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
+${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} ${sync_percentage}
+${color_yellow}   /'          ${color_gray}
+${color_yellow}               ${color_gray}LND ${color_green}${ln_version} ${ln_baseInfo}
+${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
+${color_yellow}               ${color_gray}${ln_feeReport}
+$lastLine
+"
