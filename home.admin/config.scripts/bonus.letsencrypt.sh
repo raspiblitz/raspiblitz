@@ -47,7 +47,7 @@ You can *optionally* enter an eMail address.\n
 \n
 The address will not be included in the generated certificates.\n
 \n
-It will be used to e.g. notify you about certificate expiries and changes
+It will be used to e.g. notify you about certificate expiration and changes
 to the Terms of Service of Let's Encrypt.\n
 \n
 Feel free to leave empty."
@@ -164,7 +164,7 @@ function refresh_certs_with_nginx() {
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
         fi
 
-        # repleace certs for tor
+        # replace certs for tor
         if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
           echo "# replacing TOR certs for ${FQDN}"
           sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
@@ -250,7 +250,7 @@ elif [ "$1" = "issue-cert" ]; then
 
   # check if letsencrypt is on
   if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsenscrypt is not on'"
+    echo "error='letsencrypt is not on'"
     exit 1
   fi
 
@@ -289,7 +289,7 @@ elif [ "$1" = "issue-cert" ]; then
     exit 1
   fi
 
-  # create certicicates
+  # create certificates
   echo "# creating certs for ${FQDN}"
   $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
   success1=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
@@ -324,7 +324,7 @@ elif [ "$1" = "remove-cert" ]; then
 
   # check if letsencrypt is on
   if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsenscrypt is not on'"
+    echo "error='letsencrypt is not on'"
     exit 1
   fi
 

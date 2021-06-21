@@ -210,7 +210,7 @@ if [ "$1" == "stop-after-script" ]; then
   exit 0
 fi
 
-# if started after intial setup - quit here
+# if started after initial setup - quit here
 if [ "${setupStep}" = "100" ]; then
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
   sudo systemctl enable bitcoind
@@ -229,7 +229,7 @@ if [ ${quickCheckOK} -eq 0 ]; then
   echo "Wait 5 secs ..."
   sleep 5
 
-  dialog --title " INVALID TRANSFER - TRY AGAIN?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. Maybe transfere was interrupted and not completed.\n\nDo you want retry/proceed the copy process?" 8 70
+  dialog --title " INVALID TRANSFER - TRY AGAIN?" --yesno "Quickcheck shows the data you transferred is invalid/incomplete. Maybe transfer was interrupted and not completed.\n\nDo you want retry/proceed the copy process?" 8 70
   response=$?
   echo "response(${response})"
   if [ "${response}" == "0" ]; then

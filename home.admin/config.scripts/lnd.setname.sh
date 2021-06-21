@@ -30,7 +30,7 @@ blitzConfig="/mnt/hdd/raspiblitz.conf"
 # lnd conf file
 lndConfig="/mnt/hdd/lnd/lnd.conf"
 
-# check if raspibblitz config file exists
+# check if raspiblitz config file exists
 configExists=$(ls ${blitzConfig} | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
  echo "FAIL - missing ${blitzConfig}"

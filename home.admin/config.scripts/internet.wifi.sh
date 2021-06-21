@@ -55,7 +55,7 @@ network={
 
   # activate new wifi settings
   sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be actrive now - maybe reboot needed"
+  echo "# OK - changes should be active now - maybe reboot needed"
   exit 0
 
 elif [ "$1" == "off" ]; then
@@ -73,7 +73,7 @@ update_config=1"
 
   # activate new wifi settings
   sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be actrive now - maybe reboot needed"
+  echo "# OK - changes should be active now - maybe reboot needed"
   exit 0
 
 # https://github.com/rootzoll/raspiblitz/issues/560
@@ -99,7 +99,7 @@ elif [ "$1" == "backup-restore" ]; then
   elif [ -f /mnt/hdd/app-data/wpa_supplicant.conf ]; then
     # RESTORE backuped wifi settings from HDD to RaspiBlitz
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-    echo "# restoring old wifi settings ... wait 4 secounds to connect"
+    echo "# restoring old wifi settings ... wait 4 seconds to connect"
     sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
     sleep 4
     echo "wifiRestore=1"

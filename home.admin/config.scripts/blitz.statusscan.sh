@@ -12,7 +12,7 @@ fi
 # measure time of scan
 startTime=$(date +%s)
 
-# macke sure temp folder on HDD is available and fro all usable
+# make sure temp folder on HDD is available and fro all usable
 sudo mkdir /mnt/hdd/temp 2>/dev/null
 sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 
@@ -178,7 +178,7 @@ if [ ${lndRunning} -eq 1 ]; then
           # nullify error - this is normal
           lndErrorFull=""
           errorResolved=1
-          # oputput basic data because no error
+          # output basic data because no error
           echo "# LND RPC is still warming up - no scan progress: prepare scan"
           echo "scanTimestamp=-2"
           echo "syncedToChain=0"
@@ -191,7 +191,7 @@ if [ ${lndRunning} -eq 1 ]; then
 
       # if not known error and not resolved before - keep generic
       if [ ${#lndErrorShort} -eq 0 ] && [ ${errorResolved} -eq 0 ]; then
-        lndErrorShort='Unkown Error - see logs'
+        lndErrorShort='Unknown Error - see logs'
         lndErrorFull=$(echo ${lndErrorFull} | tr -d "'")
       fi
 
@@ -233,7 +233,7 @@ if [ ${lndRunning} -eq 1 ]; then
       scanDate=$(date -d @${scanTimestamp} 2>/dev/null)
       echo "scanDate='${scanDate}'"
       
-      # calculate LND scan progress by seconds since Genesisblock
+      # calculate LND scan progress by seconds since Genesis block
       genesisTimestamp=1230940800
 
       totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)

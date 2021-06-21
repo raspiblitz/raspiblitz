@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO: check if services/apps are running and stop all ... or let thet to outside?
+# TODO: check if services/apps are running and stop all ... or let them to outside?
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
@@ -108,7 +108,7 @@ if [ "$1" = "migration-umbrel" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # can olny migrate unmonted data disks
+  # can only migrate unmounted data disks
   if [ "${isMounted}" == "1" ]; then
     echo "err='cannot migrate mounted drive'"
     exit 1
@@ -202,7 +202,7 @@ if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # can olny migrate unmonted data disks
+  # can only migrate unmounted data disks
   if [ "${isMounted}" == "1" ]; then
     echo "err='cannot migrate mounted drive'"
     exit 1
@@ -364,7 +364,7 @@ if [ "$1" = "export-gui" ]; then
   echo "* DOWNLOAD THE MIGRATION FILE *"
   echo "*******************************"
   echo 
-  echo "On yoz Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
+  echo "On your Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
   echo "${scpDownloadUnix}"
   echo "On Windows use command:"
   echo "${scpDownloadWin}"
@@ -399,7 +399,7 @@ if [ "$1" = "import" ]; then
     if [ ${containsPath} -gt 0 ]; then
       startsOnPath=$(echo $2 | grep -c '^/')
       if [ ${startsOnPath} -eq 0 ]; then
-        echo "# needs to be an absolut path: ${2}"
+        echo "# needs to be an absolute path: ${2}"
         echo "error='invalid path'"
         exit 1
       else
@@ -436,7 +436,7 @@ if [ "$1" = "import" ]; then
     importFile=$(sudo ls ${importFile})
   else
     echo "# Multiple files found. Not sure which to use."
-    echo "# Please use absolut-path+file as second parameter."
+    echo "# Please use absolute-path+file as second parameter."
     echo "error='file not unique'"
     exit 1
   fi
@@ -457,7 +457,7 @@ if [ "$1" = "import" ]; then
   echo "# Importing (overwrite) (can take some time) .."
   sudo tar -xf ${importFile} -C /
 
-  # copy bitcoin/litecoin data backups back to orgplaces (if part of backup)
+  # copy bitcoin/litecoin data backups back to original places (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
     sudo mkdir /mnt/hdd/bitcoin
@@ -568,7 +568,7 @@ if [ "$1" = "import-gui" ]; then
     exit 1
   fi
 
-  # make sure all directories betare propper linked
+  # make sure all directories are properly linked
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # make sure that temp directory exists and can be written by admin
@@ -628,7 +628,7 @@ if [ "$1" = "import-gui" ]; then
   source /mnt/hdd/raspiblitz.conf
   if [ ${#network} -eq 0 ]; then
     echo
-    echo "FAIL: No raspiblitz.conf found afer migration restore"
+    echo "FAIL: No raspiblitz.conf found after migration restore"
     echo "error='migration contains no raspiblitz.conf'"
     sleep 3
     exit 1
@@ -667,5 +667,5 @@ if [ "$1" = "import-gui" ]; then
   exit 0
 fi
 
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1

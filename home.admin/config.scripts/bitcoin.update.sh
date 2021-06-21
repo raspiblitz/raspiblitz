@@ -19,7 +19,7 @@ source /home/admin/raspiblitz.info
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+# comment will be shown as "BEWARE Info" when option is chosen (can be multiple lines) 
 bitcoinVersion="0.21.0"
 
 # needed to check code signing

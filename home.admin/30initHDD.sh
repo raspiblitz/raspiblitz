@@ -31,7 +31,7 @@ if [ ${hddRaspiData} -eq 1 ]; then
   exit 1
 fi
 
-# check if there is a HDD connectecd to use as data drive
+# check if there is a HDD connected to use as data drive
 echo "hddCandidate=${hddCandidate}"
 if [ ${#hddCandidate} -eq 0 ]; then
   echo "# FAIL please connect a HDD and call ./30initHDD.sh again"
@@ -65,7 +65,7 @@ fi
 echo " OK"
 
 # format drive if it does not have any blockchain or blitz data on it
-# to be sure that HDD has no faulty partions, etc.
+# to be sure that HDD has no faulty partitions, etc.
 echo
 echo "# --> Check HDD/SSD for Blockchain ..."
 echo "# hddGotBlockchain=${hddGotBlockchain}"
@@ -84,15 +84,15 @@ if [ "${hddGotBlockchain}" == "" ] || [ ${hddGotBlockchain}  -eq 0 ]; then
     echo "# EXPERIMENTAL FEATURE: BTRFS + RAID"
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# You connected an extra USB thumb drive to your RaspiBlitz."
-    echo "# This activates the exterimental feature of running BTRFS"
+    echo "# This activates the experimental feature of running BTRFS"
     echo "# instead of EXT4 and is still unstable but needs testing."
     echo "# PRESS ENTER to continue with BTRFS+RAID setup or press"
     echo "# CTRL+C, remove device & call ./30initHDD.sh again."
     read key
     format="btrfs"
 
-    # check that raid cadidate is big enough
-    # a 32GB drive gets shown with 28GB in mby tests
+    # check that raid candidate is big enough
+    # a 32GB drive gets shown with 28GB in my tests
     if [ ${raidSizeGB} -lt 27 ]; then
       echo "# FAIL the raid device needs to be at least a 32GB thumb drive."
       echo "# Please remove or replace and call ./30initHDD.sh again"
@@ -101,7 +101,7 @@ if [ "${hddGotBlockchain}" == "" ] || [ ${hddGotBlockchain}  -eq 0 ]; then
 
   elif [ ${raidCandidates} -gt 1 ]; then
     echo "# FAIL more then one USB raid drive candidate connected."
-    echo "# Please max one extra usb drive and the call ./30initHDD.sh again"
+    echo "# Please max one extra USB drive and the call ./30initHDD.sh again"
     exit 1
   fi
 

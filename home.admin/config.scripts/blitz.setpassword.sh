@@ -133,7 +133,7 @@ if [ "${abcd}" = "a" ]; then
       exit 1
     fi
 
-    # use entred password now as parameter
+    # use entered password now as parameter
     newPassword="${password1}"
 
   fi  
@@ -209,7 +209,7 @@ elif [ "${abcd}" = "b" ]; then
       exit 1
     fi
 
-    # use entred password now as parameter
+    # use entered password now as parameter
     newPassword="${password1}"
   fi
 

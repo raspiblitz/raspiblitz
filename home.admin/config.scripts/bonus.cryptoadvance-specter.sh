@@ -308,7 +308,7 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
+    # port 25441 is HTTPS with self-signed cert - specter only makes sense to be served over HTTPS
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
 

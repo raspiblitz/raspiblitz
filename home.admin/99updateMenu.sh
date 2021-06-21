@@ -53,7 +53,7 @@ Do you want to download LND Data Backup now?
   fi
 
   whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
-Once the LCD is white and no LEDs are blicking anymore:
+Once the LCD is white and no LEDs are blinking anymore:
 
 - Remove the Power from RaspiBlitz
 - Exchange the old with the new SD card

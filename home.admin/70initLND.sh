@@ -277,7 +277,7 @@ or having a complete LND rescue-backup from your old node.
     fi
 
     # IF SEED and SCB - make user upload channel.backup file now
-    # and it will get automated activated after syns are ready
+    # and it will get automated activated after syncs are ready
     # TODO: later activate directly with call to lnd.iniwallet.py
     if [ "${CHOICE}" == "SEED+SCB" ]; then
 
@@ -317,7 +317,7 @@ or having a complete LND rescue-backup from your old node.
         # dialog to enter
         sudo touch /var/cache/raspiblitz/.seed.tmp
         sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
-        dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+        dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, separated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
         wordstring=$( cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g' )
         shred -u /var/cache/raspiblitz/.seed.tmp
         echo "processing ... ${wordstring}"
@@ -339,7 +339,7 @@ Best is to write words in external editor
 and then copy and paste them into dialog.
 
 The Word list should look like this:
-wordone wordtweo wordthree ...
+wordone wordtwo wordthree ...
 
 " 16 52
 
