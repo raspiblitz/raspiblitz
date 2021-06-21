@@ -23,20 +23,6 @@ echo "###################################" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
 
 ###################################
-# Set Password A
-
-if [ "${passwordA}" == "" ]; then
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing passwordA in (${setupFile})!" >> ${logFile}
-  exit 1
-fi
-
-echo "SETTING PASSWORD A" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
-
-###################################
 # Preserve SSH keys
 # just copy dont link anymore
 # see: https://github.com/rootzoll/raspiblitz/issues/1798

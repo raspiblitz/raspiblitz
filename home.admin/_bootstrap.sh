@@ -491,7 +491,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
-    echo "Calling _bootstrap.setup.sh for basic setup tasks .." >> $logFile
+    echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
@@ -500,24 +500,24 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
-  # if update - run provision update migration first
-  if [ "${setupPhase}" == "update" ]; then
-    echo "Calling _bootstrap.update.sh for possible update migrations .." >> $logFile
-    sudo /home/admin/_provision.update.sh
-    if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
-      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
-      exit 1
-    fi
-  fi
-
-  # if update - run provision update migration first
+  # if migration - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
-    echo "Calling _bootstrap.migration.sh for possible update migrations .." >> $logFile
+    echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sudo /home/admin/_provision.migration.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
+      exit 1
+    fi
+  fi
+
+  # if update/recovery/migration
+  if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
+    echo "Calling _provision.update.sh .." >> $logFile
+    sudo /home/admin/_provision.update.sh
+    if [ "$?" != "0" ]; then
+      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
       exit 1
     fi
   fi
