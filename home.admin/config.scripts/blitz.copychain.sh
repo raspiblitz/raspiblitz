@@ -367,7 +367,7 @@ if [ "$1" = "source" ]; then
 
       # wait 20 seconds for user exiting loop
       echo ""
-      echo -en "OK on sync loop done ... will test in another if all was transferred."
+      echo -en "OK one sync loop done ... will test in next loop if all was transferred."
       echo -en "PRESS X TO MANUALLY FINISH SYNCING"
       read -n 1 -t 6 keyPressed
       if [ "${keyPressed}" = "x" ]; then
