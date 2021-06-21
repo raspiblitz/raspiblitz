@@ -299,29 +299,29 @@ if [ "$1" = "source" ]; then
   targetIP=$(echo "${targetIP[0]}")
   localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#targetIP} -eq 0 ]; then
-    return
+    exit 1
   fi
   if [ "${localIP}" == "${targetIP}" ]; then
     whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
-    return
+    exit 1
   fi
   canPingIP=$(ping ${targetIP} -c 1 | grep -c "1 received")
   if [ ${canPingIP} -eq 0 ]; then
     whiptail --msgbox "Was not able to contact/ping: ${targetIP}\n\n- check if IP of target RaspiBlitz is correct.\n- check to be on the same local network.\n- try again ..." 11 58 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
-    return
+    exit 1
   fi
   
   echo "# get Password of RaspiBlitz to copy to ..."
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   if [ ${#targetPassword} -eq 0 ]; then
-    return
+    exit 1
   fi
 
   sudo rm /root/.ssh/known_hosts 2>/dev/null
   canLogin=$(sudo sshpass -p "${targetPassword}" ssh -t -o StrictHostKeyChecking=no bitcoin@${targetIP} "echo 'working'" 2>/dev/null | grep -c 'working')
   if [ ${canLogin} -eq 0 ]; then
     whiptail --msgbox "Password was not working for IP: ${targetIP}\n\n- check thats the correct IP for correct RaspiBlitz\n- check that you used PASSWORD A and had no typo\n- If you tried too often, wait 1h try again" 11 58 "" --title " Testing Target Password " --backtitle "RaspiBlitz - Copy Blockchain"
-    return
+    exit 1
   fi
 
   echo "# stopping services ..."
