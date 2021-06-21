@@ -97,6 +97,8 @@ sudo chmod 777 ${infoFile}
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop lnd 2>/dev/null
   sed -i "s/^state=.*/state=inconsistentsystem/g" ${infoFile}
   sed -i "s/^message=.*/message='provision did not ran thru'/g" ${infoFile}
   echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}

@@ -380,7 +380,7 @@ if [ "$1" = "source" ]; then
     done
   
   # transfere end flag
-  sed -i "s/^state=.*/state=/g" /home/admin/raspiblitz.info
+  sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
   date +%s > /home/admin/copy_end.time
   sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' /home/admin/copy_end.time bitcoin@${targetIP}:/mnt/hdd/bitcoin
   sudo rm -f /home/admin/copy_end.time
