@@ -321,7 +321,6 @@ do
           source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
           if [ ${#err} -gt 0 ]; then
             echo "FAIL -  ${err}"
-            echo "${errMore}"
           else
             echo "OK - ${upload}"
           fi
