@@ -2,14 +2,18 @@
 
 # Usage:
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
+
+# To have aliases resolved inside a script:
 # shopt -s expand_aliases
 # alias bitcoincli_alias="$bitcoincli_alias"
 # alias lncli_alias="$lncli_alias"
 # alias lightningcli_alias="$lightningcli_alias"
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 if [ $1 = getvars ];then
-  # LNTYPE is lnd | cln
+  
+  # LNTYPE is: lnd | cln
   if [ $# -gt 1 ];then
     LNTYPE=$2
   else
@@ -20,13 +24,16 @@ if [ $1 = getvars ];then
     fi
   fi
   echo "LNTYPE=${LNTYPE}"
-  if [ $LNTYPE = cln ];then
-    echo "typeprefix=c"
-  elif [ $LNTYPE = lnd ];then
-    echo "typeprefix=''"
-  fi
 
-  # CHAIN is signet | testnet | mainnet
+  # typeprefix is: "" | c
+  if [ $LNTYPE = cln ];then
+    typeprefix=c
+  elif [ $LNTYPE = lnd ];then
+    typeprefix=''
+  fi
+  echo "typeprefix=${typeprefix}"
+
+  # CHAIN is: signet | testnet | mainnet
   if [ $# -gt 2 ];then
     CHAIN=$3
     chain=${CHAIN::-3}
@@ -35,25 +42,35 @@ if [ $1 = getvars ];then
   fi
   echo "CHAIN=${chain}net"
   echo "chain=${chain}"
+
+  # netprefix is:  "" | t | s
+  # portprefix is: "" | 1 | 3
   if [ ${chain} = "test" ];then
     netprefix="t"
-    echo "netprefix=t"
     L1rpcportmod=1
     L2rpcportmod=1
-    echo "portprefix=1"
+    portprefix=1
   elif [ ${chain} = "sig" ];then
     netprefix="s"
-    echo "netprefix=s"
     L1rpcportmod=3
     L2rpcportmod=3
-    echo "portprefix=3"
+    portprefix=3
   elif [ ${chain} = "main" ];then
     netprefix=""
-    echo "netprefix=''"
     L1rpcportmod=""
     L2rpcportmod=0
-    echo "portprefix=''"
+    portprefix=""
   fi
+  echo "netprefix=${netprefix}"
+  echo "portprefix=${portprefix}"
+
+  # CLNETWORK is: bitcoin / signet / testnet
+  if [ $chain = main ];then
+    CLNETWORK=${network}
+  else
+    CLNETWORK=${chain}net
+  fi
+  echo CLNETWORK=${CLNETWORK}
 
   # instead of all
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
@@ -61,6 +78,7 @@ if [ $1 = getvars ];then
   # sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
   echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
   echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/${netprefix}config\""
+
 fi
 
 #TODO
