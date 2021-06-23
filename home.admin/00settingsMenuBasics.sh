@@ -75,7 +75,6 @@ echo "run dialog ..."
 # BASIC MENU INFO
 HEIGHT=19 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=45
-CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
@@ -97,6 +96,8 @@ if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi 
+
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}" / 3))
 
 CHOICES=$(dialog \
           --title ' Node Settings & Options ' \
