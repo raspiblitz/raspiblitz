@@ -2,6 +2,7 @@
 
 # explanation on paths https://github.com/ElementsProject/lightning/issues/4223
 # built-in path dir: /usr/local/libexec/c-lightning/plugins/
+# added --plugin-dir=/home/bitcoin/cln-plugins-enabled
 
 SPARKOVERSION="v2.7"
 
@@ -55,9 +56,9 @@ if [ $1 = on ];then
   
   # download binary
   sudo wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
-   -O /usr/local/libexec/c-lightning/plugins/sparko
+   -O /home/bitcoin/cln-plugins-enabled/sparko
   # make executable
-  sudo chmod +x /usr/local/libexec/c-lightning/plugins/sparko
+  sudo chmod +x /home/bitcoin/cln-plugins-enabled/sparko
   
   echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
   echo "# See: https://github.com/fiatjaf/sparko#how-to-use"
@@ -79,7 +80,7 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   echo "# Editing /etc/systemd/system/${netprefix}lightningd.service"
   sudo sed -i "s#^ExecStart=.*#ExecStart=/usr/local/bin/lightningd\
  --conf=/home/bitcoin/.lightning/${netprefix}config\
- --plugin=/usr/local/libexec/c-lightning/plugins/sparko#g"\
+ --plugin=/home/bitcoin/cln-plugins-enabled/sparko#g"\
   /etc/systemd/system/${netprefix}lightningd.service
 
   sudo systemctl daemon-reload
@@ -121,7 +122,7 @@ if [ $1 = off ];then
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Delete plugin"
-    sudo rm /usr/local/libexec/c-lightning/plugins/${netprefix}sparko
+    sudo rm /home/bitcoin/cln-plugins-enabled/${netprefix}sparko
   fi
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf

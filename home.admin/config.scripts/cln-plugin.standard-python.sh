@@ -24,14 +24,15 @@ alias lightningcli_alias="$lightningcli_alias"
 
 plugin=$1
 
-if [ ! -f "/home/bitcoin/plugins/${plugin}/${plugin}.py" ]; then
-  cd /home/bitcoin || exit 1
+if [ ! -f "/home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py" ]; then
+  cd /home/bitcoin/cln-plugins-available || exit 1
   sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
 fi
+
 if [ $(lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
   echo "# Starting the ${plugin} plugin"
-  sudo -u bitcoin pip install -r /home/bitcoin/plugins/${plugin}/requirements.txt
-  lightningcli_alias plugin start /home/bitcoin/plugins/${plugin}/${plugin}.py
+  sudo -u bitcoin pip install -r /home/bitcoin/cln-plugins-available/plugins/${plugin}/requirements.txt
+  lightningcli_alias plugin start /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
 fi
 
 echo
@@ -49,5 +50,5 @@ lightningcli_alias ${plugin}
 echo
 
 if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ];then
-  lightningcli_alias plugin stop /home/bitcoin/plugins/${plugin}/${plugin}.py
+  lightningcli_alias plugin stop /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
 fi

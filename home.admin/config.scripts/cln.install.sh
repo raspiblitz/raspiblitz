@@ -27,31 +27,10 @@ fi
 # Tor
 TORGROUP="debian-tor"
 
-# bitcoin mainnet / signet / testnet
-if [ "$1" = on ] || [ "$1" = off ] && [ $# -gt 1 ];then
-  NETWORK=$2
-else 
-  if [ $chain = main ];then
-    NETWORK=${network}
-  else
-    NETWORK=${chain}net
-  fi
-fi
-
-# prefix for parallel testnetwork services
-if [ $NETWORK = testnet ];then
-  netprefix="t"
-  portprefix=1
-elif [ $NETWORK = signet ];then
-  netprefix="s"
-  portprefix=3
-else
-  netprefix=""
-  portprefix=""
-fi
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
 
 echo "# Running: 'cln.install.sh $*'"
-echo "# Using the settings for: ${NETWORK} "
+echo "# Using the settings for: ${network} ${CHAIN}"
 
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
@@ -136,6 +115,14 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
 
+  echo "# Add plugin-dir: /home/bitcoin/cln-plugins-enabled"
+  echo "# Add plugin-dir: /home/bitcoin/cln-plugins-available"
+  # note that the disk is mounted with noexec
+  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-enabled
+  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
+  echo "# symlink to /home/bitcoin/cln-plugins-enabled to /home/bitcoin/.lightning/plugins"
+  sudo ln -s /home/bitcoin/cln-plugins-enabled /home/bitcoin/.lightning/plugins
+  
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
   echo "# Symlink to /home/bitcoin/"
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
@@ -144,12 +131,13 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   echo "# Create /home/bitcoin/.lightning/${netprefix}config"
   if [ ! -f /home/bitcoin/.lightning/${netprefix}config ];then
     echo "
-# lightningd configuration for $NETWORK
+# lightningd configuration for ${network} ${CHAIN}
 
-network=$NETWORK
+network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
 log-level=debug
+plugin-dir=/home/bitcoin/cln-plugins-enabled
 
 # Tor settings
 proxy=127.0.0.1:9050
@@ -161,7 +149,7 @@ always-use-proxy=true
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
     #TODO look for plugin configs and clear or install
     if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
-      /home/admin/config.scripts/cln-plugin.sparko.sh on $NETWORK
+      /home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN
     fi
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
@@ -173,7 +161,7 @@ always-use-proxy=true
   echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
   echo "
 [Unit]
-Description=c-lightning daemon on $NETWORK
+Description=c-lightning daemon on $CHAIN
 
 [Service]
 User=bitcoin
@@ -222,7 +210,7 @@ alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
   echo "sudo journalctl -fu ${netprefix}lightningd"
   echo "sudo systemctl status ${netprefix}lightningd"
   echo "# logs:"
-  echo "sudo tail -f /home/bitcoin/.lightning/${NETWORK}/cl.log"
+  echo "sudo tail -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log"
   echo "# for the command line options use"
   echo "${netprefix}lightning-cli help"
   echo
