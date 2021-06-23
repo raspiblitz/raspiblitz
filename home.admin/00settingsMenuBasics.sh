@@ -158,8 +158,11 @@ if [ "${chain}" != "${choice}" ]; then
           echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
           echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
           echo "****************************************************************************"
-          sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>error.out
-          error=`sudo cat error.out`
+          source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
+          shopt -s expand_aliases
+          alias lncli_alias="$lncli_alias"
+          lncli_alias create 2>error.out
+          error=$(sudo cat error.out)
           if [ ${#error} -eq 0 ]; then
             sleep 2
             # WIN

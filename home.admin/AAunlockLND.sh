@@ -18,9 +18,12 @@ echo "**************************************************************************
 echo "HELP: Enter your PASSWORD C"
 echo "You may wait some seconds until you get asked for password."
 echo "****************************************************************************"
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+shopt -s expand_aliases
+alias lncli_alias="$lncli_alias"
 while :
   do
-    sudo -u bitcoin /usr/local/bin/lncli --chain=${network} unlock
+    lncli_alias --chain=${network} unlock
     sleep 4
     locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
     if [ ${locked} -eq 0  ]; then

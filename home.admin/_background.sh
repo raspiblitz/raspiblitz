@@ -400,7 +400,8 @@ do
     if [ "${autoUnlock}" = "on" ]; then
 
       # check if lnd is locked
-      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+      source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+      locked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
       if [ ${locked} -gt 0 ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
@@ -441,7 +442,8 @@ do
     # check if flag exists (got created on 50syncHDD.sh)
     flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-      finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      source <(/home/admin/config.scripts/network.aliases.sh getvars)
+      finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
         echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"

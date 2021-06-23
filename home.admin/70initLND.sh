@@ -22,11 +22,11 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 # CHECK #########
-
+source <(/home/admin/config.scripts/network.aliases.sh getvars)
 echo "*** Check ${network} Running ***"
-bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c running)
+bitcoinRunning=$(systemctl status ${netprefix}${network}d.service 2>/dev/null | grep -c running)
 if [ ${bitcoinRunning} -eq 0 ]; then
-  bitcoinRunning=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo  | grep -c verificationprogress)
+  bitcoinRunning=$($bitcoincli_alias getblockchaininfo  | grep -c verificationprogress)
 fi
 if [ ${bitcoinRunning} -eq 0 ]; then 
   whiptail --title "70initLND - WARNING" --yes-button "Retry" --no-button "EXIT+Logs" --yesno "Service ${network}d is not running." 8 50
@@ -46,7 +46,7 @@ loopCount=0
 while [ ${chainIsReady} -eq 0 ]
   do
     loopCount=$(($loopCount +1))
-    result=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 2>error.out)
+    result=$($bitcoincli_alias getblockchaininfo 2>error.out)
     error=$(cat error.out)
     rm error.out
     if [ ${#error} -gt 0 ]; then

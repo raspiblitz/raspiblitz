@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# source <(/home/admin/config.scripts/network.aliases.sh <lnd|cln> <mainnet|testnet|signet>
+# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
 # shopt -s expand_aliases
 # alias bitcoincli_alias="$bitcoincli_alias"
 # alias lncli_alias="$lncli_alias"
@@ -55,7 +55,6 @@ if [ $1 = getvars ];then
     echo "portprefix=''"
   fi
 
-  #TODO ALL
   # instead of all
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
   echo "lncli_alias=\"sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009\""

@@ -53,7 +53,7 @@ fi
 # info output
 clear
 echo "******************************"
-echo "Connect to A Lightning Node"
+echo "Connect to a Lightning Node"
 echo "******************************"
 echo
 echo "COMMAND LINE: "

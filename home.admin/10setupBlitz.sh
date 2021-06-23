@@ -50,6 +50,11 @@ fi
 lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
   
+  source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+  shopt -s expand_aliases
+  alias bitcoincli_alias="$bitcoincli_alias"
+  alias lncli_alias="$lncli_alias"
+
   echo "LND is running ..."
   sleep 1
 
@@ -60,7 +65,7 @@ if [ ${lndRunning} -eq 1 ]; then
   if [ ${walletExists} -eq 1 ];then
     echo "lnd wallet exists ... checking if locked"
     sleep 2
-    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+    walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
   fi
   if [ ${walletLocked} -gt 0 ]; then
     # LND wallet is locked
@@ -70,7 +75,7 @@ if [ ${lndRunning} -eq 1 ]; then
   fi
 
   # check if blockchain still syncing (during sync sometimes CLI returns with error at this point)
-  chainInfo=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
+  chainInfo=$($bitcoincli_alias getblockchaininfo 2>/dev/null | grep 'initialblockdownload')
   chainSyncing=1
   if [ ${#chainInfo} -gt 0 ];then
     echo "check chaininfo" 
@@ -86,7 +91,7 @@ if [ ${lndRunning} -eq 1 ]; then
   fi
 
   # check if lnd is scanning blockchain
-  lndInfo=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} getinfo 2>/dev/null | grep "synced_to_chain")
+  lndInfo=$($lncli_alias --chain=${network} getinfo 2>/dev/null | grep "synced_to_chain")
   lndSyncing=1
   if [ ${#lndInfo} -gt 0 ];then
     lndSyncing=$(echo "${chainInfo}" | grep "false" -c)

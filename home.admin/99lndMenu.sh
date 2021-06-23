@@ -8,6 +8,8 @@ source /mnt/hdd/raspiblitz.conf
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
+
 # BASIC MENU INFO
 HEIGHT=13
 WIDTH=64
@@ -33,7 +35,7 @@ fi
 
 OPTIONS+=(NAME "Change Name/Alias of Node")
 
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
+openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")
   HEIGHT=$((HEIGHT+1))
