@@ -11,6 +11,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 
 # SETUPFILE - - setup data of RaspiBlitz
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+source ${setupFile}
 
 # log header
 echo "" >> ${logFile}
