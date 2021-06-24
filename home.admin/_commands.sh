@@ -45,6 +45,11 @@ function check() {
   /home/admin/config.scripts/blitz.configcheck.py
 }
 
+# command: release
+function release() {
+  /home/admin/config.scripts/blitz.preparerelease.sh
+}
+
 # command: debug
 function debug() {
   cd /home/admin
