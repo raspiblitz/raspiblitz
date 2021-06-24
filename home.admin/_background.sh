@@ -100,7 +100,7 @@ do
     # detect a missing DHCP config 
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
-      sudo /home/admin/XXshutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
     fi

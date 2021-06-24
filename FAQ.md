@@ -840,12 +840,12 @@ https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
 
 When the LCD display is telling you to do a config check:
 - go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 - go to the RaspiBlitz terminal run the command: 'check'
 - now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
 - save config with: CTRL+o
 - exit nano editor with: CTRL+x
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 
 ## How to fix my upside down LCD after update?
 
