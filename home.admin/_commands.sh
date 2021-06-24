@@ -53,7 +53,7 @@ function release() {
 # command: debug
 function debug() {
   cd /home/admin
-  ./XXdebugLogs.sh
+  /home/admin/config.scripts/blitz.debug.sh
 }
 
 # command: patch
