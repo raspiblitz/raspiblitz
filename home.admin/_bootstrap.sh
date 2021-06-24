@@ -465,7 +465,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # refresh data from info file
   source ${infoFile}
-  echo "# PROVISION PROCESS with setupPhase(${setupPhase})"
+  echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> $logFile
 
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
@@ -492,6 +492,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
+    sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
@@ -503,6 +504,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if migration - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
+    sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
     sudo /home/admin/_provision.migration.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
@@ -514,6 +516,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if update/recovery/migration
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
+    sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     sudo /home/admin/_provision.update.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
@@ -522,12 +525,17 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
+  # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
+  sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
   sudo /home/admin/_provision_.sh
   if [ "$?" != "0" ]; then
     echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
     exit 1
   fi
+
+  # mark provision process done
+  sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
   ###################################################
   # WAIT LOOP: AFTER FRESH SETUP, MIGRATION

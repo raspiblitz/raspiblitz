@@ -63,7 +63,7 @@ function debug() {
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  ./XXsyncScripts.sh -run
+  /home/admin/config.scripts/blitz.github.sh
 }
 
 # command: off
