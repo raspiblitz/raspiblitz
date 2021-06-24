@@ -126,7 +126,7 @@ patch()
       if [ $? -eq 0 ]; then
         clear
         echo "REBOOT .."
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       else
         echo "SKIP REBOOT .."
@@ -238,7 +238,7 @@ Do you really want to update LND now?
         if [ "${loop}" == "on" ]; then
           sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
         fi
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -262,7 +262,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;

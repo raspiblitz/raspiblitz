@@ -1,5 +1,5 @@
 #!/bin/bash
-# for reboot call: sudo /home/admin/XXshutdown.sh reboot
+# for reboot call: sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
 # use this script instead of dirct shutdown command to:
 # 1) give UI the info that a reboot/shutdown is now happening

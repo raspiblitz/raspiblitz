@@ -76,7 +76,7 @@ case $CHOICE in
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
-    /home/admin/XXshutdown.sh
+    /home/admin/config.scripts/blitz.shutdown.sh
     ;;
   MIGRATION)
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"

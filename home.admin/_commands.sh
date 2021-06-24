@@ -32,8 +32,7 @@ function repair() {
 
 # command: restart
 function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
 
 # command: sourcemode
@@ -61,8 +60,7 @@ function patch() {
 
 # command: off
 function off() {
-  cd /home/admin
-  ./XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
 }
 
 # command: github
