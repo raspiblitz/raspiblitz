@@ -203,7 +203,7 @@ if [ "$1" = "status" ]; then
         else
 
           #####################################
-          # Pre-Setup Invetigation of DATA-PART
+          # Pre-Setup Investigation of DATA-PART
 
           # check for recoverable RaspiBlitz data (if config file exists) and raid 
           hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)

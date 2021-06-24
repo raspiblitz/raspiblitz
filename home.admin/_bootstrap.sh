@@ -62,7 +62,10 @@ source ${configFile} 2>/dev/null
 source <(/home/admin/config.scripts/internet.sh status)
 
 # get basic hardware info
-source <(/home/admin/config.scripts/internet.sh status)
+source <(/home/admin/config.scripts/.sh status)
+
+# get basic dns info
+source <(sudo /home/admin/config.scripts/internet.dns.sh test nodialog)
 
 # resetting info file
 echo "Resetting the InfoFile: ${infoFile}"
@@ -76,6 +79,7 @@ echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "localip='${localip}'" >> $infoFile
 echo "online='${online}'" >> $infoFile
+echo "dnsworking=${dnsworking}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
@@ -93,6 +97,8 @@ sudo chmod 777 ${infoFile}
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop lnd 2>/dev/null
   sed -i "s/^state=.*/state=inconsistentsystem/g" ${infoFile}
   sed -i "s/^message=.*/message='provision did not ran thru'/g" ${infoFile}
   echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}
@@ -389,6 +395,7 @@ echo "HDD already part of system: $isMounted" >> $logFile
 if [ ${isMounted} -eq 0 ]; then
 
   # write data needed for setup process into raspiblitz.info
+  echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
   echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
@@ -484,7 +491,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
-    echo "Calling _bootstrap.setup.sh for basic setup tasks .." >> $logFile
+    echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
@@ -493,24 +500,24 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
-  # if update - run provision update migration first
-  if [ "${setupPhase}" == "update" ]; then
-    echo "Calling _bootstrap.update.sh for possible update migrations .." >> $logFile
-    sudo /home/admin/_provision.update.sh
-    if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
-      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
-      exit 1
-    fi
-  fi
-
-  # if update - run provision update migration first
+  # if migration - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
-    echo "Calling _bootstrap.migration.sh for possible update migrations .." >> $logFile
+    echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sudo /home/admin/_provision.migration.sh
     if [ "$?" != "0" ]; then
       echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
+      exit 1
+    fi
+  fi
+
+  # if update/recovery/migration
+  if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
+    echo "Calling _provision.update.sh .." >> $logFile
+    sudo /home/admin/_provision.update.sh
+    if [ "$?" != "0" ]; then
+      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
       exit 1
     fi
   fi

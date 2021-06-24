@@ -39,6 +39,10 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
+echo "*** BACKGROUNDSERVICE ***"
+echo "to monitor Background service call: sudo journalctl -f -u background"
+echo ""
+
 echo "*** BLOCKCHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""

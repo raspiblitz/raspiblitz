@@ -38,7 +38,7 @@ backtitle="RaspiBlitz ${codeVersion} / ${localip} / ${eventID}"
 # 1) WELL DEFINED EVENTS
 ################################################
 
-if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ]; then
+if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ] || [ "${eventID}" == "ready" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Starting RaspiBlitz
@@ -77,13 +77,37 @@ elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Upgrade/Recover/Provision
 ---> ${contentString}
-Please keep running until reboot.
+Please keep running until done.
 " 7 40
 
 elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Repair-Mode - Login for Details:
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "copysource" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Repair-Mode - Providing Blockchain
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "copystation" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Copy-Station Mode
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "copytarget" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Receiving Blockchain over LAN
 ssh admin@${localip}
 Use your Password A
 " 7 41
@@ -144,7 +168,7 @@ Use password: raspiblitz
 " 8 41
     fi
 
-elif [ "${eventID}" == "waitfinal" ]; then
+elif [ "${eventID}" == "waitfinal" ] || [ "${eventID}" == "finalready" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Setup-Done - Login for Details:
@@ -192,14 +216,6 @@ Waiting for Network ...
 Not able to get local IP.
 LAN cable connected? WIFI lost?
 " 7 41
-
-elif [ "${eventID}" = "noInternet" ]; then
-
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Waiting for Internet ...
-Local Network seems OK but no Internet.
-Is your router still online?
-" 7 43
 
 elif [ "${eventID}" = "noInternet" ]; then
 

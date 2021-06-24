@@ -58,7 +58,7 @@ case $CHOICE in
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
-    sudo /home/admin/XXshutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)
     sudo /home/admin/config.scripts/lnd.credentials.sh sync

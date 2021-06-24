@@ -20,6 +20,12 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 ############################################
+# PRESETUP: SET DNS (just if needed)
+if [ "${dnsworking}" == "0" ]; then
+  sudo /home/admin/config.scripts/internet.dns.sh test
+fi
+
+############################################
 # QuickOption: Update
 if [ "${setupPhase}" == "update" ]; then
   # show update dialog
@@ -128,6 +134,7 @@ if [ "${setupPhase}" == "setup" ]; then
       fi
 
       # run formatting
+      echo "Running Format: (${filesystem}) (${hddCandidate})"
       source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
       if [ "${error}" != "" ]; then
         echo "FAIL ON FORMATTING THE DRIVE:"
@@ -136,10 +143,6 @@ if [ "${setupPhase}" == "setup" ]; then
         exit 1
       fi
 
-      # DEBUG EXIT
-      echo "OK Format done"
-      exit 1
-    
     elif [ "${userChoice}" == "2" ]; then
 
       # KEEP BLOCKCHAIN + DLETE ALL THE REST

@@ -541,7 +541,7 @@ Work notes for the process of producing a new SD card image release:
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
 * `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false true rootzoll [BRANCH] lcd true true`
 * Monitor/Check outputs for warnings/errors - install LCD
-* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
@@ -840,12 +840,12 @@ https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
 
 When the LCD display is telling you to do a config check:
 - go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 - go to the RaspiBlitz terminal run the command: 'check'
 - now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
 - save config with: CTRL+o
 - exit nano editor with: CTRL+x
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 
 ## How to fix my upside down LCD after update?
 

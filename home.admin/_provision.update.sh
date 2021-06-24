@@ -9,8 +9,8 @@ infoFile="/home/admin/raspiblitz.info"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
-# SETUPFILE - configuration of RaspiBlitz
-setupFile="/mnt/hdd/raspiblitz.conf"
+# SETUPFILE - - setup data of RaspiBlitz
+setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
 # log header
 echo "" >> ${logFile}
@@ -59,6 +59,20 @@ if [ ${#codeVersion} -eq 0 ]; then
 fi
 
 echo "prechecks OK"  >> ${logFile}
+
+###################################
+# Set Password A
+
+if [ "${passwordA}" == "" ]; then
+  sed -i "s/^state=.*/state=error/g" ${infoFile}
+  sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
+  echo "FAIL see ${logFile}"
+  echo "FAIL: missing passwordA in (${setupFile})!" >> ${logFile}
+  exit 1
+fi
+
+echo "SETTING PASSWORD A" >> ${logFile}
+sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
@@ -218,6 +232,22 @@ if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
 else
   echo "OK - version of config data is up to date" >> ${logFile}
 fi
+
+# start network service
+echo ""
+echo "*** Start ${network} ***" >> ${logFile}
+sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
+echo "- This can take a while .." >> ${logFile}
+sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+#sudo chmod +x /etc/systemd/system/${network}d.service
+sudo systemctl daemon-reload >> ${logFile}
+sudo systemctl enable ${network}d.service >> ${logFile}
+sudo systemctl start ${network}d.service >> ${logFile}
+
+# start lightning service
+echo "Starting LND Service ..." >> ${logFile}
+sudo systemctl enable lnd >> ${logFile}
+sudo systemctl start lnd >> ${logFile}
 
 echo "END Migration/Init"  >> ${logFile}
 

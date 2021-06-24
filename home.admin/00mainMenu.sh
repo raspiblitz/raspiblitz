@@ -360,7 +360,7 @@ case $CHOICE in
 	          if [ $confirmationReboot -eq 0 ]; then
                clear
                echo ""
-               sudo /home/admin/XXshutdown.sh reboot
+               sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
                exit 1
 	          fi
             ;;
@@ -371,13 +371,13 @@ case $CHOICE in
 	          if [ $confirmationShutdown -eq 0 ]; then
                clear
                echo ""
-               sudo /home/admin/XXshutdown.sh
+               sudo /home/admin/config.scripts/blitz.shutdown.sh
                exit 1
 	          fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh
-            sudo /home/admin/XXshutdown.sh reboot
+            sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
             exit 1
             ;;
         *)
