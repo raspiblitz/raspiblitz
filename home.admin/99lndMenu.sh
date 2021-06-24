@@ -109,7 +109,7 @@ case $CHOICE in
         sudo -u bitcoin ${network}-cli stop
         echo "Press ENTER to Reboot."
         read key
-        sudo /home/admin/XXshutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         exit 0
       fi
       ;;
