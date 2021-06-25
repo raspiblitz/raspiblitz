@@ -30,7 +30,7 @@ sudo mkdir /mnt/hdd/temp 2>/dev/null
 sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 
 # localIP
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep -E -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
 
 # temp - no measurement in a VM

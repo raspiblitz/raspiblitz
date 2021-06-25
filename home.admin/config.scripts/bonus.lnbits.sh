@@ -85,7 +85,7 @@ if [ "$1" = "status" ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"

@@ -6,7 +6,7 @@ sudo -u bitcoin mkdir /mnt/hdd/app-data/selfsignedcert
 cd /mnt/hdd/app-data/selfsignedcert || exit 1
 
 echo "# Create a self signed SSL certificate"
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 
 sudo -u bitcoin openssl genrsa -out selfsigned.key 2048
 #https://www.humankode.com/ssl/create-a-selfsigned-certificate-for-nginx-in-5-minutes

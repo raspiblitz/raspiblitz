@@ -94,7 +94,7 @@ do
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localip(${localip})"
 
     # detect a missing DHCP config 

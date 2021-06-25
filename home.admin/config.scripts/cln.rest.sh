@@ -24,7 +24,7 @@ echo "# Running 'cln.rest.sh $*'"
 if [ $1 = connect ];then
   echo "# Allowing port ${portprefix}6100 through the firewall"
   sudo ufw allow "${portprefix}6100" comment "${netprefix}clnrest"
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
   /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}clnrest 443 ${portprefix}6100
   
