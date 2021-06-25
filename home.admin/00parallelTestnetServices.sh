@@ -27,7 +27,7 @@ OPTIONS+=(s "Sparko for CLN on $CHAIN" ${tsparko})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          11 45 4  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          12 45 5  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
