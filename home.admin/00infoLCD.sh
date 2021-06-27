@@ -90,10 +90,6 @@ while :
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
-      shopt -s expand_aliases
-      alias bitcoincli_alias="$bitcoincli_alias"
-      alias lncli_alias="$lncli_alias"
-      alias lightningcli_alias="$lightningcli_alias"
     fi
 
     if [ "${setupPhase}" != "done" ]; then

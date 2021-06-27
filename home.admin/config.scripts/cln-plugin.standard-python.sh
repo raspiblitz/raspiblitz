@@ -19,10 +19,6 @@ fi
 if [ $1 = on ];then
 
   source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
-  shopt -s expand_aliases
-  alias bitcoincli_alias="$bitcoincli_alias"
-  alias lncli_alias="$lncli_alias"
-  alias lightningcli_alias="$lightningcli_alias"
 
   plugin=$2
 
@@ -31,15 +27,15 @@ if [ $1 = on ];then
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
 
-  if [ $(lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
+  if [ $($lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
     echo "# Starting the ${plugin} plugin"
     sudo -u bitcoin pip install -r /home/bitcoin/cln-plugins-available/plugins/${plugin}/requirements.txt
-    lightningcli_alias plugin start /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
+    $lightningcli_alias plugin start /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
   fi
 
   echo
   echo "Node URI:"
-  ln_getinfo=$(lightningcli_alias -H getinfo 2>/dev/null)
+  ln_getinfo=$($lightningcli_alias -H getinfo 2>/dev/null)
   pubkey=$(echo "$ln_getinfo" | grep "id=" | cut -d= -f2)
   toraddress=$(echo "$ln_getinfo" | grep ".onion" | cut -d= -f2)
   port=$(echo "$ln_getinfo" | grep "port" | tail -n1 | cut -d= -f2)
@@ -48,11 +44,11 @@ if [ $1 = on ];then
   echo "# Running:"
   echo "${netprefix}lightning-cli ${plugin}"
   echo 
-  lightningcli_alias ${plugin}
+  $lightningcli_alias ${plugin}
   echo
 
   if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ];then
-    lightningcli_alias plugin stop /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
+    $lightningcli_alias plugin stop /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
   fi
 
 fi

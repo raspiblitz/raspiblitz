@@ -17,10 +17,6 @@ source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 ## get HDD/SSD info
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -282,7 +278,7 @@ if [ ${LNTYPE} = "cln" ]; then
   else
     ln_sync=0
   fi
-  ln_version=$(lightningcli_alias -V)
+  ln_version=$($lightningcli_alias -V)
   if [ ${ln_sync} -eq 0 ]; then
      if [ ${#ln_getInfo} -eq 0 ]; then
        ln_baseInfo="${color_red} Not Started | Not Ready Yet"

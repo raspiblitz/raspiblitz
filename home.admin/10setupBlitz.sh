@@ -51,9 +51,6 @@ lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
 if [ ${lndRunning} -eq 1 ]; then
   
   source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
-  shopt -s expand_aliases
-  alias bitcoincli_alias="$bitcoincli_alias"
-  alias lncli_alias="$lncli_alias"
 
   echo "LND is running ..."
   sleep 1

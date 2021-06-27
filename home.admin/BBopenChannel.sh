@@ -13,10 +13,6 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 echo
 echo "# Precheck" # PRECHECK) check if chain is in sync
@@ -89,14 +85,14 @@ if [ $LNTYPE = cln ];then
     pubKey=$(echo ${grepLine} | cut -d '"' -f4)
     # echo "grepLine(${pubKey})"
     OPTIONS+=(${pubKey} "")
-  done < <(lightningcli_alias listpeers | grep '"id":')
+  done < <($lightningcli_alias listpeers | grep '"id":')
 elif [ $LNTYPE = lnd ];then
   while IFS= read -r grepLine
   do
     pubKey=$(echo ${grepLine} | cut -d '"' -f4)
     # echo "grepLine(${pubKey})"
     OPTIONS+=(${pubKey} "")
-  done < <(lncli_alias listpeers | grep pub_key)
+  done < <($lncli_alias listpeers | grep pub_key)
 fi
 TITLE="Open (Payment) Channel"
 MENU="\nChoose a peer you connected to, to open the channel with: \n "
@@ -125,7 +121,7 @@ if [ "${network}" = "bitcoin" ]; then
 fi
 if [ $LNTYPE = lnd ];then
   _error="./.error.out"
-  lncli_alias openchannel ${pubkey} 1 0 2>$_error
+  $lncli_alias openchannel ${pubkey} 1 0 2>$_error
   error=$(cat ${_error})
   if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
     minSat=$(echo "${error}" | tr -dc '0-9')
@@ -165,9 +161,9 @@ fi
 if [ $LNTYPE = cln ];then
   # fundchannel id amount [feerate] [announce] [minconf] [utxos] [push_msat] [close_to]
   feerate=$($bitcoincli_alias estimatesmartfee $conf_target |grep feerate|awk '{print $2}'|cut -c 5-7|bc)
-  command="lightningcli_alias fundchannel ${pubKey} ${amount} $feerate"
+  command="$lightningcli_alias fundchannel ${pubKey} ${amount} $feerate"
 elif [ $LNTYPE = lnd ];then
-  command="lncli_alias openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
+  command="$lncli_alias openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
 fi
 # info output
 clear

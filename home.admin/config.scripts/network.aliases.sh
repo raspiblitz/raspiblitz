@@ -3,11 +3,6 @@
 # Usage:
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
 
-# To have aliases resolved inside a script:
-# shopt -s expand_aliases
-# alias bitcoincli_alias="$bitcoincli_alias"
-# alias lncli_alias="$lncli_alias"
-# alias lightningcli_alias="$lightningcli_alias"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 

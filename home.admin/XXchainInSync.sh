@@ -15,14 +15,10 @@ else
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 # check if chain is in sync
 if [ $LNTYPE = cln ];then
-  lncommand="lightning-cli"
+  lncommand="${netprefix}lightning-cli"
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
@@ -31,8 +27,8 @@ if [ $LNTYPE = cln ];then
     cmdChainInSync=0
   fi
 elif [ $LNTYPE = lnd ];then
-  lncommand="lncli"
-  cmdChainInSync="lncli_alias getinfo | grep '"synced_to_chain": true' -c"
+  lncommand="${netprefix}lncli"
+  cmdChainInSync="$lncli_alias getinfo | grep '"synced_to_chain": true' -c"
 fi
 chainInSync=${cmdChainInSync}
 while [ "${chainInSync}" == "0" ]; do

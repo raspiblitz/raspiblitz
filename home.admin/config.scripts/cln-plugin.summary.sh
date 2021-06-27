@@ -27,7 +27,7 @@ fi
 
 echo
 echo "Node URI:"
-ln_getinfo=$(lightningcli_alias -H getinfo 2>/dev/null)
+ln_getinfo=$($lightningcli_alias -H getinfo 2>/dev/null)
 pubkey=$(echo "$ln_getinfo" | grep "id=" | cut -d= -f2)
 toraddress=$(echo "$ln_getinfo" | grep ".onion" | cut -d= -f2)
 port=$(echo "$ln_getinfo" | grep "port" | tail -n1 | cut -d= -f2)

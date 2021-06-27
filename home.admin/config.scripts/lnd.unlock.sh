@@ -11,10 +11,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 # 1. parameter
 passwordC="$1"
@@ -128,7 +124,7 @@ do
     echo "############################"
     echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    lncli_alias unlock --recovery_window=1000
+    $lncli_alias unlock --recovery_window=1000
 
     # test unlock
     walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)

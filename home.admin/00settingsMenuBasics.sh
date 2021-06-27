@@ -159,9 +159,7 @@ if [ "${chain}" != "${choice}" ]; then
           echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
           echo "****************************************************************************"
           source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
-          shopt -s expand_aliases
-          alias lncli_alias="$lncli_alias"
-          lncli_alias create 2>error.out
+          $lncli_alias create 2>error.out
           error=$(sudo cat error.out)
           if [ ${#error} -eq 0 ]; then
             sleep 2

@@ -10,10 +10,6 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 if [ $LNTYPE = cln ];then
   # https://lightning.readthedocs.io/lightning-close.7.html
@@ -30,7 +26,7 @@ if [ $LNTYPE = cln ];then
   function cln_closeall {
     for i in $peerlist; do
       # close id [unilateraltimeout] [destination] [fee_negotiation_step] [*wrong_funding*]
-      lightningcli_alias close $i 30
+      $lightningcli_alias close $i 30
     done
   }
 elif [ $LNTYPE = lnd ];then

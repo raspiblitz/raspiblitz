@@ -314,10 +314,6 @@ if [ "${state}" = "ready" ]; then
     echo "loading config data"
     source ${configFile}
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-    shopt -s expand_aliases
-    alias bitcoincli_alias="$bitcoincli_alias"
-    alias lncli_alias="$lncli_alias"
-    alias lightningcli_alias="$lightningcli_alias"
   else
     echo "setup still in progress - setupStep(${setupStep})"
   fi
@@ -344,7 +340,7 @@ waitUntilChainNetworkIsReady()
     echo "can take longer if device was off or first time"
 
     # check for error on network
-    bitcoincli_alias getblockchaininfo 1>/dev/null 2>error.tmp
+    $bitcoincli_alias getblockchaininfo 1>/dev/null 2>error.tmp
     clienterror=$(cat error.tmp)
     rm error.tmp
 
