@@ -64,7 +64,7 @@ fi
 if [ $chain = test ]&&[ "$tlnd" = "on" ]||\
    [ $chain = sig ]&& [ "$slnd" = "on" ]||\
    [ $chain = main ]&&[ "$lnd" = "on" ]; then
-  #TODO OPTIONS+=(LND "LND options for ${CHAIN}")
+  OPTIONS+=(LND "LND options for ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
