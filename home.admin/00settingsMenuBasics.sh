@@ -83,9 +83,11 @@ if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 fi
-OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
-OPTIONS+=(k 'Accept Keysend' ${keysend})  
-# OPTIONS+=(n 'Testnet' ${chainValue})    #TODO remove related code
+if [ ${chain} = "main" ];then
+  OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
+  OPTIONS+=(k 'Accept Keysend' ${keysend})  
+fi
+# OPTIONS+=(n 'Testnet' ${chainValue})    
 OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
@@ -121,91 +123,92 @@ fi
 needsReboot=0
 anychange=0
 
-# TESTNET process choice - KEEP FIRST IN ORDER
-choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
-if [ ${check} -eq 1 ]; then choice="test"; fi
-if [ "${chain}" != "${choice}" ]; then
-  if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
-     dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
-  elif [ "${BTCRPCexplorer}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
-     exit 1
-  elif [ "${BTCPayServer}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
-     exit 1
-  elif [ "${ElectRS}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
-     exit 1
-  elif [ "${loop}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
-     exit 1
-  else
-    echo "Testnet Setting changed .."
-    anychange=1
-    sudo /home/admin/config.scripts/network.chain.sh ${choice}net
-    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
-    if [ ${walletExists} -eq 0 ]; then
-      echo "Need to creating a new wallet ... wait 20secs"
-      sudo systemctl start lnd
-      sleep 20
-      tryAgain=1
-      while [ ${tryAgain} -eq 1 ]
-        do
-          echo "****************************************************************************"
-          echo "Creating a new LND Wallet for ${network}/${choice}net"
-          echo "****************************************************************************"
-          echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
-          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
-          echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
-          echo "****************************************************************************"
-          source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
-          $lncli_alias create 2>error.out
-          error=$(sudo cat error.out)
-          if [ ${#error} -eq 0 ]; then
-            sleep 2
-            # WIN
-            tryAgain=0
-            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
-            echo "If you are ready. Press ENTER."
-          else
-            # FAIL
-            tryAgain=1
-            echo "!!! FAIL ---> SOMETHING WENT WRONG !!!"
-            echo "${error}"
-            echo "Press ENTER to retry ... or CTRL-c to EXIT"
-          fi
-          read key
-        done
-      echo "Check for Macaroon .. (10sec)"
-      sleep 10
-      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-      if [ ${macaroonExists} -eq 0 ]; then
-        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
-        lncli unlock 2>/dev/null
-        sleep 6
-      fi
-      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-      if [ ${macaroonExists} -eq 0 ]; then
-        echo "FAIL --> Was not able to create macaroon"
-        echo "Please report problem."
-        exit 1
-      fi
-      echo "stopping lnd again"
-      sleep 5
-      sudo systemctl stop lnd
-    fi
-
-    echo "Update Admin Macaroon"
-    sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
-    sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
-    sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
-    sudo chown -R admin:admin /home/admin/.lnd/
-
-    needsReboot=1
-  fi
-else
-  echo "Testnet Setting unchanged."
-fi
+# deprecated - see https://github.com/rootzoll/raspiblitz/issues/2290
+## TESTNET process choice - KEEP FIRST IN ORDER
+#choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
+#if [ ${check} -eq 1 ]; then choice="test"; fi
+#if [ "${chain}" != "${choice}" ]; then
+#  if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
+#     dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
+#  elif [ "${BTCRPCexplorer}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
+#     exit 1
+#  elif [ "${BTCPayServer}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
+#     exit 1
+#  elif [ "${ElectRS}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
+#     exit 1
+#  elif [ "${loop}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
+#     exit 1
+#  else
+#    echo "Testnet Setting changed .."
+#    anychange=1
+#    sudo /home/admin/config.scripts/network.chain.sh ${choice}net
+#    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
+#    if [ ${walletExists} -eq 0 ]; then
+#      echo "Need to creating a new wallet ... wait 20secs"
+#      sudo systemctl start lnd
+#      sleep 20
+#      tryAgain=1
+#      while [ ${tryAgain} -eq 1 ]
+#        do
+#          echo "****************************************************************************"
+#          echo "Creating a new LND Wallet for ${network}/${choice}net"
+#          echo "****************************************************************************"
+#          echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
+#          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
+#          echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
+#          echo "****************************************************************************"
+#          source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
+#          $lncli_alias create 2>error.out
+#          error=$(sudo cat error.out)
+#          if [ ${#error} -eq 0 ]; then
+#            sleep 2
+#            # WIN
+#            tryAgain=0
+#            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
+#            echo "If you are ready. Press ENTER."
+#          else
+#            # FAIL
+#            tryAgain=1
+#            echo "!!! FAIL ---> SOMETHING WENT WRONG !!!"
+#            echo "${error}"
+#            echo "Press ENTER to retry ... or CTRL-c to EXIT"
+#          fi
+#          read key
+#        done
+#      echo "Check for Macaroon .. (10sec)"
+#      sleep 10
+#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+#      if [ ${macaroonExists} -eq 0 ]; then
+#        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
+#        lncli unlock 2>/dev/null
+#        sleep 6
+#      fi
+#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+#      if [ ${macaroonExists} -eq 0 ]; then
+#        echo "FAIL --> Was not able to create macaroon"
+#        echo "Please report problem."
+#        exit 1
+#      fi
+#      echo "stopping lnd again"
+#      sleep 5
+#      sudo systemctl stop lnd
+#    fi
+# 
+#     echo "Update Admin Macaroon"
+#     sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
+#     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
+#     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
+#     sudo chown -R admin:admin /home/admin/.lnd/
+# 
+#     needsReboot=1
+#   fi
+# else
+#   echo "Testnet Setting unchanged."
+# fi
 
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
