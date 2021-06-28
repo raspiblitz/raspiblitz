@@ -147,7 +147,6 @@ always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
-    #TODO look for plugin configs and clear or install
     if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
       /home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN
     fi

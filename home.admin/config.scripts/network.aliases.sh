@@ -2,6 +2,7 @@
 
 # Usage:
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
+# if no values given uses the default values from the raspiblitz.conf
 
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -77,4 +78,5 @@ if [ $1 = getvars ];then
 fi
 
 #TODO
-#change all /lnd.conf to /${netprefix}lnd.conf
+# where /lnd.conf is not changed to /${netprefix}lnd.conf
+# the service remains mainnet only
