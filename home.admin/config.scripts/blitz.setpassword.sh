@@ -453,7 +453,7 @@ fi
 # when started with menu ... reboot when done
 if [ "${reboot}" == "1" ]; then
   echo "Now rebooting to activate changes ..."
-  sudo /home/admin/XXshutdown.sh reboot
+  sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 else
   echo "..."
 fi

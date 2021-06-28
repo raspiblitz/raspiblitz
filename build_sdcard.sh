@@ -1073,7 +1073,7 @@ echo "Take the chance & look thru the output above if you can spot any errors or
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
-echo "2. run --> ./XXprepareRelease.sh"
+echo "2. run --> release"
 echo ""
 
 # (do last - because might trigger reboot)

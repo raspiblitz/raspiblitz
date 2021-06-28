@@ -440,5 +440,5 @@ if [ ${needsReboot} -eq 1 ]; then
    # stop bitcoind
    sudo -u bitcoin ${network}-cli stop
    sleep 4
-   sudo /home/admin/XXshutdown.sh reboot
+   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 fi

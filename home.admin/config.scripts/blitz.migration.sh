@@ -377,7 +377,7 @@ if [ "$1" = "export-gui" ]; then
   read key
   echo "Shutting down ...."
   sleep 4
-  /home/admin/XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
   exit 0
 fi
 

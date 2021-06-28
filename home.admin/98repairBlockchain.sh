@@ -26,7 +26,7 @@ elif [ "${CHOICE}" = "RESYNC" ]; then
     dialog --pause "OK. System will reboot to activate changes." 8 58 8
     clear
     echo "rebooting .. (please wait)"
-    sudo /home/admin/XXshutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
 elif [ "${CHOICE}" = "REINDEX" ]; then
     echo "Starting REINDEX ..."

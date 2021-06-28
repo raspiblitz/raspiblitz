@@ -358,10 +358,10 @@ case $CHOICE in
 	          confirmation "Are you sure?" "Reboot" "Cancel" true 7 40
 	          confirmationReboot=$?
 	          if [ $confirmationReboot -eq 0 ]; then
-              clear
-              echo ""
-              sudo /home/admin/XXshutdown.sh reboot
-              exit 1
+               clear
+               echo ""
+               sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
+               exit 1
 	          fi
             ;;
         OFF)
@@ -371,13 +371,13 @@ case $CHOICE in
 	          if [ $confirmationShutdown -eq 0 ]; then
                clear
                echo ""
-               sudo /home/admin/XXshutdown.sh
+               sudo /home/admin/config.scripts/blitz.shutdown.sh
                exit 1
 	          fi
             ;;
         DELETE)
             sudo /home/admin/XXcleanHDD.sh
-            sudo /home/admin/XXshutdown.sh reboot
+            sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
             exit 1
             ;;
         *)

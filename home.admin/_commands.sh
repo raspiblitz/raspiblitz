@@ -35,19 +35,22 @@ function repair() {
 
 # command: restart
 function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
 
 # command: sourcemode
 function sourcemode() {
-  cd /home/admin
-  ./98repairMenu.sh sourcemode
+  /home/admin/config.scripts/blitz.copychain.sh source
 }
 
 # command: check
 function check() {
   /home/admin/config.scripts/blitz.configcheck.py
+}
+
+# command: release
+function release() {
+  /home/admin/config.scripts/blitz.preparerelease.sh
 }
 
 # command: debug
@@ -60,13 +63,12 @@ function debug() {
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  ./XXsyncScripts.sh -run
+  /home/admin/config.scripts/blitz.github.sh
 }
 
 # command: off
 function off() {
-  cd /home/admin
-  ./XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
 }
 
 # command: github

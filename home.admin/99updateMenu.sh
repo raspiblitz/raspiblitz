@@ -101,7 +101,7 @@ patch()
 {
 
   # get sync info
-  source <(sudo /home/admin/XXsyncScripts.sh info)
+  source <(sudo /home/admin/config.scripts/blitz.github.sh info)
 
   # Patch Options
   OPTIONS=(PATCH "Patch/Sync RaspiBlitz with GitHub Repo" \
@@ -115,7 +115,7 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/XXsyncScripts.sh -run
+      sudo -u admin /home/admin/config.scripts/blitz.github.sh -run
       sleep 4
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
@@ -126,7 +126,7 @@ patch()
       if [ $? -eq 0 ]; then
         clear
         echo "REBOOT .."
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       else
         echo "SKIP REBOOT .."
@@ -142,7 +142,7 @@ patch()
         newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
         echo "--> " ${newGitHubUser}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh -clean ${activeBranch} ${newGitHubUser})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh -clean ${activeBranch} ${newGitHubUser})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
@@ -159,7 +159,7 @@ patch()
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh ${newGitHubBranch})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
@@ -178,12 +178,12 @@ patch()
         cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         else
           echo "# update installs .."
-          /home/admin/XXsyncScripts.sh -justinstall
+          /home/admin/config.scripts/blitz.github.sh -justinstall
         fi
       fi
       exit 1
@@ -238,7 +238,7 @@ Do you really want to update LND now?
         if [ "${loop}" == "on" ]; then
           sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
         fi
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -262,7 +262,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;

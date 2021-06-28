@@ -92,7 +92,7 @@ while :
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
-    if [ "${setupPhase}" != "done" ]; then
+    if [ "${setupPhase}" != "done" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
 
       # show status info during boot & setup & repair on LCD
       /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
@@ -105,7 +105,7 @@ while :
     # if LND is syncing or scanning
     lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
-      /home/admin/80scanLND.sh
+      /home/admin/setup.scripts/controlScanInfo.sh
       sleep 20
       continue
     fi

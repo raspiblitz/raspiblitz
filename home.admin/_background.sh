@@ -57,7 +57,7 @@ do
   # https://github.com/rootzoll/raspiblitz/issues/160
   ####################################################
 
-  if [ "${state}" == "" ] || [ "${state}" == "copysource" ]; then
+  if [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
     echo "skipping background loop (${counter}) - state(${state})"
     sleep 1
     continue
@@ -100,7 +100,7 @@ do
     # detect a missing DHCP config 
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
-      sudo /home/admin/XXshutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
     fi
