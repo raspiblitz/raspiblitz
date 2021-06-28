@@ -40,7 +40,11 @@ source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
   if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
-    # dependencies
+
+    ########################
+    # Install dependencies # 
+    ########################
+  
     echo "# apt update"
     echo
     sudo apt-get update
@@ -52,7 +56,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
     gettext
 
-    # download and compile from source
+    ####################################
+    # Download and compile from source #
+    ####################################
+
     cd /home/bitcoin || exit 1
     if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "experimental" ]; then
       echo
@@ -110,8 +117,11 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     installedVersion=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
     echo "# C-lightning ${installedVersion} is already installed"
   fi
+  
+  ##########
+  # Config #
+  ##########
 
-  # config
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
 
@@ -154,7 +164,10 @@ always-use-proxy=true
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
-  # systemd service
+  ###################
+  # Systemd service #
+  ###################
+
   sudo systemctl stop ${netprefix}lightningd
   sudo systemctl disable ${netprefix}lightningd
   echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
@@ -198,13 +211,13 @@ alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
 alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
-" | sudo tee -a /home/admin/_aliases.sh
+" | sudo tee -a /home/admin/_aliases
 
   echo
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo   
   echo "# To activate the aliases reopen the terminal or use:"
-  echo "source ~/_aliases.sh"
+  echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lightningd with:"
   echo "sudo journalctl -fu ${netprefix}lightningd"
   echo "sudo systemctl status ${netprefix}lightningd"
@@ -225,8 +238,8 @@ if [ "$1" = "off" ];then
   sudo systemctl disable ${netprefix}lightningd
   sudo systemctl stop ${netprefix}lightningd
   echo "# Removing the aliases"
-  sudo sed -i "/${netprefix}lightning-cli/d" /home/admin/_aliases.sh
-  sudo sed -i "/${netprefix}cl/d" /home/admin/_aliases.sh
+  sudo sed -i "/${netprefix}lightning-cli/d" /home/admin/_aliases
+  sudo sed -i "/${netprefix}cl/d" /home/admin/_aliases
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Removing the binaries"
     sudo rm -f /usr/local/bin/lightningd

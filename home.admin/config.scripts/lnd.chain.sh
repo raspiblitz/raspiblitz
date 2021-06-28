@@ -171,13 +171,13 @@ WantedBy=multi-user.target
   echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
-" | sudo tee -a /home/admin/_aliases.sh
+" | sudo tee -a /home/admin/_aliases
 
   echo
   echo "# The installed LND version is: $(sudo -u bitcoin /usr/local/bin/lnd --version)"
   echo   
   echo "# To activate the aliases reopen the terminal or use:"
-  echo "source ~/_aliases.sh"
+  echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lnd with:"
   echo "sudo journalctl -fu ${netprefix}lnd"
   echo "sudo systemctl status ${netprefix}lnd"

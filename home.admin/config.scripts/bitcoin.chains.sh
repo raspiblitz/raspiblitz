@@ -177,10 +177,10 @@ WantedBy=multi-user.target
     if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
       bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
  -rpcport=${rpcprefix}8332\"' \
-      >> /home/admin/_aliases.sh"
+      >> /home/admin/_aliases"
       bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
  -${CHAIN}\"' \
-      >> /home/admin/_aliases.sh"
+      >> /home/admin/_aliases"
     fi
   fi
 

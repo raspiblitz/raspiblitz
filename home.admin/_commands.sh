@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# source aliases from /home/admin/_aliases.sh
-source /home/admin/_aliases.sh
+# source aliases from /home/admin/_aliases
+source /home/admin/_aliases
 
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
