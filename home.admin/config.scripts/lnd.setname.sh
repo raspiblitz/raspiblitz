@@ -10,6 +10,9 @@ fi
 # 1. parameter [?newName]
 newName=$1
 
+# use default values from the raspiblitz.conf
+source <(/home/admin/config.scripts/network.aliases.sh getvars)
+
 # run interactive if 'turn on' && no further parameters
 if [ ${#newName} -eq 0 ]; then
 
@@ -28,7 +31,7 @@ fi
 blitzConfig="/mnt/hdd/raspiblitz.conf"
 
 # lnd conf file
-lndConfig="/mnt/hdd/lnd/lnd.conf"
+lndConfig="/mnt/hdd/lnd/${netprefix}lnd.conf"
 
 # check if raspibblitz config file exists
 configExists=$(ls ${blitzConfig} | grep -c '.conf')
@@ -64,7 +67,7 @@ fi
 
 # stop services
 echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
+sudo systemctl stop ${netprefix}lnd 2>/dev/null
 
 # lnd.conf: change name
 sudo sed -i "s/^alias=.*/alias=${newName}/g" ${lndConfig}
