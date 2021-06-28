@@ -5,11 +5,14 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+# use default values from the raspiblitz.conf
+source <(/home/admin/config.scripts/network.aliases.sh getvars)
+
 echo "services default values"
-if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
+if [ ${#${netprefix}autoPilot} -eq 0 ]; then ${netprefix}autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-if [ ${#chain} -eq 0 ]; then chain="main"; fi
+# if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
@@ -29,9 +32,9 @@ echo "map zerotier to on/off"
 zerotierSwitch="off"
 if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
-echo "map chain to on/off"
-chainValue="off"
-if [ "${chain}" = "test" ]; then chainValue="on"; fi
+# echo "map chain to on/off"
+# chainValue="off"
+# if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
 echo "map domain to on/off"
 domainValue="off"
@@ -53,12 +56,12 @@ if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
-echo "check autopilot by lnd.conf"
-lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
+echo "check ${netprefix}autopilot in ${netprefix}lnd.conf"
+lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c 'autopilot.active=1')
 if [ ${lndAutoPilotOn} -eq 1 ]; then
-  autoPilot="on"
+  ${netprefix}autoPilot="on"
 else
-  autoPilot="off"
+  ${netprefix}autoPilot="off"
 fi
 
 echo "map keysend to on/off"
@@ -83,11 +86,12 @@ if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 fi
+OPTIONS+=(a 'Channel Autopilot' ${${netprefix}autoPilot}) 
 if [ ${chain} = "main" ];then
-  OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
   OPTIONS+=(k 'Accept Keysend' ${keysend})  
 fi
-# OPTIONS+=(n 'Testnet' ${chainValue})    
+# OPTIONS+=(n 'Testnet' ${chainValue}) # deprecated option
+# see the parallel network in SERVICES
 OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
@@ -213,7 +217,7 @@ anychange=0
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoPilot}" != "${choice}" ]; then
+if [ "${${netprefix}autoPilot}" != "${choice}" ]; then
   echo "Autopilot Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
