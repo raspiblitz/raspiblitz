@@ -6,7 +6,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
-source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
+source <(/home/admin/config.scripts/network.aliases.sh getvars "" $1)
 
 # BASIC MENU INFO
 HEIGHT=12 # add 6 to CHOICE_HEIGHT + MENU lines
@@ -17,10 +17,10 @@ TITLE="System Options"
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
-OPTIONS+=(${network}LOG "Monitor the debug.log")
+OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
-OPTIONS+=(LNDLOG "Monitor the lnd.log")
-OPTIONS+=(LNDCONF "Edit the lnd.conf")
+OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
+OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TORLOG "Monitor the Tor Service with Nyx")
