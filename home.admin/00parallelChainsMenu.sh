@@ -92,7 +92,7 @@ OPTIONS+=(SERVICES "Additional Apps & Services on ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
-#TODO OPTIONS+=(SYSTEM "Monitoring & Configuration")
+OPTIONS+=(SYSTEM "Monitoring & Configuration")
 #TODO OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
 
 if [ $nonDefaultLNtype = 1 ];then
