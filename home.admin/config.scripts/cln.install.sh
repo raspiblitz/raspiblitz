@@ -125,14 +125,12 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
 
-  echo "# Add plugin-dir: /home/bitcoin/cln-plugins-enabled"
+  echo "# Add plugin-dir: /home/bitcoin/${netprefix}cln-plugins-enabled"
   echo "# Add plugin-dir: /home/bitcoin/cln-plugins-available"
   # note that the disk is mounted with noexec
-  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-enabled
+  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cln-plugins-enabled
   sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
-  echo "# symlink to /home/bitcoin/cln-plugins-enabled to /home/bitcoin/.lightning/plugins"
-  sudo ln -s /home/bitcoin/cln-plugins-enabled /home/bitcoin/.lightning/plugins
-  
+
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
   echo "# Symlink to /home/bitcoin/"
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
@@ -147,7 +145,7 @@ network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
 log-level=debug
-plugin-dir=/home/bitcoin/cln-plugins-enabled
+plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
 
 # Tor settings
 proxy=127.0.0.1:9050
@@ -157,9 +155,6 @@ always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
-    if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
-      /home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN
-    fi
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
@@ -167,43 +162,8 @@ always-use-proxy=true
   ###################
   # Systemd service #
   ###################
+  /home/admin/config.scripts/cln.install-service.sh $CHAIN
 
-  sudo systemctl stop ${netprefix}lightningd
-  sudo systemctl disable ${netprefix}lightningd
-  echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
-  echo "
-[Unit]
-Description=c-lightning daemon on $CHAIN
-
-[Service]
-User=bitcoin
-Group=bitcoin
-Type=simple
-ExecStart=/usr/local/bin/lightningd\
- --conf=\"/home/bitcoin/.lightning/${netprefix}config\"
-KillMode=process
-Restart=always
-TimeoutSec=120
-RestartSec=30
-StandardOutput=null
-StandardError=journal
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-
-[Install]
-WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${netprefix}lightningd.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable ${netprefix}lightningd
-  echo "# Enabled the ${netprefix}lightningd.service"
-  if [ "${state}" == "ready" ]; then
-    sudo systemctl start ${netprefix}lightningd
-    echo "# Started the ${netprefix}lightningd.service"
-  fi
   echo
   echo "# Adding aliases"
   echo "\
