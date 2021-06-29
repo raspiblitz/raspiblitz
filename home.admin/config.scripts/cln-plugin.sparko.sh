@@ -2,7 +2,7 @@
 
 # explanation on paths https://github.com/ElementsProject/lightning/issues/4223
 # built-in path dir: /usr/local/libexec/c-lightning/plugins/
-# added --plugin-dir=/home/bitcoin/cln-plugins-enabled
+# added --plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
 
 SPARKOVERSION="v2.7"
 
@@ -17,23 +17,8 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-# CHAIN is signet | testnet | mainnet
-CHAIN=$2
-
-# prefix for parallel services
-if [ ${CHAIN} = testnet ];then
-  netprefix="t"
-  clnetwork="testnet"
-  portprefix=1
-elif [ ${CHAIN} = signet ];then
-  netprefix="s"
-  clnetwork="signet"
-  portprefix=3
-elif [ ${CHAIN} = mainnet ];then
-  netprefix=""
-  clnetwork="bitcoin"
-  portprefix=""
-fi
+# source <(/home/admin/config.scripts/network.aliases.sh getvars cln <mainnet|testnet|signet>)
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -106,12 +91,19 @@ if [ $1 = on ];then
     DISTRO="linux_amd64"
   fi
   
-  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-enabled
-  # download binary
-  sudo -u bitcoin wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
-   -O /home/bitcoin/cln-plugins-enabled/sparko || exit 1
-  # make executable
-  sudo chmod +x /home/bitcoin/cln-plugins-enabled/sparko
+  if [ ! -f /home/bitcoin/cln-plugins-available/sparko ];then
+    sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
+    # download binary
+    sudo -u bitcoin wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
+    -O /home/bitcoin/${netprefix}cln-plugins-available/sparko || exit 1
+    # make executable
+    sudo chmod +x /home/bitcoin/cln-plugins-available/sparko
+  fi
+
+  if [ ! -L /home/bitcoin/${netprefix}cln-plugins-enabled/sparko ];then
+    sudo ln -s /home/bitcoin/cln-plugins-available/sparko \
+               /home/bitcoin/${netprefix}cln-plugins-enabled
+  fi
 
   if [ ! -f /home/bitcoin/.lightning/sparko-tls/key.pem ];then
     # create a self signed cert https://github.com/fiatjaf/sparko#how-to-use
@@ -124,6 +116,9 @@ if [ $1 = on ];then
         /home/bitcoin/.lightning/sparko-tls/cert.pem
   fi
 
+  ##########
+  # Config #
+  ##########
   if ! grep -Eq "^sparko" /home/bitcoin/.lightning/${netprefix}config;then
     echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
     echo "# See: https://github.com/fiatjaf/sparko#how-to-use"
@@ -144,17 +139,10 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
     echo "# Sparko is already configured in the /home/bitcoin/.lightning/${netprefix}config"
   fi
 
-  echo "# Editing /etc/systemd/system/${netprefix}lightningd.service"
-  sudo sed -i "s#^ExecStart=.*#ExecStart=/usr/local/bin/lightningd\
- --conf=/home/bitcoin/.lightning/${netprefix}config\
- --plugin=/home/bitcoin/cln-plugins-enabled/sparko#g"\
-  /etc/systemd/system/${netprefix}lightningd.service
-
-  sudo systemctl daemon-reload
-  source /home/admin/raspiblitz.info
-  if [ "${state}" == "ready" ]; then
-    sudo systemctl restart ${netprefix}lightningd
-  fi
+  ###################
+  # Systemd service #
+  ###################
+  /home/admin/config.scripts/cln.install-service.sh $CHAIN
 
   echo "# Allowing port ${portprefix}9000 through the firewall"
   sudo ufw allow "${portprefix}9000" comment "${netprefix}sparko"
@@ -167,38 +155,36 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
 
   sleep 5
   # show some logs
-  sudo tail -n100 /home/bitcoin/.lightning/${clnetwork}/cl.log | grep sparko 
+  sudo tail -n100 /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko 
   netstat -tulpn | grep "${portprefix}9000"
 
   echo "# Sparko was installed"
   echo "# Monitor with:"
   echo "sudo journalctl | grep sparko | tail -n5"
-  echo "sudo tail -n 100 -f /home/bitcoin/.lightning/${clnetwork}/cl.log | grep sparko"
+  echo "sudo tail -n 100 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko"
   
 fi
 
 if [ $1 = off ];then
+  # delete symlink
+  sudo rm -rf /home/bitcoin/${netprefix}cln-plugins-enabled/sparko
+  
   echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
   sudo sed -i "/^sparko/d" /home/bitcoin/.lightning/${netprefix}config
 
-  echo "# Editing /etc/systemd/system/${netprefix}lightningd.service"
-  sudo sed -i "s#^ExecStart=*#ExecStart=/usr/local/bin/lightningd\
- --conf=/home/bitcoin/.lightning/${netprefix}config#"\
-  /etc/systemd/system/${netprefix}lightningd.service
-  sudo systemctl daemon-reload
-  source /home/admin/raspiblitz.info
-  if [ "${state}" == "ready" ]; then
-    sudo systemctl restart ${netprefix}lightningd
+  if [ -f /etc/systemd/system/multi-user.target.wants/slightningd.service ];then
+    /home/admin/config.scripts/cln.install-service.sh $CHAIN
   fi
+
   echo "# Deny port ${portprefix}9000 through the firewall"
   sudo ufw deny "${portprefix}9000"
   
   /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}sparko
-  
+
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Delete plugin"
-    sudo rm /home/bitcoin/cln-plugins-enabled/${netprefix}sparko
+    sudo rm -rf /home/bitcoin/cln-plugins-available/sparko
   fi
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf

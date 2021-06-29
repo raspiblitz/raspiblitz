@@ -33,8 +33,9 @@ function install() {
     sudo -u bitcoin pip install --user -r ${plugindir}/${plugin}/requirements.txt
     sudo chmod +x ${plugindir}/${plugin}/${plugin}.py
     # symlink to the default plugin dir
-    if [ ! -L /home/bitcoin/cln-plugins-enabled/backup ];then
-      sudo ln -s /home/bitcoin/cln-plugins-available/plugins/backup /home/bitcoin/cln-plugins-enabled/
+    if [ ! -L /home/bitcoin/${netprefix}cln-plugins-enabled/backup ];then
+      sudo ln -s /home/bitcoin/cln-plugins-available/plugins/backup \
+                 /home/bitcoin/${netprefix}cln-plugins-enabled/
     fi
   fi
 }
@@ -46,7 +47,7 @@ if [ $1 = on ];then
   # initialize
   if [ ! -f /home/bitcoin/.lightning/${CLNETWORK}/backup.lock ];then
   # https://github.com/lightningd/plugins/tree/master/backup#setup
-  /home/bitcoin/cln-plugins-enabled/backup/backup-cli init\
+  /home/bitcoin/${netprefix}cln-plugins-enabled/backup/backup-cli init\
     --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
     file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
   fi
@@ -74,7 +75,7 @@ elif [ $1 = restore ];then
     fi
   
     # restore
-    /home/bitcoin/cln-plugins-enabled/backup/backup-cli restore \
+    /home/bitcoin/${netprefix}cln-plugins-enabled/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
   
