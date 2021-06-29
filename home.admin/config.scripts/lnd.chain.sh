@@ -143,7 +143,6 @@ Group=bitcoin
 Type=simple
 ExecStart=/usr/local/bin/lnd\
  --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
-KillMode=process
 Restart=always
 TimeoutSec=120
 RestartSec=30

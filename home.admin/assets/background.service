@@ -14,7 +14,6 @@ User=root
 Group=root
 Type=simple
 ExecStart=/home/admin/_background.sh
-KillMode=process
 Restart=always
 TimeoutSec=10
 RestartSec=10

@@ -16,7 +16,6 @@ Type=forking
 PIDFile=/home/bitcoin/.litecoin/litecoind.pid
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
 ExecStart=/usr/local/bin/litecoind -daemon -conf=/home/bitcoin/.litecoin/litecoin.conf -pid=/home/bitcoin/.litecoin/litecoind.pid
-KillMode=process
 Restart=always
 TimeoutSec=120
 RestartSec=30

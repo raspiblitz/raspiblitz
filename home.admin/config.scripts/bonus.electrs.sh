@@ -403,7 +403,6 @@ ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --e
 User=electrs
 Group=electrs
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60

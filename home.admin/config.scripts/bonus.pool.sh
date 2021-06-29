@@ -114,7 +114,6 @@ ExecStart=$proxy /home/pool/go/bin/poold --network=${chain}net --debuglevel=trac
 User=pool
 Group=pool
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60

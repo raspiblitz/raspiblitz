@@ -17,7 +17,6 @@ User=bitcoin
 Group=bitcoin
 LimitNOFILE=128000
 Type=simple
-KillMode=process
 TimeoutSec=180
 Restart=always
 RestartSec=60

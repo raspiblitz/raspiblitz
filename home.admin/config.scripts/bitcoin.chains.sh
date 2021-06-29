@@ -151,7 +151,6 @@ Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon\
  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-KillMode=process
 Restart=always
 TimeoutSec=120
 RestartSec=30
