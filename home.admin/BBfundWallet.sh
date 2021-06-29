@@ -59,9 +59,13 @@ if [ ${#result} -eq 0 ]; then
   read key
   exit 1
 fi
- 
+
 # parse address from result
-address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+if [ $LNTYPE = cln ];then
+  address=$( echo "$result" | grep "bech32" | cut -d '"' -f4)
+elif [ $LNTYPE = lnd ];then
+  address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+fi
 
 # prepare coin info
 coininfo="Bitcoin"
