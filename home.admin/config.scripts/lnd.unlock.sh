@@ -66,7 +66,7 @@ while [ ${fallback} -eq 0 ]
         recoveryOption="--recovery_window=1000 "
         echo "# runnign unlock with ${recoveryOption}"
     fi
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock ${recoveryOption}--stdin 2>&1)
+    result=$(echo "$passwordC" | $lncli_alias unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
