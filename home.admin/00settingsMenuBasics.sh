@@ -5,11 +5,8 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# use default values from the raspiblitz.conf
-source <(/home/admin/config.scripts/network.aliases.sh getvars)
-
 echo "services default values"
-if [ ${#${netprefix}autoPilot} -eq 0 ]; then ${netprefix}autoPilot="off"; fi
+if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 # if [ ${#chain} -eq 0 ]; then chain="main"; fi
@@ -56,12 +53,12 @@ if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
-echo "check ${netprefix}autopilot in ${netprefix}lnd.conf"
-lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c 'autopilot.active=1')
+echo "check autopilot in lnd.conf"
+lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
 if [ ${lndAutoPilotOn} -eq 1 ]; then
-  ${netprefix}autoPilot="on"
+  autoPilot="on"
 else
-  ${netprefix}autoPilot="off"
+  autoPilot="off"
 fi
 
 echo "map keysend to on/off"
@@ -86,23 +83,25 @@ if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 fi
-OPTIONS+=(a 'Channel Autopilot' ${${netprefix}autoPilot}) 
 if [ ${chain} = "main" ];then
+  OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
   OPTIONS+=(k 'Accept Keysend' ${keysend})  
+  # OPTIONS+=(n 'Testnet' ${chainValue}) # deprecated option
+  # see the parallel network in SERVICES
+  OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
+  OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
+  OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+  OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 fi
-# OPTIONS+=(n 'Testnet' ${chainValue}) # deprecated option
-# see the parallel network in SERVICES
-OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
-OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
-OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
-OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
-if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
-  OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
-  OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
-fi 
+if [ ${chain} = "main" ];then
+  if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
+    OPTIONS+=(y ${dynDomainMenu} ${domainValue})
+    OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+    OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
+  fi
+fi
 
 CHOICES=$(dialog \
           --title ' Node Settings & Options ' \
@@ -217,7 +216,7 @@ anychange=0
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${${netprefix}autoPilot}" != "${choice}" ]; then
+if [ "${autoPilot}" != "${choice}" ]; then
   echo "Autopilot Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
