@@ -1,27 +1,20 @@
 #!/bin/bash
 
-# keep password in memory: /dev/shm/.${netprefix}cln.pw
-# do not store password on disk unless auto-unlock is enabled
+# keeps the password in memory between restarts: /dev/shm/.${netprefix}cln.pw
+# does not store the password on disk unless auto-unlock is enabled
 # autounlock password is in /root/.${netprefix}cln.pw
-
-# sudo journalctl -n5 -u ${netprefix}lightningd | grep -c \
-# error when encrypted hsm not called with --encrypted-hsm in systemd:
-# "hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option."
-
-# error when the passwordFile is misisng:
-# '--encrypted-hsm: Could not read pass from stdin.'
-
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
-  ! echo "$@" | grep -Eq "unlock|encrypt|decrypt|autounlock-on|autounlock-off" ;then
+  ! echo "$@" | grep -Eq "unlock|lock|encrypt|decrypt|autounlock-on|autounlock-off|change-password" ;then
   echo
-  echo "unlock, encrypt, decrypt or set autounlock for the hsm_secret"
+  echo "# unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret"
   echo
-  echo "usage:"
-  echo "cln.hsmtool.sh [unlock] [testnet|mainnet|signet]"
-  echo "cln.hsmtool.sh [encrypt|decrypt] [testnet|mainnet|signet]"
-  echo "cln.hsmtool.sh [autounlock-on|autounlock-off] [testnet|mainnet|signet]"
+  echo "# usage:"
+  echo "# cln.hsmtool.sh [unlock|lock] [testnet|mainnet|signet]"
+  echo "# cln.hsmtool.sh [encrypt|decrypt] [testnet|mainnet|signet]"
+  echo "# cln.hsmtool.sh [autounlock-on|autounlock-off] [testnet|mainnet|signet]"
+  echo "# cln.hsmtool.sh [change-password] [testnet|mainnet|signet]"
   echo
   exit 1
 fi
@@ -36,7 +29,24 @@ if grep -Eq "${netprefix}clnEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   fi
 fi
 
+# add default value to raspi config if needed
+if ! grep -Eq "^${netprefix}clnEncryptedHSM=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}clnEncryptedHSM=off" >> /mnt/hdd/raspiblitz.conf
+fi
+# add default value to raspi config if needed
+if ! grep -Eq "^${netprefix}clnAutoUnlock=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}clnAutoUnlock=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+#############
+# Functions #
+#############
 function passwordToFile() {
+  if [ $# -gt 0 ];then
+    text="$1"
+  else
+    text="Type or paste the decryption password for the $CHAIN C-lightning wallet"
+  fi
   # write password into a file (to be shredded)
   # get password
   data=$(mktemp -p /dev/shm/)
@@ -46,7 +56,7 @@ function passwordToFile() {
    --backtitle "Enter password" \
    --title "Enter password" \
    --insecure \
-   --passwordbox "Type or paste the C-lightning wallet decryption password" 8 52 2> "$data"
+   --passwordbox "$text" 8 52 2> "$data"
   # make decison
   pressed=$?
   case $pressed in
@@ -76,35 +86,7 @@ function shredPasswordFile() {
   sudo shred -uvz $passwordFile
 }
 
-if [ "$1" = "unlock" ]; then
-  if [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
-    grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
-    echo "# No / wrong passwordFile present"
-    passwordToFile
-    sudo systemctl restart ${netprefix}lightningd
-    exit 0
-  elif [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
-    grep -c 'hsm_secret is encrypted, you need to pass the \--encrypted-hsm startup option.') -gt 0 ];then
-    echo "# The hsm_secret encrypted"
-    passwordToFile
-    # setting value in raspiblitz config
-    sudo sed -i \
-      "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
-      /mnt/hdd/raspiblitz.conf
-    # needs the service to be refreshed -> end of script
-  fi
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}clnEncryptedHSM=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clnEncryptedHSM=off" >> /mnt/hdd/raspiblitz.conf
-fi
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}clnAutoUnlock=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clnAutoUnlock=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
-if [ "$1" = "encrypt" ]; then
+function encryptHSMsecret() {
   sudo /home/admin/config.scripts/blitz.setpassword.sh x \
     "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
     "$passwordFile"
@@ -118,8 +100,9 @@ if [ "$1" = "encrypt" ]; then
     "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
     /mnt/hdd/raspiblitz.conf
   echo "# Encrypted the hsm_secret for C-lightning $CHAIN"
+}
 
-elif [ "$1" = "decrypt" ]; then
+function decryptHSMsecret() {
   if [ ! -f $passwordFile ];then
     passwordToFile
   else
@@ -134,6 +117,66 @@ elif [ "$1" = "decrypt" ]; then
     "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=off/g" \
     /mnt/hdd/raspiblitz.conf
   echo "# Decrypted the hsm_secret for C-lightning $CHAIN"
+}
+
+###########
+# Options #
+########### 
+if [ "$1" = "unlock" ]; then
+  # getpassword
+  if [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+    grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
+    if [ -f $passwordFile ];then
+      echo "# Wrong passwordFile is present"
+    else
+      echo "# No passwordFile is present"
+    fi
+    passwordToFile
+    sudo systemctl restart ${netprefix}lightningd
+
+  # configure --encrypted-hsm 
+  elif [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+    grep -c 'hsm_secret is encrypted, you need to pass the \--encrypted-hsm startup option.') -gt 0 ];then
+    echo "# The hsm_secret encrypted, but unlock is not configured"
+    passwordToFile
+    # setting value in raspiblitz config
+    sudo sed -i \
+      "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
+      /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/cln.install-service.sh $CHAIN
+  fi
+
+  # check if unlocked
+  attempt=0
+  while [ $($lightningcli_alias getinfo | grep -c '"id":') -eq 0 ];do
+    if [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+      grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ];then
+      echo "# Wrong password"
+      sudo rm -f $passwordFile
+      passwordToFile "Wrong password - type the decryption password for the $CHAIN C-lightning wallet"
+      sudo systemctl restart ${netprefix}lightningd
+    elif [ $attempt -eq 12 ];then
+      echo "# Failed to unlock the ${netprefix}lightningd wallet - giving up after 1 minute"
+      echo "# Check: sudo journalctl -u ${netprefix}lightningd"
+      exit 1
+    fi
+    echo "# Waiting to unlock wallet ... "
+    sleep 5
+    attempt=$((attempt+1))
+  done
+  echo "# Ok the ${netprefix}lightningd wallet is unlocked"
+  exit 0
+
+elif [ "$1" = "lock" ]; then
+  shredPasswordFile
+  sudo systemctl restart ${netprefix}lightningd
+  exit 0
+
+elif [ "$1" = "encrypt" ]; then
+  encryptHSMsecret
+
+elif [ "$1" = "decrypt" ]; then
+  decryptHSMsecret
 
 elif [ "$1" = "autounlock-on" ]; then
   if grep -Eq "${netprefix}clnEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
@@ -156,6 +199,20 @@ elif [ "$1" = "autounlock-off" ]; then
     "s/^${netprefix}clnAutoUnlock=.*/${netprefix}clnEncryptedHSM=off/g" \
     /mnt/hdd/raspiblitz.conf
   echo "# Autounlock is off for C-lightning $CHAIN"
+
+elif [ "$1" = "change-password" ]; then
+  decryptHSMsecret || exit 1
+   if ! encryptHSMsecret;then
+    echo "# Warning: the hsm_secret is left unencrypted."
+    echo "# To fix run:"
+    echo "/home/admin/config.scripts/cln.hsmtool encrypt $2"
+    exit 1
+  fi
+  exit 0
+
+else
+  echo "# Unknown option - exiting script"
+  exit 1
 fi
 
 # set the lightnind service file after all choices
