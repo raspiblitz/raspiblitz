@@ -605,6 +605,7 @@ if [ ${isMounted} -eq 0 ]; then
     source ${infoFile}
 
   done
+  echo "WAIT LOOP: DONE" >> $logFile
 
   ########################################
   # AFTER FINAL SETUP TASKS
