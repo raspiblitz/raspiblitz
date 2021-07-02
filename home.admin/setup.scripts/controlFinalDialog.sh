@@ -40,9 +40,7 @@ if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncP
   if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh target
   fi
-
-  exit 1
-
+  
 fi
 
 ############# SCB activation
