@@ -37,7 +37,7 @@ if [ "$1" = "peer-status" ]; then
     running=0
     peerNum=0
   fi
-  result=$'running=$running\npeers=$peerNum'
+  result=$'running=${running}\npeers=${peerNum}'
 
   # output to cache (normally gets written every 1min by background)
   echo "${result}" > /var/cache/raspiblitz/temp/network.monitor.peer-status.cache
