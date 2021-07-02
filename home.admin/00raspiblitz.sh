@@ -103,7 +103,7 @@ do
   ############################
   # LND Wallet Unlock
 
-  if [ "${walletLocked}" == "1" ]; then
+  if [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ]; then
     /home/admin/config.scripts/lnd.unlock.sh
   fi
 
@@ -199,17 +199,6 @@ do
     fi
 
   fi
-
-  #####################################
-  # AFTER SETUP: Handle System States 
-  #####################################
-
-  if [ "${setupPhase}" == "done" ]; then
-    echo "# AFTER SETUP: Handle System States "
-  fi
-
-  # debug wait
-  sleep 3
 
 done
 
