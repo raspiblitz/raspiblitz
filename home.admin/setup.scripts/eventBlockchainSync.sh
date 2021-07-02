@@ -67,7 +67,7 @@ do
 
     # set admin string
     if [ ${lcd} -eq 1 ]; then
-        adminStr="ssh admin@${localip} ->Password A"
+        adminStr="ssh admin@${localip} -> Password A"
     else
         adminStr="Use CTRL+c to EXIT to Terminal"
     fi
