@@ -486,7 +486,7 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
-  configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c "raspiblitz.conf")
+  configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
     sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf
   fi
