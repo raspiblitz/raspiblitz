@@ -588,15 +588,9 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   source ${infoFile}
+  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh" >> $logFile
   until [ "${state}" == "ready" ]
   do
-
-    # TODO: DETECT WHEN USER SETUP IS DONE
-    echo "TODO: DETECT WHEN USER FINAL DIALOG IS DONE" >> $logFile
-  
-    # offer option to COPY BLOCKHCAIN (see 50copyHDD.sh)
-    # handle possible errors
-    # show seed words
 
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
