@@ -4,8 +4,8 @@
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/_version.info
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
 source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # 1st PARAMETER: ssh|lcd
 lcd=0
