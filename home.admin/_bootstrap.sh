@@ -557,7 +557,7 @@ if [ ${isMounted} -eq 0 ]; then
   # unlock lnd if needed
   source ${setupFile}
   echo "checking Unlock ..." >> $logFile
-  if [ "${lightning}" == "lnd" ] && [ "${${passwordC}}" != "" ]; then
+  if [ "${lightning}" == "lnd" ] && [ "${passwordC}" != "" ]; then
     echo "Unlock LND at end of provision with temp stored password C" >> $logFile
     /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
     sleep 3
