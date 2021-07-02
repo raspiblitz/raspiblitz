@@ -168,10 +168,18 @@ Use password: raspiblitz
 " 8 41
     fi
 
-elif [ "${eventID}" == "waitfinal" ] || [ "${eventID}" == "finalready" ]; then
+elif [ "${eventID}" == "waitfinal" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Setup-Done - Login for Details:
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
+elif [ "${eventID}" == "finalready" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Setup-Done - Please Wait
 ssh admin@${localip}
 Use your Password A
 " 7 41
