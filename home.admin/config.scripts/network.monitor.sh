@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "monitor and troubleshot the bitcoin network"
- echo "network.monitor.sh peer-status"
+ echo "network.monitor.sh peer-status [cached]"
  echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
  echo "network.monitor.sh peer-disconnectall"
  exit 1
@@ -18,10 +18,27 @@ source /mnt/hdd/raspiblitz.conf
 if [ "$1" = "peer-status" ]; then
   echo "#network.monitor.sh peer-status"
 
+  # if second parameter is "cached" deliver cahed result if available
+  if [ "$2" == "cached" ]; then
+    cacheExists=$(ls /var/cache/raspiblitz/temp/network.monitor.peer-status.cache | grep -c "etwork.monitor.peer-status.cache")
+    if [ "${cacheExists}" == "1" ]; then
+      echo "cached=1"
+      cat ls /var/cache/raspiblitz/temp/network.monitor.peer-status.cache
+      exit 1
+    else
+      echo "cached=0"
+    fi
+  fi
+
   # number of peers connected
   peerNum=$(${network}-cli getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
-  echo "peers=${peerNum}"
+  result="peers=${peerNum}"
 
+  # output to cache (normally gets written every 1min by background)
+  echo "${result}" > /var/cache/raspiblitz/temp/network.monitor.peer-status.cache
+
+  # output to user
+  echo "${result}"
   exit 0
 fi
 
