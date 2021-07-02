@@ -554,6 +554,16 @@ if [ ${isMounted} -eq 0 ]; then
     exit 1
   fi
 
+  # unlock lnd if needed
+  source ${setupFile}
+  if [ "${lightning}" == "lnd" ]; then
+    echo "Unlock LND at end of provision ..." >> $logFile
+    /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
+    sleep 3
+  else
+    echo "No lightning unlock (${lightning})" >> $logFile
+  fi
+
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
