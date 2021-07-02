@@ -38,9 +38,13 @@ if [ "$1" = "peer-status" ]; then
     peerNum=0
   fi
 
-  # output to cache (normally gets written every 1min by background)
-  echo "running=${running}" > /var/cache/raspiblitz/network.monitor.peer-status.cache
-  echo "peers=${peerNum}" >> /var/cache/raspiblitz/network.monitor.peer-status.cache
+  # output to cache (normally gets written every 1min by background) if sudo
+  if [ "$EUID" -eq 0 ]; then
+    touch /var/cache/raspiblitz/network.monitor.peer-status.cache
+    echo "running=${running}" > /var/cache/raspiblitz/network.monitor.peer-status.cache
+    echo "peers=${peerNum}" >> /var/cache/raspiblitz/network.monitor.peer-status.cache
+    sudo chmod 664 /var/cache/raspiblitz/network.monitor.peer-status.cache
+  fi
 
   # output to user
   echo "running=${running}"
