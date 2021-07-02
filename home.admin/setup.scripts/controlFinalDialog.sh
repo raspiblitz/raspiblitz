@@ -28,7 +28,8 @@ fi
 
 # get fresh data
 source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-if [ "${syncProgress}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgress} -lt 75 ]; then
+syncProgressFull=$(echo "${syncProgress}" | cut -d "." -f1)
+if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 
   # offer choice to copy blockchain over LAN
   OPTIONS=()
