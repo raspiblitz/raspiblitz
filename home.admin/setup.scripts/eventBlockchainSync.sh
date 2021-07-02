@@ -72,7 +72,8 @@ do
     fi
 
     # display info to user
-    dialog --title " Node is Syncing " --backtitle "RaspiBlitz ${codeVersion} ${hostname} / ${network} / ${chain} / ${tempCelsius}°C" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+    time=$(date '+%H:%M:%S')
+    dialog --title " Node is Syncing (${time})" --backtitle "RaspiBlitz ${codeVersion} ${hostname} / ${network} / ${chain} / ${tempCelsius}°C" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
 
     # determine to loop or not
     loop=0
