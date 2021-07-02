@@ -49,20 +49,20 @@ networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d "
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_rx=$(ifconfig 2>/dev/null | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig 2>/dev/null | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 else
-  network_rx=$(ifconfig ${networkDevice} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${networkDevice} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_rx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 fi
 
 #############################################
 # get local IP (from different sources)
-localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|inet|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip_ALL=$(ip addr 2>/dev/null | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|inet|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 if [ $(isValidIP ${localip_ALL}) -eq 0 ]; then
   localip_ALL=""
 fi
-localip_LAN=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip_LAN=$(ip addr 2>/dev/null | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 if [ $(isValidIP ${localip_LAN}) -eq 0 ]; then
   localip_LAN=""
 fi
@@ -98,31 +98,31 @@ if [ "${peers}" != "0" ]; then
 fi
 if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
   # re-test with user set dns server
-  online=$(ping ${dnsServer} -c 1 -W 2 | grep -c '1 received')
+  online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server (IPv6)
-  online=$(ping 2620:119:35::35 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server (IPv6)
-  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 
 #############################################
