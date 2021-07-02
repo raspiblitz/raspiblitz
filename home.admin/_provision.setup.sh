@@ -303,7 +303,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # make sure wallet is unlocked
   sleep 3
-  /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
+  /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
   sleep 3
 
   # check if macaroon exists now - if not fail
@@ -320,10 +320,10 @@ if [ "${lightning}" == "lnd" ]; then
 
   # unlock Wallet (if needed)
   echo "*** Check Wallet Lock ***" >> ${logFile}
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
-  if [ ${locked} -gt 0 ]; then
+  source <(/home/admin/config.scripts/lnd.unlock.sh status)
+  if [ "${locked}" != "0" ]; then
     echo "OK - Wallet is locked ... starting unlocking dialog" >> ${logFile}
-    /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
+    /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
   else
     echo "OK - Wallet is already unlocked" >> ${logFile}
   fi

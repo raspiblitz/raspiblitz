@@ -233,8 +233,8 @@ if [ ${#ln_port} -eq 0 ]; then
   ln_port="9735"
 fi
 
-wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
-if [ "$wallet_unlocked" -gt 0 ] ; then
+source <(/home/admin/config.scripts/lnd.unlock.sh status)
+if [ "${locked}" != "0" ] ; then
  alias_color="${color_red}"
  ln_alias="Wallet Locked"
 else

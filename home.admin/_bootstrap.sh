@@ -558,7 +558,7 @@ if [ ${isMounted} -eq 0 ]; then
   source ${setupFile}
   if [ "${lightning}" == "lnd" ]; then
     echo "Unlock LND at end of provision ..." >> $logFile
-    /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
+    /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
     sleep 3
   else
     echo "No lightning unlock (${lightning})" >> $logFile

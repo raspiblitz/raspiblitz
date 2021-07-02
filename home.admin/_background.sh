@@ -400,8 +400,8 @@ do
     if [ "${autoUnlock}" = "on" ]; then
 
       # check if lnd is locked
-      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-      if [ ${locked} -gt 0 ]; then
+      source <(/home/admin/config.scripts/lnd.unlock.sh status)
+      if [ "${locked}" != "0" ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
         sudo /home/admin/config.scripts/lnd.unlock.sh
