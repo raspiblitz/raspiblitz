@@ -32,7 +32,13 @@ if [ "$1" = "peer-status" ]; then
 
   # number of peers connected
   running=1
-  peerNum=$(${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+  if [ "$EUID" -eq 0 ]; then
+    # sudo call
+    peerNum=$(sudo -u admin ${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+  else
+    # user call
+    peerNum=$(${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]') 
+  fi
   if [ "${peerNum}" = "" ]; then
     running=0
     peerNum=0
