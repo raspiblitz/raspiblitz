@@ -31,8 +31,13 @@ if [ "$1" = "peer-status" ]; then
   fi
 
   # number of peers connected
-  peerNum=$(${network}-cli getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
-  result="peers=${peerNum}"
+  running=1
+  peerNum=$(${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+  if [ "${peerNum}" = "" ]; then
+    running=0
+    peerNum=0
+  fi
+  result="running=${running}\npeers=${peerNum}"
 
   # output to cache (normally gets written every 1min by background)
   echo "${result}" > /var/cache/raspiblitz/temp/network.monitor.peer-status.cache
