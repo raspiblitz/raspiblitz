@@ -89,7 +89,7 @@ configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null|
 # first quick check if bitcoind has peers - if so the client is online
 # if not then recheck by pinging different sources if online
 # used cached results to not delay (cache will be updated by background process)
-source <(/home/admin/config.scripts/network.monitor.sh peer-status)
+source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
 
 online=0
 if [ "${peers}" != "0" ]; then
