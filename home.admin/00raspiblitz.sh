@@ -160,7 +160,7 @@ do
 
   if [ "${setupPhase}" != "done" ]; then
 
-    echo "# DURING SETUP: Handle System State (${state})"
+    #echo "# DURING SETUP: Handle System State (${state})"
 
     # when no HDD on Vagrant - just print info & exit (admin info & exit)
     if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
