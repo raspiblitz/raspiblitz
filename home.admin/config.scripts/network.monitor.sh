@@ -23,7 +23,7 @@ if [ "$1" = "peer-status" ]; then
     cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "etwork.monitor.peer-status.cache")
     if [ "${cacheExists}" == "1" ]; then
       echo "cached=1"
-      cat /var/cache/raspiblitz/temp/network.monitor.peer-status.cache
+      cat /var/cache/raspiblitz/network.monitor.peer-status.cache
       exit 1
     else
       echo "cached=0"
