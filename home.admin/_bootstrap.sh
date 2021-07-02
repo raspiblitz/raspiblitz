@@ -467,6 +467,9 @@ if [ ${isMounted} -eq 0 ]; then
   source ${infoFile}
   echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> $logFile
 
+  # try to load setup values if available
+  source ${setupFile} 2>/dev/null
+
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
@@ -483,11 +486,28 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
-  sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf 
+  configExists=$(ls /mnt/hdd/raspiblitz.conf | grep -c "raspiblitz.conf")
+  if [ "${configExists}" != "1" ]; then
+    sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf
+  fi
 
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
+
+  ###################################
+  # Set Password A (in all cases)
+
+  if [ "${passwordA}" == "" ]; then
+    sed -i "s/^state=.*/state=error/g" ${infoFile}
+    sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
+    echo "FAIL see ${logFile}"
+    echo "FAIL: missing passwordA in (${setupFile})!" >> ${logFile}
+    exit 1
+  fi
+
+  echo "SETTING PASSWORD A" >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
@@ -524,7 +544,7 @@ if [ ${isMounted} -eq 0 ]; then
       exit 1
     fi
   fi
-
+  
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}

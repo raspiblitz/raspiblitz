@@ -61,20 +61,6 @@ fi
 
 echo "prechecks OK"  >> ${logFile}
 
-###################################
-# Set Password A
-
-if [ "${passwordA}" == "" ]; then
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing passwordA in (${setupFile})!" >> ${logFile}
-  exit 1
-fi
-
-echo "SETTING PASSWORD A" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
-
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
 # a conversion of config data or app data is needed 
