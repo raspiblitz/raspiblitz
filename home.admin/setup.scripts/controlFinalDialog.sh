@@ -40,7 +40,7 @@ if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncP
   if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh target
   fi
-  
+
 fi
 
 ############# SCB activation
@@ -122,4 +122,4 @@ fi
 echo "Starting ... (please wait)"
 
 # signal to backend that all is good and it can continue
-sudo sed -i "s/^state=.*/state='finalready'/g" /home/admin/raspiblitz.info 
+sudo sed -i "s/^state=.*/state='ready'/g" /home/admin/raspiblitz.info 

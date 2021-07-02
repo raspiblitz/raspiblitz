@@ -583,12 +583,12 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
   else
     echo "# Skip WAIT LOOP boot directly into main menu ..." >> $logFile
-    sed -i "s/^state=.*/state=finalready/g" ${infoFile}
+    sed -i "s/^state=.*/state=ready/g" ${infoFile}
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
   fi
 
   source ${infoFile}
-  until [ "${state}" == "finalready" ]
+  until [ "${state}" == "ready" ]
   do
 
     # TODO: DETECT WHEN USER SETUP IS DONE

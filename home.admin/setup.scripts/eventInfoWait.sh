@@ -176,14 +176,6 @@ ssh admin@${localip}
 Use your Password A
 " 7 41
 
-elif [ "${eventID}" == "finalready" ]; then
-
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Setup-Done - Please Wait
-ssh admin@${localip}
-Use your Password A
-" 7 41
-
 elif [ "${eventID}" == "shutdown" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
