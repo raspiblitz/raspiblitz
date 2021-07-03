@@ -467,9 +467,6 @@ if [ ${isMounted} -eq 0 ]; then
   source ${infoFile}
   echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> $logFile
 
-  # try to load setup values if available
-  source ${setupFile} 2>/dev/null
-
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
@@ -497,7 +494,8 @@ if [ ${isMounted} -eq 0 ]; then
 
   ###################################
   # Set Password A (in all cases)
-
+  
+  source ${setupFile} 2>$logFile
   if [ "${passwordA}" == "" ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
