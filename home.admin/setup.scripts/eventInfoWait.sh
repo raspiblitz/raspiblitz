@@ -32,7 +32,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${localip} / ${eventID}"
+backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${localip}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
@@ -168,7 +168,7 @@ Use password: raspiblitz
 " 8 41
     fi
 
-elif [ "${eventID}" == "waitfinal" ] || [ "${eventID}" == "finalready" ]; then
+elif [ "${eventID}" == "waitfinal" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Setup-Done - Login for Details:

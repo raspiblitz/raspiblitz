@@ -20,7 +20,7 @@ if [ ${#openChannels} -eq 0 ]; then
   echo "*** IMPORTANT **********************************"
   echo "It looks like LND is not responding."
   echo "Still starting up, is locked or is not running?"
-  echo "Try later, try reboot or check ./XXdebugLogs.sh"
+  echo "Try later, try reboot or run command: debug"
   echo "************************************************"
   echo "Press ENTER to return to main menu."
   read key

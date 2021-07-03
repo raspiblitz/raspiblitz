@@ -188,7 +188,7 @@ If your RaspiBlitz is not working correctly and you like to get help from the co
 
 - SSH into your raspiblitz as admin user with your password A
 - If you see the menu - use CTRL+C to get to the terminal
-- To generate debug report run: `./XXdebugLogs.sh`
+- To generate debug report run: `debug`
 - Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
 
 *PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*

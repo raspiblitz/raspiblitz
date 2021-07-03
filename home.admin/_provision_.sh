@@ -306,8 +306,7 @@ else
 fi
 
 # TOR
-source <(/home/admin/config.scripts/internet.tor.sh status)
-if [ "${runBehindTor}" == "on" ] && [ "${torRunning}" == "0" ]; then
+if [ "${runBehindTor}" == "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1

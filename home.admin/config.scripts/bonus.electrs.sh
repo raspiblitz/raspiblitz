@@ -137,7 +137,7 @@ if [ "$1" = "menu" ]; then
 The electrum system service is not running.
 Please check the following debug info.
       " 8 48
-    /home/admin/XXdebugLogs.sh
+    /home/admin/config.scripts/blitz.debug.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0

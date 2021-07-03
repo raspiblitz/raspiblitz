@@ -5,6 +5,7 @@
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # 1st PARAMETER: ssh|lcd
 lcd=0
@@ -66,13 +67,14 @@ do
 
     # set admin string
     if [ ${lcd} -eq 1 ]; then
-        adminStr="ssh admin@${localip} ->Password A"
+        adminStr="ssh admin@${localip} -> Password A"
     else
         adminStr="Use CTRL+c to EXIT to Terminal"
     fi
 
     # display info to user
-    dialog --title " Node is Syncing " --backtitle "RaspiBlitz ${codeVersion} ${hostname} / ${network} / ${chain} / ${tempCelsius}°C" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+    time=$(date '+%H:%M:%S')
+    dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} ${tempCelsius}°C / ${hostname} / ${network} / ${chain}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
 
     # determine to loop or not
     loop=0

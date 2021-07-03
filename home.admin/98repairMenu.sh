@@ -67,7 +67,7 @@ case $CHOICE in
 #  HARDWARE)
 #    ;;
   SOFTWARE)
-    sudo /home/admin/XXdebugLogs.sh
+    sudo /home/admin/config.scripts/blitz.debug.sh
     echo "Press ENTER to return to main menu."
     read key
     ;;

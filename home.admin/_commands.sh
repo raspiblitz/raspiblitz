@@ -56,14 +56,14 @@ function release() {
 # command: debug
 function debug() {
   cd /home/admin
-  ./XXdebugLogs.sh
+  /home/admin/config.scripts/blitz.debug.sh
 }
 
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  /home/admin/config.scripts/blitz.github.sh
+  /home/admin/config.scripts/blitz.github.sh -run
 }
 
 # command: off

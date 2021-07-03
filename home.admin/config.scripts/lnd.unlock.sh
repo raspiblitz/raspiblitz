@@ -2,7 +2,8 @@
 
 if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
- echo "lnd.unlock.sh [?passwordC]"
+ echo "lnd.unlock.sh status"
+ echo "lnd.unlock.sh unlock [?passwordC]"
  exit 1
 fi
 
@@ -16,13 +17,25 @@ alias bitcoincli_alias="$bitcoincli_alias"
 alias lncli_alias="$lncli_alias"
 alias lightningcli_alias="$lightningcli_alias"
 
-# 1. parameter
-passwordC="$1"
+# 1. parameter (default is unlock)
+action="$1"
+
+# 2. parameter (optional password)
+passwordC="$2"
 
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
-walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
-macaroonsMissing=$($lncli_alias getinfo 2>&1 | grep -c "unable to read macaroon")
+walletLocked=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+macaroonsMissing=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
+
+# if action sis just status
+if [ "${action}" == "status" ]; then
+    echo "locked=${walletLocked}"
+    echo "missingMacaroons=${macaroonsMissing}"
+    exit 0
+fi
+
+# if already unlocked all is done
 if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
     echo "# OK LND wallet was already unlocked"
     exit 0

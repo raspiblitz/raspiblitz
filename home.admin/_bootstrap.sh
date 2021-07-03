@@ -483,11 +483,29 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
-  sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf 
+  configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+  if [ "${configExists}" != "1" ]; then
+    sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf
+  fi
 
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
+
+  ###################################
+  # Set Password A (in all cases)
+  
+  source ${setupFile} 2>$logFile
+  if [ "${passwordA}" == "" ]; then
+    sed -i "s/^state=.*/state=error/g" ${infoFile}
+    sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}
+    echo "FAIL see ${logFile}"
+    echo "FAIL: missing passwordA in (${setupFile})!" >> ${logFile}
+    exit 1
+  fi
+
+  echo "SETTING PASSWORD A" >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
@@ -524,7 +542,7 @@ if [ ${isMounted} -eq 0 ]; then
       exit 1
     fi
   fi
-
+  
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
@@ -532,6 +550,17 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "$?" != "0" ]; then
     echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
     exit 1
+  fi
+
+  # unlock lnd if needed
+  source ${setupFile}
+  echo "checking Unlock ..." >> $logFile
+  if [ "${lightning}" == "lnd" ] && [ "${passwordC}" != "" ]; then
+    echo "Unlock LND at end of provision with temp stored password C" >> $logFile
+    /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
+    sleep 3
+  else
+    echo "No lightning unlock (${lightning}) or password C temp stored" >> $logFile
   fi
 
   # mark provision process done
@@ -553,20 +582,14 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
   else
     echo "# Skip WAIT LOOP boot directly into main menu ..." >> $logFile
-    sed -i "s/^state=.*/state=finalready/g" ${infoFile}
+    sed -i "s/^state=.*/state=ready/g" ${infoFile}
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
   fi
 
   source ${infoFile}
-  until [ "${state}" == "finalready" ]
+  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh" >> $logFile
+  until [ "${state}" == "ready" ]
   do
-
-    # TODO: DETECT WHEN USER SETUP IS DONE
-    echo "TODO: DETECT WHEN USER FINAL DIALOG IS DONE" >> $logFile
-  
-    # offer option to COPY BLOCKHCAIN (see 50copyHDD.sh)
-    # handle possible errors
-    # show seed words
 
     # get latest network info & update raspiblitz.info (in case network changes)
     source <(/home/admin/config.scripts/internet.sh status)
@@ -580,6 +603,7 @@ if [ ${isMounted} -eq 0 ]; then
     source ${infoFile}
 
   done
+  echo "WAIT LOOP: DONE" >> $logFile
 
   ########################################
   # AFTER FINAL SETUP TASKS
