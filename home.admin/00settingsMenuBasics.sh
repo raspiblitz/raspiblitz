@@ -85,7 +85,7 @@ if [ "${displayClass}" == "lcd" ]; then
 fi
 OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
 OPTIONS+=(k 'Accept Keysend' ${keysend})  
-OPTIONS+=(n 'Testnet' ${chainValue})    
+# OPTIONS+=(n 'Testnet' ${chainValue})    #TODO remove related code
 OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
 OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})

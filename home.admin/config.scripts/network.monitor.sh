@@ -12,6 +12,12 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+shopt -s expand_aliases
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lncli_alias="$lncli_alias"
+alias lightningcli_alias="$lightningcli_alias"
+
 ###################
 # STATUS
 ###################
@@ -34,10 +40,11 @@ if [ "$1" = "peer-status" ]; then
   running=1
   if [ "$EUID" -eq 0 ]; then
     # sudo call
-    peerNum=$(sudo -u admin ${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+    peerNum=$(sudo -u admin $bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
   else
     # user call
-    peerNum=$(${network}-cli getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]') 
+    peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+    peerNum=$( getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
   fi
   if [ "${peerNum}" = "" ]; then
     running=0
@@ -144,7 +151,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "newpeer='${nodeAddress}"
 
   # kick start node with 
-  sudo -u admin ${network}-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
+  bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
   exit 0
@@ -164,15 +171,15 @@ if [ "$1" = "peer-disconnectall" ]; then
   fi
 
   # get all peer id and disconnect them
-  sudo -u admin ${network}-cli getpeerinfo | grep '"addr": "' | while read line 
+  bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line 
   do
     peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"
-    sudo -u admin ${network}-cli disconnectnode ${peerID}
+    bitcoincli_alias disconnectnode ${peerID}
   done
 
-  echo "#### FINAL PEER INFO FORM BITCOIND"
-  sudo -u admin ${network}-cli getpeerinfo
+  echo "#### FINAL PEER INFO FROM BITCOIND"
+  bitcoincli_alias getpeerinfo
   exit 0
 fi
 

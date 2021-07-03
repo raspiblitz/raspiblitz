@@ -11,6 +11,12 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+shopt -s expand_aliases
+alias bitcoincli_alias="$bitcoincli_alias"
+alias lncli_alias="$lncli_alias"
+alias lightningcli_alias="$lightningcli_alias"
+
 # 1. parameter (default is unlock)
 action="$1"
 
@@ -19,8 +25,8 @@ passwordC="$2"
 
 # check if wallet is already unlocked
 echo "# checking LND wallet ... (can take some time)"
-walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-macaroonsMissing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
+walletLocked=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+macaroonsMissing=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
 
 # if action sis just status
 if [ "${action}" == "status" ]; then
@@ -104,7 +110,7 @@ while [ ${fallback} -eq 0 ]
         # UNKNOWN RESULT
 
         # check if wallet was unlocked anyway
-        walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+        walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
         if [ "${walletUnlocked}" = "0" ]; then
             echo "# OK LND wallet unlocked"
             exit 0
@@ -133,12 +139,12 @@ do
     # do CLI unlock
     echo
     echo "############################"
-    echo "Calling: lncli unlock"
+    echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    lncli --chain=${network} --network=${chain}net unlock --recovery_window=1000
+    lncli_alias unlock --recovery_window=1000
 
     # test unlock
-    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+    walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
     if [ ${walletLocked} -eq 0 ]; then
         echo "# --> OK LND wallet unlocked"
     else
