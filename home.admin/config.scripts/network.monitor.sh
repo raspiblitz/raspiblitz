@@ -2,8 +2,8 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "monitor and troubleshoot the bitcoin network"
- echo "network.monitor.sh peer-status"
+ echo "monitor and troubleshot the bitcoin network"
+ echo "network.monitor.sh peer-status [cached]"
  echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
  echo "network.monitor.sh peer-disconnectall"
  exit 1
@@ -20,10 +20,44 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 if [ "$1" = "peer-status" ]; then
   echo "#network.monitor.sh peer-status"
 
-  # number of peers connected
-  peerNum=$($bitcoincli_alias getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
-  echo "peers=${peerNum}"
+  # if second parameter is "cached" deliver cahed result if available
+  if [ "$2" == "cached" ]; then
+    cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "etwork.monitor.peer-status.cache")
+    if [ "${cacheExists}" == "1" ]; then
+      echo "cached=1"
+      cat /var/cache/raspiblitz/network.monitor.peer-status.cache
+      exit 1
+    else
+      echo "cached=0"
+    fi
+  fi
 
+  # number of peers connected
+  running=1
+  if [ "$EUID" -eq 0 ]; then
+    # sudo call
+    peerNum=$(sudo -u admin $bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+  else
+    # user call
+    peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+    peerNum=$( getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
+  fi
+  if [ "${peerNum}" = "" ]; then
+    running=0
+    peerNum=0
+  fi
+
+  # output to cache (normally gets written every 1min by background) if sudo
+  if [ "$EUID" -eq 0 ]; then
+    touch /var/cache/raspiblitz/network.monitor.peer-status.cache
+    echo "running=${running}" > /var/cache/raspiblitz/network.monitor.peer-status.cache
+    echo "peers=${peerNum}" >> /var/cache/raspiblitz/network.monitor.peer-status.cache
+    sudo chmod 664 /var/cache/raspiblitz/network.monitor.peer-status.cache
+  fi
+
+  # output to user
+  echo "running=${running}"
+  echo "peers=${peerNum}"
   exit 0
 fi
 

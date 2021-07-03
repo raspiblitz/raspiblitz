@@ -249,6 +249,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> SEED + SCB 
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
+    echo "WALLET --> SEED + SCB " >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py scb ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
@@ -264,6 +265,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> SEED
   elif [ "${seedWords}" != "" ]; then
     
+    echo "WALLET --> SEED" >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
     sudo /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
@@ -279,6 +281,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> NEW
   else
 
+    echo "WALLET --> NEW" >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${passwordC})
     if [ "${err}" != "" ]; then
@@ -301,11 +304,6 @@ if [ "${lightning}" == "lnd" ]; then
   echo "*** Copy LND Macaroons to user admin ***" >> ${logFile}
   sudo sed -i "s/^message=.*/message='LND Credentials'/g" ${infoFile}    
 
-  # make sure wallet is unlocked
-  sleep 3
-  /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
-  sleep 3
-
   # check if macaroon exists now - if not fail
   macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
   if [ ${macaroonExists} -eq 0 ]; then
@@ -317,16 +315,6 @@ if [ "${lightning}" == "lnd" ]; then
 
   # now sync macaroons & TLS zo other users
   sudo /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
-
-  # unlock Wallet (if needed)
-  echo "*** Check Wallet Lock ***" >> ${logFile}
-  locked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null | grep -c unlock)
-  if [ ${locked} -gt 0 ]; then
-    echo "OK - Wallet is locked ... starting unlocking dialog" >> ${logFile}
-    /home/admin/config.scripts/lnd.unlock.sh "${passwordC}" >> ${logFile}
-  else
-    echo "OK - Wallet is already unlocked" >> ${logFile}
-  fi
 
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)

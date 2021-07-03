@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # load raspiblitz config data
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
 source /home/admin/_version.info
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ## PROCEDURES
 
