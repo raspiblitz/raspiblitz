@@ -13,7 +13,8 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
 if [ ! -f "/home/bitcoin/cln-plugins-available/plugins/summary/summary.py" ]; then
-  cd /home/bitcoin || exit 1
+  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
+  cd /home/bitcoin/cln-plugins-available || exit 1
   sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
 fi
 if [ $($lightningcli_alias | grep -c "summary") -eq 0 ];then
