@@ -87,22 +87,22 @@ case $CHOICE in
       read key
       ;;
   PEERING)
-      /home/admin/BBconnectPeer.sh
+      /home/admin/BBconnectPeer.sh lnd $CHAIN
       ;;
   FUNDING)
-      /home/admin/BBfundWallet.sh
+      /home/admin/BBfundWallet.sh lnd $CHAIN
       ;;
   CASHOUT)
-      /home/admin/BBcashoutWallet.sh
+      /home/admin/BBcashoutWallet.sh lnd $CHAIN
       ;;
   CHANNEL)
-      /home/admin/BBopenChannel.sh
+      /home/admin/BBopenChannel.sh lnd $CHAIN
       ;;
   SEND)
-      /home/admin/BBpayInvoice.sh
+      /home/admin/BBpayInvoice.sh lnd $CHAIN
       ;;
   RECEIVE)
-      /home/admin/BBcreateInvoice.sh
+      /home/admin/BBcreateInvoice.sh lnd $CHAIN
       ;;
   NAME)
       sudo /home/admin/config.scripts/lnd.setname.sh
@@ -116,7 +116,7 @@ case $CHOICE in
       fi
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh
+      /home/admin/BBcloseAllChannels.sh lnd $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;

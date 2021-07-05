@@ -5,12 +5,6 @@ echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-if [ $# -gt 0 ];then
-  NETWORK=$1
-else
-  NETWORK=${chain}net
-fi
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
 # get the local network IP to be displayed on the LCD
@@ -63,25 +57,25 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   SUMMARY)
-      /home/admin/config.scripts/cln-plugin.summary.sh $NETWORK
+      /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
       ;;
   PEERING)
-      /home/admin/BBconnectPeer.sh cln $NETWORK
+      /home/admin/BBconnectPeer.sh cln $CHAIN
       ;;
   FUNDING)
-      /home/admin/BBfundWallet.sh cln $NETWORK
+      /home/admin/BBfundWallet.sh cln $CHAIN
       ;;
   CASHOUT)
-      /home/admin/BBcashoutWallet.sh
+      /home/admin/BBcashoutWallet.sh cln $CHAIN
       ;;
   CHANNEL)
-      /home/admin/BBopenChannel.sh cln $NETWORK
+      /home/admin/BBopenChannel.sh cln $CHAIN
       ;;
   SEND)
-      /home/admin/BBpayInvoice.sh cln $NETWORK
+      /home/admin/BBpayInvoice.sh cln $CHAIN
       ;;
   RECEIVE)
-      /home/admin/BBcreateInvoice.sh cln $NETWORK
+      /home/admin/BBcreateInvoice.sh cln $CHAIN
       ;;
   NAME)
       sudo /home/admin/config.scripts/lnd.setname.sh
@@ -95,7 +89,7 @@ case $CHOICE in
       fi
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh cln $NETWORK
+      /home/admin/BBcloseAllChannels.sh cln $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;
