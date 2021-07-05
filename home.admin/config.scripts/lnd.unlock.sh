@@ -77,7 +77,7 @@ while [ ${fallback} -eq 0 ]
     recoveryOption=""
     if [ "${fundRecovery}" == "1" ]; then
         recoveryOption="--recovery_window=1000 "
-        echo "# runnign unlock with ${recoveryOption}"
+        echo "# running unlock with ${recoveryOption}"
     fi
     result=$(echo "$passwordC" | $lncli_alias unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
