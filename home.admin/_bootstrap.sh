@@ -116,6 +116,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
     echo "/var/log/nginx is present"
   fi
   sudo rm -r /var/log/*
+  sudo service rsyslog restart
   if [ $nginxLog == 1 ]; then
     sudo mkdir /var/log/nginx
     echo "Recreated /var/log/nginx"
