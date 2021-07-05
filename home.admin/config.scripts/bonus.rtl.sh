@@ -168,7 +168,7 @@ console.log(JSON.stringify(data, null, 2));
 EOF
   sudo -u rtl mkdir -p /home/rtl/${netprefix}RTL
   sudo rm -f /home/rtl/${netprefix}RTL/RTL-Config.json
-  sudo -u rtl mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
+  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
   sudo chown rtl:rtl /home/rtl/${netprefix}RTL/RTL-Config.json
 }
 
