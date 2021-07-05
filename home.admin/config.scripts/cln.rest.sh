@@ -64,7 +64,7 @@ if [ $1 = on ];then
 
   # symlink to /home/bitcoin/.lightning/lightning-rpc from the chosen network directory
   sudo rm /home/bitcoin/.lightning/lightning-rpc # delete old symlink
-  sudo ln -s /home/bitcoin/.lightning/${NETWORK}/lightning-rpc /home/bitcoin/.lightning/
+  sudo ln -s /home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc /home/bitcoin/.lightning/
   
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}

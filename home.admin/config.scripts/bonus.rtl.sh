@@ -248,7 +248,7 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}${typeprefix}RTL/\"
+Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
 Restart=always
@@ -282,8 +282,8 @@ WantedBy=multi-user.target
 
 [Unit]
 Description=${netprefix}${typeprefix}RTL daemon
-Wants=${netprefix}lightning.service
-After=${netprefix}lightning.service
+Wants=${netprefix}lightningd.service
+After=${netprefix}lightningd.service
 
 [Service]
 Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"

@@ -128,7 +128,7 @@ if [ "${tcrtlWebinterface}" != "${choice}" ]; then
       sudo systemctl start tcRTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
+      /home/admin/config.scripts/bonus.rtl.sh menu cln $CHAIN
     else
       l1="!!! FAIL on RTL for CLN $CHAIN install !!!"
       l2="Try manual install on terminal after reboot with:"
