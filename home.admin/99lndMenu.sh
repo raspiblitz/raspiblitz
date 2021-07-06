@@ -42,7 +42,7 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 
-OPTIONS+=(CASHOUT "Remove Funds from LND")
+OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
 if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = cln ];then
   OPTIONS+=(SWITCHLN  "Use LND as default")
   HEIGHT=$((HEIGHT+1))

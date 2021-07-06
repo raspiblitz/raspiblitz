@@ -26,6 +26,7 @@ if [ $LNTYPE = cln ];then
   function cln_closeall {
     for i in $peerlist; do
       # close id [unilateraltimeout] [destination] [fee_negotiation_step] [*wrong_funding*]
+      echo "# Attempting a mutual close one-by-one with a 30 seconds timeout"
       $lightningcli_alias close $i 30
     done
   }

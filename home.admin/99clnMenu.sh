@@ -32,7 +32,7 @@ ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/d
 cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
 openChannels=$((ln_channels_online+cln_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-OPTIONS+=(CLOSEALL "Close all open Channels")
+OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
@@ -43,7 +43,7 @@ if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi  
 
-OPTIONS+=(CASHOUT "Remove Funds from LND")
+OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
