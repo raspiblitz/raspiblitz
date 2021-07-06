@@ -92,7 +92,7 @@ echo "******************************"
 if [ ${LNTYPE} = "cln" ];then
   # TODO no easy way to sweep funds
   # withdraw destination satoshi [feerate] [minconf] [utxos]
-  command="NOT IMPLEMENTED YET"
+  command="$lightningcli_alias withdraw ${address} all slow"
 elif [ ${LNTYPE} = "lnd" ];then
   command="$lncli_alias sendcoins --sweepall --addr=${address} --conf_target=36"
 fi

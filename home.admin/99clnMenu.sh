@@ -43,7 +43,7 @@ if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi  
 
-#TODO OPTIONS+=(CASHOUT "Remove Funds from LND")
+OPTIONS+=(CASHOUT "Remove Funds from LND")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
