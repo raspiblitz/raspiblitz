@@ -150,7 +150,7 @@ plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
 # Tor settings
 proxy=127.0.0.1:9050
 bind-addr=127.0.0.1:${portprefix}9736
-addr=statictor:127.0.0.1:9051\torport=${portprefix}9736
+addr=statictor:127.0.0.1:9051/torport=${portprefix}9736
 always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
