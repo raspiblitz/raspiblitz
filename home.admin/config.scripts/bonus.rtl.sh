@@ -87,14 +87,14 @@ function configRTL() {
   # prepare RTL-Config.json file
   echo "# RTL.conf"
   # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
-  sudo cp /home/rtl/RTL/sample-RTL-Config.json /home/admin/RTL-Config.json
+  sudo cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/admin/RTL-Config.json
   sudo chown admin:admin /home/admin/RTL-Config.json
   sudo chmod 600 /home/admin/RTL-Config.json || exit 1
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
   # modify sample-RTL-Config.json and save in RTL-Config.json
   sudo node > /home/admin/RTL-Config.json <<EOF
 //Read data
-var data = require('/home/rtl/RTL/sample-RTL-Config.json');
+var data = require('/home/rtl/RTL/docs/Sample-RTL-Config.json');
 //Manipulate data
 data.nodes[0].lnNode = '$hostname'
 data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
