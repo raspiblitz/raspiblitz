@@ -4,6 +4,16 @@
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
 # if no values given uses the default values from the raspiblitz.conf
 
+# chain is: main | test ; from raspiblitz.conf or raspiblitz.info or defaults to main
+
+# LNTYPE is: lnd | cln ; default: lnd
+# typeprefix is: "" | c
+
+# CHAIN is: mainnet | testnet | signet
+# netprefix is:  "" | t | s
+# portprefix is: "" | 1 | 3
+# CLNETWORK is: bitcoin / signet / testnet
+
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
@@ -29,8 +39,12 @@ if [ $1 = getvars ];then
   fi
   echo "typeprefix=${typeprefix}"
 
+  # from raspiblitz.conf or raspiblitz.info or defaults to main
+  if [ ${#chain} -eq 0 ] || [ $3 = net ]; then
+    chain=main
+  fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ];then
+  if [ $# -gt 2 ]&&[ $3 != net ];then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
