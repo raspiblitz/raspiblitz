@@ -1625,12 +1625,13 @@ if [ "$1" = "clean" ]; then
             # take extra care if wallet.db exists
             sudo srm /mnt/hdd/${chain}/wallet.db 2>/dev/null
 
-            # the rest just delete (keep blocks and chainstate)
+            # the rest just delete (keep blocks and chainstate and testnet3)
             for entry in $(ls -A1 /mnt/hdd/${chain} 2>/dev/null)
             do
               # sorting file
               delete=1
-              if [ "${entry}" = "blocks" ] || [ "${entry}" = "chainstate" ]; then
+              if [ "${entry}" = "blocks" ] || [ "${entry}" = "chainstate" ]\
+              || [ "${entry}" = "testnet3" ] ; then
                 delete=0
               fi
               # delete or keep
@@ -1646,6 +1647,30 @@ if [ "$1" = "clean" ]; then
                 >&2 echo "# keeping: ${entry}"
               fi
             done
+
+            # keep blocks and chainstate in testnet3 if exists
+            if [ -d /mnt/hdd/bitcoin/testnet3 ];then
+            for entry in $(ls -A1 /mnt/hdd/bitcoin/testnet3 2>/dev/null)
+              do
+                # sorting file
+                delete=1
+                if [ "${entry}" = "blocks" ] || [ "${entry}" = "chainstate" ]; then
+                  delete=0
+                fi
+                # delete or keep
+                if [ ${delete} -eq 1 ]; then
+                  if [ -d "/mnt/hdd/bitcoin/testnet3/$entry" ]; then
+                    >&2 echo "# Deleting DIR  : /mnt/hdd/bitcoin/testnet3/${entry}"
+                    sudo rm -r /mnt/hdd/bitcoin/testnet3/$entry
+                  else
+                    >&2 echo "# deleting FILE : /mnt/hdd/bitcoin/testnet3/${entry}"
+                    sudo rm /mnt/hdd/bitcoin/testnet3/$entry
+                  fi
+                else
+                  >&2 echo "# keeping: ${entry}"
+                fi
+              done
+            fi  
           done
         fi
 
