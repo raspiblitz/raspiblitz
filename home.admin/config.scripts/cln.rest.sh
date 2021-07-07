@@ -9,49 +9,47 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "C-lightning-REST install script"
   echo "the default version is: $CLRESTVERSION"
   echo "setting up on ${chain}net unless otherwise specified"
-  echo "mainnet / signet / testnet instances cannot run parallel"
+  echo "mainnet | testnet | signet instances cannot run parallel"
   echo
   echo "usage:"
-  echo "cln.rest.sh on  <signet|testnet>"
-  echo "cln.rest.sh off"
+  echo "cln.rest.sh [on|off|connect] <mainnet|testnet|signet>"
   echo
   exit 1
 fi
 
-# bitcoin mainnet / signet / testnet
-if [ "$1" = on ] || [ "$1" = off ] && [ $# -gt 1 ];then
-  if [ $2 = main ]||[ $2 = mainnet ]||[ $2 = bitcoin ];then
-    NETWORK=bitcoin
-  else
-    NETWORK=$2
-  fi
-else 
-  if [ $chain = main ];then
-    NETWORK=bitcoin
-  else
-    NETWORK=${chain}net
-  fi
-fi
-
-# prefix for parallel testnetwork services
-if [ $NETWORK = testnet ];then
-  prefix="t"
-  portprefix=1
-elif [ $NETWORK = signet ];then
-  prefix="s"
-  portprefix=3
-elif [ $NETWORK = bitcoin ];then
-  prefix=""
-  portprefix=""
-else
-  echo "$NETWORK is not supported"
-  exit 1
-fi
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
 
 echo "# Running 'cln.rest.sh $*'"
 
+if [ $1 = connect ];then
+  echo "# Allowing port ${portprefix}6100 through the firewall"
+  sudo ufw allow "${portprefix}6100" comment "${netprefix}clnrest"
+  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  # hidden service to https://xx.onion
+  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}clnrest 443 ${portprefix}6100
+  
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clnrest/hostname)
+  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n') 
+  url="https://${localip}:${portprefix}6100/"
+  string="${url}?${hex_macaroon}"
+
+  /home/admin/config.scripts/blitz.display.sh qr "$string"
+  clear
+  echo "connection string (shown as a QRcode on the top and on the LCD):"
+  echo "$string"
+  qrencode -t ANSIUTF8 "${string}"
+  echo
+  echo "Tor address (shown as a QRcode below):"
+  echo "${toraddress}"
+  qrencode -t ANSIUTF8 "${toraddress}"
+  echo
+  echo "# Press enter to hide the QRcode from the LCD"
+  read key
+  /home/admin/config.scripts/blitz.display.sh hide
+fi
+
 if [ $1 = on ];then
-  echo "# Setting up c-lightning-REST for $NETWORK"
+  echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop clnrest
   sudo systemctl disable clnrest
@@ -66,15 +64,15 @@ if [ $1 = on ];then
 
   # symlink to /home/bitcoin/.lightning/lightning-rpc from the chosen network directory
   sudo rm /home/bitcoin/.lightning/lightning-rpc # delete old symlink
-  sudo ln -s /home/bitcoin/.lightning/${NETWORK}/lightning-rpc /home/bitcoin/.lightning/
+  sudo ln -s /home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc /home/bitcoin/.lightning/
   
   echo "
-# systemd unit for c-lightning-REST for ${NETWORK}
+# systemd unit for c-lightning-REST for ${CHAIN}
 #/etc/systemd/system/clnrest.service
 [Unit]
-Description=c-lightning-REST daemon for $NETWORK
-Wants=${prefix}lightningd.service
-After=${prefix}lightningd.service
+Description=c-lightning-REST daemon for ${CHAIN}
+Wants=${netprefix}lightningd.service
+After=${netprefix}lightningd.service
 
 [Service]
 ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/cl-rest.js
@@ -108,8 +106,11 @@ WantedBy=multi-user.target
 fi
 
 if [ $1 = off ];then
-  echo "# Removing c-lightning-REST for $NETWORK"
+  echo "# Removing c-lightning-REST for ${CHAIN}"
   sudo systemctl stop clnrest
   sudo systemctl disable clnrest
   sudo rm -rf /home/bitcoin/c-lightning-REST
+  echo "# Deny port ${portprefix}6100 through the firewall"
+  sudo ufw deny "${portprefix}6100"
+  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}clnrest
 fi

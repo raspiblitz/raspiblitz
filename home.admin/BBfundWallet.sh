@@ -4,7 +4,7 @@ clear
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
 if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
@@ -12,10 +12,6 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 # PRECHECK) check if chain is in sync
 if [ $LNTYPE = cln ];then
@@ -63,9 +59,13 @@ if [ ${#result} -eq 0 ]; then
   read key
   exit 1
 fi
- 
+
 # parse address from result
-address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+if [ $LNTYPE = cln ];then
+  address=$( echo "$result" | grep "bech32" | cut -d '"' -f4)
+elif [ $LNTYPE = lnd ];then
+  address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+fi
 
 # prepare coin info
 coininfo="Bitcoin"

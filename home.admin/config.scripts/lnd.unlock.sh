@@ -12,10 +12,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 # 1. parameter (default is unlock)
 action="$1"
@@ -81,9 +77,9 @@ while [ ${fallback} -eq 0 ]
     recoveryOption=""
     if [ "${fundRecovery}" == "1" ]; then
         recoveryOption="--recovery_window=1000 "
-        echo "# runnign unlock with ${recoveryOption}"
+        echo "# running unlock with ${recoveryOption}"
     fi
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock ${recoveryOption}--stdin 2>&1)
+    result=$(echo "$passwordC" | $lncli_alias unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
@@ -141,7 +137,7 @@ do
     echo "############################"
     echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    lncli_alias unlock --recovery_window=1000
+    $lncli_alias unlock --recovery_window=1000
 
     # test unlock
     walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)

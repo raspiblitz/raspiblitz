@@ -5,7 +5,7 @@ _error=$(mktemp -p /dev/shm/)
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
 if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
@@ -13,22 +13,8 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
-
-# set network map info
-networkMap="https://lnmainnet.gaben.win"
-if [ "$network" = "litecoin" ]; then
-  networkMap="https://lnexplorer.hcwong.me"
-fi
-if [ "$chain" = "test" ]; then
-  networkMap="https://explorer.acinq.co"
-fi
 
 # let user enter a <pubkey>@host
-
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
 if [ "$chain" = "main" ]; then
@@ -49,21 +35,21 @@ if [ ${#_input} -eq 0 ]; then
   exit 1
 fi
 
-pubkey=$(echo $_input|cut -d@ -f1)
-address=$(echo ${_input}|cut -d@ -f2|cut -d: -f1)
-port=$(echo ${_input}|cut -d: -f2)
+pubkey=$(echo "${_input}"|cut -d@ -f1)
+# address=$(echo "${_input}"|cut -d@ -f2|cut -d: -f1)
+# port=$(echo "${_input}"|cut -d: -f2)
 # build command
 if [ $LNTYPE = cln ];then
   # connect id [host port]
-  command="$lightningcli_alias connect $pubkey $address $port"
+  command="$lightningcli_alias connect ${_input}"
 elif [ $LNTYPE = lnd ];then
-  command="$lncli_alias connect ${pubkey}@${address}:${port}"
+  command="$lncli_alias connect ${_input}"
 fi
 
 # info output
 clear
 echo "******************************"
-echo "Connect to A Lightning Node"
+echo "Connect to a Lightning Node"
 echo "******************************"
 echo
 echo "COMMAND LINE: "
@@ -78,7 +64,7 @@ info=""
 if [ ${#_input} -lt 10 ]; then
   win=0
   info="node pubkey@host info is too short"
-else
+elif [ $LNTYPE = lnd ];then
   gotAt=$(echo $_input | grep '@' -c)
   if [ ${gotAt} -eq 0 ]; then
     win=0
@@ -130,6 +116,7 @@ else
     # TODO: try to find out more details from cli output
 
   else
+    win=0
     info="Perfect - a connection to that node got established :)"
   fi
 

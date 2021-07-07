@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# source aliases from /home/admin/_aliases.sh
-source /home/admin/_aliases.sh
+# source aliases from /home/admin/_aliases
+if [ -f /home/admin/_aliases ];then
+  source /home/admin/_aliases
+fi
 
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 

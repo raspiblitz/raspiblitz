@@ -123,7 +123,7 @@ elif [ "${exportType}" = "btcpay" ]; then
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
@@ -141,7 +141,7 @@ elif [ "${exportType}" = "scp" ]; then
 ###########################
 elif [ "${exportType}" = "http" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear

@@ -64,7 +64,7 @@ fi
 if [ $chain = test ]&&[ "$tlnd" = "on" ]||\
    [ $chain = sig ]&& [ "$slnd" = "on" ]||\
    [ $chain = main ]&&[ "$lnd" = "on" ]; then
-  #TODO OPTIONS+=(LND "LND options for ${CHAIN}")
+  OPTIONS+=(LND "LND options for ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
@@ -92,7 +92,7 @@ OPTIONS+=(SERVICES "Additional Apps & Services on ${CHAIN}")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
-#TODO OPTIONS+=(SYSTEM "Monitoring & Configuration")
+OPTIONS+=(SYSTEM "Monitoring & Configuration")
 #TODO OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
 
 if [ $nonDefaultLNtype = 1 ];then
@@ -184,6 +184,10 @@ case $CHOICE in
     sudo sed -i "s/^chain=.*/chain=${newchain}/g" /mnt/hdd/raspiblitz.conf
     echo "# OK - Set chain=${newchain} in /mnt/hdd/raspiblitz.conf"
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    if grep -Eq "^specter=on" /mnt/hdd/raspiblitz.conf; then
+      echo "# Restart Specter on $CHAIN"
+      sudo systemctl restart cryptoadvance-specter.service
+    fi
     echo
     echo "Press ENTER to return to main menu."
     read key

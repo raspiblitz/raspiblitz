@@ -2,7 +2,11 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.10.0
+#CLVERSION=v0.10.0
+
+# install the latest master by using the last commit id
+# https://github.com/ElementsProject/lightning/commit/063366ed7e3b7cc12a8d1681acc2b639cf07fa23
+CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # vars
 source /home/admin/raspiblitz.info
@@ -19,7 +23,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "usage:"
   echo "cln.install.sh on  <signet|testnet>"
   echo "cln.install.sh off <signet|testnet> <purge>"
-  echo "cln.install.sh [update<version>|commit|testPR<PRnumber>]"
+  echo "cln.install.sh [update <version>|experimental|testPR <PRnumber>]"
   echo
   exit 1
 fi
@@ -27,31 +31,10 @@ fi
 # Tor
 TORGROUP="debian-tor"
 
-# bitcoin mainnet / signet / testnet
-if [ "$1" = on ] || [ "$1" = off ] && [ $# -gt 1 ];then
-  NETWORK=$2
-else 
-  if [ $chain = main ];then
-    NETWORK=${network}
-  else
-    NETWORK=${chain}net
-  fi
-fi
-
-# prefix for parallel testnetwork services
-if [ $NETWORK = testnet ];then
-  netprefix="t"
-  portprefix=1
-elif [ $NETWORK = signet ];then
-  netprefix="s"
-  portprefix=3
-else
-  netprefix=""
-  portprefix=""
-fi
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
 
 echo "# Running: 'cln.install.sh $*'"
-echo "# Using the settings for: ${NETWORK} "
+echo "# Using the settings for: ${network} ${CHAIN}"
 
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
@@ -59,9 +42,13 @@ if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
 fi
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
-    # dependencies
+if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+
+    ########################
+    # Install dependencies # 
+    ########################
+  
     echo "# apt update"
     echo
     sudo apt-get update
@@ -73,12 +60,14 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
     gettext
 
-    # download and compile from source
+    ####################################
+    # Download and compile from source #
+    ####################################
+
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "commit" ]; then
+    if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "experimental" ]; then
       echo
       echo "# Deleting the old source code"
-      echo
       sudo rm -rf lightning
     fi
     echo
@@ -92,12 +81,12 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
       echo
       echo "# Using the PR:"
       echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
-      echo
       sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
       sudo -u bitcoin git checkout pr$PRnumber || exit 1
       echo "# Building with EXPERIMENTAL_FEATURES enabled"
+      echo
       sudo -u bitcoin ./configure --enable-experimental-features
-    elif [ "$1" = "commit" ]; then
+    elif [ "$1" = "experimental" ]; then
       echo
       echo "# Updating to the latest commit in:"
       echo "# https://github.com/ElementsProject/lightning"
@@ -132,10 +121,19 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
     installedVersion=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
     echo "# C-lightning ${installedVersion} is already installed"
   fi
+  
+  ##########
+  # Config #
+  ##########
 
-  # config
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
+
+  echo "# Add plugin-dir: /home/bitcoin/${netprefix}cln-plugins-enabled"
+  echo "# Add plugin-dir: /home/bitcoin/cln-plugins-available"
+  # note that the disk is mounted with noexec
+  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cln-plugins-enabled
+  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
   echo "# Symlink to /home/bitcoin/"
@@ -145,63 +143,31 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = commit ]||[ "$1" = testPR ];then
   echo "# Create /home/bitcoin/.lightning/${netprefix}config"
   if [ ! -f /home/bitcoin/.lightning/${netprefix}config ];then
     echo "
-# lightningd configuration for $NETWORK
+# lightningd configuration for ${network} ${CHAIN}
 
-network=$NETWORK
+network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
 log-level=debug
+plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
 
 # Tor settings
 proxy=127.0.0.1:9050
 bind-addr=127.0.0.1:${portprefix}9736
-addr=statictor:127.0.0.1:9051
+addr=statictor:127.0.0.1:9051/torport=${portprefix}9736
 always-use-proxy=true
 " | sudo tee /home/bitcoin/.lightning/${netprefix}config
   else
     echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
-    #TODO look for pluging configs and clear or install
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
-  # systemd service
-  sudo systemctl stop ${netprefix}lightningd
-  sudo systemctl disable ${netprefix}lightningd
-  echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
-  echo "
-[Unit]
-Description=c-lightning daemon on $NETWORK
+  ###################
+  # Systemd service #
+  ###################
+  /home/admin/config.scripts/cln.install-service.sh $CHAIN
 
-[Service]
-User=bitcoin
-Group=bitcoin
-Type=simple
-ExecStart=/usr/local/bin/lightningd\
- --conf=\"/home/bitcoin/.lightning/${netprefix}config\"
-KillMode=process
-Restart=always
-TimeoutSec=120
-RestartSec=30
-StandardOutput=null
-StandardError=journal
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-
-[Install]
-WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${netprefix}lightningd.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable ${netprefix}lightningd
-  echo "# Enabled the ${netprefix}lightningd.service"
-  if [ "${state}" == "ready" ]; then
-    sudo systemctl start ${netprefix}lightningd
-    echo "# Started the ${netprefix}lightningd.service"
-  fi
   echo
   echo "# Adding aliases"
   echo "\
@@ -209,18 +175,18 @@ alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
 alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
-" | sudo tee -a /home/admin/_aliases.sh
+" | sudo tee -a /home/admin/_aliases
 
   echo
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo   
   echo "# To activate the aliases reopen the terminal or use:"
-  echo "source ~/_aliases.sh"
+  echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lightningd with:"
   echo "sudo journalctl -fu ${netprefix}lightningd"
   echo "sudo systemctl status ${netprefix}lightningd"
   echo "# logs:"
-  echo "sudo tail -f /home/bitcoin/.lightning/${NETWORK}/cl.log"
+  echo "sudo tail -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log"
   echo "# for the command line options use"
   echo "${netprefix}lightning-cli help"
   echo
@@ -236,8 +202,8 @@ if [ "$1" = "off" ];then
   sudo systemctl disable ${netprefix}lightningd
   sudo systemctl stop ${netprefix}lightningd
   echo "# Removing the aliases"
-  sudo sed -i "/${netprefix}lightning-cli/d" /home/admin/_aliases.sh
-  sudo sed -i "/${netprefix}cl/d" /home/admin/_aliases.sh
+  sudo sed -i "/${netprefix}lightning-cli/d" /home/admin/_aliases
+  sudo sed -i "/${netprefix}cl/d" /home/admin/_aliases
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Removing the binaries"
     sudo rm -f /usr/local/bin/lightningd

@@ -13,10 +13,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 ###################
 # STATUS
@@ -24,7 +20,7 @@ alias lightningcli_alias="$lightningcli_alias"
 if [ "$1" = "peer-status" ]; then
   echo "#network.monitor.sh peer-status"
 
-  # if second parameter is "cached" deliver cahed result if available
+  # if second parameter is "cached" deliver cached result if available
   if [ "$2" == "cached" ]; then
     cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "etwork.monitor.peer-status.cache")
     if [ "${cacheExists}" == "1" ]; then
@@ -44,7 +40,6 @@ if [ "$1" = "peer-status" ]; then
   else
     # user call
     peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
-    peerNum=$( getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
   fi
   if [ "${peerNum}" = "" ]; then
     running=0
@@ -151,7 +146,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "newpeer='${nodeAddress}"
 
   # kick start node with 
-  bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null
+  $bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
   exit 0
@@ -171,15 +166,15 @@ if [ "$1" = "peer-disconnectall" ]; then
   fi
 
   # get all peer id and disconnect them
-  bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line 
+  $bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line 
   do
     peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"
-    bitcoincli_alias disconnectnode ${peerID}
+    $bitcoincli_alias disconnectnode ${peerID}
   done
 
   echo "#### FINAL PEER INFO FROM BITCOIND"
-  bitcoincli_alias getpeerinfo
+  $bitcoincli_alias getpeerinfo
   exit 0
 fi
 
