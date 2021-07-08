@@ -275,29 +275,19 @@ function notifyme() {
 }
 
 
-# command: pb
-# switch to the programmingbitcoin user for the 'Programming Bitcoin' environment
+# command: bm
+# switch to the bitcoinminds user for the 'BitcoinMinds.org' in your local environment
 function pb() {
-  if [ $(grep -c "programmingbitcoin=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "bitcoinminds=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo ""
     echo "# ***"
-    echo "# Switching to the programmingbitcoin user with the command: 'sudo su - programmingbitcoin'"
-    echo "# Use command 'jupyter lab' to start the JupyterLab service at will"
-    echo "# Use Ctrl + C to end the Jupyter server"
-    echo "# Use command 'exit' and then 'raspiblitz' to return to menu"
-    echo ""
-    echo "# To access the JupyterLab from your LAN, start a tunnel from the device connected via LAN."
-    echo "# Something like this:"
-    echo "#    ssh -L 8888:localhost:8888 admin@<Raspiblitz IP>"
-    echo "# Where 'admin' is Raspiblitz's admin, and the IP is the IP of the Raspiblitz."
-    echo "# After successfully running that command, you can access JupyterLab in the browser via"
-    echo "#    http://localhost:8888 <- plus the token generated in the server (you can see this from the Raspiblitz)"
+    echo "# Switching to the bitcoinminds user with the command: 'sudo su - bitcoinminds'"
     echo "# ***"
     echo ""
-    sudo su - programmingbitcoin
+    sudo su - bitcoinminds
     echo "# Use command 'raspiblitz' to return to menu"
   else
-    echo "ProgrammingBitcoin script is not installed - to install run:"
-    echo "sudo /home/admin/config.scripts/bonus.programmingbitcoin.sh on"
+    echo "BitcoinMinds script is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.bitcoinminds.sh on"
   fi
 }
