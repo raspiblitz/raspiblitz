@@ -47,33 +47,82 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo ""
     echo "# ***"
-    echo "# Downloading data from the GitHub repository 'https://github.com/jimmysong/programmingbitcoin' ..."
+    echo "# Installing main packages and dependencies"
     echo "# ***"
     echo ""
     cd /home/programmingbitcoin
-    sudo -u programmingbitcoin git clone https://github.com/jimmysong/programmingbitcoin 2>/dev/null
-
-    echo ""
-    echo "# ***"
-    echo "# Installing virtualenv and requirements ..."
-    echo "# ***"
-    echo ""
-    
-    cd /home/programmingbitcoin/programmingbitcoin
     sudo -u programmingbitcoin pip install virtualenv
     sudo -u programmingbitcoin virtualenv -p python3 .venv
     . .venv/bin/activate
-    sudo -u programmingbitcoin pip install -r requirements.txt
+    sudo -u programmingbitcoin pip install jupyter
+    sudo -u programmingbitcoin pip install jupyterlab
+    sudo -u programmingbitcoin pip install requests
     sudo -u programmingbitcoin pip install pygments==2.4.1
+    
+    # NO NEED THIS EXTENSION SINCE WE WILL BE USING JUPYTER LAB
+    # https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator
+    # sudo -u programmingbitcoin pip install jupyter_nbextensions_configurator
+    # sudo -u programmingbitcoin jupyter nbextensions_configurator enable --user
+    
+
+    echo ""
+    echo "# ***"
+    echo "# Downloading and installing PROGRAMMING BITCOIN virtualenv and requirements ..."
+    echo "# ***"
+    echo ""
+    sudo -u programmingbitcoin git clone https://github.com/jimmysong/programmingbitcoin 2>/dev/null
+    cd /home/programmingbitcoin/programmingbitcoin
+    sudo -u programmingbitcoin pip install -r requirements.txt
+    
+    echo ""
+    echo "# ***"
+    echo "# Downloading and installing MASTERING BITCOIN ..."
+    echo "# ***"
+    echo ""
+    cd /home/programmingbitcoin
+    sudo -u programmingbitcoin git clone https://github.com/bitcoinbook/bitcoinbook 2>/dev/null
+    # ...
+    # ... WHAT CAN WE DO TO RENDER .asciidoc FILES IN JUPYTER NOTEBOOK ??
+
+
+    echo ""
+    echo "# ***"
+    echo "# Downloading and installing LEARNING BITCOIN FROM THE COMMAND LINE ..."
+    echo "# ***"
+    echo ""
+    cd /home/programmingbitcoin
+    sudo -u programmingbitcoin git clone https://github.com/BlockchainCommons/Learning-Bitcoin-from-the-Command-Line 2>/dev/null
+    # ...
+    # ... WHAT CAN WE DO TO RENDER .md FILES IN JUPYTER NOTEBOOK ?? -- JupyterLab already has a preview for md files
+    # https://github.com/jupyter/notebook/issues/2485
+
+    echo ""
+    echo "# ***"
+    echo "# Installing OTHER virtualenv and requirements ..."
+    echo "# ***"
+    echo ""
+
+    # THIS ONE IS STILL BEING DEVELOPED, MAYBE FUTURE VERSIONS
+    # https://github.com/lnbook/lnbook 
+
+
+    echo ""
+    echo "# ***"
+    echo "# Downloading other sources (articles, books, etc.) ..."
+    echo "# ***"
+    echo ""
+    # link to articles and resources? Download pdfs when possible?
+    # https://www.goodreads.com/shelf/show/cypherpunk
+
+    
 
     echo ""
     echo "# ***"
     echo "# Setting the autostart script for programmingbitcoin"
     echo "# ***"
     echo "
-cd /home/programmingbitcoin/programmingbitcoin
+cd /home/programmingbitcoin
 source .venv/bin/activate
-jupyter notebook
 " | sudo -u programmingbitcoin tee -a /home/programmingbitcoin/.bashrc
 
 
