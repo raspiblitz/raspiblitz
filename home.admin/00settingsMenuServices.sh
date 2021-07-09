@@ -22,7 +22,7 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
-if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
+if [ ${#programmingbitcoin} -eq 0 ]; then programmingbitcoin="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -43,7 +43,7 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
-OPTIONS+=(v 'BitcoinMinds.org Local Environment' ${bitcoinminds})
+OPTIONS+=(v 'Programming Bitcoin Environment' ${programmingbitcoin})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -433,19 +433,19 @@ else
   echo "Whitepaper setting unchanged."
 fi
 
-# Bitcoin Minds process choice
+# Programming Bitcoin process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${bitcoinminds}" != "${choice}" ]; then
-  echo "Bitcoin Minds setting changed."
+if [ "${programmingbitcoin}" != "${choice}" ]; then
+  echo "Programming Bitcoin setting changed."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.programmingbitcoin.sh ${choice}
   source /mnt/hdd/raspiblitz.conf
-  if [ "${bitcoinminds}" =  "on" ]; then
-    sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh menu
+  if [ "${programmingbitcoin}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.programmingbitcoin.sh menu
   fi
 else
-  echo "Bitcoin Minds setting unchanged."
+  echo "Programming Bitcoin setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
