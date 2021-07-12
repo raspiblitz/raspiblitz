@@ -18,11 +18,11 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "C-lightning install script"
   echo "the default version is: $CLVERSION"
   echo "setting up on ${chain}net unless otherwise specified"
-  echo "mainnet / signet / testnet instances can run parallel"
+  echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "usage:"
-  echo "cln.install.sh on  <signet|testnet>"
-  echo "cln.install.sh off <signet|testnet> <purge>"
+  echo "cln.install.sh on <mainnet|testnet|signet>"
+  echo "cln.install.sh off <mainnet|testnet|signet> <purge>"
   echo "cln.install.sh [update <version>|experimental|testPR <PRnumber>]"
   echo
   exit 1

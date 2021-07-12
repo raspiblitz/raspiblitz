@@ -1,18 +1,22 @@
 #!/bin/bash
 
-# Usage:
-# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
-# if no values given uses the default values from the raspiblitz.conf
-
-# chain is: main | test ; from raspiblitz.conf or raspiblitz.info or defaults to main
-
-# LNTYPE is: lnd | cln ; default: lnd
-# typeprefix is: "" | c
-
-# CHAIN is: mainnet | testnet | signet
-# netprefix is:  "" | t | s
-# portprefix is: "" | 1 | 3
-# CLNETWORK is: bitcoin / signet / testnet
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+  echo "# Usage:"
+  echo "# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)"
+  echo "# if no values given uses the default values from the raspiblitz.conf"
+  echo
+  echo "# chain is: main | test ; from raspiblitz.conf or raspiblitz.info or defaults to main"
+  echo
+  echo "# LNTYPE is: lnd | cln ; default: lnd"
+  echo "# typeprefix is: "" | c"
+  echo
+  echo "# CHAIN is: mainnet | testnet | signet"
+  echo "# netprefix is:  "" | t | s"
+  echo "# portprefix is: "" | 1 | 3"
+  echo "# CLNETWORK is: bitcoin / signet / testnet"
+  exit 1
+fi
 
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -40,7 +44,7 @@ if [ $1 = getvars ];then
   echo "typeprefix=${typeprefix}"
 
   # from raspiblitz.conf or raspiblitz.info or defaults to main
-  if [ ${#chain} -eq 0 ] || [ $3 = net ]; then
+  if [ ${#chain} -eq 0 ]; then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
