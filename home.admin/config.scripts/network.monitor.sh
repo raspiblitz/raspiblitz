@@ -44,7 +44,6 @@ if [ "$1" = "peer-status" ]; then
   else
     # user call
     peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
-    peerNum=$( getnetworkinfo | grep "connections\"" | tr -cd '[[:digit:]]')
   fi
   if [ "${peerNum}" = "" ]; then
     running=0
