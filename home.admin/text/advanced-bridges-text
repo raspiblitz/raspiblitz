@@ -1,0 +1,7 @@
+With this menu entry, you can DIRECTLY EDIT THE TOR CONFIGURATION FILE. You find some helpful comments in the configuration file. Nevertheless, you should know what you are doing. If you are unsure, then contact us: anonym@torbox.ch
+
+After changing the configuration, use the following commands in the editor:
+CTRL-O followed with an ENTER to save the changes.
+CTRL-X to exit the editor.
+
+Would you like to change the Tor configuration file directly?

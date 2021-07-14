@@ -1,0 +1,11 @@
+This menu entry will disconnect the Tor instance from a VPN so that the local
+network data from the command prompt is routed through your Internet
+provider without a VPN (default). Client network data will always be
+routed through Tor.
+
+IMPORTANT
+- This menu entry will not restart Tor and break your Tor connectivity
+  if you route the Tor traffic through VPN. In this case just use
+  another Internet source in the main menu (entry 4-9).
+
+Would you like to CONTINUE?

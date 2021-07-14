@@ -1,0 +1,9 @@
+CONGRATULATION !!
+
+According to our check, Tor should work now correctly! Nevertheless, to be sure, run the following command:
+
+  curl --socks5 localhost:9050 --socks5-hostname localhost:9050 -m 5 -s https://check.torproject.org/ | cat | grep -m 1 Congratulations
+
+You should read: "Congratulations. This browser is configured to use Tor." ONLY IN THIS CASE IS YOUR CONNECTION PROTECTED !!
+
+This may be sufficient to protect others from spying on your Internet traffic or to circumvent censorship measures. However, to stay anonymous is much harder. For example, in this case, you should exclusively use Tor Browser while browsing the web to withhold some information about your computer's configuration. You can download it here: https://goo.gl/2UwZmR

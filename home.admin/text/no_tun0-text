@@ -1,0 +1,6 @@
+There is no VPN connection through tun0 and/or no
+*.ovpn file in the ~/openvpn directory!
+
+Sorry, but for this functionality, a VPN connection
+through tun0 or a *.ovpn - file in the ~/openvpn
+directory is mandatory!

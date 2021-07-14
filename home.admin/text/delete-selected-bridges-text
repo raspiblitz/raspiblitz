@@ -1,0 +1,10 @@
+With this menu entry, you can REMOVE SELECTED BRIDGES from the Tor configuration. However, bridges are necessary for Tor to bypass Tor blocking in a country. After deleting all bridges, you should add new bridges.
+
+2-STEP PROCEDURE
+To remove selected bridges, you have to follow a 2-step procedure:
+1. List all bridges (menu entry 2) and make a note of all bridge numbers
+   you want to remove.
+2. Continue with this menu entry and put in all bridge numbers separated
+   by a comma, which you want to remove (for example: 1,2,3,10)
+
+Would you like to CONTINUE?

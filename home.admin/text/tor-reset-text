@@ -1,0 +1,9 @@
+This resets Tor, meaning:
+- delete all circuits and force a change of the permanent entry node,
+- delete the Tor statistics.
+
+We will NOT...
+...delete or reset the configuration files,
+...delete your bridges,
+
+Are you sure you want to reset Tor?

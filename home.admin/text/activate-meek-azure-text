@@ -1,0 +1,14 @@
+MEEK-AZURE circumvents sophisticated censorship. In contrast to the OBFS4 bridges (see menu entries above), MEEK-AZURE is based on another technique, which should also work for users in China.
+
+You should only activate MEEK-AZURE, if necessary and if OBFS4 bridges don't work. MEEK-AZURE could lead to a less stable and slower data transfer speed. SNOWFLAKE seems to be more performant than MEEK-AZURE, but it is currently in an experimental status. By default, MEEK-AZURE is deactivated.
+
+IMPORTANT
+- This menu entry activates MEEK-AZURE to bypass Tor blocking in a
+  country. It helps to circumvent censorship; however, it doesn't help if
+  a firewall blocks the network traffic.
+- Ignore all the error messages. In the end, you should see
+  "Bootstrapped 100%: Done".
+- Tor Statistics (and probably some other tools) will not work under
+  MEEK-AZURE.
+
+Would you like to ACTIVATE MEEK-AZURE?

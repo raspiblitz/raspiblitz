@@ -1,0 +1,8 @@
+With this menu entry, you can deactivate the OBFS4 bridges for Tor.
+This is the default.
+
+However, the bridges will not be deleted, you can activate again these bridges -- no need to worry ;-)
+
+In the end, Tor automatically restarts - no need to do it again.
+
+Would you like to DEACTIVATE the OBFS4 bridges for Tor?

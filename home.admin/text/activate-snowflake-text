@@ -1,0 +1,14 @@
+SNOWFLAKE circumvents sophisticated censorship. In contrast to the OBFS4 bridges (see menu entries above), SNOWFLAKE is based on another technique, which should also work for users in China.
+
+You should only activate SNOWFLAKE, if necessary and if OBFS4 bridges don't work. SNOWFLAKE could lead to a slower data transfer speed. However, SNOWFLAKE seems to be more performant than MEEK-AZURE, but it is currently in an experimental status. By default, SNOWFLAKE is deactivated.
+
+IMPORTANT
+- This menu entry activates SNOWFLAKE to bypass Tor blocking in a
+  country. It helps to circumvent censorship; however, it doesn't help if
+  a firewall blocks the network traffic.
+- Ignore all the error messages. In the end, you should see
+  "Bootstrapped 100%: Done".
+- Tor Statistics (and probably some other tools) will not work under
+  SNOWFLAKE.
+
+Would you like to ACTIVATE SNOWFLAKE?

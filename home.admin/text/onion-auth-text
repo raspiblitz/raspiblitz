@@ -1,0 +1,11 @@
+Client authorization is a method to make an onion service private and authenticated. It requires Tor clients to provide an authentication credential in order to connect to the onion service. For v3 onion services, this method works with a pair of keys (a public and a private). The service side is configured with a public key and the client can only access it with a private key.
+
+Note: Once you have configured client authorization, anyone with the address will not be able to access it from this point on. If no authorization is configured, the service will be accessible to anyone with the onion address.
+
+Source:
+https://community.torproject.org/onion-services/advanced/client-auth/
+
+WARNING: Does not work with Tor Browser mobile
+https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/31672
+
+Would you like to enable/disable client authorization for a specific onion service?

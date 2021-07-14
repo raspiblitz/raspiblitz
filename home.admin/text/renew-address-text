@@ -1,0 +1,9 @@
+This menu entry is dedicated to specific use cases such as:
+- when an address is leaked
+- trying to overcome DDoS attacks to that specific address
+
+Important: Renewing certain addresses will cause
+- disconnection from a coinjoin when
+- disconnection from current connected electrum compatible wallets
+
+So it is advisable you update your Tor Browser bookmarks to the newly generated address.

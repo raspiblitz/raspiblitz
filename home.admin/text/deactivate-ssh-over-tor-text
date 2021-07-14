@@ -1,0 +1,6 @@
+This menu entry will delete the SSH hidden service so that only local network SSH is available.
+
+IMPORTANT
+- It is safer to disable SSH outside of Locan Area Network (LAN), but it can be useful to access when travelling or outside of home.
+
+Would you like to DEACTIVATE SSH with Tor?

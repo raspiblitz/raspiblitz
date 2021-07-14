@@ -1,0 +1,5 @@
+You can reload Tor to apply changes made to the configuration files. You can leave the progress report with CTRL-C.
+
+ATTENTION: If you chose NO, all bridges would be deactivated, and Tor switches back using the Tor network without bridges!!
+
+Are you ready to reload Tor now?

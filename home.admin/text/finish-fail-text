@@ -1,0 +1,11 @@
+HMMM... THAT DOESN'T LOOK GOOD...
+
+We couldn't check if your connection is now protected. However, BE PATIENT! Tor needs UP TO ONE MINUTE to establish the necessary circuits -- check with main menu entry 3 "Show the Tor log file" in the main menu. At the end of Tor's boot process, you should see "Bootstrapped 100%: Done". You can leave the progress report with CTRL-C.
+
+If this doesn't help you may have to choose the Internet source again or even restart tor. You can also manually check, if tor is working and your connection being protected. To make so, run the following command:
+
+  curl --socks5 localhost:9050 --socks5-hostname localhost:9050 -m 5 -s https://check.torproject.org/ | cat | grep -m 1 Congratulations
+
+Finally, you should read: "Congratulations. This browser is configured to use Tor." ONLY IN THIS CASE IS YOUR CONNECTION PROTECTED !!
+
+This may be sufficient to protect others from spying on your internet traffic or to circumvent censorship measures. However, to stay anonymous is much harder. For example, in this case, you should exclusively use Tor Browser while browsing the web to withhold some information about your computer's configuration. You can download it here: https://goo.gl/2UwZmR

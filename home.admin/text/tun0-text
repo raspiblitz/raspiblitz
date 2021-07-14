@@ -1,0 +1,19 @@
+This menu entry supposes that Tor is connected with the internet
+through a VPN connection using the interface tun0. There are two
+possibilities of how Tor on Raspiblitz handles VPN connections:
+
+1. The VPN connection is already established, and the interface tun0 is
+   configured.
+
+2. The VPN connection is not established yet, but one ore more *.ovpn
+   - files are in the ~/openvpn directory so that Tor can execute
+   OpenVPN with that file.
+
+IMPORTANT
+- We do NOT recommend using a VPN. If Tor entry guards cannot be reached
+  for censorship reasons, we recommend using OBFS4 bridges as a priority
+  (main menu entry 10). We consider a VPN connection as a last resort.
+- Nevertheless, we consider the additional risk of this "Tor over VPN"
+  situation  to be proportionate - see here: https://bit.ly/31lUhLQ
+
+Would you like to CONTINUE?

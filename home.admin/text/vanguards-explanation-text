@@ -1,0 +1,8 @@
+Even after deployment of the new v3 onion service protocol, the attacks facing onion services are wide-ranging, and still require more extensive modifications to fix in Tor-core itself.
+
+Because of this, Tor Project have decided to rapid-prototype these defenses in a controller addon in order to make them available ahead of their official Tor-core release, for onion services that require high security as soon as possible.
+
+For details about the defenses themselves, please see README_TECHNICAL.md.
+For additional security information, please see README_SECURITY.md.
+
+Source: https://github.com/mikeperry-tor/vanguards

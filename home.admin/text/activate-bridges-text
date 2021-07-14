@@ -1,0 +1,13 @@
+To circumvent sophisticated censorship, Tor introduced BRIDGES, which supports pluggable transports. These transports manipulate all Tor traffic between the client and its first hop such that it is not identifiable as a Tor connection.
+
+IMPORTANT
+- This menu entry activates OBFS4 bridges of Tor to bypass
+  Tor blocking in a country. It helps to circumvent censorship; however,
+  it doesn't help if a firewall blocks the network traffic.
+- If OBFS4 bridges don't help, try MEEK-AZURE or SNOWFLAKE (see menu
+  entries below).
+- You should only activate OBFS4 bridges if necessary. It could lead
+  to a less stable and slower data transfer speed. By default, the OBFS4
+  BRIDGE MODE is deactivated.
+
+Would you like to ACTIVATE OBFS4 bridges for Tor?

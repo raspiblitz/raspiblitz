@@ -1,0 +1,5 @@
+This menu entry REMOVES all or specific OBFS4 bridges. However, OBFS4 bridges are necessary to bypass Tor blocking in a country. To use this feature, you need to have at least one OBFS4 bridge configured.
+
+IMPORTANT
+If you remove ALL OBFS4 bridges, you will be directly connected to the Tor network, which is the default.
+However, instead of removing OBFS4 bridges, we recommend simply to deactivate them.

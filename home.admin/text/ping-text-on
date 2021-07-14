@@ -1,0 +1,3 @@
+Certain Internet provider (usually at airports, in hotels, coffee houses, etc.) disconnect the network connection after a particular time of inactivity. In this case, the Tor statistics (main menu entry 1) no longer shows any data transfer. After about 15 seconds, errors in communication with the Tor network will appear.
+
+This menu entry activates a recurring Ping to debian.org to prevent disconnection by an Internet provider with an activated "disconnect when idle feature".

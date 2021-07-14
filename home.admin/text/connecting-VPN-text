@@ -1,0 +1,17 @@
+This menu entry will connect the Tor to a VPN so that the local
+network data from the command prompt is routed through VPN. However,
+this menu entry will not restart Tor, and your client network data will
+still be routed through Tor using the interface highlighted in the main
+menu.
+
+IMPORTANT
+- To use this menu entry, you have first to put one ore more *.ovpn
+  - files in the ~/openvpn directory so that Tor can execute OpenVPN
+  with that file.
+- We do NOT recommend using a VPN. If Tor entry guards cannot be reached
+  for censorship reasons, we recommend using OBFS4 bridges as a priority
+  (main menu entry 10). We consider a VPN connection as a last resort.
+- Nevertheless, we consider the additional risk of this "Tor over VPN"
+  situation to be proportionate - see here: https://bit.ly/31lUhLQ
+
+Would you like to CONTINUE?

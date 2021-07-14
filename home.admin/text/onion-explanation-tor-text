@@ -1,0 +1,15 @@
+Onion services offer various privacy and security benefits to their users.
+
+* Location hiding
+An onion service's IP address is protected. Onion services are an overlay network on top of TCP/IP.
+
+* End-to-end authentication
+When a user visits a particular onion, the content they are seeing can only come from that particular onion. No impersonation is possible.
+
+* End-to-end encryption
+Onion service traffic is encrypted from the client to the onion host. This is like getting strong SSL/HTTPS for free.
+
+* NAT punching
+Onion services don't need open ports because they punch through NAT. They only establish outgoing connections.
+
+Source: https://community.torproject.org/onion-services/overview/

@@ -1,0 +1,8 @@
+This is an ADVANCED tool. Tor can't help your if you don't know what you are doing.
+
+This menu entry will create the SSH hidden service so that you can access your node with SSH through the onion routing network.
+
+IMPORTANT
+- It is recommended to configure Client Authorization to add an extra layer of protection to SSH hidden service.
+
+Would you like to ACTIVATE SSH with Tor?

@@ -1,0 +1,6 @@
+With this menu entry, you can ADD BRIDGES AUTOMATICALLY. Bridges are necessary for Tor to bypass Tor blocking in a country.
+
+IMPORTANT
+- Tor is not always able to catch a bridge. If it stuck for several
+  minutes, press CTR-C and add the bridges manually.
+- For security reasons, only one bridge is acquired about every 24 hours.

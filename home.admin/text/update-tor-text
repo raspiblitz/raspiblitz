@@ -1,0 +1,10 @@
+You choose to update to the newest stable version of Tor. This menu entry
+is a fall-back option if something goes wrong, and menu entry 1 didn't
+update Tor correctly. It fetches the source package from the Tor repository
+and compiles it on the Raspberry Pi. Usually, you should update the entire
+base system (menu entry 1).
+
+IMPORTANT
+- Don't remove power from your Tor during the update.
+
+Duration: up to 30 minutes

@@ -1,0 +1,15 @@
+TorBox is a non-commercial, private project. All the scripts are free software under the GNU General Public License version 3. https://www.torbox.ch
+
+There are a few things you can do for this project:
+- Spread the word! Tell others about TorBox.
+- Give feedback: What do you like? What should be improved (and how)? Which
+  features do you request?
+- Report bugs, problems, spelling errors etc.
+- Improve by participating on GitHub: https://github.com/radio24/TorBox
+
+
+Raspiblitz project comment:
+
+Here we thank TorBox project.
+Great part of the Tor menu (countermeasure options such as bridges, bypass idle, over vpn) scripts was sourced from TorBox.
+Tor relay scripts were removed from Raspiblitz in order to have device isolation of bitcoin services and onion traffic and to free up resources.

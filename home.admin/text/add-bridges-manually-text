@@ -1,0 +1,11 @@
+With this menu entry, you can ADD BRIDGES MANUALLY. Bridges are necessary for Tor to bypass Tor blocking in a country.
+
+With the help of this dialogue-based configuration assistant, 3-5 bridges can easily be added. When adding more than five bridges, it is recommended to use the advanced configuration editor (menu entry 7).
+
+HOW TO OBTAIN BRIDGES?
+With Tor, you have three ways to obtain bridges:
+1. Obtain about every 24h one bridge automatically.
+2. Get them here: https://bridges.torproject.org/
+   (chose "Advanced Options", "obfs4" and press "Get Bridges).
+3. Send an email to bridges@torproject.org, using an address from Riseup
+   or Gmail with "get transport obfs4" in the body of the mail.
