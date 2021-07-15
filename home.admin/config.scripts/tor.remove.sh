@@ -66,12 +66,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # sudo rm /home/pi/.curlrc
   # sudo rm /home/admin/.curlrc
 
-  # disable TOR service
+  # disable Tor service
   echo "# *** Disable Tor service ***"
   sudo systemctl disable tor@default
   echo ""
 
-  # DEACTIVATE BITCOIN OVER TOR (function call)
+  # DEACTIVATE BITCOIN OVER Tor (function call)
   deactivateBitcoinOverTOR
   echo ""
 

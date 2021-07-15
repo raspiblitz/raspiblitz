@@ -30,14 +30,14 @@ if [ ${portnumber} -gt 65535 ]; then
   exit 1
 fi
 
-# check if TOR is on
+# check if Tor is on
 source /mnt/hdd/raspiblitz.conf
 if [ "${runBehindTor}" = "on" ]; then
-  echo "FAIL - portnumber cannot be changed if TOR is ON (not implemented)"
+  echo "FAIL - portnumber cannot be changed if Tor is ON (not implemented)"
   exit 1
 fi
 
-# check lnd.conf exits 
+# check lnd.conf exits
 lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c 'lnd.conf')
 if [ ${lndConfExists} -eq 0 ]; then
   echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"

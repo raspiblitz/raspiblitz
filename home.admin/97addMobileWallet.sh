@@ -7,7 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 justLocal=1
 aks4IP2TOR=0
 
-# if TOR is activated then outside reach is possible (no notice)
+# if Tor is activated then outside reach is possible (no notice)
 if [ "${runBehindTor}" = "on" ]; then
   echo "# runBehindTor ON"
   justLocal=0
@@ -42,10 +42,10 @@ fi
 # check if dynamic domain is set
 if [ ${justLocal} -eq 1 ]; then
   whiptail --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
-also from outside your local network you need to 
+also from outside your local network you need to
 activate 'Services' -> 'DynamicDNS' FIRST.
 OR use SSH tunnel forwarding for port 10009
-OR have TOR activated.
+OR have Tor activated.
 
 Do you JUST want to connect with your mobile
 when your are on the same LOCAL NETWORK?
@@ -63,17 +63,17 @@ For full support switch to mainnet.
 " 9 55
 fi
 
-# fuction to call for wallets that support TOR
+# fuction to call for wallets that support Tor
 connect="ip"
 choose_IP_or_TOR()
 {
   whiptail --title " How to Connect? " \
-	--yes-button "TOR" \
+	--yes-button "Tor" \
 	--no-button "IP/Domain" \
-	--yesno "The mobile wallet you selected supports TOR.\nDo you want to connect over TOR to your RaspiBlitz or fallback to Domain/IP?" 9 60
+	--yesno "The mobile wallet you selected supports Tor.\nDo you want to connect over Tor to your RaspiBlitz or fallback to Domain/IP?" 9 60
 	if [ $? -eq 0 ]; then
-	  echo "# yes-button -> TOR"
-	  connect="tor" 
+	  echo "# yes-button -> Tor"
+	  connect="tor"
 	else
 	  echo "# no-button -> IP"
 	  connect="ip"
@@ -97,12 +97,12 @@ checkIP2TOR()
   #echo "# ip2tor(${ip2tor})"
   #echo "# aks4IP2TOR(${aks4IP2TOR})"
   #read key
-  
+
   # if IP2TOR is not already available:
   # and the checks from avove showed there is SSH forwarding / dynDNS
   # then ask user if IP2TOR subscription is wanted
   if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
-    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to connect to your RaspiBlitz when away from home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
+    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to connect to your RaspiBlitz when away from home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind Tor) and make it more easy to connect your mobile wallet?" 12 60
   	if [ $? -eq 0 ]; then
   	  echo "# yes-button -> Send To Shop"
 	  port="10009"
@@ -140,11 +140,11 @@ OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
 	)
 
 # add SEND MANY APP
-OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
+OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
 
-# Additinal Options with TOR
+# Additinal Options with Tor
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
+  OPTIONS+=(FULLY_NODED "Fully Noded (IOS+Tor)")
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)

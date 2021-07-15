@@ -53,7 +53,7 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
-    # TOR
+    # Tor
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
@@ -63,7 +63,7 @@ ${fingerprint}
 
 Login with the Pin being Password B. If you have connected to a different Bitcoin RPC Endpoint, the Pin is the configured RPCPassword.
 
-Hidden Service address for TOR Browser (QR see LCD):
+Hidden Service address for Tor Browser (QR see LCD):
 https://${toraddress}
 Unfortunately the camera is currently not usable via Tor, though.
 " 18 74
@@ -78,7 +78,7 @@ SHA1 Thumb/Fingerprint:
 ${fingerprint}
 
 Login with the PIN being Password B. If you have connected to a different Bitcoin RPC Endpoint, the PIN is the configured RPCPassword.\n
-Activate TOR to access the web block explorer from outside your local network.
+Activate Tor to access the web block explorer from outside your local network.
 " 15 74
   fi
 

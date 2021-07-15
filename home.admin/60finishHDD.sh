@@ -41,8 +41,8 @@ if [ "${runBehindTor}" = "on" ]; then
   echo "runBehindTor --> ON"
   sudo /home/admin/config.scripts/tor.install.sh on
 
-  # but if IBD is allowed to be public switch off TOR just fro bitcoin
-  # until IBD is done. background service will after that switch TOR on
+  # but if IBD is allowed to be public switch off Tor just fro bitcoin
+  # until IBD is done. background service will after that switch Tor on
   if [ "${ibdBehindTor}" = "off" ]; then
     echo "ibdBehindTor --> OFF"
     sudo /home/admin/config.scripts/tor.install.sh btcconf-off

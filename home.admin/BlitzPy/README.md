@@ -40,7 +40,7 @@ cfg = RaspiBlitzConfig()
 cfg.reload()
 print(cfg.hostname.value)
 if cfg.run_behind_tor.value:
-    print("using TOR!")
+    print("using Tor!")
 ```
 
 ### Changing values

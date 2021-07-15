@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
- echo "# will autodetect dyndns, sshtunnel or TOR"
+ echo "# will autodetect dyndns, sshtunnel or Tor"
  echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
  exit 1
 fi
@@ -20,10 +20,10 @@ source /mnt/hdd/raspiblitz.conf
 # 1. TARGET WALLET
 targetWallet=$1
 
-# 1. TOR or IP (optional - default IP)
-forceTOR=0
+# 1. Tor or IP (optional - default IP)
+forceTor=0
 if [ "$2" == "tor" ]; then
-  forceTOR=1
+  forceTor=1
 fi
 
 #### CHECK IF IP2TOR BRIDGES ARE AVAILABLE
@@ -44,19 +44,19 @@ if [ ${#error} -eq 0 ]; then
   ip2torGRPC_PORT="${port}"
 fi
 
-#### ADAPT PARAMETERS BASED TARGETWALLET 
+#### ADAPT PARAMETERS BASED TARGETWALLET
 
 # defaults
 host=""
 port=""
 addcert=1
-supportsTOR=0
-usingIP2TOR=""
+supportsTor=0
+usingIPTor=""
 connectInfo="When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\nClick on the 'Scan QR' button."
 
 if [ "${targetWallet}" = "zap-ios" ]; then
-  if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses REST
+  if [ ${forceTor} -eq 1 ]; then
+    # when ZAP runs on Tor it uses REST
     port="8080"
     addcert=0
   else
@@ -65,16 +65,16 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
-    usingIP2TOR="LND-GRPC-API"
-    forceTOR=0
+    usingIP2Tor="LND-GRPC-API"
+    forceTor=0
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
-  
+  fi
+
 elif [ "${targetWallet}" = "zap-android" ]; then
   connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
-  if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses gRPC
+  if [ ${forceTor} -eq 1 ]; then
+    # when ZAP runs on Tor it uses gRPC
     port="10009"
     connectInfo="${connectInfo}\n- install & connect Orbot App (VPN mode)"
   else
@@ -83,17 +83,17 @@ elif [ "${targetWallet}" = "zap-android" ]; then
   fi
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
-    usingIP2TOR="LND-GRPC-API"
-    forceTOR=1
+    usingIP2Tor="LND-GRPC-API"
+    forceTor=1
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi 
+  fi
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
     port="8080"
-    usingIP2TOR="LND-REST-API"
-    forceTOR=1
+    usingIP2Tor="LND-REST-API"
+    forceTor=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
@@ -101,30 +101,30 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
 
     port="8080"
     usingIP2TOR="LND-REST-API"
-    forceTOR=1
+    forceTor=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
   connector="lndconnect"
-  if [ ${forceTOR} -eq 1 ]; then
+  if [ ${forceTor} -eq 1 ]; then
     # echo "error='no tor support'"
     # exit 1
     # port="8080"
     # addcert=0
-    # deactivate TOR for now, because address is too long QR code is too big to be scanned by
+    # deactivate Tor for now, because address is too long QR code is too big to be scanned by
     # app and so just make it possible to use local.
-    forceTOR=0
+    forceTor=0
   fi
   port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
-    forceTOR=0
+    forceTor=0
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
+  fi
 
 else
   echo "error='unknown target wallet'"
@@ -143,20 +143,20 @@ if [ ${#dynDomain} -gt 0 ]; then
   host="${dynDomain}"
 fi
 
-# tunnel thru TOR if running and supported by the wallet
-if [ ${forceTOR} -eq 1 ]; then
-  # depending on RPC or REST use different TOR address
+# tunnel thru Tor if running and supported by the wallet
+if [ ${forceTor} -eq 1 ]; then
+  # depending on RPC or REST use different Tor address
   if [ "${port}" == "10009" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
     port="10009"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# using Tor --> host ${host} port ${port}"
   elif [ "${port}" == "8080" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     port="8080"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# using Tor --> host ${host} port ${port}"
   fi
 fi
-  
+
 # tunnel thru SSH-Reverse-Tunnel if activated for that port
 if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "${port}<")
@@ -201,7 +201,7 @@ msg=""
 if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
   msg="Make sure you are on the same local network.\n(WLAN same as LAN - use WIFI not cell network on phone).\n\n"
 fi
-if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTOR} -eq 0 ]; then
+if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTor} -eq 0 ]; then
   msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection.\n\n"
 fi
 msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}${connectInfo}\n\nIf your RaspiBlitz has no LCD use <Console QRcode>"

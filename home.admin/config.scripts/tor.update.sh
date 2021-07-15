@@ -8,8 +8,8 @@
 # function: install keys & sources
 prepareTorSources(){
 
-    # Prepare for TOR service
-    echo "*** INSTALL TOR REPO ***"
+    # Prepare for Tor service
+    echo "*** INSTALL Tor REPO ***"
     echo ""
 
     echo "*** Install dirmngr ***"
@@ -30,7 +30,7 @@ prepareTorSources(){
       sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
       echo "OK"
     else
-      echo "TOR key is available"
+      echo "Tor key is available"
     fi
     echo ""
 
@@ -38,7 +38,7 @@ prepareTorSources(){
     torSourceListAvailable=$(sudo cat /etc/apt/sources.list | grep -c 'https://deb.torproject.org/torproject.org')
     echo "torSourceListAvailable=${torSourceListAvailable}"
     if [ ${torSourceListAvailable} -eq 0 ]; then
-      echo "Adding TOR sources ..."
+      echo "Adding Tor sources ..."
       if [ "${baseImage}" = "raspbian" ] || [ "${baseImage}" = "armbian" ] || [ "${baseImage}" = "dietpi" ]; then
         echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
         echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
@@ -48,7 +48,7 @@ prepareTorSources(){
       fi
       echo "OK"
     else
-      echo "TOR sources are available"
+      echo "Tor sources are available"
     fi
     echo ""
 }

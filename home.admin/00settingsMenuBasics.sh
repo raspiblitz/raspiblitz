@@ -78,7 +78,7 @@ WIDTH=45
 CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
-OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
+OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
 if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
@@ -272,20 +272,20 @@ else
   echo "LND AUTONAT Setting unchanged."
 fi
 
-# TOR process choice
+# Tor process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${runBehindTor}" != "${choice}" ]; then
-  echo "TOR Setting changed .."
+  echo "Tor Setting changed .."
 
-  # special actions if TOR is turned on
+  # special actions if Tor is turned on
   if [ "${choice}" = "on" ]; then
 
     # inform user about privacy risk
     whiptail --title " PRIVACY NOTICE " --msgbox "
-RaspiBlitz will now install/activate TOR & after reboot run behind it.
+RaspiBlitz will now install/activate Tor & after reboot run behind it.
 
-Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind TOR. To unlink you from that IP history its recommended that after the switch/reboot to TOR you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
+Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind Tor. To unlink you from that IP history its recommended that after the switch/reboot Tor you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
 " 16 76
 
     # make sure AutoNAT & UPnP is off
@@ -293,13 +293,17 @@ Please keep in mind that thru your LND node id & your previous IP history with y
     /home/admin/config.scripts/network.upnp.sh off
   fi
 
-  # change TOR
+  # change Tor
   anychange=1
-  sudo /home/admin/config.scripts/tor.install.sh ${choice}
+  if [ "${choice}" = "on" ]; then
+    sudo /home/admin/config.scripts/tor.install.sh on
+  else
+    sudo /home/admin/config.scripts/tor.remove.sh off
+  fi
   needsReboot=1
 
 else
-  echo "TOR Setting unchanged."
+  echo "Tor Setting unchanged."
 fi
 
 # LND Auto-Unlock

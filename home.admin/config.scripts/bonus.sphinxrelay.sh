@@ -47,7 +47,7 @@ if [ "$1" = "menu" ]; then
   if [ ${connection} = "ip2tor&letsencrypt" ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: ${publicURL}
-SHA1 ${sslFingerprintTOR}\n
+SHA1 ${sslFingerprintTor}\n
 If you connect your app with this setup you should be able to
 use it securely from everywhere.
 "
@@ -233,8 +233,8 @@ if [ "$1" = "status" ]; then
   toraddress=$(cat /home/sphinxrelay/sphinx-relay/dist/toraddress.txt 2>/dev/null)
   echo "toraddress='${toraddress}'"
 
-  sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-  echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+  sslFingerprintTor=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+  echo "sslFingerprintTor='${sslFingerprintTor}'"
 
   # check for IP2TOR
   error=""
@@ -411,7 +411,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.install.sh script
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
-      # get TOR address and store it readable for sphixrelay user
+      # get Tor address and store it readable for sphixrelay user
       toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi

@@ -27,24 +27,24 @@ if [ "$1" = "menu" ]; then
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    # Info with TOR
+    # Info with Tor
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser:
 http://${localip}:3000\n
 https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
+Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
 " 16 67
     /home/admin/config.scripts/blitz.display.sh hide
   else
-    # Info without TOR
+    # Info without Tor
     whiptail --title " Ride The Lightning (RTL) " --msgbox "Open in your local web browser & accept self-signed cert:
 http://${localip}:3000\n
 https://${localip}:3001 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Activate TOR to access the web interface from outside your local network.
+Activate Tor to access the web interface from outside your local network.
 " 15 67
   fi
   echo "please wait ..."

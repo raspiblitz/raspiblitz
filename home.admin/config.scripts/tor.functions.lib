@@ -89,7 +89,7 @@ TOR_SERVICE=$(curl --socks5 localhost:9050 --socks5-hostname localhost:9050 -m 5
 TOR_SERVICE=$(cut -d "." -f1 <<< $TOR_SERVICE)
 
 if [ "$TOR_SERVICE" = "Congratulations" ]; then
-  TOR_STATUS="TOR is working"
+  TOR_STATUS="Tor is working"
 else
   TOR_STATUS=""
 fi
@@ -102,7 +102,7 @@ clear
 finish()
 {
   check_tor
-  if [ "$TOR_STATUS" = "TOR is working" ]; then
+  if [ "$TOR_STATUS" = "Tor is working" ]; then
     whiptail --title "Tor - INFO (scroll down!)" --textbox --scrolltext text/finish-ok-text $MENU_HEIGHT_25 $MENU_WIDTH
   else
     whiptail --title "Tor - INFO (scroll down!)" --textbox --scrolltext text/finish-fail-text $MENU_HEIGHT_25 $MENU_WIDTH

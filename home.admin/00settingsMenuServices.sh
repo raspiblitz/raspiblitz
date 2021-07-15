@@ -195,12 +195,12 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
-  # check if TOR is installed
+  # check if Tor is installed
   source /mnt/hdd/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
-    whiptail --title " BTCPayServer needs TOR " --msgbox "\
-At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
-Please activate TOR in SERVICES first.\n
+    whiptail --title " BTCPayServer needs Tor " --msgbox "\
+At the moment the BTCPayServer on the RaspiBlitz needs Tor.\n
+Please activate Tor in SERVICES first.\n
 Then try activating BTCPayServer again in SERVICES.\n
 " 13 42
   else
@@ -365,12 +365,12 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "j")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${joinmarket}" != "${choice}" ]; then
   echo "JoinMarket setting changed .."
-  # check if TOR is installed
+  # check if Tor is installed
   source /mnt/hdd/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " Use Tor with JoinMarket" --msgbox "\
 It is highly recommended to use Tor with JoinMarket.\n
-Please activate TOR in SERVICES first.\n
+Please activate Tor in SERVICES first.\n
 Then try activating JoinMarket again in SERVICES.\n
 " 13 42
   else

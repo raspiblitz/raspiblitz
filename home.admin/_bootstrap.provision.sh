@@ -301,13 +301,13 @@ else
     echo "Provisioning TESTNET - keep default" >> ${logFile}
 fi
 
-# TOR
+# Tor
 if [ "${runBehindTor}" = "on" ]; then
-    echo "Provisioning TOR - run config script" >> ${logFile}
+    echo "Provisioning Tor - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/tor.install.sh on >> ${logFile} 2>&1
 else
-    echo "Provisioning TOR - keep default" >> ${logFile}
+    echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
 # AUTO PILOT
@@ -389,11 +389,11 @@ fi
 # BTCPAYSERVER
 if [ "${BTCPayServer}" = "on" ]; then
 
-  echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}
+  echo "Provisioning BTCPAYSERVER on Tor - running setup" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
 
-  #echo "Provisioning BTCPAYSERVER on TOR - run on after bootup script" >> ${logFile}
+  #echo "Provisioning BTCPAYSERVER on Tor - run on after bootup script" >> ${logFile}
   # because BTCPAY server freezes during recovery .. it will get installed after reboot
   #echo "sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on" >> /home/admin/setup.sh
   #sudo chmod +x /home/admin/setup.sh >> ${logFile}

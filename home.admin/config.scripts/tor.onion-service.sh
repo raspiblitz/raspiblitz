@@ -87,7 +87,7 @@ if [ "${1}" == "off" ]; then
   sudo mv ${TORRC}.tmp ${TORRC}
   # set owner and permissions for config and data files
   set_owner_permission
-  echo "# OK service is removed - restarting TOR ..."
+  echo "# OK service is removed - restarting Tor ..."
   restarting_tor
   sleep 10
   echo "# Done"

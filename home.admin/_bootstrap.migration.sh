@@ -73,7 +73,7 @@ if [ ${#autoNatDiscovery} -eq 0 ]; then
   echo "autoNatDiscovery=off" >> $configFile
 fi
 
-# TOR
+# Tor
 # runBehindTor=off|on
 if [ ${#runBehindTor} -eq 0 ]; then
   echo "runBehindTor=off" >> $configFile
@@ -89,7 +89,7 @@ echo "default values OK"  >> ${logFile}
 
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
-# a conversion of config data or app data is needed 
+# a conversion of config data or app data is needed
 
 # if old bitcoin.conf exists ...
 configExists=$(sudo ls /mnt/hdd/bitcoin/bitcoin.conf | grep -c '.conf')

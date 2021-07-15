@@ -48,18 +48,18 @@ ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
-TOR Browser Hidden Service address (QR see LCD):
+Tor Browser Hidden Service address (QR see LCD):
 ${toraddress}"
   fi
 
   if [ ${#ip2torDomain} -gt 0 ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}"
+SHA1 ${sslFingerprintTor}"
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}
+SHA1 ${sslFingerprintTor}
 go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
@@ -104,8 +104,8 @@ if [ "$1" = "status" ]; then
     toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
-    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
+    sslFingerprintTor=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
+    echo "sslFingerprintTor='${sslFingerprintTor}'"
 
     # check for IP2TOR
     error=""

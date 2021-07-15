@@ -97,7 +97,7 @@ if [ "$1" = "status" ]; then
       # no answer on that port
       echo "publicHTTPPortAnswering=0"
     fi
-    # add TOR info
+    # add Tor info
     if [ "${runBehindTor}" == "on" ]; then
       echo "TORrunning=1"
       if [ "$2" = "showAddress" ]; then
@@ -169,7 +169,7 @@ Check 'sudo nginx -t' for a detailed error message.
     exit 0
   fi
 
-  # Options (available without TOR)
+  # Options (available without Tor)
   OPTIONS=( \
         CONNECT "How to Connect" \
         INDEX "Delete&Rebuild Index" \
@@ -198,7 +198,7 @@ Check 'sudo nginx -t' for a detailed error message.
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
-      echo "To connect through TOR open the Tor Browser and start with the options:"
+      echo "To connect through Tor open the Tor Browser and start with the options:"
       echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi

@@ -65,7 +65,7 @@ if Path("/mnt/hdd/raspiblitz.conf").is_file():
     LND_ADMIN_MACAROON_PATH = "/mnt/hdd/app-data/lnd/data/chain/{0}/{1}net/admin.macaroon".format(cfg.network.value,
                                                                                                   cfg.chain.value)
     LND_TLS_PATH = "/mnt/hdd/app-data/lnd/tls.cert"
-    # make sure to make requests thru TOR 127.0.0.1:9050
+    # make sure to make requests thru Tor 127.0.0.1:9050
     session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
     SUBSCRIPTIONS_FILE = "/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 else:
@@ -123,7 +123,7 @@ def normalizeShopUrl(shopurlUserInput):
     if shopurlUserInput.find("://") > 0:
         shopurlUserInput = shopurlUserInput[shopurlUserInput.find("://") + 3:]
 
-    # remove all path after domain 
+    # remove all path after domain
     if shopurlUserInput.find("/") > 0:
         shopurlUserInput = shopurlUserInput[:shopurlUserInput.find("/")]
 
@@ -169,7 +169,7 @@ def apiGetHosts(session, shopurl):
             # ignore if duration is less than an hour
             if hostEntry['tor_bridge_duration'] < 3600:
                 continue
-            # add duration per hour value 
+            # add duration per hour value
             hostEntry['tor_bridge_duration_hours'] = math.floor(hostEntry['tor_bridge_duration'] / 3600)
             # ignore if prices are negative or below one sat (maybe msats later)
             if hostEntry['tor_bridge_price_initial'] < 1000:
@@ -611,7 +611,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
 
         # input shop url
         d = Dialog(dialog="dialog", autowidgetsize=True)
-        d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
+        d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru Tor)")
         code, text = d.inputbox(
             "Enter Address of a IP2TOR Shop (OR JUST USE DEFAULT):",
             height=10, width=72, init=shopurl,
@@ -668,7 +668,7 @@ Try again later, enter another address or cancel.
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("IP2TOR Bridge Shop: {0}".format(shopurl))
         code, tag = d.menu(
-            "Following TOR bridge hosts are available. Select for details:",
+            "Following Tor bridge hosts are available. Select for details:",
             choices=choices, title="Available Subscriptions")
 
         # if user cancels
@@ -693,7 +693,7 @@ Every next time it would cost: {2} sats
 
 If you AGREE you will subscribe to this service.
 You will get a port on the IP {3} that will
-forward to your RaspiBlitz TOR address for '{7}':
+forward to your RaspiBlitz Tor address for '{7}':
 {4}
 
 You can cancel the subscription anytime under

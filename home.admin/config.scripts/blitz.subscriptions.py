@@ -22,7 +22,7 @@ SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
 SERVICE_SPHINX = "SPHINX"
 
-# load config 
+# load config
 cfg = RaspiBlitzConfig()
 cfg.reload()
 
@@ -264,12 +264,12 @@ def main():
 
     if tag == "NEW1":
 
-        # check if Blitz is running behind TOR
+        # check if Blitz is running behind Tor
         cfg.reload()
         if not cfg.run_behind_tor.value:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
     The IP2TOR service just makes sense if you run
-    your RaspiBlitz behind TOR.
+    your RaspiBlitz behind Tor.
             ''', title="Info")
             sys.exit(1)
 
@@ -342,31 +342,31 @@ def main():
         tor_address = None
         tor_port = None
         if tag == "REST":
-            # get TOR address for REST
+            # get Tor address for REST
             service_name = SERVICE_LND_REST_API
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 8080
         if tag == "GRPC":
-            # get TOR address for GRPC
+            # get Tor address for GRPC
             service_name = SERVICE_LND_GRPC_API
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 10009
         if tag == "LNBITS":
-            # get TOR address for LNBits
+            # get Tor address for LNBits
             service_name = SERVICE_LNBITS
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lnbits/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "BTCPAY":
-            # get TOR address for BTCPAY
+            # get Tor address for BTCPAY
             service_name = SERVICE_BTCPAY
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/btcpay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "SPHINX":
-            # get TOR address for SPHINX
+            # get Tor address for SPHINX
             service_name = SERVICE_SPHINX
             tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/sphinxrelay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
@@ -374,9 +374,9 @@ def main():
         if tag == "SELF":
             service_name = "CUSTOM"
             try:
-                # get custom TOR address
+                # get custom Tor address
                 code, text = d.inputbox(
-                    "Enter TOR Onion-Address:",
+                    "Enter Tor Onion-Address:",
                     height=10, width=60, init="",
                     title="IP2TOR Bridge Target")
                 text = text.strip()
@@ -386,13 +386,13 @@ def main():
                 if len(text) == 0:
                     sys.exit(0)
                 if text.find('.onion') < 0 or text.find(' ') > 0:
-                    print("Not a TOR Onion Address")
+                    print("Not a Tor Onion Address")
                     time.sleep(3)
                     sys.exit(0)
                 tor_address = text
-                # get custom TOR port
+                # get custom Tor port
                 code, text = d.inputbox(
-                    "Enter TOR Port Number:",
+                    "Enter Tor Port Number:",
                     height=10, width=40, init="80",
                     title="IP2TOR Bridge Target")
                 text = text.strip()

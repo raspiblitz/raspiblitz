@@ -163,14 +163,14 @@ public_addr="??"
 torInfo=""
 # Version
 networkVersion=$(${network}-cli -datadir=${bitcoin_dir} -version 2>/dev/null | cut -d ' ' -f6)
-# TOR or IP
+# Tor or IP
 networkInfo=$(${network}-cli -datadir=${bitcoin_dir} getnetworkinfo)
 networkConnections=$(echo ${networkInfo} | jq -r '.connections')
 networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}connections"
 
 if [ "${runBehindTor}" = "on" ]; then
 
-  # TOR address
+  # Tor address
   onionAddress=$(echo ${networkInfo} | jq -r '.localaddresses [0] .address')
   networkConnectionsInfo="${color_green}${networkConnections} ${color_gray}peers"
   public_addr="${onionAddress}:${public_port}"

@@ -13,7 +13,7 @@ source /home/admin/_version.info
 
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
-# and delivers basic config info for scripts 
+# and delivers basic config info for scripts
 # make raspiblitz.conf if not there
 sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -167,7 +167,7 @@ fi
 
 ################################
 # AFTER BOOT SCRIPT
-# when a process needs to 
+# when a process needs to
 # execute stuff after a reboot
 # it should in file
 # /home/admin/setup.sh
@@ -187,7 +187,7 @@ if [ ${afterSetupScriptExists} -eq 1 ]; then
   echo "\n***** RUNNING AFTER BOOT SCRIPT ******** " >> ${logFile}
   sudo /home/admin/setup.sh >> ${logFile}
   # delete the after boot script
-  sudo rm /home/admin/setup.sh 
+  sudo rm /home/admin/setup.sh
   # reboot again
   echo "DONE wait 10 secs ... one more reboot needed ... " >> ${logFile}
   sudo cp ${logFile} ${logFile}.afterboot
@@ -246,7 +246,7 @@ fi
 ################################
 # HDD CHECK & PRE-INIT
 ################################
- 
+
 # Without LCD message needs to be printed
 # wait loop until HDD is connected
 echo ""
@@ -283,7 +283,7 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUS
   if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
     # remove old usb-storage.quirks
     sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
-  fi 
+  fi
   if [ ${usbQuirkDone} -eq 0 ]; then
     # add new usb-storage.quirks
     sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
@@ -294,7 +294,7 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUS
     sudo shutdown -r now
     sleep 100
   fi
-else 
+else
   echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
 fi
 
@@ -372,8 +372,8 @@ if [ ${isMounted} -eq 0 ]; then
       sudo mv ${configFile} /mnt/hdd/raspiblitz.invalid.conf 2>/dev/null
     fi
   fi
-  
-  # UPDATE MIGRATION & CONFIG PROVISIONING 
+
+  # UPDATE MIGRATION & CONFIG PROVISIONING
   if [ ${configExists} -eq 1 ]; then
     echo "Found valid configuration" >> $logFile
     sed -i "s/^state=.*/state=recovering/g" ${infoFile}
@@ -397,7 +397,7 @@ if [ ${isMounted} -eq 0 ]; then
     sync
     sudo shutdown -r -F -t 60
     exit 0
-  else 
+  else
     echo "OK - No config file found: ${configFile}" >> $logFile
   fi
 
@@ -457,7 +457,7 @@ if [ ${configExists} -eq 1 ]; then
   echo "load and update publicIP" >> $logFile
   source ${configFile}
 
-  # if not running TOR before starting LND internet connection with a valid public IP is needed
+  # if not running Tor before starting LND internet connection with a valid public IP is needed
   waitForPublicIP=1
   if [ "${runBehindTor}" = "on" ] || [ "${runBehindTor}" = "1" ]; then
     echo "# no need to wait for internet - public Tor address already known" >> $logFile
@@ -476,14 +476,14 @@ if [ ${configExists} -eq 1 ]; then
         waitForPublicIP=0
       fi
     done
-  
+
   # update public IP on boot - set to domain is available
-  /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
+  /home/admin/config.scripts/internet.sh update-publicip ${lndAddress}
 
 fi
 
 ######################################################################
-# MAKE SURE LND RPC/REST ports are standard & open to all connections 
+# MAKE SURE LND RPC/REST ports are standard & open to all connections
 ######################################################################
 sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
 sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
@@ -510,7 +510,7 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
   echo "running LND users credentials update" >> $logFile
   sudo /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
 
-else 
+else
   echo "skipping LND credientials sync" >> $logFile
 fi
 

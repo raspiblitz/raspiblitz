@@ -109,12 +109,12 @@ if [ ${lndRunning} -eq 0 ]; then
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
   #sudo chmod +x /etc/systemd/system/lnd.service
 
-  ###### ACTIVATE TOR IF SET DURING SETUP
+  ###### ACTIVATE Tor IF SET DURING SETUP
   if [ "${runBehindTor}" = "on" ]; then
-    echo "TOR was selected"
+    echo "Tor was selected"
     sudo /home/admin/config.scripts/tor.install.sh lndconf-on
   else
-    echo "TOR was not selected"
+    echo "Tor was not selected"
   fi
 
   echo "Starting LND Service ..."

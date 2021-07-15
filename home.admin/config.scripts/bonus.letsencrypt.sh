@@ -125,7 +125,7 @@ function refresh_certs_with_nginx() {
     sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
     sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
 
-    echo "# default TOR certs"
+    echo "# default Tor certs"
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
     sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
@@ -160,7 +160,7 @@ function refresh_certs_with_nginx() {
 
         # repleace certs for tor
         if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
-          echo "# replacing TOR certs for ${FQDN}"
+          echo "# replacing Tor certs for ${FQDN}"
           sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
           sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer /mnt/hdd/app-data/nginx/tor_tls.cert

@@ -50,7 +50,7 @@ MENU="Choose one of the following options:"
 OPTIONS=()
 plus=""
 if [ "${runBehindTor}" = "on" ]; then
-  plus=" / TOR"
+  plus=" / Tor"
 fi
 if [ ${#dynDomain} -gt 0 ]; then
   plus="${plus} / ${dynDomain}"
@@ -210,7 +210,7 @@ case $CHOICE in
                 echo ""
                 echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
                 read -n 1 -t 6 keyPressed
-                echo -en "\rGathering information to update info ... please wait.                \n"  
+                echo -en "\rGathering information to update info ... please wait.                \n"
 
                 # check if user wants to abort session
                 if [ "${keyPressed}" = "x" ]; then
@@ -298,7 +298,7 @@ case $CHOICE in
             ;;
         CIRCUIT)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
-            ;;    
+            ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;

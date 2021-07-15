@@ -44,7 +44,7 @@ SUBSCRIPTIONS_FILE = "/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 cfg = RaspiBlitzConfig()
 cfg.reload()
 
-# todo: make sure that also ACME script uses TOR if activated
+# todo: make sure that also ACME script uses Tor if activated
 session = requests.session()
 if cfg.run_behind_tor.value:
     session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
@@ -129,7 +129,7 @@ def dynu_update(domain, token, ip):
         print("# response-code: {0}".format(response.status_code))
     except Exception as e:
         raise BlitzError("failed HTTP request", url, e)
-    
+
     # parse data
     apitoken=""
     try:
@@ -168,7 +168,7 @@ def dynu_update(domain, token, ip):
     try:
         print(response.content)
         data = json.loads(response.content)
-        for entry in data["domains"]:   
+        for entry in data["domains"]:
             if entry['name'] == domain:
                 id_for_domain = entry['id']
                 break
@@ -178,7 +178,7 @@ def dynu_update(domain, token, ip):
         raise BlitzError("failed parsing data", response.content, e)
     if id_for_domain == 0:
         raise BlitzError("domain not found", response.content)
-    
+
 
     # update ip address
     print("# API CALL --> Update IP for Domain-ID")
@@ -204,7 +204,7 @@ def dynu_update(domain, token, ip):
         time.sleep(4)
         raise BlitzError("failed HTTP request", url, e)
 
-    return response.content    
+    return response.content
 
 #####################
 # PROCESS FUNCTIONS
@@ -408,7 +408,7 @@ def menu_make_subscription():
         # show basic info on duck dns
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 If you havent already go to https://duckdns.org
-- consider using the TOR browser
+- consider using the Tor browser
 - create an account or login
 - make sure you have a subdomain added
         ''', title="DuckDNS Account needed")
@@ -455,11 +455,11 @@ This looks not like a valid token.
         # show basic info on duck dns
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 If you havent already go to https://dynu.com
-- consider using the TOR browser
+- consider using the Tor browser
 - create an account or login
 - DDNS Services -> create new
         ''', title="dynu.com Account needed")
-        
+
         # enter the subdomain
         code, text = d.inputbox(
             "Enter the complete DDNS name:",
@@ -475,7 +475,7 @@ This looks not like a valid DDNS.
 
         # show basic info on duck dns
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-Continue in your dynu.com account: 
+Continue in your dynu.com account:
 - open 'Control Panel' > 'API Credentials'
 - see listed 'OAuth2' ClientID & Secret
 - click glasses icon to view values
@@ -488,7 +488,7 @@ Continue in your dynu.com account:
             title="dynu.com OAuth2 ClientID")
         clientid = text.strip()
         clientid = clientid.split(' ')[0]
-        if len(clientid) < 20 or len(clientid.split('-'))<2: 
+        if len(clientid) < 20 or len(clientid.split('-'))<2:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 This looks not like valid ClientID.
         ''', title="Invalid Input")
@@ -508,13 +508,13 @@ This looks not like valid.
             sys.exit(0)
 
         token = "{}:{}".format(clientid, secret)
-        
+
     else:
         os.system("clear")
         print("Not supported yet: {0}".format(dnsservice))
         time.sleep(4)
         sys.exit(0)
-        
+
     ############################
     # PHASE 3: Choose what kind of IP: dynDNS, IP2TOR, fixedIP
 
@@ -733,7 +733,7 @@ def subscription_detail():
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
         out, err = dns_result.communicate()
         sub['dns_response'] = "unknown"
-        if subscription_id in out:        
+        if subscription_id in out:
             sub['dns_response'] = out.split(" ")[0]
             if sub['dns_response']!=sub['ip'] and len(sub['warning'])==0:
                 sub['warning'] = "Domain resolves not to target IP yet."
@@ -749,7 +749,7 @@ def subscription_detail():
                 sub['https_response'] = 0
             if sub['https_response']!=200 and len(sub['warning'])==0:
                 sub['warning'] = "Not able to get HTTPS response."
-                
+
         print(json.dumps(sub, indent=2))
 
     except Exception as e:

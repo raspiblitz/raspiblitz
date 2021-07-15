@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
   fingerprint=$(sudo openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    # Info with TOR
+    # Info with Tor
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:8443\n
@@ -48,13 +48,13 @@ use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
 " 19 74
     /home/admin/config.scripts/blitz.display.sh hide
   else
-    # Info without TOR
+    # Info without Tor
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Activate TOR to access the web interface from outside your local network.\n
+Activate Tor to access the web interface from outside your local network.\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
 use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
 " 19 63

@@ -22,7 +22,7 @@ fi
 . /home/admin/config.scripts/tor.functions.lib
 
 
-activateBitcoinOverTOR()
+activateBitcoinOverTor()
 {
   echo "*** Changing ${network} Config ***"
 
@@ -30,7 +30,7 @@ activateBitcoinOverTOR()
   if [ ${btcExists} -gt 0 ]; then
 
     # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
-    deactivateBitcoinOverTOR
+    deactivateBitcoinOverTor
 
     echo "# Make sure the user bitcoin is in the debian-tor group"
     sudo usermod -a -G debian-tor bitcoin
@@ -67,7 +67,7 @@ activateBitcoinOverTOR()
 }
 
 
-deactivateBitcoinOverTOR()
+deactivateBitcoinOverTor()
 {
   # always make sure also to remove old settings
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -85,7 +85,7 @@ deactivateBitcoinOverTOR()
 }
 
 
-activateLndOverTOR()
+activateLndOverTor()
 {
   echo "*** Putting LND behind Tor ***"
 
@@ -141,13 +141,13 @@ fi
 
 # if started with btcconf-on
 if [ "$1" = "btcconf-on" ]; then
-  activateBitcoinOverTOR
+  activateBitcoinOverTor
   exit 0
 fi
 
 # if started with lndconf-on
 if [ "$1" = "lndconf-on" ]; then
-  activateLndOverTOR
+  activateLndOverTor
   exit 0
 fi
 
@@ -157,7 +157,7 @@ if [ ${checkTorEntry} -eq 0 ]; then
   echo "runBehindTor=off" >> ${CONF}
 fi
 
-# location of TOR config
+# location of Tor config
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
 
@@ -335,19 +335,19 @@ EOF
     echo "# - Tor config ${TORRC} is already updated"
   fi
 
-  # ACTIVATE TOR SERVICE
+  # ACTIVATE Tor SERVICE
   echo "*** Enable Tor Service ***"
   sudo systemctl daemon-reload
   sudo systemctl enable tor@default
   echo ""
 
-  # ACTIVATE BITCOIN OVER TOR (function call)
-  activateBitcoinOverTOR
+  # ACTIVATE BITCOIN OVER Tor (function call)
+  activateBitcoinOverTor
 
-  # ACTIVATE LND OVER TOR (function call)
-  activateLndOverTOR
+  # ACTIVATE LND OVER Tor (function call)
+  activateLndOverTor
 
-  # ACTIVATE APPS OVER TOR
+  # ACTIVATE APPS OVER Tor
   source ${CONF} 2>/dev/null
 
   # for organizatation, FROM_PORT_2 is the TLS one
@@ -412,7 +412,7 @@ EOF
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
 
-    # get TOR address and store it readable for sphixrelay user
+    # get Tor address and store it readable for sphixrelay user
     toraddress=$(sudo cat ${DATA_DIR}/sphinxrelay/hostname 2>/dev/null)
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
