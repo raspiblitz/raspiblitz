@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# this provision file is just executed on fresh setups
+# not on recoveries or updates
+
 # LOGFILE - store debug logs of bootstrap
 logFile="/home/admin/raspiblitz.log"
 
@@ -133,6 +136,15 @@ echo "OK ${network} startup successfull " >> ${logFile}
 # Prepare Lightning
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
+if [ "${lightning}" == "" ]; then 
+
+  ###################################
+  # No Lightning
+  sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
+  sudo systemctl disable lnd
+
+if
+
 if [ "${lightning}" == "lnd" ]; then 
 
   ###################################
@@ -165,6 +177,7 @@ if [ "${lightning}" == "lnd" ]; then
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
     sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+    sudo /home/admin/config.scripts/lnd.chain.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
   fi
 
@@ -340,6 +353,9 @@ if [ "${lightning}" == "cln" ]; then
   echo "FAIL see ${logFile}"
   echo "TODO: install c-lightning!" >> ${logFile}
   exit 1
+
+  # make sure lnd is disabled
+  sudo systemctl disable lnd
 
   # these vars are available from the setup process for cln loaded from setupfile
   # seedWords --> if entered on old seed
