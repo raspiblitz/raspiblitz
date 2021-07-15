@@ -62,7 +62,7 @@ sudo systemctl stop RTL 2>/dev/null
 
 function configRTL() {
   SWAPSERVERPORT=8443
-  if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then 
+  if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then
     if [ $lit = on ];then
       echo "# Add the rtl user to the lit group"
       sudo /usr/sbin/usermod --append --groups lit rtl
@@ -226,8 +226,8 @@ EOF
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
+    # make sure to keep in sync with tor.install.sh script
+    /home/admin/config.scripts/tor.onion-service.sh RTL 80 3002 443 3003
   fi
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
@@ -257,7 +257,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off RTL
+    /home/admin/config.scripts/tor.onion-service.sh off RTL
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
@@ -319,12 +319,12 @@ if [ "$1" = "update" ]; then
     sudo -u rtl npm install --only=prod
     currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
     echo "# Updated RTL to $currentRTLcommit"
-  else 
+  else
     echo "# Unknown option: $updateOption"
   fi
 
   configRTL
-  
+
   echo
   echo "# Starting the RTL service ... "
   sudo systemctl start RTL

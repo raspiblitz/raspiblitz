@@ -21,12 +21,12 @@ OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Show LND connection string")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
@@ -229,10 +229,10 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
 
     case $CHOICE in
       ADDRPCLAN)
-        clear       
+        clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-      
+
         restartCore=0
         if [ $allowIPrange -eq 0 ]; then
           echo "rpcallowip=$localIPrange" | sudo tee -a /mnt/hdd/${network}/${network}.conf
@@ -257,7 +257,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-        /home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+        /home/admin/config.scripts/tor.onion-servce.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
         echo
         echo "The address of the local node is: $TorRPCaddress"
         echo
@@ -270,7 +270,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
       CREDENTIALS)
         clear
         showRPCcredentials
-        echo          
+        echo
         echo "Press ENTER to return to the menu."
         read key
         ;;
@@ -278,7 +278,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         # remove old entry
         sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
         # remove Hidden Service
-        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin${BITCOINRPCPORT}
+        /home/admin/config.scripts/tor.onion-service.sh off bitcoin${BITCOINRPCPORT}
         sudo ufw deny from $localIPrange to any port ${BITCOINRPCPORT}
         restartCore=0
         if [ $allowIPrange -gt 0 ]; then

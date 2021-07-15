@@ -14,7 +14,7 @@ release()
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
 - Flash that SD card image to a new SD card (best)
-  or override old SD card after shutdown (fallback) 
+  or override old SD card after shutdown (fallback)
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
@@ -82,9 +82,9 @@ patchNotice()
 It means it will sync the program code with the
 GitHub repo for your version branch v${codeVersion}.
 
-This can be useful if there are important updates 
+This can be useful if there are important updates
 in between releases to fix severe bugs. It can also
-be used to sync your own code with your RaspiBlitz 
+be used to sync your own code with your RaspiBlitz
 if you are developing on your own GitHub Repo.
 
 BUT BEWARE: This means RaspiBlitz will contact GitHub,
@@ -249,7 +249,7 @@ grab the latest LND release published on the LND GitHub page (also release candi
 There will be no security checks on signature, etc.
 
 This update mode is only recommended for testing and
-development nodes with no serious funding. 
+development nodes with no serious funding.
 
 Do you really want to update LND now?
       " 16 58
@@ -368,32 +368,32 @@ BITCOIN "Bitcoin Core Update Options"
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
@@ -401,7 +401,7 @@ fi
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 CHOICE=$(dialog --clear \
@@ -446,9 +446,9 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.pyblock.sh update
     ;;
   TOR)
-    sudo /home/admin/config.scripts/internet.tor.sh update  
+    sudo /home/admin/config.scripts/tor.update.sh update  # TODO adjuts to git
     ;;
   MEMPOOL)
-    /home/admin/config.scripts/bonus.mempool.sh update 
+    /home/admin/config.scripts/bonus.mempool.sh update
     ;;
 esac

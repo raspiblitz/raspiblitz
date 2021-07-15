@@ -2,7 +2,7 @@
 
 ## get basic info
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf
 
 echo ""
 echo "*** 70initLND.sh ***"
@@ -26,7 +26,7 @@ bitcoinRunning=$(systemctl status ${network}d.service 2>/dev/null | grep -c runn
 if [ ${bitcoinRunning} -eq 0 ]; then
   bitcoinRunning=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo  | grep -c verificationprogress)
 fi
-if [ ${bitcoinRunning} -eq 0 ]; then 
+if [ ${bitcoinRunning} -eq 0 ]; then
   whiptail --title "70initLND - WARNING" --yes-button "Retry" --no-button "EXIT+Logs" --yesno "Service ${network}d is not running." 8 50
   if [ $? -eq 0 ]; then
     /home/admin/70initLND.sh
@@ -112,7 +112,7 @@ if [ ${lndRunning} -eq 0 ]; then
   ###### ACTIVATE TOR IF SET DURING SETUP
   if [ "${runBehindTor}" = "on" ]; then
     echo "TOR was selected"
-    sudo /home/admin/config.scripts/internet.tor.sh lndconf-on
+    sudo /home/admin/config.scripts/tor.install.sh lndconf-on
   else
     echo "TOR was not selected"
   fi
@@ -202,7 +202,7 @@ if [ ${walletExists} -eq 0 ]; then
     python3 /home/admin/config.scripts/lnd.initwallet.py new ${passwordC} > /var/cache/raspiblitz/.seed.tmp
     source /var/cache/raspiblitz/.seed.tmp
     sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
-    
+
     # in case of error - retry
     if [ ${#err} -gt 0 ]; then
       whiptail --title "lnd.initwallet.py - ERROR" --msgbox "${err}" 8 50
@@ -211,7 +211,7 @@ if [ ${walletExists} -eq 0 ]; then
     else
       if [ ${#seedwords} -eq 0 ]; then
         echo "FAIL!! -> MISSING seedwords data - but also no err data ?!?"
-        echo "CHECK output data above - PRESS ENTER to restart 70initLND.sh" 
+        echo "CHECK output data above - PRESS ENTER to restart 70initLND.sh"
         read key
         /home/admin/70initLND.sh
         exit 1
@@ -335,7 +335,7 @@ or having a complete LND rescue-backup from your old node.
 The word list has ${wordcount} words. But it must be 24.
 Please check your list and try again.
 
-Best is to write words in external editor 
+Best is to write words in external editor
 and then copy and paste them into dialog.
 
 The Word list should look like this:
@@ -405,7 +405,7 @@ ${err}
 ${errMore}
       " 13 72
           clear
-          echo "Restarting LND Wallet Setup .." 
+          echo "Restarting LND Wallet Setup .."
           sleep 2
           echo
           /home/admin/70initLND.sh

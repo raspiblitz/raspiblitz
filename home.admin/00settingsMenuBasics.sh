@@ -80,23 +80,23 @@ OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
 if [ "${displayClass}" == "lcd" ]; then
-  OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
-  OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
+  OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})
+  OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
 fi
-OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
-OPTIONS+=(k 'Accept Keysend' ${keysend})  
-OPTIONS+=(n 'Testnet' ${chainValue})    
-OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
-OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
+OPTIONS+=(a 'Channel Autopilot' ${autoPilot})
+OPTIONS+=(k 'Accept Keysend' ${keysend})
+OPTIONS+=(n 'Testnet' ${chainValue})
+OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})
+OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})
 OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
 OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})
   OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
-fi 
+fi
 
 CHOICES=$(dialog \
           --title ' Node Settings & Options ' \
@@ -295,7 +295,7 @@ Please keep in mind that thru your LND node id & your previous IP history with y
 
   # change TOR
   anychange=1
-  sudo /home/admin/config.scripts/internet.tor.sh ${choice}
+  sudo /home/admin/config.scripts/tor.install.sh ${choice}
   needsReboot=1
 
 else
@@ -313,7 +313,7 @@ if [ "${autoUnlock}" != "${choice}" ]; then
     l1="AUTO-UNLOCK IS NOW OFF"
     if [ "${choice}" = "on" ]; then
       l1="AUTO-UNLOCK IS NOW ACTIVE"
-    fi  
+    fi
     dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
     needsReboot=1
   fi
@@ -418,7 +418,7 @@ if [ "${zerotierSwitch}" != "${choice}" ]; then
   else
     dialog --msgbox "ZeroTier is now OFF." 5 46
   fi
-  
+
 else
   echo "ZeroTier setting unchanged."
 fi

@@ -21,12 +21,12 @@ elif [ "${chain}net" == "signet" ]; then
   BITCOINRPCPORT=38332
 fi
 
-# check and set up the HS    
-/home/admin/config.scripts/internet.hiddenservice.sh bitcoin ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+# check and set up the HS
+/home/admin/config.scripts/tor.onion-service.sh bitcoin ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
 hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 
-# btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label> 
+# btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label>
 quickConnect="btcstandup://$RPC_USER:$PASSWORD_B@$hiddenService:${BITCOINRPCPORT}/?label=$hostname"
 echo
 echo "scan the QR Code with Fully Noded to connect to your node:"

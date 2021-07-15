@@ -145,7 +145,7 @@ elif [ "${headless}" != "" ]; then
   displayClass="lcd"
 fi
 
-# NEW: decide by displayClass 
+# NEW: decide by displayClass
 echo "raspiblitz.info(${infoFileDisplayClass}) raspiblitz.conf(${displayClass})" >> ${logFile}
 if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
   if [ "${infoFileDisplayClass}" != "${displayClass}" ]; then
@@ -305,7 +305,7 @@ fi
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
-    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/tor.install.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning TOR - keep default" >> ${logFile}
 fi
@@ -386,7 +386,7 @@ else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
 
-# BTCPAYSERVER 
+# BTCPAYSERVER
 if [ "${BTCPayServer}" = "on" ]; then
 
   echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}

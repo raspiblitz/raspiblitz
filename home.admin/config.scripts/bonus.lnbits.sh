@@ -38,12 +38,12 @@ if [ "$1" = "menu" ]; then
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
 Public Domain: https://${publicDomain}:${httpsPort}
-port forwarding on router needs to be active & may change port" 
+port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
 You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
-${sslFingerprintIP}" 
+${sslFingerprintIP}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -51,7 +51,7 @@ ${sslFingerprintIP}"
 TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
   fi
-  
+
   if [ ${#ip2torDomain} -gt 0 ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
@@ -68,7 +68,7 @@ consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
   whiptail --title " LNbits " --msgbox "${text}" 16 69
-  
+
   /home/admin/config.scripts/blitz.display.sh hide
   echo "please wait ..."
   exit 0
@@ -368,8 +368,8 @@ EOF
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
+    # make sure to keep in sync with tor.install.sh script
+    /home/admin/config.scripts/tor.onion-service.sh lnbits 80 5002 443 5003
   fi
   exit 0
 fi
@@ -407,7 +407,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off lnbits
+    /home/admin/config.scripts/tor.onion-service.sh off lnbits
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')

@@ -37,15 +37,15 @@ sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
 ###### ACTIVATE TOR IF SET DURING SETUP
 if [ "${runBehindTor}" = "on" ]; then
-     
-  echo "runBehindTor --> ON"
-  sudo /home/admin/config.scripts/internet.tor.sh on
 
-  # but if IBD is allowed to be public switch off TOR just fro bitcoin 
+  echo "runBehindTor --> ON"
+  sudo /home/admin/config.scripts/tor.install.sh on
+
+  # but if IBD is allowed to be public switch off TOR just fro bitcoin
   # until IBD is done. background service will after that switch TOR on
   if [ "${ibdBehindTor}" = "off" ]; then
     echo "ibdBehindTor --> OFF"
-    sudo /home/admin/config.scripts/internet.tor.sh btcconf-off
+    sudo /home/admin/config.scripts/tor.install.sh btcconf-off
   else
     echo "ibdBehindTor --> ON"
   fi

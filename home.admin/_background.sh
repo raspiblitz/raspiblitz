@@ -43,14 +43,14 @@ do
   # prevent restart if COPY OVER LAN is running
   # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
   source ${infoFile}
-  if [ "${state}" == "copysource" ]; then 
+  if [ "${state}" == "copysource" ]; then
     echo "copysource mode: skipping background loop"
     sleep 10
     continue
   fi
 
   ####################################################
-  # RECHECK DHCP-SERVER 
+  # RECHECK DHCP-SERVER
   # https://github.com/rootzoll/raspiblitz/issues/160
   ####################################################
 
@@ -63,7 +63,7 @@ do
     localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localip(${localip})"
 
-    # detect a missing DHCP config 
+    # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
       sudo /home/admin/XXshutdown.sh reboot
@@ -136,27 +136,27 @@ do
       if [ "${ipv6}" = "on" ]; then
         # restart bitcoind as the global IP is stored in the node configuration
         # and we will get more connections if this matches our real IP address
-        # otherwise the bitcoin-node connections will slowly decline 
+        # otherwise the bitcoin-node connections will slowly decline
         echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
         sudo systemctl stop bitcoind
         sleep 3
         sudo systemctl start bitcoind
 
-        # if BTCRPCexplorer is currently running 
+        # if BTCRPCexplorer is currently running
         # it needs to be restarted to pickup the new IP for its "Node Status Page"
-        # but this is only needed in IPv6 only mode 
+        # but this is only needed in IPv6 only mode
         breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
         if [ ${breIsRunning} -eq 1 ]; then
           echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
           sudo systemctl stop btc-rpc-explorer
           sudo systemctl start btc-rpc-explorer
-        else 
+        else
           echo "new publicIP but no BTCRPCexplorer restart because not running"
-        fi 
+        fi
 
       else
         echo "IPv6 only is OFF => no need to restart bitcoind nor BTCRPCexplorer"
-      fi 
+      fi
 
       # only restart LND if auto-unlock is activated
       if [ "${autoUnlock}" = "on" ]; then
@@ -221,7 +221,7 @@ do
     fi
     blitzTUIHeartBeatLine="${latestHeartBeatLine}"
   fi
-  
+
   ###############################
   # SCB Monitoring
   ###############################
@@ -341,7 +341,7 @@ do
   # check every hour
   recheckRAID=$((($counter % 3600)+1))
   if [ ${recheckRAID} -eq 1 ]; then
-    
+
     # check if raid is active
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     if [ ${isRaid} -eq 1 ]; then
@@ -372,7 +372,7 @@ do
 
         echo "STARTING AUTO-UNLOCK ..."
         sudo /home/admin/config.scripts/lnd.unlock.sh
-        
+
       fi
     fi
   fi
@@ -432,7 +432,7 @@ do
         # if TOR was activated during setup make sure bitcoin runs behind TOR latest from now on
         if [ "${runBehindTor}" = "on" ]; then
           echo "TOR is ON -> make sure bitcoin is running behind TOR after IBD"
-          sudo /home/admin/config.scripts/internet.tor.sh btcconf-on
+          sudo /home/admin/config.scripts/tor.install.sh btcconf-on
         else
            echo "TOR is OFF after IBD"
         fi

@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="guggero" 
+PGPsigner="guggero"
 if [ $PGPsigner=guggero ];then
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
   PGPcheck="03DB6322267C373B"
@@ -84,10 +84,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# Replacing single install of: FARADAY"
       /home/admin/config.scripts/bonus.faraday.sh off
   fi
-  
+
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
   if [ ${isInstalled} -eq 0 ]; then
- 
+
     # create dedicated user
     sudo adduser --disabled-password --gecos "" lit || exit 1
 
@@ -135,7 +135,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/lit/.loop # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/.loop/ /home/lit/.loop
     sudo chown lit:lit -R /mnt/hdd/app-data/.loop
-    
+
     echo "# Pool"
     echo "# remove so can't be used parallel with LiT"
     config.scripts/bonus.pool.sh off
@@ -146,7 +146,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.pool/ /home/lit/.pool
     sudo chown lit:lit -R /mnt/hdd/app-data/.pool
 
-    echo "Detect CPU architecture ..." 
+    echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
@@ -172,7 +172,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       OSversion="arm64"
     elif [ ${isX86_64} -eq 1 ] ; then
       OSversion="amd64"
-    fi 
+    fi
     SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
 
     echo
@@ -297,7 +297,7 @@ WantedBy=multi-user.target
     sudo systemctl enable litd
     echo "OK - the Lightning lit service is now enabled"
 
-  else 
+  else
     echo "# The Lightning Terminal is already installed."
   fi
 
@@ -319,11 +319,11 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
 
   # setting value in raspi blitz config
   sudo sed -i "s/^lit=.*/lit=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh lit 443 8443
+    # make sure to keep in sync with tor.install.sh script
+    /home/admin/config.scripts/tor.onion-service.sh lit 443 8443
   fi
 
   source /home/admin/raspiblitz.info
@@ -356,7 +356,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop litd
     sudo systemctl disable litd
     sudo rm /etc/systemd/system/litd.service
-    # delete user 
+    # delete user
     sudo userdel -rf lit
     # close ports on firewall
     sudo ufw deny 8443
@@ -365,9 +365,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# OK, the lit.service is removed."
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off lit
+      /home/admin/config.scripts/tor.onion-service.sh off lit
     fi
-  else 
+  else
     echo "# LiT is not installed."
   fi
 
@@ -377,4 +377,3 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-  

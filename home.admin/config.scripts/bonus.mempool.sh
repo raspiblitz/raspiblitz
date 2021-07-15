@@ -286,8 +286,8 @@ EOF
   # Hidden Service for Mempool if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh mempool 80 4082 443 4083
+    # make sure to keep in sync with tor.install.sh script
+    /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
   exit 0
 fi
@@ -324,8 +324,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh off mempool
+      # make sure to keep in sync with tor.install.sh script
+      /home/admin/config.scripts/tor.onion-service.sh off mempool
     fi
 
     echo "# OK Mempool removed."
@@ -343,14 +343,14 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "*** Checking Mempool Explorer Version ***"
-  
+
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
   updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
-      echo "***  You are up-to-date on version $localVersion ***" 
+      echo "***  You are up-to-date on version $localVersion ***"
       sudo systemctl restart mempool 2>/dev/null
       echo "***  Restarting Mempool  ***"
   else
@@ -393,7 +393,7 @@ if [ "$1" = "update" ]; then
       sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
 
-      # Restore frontend files 
+      # Restore frontend files
       cd /home/mempool/mempool/frontend
       sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
       sudo chown -R www-data:www-data /var/www/mempool

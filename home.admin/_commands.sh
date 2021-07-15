@@ -115,7 +115,7 @@ function torthistx() {
     curl --socks5-hostname localhost:9050 -d $1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx
   else
     echo "Not running behind Tor - to install run:"
-    echo "sudo /home/admin/config.scripts/internet.tor.sh on"
+    echo "sudo /home/admin/config.scripts/tor.install.sh on"
   fi
 }
 
@@ -243,10 +243,10 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspibl
     --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
   alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
-    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --tlscertpath=/home/lit/.lit/tls.cert \\
     --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
   alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
 fi
 
@@ -295,7 +295,7 @@ function gettx() {
 
 # command: watchtx
 # try to retrieve transaction from mempool or blockchain until certain confirmation target
-# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs. 
+# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs.
 # $ watchtx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
 function watchtx() {
     tx_id="${1}"
@@ -327,8 +327,8 @@ function watchtx() {
 }
 
 # command: notifyme
-# A wrapper for blitz.notify.sh that will send a notification using the configured 
-# method and settings. 
+# A wrapper for blitz.notify.sh that will send a notification using the configured
+# method and settings.
 # This makes sense when waiting for commands to finish and then sending a notification.
 # $ notifyme "Hello there..!"
 # $ ./run_job_which_takes_long.sh && notifyme "I'm done."
