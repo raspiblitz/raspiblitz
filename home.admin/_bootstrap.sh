@@ -515,6 +515,8 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "$?" != "0" ]; then
       echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.setup.sh has syntax errros" >> $logFile
+      sed -i "s/^state=.*/state='error'/g" ${infoFile}
+      sed -i "s/^message=.*/message='_provision.setup.sh fail'/g" ${infoFile}
       exit 1
     fi
   fi
@@ -527,6 +529,8 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "$?" != "0" ]; then
       echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
+      sed -i "s/^state=.*/state='error'/g" ${infoFile}
+      sed -i "s/^message=.*/message='_provision.migration.sh fail'/g" ${infoFile}
       exit 1
     fi
   fi
@@ -539,6 +543,8 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "$?" != "0" ]; then
       echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
+      sed -i "s/^state=.*/state='error'/g" ${infoFile}
+      sed -i "s/^message=.*/message='_provision.update.sh fail'/g" ${infoFile}
       exit 1
     fi
   fi
@@ -549,6 +555,9 @@ if [ ${isMounted} -eq 0 ]; then
   sudo /home/admin/_provision_.sh
   if [ "$?" != "0" ]; then
     echo "EXIT _provision_.sh BECAUSE OF ERROR STATE" >> $logFile
+    echo "This can also happen if _provision_.sh has syntax errros" >> $logFile
+    sed -i "s/^state=.*/state='error'/g" ${infoFile}
+    sed -i "s/^message=.*/message='_provision_.sh fail'/g" ${infoFile}
     exit 1
   fi
 
