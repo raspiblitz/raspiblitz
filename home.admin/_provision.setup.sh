@@ -143,7 +143,7 @@ if [ "${lightning}" == "" ]; then
   sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
   sudo systemctl disable lnd
 
-if
+fi
 
 if [ "${lightning}" == "lnd" ]; then 
 

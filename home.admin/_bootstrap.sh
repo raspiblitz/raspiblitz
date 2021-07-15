@@ -513,7 +513,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     sudo /home/admin/_provision.setup.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.setup.sh has syntax errros" >> $logFile
       exit 1
     fi
@@ -525,7 +525,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
     sudo /home/admin/_provision.migration.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
       exit 1
     fi
@@ -537,7 +537,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     sudo /home/admin/_provision.update.sh
     if [ "$?" != "0" ]; then
-      echo "EXIT BECAUSE OF ERROR STATE ($?)" >> $logFile
+      echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
       exit 1
     fi
@@ -548,7 +548,7 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
   sudo /home/admin/_provision_.sh
   if [ "$?" != "0" ]; then
-    echo "EXIT BECAUSE OF ERROR STATE" >> $logFile
+    echo "EXIT _provision_.sh BECAUSE OF ERROR STATE" >> $logFile
     exit 1
   fi
 
