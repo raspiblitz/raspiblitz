@@ -136,6 +136,8 @@ do
   # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
   #####################################
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${initialSync}" == "1" ]; then
+    echo "debug wait eventBlockchainSync.sh ..."
+    sleep 3
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
     continue
   fi
@@ -195,7 +197,7 @@ do
       exit 1
     else
         # every other state just push as event to SSH frontend
-        echo "debug wait ..."
+        echo "debug wait eventInfoWait.sh ..."
         sleep 3
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
