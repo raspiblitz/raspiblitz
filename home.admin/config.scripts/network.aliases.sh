@@ -6,7 +6,8 @@
 # alias bitcoincli_alias="$bitcoincli_alias"
 # alias lncli_alias="$lncli_alias"
 # alias lightningcli_alias="$lightningcli_alias"
-source /mnt/hdd/raspiblitz.conf
+source /home/admin/raspiblitz.info 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 if [ $1 = getvars ];then
   # LNTYPE is lnd | cln
