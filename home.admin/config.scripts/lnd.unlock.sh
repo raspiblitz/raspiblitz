@@ -24,7 +24,7 @@ action="$1"
 passwordC="$2"
 
 # check if wallet is already unlocked
-echo "# checking LND wallet ... (can take some time)"
+# echo "# checking LND wallet ... (can take some time)"
 walletLocked=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
 macaroonsMissing=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
 
@@ -37,7 +37,7 @@ fi
 
 # if already unlocked all is done
 if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
-    echo "# OK LND wallet was already unlocked"
+    # echo "# OK LND wallet was already unlocked"
     exit 0
 fi
 
