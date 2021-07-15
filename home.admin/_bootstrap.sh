@@ -492,10 +492,17 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
 
+  # load setup data
+  source ${setupFile} 2>$logFile
+  
+  # make sure basic info id in raspiblitz.info
+  sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
+  sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
+  sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
+
   ###################################
   # Set Password A (in all cases)
   
-  source ${setupFile} 2>$logFile
   if [ "${passwordA}" == "" ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='config: missing passwordA'/g" ${infoFile}

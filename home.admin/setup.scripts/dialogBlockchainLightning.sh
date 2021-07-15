@@ -85,5 +85,6 @@ fi
 # write results to setup sate
 echo "lightning=${lightning}" >> $SETUPFILE
 echo "network=${network}" >> $SETUPFILE
+echo "chain=main" >> $SETUPFILE
 
 exit 0
