@@ -28,7 +28,7 @@ source ${infoFile}
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
   echo "setupPhase(${setupPhase}) state(${state})"
-  echo "FAIL: ${infoFile} does not contain important state information."
+  echo "FAIL: ${infoFile} does not exist or missing state."
   echo "Check logs & bootstrap.service for errors and report to devs."
   exit 1
 fi
