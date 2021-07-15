@@ -195,6 +195,8 @@ do
       exit 1
     else
         # every other state just push as event to SSH frontend
+        echo "debug wait ..."
+        sleep 3
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
 
