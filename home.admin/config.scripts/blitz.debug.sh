@@ -46,7 +46,6 @@ echo ""
 echo "*** BLOCKCHAIN SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
-
 echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
@@ -64,7 +63,6 @@ echo ""
 echo "*** LND SYSTEMD STATUS ***"
 sudo systemctl status lnd -n2 --no-pager
 echo ""
-
 echo "*** LAST LND ERROR LOGS ***"
 echo "sudo journalctl -u lnd -b --no-pager -n12"
 sudo journalctl -u lnd -b --no-pager -n12
@@ -73,6 +71,14 @@ echo ""
 echo "*** LAST 30 LND INFO LOGS ***"
 echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
+echo ""
+
+echo "*** C-LIGHTNING SYSTEMD STATUS ***"
+sudo systemctl status lightningd -n2 --no-pager
+echo ""
+echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
+echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 echo ""
 
 echo "*** NGINX SYSTEMD STATUS ***"
