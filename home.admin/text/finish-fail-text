@@ -1,6 +1,6 @@
 HMMM... THAT DOESN'T LOOK GOOD...
 
-We couldn't check if your connection is now protected. However, BE PATIENT! Tor needs UP TO ONE MINUTE to establish the necessary circuits -- check with main menu entry 3 "Show the Tor log file" in the main menu. At the end of Tor's boot process, you should see "Bootstrapped 100%: Done". You can leave the progress report with CTRL-C.
+We couldn't check if your connection is now protected. However, BE PATIENT! Tor needs UP TO ONE MINUTE to establish the necessary circuits. At the end of Tor's boot process, you should see "Bootstrapped 100%: Done". You can leave the progress report with CTRL-C.
 
 If this doesn't help you may have to choose the Internet source again or even restart tor. You can also manually check, if tor is working and your connection being protected. To make so, run the following command:
 

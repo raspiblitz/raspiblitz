@@ -1,4 +1,4 @@
-Currently, no bridges are configured. Bridges are necessary for Tor to bypass Tor blocking in a country. With the help of this dialog-based configuration assistant, bridges can easily be added. When adding more than 5 bridges, it is recommended to use the advanced configuration editor (menu entry 7).
+Currently, no bridges are configured. Bridges are necessary for Tor to bypass Tor blocking in a country. With the help of this dialog-based configuration assistant, bridges can easily be added. When adding more than 5 bridges, it is recommended to edit the torrc.
 
 HOW TO OBTAIN BRIDGES?
 With Tor, you have three ways to obtain bridges:

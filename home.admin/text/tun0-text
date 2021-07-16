@@ -11,8 +11,8 @@ possibilities of how Tor on Raspiblitz handles VPN connections:
 
 IMPORTANT
 - We do NOT recommend using a VPN. If Tor entry guards cannot be reached
-  for censorship reasons, we recommend using OBFS4 bridges as a priority
-  (main menu entry 10). We consider a VPN connection as a last resort.
+  for censorship reasons, we recommend using OBFS4 bridges as a priority.
+  We consider a VPN connection as a last resort.
 - Nevertheless, we consider the additional risk of this "Tor over VPN"
   situation  to be proportionate - see here: https://bit.ly/31lUhLQ
 

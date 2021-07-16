@@ -2,7 +2,7 @@ With this menu entry, you can DEACTIVATE SELECTED BRIDGES from the Tor configura
 
 2-STEP PROCEDURE
 To activate selected bridges, you have to follow a 2-step procedure:
-1. List all bridges (menu entry 2) and make a note of all bridge numbers
+1. List all bridges and make a note of all bridge numbers
    you want to deactivate.
 2. Continue with this menu entry and put in all bridge numbers separated
    by a comma, which you want to deactivate (for example 1,2,3,10)

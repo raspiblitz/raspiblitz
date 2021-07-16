@@ -1,6 +1,6 @@
 With this menu entry, you can ADD BRIDGES MANUALLY. Bridges are necessary for Tor to bypass Tor blocking in a country.
 
-With the help of this dialogue-based configuration assistant, 3-5 bridges can easily be added. When adding more than five bridges, it is recommended to use the advanced configuration editor (menu entry 7).
+With the help of this dialogue-based configuration assistant, 3-5 bridges can easily be added. When adding more than five bridges, it is recommended to edit the torrc.
 
 HOW TO OBTAIN BRIDGES?
 With Tor, you have three ways to obtain bridges:

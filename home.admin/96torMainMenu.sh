@@ -369,7 +369,6 @@ EOF
         sudo /sbin/iptables-restore < /etc/iptables.ipv4.nat
         echo ""
         echo -e "${RED}[+] It may take some time for Tor to reconnect.${NOCOLOR}"
-        echo -e "${RED}[+] In case of problems, use main menu entry 4-9.${NOCOLOR}"
         sleep 5
         tun0up=$(ip link | grep tun0)
       fi
@@ -383,7 +382,6 @@ EOF
         sleep 15
         echo ""
         echo -e "${RED}[+] It may take some time for Tor to reconnect.${NOCOLOR}"
-        echo -e "${RED}[+] In case of problems, use main menu entry 4-9.${NOCOLOR}"
         sleep 5
         tun0up=$(ip link | grep tun0)
       fi
