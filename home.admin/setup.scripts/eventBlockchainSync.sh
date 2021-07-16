@@ -70,7 +70,7 @@ do
        infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
     else
        # if lightning is deactivated
-       infoStr="${infoStr} Lightning deactivated"
+       infoStr="${infoStr} Lightning deactivated\n ${actionString}"
     fi
     
     # set admin string
