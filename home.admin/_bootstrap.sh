@@ -582,6 +582,15 @@ if [ ${isMounted} -eq 0 ]; then
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
+  # wait until syncProgress is available (neeed for final dialogs)
+  while [ "${syncProgress}" == "" ]
+  do
+    echo "# Waiting for blockchain sync progress info ..." >> $logFile
+    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+    sed -i "s/^state=.*/state=waitsync/g" ${infoFile}
+    sleep 2
+  done
+
   ###################################################
   # WAIT LOOP: AFTER FRESH SETUP, MIGRATION
   # successfull update & recover can skip this
