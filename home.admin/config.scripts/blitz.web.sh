@@ -201,11 +201,27 @@ EOF
   sudo apt-get install -y python3-jinja2
   sudo -H python3 -m pip install j2cli
 
-  # use LND cert by default
-  sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-  sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
-  sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-  sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+  if [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
+    if [ -f /mnt/hdd/lnd/tls.cert ]; then
+      # use LND cert by default
+      sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
+      sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+      sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+      sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+    else 
+      # create a self-signed cert if the LND cert is not present
+      /home/admin/config.scripts/internet.selfsignedcert.sh   
+  
+      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
+                  /mnt/hdd/app-data/nginx/tls.cert
+      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
+                  /mnt/hdd/app-data/nginx/tls.key
+      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
+                  /mnt/hdd/app-data/nginx/tor_tls.cert
+      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
+                  /mnt/hdd/app-data/nginx/tor_tls.key
+    fi
+  fi
 
   # config
   sudo cp /home/admin/assets/blitzweb.conf /etc/nginx/sites-available/blitzweb.conf

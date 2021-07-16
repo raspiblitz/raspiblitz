@@ -11,10 +11,6 @@ else
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
-shopt -s expand_aliases
-alias bitcoincli_alias="$bitcoincli_alias"
-alias lncli_alias="$lncli_alias"
-alias lightningcli_alias="$lightningcli_alias"
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -30,7 +26,7 @@ sudo mkdir /mnt/hdd/temp 2>/dev/null
 sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 
 # localIP
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep -E -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
 
 # temp - no measurement in a VM
@@ -58,7 +54,7 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  bitcoincli_alias getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
+  $bitcoincli_alias getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
   # check if error on request
   blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)

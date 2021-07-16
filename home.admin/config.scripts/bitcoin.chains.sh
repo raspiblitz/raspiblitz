@@ -11,9 +11,7 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = signet ]||[ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
-  echo "# Installing Bitcoin Core instance on ${CHAIN}"
-else
+if [ "${CHAIN}" != signet ]&&[ "${CHAIN}" != testnet ]&&[ "${CHAIN}" != mainnet ];then
   echo "# ${CHAIN} is not supported"
   exit 1
 fi
@@ -21,17 +19,17 @@ fi
 # prefix for parallel services
 if [ ${CHAIN} = testnet ];then
   prefix="t"
-  bitcoinprefix=test
+  bitcoinprefix="test"
   zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
   rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
-  bitcoinprefix=signet
+  bitcoinprefix="signet"
   zmqprefix=23
   rpcprefix=3
 elif [ ${CHAIN} = mainnet ];then
   prefix=""
-  bitcoinprefix=main
+  bitcoinprefix="main"
   zmqprefix=28
   rpcprefix=""
 fi
@@ -45,12 +43,20 @@ function removeParallelService() {
     fi
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
+    if [ ${bitcoinprefix} = signet ];then
+      # check for signet service set up by joininbox  
+      if [ -f "/etc/systemd/system/signetd.service" ];then
+        sudo systemctl stop signetd
+        sudo systemctl disable signetd
+        echo "# The signetd.service is stopped and disabled"
+      fi
+    fi
     echo "# Bitcoin Core on ${CHAIN} service is stopped and disabled"
-    echo
   fi
 }
 
 function installParallelService() {
+  echo "# Installing Bitcoin Core instance on ${CHAIN}"
   # bitcoin.conf
   if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
     # add minimal config
@@ -75,6 +81,13 @@ datadir=/mnt/hdd/bitcoin
   
   # make sure rpcbind is correctly configured
   sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "rpcallowip" < /mnt/hdd/${network}/${network}.conf) -gt 0 ];then
+    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+      echo "\
+${bitcoinprefix}.rpcbind=127.0.0.1"|\
+      sudo tee -a /mnt/hdd/${network}/${network}.conf
+    fi
+  fi
 
   # correct rpcport entry
   sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
@@ -93,17 +106,30 @@ ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
     sudo tee -a /mnt/hdd/${network}/${network}.conf
   fi
 
+  if [ -f /mnt/hdd/lnd/lnd.conf ];then
+    echo "# Check mainnet lnd.conf" 
+    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    # it does not pick up main.zmqpubraw entries from bitcoin.conf, need to set manually
+    if [ $(grep -c zmqpubrawblock /mnt/hdd/lnd/lnd.conf) -eq 0 ];then 
+      echo "
+[bitcoind]
+bitcoind.rpcuser=$RPCUSER
+bitcoind.rpcpass=$RPCPSW
+bitcoind.zmqpubrawblock=tcp://127.0.0.1:28332
+bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333
+"   | sudo tee -a /mnt/hdd/lnd/lnd.conf
+    fi
+  fi
+
   # addnode
   if [ ${bitcoinprefix} = signet ];then
     if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
       echo "\
-signet.addnode=g7fyzp4rgxlrcg73jmrwrzhjnfpsuavjvopurvfq7nrl5x2tif3gx6qd.onion:38333
 signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
 signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
 signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
-signet.addnode=4j6owtnrkgfty2ehbyuwz72k32fyos7co7jnnktxwg7rfrgnqk3obkid.onion:38333
 signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
-signet.addnode=u2d5lofh73k275q3zm76r5bob5pjbff35goubg5hwr2xpgj365ei7cyd.onion:38333
 signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
       sudo tee -a /mnt/hdd/${network}/${network}.conf
     fi
@@ -125,7 +151,6 @@ Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon\
  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-KillMode=process
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -151,10 +176,10 @@ WantedBy=multi-user.target
     if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
       bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
  -rpcport=${rpcprefix}8332\"' \
-      >> /home/admin/_aliases.sh"
+      >> /home/admin/_aliases"
       bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
  -${CHAIN}\"' \
-      >> /home/admin/_aliases.sh"
+      >> /home/admin/_aliases"
     fi
   fi
 
@@ -169,7 +194,7 @@ WantedBy=multi-user.target
 
   isInstalled=$(systemctl status ${prefix}bitcoind | grep -c active)
   if [ $isInstalled -gt 0 ];then 
-    echo "# Installed $(bitcoind --version | grep version) ${prefix}bitcoind.service"
+    echo "# Installed $(bitcoind --version | grep version)"
     echo 
     echo "# Monitor the ${prefix}bitcoind with:"
     if [ ${CHAIN} = signet ]; then
@@ -205,6 +230,7 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  echo "# Uninstall Bitcoin Core instance on ${CHAIN}"
   removeParallelService
   # setting value in raspi blitz config
   sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=off/g" /mnt/hdd/raspiblitz.conf

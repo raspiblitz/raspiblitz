@@ -8,6 +8,8 @@ source /mnt/hdd/raspiblitz.conf
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
+
 # BASIC MENU INFO
 HEIGHT=13
 WIDTH=64
@@ -33,14 +35,14 @@ fi
 
 OPTIONS+=(NAME "Change Name/Alias of Node")
 
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
+openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 
-OPTIONS+=(CASHOUT "Remove Funds from LND")
+OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
 if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = cln ];then
   OPTIONS+=(SWITCHLN  "Use LND as default")
   HEIGHT=$((HEIGHT+1))
@@ -85,22 +87,22 @@ case $CHOICE in
       read key
       ;;
   PEERING)
-      /home/admin/BBconnectPeer.sh
+      /home/admin/BBconnectPeer.sh lnd $CHAIN
       ;;
   FUNDING)
-      /home/admin/BBfundWallet.sh
+      /home/admin/BBfundWallet.sh lnd $CHAIN
       ;;
   CASHOUT)
-      /home/admin/BBcashoutWallet.sh
+      /home/admin/BBcashoutWallet.sh lnd $CHAIN
       ;;
   CHANNEL)
-      /home/admin/BBopenChannel.sh
+      /home/admin/BBopenChannel.sh lnd $CHAIN
       ;;
   SEND)
-      /home/admin/BBpayInvoice.sh
+      /home/admin/BBpayInvoice.sh lnd $CHAIN
       ;;
   RECEIVE)
-      /home/admin/BBcreateInvoice.sh
+      /home/admin/BBcreateInvoice.sh lnd $CHAIN
       ;;
   NAME)
       sudo /home/admin/config.scripts/lnd.setname.sh
@@ -114,7 +116,7 @@ case $CHOICE in
       fi
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh
+      /home/admin/BBcloseAllChannels.sh lnd $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;

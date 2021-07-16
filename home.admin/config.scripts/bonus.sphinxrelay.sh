@@ -199,7 +199,7 @@ if [ "$1" = "status" ]; then
     echo "installed=0"
   fi
 
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   echo "localIP='${localIP}'"
   echo "httpsPort='3301'"
   echo "httpPort='3300'"
@@ -441,6 +441,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=journal
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

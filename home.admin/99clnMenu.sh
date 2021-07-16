@@ -5,11 +5,7 @@ echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-if [ $# -gt 0 ];then
-  NETWORK=$1
-else
-  NETWORK=${chain}net
-fi
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
@@ -28,30 +24,26 @@ OPTIONS+=(PEERING "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-
-if [ "${chain}" = "main" ]; then
-#TODO OPTIONS+=(lnbalance "Detailed Wallet Balances")
-#TODO OPTIONS+=(lnchannels "Lightning Channel List")
-#TODO OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")
-  HEIGHT=$((HEIGHT+3))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+3))  
-fi
-
+OPTIONS+=(SUMMARY "Information about this node")
 #TODO OPTIONS+=(NAME "Change Name/Alias of Node")
 
-openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net listchannels 2>/dev/null | jq '.[] | length')
+ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
+ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
+cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
+openChannels=$((ln_channels_online+cln_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-#TODO   OPTIONS+=(CLOSEALL "Close all open Channels")
+OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi  
 
-#TODO OPTIONS+=(CASHOUT "Remove Funds from LND")
+OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
@@ -64,49 +56,26 @@ CHOICE=$(dialog --clear \
                 2>&1 >/dev/tty)
 
 case $CHOICE in
-  lnbalance)
-      clear
-      echo "*** YOUR SATOSHI BALANCES ***"
-      /home/admin/config.scripts/lnd.balance.sh ${network}
-      echo "Press ENTER to return to main menu."
-      read key
-      ;;
-  lnchannels)
-      clear
-      echo "*** YOUR LIGHTNING CHANNELS ***"
-      echo ""
-      echo "Capacity -> total sats in the channel (their side + your side)"
-      echo "Commit-Fee -> the fee that's charged if either side of the channel closes"
-      echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
-      echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
-      echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
-      echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
-      /home/admin/config.scripts/lnd.channels.sh ${network}
-      echo "Press ENTER to return to main menu."
-      read key
-      ;;
-  lnfwdreport)
-      /home/admin/config.scripts/lnd.fwdreport.sh -menu
-      echo "Press ENTER to return to main menu."
-      read key
+  SUMMARY)
+      /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
       ;;
   PEERING)
-      /home/admin/BBconnectPeer.sh cln $NETWORK
+      /home/admin/BBconnectPeer.sh cln $CHAIN
       ;;
   FUNDING)
-      /home/admin/BBfundWallet.sh cln $NETWORK
+      /home/admin/BBfundWallet.sh cln $CHAIN
       ;;
   CASHOUT)
-      /home/admin/BBcashoutWallet.sh
+      /home/admin/BBcashoutWallet.sh cln $CHAIN
       ;;
   CHANNEL)
-      /home/admin/BBopenChannel.sh cln $NETWORK
+      /home/admin/BBopenChannel.sh cln $CHAIN
       ;;
   SEND)
-      /home/admin/BBpayInvoice.sh cln $NETWORK
+      /home/admin/BBpayInvoice.sh cln $CHAIN
       ;;
   RECEIVE)
-      /home/admin/BBcreateInvoice.sh cln $NETWORK
+      /home/admin/BBcreateInvoice.sh cln $CHAIN
       ;;
   NAME)
       sudo /home/admin/config.scripts/lnd.setname.sh
@@ -120,7 +89,7 @@ case $CHOICE in
       fi
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh
+      /home/admin/BBcloseAllChannels.sh cln $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;

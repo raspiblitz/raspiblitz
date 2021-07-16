@@ -135,7 +135,7 @@ fi
 
 # get the local IP as default host
 if [ ${#host} -eq 0 ]; then
-    host=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    host=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 fi
 
 # change host to dynDNS if set

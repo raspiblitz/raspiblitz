@@ -49,6 +49,7 @@ Ensure that you put quotes around fingerprints containing spaces if importing wi
 # Physical Security
 
 * The lightning wallet and user interfaces are password protected by default so this has more privacy implications (in the case of physical theft) than security.
+* Basic hardening measures are applied to all systemd services
 * Optional log in through SSH using a hardware wallet.
 * LUKS encryption would be welcome in the future.
 

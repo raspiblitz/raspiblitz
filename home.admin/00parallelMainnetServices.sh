@@ -27,7 +27,7 @@ OPTIONS+=(s "Sparko for CLN on $CHAIN" ${sparko})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          11 45 4  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          12 45 5  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -128,7 +128,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
       sudo systemctl start cRTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
+      /home/admin/config.scripts/bonus.rtl.sh menu cln $CHAIN
     else
       l1="!!! FAIL on RTL for CLN $CHAIN install !!!"
       l2="Try manual install on terminal after reboot with:"
@@ -146,15 +146,15 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${sparko}" != "${choice}" ]; then
   echo "# Sparko on $CHAIN Setting changed .."
   anychange=1
-  /home/admin/config.scripts/cln.sparko.sh ${choice} $CHAIN
+  /home/admin/config.scripts/cln-plugin.sparko.sh ${choice} $CHAIN
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cln.sparko.sh menu $CHAIN
+      /home/admin/config.scripts/cln-plugin.sparko.sh menu $CHAIN
     else
       l1="# !!! FAIL on Sparko on $CHAIN install !!!"
       l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cln.sparko.sh on $CHAIN"
+      l3="/home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi

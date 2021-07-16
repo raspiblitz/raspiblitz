@@ -1,5 +1,5 @@
 #!/bin/bash
-RTLVERSION="v0.10.1"
+RTLVERSION="v0.11.0"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -74,7 +74,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -142,33 +142,34 @@ function configRTL() {
   fi
 
   # prepare RTL-Config.json file
-  echo "# RTL.conf"
+  echo "# ${netprefix}RTL/RTL.conf"
   # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
   sudo cp /home/rtl/RTL/sample-RTL-Config.json /home/admin/RTL-Config.json
   sudo chown admin:admin /home/admin/RTL-Config.json
   sudo chmod 600 /home/admin/RTL-Config.json || exit 1
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
   # modify sample-RTL-Config.json and save in RTL-Config.json
-  sudo node > /home/admin/RTL-Config.json <<EOF
+  node > /home/admin/RTL-Config.json <<EOF
 //Read data
 var data = require('/home/rtl/RTL/sample-RTL-Config.json');
 //Manipulate data
 data.port = '$RTLHTTP'
 data.nodes[0].lnNode = '$hostname'
 data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
-data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/lnd.conf';
+data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/${netprefix}lnd.conf';
 data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
 data.nodes[0].Authentication.boltzMacaroonPath = '/home/rtl/.boltz-lnd/macaroons/'
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
-data.nodes[0].Settings.channelBackupPath = '/home/rtl/RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.channelBackupPath = '/home/rtl/${netprefix}RTL-SCB-backup-$hostname'
 data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-  sudo rm -f /home/rtl/RTL/RTL-Config.json
-  sudo mv /home/admin/RTL-Config.json /home/rtl/RTL/
-  sudo chown rtl:rtl /home/rtl/RTL/RTL-Config.json
+  sudo -u rtl mkdir -p /home/rtl/${netprefix}RTL
+  sudo rm -f /home/rtl/${netprefix}RTL/RTL-Config.json
+  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
+  sudo chown rtl:rtl /home/rtl/${netprefix}RTL/RTL-Config.json
 }
 
 # switch on
@@ -237,7 +238,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ $LNTYPE = lnd ];then
     echo "# Install service"
     echo "# Install RTL systemd for ${network} on ${chain}"
-    cat > /home/admin/${netprefix}${typeprefix}RTL.service <<EOF
+    echo "
 # Systemd unit for ${netprefix}${typeprefix}RTL
 # /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
@@ -247,7 +248,8 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/bin/node /home/rtl/RTL/rtl --lndir /home/rtl/.lnd/data/chain/bitcoin/mainnet
+Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"
+ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
 Restart=always
 TimeoutSec=120
@@ -255,9 +257,16 @@ RestartSec=30
 StandardOutput=null
 StandardError=journal
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
-EOF
+" | sudo tee /home/admin/${netprefix}${typeprefix}RTL.service
+
       sudo mv /home/admin/${netprefix}${typeprefix}RTL.service /etc/systemd/system/${netprefix}${typeprefix}RTL.service
       sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${CHAIN}|" /etc/systemd/system/${netprefix}${typeprefix}RTL.service
       sudo chown root:root /etc/systemd/system/${netprefix}${typeprefix}RTL.service
@@ -273,10 +282,11 @@ EOF
 
 [Unit]
 Description=${netprefix}${typeprefix}RTL daemon
-Wants=${netprefix}lightning.service
-After=${netprefix}lightning.service
+Wants=${netprefix}lightningd.service
+After=${netprefix}lightningd.service
 
 [Service]
+Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"
 Environment=\"PORT=$RTLHTTP\"
 Environment=\"LN_IMPLEMENTATION=CLT\"
 Environment=\"LN_SERVER_URL=https://localhost:${portprefix}6100\"
@@ -289,6 +299,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
