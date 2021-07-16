@@ -141,45 +141,52 @@ function decryptHSMsecret() {
 # Options #
 ########### 
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ]; then
-  if ! sudo ls $hsmSecretPath 2>1 1>/dev/null; then
 
-    # check for https://github.com/trezor/python-mnemonic
-    if [ $(pip list | grep -c mnemonic) -eq 0 ];then
-      pip install mnemonic==0.19 1>/dev/null
+  # check/delete existing wallet
+  if [ "$1" = "new-force" ]; then
+    echo "# deleting any old wallet ..."
+    sudo rm $hsmSecretPath
+  else
+    if sudo ls $hsmSecretPath 2>1 1>/dev/null; then
+      echo "# The hsm_secret is already present at $hsmSecretPath."
+      exit 0
     fi
-    if [ "$1" = "new" ]; then
-      seedPassword="$3"
-      # get 24 words
-      source <(python /home/admin/config.scripts/blitz.mnemonic.py)
-      #TODO seedWords to cln.backup.sh seed-export-gui
-      /home/admin/config.scripts/cln.backup.sh seed-export-gui $seedWords6x4
-    elif [ "$1" = "new-force" ]; then
-      # get 24 words
-      source <(python /home/admin/config.scripts/blitz.mnemonic.py)
-      echo "seedwords='${seedwords}'"
-      echo "seedwords6x4='${seedwords6x4}'"
-    elif [ "$1" = "seed" ]; then
-      #TODO get seedWords from cln.backup.sh seed-import-gui [$RESULTFILE]
-      seedWords="$3"
-      seedPassword="$4"
-    fi
-    # pass to 'hsmtool generatehsm hsm_secret'
-    if [ ${#seedPassword} -eq 0 ]; then
-      (echo "0"; echo "$seedWords"; echo) | \
-      sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" \
-      $hsmSecretPath
-    else
-      # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
-      (echo "0";echo "$seedWords";echo "$seedPassword";echo "$seedPassword")|\
-      sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" \
-      $hsmSecretPath
-    fi
-    exit 0
-  else 
-    echo "# The hsm_secret is already present at $hsmSecretPath."
-    exit 0
   fi
 
+  # check for https://github.com/trezor/python-mnemonic
+  if [ $(pip list | grep -c mnemonic) -eq 0 ];then
+    pip install mnemonic==0.19 1>/dev/null
+  fi
+
+  if [ "$1" = "new" ]; then
+    seedPassword="$3"
+    # get 24 words
+    source <(python /home/admin/config.scripts/blitz.mnemonic.py)
+    #TODO seedwords to cln.backup.sh seed-export-gui
+    /home/admin/config.scripts/cln.backup.sh seed-export-gui "${seedwords6x4}"
+  elif [ "$1" = "new-force" ]; then
+    # get 24 words
+    source <(python /home/admin/config.scripts/blitz.mnemonic.py)
+    echo "seedwords='${seedwords}'"
+    echo "seedwords6x4='${seedwords6x4}'"
+  elif [ "$1" = "seed" ]; then
+    #TODO get seedwords from cln.backup.sh seed-import-gui [$RESULTFILE]
+    seedwords="$3"
+    seedpassword="$4"
+  fi
+
+  # (echo "0"; echo "purpose lyrics clutch girl weird elbow hover large protect hover level guess damage advance glory warrior wear zone crash room drastic judge hurry enough"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" /home/bitcoin/.lightning/bitcoin/hsm_secret
+
+  # pass to 'hsmtool generatehsm hsm_secret'
+  if [ ${#seedpassword} -eq 0 ]; then
+    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath
+  else
+    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
+    (echo "0";echo "$seedwords";echo "$seedpassword";echo "$seedpassword")|\
+    sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath
+  fi
+  exit 0
+  
 elif [ "$1" = "unlock" ]; then
   # getpassword
   if [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
