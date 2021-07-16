@@ -303,7 +303,7 @@ Now start the Lightning App again. Your wallet password should now be your RaspI
 
 ## How do I change the Name/Alias of my lightning node
 
-Use the "Change Name/Alias of Node" option in the main menu. The RaspiBlitz will automatically reboot after this.
+Use the "Change Name/Alias of Node" option in the Lightning - LND Wallet Options menu. The RaspiBlitz will automatically reboot after this.
 
 ## What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
 
