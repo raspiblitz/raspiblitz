@@ -45,7 +45,7 @@ do
     fi
 
     # formatting LIGHTNING SCAN PROGRESS  
-    if [ "${scanProgress}" == "" ]; then
+    if [ "${lightning}" != ""  ] && [ "${scanProgress}" == "" ]; then
         # in case of LND RPC is not ready yet
         if [ ${scanTimestamp} -eq -2 ]; then
             scanProgress="prepare sync"
@@ -63,8 +63,16 @@ do
     fi
 
     # setting info string
-    infoStr=" Blockchain Progress : ${syncProgress}\n Lightning Progress  : ${scanProgress}\n ${actionString}"
-
+    infoStr=" Blockchain Progress : ${syncProgress}\n"
+    
+    if [ "${lightning}" != "" ]; then
+       # if lightning is active 
+       infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
+    else
+       # if lightning is deactivated
+       infoStr="${infoStr} Lightning deactivated"
+    fi
+    
     # set admin string
     if [ ${lcd} -eq 1 ]; then
         adminStr="ssh admin@${localip} -> Password A"

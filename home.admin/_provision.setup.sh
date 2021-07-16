@@ -139,10 +139,11 @@ echo "Prepare Lightning (${lightning})" >> ${logFile}
 if [ "${lightning}" == "" ]; then 
 
   ###################################
-  # No Lightning
+  # No Lightning (remove lnd from systemd)
   sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
   sudo systemctl disable lnd
-
+  sudo rm /etc/systemd/system/lnd.service
+  sudo systemctl daemon-reload
 fi
 
 if [ "${lightning}" == "lnd" ]; then 

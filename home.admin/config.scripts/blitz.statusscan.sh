@@ -272,6 +272,13 @@ if [ ${lndRunning} -eq 1 ]; then
 
 fi
 
+# is CLN running
+clnRunning=$(systemctl status ${netprefix}cln.service 2>/dev/null | grep -c running)
+echo "clnActive=${clnRunning}"
+if [ ${clnRunning} -eq 1 ]; then
+  echo "# TODO: cln status statistics"
+fi
+
 # touchscreen statistics
 if [ "${touchscreen}" == "1" ]; then
   echo "blitzTUIActive=1"
