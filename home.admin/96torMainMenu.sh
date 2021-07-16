@@ -419,7 +419,7 @@ EOF
       if [ "$CHOICE" == "INSTALL" ]; then
         clear
         ${ONION_SERVICE_SCRIPT} vanguards install
-        ${ONION_SERVICE_SCRIPT} vanguards on
+        ${ONION_SERVICE_SCRIPT} vanguards on 9051
       elif [ "$CHOICE" == "RESTART_vanguards" ]; then
         clear
         sudo systemctl restart vanguards@default.service

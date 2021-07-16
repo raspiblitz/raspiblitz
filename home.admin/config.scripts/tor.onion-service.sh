@@ -330,7 +330,7 @@ if [ "${1}" == "vanguards" ]; then
     sudo systemctl stop vanguards@default.service
     sudo systemctl disable vanguards@default.service
     sudo rm -rf /etc/systemd/system/vanguards@default.service
-    sudo rm -rf ${DATA_DIR}/vanguards@default.service
+    sudo rm -rf ${DATA_DIR}/vanguards
     sudo systemctl daemon-reload
     restarting_tor
     echo "Done"
@@ -351,7 +351,7 @@ Wants=tor@default.service
 After=network.target nss-lookup.target mnt-hdd.mount
 
 [Service]
-WorkingDirectory=${WORKING_VANGUARDS_DIR}/vanguards
+WorkingDirectory=${DATA_DIR}/vanguards
 ExecStart=/usr/bin/python3 src/vanguards.py --control_port ${CONTROL_PORT}
 Environment=VANGUARDS_CONFIG=${ROOT_TORRC}/vanguards.conf
 User=${OWNER_DATA_DIR}
