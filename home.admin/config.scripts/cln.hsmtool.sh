@@ -20,7 +20,9 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo "# new-force will delete any old wallet and will work without dialog"
   echo
   echo "# cln.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
+  echo "# cln.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
   echo "# the new hsm_secret will be not encrypted if no NewPassword is given"
+  echo "# seed-force will delete any old wallet and will work without dialog"
   echo
   echo "# cln.hsmtool.sh [unlock|lock] <mainnet|testnet|signet>"
   echo "# cln.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>"
@@ -140,10 +142,10 @@ function decryptHSMsecret() {
 ###########
 # Options #
 ########### 
-if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ]; then
+if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # check/delete existing wallet
-  if [ "$1" = "new-force" ]; then
+  if [ "$1" = "new-force" ] || [ "$1" = "seed-force" ]; then
     echo "# deleting any old wallet ..."
     sudo rm $hsmSecretPath
   else
@@ -169,7 +171,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ]; then
     source <(python /home/admin/config.scripts/blitz.mnemonic.py)
     echo "seedwords='${seedwords}'"
     echo "seedwords6x4='${seedwords6x4}'"
-  elif [ "$1" = "seed" ]; then
+  elif [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
     #TODO get seedwords from cln.backup.sh seed-import-gui [$RESULTFILE]
     seedwords="$3"
     seedpassword="$4"

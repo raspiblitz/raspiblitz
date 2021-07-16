@@ -348,15 +348,49 @@ if [ "${lightning}" == "cln" ]; then
 
   ###################################
   # c-lightning
+  echo "############## c-lightning" >> ${logFile}
+
+  sudo sed -i "s/^message=.*/message='C-Lightning Install'/g" ${infoFile}
+  sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
-  echo "############## Install c-lightning" >> ${logFile}
 
-  sudo /home/admin/config.scripts/cln.install.sh >> ${logFile}
+  # OLD WALLET FROM CLIGHTNING RESCUE
+  if [ "${lndrescue}" != "" ]; then
 
-  # these vars are available from the setup process for cln loaded from setupfile
-  # seedWords --> if entered on old seed
-  # clnrescue --> if user uploaded a rescue file
-  # setPasswordC --> for any new wallet encryption
+      sed -i "s/^state=.*/state=error/g" ${infoFile}
+      sed -i "s/^message=.*/message='setup: implement clnrescue'/g" ${infoFile}
+      echo "FAIL: setup: implement clnrescue" >> ${logFile}
+      exit 1
+
+  # OLD WALLET FROM SEEDWORDS
+  else [ "${seedwords}" != "" ]; then
+
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedwords}")
+
+
+  # NEW WALLET
+  else
+
+    # sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "dad march erode large digital fun lift squirrel zebra order label inquiry distance tube predict benefit skin insect mistake bullet solar ostrich shiver road"
+    
+    # generate new wallet
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
+
+    # check if got new seedwords
+    if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
+      sed -i "s/^state=.*/state=error/g" ${infoFile}
+      sed -i "s/^message=.*/message='setup: no cln seedwords'/g" ${infoFile}
+      echo "FAIL: setup: no cln seedwords" >> ${logFile}
+      exit 1
+    fi
+
+    # write created seedwords into SETUPFILE to be displayed to user on final setup later
+    echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
+    echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
+
+  fi
+
+  # TODO setPasswordC --> for any new wallet encryption
 
 fi
 
