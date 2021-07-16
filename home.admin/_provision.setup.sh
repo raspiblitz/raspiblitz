@@ -367,12 +367,18 @@ if [ "${lightning}" == "cln" ]; then
 
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedwords}")
 
+    # check if wallet really got created 
+    walletExistsNow = $(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    if [ $walletExistsNow -eq 0 ]; then
+      sed -i "s/^state=.*/state=error/g" ${infoFile}
+      sed -i "s/^message=.*/message='setup: seed maybe wrong'/g" ${infoFile}
+      echo "FAIL: setup: no cln wallet created - seed maybe wrong" >> ${logFile}
+      exit 1
+    fi
 
   # NEW WALLET
   else
 
-    # sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "dad march erode large digital fun lift squirrel zebra order label inquiry distance tube predict benefit skin insect mistake bullet solar ostrich shiver road"
-    
     # generate new wallet
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
 
@@ -381,6 +387,15 @@ if [ "${lightning}" == "cln" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: no cln seedwords'/g" ${infoFile}
       echo "FAIL: setup: no cln seedwords" >> ${logFile}
+      exit 1
+    fi
+
+    # check if wallet really got created 
+    walletExistsNow = $(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    if [ $walletExistsNow -eq 0 ]; then
+      sed -i "s/^state=.*/state=error/g" ${infoFile}
+      sed -i "s/^message=.*/message='setup: no cln wallet created'/g" ${infoFile}
+      echo "FAIL: setup: no cln wallet created" >> ${logFile}
       exit 1
     fi
 

@@ -163,12 +163,12 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   if [ "$1" = "new" ]; then
     seedPassword="$3"
     # get 24 words
-    source <(python /home/admin/config.scripts/blitz.mnemonic.py)
+    source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
     #TODO seedwords to cln.backup.sh seed-export-gui
     /home/admin/config.scripts/cln.backup.sh seed-export-gui "${seedwords6x4}"
   elif [ "$1" = "new-force" ]; then
     # get 24 words
-    source <(python /home/admin/config.scripts/blitz.mnemonic.py)
+    source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
     echo "seedwords='${seedwords}'"
     echo "seedwords6x4='${seedwords6x4}'"
   elif [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
