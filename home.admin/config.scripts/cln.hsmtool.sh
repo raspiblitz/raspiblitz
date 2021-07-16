@@ -15,7 +15,9 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo "# usage:"
   echo "# Create new wallet"
   echo "# cln.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]"  
+  echo "# cln.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]"  
   echo "# There will be no seedPassword(passphrase) used by default"
+  echo "# new-force will delete any old wallet and will work without dialog"
   echo
   echo "# cln.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
   echo "# the new hsm_secret will be not encrypted if no NewPassword is given"
@@ -138,12 +140,12 @@ function decryptHSMsecret() {
 ###########
 # Options #
 ########### 
-if [ "$1" = "new" ] || [ "$1" = "seed" ]; then
+if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ]; then
   if ! sudo ls $hsmSecretPath 2>1 1>/dev/null; then
 
     # check for https://github.com/trezor/python-mnemonic
     if [ $(pip list | grep -c mnemonic) -eq 0 ];then
-      pip install mnemonic==0.19
+      pip install mnemonic==0.19 1>/dev/null
     fi
     if [ "$1" = "new" ]; then
       seedPassword="$3"
@@ -151,6 +153,11 @@ if [ "$1" = "new" ] || [ "$1" = "seed" ]; then
       source <(python /home/admin/config.scripts/blitz.mnemonic.py)
       #TODO seedWords to cln.backup.sh seed-export-gui
       /home/admin/config.scripts/cln.backup.sh seed-export-gui $seedWords6x4
+    elif [ "$1" = "new-force" ]; then
+      # get 24 words
+      source <(python /home/admin/config.scripts/blitz.mnemonic.py)
+      echo "seedwords='${seedwords}'"
+      echo "seedwords6x4='${seedwords6x4}'"
     elif [ "$1" = "seed" ]; then
       #TODO get seedWords from cln.backup.sh seed-import-gui [$RESULTFILE]
       seedWords="$3"
