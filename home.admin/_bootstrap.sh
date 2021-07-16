@@ -588,11 +588,6 @@ if [ ${isMounted} -eq 0 ]; then
   ###################################################
 
   if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "migration" ]; then
-    echo "# Gather info on blockchain sync ..." >> $logFile
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-    if [ "${syncProgress}" == "" ]; then syncProgress="0"; fi
-    syncProgress=$(echo "${syncProgress}" | cut -d "." -f1)
-    echo "syncProgress=${syncProgress}" >> ${infoFile}
     echo "# Go into WAIT LOOP for final setup dialog ..." >> $logFile
     sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}

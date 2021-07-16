@@ -26,8 +26,15 @@ fi
 ############################################
 # BLOCKCHAIN INFO & OPTIONS
 
+# wait until syncProgress is available
+while [ "${syncProgress}" == "" ]
+do
+  source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+  /home/admin/setup.scripts/eventInfoWait.sh "waitsync" "waitloop" ssh
+  sleep 2
+done
+
 # get fresh data
-source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
 syncProgressFull=$(echo "${syncProgress}" | cut -d "." -f1)
 if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 

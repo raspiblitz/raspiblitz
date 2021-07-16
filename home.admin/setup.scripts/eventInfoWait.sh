@@ -45,6 +45,13 @@ Starting RaspiBlitz
 Please wait ...
 " 6 24
 
+if [ "${eventID}" == "waitsync" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Preparing Blockchain Sync
+Please wait ...
+" 6 30
+
 elif [ "${eventID}" == "reboot" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
