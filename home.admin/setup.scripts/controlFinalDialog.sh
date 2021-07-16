@@ -27,6 +27,7 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
+source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
 syncProgressFull=$(echo "${syncProgress}" | cut -d "." -f1)
 if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 
