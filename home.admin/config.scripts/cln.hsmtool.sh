@@ -175,15 +175,12 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ]; then
     seedpassword="$4"
   fi
 
-  # (echo "0"; echo "purpose lyrics clutch girl weird elbow hover large protect hover level guess damage advance glory warrior wear zone crash room drastic judge hurry enough"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" /home/bitcoin/.lightning/bitcoin/hsm_secret
-
   # pass to 'hsmtool generatehsm hsm_secret'
   if [ ${#seedpassword} -eq 0 ]; then
-    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath
+    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 2>&1
   else
     # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
-    (echo "0";echo "$seedwords";echo "$seedpassword";echo "$seedpassword")|\
-    sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath
+    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword") | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 2>&1
   fi
   exit 0
   
