@@ -39,6 +39,15 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo ""
 
+echo "*** SETUPPHASE / BOOTSTRAP ***"
+echo "see logs: cat /home/admin/raspiblitz.log"
+echo "setupPhase--> ${setupPhase}"
+echo "state--> ${state}"
+if [ "${setupPhase}" != "done" ]; then
+  sudo tail -n 20 /home/admin/raspiblitz.log
+fi
+echo ""
+
 echo "*** BACKGROUNDSERVICE ***"
 echo "to monitor Background service call: sudo journalctl -f -u background"
 echo ""
