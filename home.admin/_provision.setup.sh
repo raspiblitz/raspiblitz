@@ -136,10 +136,10 @@ echo "OK ${network} startup successfull " >> ${logFile}
 # Prepare Lightning
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
-if [ "${lightning}" == "" ]; then 
+if [ "${lightning}" != "lnd" ] then 
 
   ###################################
-  # No Lightning (remove lnd from systemd)
+  # Remove LND from systemd
   sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
   sudo systemctl disable lnd
   sudo rm /etc/systemd/system/lnd.service
@@ -346,17 +346,10 @@ if [ "${lightning}" == "cln" ]; then
 
   ###################################
   # c-lightning
-  sudo sed -i "s/^message=.*/message='c-lightning Setup'/g" ${infoFile}
+  sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
+  echo "############## Install c-lightning" >> ${logFile}
 
-  # TODO: implement
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='TODO: install c-lightning'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "TODO: install c-lightning!" >> ${logFile}
-  exit 1
-
-  # make sure lnd is disabled
-  sudo systemctl disable lnd
+  sudo /home/admin/config.scripts/cln.install.sh >> ${logFile}
 
   # these vars are available from the setup process for cln loaded from setupfile
   # seedWords --> if entered on old seed
