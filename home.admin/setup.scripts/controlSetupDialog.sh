@@ -208,6 +208,12 @@ if [ "${setupPhase}" == "setup" ]; then
   if [ "${menuresult}" == "0" ]; then
 
     ############################################
+    # Setting Name for Node
+
+    echo "# Starting name dialog ..."
+    /home/admin/setup.scripts/dialogName.sh
+
+    ############################################
     # Choosing Blockchain & Lightning
 
     echo "# Starting Blockchain & Lightning selection ..."
@@ -216,12 +222,6 @@ if [ "${setupPhase}" == "setup" ]; then
       # exit with 0 to restart process from outside loop
       exit 0
     fi
-
-    ############################################
-    # Setting Name for Node
-
-    echo "# Starting name dialog ..."
-    /home/admin/setup.scripts/dialogName.sh
 
     ############################################
     # Lightning Wallet (new or restore) do this before passwords
