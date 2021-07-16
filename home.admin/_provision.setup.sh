@@ -136,10 +136,11 @@ echo "OK ${network} startup successfull " >> ${logFile}
 # Prepare Lightning
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
-if [ "${lightning}" != "lnd" ] then 
+if [ "${lightning}" != "lnd" ]; then 
 
   ###################################
   # Remove LND from systemd
+  echo "Remove LND" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
   sudo systemctl disable lnd
   sudo rm /etc/systemd/system/lnd.service
@@ -150,6 +151,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   ###################################
   # LND
+  echo "############## Setup LND" >> ${logFile}
   sudo sed -i "s/^message=.*/message='LND Setup'/g" ${infoFile}
 
   if [ "${passwordC}" == "" ]; then
@@ -361,4 +363,3 @@ fi
 sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
 echo "END Setup"  >> ${logFile}
 exit 0
-
