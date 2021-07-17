@@ -95,7 +95,7 @@ if [ ${mode} = "cln-export-gui" ]; then
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo ""
   echo "Use password A to authenticate file transfer."
-  echo "Check for correct file size after transfer: ${byteSize} byte"
+  echo "Check for correct file size after transfer: ${size} byte"
   echo
   echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
