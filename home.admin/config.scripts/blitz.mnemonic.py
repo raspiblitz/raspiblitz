@@ -38,6 +38,7 @@ def generate():
 #######################
 def test(words):
 
+    mnemo = Mnemonic("english")
     seed = mnemo.to_seed(words, passphrase="")
 
 def main():
