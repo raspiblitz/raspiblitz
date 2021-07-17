@@ -45,7 +45,7 @@ def test(words):
     mnemo = Mnemonic("english")
     if mnemo.check(words): 
         print("valid=1")
-    else
+    else:
         print("valid=0")
 
 def main():
