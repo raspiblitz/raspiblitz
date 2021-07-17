@@ -3,7 +3,13 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# ---------------------------------------------------"
-
+ echo "# CLN RESCUE FILE (tar.gz of complete cln directory)"
+ echo "# ---------------------------------------------------"
+ echo "# cln.backup.sh cln-export"
+ echo "# cln.backup.sh cln-export-gui"
+ echo "# cln.backup.sh cln-import [file]"
+ echo "# cln.backup.sh cln-import-gui [setup|production] [?resultfile]"
+ echo "# ---------------------------------------------------"
  echo "# SEED WORDS"
  echo "# ---------------------------------------------------"
  echo "# cln.backup.sh seed-export-gui [lndseeddata]"
@@ -14,6 +20,89 @@ fi
 # 1st PARAMETER action
 mode="$1"
 
+################################
+# CLN RESCUE FILE - EXPORT
+################################
+
+if [ ${mode} = "cln-export" ]; then
+
+  echo "# *** CLN.RESCUE --> BACKUP"
+  downloadPath="/home/admin"
+  fileowner="admin"
+
+  # stop LND
+  echo "# Stopping cln..."
+  sudo systemctl stop lightningd
+  sleep 5
+  echo "# OK"
+  echo 
+
+  # add cln version info into lnd dir (to detect needed updates later)
+  clnVersion=$(sudo -u bitcoin lncli getinfo | jq -r ".version" | cut -d ' ' -f1)
+  sudo rm /mnt/hdd/app-data/.lightning/version.info 2>/dev/null
+  echo "${clnVersion}" > /home/admin/cln.version.info
+  sudo mv /home/admin/cln.version.info /mnt/hdd/app-data/.lightning/version.info
+  sudo chown bitcoin:bitcoin /mnt/hdd/app-data/.lightning/version.info
+
+  # zip it
+  sudo tar -zcvf ${downloadPath}/cln-rescue.tar.gz /mnt/hdd/app-data/.lightning 1>&2
+  sudo chown ${fileowner}:${fileowner} ${downloadPath}/cln-rescue.tar.gz 1>&2
+
+  # delete old backups
+  rm ${downloadPath}/cln-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+
+  # name with md5 checksum
+  md5checksum=$(md5sum ${downloadPath}/cln-rescue.tar.gz | head -n1 | cut -d " " -f1)
+  mv ${downloadPath}/cln-rescue.tar.gz ${downloadPath}/cln-rescue-${md5checksum}.tar.gz 1>&2
+  byteSize=$(ls -l ${downloadPath}/cln-rescue-${md5checksum}.tar.gz | awk '{print $5}')
+
+  # check file size
+  if [ ${byteSize} -lt 100 ]; then
+    echo "error='backup is empty'"
+    exit 1
+  fi
+
+  # output result data
+  echo "# cln service is stopped for security"
+  echo "filename='${downloadPath}/lnd-rescue-${md5checksum}.tar.gz'"
+  echo "fileowner='${fileowner}'"
+  echo "size=${byteSize}"
+  exit 0
+fi
+
+if [ ${mode} = "lnd-export-gui" ]; then
+
+  # create lnd rescue file
+  source <(/home/admin/config.scripts/cln.backup.sh cln-export)
+  if [ "${error}" != "" ]; then
+    echo "error='${error}'"
+    exit 1
+  fi
+
+  # get local ip info
+  source <(/home/admin/config.scripts/internet.sh status local)
+
+  # offer SCP for download
+  clear
+  echo
+  echo "****************************"
+  echo "* DOWNLOAD THE RESCUE FILE *"
+  echo "****************************"
+  echo 
+  echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
+  echo "scp '${fileowner}@${localip}:${filename}' ./"
+  echo "ON WINDOWS USE:"
+  echo "scp ${fileowner}@${localip}:${filename} ."
+  echo ""
+  echo "Use password A to authenticate file transfer."
+  echo "Check for correct file size after transfer: ${byteSize} byte"
+  echo
+  echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
+  echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
+  echo "again or rebooted, it's not advised to restore the backup file because"
+  echo "it would contain outdated channel data and can lead to loss of channel funds."
+  exit 0
+fi
 
 ####################################
 # SEED WORDS - GUI PARTS
@@ -81,8 +170,26 @@ if [ ${mode} = "seed-import-gui" ]; then
       # check correct number of words
       wordcount=$(echo "${wordstring}" | wc -w)
       if [ ${wordcount} -eq 24 ]; then
-        echo "OK - 24 words"
-        wordsCorrect=1
+
+        # check if words are valid seed
+        source <(python /home/admin/config.scripts/blitz.mnemonic.py test "${wordstring}")
+        if [ "${valid}" == "0" ]; then
+          whiptail --title " WARNING " --yes-button "Try Again" --no-button "Cancel" --yesno "
+The word list has 24 words BUT its not a
+valid seed word list by our test.
+
+Please check for typos.
+
+" 12 52
+	        if [ $? -eq 1 ]; then
+            clear
+            echo "# CANCEL empty results in: ${RESULTFILE}"
+            exit 1
+	        fi
+        else
+          echo "OK - 24 words"
+          wordsCorrect=1
+        fi
       else
         whiptail --title " WARNING " \
 			  --yes-button "Try Again" \
