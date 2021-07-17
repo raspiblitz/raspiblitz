@@ -62,8 +62,8 @@ elif [ "${exportType}" = "hexstring" ]; then
   clear
   echo "###### HEXSTRING EXPORT ######"
   echo ""
-  echo "admin.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  echo "adminMacaroon=${adminMacaroon}"
   echo ""
   echo "invoice.macaroon:"
   sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon
