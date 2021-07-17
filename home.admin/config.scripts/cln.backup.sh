@@ -64,13 +64,13 @@ if [ ${mode} = "cln-export" ]; then
 
   # output result data
   echo "# cln service is stopped for security"
-  echo "filename='${downloadPath}/lnd-rescue-${md5checksum}.tar.gz'"
+  echo "filename='${downloadPath}/cln-rescue-${md5checksum}.tar.gz'"
   echo "fileowner='${fileowner}'"
   echo "size=${byteSize}"
   exit 0
 fi
 
-if [ ${mode} = "lnd-export-gui" ]; then
+if [ ${mode} = "cln-export-gui" ]; then
 
   # create lnd rescue file
   source <(/home/admin/config.scripts/cln.backup.sh cln-export)
