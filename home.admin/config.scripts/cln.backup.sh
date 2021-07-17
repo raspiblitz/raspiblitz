@@ -32,7 +32,7 @@ if [ ${mode} = "cln-export" ]; then
 
   # stop LND
   echo "# Stopping cln..."
-  sudo systemctl stop lightningd
+  sudo systemctl stop lightningd 1>/dev/null
   sleep 5
   echo "# OK"
   echo 
@@ -101,6 +101,172 @@ if [ ${mode} = "cln-export-gui" ]; then
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
   echo "again or rebooted, it's not advised to restore the backup file because"
   echo "it would contain outdated channel data and can lead to loss of channel funds."
+  exit 0
+fi
+
+################################
+# CLN RESCUE FILE - IMPORT
+################################
+
+if [ ${mode} = "cln-import" ]; then
+
+  # 2nd PARAMETER: file to import (expect that the file was valid checked from calling script)
+  filename=$2
+  if [ "${filename}" == "" ]; then
+    echo "error='filename missing'"
+    exit 1
+  fi
+  fileExists=$(sudo ls ${filename} 2>/dev/null | grep -c "${filename}")
+  if [ "${fileExists}" != "1" ]; then
+    echo "error='filename not found'"
+    exit 1
+  fi
+
+  # stop LND
+  echo "# stopping cln..."
+  sudo systemctl stop lightningd 1>/dev/null
+  sleep 5
+
+  # clean DIR
+  echo "# cleaning old CLN data ..."
+  sudo rm -r /mnt/hdd/app-data/.lightning/* 1>/dev/null 2>/dev/null
+
+  # unpack zip
+  echo "# restoring CLN data from ${filename} ..."
+  sudo tar -xf ${filename} -C / 1>/dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning 1>/dev/null
+
+  echo "# DONE - lightningd service is still stopped - start manually with command:"
+  echo "# sudo systemctl start lightningd"
+  exit 0
+
+fi
+
+if [ ${mode} = "cln-import-gui" ]; then
+
+  # get by second parameter if this call if happening during setup or production
+  scenario=$2
+  if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
+    echo "error='mising parameter'"
+    exit 1
+  fi
+
+  # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
+  if [ "${scenario}" == "setup" ]; then
+    RESULTFILE=$3
+    if [ "${RESULTFILE}" == "" ]; then
+      echo "error='mising parameter'"
+      exit 1 
+    fi
+  fi
+
+  # determine password info based on scenario
+  if [ "${scenario}" == "setup" ]; then
+    passwordInfo="password 'raspiblitz'"
+  else
+    passwordInfo="your Password A"
+  fi
+
+  # get defaultUploadPath, localIP, etc
+  source <(sudo /home/admin/config.scripts/blitz.upload.sh prepare-upload)
+
+  filename=""
+  while [ "${filename}" == "" ]
+    do
+      clear 
+      echo "**************************"
+      echo "* UPLOAD THE RESCUE FILE *"
+      echo "**************************"
+      echo "If you have a cln-rescue backup file on your laptop you can now"
+      echo "upload it and restore your latest C-Lightning state."
+      echo
+      echo "CAUTION: Dont restore outdated states - risk of loosing funds!"
+      echo
+      echo "To make upload open a new terminal on your laptop,"
+      echo "change into the directory where your cln-rescue file is and"
+      echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+      echo "scp -r ./cln-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo ""
+      echo "Use ${passwordInfo} to authenticate file transfer."
+      echo "PRESS ENTER when upload is done"
+      read key
+
+      # check upload (will return filename or error)
+      source <(sudo /home/admin/config.scripts/blitz.upload.sh check-upload cln-rescue)
+      if [ "${filename}" != "" ]; then
+        echo "OK - File found: ${filename}"
+        echo "PRESS ENTER to continue."
+        read key
+      elif [ "${error}" == "not-found" ]; then
+        echo "!! WARNING !!"
+        echo "There was no upload found in ${defaultUploadPath}"
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
+      elif [ "${error}" == "multiple" ]; then
+        echo "!! WARNING !!"
+        echo "There are multiple cln-rescue files in directory ${defaultUploadPath}"
+        echo "Make sure you upload only one tar.gz-file and start again."
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
+      elif [ "${error}" == "invalid" ]; then
+        echo "!! WARNING !!"
+        echo "The file uploaded is not a valid (complete upload failed or not correct file)."
+        echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
+        read keyRetry
+      else
+        # create no result file and exit
+        echo "!! WARNING !! Unknown State (report to devs)"
+        exit 1
+      fi
+
+      if [ "${keyRetry}" == "x" ] || [ "${keyRetry}" == "X" ] || [ "${keyRetry}" == "'x'" ]; then
+        # create no result file and exit
+        echo "# USER CANCEL"
+        exit 1
+      fi
+
+  done
+
+  # in setup scenario the final import is happening during provison
+  if [ "${scenario}" == "setup" ]; then
+    # just add lndrescue filename to give file
+    echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
+    echo "clnrescue='${filename}'" >> $RESULTFILE
+    exit 0
+  fi
+
+  # in production now start restoring LND data based on file
+  source /mnt/hdd/raspiblitz.conf
+  
+  # ask security question before deleting old wallet
+  echo "WARNING: This will delete/overwrite the C-Lightning state/funds of this RaspiBlitz."
+  echo
+  echo "Write the word 'override' and press ENTER to CONTINUE:"
+  read securityInput
+  if [ "${securityInput}" != "override" ] && [ "${securityInput}" != "'override'" ]; then
+      echo
+      echo "CANCELED import of uploaded rescue file"
+      exit 1
+  fi
+  echo
+
+  # run import process
+  echo "OK deleting old CLN data & restoring imported rescue file ..."
+  source <(sudo /home/admin/config.scripts/cln.backup.sh cln-import ${filename})
+
+  # TODO: check if update of CLN is needed (see detailes in cln-import) for edge case
+
+  # TODO: auto-unlock for c-lightning?
+  # turn off auto-unlock if activated because password c might now change
+  # if [ "${autoUnlock}" == "on" ]; then
+  #   /home/admin/config.scripts/cln.autounlock.sh off
+  # fi
+  
+  # restarting lnd & give final info
+  sudo systemctl start lightningd
+  echo "DONE - lightningd is now restarting .. Password C is now like within your rescue file"
+  echo "Check that CLN is starting up correctly and your old channel & funds are restored."
+  echo "Take into account that some channels might have been force closed in the meanwhile."
   exit 0
 fi
 

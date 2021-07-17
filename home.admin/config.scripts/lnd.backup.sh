@@ -507,7 +507,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
 
       # dialog to enter
-      dialog --backtitle "RaspiBlitz - LND Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+      dialog --backtitle "RaspiBlitz - Seed Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."
@@ -564,7 +564,7 @@ wordone wordtweo wordthree ...
   dialog --title "SEED PASSWORD" --yes-button "No extra Password" --no-button "Yes" --yesno "
 Are your seed words protected by an extra password?
 
-During wallet creation LND offers to set an extra password
+During wallet creation its an option to set an extra password
 to protect the seed words. Most users did not set this.
   " 11 65
   if [ $? -eq 1 ]; then

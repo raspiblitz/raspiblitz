@@ -14,7 +14,7 @@ enterSEED=0
 OPTIONS=()
 OPTIONS+=(NEW "Setup a brand new Lightning Node (DEFAULT)")
 OPTIONS+=(OLD "I had an old Node I want to recover/restore")
-CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "LND Setup" --menu "LND Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --backtitle "RaspiBlitz" --clear --title "C-Lightning Setup" --menu "C-Lightning Data & Wallet" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 if [ "${CHOICE}" == "NEW" ]; then
 
@@ -100,9 +100,7 @@ if [ ${uploadRESCUE} -eq 1 ]; then
   # run upload dialog and get result
   _temp="/var/cache/raspiblitz/temp/.temp.tmp"
   clear
-  echo "TODO: cln.backup.sh cln-import-gui"
-  sleep 8
-  #/home/admin/config.scripts/cln.backup.sh cln-import-gui setup $_temp
+  /home/admin/config.scripts/cln.backup.sh cln-import-gui setup $_temp
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
 
@@ -124,10 +122,7 @@ if [ ${enterSEED} -eq 1 ]; then
 
   # start seed input and get results
   _temp="/var/cache/raspiblitz/.temp.tmp"
-  clear
-  echo "TODO: cln.backup.sh seed-import-gui"
-  sleep 8
-  #/home/admin/config.scripts/cln.backup.sh seed-import-gui $_temp
+  /home/admin/config.scripts/cln.backup.sh seed-import-gui $_temp
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
 
@@ -143,4 +138,6 @@ if [ ${enterSEED} -eq 1 ]; then
 
   # write the seed data into the setup state
   echo "seedWords='${seedWords}'" >> $SETUPFILE
+  echo "seedPassword='${seedPassword}'" >> $SETUPFILE
+
 fi
