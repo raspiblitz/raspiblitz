@@ -38,7 +38,7 @@ if [ ${mode} = "cln-export" ]; then
   echo 
 
   # add cln version info into lnd dir (to detect needed updates later)
-  clnVersion=$(sudo -u bitcoin lncli getinfo | jq -r ".version" | cut -d ' ' -f1)
+  clnVersion=$(sudo -u bitcoin lightning-cli --version | cut -d '-' -f1 | cut -d 'v' -f2)
   sudo rm /mnt/hdd/app-data/.lightning/version.info 2>/dev/null
   echo "${clnVersion}" > /home/admin/cln.version.info
   sudo mv /home/admin/cln.version.info /mnt/hdd/app-data/.lightning/version.info
