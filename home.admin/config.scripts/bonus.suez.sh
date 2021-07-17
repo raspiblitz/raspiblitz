@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# https://github.com/prusnak/suez/commits/master
+SUEZVERSION="bbf366572ad6dc2d8644de85c0946c7fc386d141"
+
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "config script to install, update or uninstall Suez"
+ echo "bonus.suez.sh [on|off|menu|update]"
+ echo "installs the version $SUEZVERSION by default"
+ exit 1
+fi
+
+source /mnt/hdd/raspiblitz.conf
+
+# add default value to raspi config if needed
+if ! grep -Eq "^suez=" /mnt/hdd/raspiblitz.conf; then
+  echo "suez=off" >> /mnt/hdd/raspiblitz.conf
+fi
+
+# show info menu
+# alias suez="cd /home/suez/suez && /home/suez/.local/bin/poetry run ./suez"
+if [ "$1" = "menu" ]; then
+  dialog --title " Info Suez" --msgbox "
+Suez is a command line tool.
+Type: 'suez' for the default channel visualization for LND
+Type: 'suez --help' in the command line to see the usage options.
+Readme: https://github.com/prusnak/suez#readme
+" 10 75
+  exit 0
+fi
+
+# install
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+  echo "# INSTALL SUEZ"
+
+  # create user
+  sudo adduser --disabled-password --gecos "" suez
+  cd /home/suez || exit 1 
+
+  # dependency
+  sudo -u suez curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
+    | sudo -u suez python -
+  
+  # download source code
+  sudo -u suez git clone https://github.com/prusnak/suez.git
+  cd suez || exit 1 
+  sudo -u suez git reset --hard $SUEZVERSION
+  sudo -u suez /home/suez/.local/bin/poetry install
+
+  # make sure symlink to central app-data directory exists ***"
+  sudo rm -rf /home/suez/.lnd  # not a symlink.. delete it silently
+  # create symlink
+  sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/suez/.lnd"
+  
+  # add user to group with admin access to lnd
+  sudo /usr/sbin/usermod --append --groups lndadmin suez
+
+  echo "# Adding alias"
+  echo "alias suez='cd /home/suez/suez && sudo -u suez /home/suez/.local/bin/poetry run ./suez'"\
+    | sudo tee -a /home/admin/_aliases
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^suez=.*/suez=on/g" /mnt/hdd/raspiblitz.conf
+
+  echo "# To use the alias in /home/admin/_aliases:"
+  echo "source /home/admin/_aliases"
+  echo "# Type: 'suez' for the default channel visualization for LND"
+  echo "# Type: 'suez --help' in the command line to see the usage options."
+  echo "# Readme: https://github.com/prusnak/suez#readme"
+
+  exit 0
+fi
+
+# switch off
+if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+
+  echo "# REMOVING SUEZ"
+  sudo userdel -rf suez
+  echo "# OK, suez is removed."
+
+  # setting value in raspi blitz config
+  sudo sed -i "s/^suez=.*/suez=off/g" /mnt/hdd/raspiblitz.conf
+
+  exit 0
+
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  echo "# UPDATE SUEZ"
+  cd /home/suez || exit 1 
+  # dependency
+  sudo -u suez curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
+    | sudo -u suez python -
+  # download source code
+  sudo -u suez git clone https://github.com/prusnak/suez.git
+  cd suez || exit 1 
+  sudo -u suez /home/suez/.local/bin/poetry install
+  echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
+  exit 0
+fi
+
+echo "FAIL - Unknown Parameter $1"
+exit 1
