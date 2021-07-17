@@ -10,6 +10,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("blitz.mnemonic.py test \"[SEEDWORDS-SPACE-SEPERATED]\"")
     sys.exit(1)
 
+def dump(obj):
+  for attr in dir(obj):
+    print("obj.%s = %r" % (attr, getattr(obj, attr)))
+
 #######################
 # GENERATE SEED WORDS
 #######################
@@ -40,7 +44,7 @@ def test(words):
 
     mnemo = Mnemonic("english")
     seed = mnemo.to_seed(words, passphrase="")
-    print(vars(seed))
+    dump(seed)
 
 def main():
     if sys.argv[1] == "generate":
