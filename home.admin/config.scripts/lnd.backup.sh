@@ -515,8 +515,27 @@ if [ ${mode} = "seed-import-gui" ]; then
       # check correct number of words
       wordcount=$(echo "${wordstring}" | wc -w)
       if [ ${wordcount} -eq 24 ]; then
-        echo "OK - 24 words"
-        wordsCorrect=1
+
+        # check if words are valid seed
+        source <(python /home/admin/config.scripts/blitz.mnemonic.py test "${wordstring}")
+        if [ "${valid}" == "0" ]; then
+          whiptail --title " WARNING " --yes-button "Try Again" --no-button "Cancel" --yesno "
+The word list has 24 words BUT its not a
+valid seed word list by our test.
+
+Please check for typos.
+
+" 52 52
+
+	        if [ $? -eq 1 ]; then
+            clear
+            echo "# CANCEL empty results in: ${RESULTFILE}"
+            exit 1
+	        fi
+        else
+          echo "OK - 24 words"
+          wordsCorrect=1
+        fi
       else
         whiptail --title " WARNING " \
 			  --yes-button "Try Again" \
