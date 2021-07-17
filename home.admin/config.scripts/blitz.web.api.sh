@@ -6,23 +6,38 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
-  echo "blitz.web.api.sh on"
+  echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
   echo "blitz.web.api.sh off"
   exit 1
 fi
 
-DEFAULT_GITHUB_REPO="https://github.com/fusion44/blitz_api"
+DEFAULT_GITHUB_USER="fusion44"
+DEFAULT_GITHUB_REPO="blitz_api"
+DEFAULT_GITHUB_BRANCH="main"
 
 ###################
 # ON / INSTALL
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  if [ "$2" != "" ]; then
+    DEFAULT_GITHUB_USER="$2"
+  fi
+
+  if [ "$3" != "" ]; then
+    DEFAULT_GITHUB_REPO="$3"
+  fi
+
+  if [ "$4" != "" ]; then
+    DEFAULT_GITHUB_BRANCH="$4"
+  fi
+
   echo "# INSTALL Web API ..."
   sudo rm -r /home/admin/blitz_api 2>/dev/null
   cd /home/admin
-  git clone https://github.com/fusion44/blitz_api.git
+  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/admin/blitz_api
   cd blitz_api
+  git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
 
   # make it fixed on Bitcoin & Mainnet - the WebUI will start limited to this first
