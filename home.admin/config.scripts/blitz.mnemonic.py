@@ -43,9 +43,10 @@ def generate():
 def test(words):
 
     mnemo = Mnemonic("english")
-    iscorrect = mnemo.check(words)
-    dump(iscorrect)
-    print(iscorrect)
+    if mnemo.check(words): 
+        print("valid=1")
+    else
+        print("valid=0")
 
 def main():
     if sys.argv[1] == "generate":
