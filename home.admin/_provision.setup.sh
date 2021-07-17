@@ -355,17 +355,23 @@ if [ "${lightning}" == "cln" ]; then
   sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
-  if [ "${lndrescue}" != "" ]; then
+  if [ "${clnrescue}" != "" ]; then
 
+    echo "Restore CLN data from uploaded rescue file ${lndrescue} ..." >> ${logFile}
+    source <(sudo /home/admin/config.scripts/cln.backup.sh cln-import ${lndrescue})
+    if [ "${error}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
-      sed -i "s/^message=.*/message='setup: implement clnrescue'/g" ${infoFile}
-      echo "FAIL: setup: implement clnrescue" >> ${logFile}
+      sed -i "s/^message=.*/message='setup: cln import backup failed'/g" ${infoFile}
+      echo "FAIL see ${logFile}"
+      echo "FAIL: setup: cln import backup failed" >> ${logFile}
+      echo "${error}" >> ${logFile}
       exit 1
+    fi
 
   # OLD WALLET FROM SEEDWORDS
-  else [ "${seedwords}" != "" ]; then
+  else [ "${seedWords}" != "" ]; then
 
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedwords}")
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
     # check if wallet really got created 
     walletExistsNow = $(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
@@ -380,7 +386,7 @@ if [ "${lightning}" == "cln" ]; then
   else
 
     # generate new wallet
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet "${passwordC}")
 
     # check if got new seedwords
     if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
@@ -404,8 +410,6 @@ if [ "${lightning}" == "cln" ]; then
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 
   fi
-
-  # TODO setPasswordC --> for any new wallet encryption
 
 fi
 
