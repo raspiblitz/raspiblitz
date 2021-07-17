@@ -13,7 +13,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cln-plugins-enabled/sparko ];then
     echo "# The Sparko plugin is not present despite being configured"
-    /home/admin/config.scripts/cln-plugin.sparko.sh $CHAIN
+    /home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN
   fi
   sparkoStart="--plugin=/home/bitcoin/${netprefix}cln-plugins-enabled/sparko"
 fi
