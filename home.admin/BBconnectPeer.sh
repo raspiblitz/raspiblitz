@@ -116,7 +116,7 @@ else
     # TODO: try to find out more details from cli output
 
   else
-    win=0
+    win=1
     info="Perfect - a connection to that node got established :)"
   fi
 
