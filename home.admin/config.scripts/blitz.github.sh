@@ -165,7 +165,7 @@ echo "# ******************************************"
 
 echo "# Syncing Webcontent .."
 if [ -d /var/www/public ]; then
-  sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
+  sudo cp -a /home/admin/assets/nginx/www_public/* /var/www/public
   sudo chown www-data:www-data /var/www/public
 fi
 
