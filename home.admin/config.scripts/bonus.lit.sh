@@ -18,7 +18,8 @@ if [ $PGPsigner=guggero ];then
   PGPcheck="03DB6322267C373B"
 fi
 
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 # add default value to raspi config if needed
 if ! grep -Eq "^lit=" /mnt/hdd/raspiblitz.conf; then
@@ -30,7 +31,7 @@ if [ "$1" = "menu" ]; then
 
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/lit/hostname 2>/dev/null)
+  toraddress=$(sudo cat ${SERVICES_DATA_DIR}/lit/hostname 2>/dev/null)
   fingerprint=$(sudo openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then

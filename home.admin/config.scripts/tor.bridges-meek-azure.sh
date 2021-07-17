@@ -47,8 +47,7 @@ i=0
 ######## FUNCTIONS ########
 
 #include lib
-#. /home/admin/config.scripts/tor.functions.lib
-. /home/admin/raspi-tor/config.scripts/tor.functions.lib
+. /home/admin/config.scripts/tor.functions.lib
 
 ######## PREPARATIONS ########
 ###########################

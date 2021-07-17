@@ -45,8 +45,7 @@ fi
 
 
 # include lib
-#. /home/admin/config.scripts/tor.functions.lib
-. /home/admin/raspi-tor/config.scripts/tor.functions.lib
+. /home/admin/config.scripts/tor.functions.lib
 
 if [ "${runBehindTor}" != "on" ]; then
   echo "ERROR: Tor is not configured"
@@ -324,6 +323,7 @@ if [ "${1}" == "vanguards" ]; then
     sudo mv vanguards ${DATA_DIR}/
     set_owner_permission
     sudo apt install -y python3-stem #python-stem vanguards
+    echo "Done"
 
   elif [ "${STATUS}" == "remove" ]; then
      echo "Removing Vanguards..."

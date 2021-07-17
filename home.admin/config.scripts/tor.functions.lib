@@ -28,6 +28,8 @@
 # It contains functions which are used in several scripts.
 # Hopefully, this way the scripts stay short and clear.
 #
+# SYNTAX
+# . tor.functions.lib
 #
 ##### SET VARIABLES ######
 #
@@ -39,10 +41,12 @@ MENU_HEIGHT_20=20
 MENU_HEIGHT_25=25
 
 #Colors
+NOCOLOR='\033[0m'
 RED='\033[1;31m'
 GREEN='\033[1;32m'
+AMBER='\033[0;33m'
 WHITE='\033[1;37m'
-NOCOLOR='\033[0m'
+YELLOW='\033[1;93m'
 
 #Connectivity check
 CHECK_URL1="http://debian.org"
@@ -51,18 +55,18 @@ PING_SERVER="debian.org"
 #Other variables
 DEFAULT_CONTROL_PORT=9051
 DEFAULT_SOCKS_PORT=9050
-MAIN_DIR="/home/admin/raspi-tor" #"/home/admin"
-ONION_SERVICE_SCRIPT="${MAIN_DIR}/config.scripts/tor.onion-service.sh"
-INFO="/home/admin/raspi-tor/raspiblitz.info" #"/home/admin/raspiblitz.info"
-CONF="/home/admin/raspi-tor/raspiblitz.conf" #"/mnt/hdd/raspibitz.conf"
-ROOT_TORRC="/etc/tor"
-TORRC="${ROOT_TORRC}/torrc"
-TORRC_BRIDGES="${ROOT_TORRC}/bridges"
-ROOT_DATA_DIR="/var/lib"
-DATA_DIR="${ROOT_DATA_DIR}/tor" #"/mnt/hdd/tor"
-SERVICES_DATA_DIR="${ROOT_DATA_DIR}/tor/services"
 OWNER_TOR_CONF_DIR="bitcoin"
 OWNER_TOR_DATA_DIR="debian-tor"
+ROOT_TORRC="/etc/tor"
+TORRC="${ROOT_TORRC}/torrc"
+ROOT_DATA_DIR="/var/lib" #"/mnt/hdd"
+DATA_DIR="${ROOT_DATA_DIR}/tor"
+SERVICES_DATA_DIR="${DATA_DIR}/services"
+USER_DIR="/home/admin" #"/home/admin"
+SCRIPTS_DIR="${USER_DIR}/config.scripts"
+ONION_SERVICE_SCRIPT="${SCRIPTS_DIR}/tor.onion-service.sh"
+INFO="${ROOT_DATA_DIR}/raspiblitz.info"
+CONF="${ROOT_DATA_DIR}/raspiblitz.conf"
 
 source ${INFO}
 source ${CONF}
@@ -74,7 +78,6 @@ set_owner_permission(){
   sudo chown -R ${OWNER_TOR_DATA_DIR}:${OWNER_TOR_DATA_DIR} ${DATA_DIR}
   sudo chown ${OWNER_TOR_CONF_DIR}:${OWNER_TOR_CONF_DIR} ${TORRC}
   sudo chmod 700 ${DATA_DIR}
-  sudo chown bitcoin:bitcoin ${TORRC}
   sudo chmod 644 ${TORRC}
 }
 

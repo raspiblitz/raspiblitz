@@ -13,7 +13,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -101,7 +102,7 @@ if [ "$1" = "status" ]; then
     sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-    toraddress=$(sudo cat /mnt/hdd/tor/lnbits/hostname 2>/dev/null)
+    toraddress=$(sudo cat ${SERVICES_DATA_DIR}/lnbits/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
     sslFingerprintTor=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)

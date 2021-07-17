@@ -12,7 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 # get local and global internet info
 source <(/home/admin/config.scripts/internet.sh status global)
@@ -101,7 +102,7 @@ if [ "$1" = "status" ]; then
     if [ "${runBehindTor}" == "on" ]; then
       echo "TORrunning=1"
       if [ "$2" = "showAddress" ]; then
-        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        TORaddress=$(sudo cat ${SERVICES_DATA_DIR}/electrs/hostname)
         echo "TORaddress='${TORaddress}'"
       fi
     else

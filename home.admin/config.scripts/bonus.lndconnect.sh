@@ -11,9 +11,8 @@ fi
 # make sure commandline tool is available
 sudo apt-get install -y qrencode 1>/dev/null 2>/dev/null
 
-# load raspiblitz config data
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 #### PARAMETER
 
@@ -94,7 +93,7 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
     port="8080"
     usingIP2Tor="LND-REST-API"
     forceTor=1
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    host=$(sudo cat ${SERVICES_DATA_DIR}/lndrest8080/hostname)
     connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
@@ -102,7 +101,7 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     port="8080"
     usingIP2TOR="LND-REST-API"
     forceTor=1
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    host=$(sudo cat ${SERVICES_DATA_DIR}/lndrest8080/hostname)
     connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
@@ -147,11 +146,11 @@ fi
 if [ ${forceTor} -eq 1 ]; then
   # depending on RPC or REST use different Tor address
   if [ "${port}" == "10009" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
+    host=$(sudo cat ${SERVICES_DATA_DIR}/lndrpc10009/hostname)
     port="10009"
     echo "# using Tor --> host ${host} port ${port}"
   elif [ "${port}" == "8080" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    host=$(sudo cat ${SERVICES_DATA_DIR}/lndrest8080/hostname)
     port="8080"
     echo "# using Tor --> host ${host} port ${port}"
   fi

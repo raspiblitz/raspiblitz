@@ -15,9 +15,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-# get cpu architecture
-source /home/admin/raspiblitz.info
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 if [ "$1" = "status" ]; then
 
@@ -42,7 +41,7 @@ if [ "$1" = "status" ]; then
     sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-    toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+    toraddress=$(sudo cat ${SERVICES_DATA_DIR}/btcpay/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
     sslFingerprintTor=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)

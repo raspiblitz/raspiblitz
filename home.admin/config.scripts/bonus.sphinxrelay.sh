@@ -12,7 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -412,7 +413,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       # make sure to keep in sync with tor.install.sh script
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
       # get Tor address and store it readable for sphixrelay user
-      toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+      toraddress=$(sudo cat ${SERVICES_DATA_DIR}/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi
 

@@ -92,7 +92,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   if [ "$2" == "clear" ]; then
       echo "# *** Deinstall Tor & Delete Data ***"
-      sudo rm -r /mnt/hdd/tor 2>/dev/null
+      sudo rm -r ${DATA_DIR} 2>/dev/null
       sudo apt remove tor nyx -y
   fi
 

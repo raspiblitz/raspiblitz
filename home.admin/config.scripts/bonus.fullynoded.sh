@@ -1,9 +1,8 @@
 #!/bin/bash
 clear
 
-# load raspiblitz config data
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
 
 # make sure txindex and wallet of bitcoin is on
 /home/admin/config.scripts/network.wallet.sh on
@@ -24,7 +23,7 @@ fi
 # check and set up the HS
 /home/admin/config.scripts/tor.onion-service.sh bitcoin ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
-hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
+hiddenService=$(sudo cat ${SERVICES_DATA_DIR}/bitcoin${BITCOINRPCPORT}/hostname)
 
 # btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label>
 quickConnect="btcstandup://$RPC_USER:$PASSWORD_B@$hiddenService:${BITCOINRPCPORT}/?label=$hostname"

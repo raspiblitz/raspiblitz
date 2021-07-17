@@ -6,6 +6,10 @@
 
 # TODO change this, you know what to do
 # function: install keys & sources
+
+#include lib
+. /home/admin/config.scripts/tor.functions.lib
+
 prepareTorSources(){
 
     # Prepare for Tor service
