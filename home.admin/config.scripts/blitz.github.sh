@@ -163,6 +163,12 @@ sudo -u admin chmod -R +x /home/admin/config.scripts
 sudo -u admin chmod -R +x /home/admin/setup.scripts
 echo "# ******************************************"
 
+echo "# Syncing Webcontent .."
+if [ -d /var/www/public ]; then
+  sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
+  sudo chown www-data:www-data /var/www/public
+fi
+
 echo "# Checking if the content of BlitzPy changed .."
 checkSumBlitzPyAfter=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 echo "# checkSumBlitzPyBefore = ${checkSumBlitzPyBefore}"
