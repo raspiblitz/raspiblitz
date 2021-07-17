@@ -32,9 +32,10 @@ ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/d
 cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
 openChannels=$((ln_channels_online+cln_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
+OPTIONS+=(SUEZ "Visualize channels")
 OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  HEIGHT=$((HEIGHT+2))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))  
 fi
 
 if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
@@ -87,6 +88,19 @@ case $CHOICE in
         sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         exit 0
       fi
+      ;;
+  SUEZ)
+      clear
+      if [ ! -f /home/bitcoin/suez/suez ];then
+        /home/admin/config.scripts/bonus.suez.sh on
+      fi
+      cd /home/bitcoin/suez || exit 1 
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+        --client=c-lightning \
+        --client-args=--conf=/home/bitcoin/.lightning/${netprefix}config
+      echo
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   CLOSEALL)
       /home/admin/BBcloseAllChannels.sh cln $CHAIN

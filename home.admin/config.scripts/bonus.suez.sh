@@ -19,7 +19,6 @@ if ! grep -Eq "^suez=" /mnt/hdd/raspiblitz.conf; then
 fi
 
 # show info menu
-# alias suez="cd /home/suez/suez && /home/suez/.local/bin/poetry run ./suez"
 if [ "$1" = "menu" ]; then
   dialog --title " Info Suez" --msgbox "
 Suez is a command line tool.
@@ -34,30 +33,21 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# INSTALL SUEZ"
 
-  # create user
-  sudo adduser --disabled-password --gecos "" suez
-  cd /home/suez || exit 1 
+  cd /home/bitcoin || exit 1 
 
   # dependency
-  sudo -u suez curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u suez python -
+  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
+    | sudo -u bitcoin python -
   
   # download source code
-  sudo -u suez git clone https://github.com/prusnak/suez.git
+  sudo -u bitcoin git clone https://github.com/prusnak/suez.git
   cd suez || exit 1 
-  sudo -u suez git reset --hard $SUEZVERSION
-  sudo -u suez /home/suez/.local/bin/poetry install
+  sudo -u bitcoin git reset --hard $SUEZVERSION
+  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 
-  # make sure symlink to central app-data directory exists ***"
-  sudo rm -rf /home/suez/.lnd  # not a symlink.. delete it silently
-  # create symlink
-  sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/suez/.lnd"
-  
-  # add user to group with admin access to lnd
-  sudo /usr/sbin/usermod --append --groups lndadmin suez
 
   echo "# Adding alias"
-  echo "alias suez='cd /home/suez/suez && sudo -u suez /home/suez/.local/bin/poetry run ./suez'"\
+  echo "alias suez='cd /home/bitcoin/suez && sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez'"\
     | sudo tee -a /home/admin/_aliases
 
   # setting value in raspi blitz config
@@ -89,14 +79,14 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# UPDATE SUEZ"
-  cd /home/suez || exit 1 
+  cd /home/bitcoin || exit 1 
   # dependency
-  sudo -u suez curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u suez python -
+  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
+    | sudo -u bitcoin python -
   # download source code
-  sudo -u suez git clone https://github.com/prusnak/suez.git
+  sudo -u bitcoin git clone https://github.com/prusnak/suez.git
   cd suez || exit 1 
-  sudo -u suez /home/suez/.local/bin/poetry install
+  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
   exit 0
 fi

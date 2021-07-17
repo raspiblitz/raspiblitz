@@ -37,9 +37,10 @@ OPTIONS+=(NAME "Change Name/Alias of Node")
 
 openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-  OPTIONS+=(CLOSEALL "Close all open Channels")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+OPTIONS+=(SUEZ "Visualize channels")
+OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
+  HEIGHT=$((HEIGHT+2))
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))  
 fi
 
 OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
@@ -114,6 +115,19 @@ case $CHOICE in
         sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         exit 0
       fi
+      ;;
+  SUEZ)
+      clear
+      if [ ! -f /home/bitcoin/suez/suez ];then
+        /home/admin/config.scripts/bonus.suez.sh on
+      fi
+      cd /home/bitcoin/suez || exit 1 
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+        --client-args=-n=${CHAIN} \
+        --client-args=--rpcserver=localhost:1${L2rpcportmod}009
+      echo
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   CLOSEALL)
       /home/admin/BBcloseAllChannels.sh lnd $CHAIN

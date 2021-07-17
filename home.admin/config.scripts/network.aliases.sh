@@ -57,8 +57,9 @@ if [ $1 = getvars ];then
   echo "CHAIN=${chain}net"
   echo "chain=${chain}"
 
-  # netprefix is:  "" | t | s
-  # portprefix is: "" | 1 | 3
+  # netprefix is:     "" | t | s
+  # portprefix is:    "" | 1 | 3
+  # L2rpcportmod is:   0 | 1 | 3   
   if [ ${chain} = "test" ];then
     netprefix="t"
     L1rpcportmod=1
@@ -77,6 +78,7 @@ if [ $1 = getvars ];then
   fi
   echo "netprefix=${netprefix}"
   echo "portprefix=${portprefix}"
+  echo "L2rpcportmod=${L2rpcportmod}"
 
   # CLNETWORK is: bitcoin / signet / testnet
   if [ $chain = main ];then
@@ -96,5 +98,4 @@ if [ $1 = getvars ];then
 fi
 
 #TODO
-# where /lnd.conf is not changed to /${netprefix}lnd.conf
-# the service remains mainnet only
+# where /lnd.conf is not changed to /${netprefix}lnd.conf the service remains for mainnet only
