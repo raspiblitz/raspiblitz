@@ -20,9 +20,21 @@
         Welcome Node Operator
     </h2>
 
-    <p id="tortest"></p>
+    <p id="userinfo">Please Wait ...</p>
     <script>
-        document.getElementById("tortest").innerHTML=window.location.hostname
+        document.getElementById("userinfo").innerHTML=window.location.hostname;
+        if (window.location.hostname.endsWith(".onion")) {
+            document.getElementById("userinfo").innerHTML="onion domain address"
+        }
+        else if (window.location.hostname.endsWith(".local")) {
+            document.getElementById("userinfo").innerHTML="local domain address"
+        }
+        else if (window.location.hostname.split(".").length>2) {
+            document.getElementById("userinfo").innerHTML="local IP address or a subdomain"
+        }
+        else {
+            document.getElementById("userinfo").innerHTML="unknown"
+        }
     </script>
 
     <h4>Use one the following link to access your RaspiBlitz</h4>
