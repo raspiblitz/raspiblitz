@@ -29,6 +29,8 @@ cfg.reload()
 # basic values
 SUBSCRIPTIONS_FILE = "/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 
+exec(open('/home/admin/config.scripts/tor.functions.lib').read())
+
 
 #######################
 # HELPER FUNCTIONS
