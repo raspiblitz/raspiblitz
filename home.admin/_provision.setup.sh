@@ -369,7 +369,7 @@ if [ "${lightning}" == "cln" ]; then
     fi
 
   # OLD WALLET FROM SEEDWORDS
-  else [ "${seedWords}" != "" ]; then
+  elif [ "${seedWords}" != "" ]; then
 
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
