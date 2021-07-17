@@ -40,6 +40,7 @@ def test(words):
 
     mnemo = Mnemonic("english")
     seed = mnemo.to_seed(words, passphrase="")
+    print(vars(seed))
 
 def main():
     if sys.argv[1] == "generate":
