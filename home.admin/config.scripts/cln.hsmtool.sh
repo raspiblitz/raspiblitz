@@ -147,7 +147,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   # check/delete existing wallet
   if [ "$1" = "new-force" ] || [ "$1" = "seed-force" ]; then
     echo "# deleting any old wallet ..."
-    sudo rm $hsmSecretPath
+    sudo rm $hsmSecretPath 2>/dev/null
   else
     if sudo ls $hsmSecretPath 2>1 1>/dev/null; then
       echo "# The hsm_secret is already present at $hsmSecretPath."

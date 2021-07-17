@@ -386,7 +386,7 @@ if [ "${lightning}" == "cln" ]; then
   else
 
     # generate new wallet
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet "${passwordC}")
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet ${passwordC})
 
     # check if got new seedwords
     if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
