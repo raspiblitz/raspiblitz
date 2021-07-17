@@ -65,14 +65,14 @@ elif [ "${exportType}" = "hexstring" ]; then
   adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   echo "adminMacaroon=${adminMacaroon}"
   echo ""
-  echo "invoice.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon
+  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  echo "invoiceMacaroon=${invoiceMacaroon}"
   echo ""
-  echo "readonly.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  echo "readonlyMacaroon=${readonlyMacaroon}"
   echo ""
-  echo "tls.cert:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert
+  tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+  echo "tlsCert=${tlsCert}"
   echo ""
 
 ########################
