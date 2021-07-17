@@ -525,8 +525,7 @@ valid seed word list by our test.
 
 Please check for typos.
 
-" 52 52
-
+" 12 52
 	        if [ $? -eq 1 ]; then
             clear
             echo "# CANCEL empty results in: ${RESULTFILE}"
