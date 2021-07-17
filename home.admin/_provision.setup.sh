@@ -143,7 +143,7 @@ if [ "${lightning}" != "lnd" ]; then
   echo "Remove LND" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Deactivate Lightning'/g" ${infoFile}
   sudo systemctl disable lnd
-  sudo rm /etc/systemd/system/lnd.service
+  sudo rm /etc/systemd/system/lnd.service 2>/dev/null
   sudo systemctl daemon-reload
 fi
 
@@ -374,7 +374,7 @@ if [ "${lightning}" == "cln" ]; then
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
     # check if wallet really got created 
-    walletExistsNow = $(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    walletExistsNow=$(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: seed maybe wrong'/g" ${infoFile}
@@ -397,7 +397,7 @@ if [ "${lightning}" == "cln" ]; then
     fi
 
     # check if wallet really got created 
-    walletExistsNow = $(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    walletExistsNow=$(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: no cln wallet created'/g" ${infoFile}
