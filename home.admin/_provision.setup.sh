@@ -106,11 +106,11 @@ echo ""
 echo "*** Start ${network} ***" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
+sudo systemctl stop ${network}d.service
+sudo systemctl disable ${network}d.service
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-#sudo chmod +x /etc/systemd/system/${network}d.service
-sudo systemctl daemon-reload >> ${logFile}
-sudo systemctl enable ${network}d.service >> ${logFile}
-sudo systemctl start ${network}d.service >> ${logFile}
+sudo systemctl enable ${network}d.service
+sudo systemctl start ${network}d.service
 
 # check if bitcoin has started
 bitcoinRunning=0
@@ -129,7 +129,7 @@ do
     exit 1
   fi
 done
-echo "OK ${network} startup successfull " >> ${logFile}
+echo "OK ${network} startup successful " >> ${logFile}
 
 
 ###################################
@@ -386,7 +386,7 @@ if [ "${lightning}" == "cln" ]; then
   else
 
     # generate new wallet
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet ${passwordC})
+    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
 
     # check if got new seedwords
     if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
