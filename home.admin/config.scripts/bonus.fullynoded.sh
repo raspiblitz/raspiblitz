@@ -2,7 +2,7 @@
 clear
 
 #include lib
-. /home/admin/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 # make sure txindex and wallet of bitcoin is on
 /home/admin/config.scripts/network.wallet.sh on

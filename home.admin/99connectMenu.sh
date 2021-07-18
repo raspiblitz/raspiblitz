@@ -106,17 +106,17 @@ case $CHOICE in
             echo "# Creating the Hidden Service for Bisq"
             echo "
 # Hidden Service for Bisq (bitcoin RPC v2)
-HiddenServiceDir /mnt/hdd/tor/bisq
+HiddenServiceDir ${SERVICES_DATA_DIR}/bisq
 HiddenServiceVersion 2
 HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
             echo "# Restarting Tor"
             sudo systemctl restart tor
             sleep 10
-            TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
+            TOR_ADDRESS=$(sudo cat ${SERVICES_DATA_DIR}/bisq/hostname)
               if [ -z "$TOR_ADDRESS" ]; then
                 echo "Waiting for the Hidden Service"
                 sleep 10
-                TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
+                TOR_ADDRESS=$(sudo cat ${SERVICES_DATA_DIR}/bisq/hostname)
                 if [ -z "$TOR_ADDRESS" ]; then
                   echo "# FAIL - The Hidden Service address could not be found - Tor error?"
                   exit 1
@@ -140,7 +140,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           sudo systemctl restart tor;;
         SHOWBISQ)
           clear
-          TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
+          TOR_ADDRESS=$(sudo cat ${SERVICES_DATA_DIR}/bisq/hostname)
           echo
           echo "Install from https://bisq.network/downloads/"
           echo "Go to Bisq Settings -> Network Info -> 'Custom Bitcoin Node'."
@@ -173,7 +173,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
     bindIP=$(grep -c "rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
-    TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
+    TorRPCaddress=$(sudo cat ${SERVICES_DATA_DIR}/bitcoin${BITCOINRPCPORT}/hostname)
 
     function showRPCcredentials() {
       RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)

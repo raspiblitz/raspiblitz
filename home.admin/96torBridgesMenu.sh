@@ -48,8 +48,7 @@ j=0
 ######## FUNCTIONS ########
 
 # include lib
-#. /home/admin/config.scripts/tor.functions.lib
-. /home/admin/raspi-tor/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 # This function imports the configuration and makes some preparations
 read_config(){

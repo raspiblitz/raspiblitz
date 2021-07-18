@@ -47,7 +47,7 @@ i=0
 ######## FUNCTIONS ########
 
 #include lib
-. /home/admin/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 ######## PREPARATIONS ########
 ###########################

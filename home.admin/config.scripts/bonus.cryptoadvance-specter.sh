@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 #include lib
-. /home/admin/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 echo "# bonus.cryptoadvance-specter.sh $1"
 

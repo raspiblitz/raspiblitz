@@ -106,10 +106,10 @@ checkIP2TOR()
   	if [ $? -eq 0 ]; then
   	  echo "# yes-button -> Send To Shop"
 	  port="10009"
-	  toraddress=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
+	  toraddress=$(sudo cat ${SERVICES_DATA_DIR}/lndrpc10009/hostname)
 	  if [ "$1" == "LND-REST-API" ]; then
 	    port="8080"
-		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+		toraddress=$(sudo cat ${SERVICES_DATA_DIR}/lndrest8080/hostname)
 	  fi
 
 	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')

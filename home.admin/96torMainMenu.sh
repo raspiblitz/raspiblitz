@@ -47,8 +47,7 @@ torSourcesPlainUpdate="https://deb.torproject.org/"
 ######## FUNCTIONS ###########
 
 # include lib
-#. /home/admin/config.scripts/tor.functions.lib
-. /home/admin/raspi-tor/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 # This function imports the configuration and makes some preparations
 read_config(){
@@ -411,22 +410,26 @@ EOF
     if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       CHOICE=$(whiptail --menu "Vanguards are: ${vanguardsStatus}" 16 80 6 \
               "INSTALL" "Install Vanguards" \
-              "RESTART_vanguards" "Restart the service for the default instance" \
-              "STOP_vanguards" "Stop the service for the default instance" \
+              "RESTART" "Restart the service for the default instance" \
+              "STOP" "Stop the service for the default instance" \
               "REMOVE" "Remove/Uninstall Vanguards" \
               3>&1 1>&2 2>&3)
 
-      if [ "$CHOICE" == "INSTALL" ]; then
+      if [ "$CHOICE" == " LOGS" ]; then
+        clear
+        trap "bash 96torMainMenu.sh; exit 0" EXIT
+        sudo journalctl -n 10 -fu vanguards@default.service
+      elif [ "$CHOICE" == "INSTALL" ]; then
         clear
         ${ONION_SERVICE_SCRIPT} vanguards install
         ${ONION_SERVICE_SCRIPT} vanguards on 9051
-      elif [ "$CHOICE" == "RESTART_vanguards" ]; then
+      elif [ "$CHOICE" == "RESTART" ]; then
         clear
         sudo systemctl restart vanguards@default.service
         vanguardsStatus=$(sudo systemctl is-active vanguards@default.service)
         sleep 3
         whiptail --msgbox "Vanguards are now: ${vanguardsStatus}" 10 35
-      elif [ "$CHOICE" == "STOP_vanguards" ]; then
+      elif [ "$CHOICE" == "STOP" ]; then
         clear
         sudo systemctl stop vanguards@default.service
         vanguardsStatus=$(sudo systemctl is-active vanguards@default.service)

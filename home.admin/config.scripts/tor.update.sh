@@ -8,7 +8,7 @@
 # function: install keys & sources
 
 #include lib
-. /home/admin/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 prepareTorSources(){
 

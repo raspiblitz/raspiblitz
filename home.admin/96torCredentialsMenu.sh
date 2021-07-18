@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # include lib
-#. /home/admin/config.scripts/tor.functions.lib
-. /home/admin/raspi-tor/config.scripts/tor.functions.lib
+. /home/admin/_tor.commands.sh
 
 echo "services default values"
 if [ ${#sshTor} -eq 0 ]; then sshTor="off"; fi
