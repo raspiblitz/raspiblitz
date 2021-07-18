@@ -2,15 +2,6 @@ SocksPort 9050
 ControlPort 9051
 CookieAuthentication 1
 
-# Hidden Service for 1005
-HiddenServiceDir /var/lib/tor/1005
-HiddenServicePort 1005 127.0.0.1:1005
-
-# Hidden Service for test
-HiddenServiceDir /var/lib/tor/test
-HiddenServicePort 80 127.0.0.1:80
-
-
 ## TO OVERCOME CENSORSHIP, START HERE!
 ######################################################
 ## If you like to use bridges to overcome censorship, EDIT THE LINES BELOW!

@@ -1,0 +1,6 @@
+mechanize
+Pillow
+pytesseract
+requests
+PySocks
+urwid
