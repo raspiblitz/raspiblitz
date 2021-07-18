@@ -43,9 +43,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  sudo npm install --global yarn #FAIL: yarn comand not available afterwards (test with fresh sd card image) 
-  /usr/local/lib/nodejs/node-v14.15.4-linux-arm64/bin/yarn install
-  /usr/local/lib/nodejs/node-v14.15.4-linux-arm64/bin/yarn build
+  source /etc/profile
+  sudo npm install --global yarn
+  yarn install
+  yarn build
 
   sudo rm -r /var/www/public/ui 2>/dev/null
   sudo cp -r /home/admin/blitz_web/build /var/www/public/ui
