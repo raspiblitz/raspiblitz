@@ -24,16 +24,13 @@
     <script>
         document.getElementById("userinfo").innerHTML=window.location.hostname;
         if (window.location.hostname.endsWith(".onion")) {
-            document.getElementById("userinfo").innerHTML="onion domain address"
+            document.getElementById("userinfo").innerHTML="onion domain address TODO: redirect on same address to subfolder of /ui"
         }
-        else if (window.location.hostname.endsWith(".local")) {
-            document.getElementById("userinfo").innerHTML="local domain address"
-        }
-        else if (window.location.hostname.split(".").length>2) {
-            document.getElementById("userinfo").innerHTML="local IP address or a subdomain"
+        else if ((window.location.hostname.endsWith(".local")) || (window.location.hostname.split(".").length>2)) {
+            document.getElementById("userinfo").innerHTML="local domain/IP address TODO: give info on download/use Tor and offer onion address for easy copy & paste"
         }
         else {
-            document.getElementById("userinfo").innerHTML="unknown"
+            document.getElementById("userinfo").innerHTML="unknown hostname: "+window.location.hostname
         }
     </script>
 
