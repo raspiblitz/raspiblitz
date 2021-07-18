@@ -14,9 +14,11 @@ fi
 source /mnt/hdd/raspiblitz.conf
 
 # CHAIN is signet | testnet | mainnet
-if [ $# -gt 0 ] && [ $1 != ${chain}net ];then
-  nonDefaultChain=1
+if [ $# -gt 0 ]; then
   CHAIN=$1
+  if [ $1 != ${chain}net ];then
+    nonDefaultChain=1
+  fi
 else
   nonDefaultChain=0
   CHAIN=${chain}net

@@ -22,7 +22,7 @@ OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
 OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 
-if grep "${netprefix}cln=on" /mnt/hdd/raspiblitz.conf;then
+if grep "^${netprefix}cln=on" /mnt/hdd/raspiblitz.conf;then
   OPTIONS+=(CLNLOG "Monitor the CLN log for ${CHAIN}")
   OPTIONS+=(CLNCONF "Edit the CLN config for ${CHAIN}")
     HEIGHT=$((HEIGHT+2))

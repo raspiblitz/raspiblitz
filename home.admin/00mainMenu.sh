@@ -263,7 +263,7 @@ case $CHOICE in
             /home/admin/99connectMenu.sh
             ;;
         SYSTEM)
-            /home/admin/99systemMenu.sh
+            /home/admin/99systemMenu.sh ${chain}net
             ;;
         SCREEN)
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
