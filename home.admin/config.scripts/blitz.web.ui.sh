@@ -4,6 +4,9 @@
 # that comes with the repo so that the user does not need to install node
 # use fro that then: yarn build:production & yarn licenses generate-disclaimer
 
+# TODO: Put WebUI into / base directory of nginx and let the index.html of the webUI handle
+# the Tor detection or build it directly into the WebUI
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web UI"
@@ -48,9 +51,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   yarn install
   yarn build
 
-  sudo rm -r /var/www/public/ui 2>/dev/null
-  sudo cp -r /home/admin/blitz_web/build /var/www/public/ui
-  sudo chown www-data:www-data -r /var/www/public/ui
+  sudo rm -r /var/www/public/* 2>/dev/null
+  sudo cp -r /home/admin/blitz_web/build/* /var/www/public
+  sudo chown www-data:www-data -R /var/www/public
 
   exit 1
 fi
@@ -61,8 +64,8 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# UNINSTALL WebUI"
-
-  echo "TODO: Implement"
+  sudo rm -r /home/admin/blitz_web 2>/dev/null
+  sudo rm -r /var/www/public/* 2>/dev/null
   exit 0
 fi
 
