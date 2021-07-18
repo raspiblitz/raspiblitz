@@ -90,7 +90,6 @@ echo "******************************"
 
 # execute command
 if [ ${LNTYPE} = "cln" ];then
-  # TODO no easy way to sweep funds
   # withdraw destination satoshi [feerate] [minconf] [utxos]
   command="$lightningcli_alias withdraw ${address} all slow"
 elif [ ${LNTYPE} = "lnd" ];then

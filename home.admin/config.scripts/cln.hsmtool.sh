@@ -290,5 +290,5 @@ else
   exit 1
 fi
 
-# set the lightnind service file after all choices
+# set the lightnind service file after all choices unless exited before
 /home/admin/config.scripts/cln.install-service.sh $CHAIN
