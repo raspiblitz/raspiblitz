@@ -173,8 +173,12 @@ always-use-proxy=true
   echo "\
 alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
-alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
+alias ${netprefix}cln=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=/home/bitcoin/.lightning/${netprefix}config\"
+alias ${netprefix}clnlog=\"sudo\
+ tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log\"
+alias ${netprefix}clnconf=\"sudo\
+ nano /home/bitcoin/.lightning/${netprefix}config\"
 " | sudo tee -a /home/admin/_aliases
 
   echo
