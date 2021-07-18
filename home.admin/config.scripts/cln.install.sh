@@ -163,6 +163,11 @@ always-use-proxy=true
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
+  #################
+  # Backup plugin #
+  #################
+  /home/admin/config.scripts/cln-plugin.backup.sh on $CHAIN
+
   ###################
   # Systemd service #
   ###################
