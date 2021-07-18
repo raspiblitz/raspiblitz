@@ -33,7 +33,7 @@ activateBitcoinOverTor()
     deactivateBitcoinOverTor
 
     echo "# Make sure the user bitcoin is in the debian-tor group"
-    sudo usermod -a -G debian-tor bitcoin
+    sudo usermod -a -G ${OWNER_TOR_DATA_DIR} ${OWNER_TOR_CONF_DIR}
     sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
     echo "Adding Tor config to the the ${network}.conf ..."
     # deprecate 'torpassword='
@@ -58,8 +58,8 @@ activateBitcoinOverTor()
     sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
 
     # copy new bitcoin.conf to admin user for cli access
-    sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-    sudo chown admin:admin /home/admin/.${network}/${network}.conf
+    sudo cp /home/bitcoin/.${network}/${network}.conf ${USER_DIR}/.${network}/${network}.conf
+    sudo chown ${USER}:${USER} ${USER_DIR}/.${network}/${network}.conf
 
   else
     echo "BTC config does not found (yet) -  try with 'tor.on.sh btcconf-on' again later"
@@ -80,8 +80,8 @@ deactivateBitcoinOverTor()
   sudo sed -i "s/^dns=.*//g" /home/bitcoin/.${network}/${network}.conf
   # remove empty lines
   sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
-  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-  sudo chown admin:admin /home/admin/.${network}/${network}.conf
+  sudo cp /home/bitcoin/.${network}/${network}.conf ${USER_DIR}/.${network}/${network}.conf
+  sudo chown ${USER}:${USER} ${USER_DIR}/.${network}/${network}.conf
 }
 
 
@@ -118,8 +118,8 @@ activateLndOverTor()
 
 # check and load raspiblitz config
 # to know which network is running
-if [ -f "/home/admin/raspiblitz.info" ]; then
-  source /home/admin/raspiblitz.info
+if [ -f "${INFO}" ]; then
+  source ${INFO}
 fi
 
 if [ -f "${CONF}" ]; then
@@ -209,10 +209,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
   fi
 
-  # 7. Configuring Tor with the pluggable transports
+  #  Configuring Tor with the pluggable transports
   sleep 10
   clear
-  echo -e "${RED}[+] Step 7: Configuring Tor with the pluggable transports....${NOCOLOR}"
+  echo -e "${RED}[+] Configuring Tor with the pluggable transports....${NOCOLOR}"
   sudo cp /usr/share/tor/geoip* /usr/bin
   sudo chmod a+x /usr/bin/geoip*
   sudo setcap 'cap_net_bind_service=+ep' /usr/bin/obfs4proxy
@@ -220,7 +220,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@.service
 
   # Additional installation for GO
-  bash /home/admin/config.scripts/bonus.go.sh on
+  bash ${USER_DIR}/config.scripts/bonus.go.sh on
   export GO111MODULE="on"
 
   # Do NOT use torproject.org domain cause they could be blocked
@@ -230,36 +230,36 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # SNOWFLAKE
   #git clone https://git.torproject.org/pluggable-transports/snowflake.git
   git clone https://github.com/keroserene/snowflake.git
-  cd /home/admin/snowflake/proxy
+  cd ${USER_DIR}/snowflake/proxy
   go get
   go build
   sudo cp proxy /usr/bin/snowflake-proxy
-  cd /home/admin/snowflake/client
+  cd ${USER_DIR}/snowflake/client
   go get
   go build
   sudo cp client /usr/bin/snowflake-client
 
-  cd /home/admin
+  cd ${USER_DIR}
 
   # OBFS4
   #git clone https://gitweb.torproject.org/pluggable-transports/obfs4.git/
   git clone https://salsa.debian.org/pkg-privacy-team/obfs4proxy.git
-  cd /home/admin/obfs4proxy/
+  cd ${USER_DIR}/obfs4proxy/
   go build -o obfs4proxy/obfs4proxy ./obfs4proxy
   sudo cp ./obfs4proxy/obfsproxy /usr/local/bin/obfs4proxy/obfsproxy
 
-  cd /home/admin
+  cd ${USER_DIR}
 
   sudo rm -rf obfs4proxy
   sudo rm -rf snowflake
   sudo rm -rf go*
 
   # remove GO
-  bash /home/admin/config.scripts/bonus.go.sh off
+  bash ${USER_DIR}/config.scripts/bonus.go.sh off
 
   # Install requirements to request bridges from the database
   # https://github.com/radio24/TorBox/blob/master/requirements.txt
-  sudo pip3 -r install /home/admin/tor.requirements.txt
+  sudo pip3 -r install ${USER_DIR}/tor.requirements.txt
 
   # install package just in case it was deinstalled
   packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
@@ -319,7 +319,7 @@ EOF
     sudo rm ${TORRC}
     sudo mv ./torrc ${TORRC}
     sudo chmod 644 ${TORRC}
-    sudo chown -R debian-tor:debian-tor /var/run/tor/ 2>/dev/null
+    sudo chown -R ${OWNER_TOR_DATA_DIR}:${OWNER_TOR_DATA_DIR} /var/run/tor/ 2>/dev/null
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d

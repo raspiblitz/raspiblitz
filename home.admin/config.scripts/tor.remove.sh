@@ -34,18 +34,18 @@ deactivateBitcoinOverTOR()
   sudo sed -i "s/^dns=.*//g" /home/bitcoin/.${network}/${network}.conf
   # remove empty lines
   sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
-  sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
-  sudo chown admin:admin /home/admin/.${network}/${network}.conf
+  sudo cp /home/bitcoin/.${network}/${network}.conf ${USER_DIR}/.${network}/${network}.conf
+  sudo chown admin:admin ${USER_DIR}/.${network}/${network}.conf
 }
 
 # check and load raspiblitz config
 # to know which network is running
-if [ -f "/home/admin/raspiblitz.info" ]; then
-  source /home/admin/raspiblitz.info
+if [ -f "${INFO}" ]; then
+  source ${INFO}
 fi
 
-if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-  source /mnt/hdd/raspiblitz.conf
+if [ -f "${CONF}" ]; then
+  source ${CONF}
 fi
 
 # if started with btcconf-off
@@ -80,7 +80,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# editing /etc/systemd/system/lnd.service"
   sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
 
-  sudo /home/admin/config.scripts/internet.sh update-publicip
+  sudo ${USER_DIR}/config.scripts/internet.sh update-publicip
 
   sudo systemctl enable lnd
   echo "# OK"

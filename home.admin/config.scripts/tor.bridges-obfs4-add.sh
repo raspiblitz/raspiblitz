@@ -27,9 +27,15 @@
 # <standalone>: 0 - bridges_add_old was executed as part of the activation process, when no bridges were found
 #               1 - bridges_add_old was directly executed
 #
+###########################
+######## FUNCTIONS ########
+
+# include lib
+. /home/admin/_tor.commands.sh
+
 ###### SET VARIABLES ######
 
-SOURCE_SCRIPT="config.scripts/tor.obfs4-add-old.sh"
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-obfs4-add.sh"
 
 #Other variables
 MODE_BRIDGES=$1
@@ -37,11 +43,7 @@ STANDALONE=$2
 number_bridges=0
 i=0
 
-###########################
-######## FUNCTIONS ########
 
-# include lib
-. /home/admin/_tor.commands.sh
 
 ###########################
 
@@ -80,7 +82,7 @@ case $CHOICE in
       echo -e "${WHITE}[+] OK - we are connected with the bridge database${NOCOLOR}"
       sleep 3
       clear
-      whiptail --title "Tor - INFO" --textbox text/add-bridges-automatically-text $MENU_HEIGHT_15 $MENU_WIDTH
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/add-bridges-automatically-text $MENU_HEIGHT_15 $MENU_WIDTH
       clear
       echo -e "${RED}[+] Fetching a bridge... this may take some time, please wait!${NOCOLOR}"
       trap "bash ${SOURCE_SCRIPT} $MODE_BRIDGES $STANDALONE; exit 0" SIGINT
@@ -121,7 +123,7 @@ case $CHOICE in
 
   MANUALLY)
     clear
-    whiptail --title "Tor - INFO" --textbox text/add-bridges-manually-text $MENU_HEIGHT_25 $MENU_WIDTH
+    whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/add-bridges-manually-text $MENU_HEIGHT_25 $MENU_WIDTH
     number_bridges=$(whiptail --title "Tor - INFO" --inputbox "\n\nHow many bridges do you like to add?" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX 3>&1 1>&2 2>&3)
     if [ $number_bridges > 0 ]; then
       i=1

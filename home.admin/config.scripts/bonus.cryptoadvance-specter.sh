@@ -234,9 +234,9 @@ EOF
 #
 # Put this file into /etc/udev/rules.d
 #
-# If you are creating a distribution package,
+# If you are creating a DISTRIBUTION package,
 # put this into /usr/lib/udev/rules.d or /lib/udev/rules.d
-# depending on your distribution
+# depending on your DISTRIBUTION
 
 # Trezor
 SUBSYSTEM=="usb", ATTR{idVendor}=="534c", ATTR{idProduct}=="0001", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl", SYMLINK+="trezor%n"

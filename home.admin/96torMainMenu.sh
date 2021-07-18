@@ -29,25 +29,16 @@
 # ./96torMainMenu.sh
 #
 #
-###### SET VARIABLES ######
-
-SOURCE_SCRIPT="96torMainMenu.sh"
-
-distribution=$(lsb_release -sc)
-
-debianSourcesOnionUpdate="http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/"
-debianSourcesOnionSecurity="http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/"
-torSourcesOnionUpdate="http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/"
-
-debianSourcesPlainUpdate="https://deb.debian.org/"
-debianSourcesPlainSecurity="https://deb.debian.org/"
-torSourcesPlainUpdate="https://deb.torproject.org/"
 
 ##############################
 ######## FUNCTIONS ###########
 
 # include lib
 . /home/admin/_tor.commands.sh
+
+###### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/96torMainMenu.sh"
 
 # This function imports the configuration and makes some preparations
 read_config(){
@@ -314,33 +305,33 @@ case $CHOICE in
     if [ "$CHOICE" == "ONION_tor" ]||[ "$CHOICE" == "ONION_debian_tor" ]; then
       sudo rm -f /etc/apt/sources.list.d/tor.list
       sudo tee /etc/apt/sources.list.d/tor.list >/dev/null <<EOF
-deb [arch=arm64] tor+${torSourcesOnionUpdate}torproject.org ${distribution} main
-deb-src [arch=arm64] tor+${torSourcesOnionUpdate}torproject.org ${distribution} main
+deb [arch=arm64] tor+${SOURCES_TOR_UPDATE_ONION}torproject.org ${DISTRIBUTION} main
+deb-src [arch=arm64] tor+${SOURCES_TOR_UPDATE_ONION}torproject.org ${DISTRIBUTION} main
 EOF
     fi
 
     if [ "$CHOICE" == "ONION_debian" ]||[ "$CHOICE" == "ONION_debian_tor" ]; then
       sudo tee /etc/apt/sources.list.d/deb.list >/dev/null <<EOF
-deb [arch=arm64] tor+${debianSourcesOnionUpdate}debian ${distribution} main
-deb [arch=arm64] tor+${debianSourcesOnionUpdate}debian ${distribution}-updates main
-deb [arch=arm64] tor+${debianSourcesOnionSecurity}debian-security/ ${distribution}-security main
-#deb [arch=arm64] tor+${debianSourcesOnionUpdate}debian ${distribution}-backports main
+deb [arch=arm64] tor+${SOURCES_DEB_UPDATE_ONION}debian ${DISTRIBUTION} main
+deb [arch=arm64] tor+${SOURCES_DEB_UPDATE_ONION}debian ${DISTRIBUTION}-updates main
+deb [arch=arm64] tor+${SOURCES_DEB_SECURITY_ONION}debian-security/ ${DISTRIBUTION}-security main
+#deb [arch=arm64] tor+${SOURCES_DEB_UPDATE_ONION}debian ${DISTRIBUTION}-backports main
 EOF
     fi
 
     if [ "$CHOICE" == "PLAIN_tor" ] || [ "$CHOICE" == "PLAIN_debian_tor" ]; then
       sudo tee /etc/apt/sources.list.d/tor.list >/dev/null <<EOF
-deb [arch=arm64] ${torSourcesPlainUpdate}torproject.org ${distribution} main
-deb-src [arch=arm64] ${torSourcesPlainUpdate}torproject.org ${distribution} main
+deb [arch=arm64] ${SOURCES_TOR_UPDATE_PLAIN}torproject.org ${DISTRIBUTION} main
+deb-src [arch=arm64] ${SOURCES_TOR_UPDATE_PLAIN}torproject.org ${DISTRIBUTION} main
 EOF
     fi
 
     if [ "$CHOICE" == "PLAIN_debian" ]||[ "$CHOICE" == "PLAIN_debian_tor" ]; then
       sudo tee /etc/apt/sources.list.d/deb.list >/dev/null <<EOF
-deb [arch=arm64] ${debianSourcesPlainUpdate}debian ${distribution} main
-deb [arch=arm64] ${debianSourcesPlainUpdate}debian ${distribution}-updates main
-deb [arch=arm64] ${debianSourcesPlainSecurity}debian-security/ ${distribution}-security main
-#deb [arch=arm64] ${debianSourcesPlainUpdate}debian ${distribution}-backports main
+deb [arch=arm64] ${SOURCES_DEB_UPDATE_PLAIN}debian ${DISTRIBUTION} main
+deb [arch=arm64] ${SOURCES_DEB_UPDATE_PLAIN}debian ${DISTRIBUTION}-updates main
+deb [arch=arm64] ${SOURCES_DEB_SECURITY_PLAIN}debian-security/ ${DISTRIBUTION}-security main
+#deb [arch=arm64] ${SOURCES_DEB_UPDATE_PLAIN}debian ${DISTRIBUTION}-backports main
 EOF
     fi
 

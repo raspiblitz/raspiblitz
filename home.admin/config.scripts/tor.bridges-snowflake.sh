@@ -29,20 +29,21 @@
 # Possible values for <SNOWSTRING> <MEEKSTRING>: "ON!" or "OFF".
 #
 #
-##### SET VARIABLES ######
-
-SOURCE_SCRIPT="config.scripts/tor.snowflake.sh"
-
-#Other variables
-SNOWSTRING=$1
-MEEKSTRING=$2
-i=0
 
 ###########################
 ######## FUNCTIONS ########
 
 #include lib
 . /home/admin/_tor.commands.sh
+
+##### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-snowflake.sh"
+
+#Other variables
+SNOWSTRING=$1
+MEEKSTRING=$2
+i=0
 
 ######## PREPARATIONS ########
 ###########################
@@ -75,7 +76,7 @@ if [ "$SNOWSTRING" = "OFF" ]; then
 		do
 			bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_snowflake_deactivated[$i]})
 			bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-			bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+			bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
 			if [ $bridge_status == 1 ]; then bridge_status_txt="${GREEN}- ONLINE${NOCOLOR}"
 		elif [ $bridge_status == 0 ]; then bridge_status_txt="${RED}- OFFLINE${NOCOLOR}"
 	elif [ $bridge_status == 2 ]; then bridge_status_txt="- DOESN'T EXIST" ; fi
@@ -97,7 +98,7 @@ if [ "$SNOWSTRING" = "OFF" ]; then
 		read -n 1 -s -r -p "Press any key to continue"
 	fi
 	clear
-	INPUT=$(cat text/activate-snowflake-text)
+	INPUT=$(cat ${USER_DIR}/text/activate-snowflake-text)
 	if (whiptail --title "Tor - INFO (scroll down!)" --scrolltext --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
 		clear
 		activate_snowflake_bridges ${SOURCE_SCRIPT}
@@ -105,7 +106,7 @@ if [ "$SNOWSTRING" = "OFF" ]; then
 	fi
 else
 	if [ "$SNOWSTRING" = "ON!" ]; then
-		INPUT=$(cat text/deactivate-snowflake-text)
+		INPUT=$(cat ${USER_DIR}/text/deactivate-snowflake-text)
 		if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX); then
 			clear
 	    	activate_snowflake_bridges ${SOURCE_SCRIPT}

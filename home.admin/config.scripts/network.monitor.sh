@@ -32,7 +32,7 @@ if [ "$1" = "peer-kickstart" ]; then
   echo "#network.monitor.sh peer-kickstart"
 
   # check if started with sudo
-  if [ "$EUID" -ne 0 ]; then 
+  if [ "$EUID" -ne 0 ]; then
     echo "error='missing sudo'"
     exit 1
   fi
@@ -67,7 +67,7 @@ if [ "$1" = "peer-kickstart" ]; then
     if [ "${runBehindTor}" == "on" ]; then
       addressFormat="tor"
     else
-      source <(sudo ./config.scripts/internet.sh status global)
+      source <(sudo /home/admin/config.scripts/internet.sh status global)
       if [ "${ipv6}" == "off" ]; then
         addressFormat="ipv4"
       else
@@ -110,7 +110,7 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
   echo "newpeer='${nodeAddress}"
 
-  # kick start node with 
+  # kick start node with
   sudo -u admin ${network}-cli addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
@@ -125,13 +125,13 @@ if [ "$1" = "peer-disconnectall" ]; then
   echo "#network.monitor.sh peer-disconnectall"
 
   # check if started with sudo
-  if [ "$EUID" -ne 0 ]; then 
+  if [ "$EUID" -ne 0 ]; then
     echo "error='missing sudo'"
     exit 1
   fi
 
   # get all peer id and disconnect them
-  sudo -u admin ${network}-cli getpeerinfo | grep '"addr": "' | while read line 
+  sudo -u admin ${network}-cli getpeerinfo | grep '"addr": "' | while read line
   do
     peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"

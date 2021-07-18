@@ -120,7 +120,7 @@ case $CHOICE in
     if [ $number_configured_bridges_total = 0 ]; then
       INPUT=$(cat text/add-bridges-first-text)
       if (whiptail --title "Tor - INFO" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-        sudo bash config.scripts/tor.bridges-obfs4-add-old.sh "$MODE_BRIDGES" 0
+        sudo bash config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 0
       else
         deactivate_obfs4_bridges
         trap "bash 96torBridgesMenu.sh; exit 0" EXIT
@@ -130,13 +130,13 @@ case $CHOICE in
     if [ "$MODE_BRIDGES" != "UseBridges 1" ]; then
       INPUT=$(cat text/activate-bridges-text)
       if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-        sudo bash config.scripts/tor.bridges-obfs4-activate-old.sh
+        sudo bash config.scripts/tor.bridges-obfs4-activate.sh
       else
         trap "bash 96torBridgesMenu.sh; exit 0" EXIT
         exit 0
       fi
     else
-      sudo bash config.scripts/tor.bridges-obfs4-activate-old.sh
+      sudo bash config.scripts/tor.bridges-obfs4-activate.sh
     fi
     read_config
   ;;
@@ -155,7 +155,7 @@ case $CHOICE in
       else
         INPUT=$(cat text/deactivate-bridges-text)
         if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-          sudo bash config.scripts/tor.bridges-obfs4-deactivate-old.sh
+          sudo bash config.scripts/tor.bridges-obfs4-deactivate.sh
           read_config
         fi
       fi
@@ -166,7 +166,7 @@ case $CHOICE in
     if [ "$MODE_MEEK" = "Bridge meek_lite " ] || [ "$MODE_SNOW" = "Bridge snowflake " ]; then
       whiptail --title "Tor - INFO" --textbox text/no_meek-snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
     fi
-    sudo bash config.scripts/tor.bridges-obfs4-add-old.sh "$MODE_BRIDGES" 1
+    sudo bash config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 1
     read_config
   ;;
 
@@ -177,7 +177,7 @@ case $CHOICE in
       sleep 5
     else
       whiptail --title "Tor - INFO" --textbox text/remove-bridges-text $MENU_HEIGHT_25 $MENU_WIDTH
-      sudo bash config.scripts/tor.bridges-obfs4-remove-old.sh "$MODE_BRIDGES"
+      sudo bash config.scripts/tor.bridges-obfs4-remove.sh "$MODE_BRIDGES"
       read_config
     fi
   ;;
@@ -211,7 +211,7 @@ case $CHOICE in
           bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_bridges_deactivated[$i]})
           if [ $OCHECK == 0 ]; then
             bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-            bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+            bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
             if [ $bridge_status == 1 ]; then bridge_status="${GREEN}- ONLINE${NOCOLOR}"
             elif [ $bridge_status == 0 ]; then bridge_status="${RED}- OFFLINE${NOCOLOR}"
             elif [ $bridge_status == 2 ]; then bridge_status="- DOESN'T EXIST" ; fi
@@ -237,7 +237,7 @@ case $CHOICE in
           bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_bridges_activated[$j]})
           if [ $OCHECK == 0 ]; then
             bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-            bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+            bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
             if [ $bridge_status == 1 ]; then bridge_status="${GREEN}- ONLINE${NOCOLOR}"
             elif [ $bridge_status == 0 ]; then bridge_status="${RED}- OFFLINE${NOCOLOR}"
             elif [ $bridge_status == 2 ]; then bridge_status="- DOESN'T EXIST" ; fi

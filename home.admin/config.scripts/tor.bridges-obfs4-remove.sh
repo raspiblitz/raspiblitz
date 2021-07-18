@@ -22,26 +22,27 @@
 # This file removes already configured bridges in /etc/tor/torrc.
 #
 # SYNTAX
-# ./tor.bridges-obfs4-remove-old.sh <bridge mode>
+# ./tor.bridges-obfs4-remove.sh <bridge mode>
 #
 # <show when zero bridges> -> defines if a message is shown or not if no bridges are configured in /etc/tor/torrc.
 #
 # <bridge mode>: "UseBridges 1" for bridge mode on; everything else = bridge mode off
 #
-###### SET VARIABLES ######
-
-SOURCE_SCRIPT="config.scripts/tor.obfs4-remove-old.sh"
-
-#Other variables
-MODE_BRIDGES=$1
-number_bridges=0
-i=0
 
 ###########################
 ######## FUNCTIONS ########
 
 # include lib
 . /home/admin/_tor.commands.sh
+
+###### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-obfs4-remove.sh"
+
+#Other variables
+MODE_BRIDGES=$1
+number_bridges=0
+i=0
 
 ######## PREPARATIONS ########
 #
@@ -86,7 +87,7 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
 
 ALL)
-  INPUT=$(cat text/delete-all-bridges-text)
+  INPUT=$(cat ${USER_DIR}/text/delete-all-bridges-text)
   if (whiptail --title "Tor - INFO" --defaultno --no-button "DON'T CHANGE" --yes-button "REMOVE ALL BRIDGES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       sudo cp ${TORRC} ${BAK}
       deactivate_obfs4_bridges
@@ -112,7 +113,7 @@ DEPRECATED)
     do
       bridge_address=$(cut -d ' ' -f2- <<< ${configured_bridges_deactivated[$i]})
       bridge_hash=$(cut -d ' ' -f3 <<< $bridge_address)
-      bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+      bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
       if [ $bridge_status == 2 ]; then
         j=$(($j + 1))
         echo -e "${RED}[+] Removing bridge with the hash $bridge_hash${NOCOLOR}"
@@ -129,7 +130,7 @@ DEPRECATED)
     do
       bridge_address=$(cut -d ' ' -f2- <<< ${configured_bridges_activated[$i]})
       bridge_hash=$(cut -d ' ' -f3 <<< $bridge_address)
-      bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+      bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
       if [ $bridge_status == 2 ]; then
         j=$(($j + 1))
         echo -e "${RED}[+] Removing bridge with the hash $bridge_hash${NOCOLOR}"
@@ -171,7 +172,7 @@ DEPRECATED)
 
 
 SELECTED)
-  INPUT=$(cat text/delete-selected-bridges-text)
+  INPUT=$(cat ${USER_DIR}/text/delete-selected-bridges-text)
   if (whiptail --title "Tor - INFO" --defaultno --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
     number_to_be_deleted=$(whiptail --title "Tor - INFO" --inputbox "\n\nWhich bridge number(s) do you like to remove? Put in all bridge numbers separated by a comma (for example 1,2,3,10)" $MENU_HEIGHT_25 $MENU_WIDTH_REDUX 3>&1 1>&2 2>&3)
     number_to_be_deleted=$(cut -f1- -d ',' --output-delimiter=' ' <<< $number_to_be_deleted)

@@ -255,7 +255,7 @@ do
         echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
 
         # check if a additional local backup target is set
-        # see ./config.scripts/blitz.backupdevice.sh
+        # see /home/admin/config.scripts/blitz.backupdevice.sh
         if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
 
           # check if device got mounted on "/mnt/backup" (gets mounted by _bootstrap.sh)

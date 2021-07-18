@@ -22,21 +22,21 @@
 # This file deactivates already configured bridges in /etc/tor/torrc.
 #
 # SYNTAX
-# ./tor.bridges-obfs4-deactivate-old
+# ./tor.bridges-obfs4-deactivate.sh
 #
 #
-###### SET VARIABLES ######
-
-SOURCE_SCRIPT="config.scripts/tor.obfs4-deactivate-old.sh"
-
-#Other variables
-i=0
-
 ###########################
 ######## FUNCTIONS ########
 
 # include lib
 . /home/admin/_tor.commands.sh
+
+###### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-obfs4-deactivate.sh"
+
+#Other variables
+i=0
 
 ######## PREPARATIONS ########
 #
@@ -108,7 +108,7 @@ else
       do
         bridge_address=$(cut -d ' ' -f2- <<< ${configured_bridges_activated[$i]})
         bridge_hash=$(cut -d ' ' -f3 <<< $bridge_address)
-        bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+        bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
         if [ $bridge_status == 0 ] || [ $bridge_status == 2 ]; then
           j=$(($j + 1))
           echo -e "${RED}[+] Deactivating bridge with the hash $bridge_hash${NOCOLOR}"
@@ -150,7 +150,7 @@ else
   ;;
 
   SELECTED)
-    INPUT=$(cat text/deactivate-selected-bridges-text)
+    INPUT=$(cat ${USER_DIR}/text/deactivate-selected-bridges-text)
     if (whiptail --title "Tor - INFO" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       number_to_be_deactivated=$(whiptail --title "Tor - INFO" --inputbox "\n\nWhich bridge number(s) do you like to deactivate? Put in all bridge numbers separated by a comma (for example 1,2,3,10)" $MENU_HEIGHT_25 $MENU_WIDTH_REDUX 3>&1 1>&2 2>&3)
       number_to_be_deactivated=$(cut -f1- -d ',' --output-delimiter=' ' <<< $number_to_be_deactivated)

@@ -25,18 +25,20 @@
 # ./bridges_activate_old
 #
 #
-###### SET VARIABLES ######
-
-SOURCE_SCRIPT="config.scripts/tor.bridges-obfs4-activate.sh"
-
-#Other variables
-i=0
-
 ###########################
 ######## FUNCTIONS ########
 
 # include lib
 . /home/admin/_tor.commands.sh
+
+###### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-obfs4-activate.sh"
+
+#Other variables
+i=0
+
+
 
 ######## PREPARATIONS ########
 #
@@ -107,7 +109,7 @@ else
       do
         bridge_address=$(cut -d ' ' -f2- <<< ${configured_bridges_deactivated[$i]})
         bridge_hash=$(cut -d ' ' -f3 <<< $bridge_address)
-        bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+        bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
         j=0
         if [ $bridge_status == 1 ]; then
           j=$(($i + 1))
@@ -146,7 +148,7 @@ else
   ;;
 
   SELECTED)
-    INPUT=$(cat text/activate-selected-bridges-text)
+    INPUT=$(cat ${USER_DIR}/text/activate-selected-bridges-text)
     if (whiptail --title "Tor - INFO" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       number_to_be_activated=$(whiptail --title "Tor - INFO" --inputbox "\n\nWhich bridge number(s) do you like to activate? Put in all bridge numbers separated by a comma (for example 1,2,3,10)" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX 3>&1 1>&2 2>&3)
       number_to_be_activated=$(cut -f1- -d ',' --output-delimiter=' ' <<< $number_to_be_activated)

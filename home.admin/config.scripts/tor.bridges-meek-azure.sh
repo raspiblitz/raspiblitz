@@ -33,21 +33,20 @@
 #
 #
 #
-##### SET VARIABLES ######
-
-SOURCE_SCRIPT="config.scripts/tor.bridges-meek.sh"
-
-#Other variables
-MEEKSTRING=$1
-SNOWSTRING=$2
-i=0
-
-
 ###########################
 ######## FUNCTIONS ########
 
 #include lib
 . /home/admin/_tor.commands.sh
+
+##### SET VARIABLES ######
+
+SOURCE_SCRIPT="${USER_DIR}/config.scripts/tor.bridges-meek-azure.sh"
+
+#Other variables
+MEEKSTRING=$1
+SNOWSTRING=$2
+i=0
 
 ######## PREPARATIONS ########
 ###########################
@@ -80,7 +79,7 @@ if [ "$MEEKSTRING" = "OFF" ]; then
 		do
 			bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_meekazure_deactivated[$i]})
 			bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-			bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+			bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
 			if [ $bridge_status == 1 ]; then bridge_status_txt="${GREEN}- ONLINE${NOCOLOR}"
 		elif [ $bridge_status == 0 ]; then bridge_status_txt="${RED}- OFFLINE${NOCOLOR}"
 	elif [ $bridge_status == 2 ]; then bridge_status_txt="- DOESN'T EXIST" ; fi

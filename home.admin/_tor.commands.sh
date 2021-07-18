@@ -52,17 +52,28 @@ YELLOW='\033[1;93m'
 CHECK_URL1="http://debian.org"
 PING_SERVER="debian.org"
 
+DISTRIBUTION=$(lsb_release -sc)
+
+SOURCES_DEB_SECURITY_ONION="http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/"
+SOURCES_DEB_UPDATE_ONION="http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/"
+SOURCES_DEB_SECURITY_PLAIN="https://deb.debian.org/"
+SOURCES_DEB_UPDATE_PLAIN="https://deb.debian.org/"
+
+SOURCES_TOR_UPDATE_ONION="http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/"
+SOURCES_TOR_UPDATE_PLAIN="https://deb.torproject.org/"
+
 #Other variables
 DEFAULT_CONTROL_PORT=9051
 DEFAULT_SOCKS_PORT=9050
 OWNER_TOR_CONF_DIR="bitcoin"
 OWNER_TOR_DATA_DIR="debian-tor"
+USER="admin"
 ROOT_TORRC="/etc/tor"
 TORRC="${ROOT_TORRC}/torrc"
 ROOT_DATA_DIR="/var/lib" #"/mnt/hdd"
 DATA_DIR="${ROOT_DATA_DIR}/tor"
 SERVICES_DATA_DIR="${DATA_DIR}/services"
-USER_DIR="/home/admin"
+USER_DIR="/home/${USER}"
 SCRIPTS_DIR="${USER_DIR}/config.scripts"
 ONION_SERVICE_SCRIPT="${SCRIPTS_DIR}/tor.onion-service.sh"
 INFO="${ROOT_DATA_DIR}/raspiblitz.info"
@@ -322,7 +333,7 @@ list_all_obfs4_bridges()
         bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_bridges_deactivated[$i]})
         if [ $OCHECK == 0 ]; then
           bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-          bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+          bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
           if [ $bridge_status == 1 ]; then bridge_status="${GREEN}- ONLINE${NOCOLOR}"
           elif [ $bridge_status == 0 ]; then bridge_status="${RED}- OFFLINE${NOCOLOR}"
           elif [ $bridge_status == 2 ]; then bridge_status="- DOESN'T EXIST" ; fi
@@ -348,7 +359,7 @@ list_all_obfs4_bridges()
         bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_bridges_activated[$j]})
         if [ $OCHECK == 0 ]; then
           bridge_hash=$(cut -d ' ' -f2 <<< $bridge_address)
-          bridge_status=$(./config.scripts/tor.bridges-check.py -f $bridge_hash)
+          bridge_status=$(${USER_DIR}/config.scripts/tor.bridges-check.py -f $bridge_hash)
           if [ $bridge_status == 1 ]; then bridge_status="${GREEN}- ONLINE${NOCOLOR}"
           elif [ $bridge_status == 0 ]; then bridge_status="${RED}- OFFLINE${NOCOLOR}"
           elif [ $bridge_status == 2 ]; then bridge_status="- DOESN'T EXIST" ; fi
