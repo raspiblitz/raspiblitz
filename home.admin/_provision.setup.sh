@@ -181,7 +181,7 @@ if [ "${lightning}" == "lnd" ]; then
     sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
     sudo /home/admin/config.scripts/lnd.chain.sh on mainnet
-    sudo /home/admin/config.scripts/lnd.setname.sh ${hostname}
+    sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
   fi
 
   # check if now a config exists

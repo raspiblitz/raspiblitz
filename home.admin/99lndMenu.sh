@@ -106,7 +106,7 @@ case $CHOICE in
       /home/admin/BBcreateInvoice.sh lnd $CHAIN
       ;;
   NAME)
-      sudo /home/admin/config.scripts/lnd.setname.sh
+      sudo /home/admin/config.scripts/lnd.setname.sh $CHAIN
       noreboot=$?
       if [ "${noreboot}" = "0" ]; then
         sudo -u bitcoin ${network}-cli stop

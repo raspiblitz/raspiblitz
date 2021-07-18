@@ -11,9 +11,9 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=13
+HEIGHT=14
 WIDTH=64
-CHOICE_HEIGHT=7
+CHOICE_HEIGHT=8
 BACKTITLE="RaspiBlitz"
 TITLE="C-Lightning Options"
 MENU=""
@@ -25,7 +25,7 @@ OPTIONS+=(CHANNEL "Open a Channel with Peer")
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
 OPTIONS+=(SUMMARY "Information about this node")
-#TODO OPTIONS+=(NAME "Change Name/Alias of Node")
+OPTIONS+=(NAME "Change Name/Alias of the Node")
 
 ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
 ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
@@ -79,15 +79,7 @@ case $CHOICE in
       /home/admin/BBcreateInvoice.sh cln $CHAIN
       ;;
   NAME)
-      sudo /home/admin/config.scripts/lnd.setname.sh
-      noreboot=$?
-      if [ "${noreboot}" = "0" ]; then
-        sudo -u bitcoin ${network}-cli stop
-        echo "Press ENTER to Reboot."
-        read key
-        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
-        exit 0
-      fi
+      sudo /home/admin/config.scripts/cln.setname.sh $CHAIN
       ;;
   SUEZ)
       clear

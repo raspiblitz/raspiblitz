@@ -108,7 +108,7 @@ case $CHOICE in
 
     # make sure host is named like in the raspiblitz config
     echo "Setting the Name/Alias/Hostname .."
-    sudo /home/admin/config.scripts/lnd.setname.sh ${result}
+    sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${result}
     sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
 
     echo "stopping lnd ..."
