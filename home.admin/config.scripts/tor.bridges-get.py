@@ -20,6 +20,7 @@
 # DESCRIPTION
 # This file fetches one new bridge. The return values is:
 # obfs4 <IP address>:<Port> <Fingerprint> <Certificate> <iat-mode>
+# or 0 if fetching the bridge fails over tor and clearnet.
 #
 # IMPORTANT
 # The bridge database delivers only 1-3 bridges approximately every 24 hours,
@@ -60,9 +61,6 @@ while bridges == False:
     br.set_handle_robots(False)
 
     try:
-        # Clearnet request
-        res = br.open(BRIDGES_URL)
-    except:
         # Tor request
         socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,
                               SOCKS_HOST,
@@ -71,9 +69,17 @@ while bridges == False:
         # patch socket module
         socket.socket = socks.socksocket
         socket.create_connection = create_connection
+
+        res = br.open(BRIDGES_URL)
+    except:
+        # Clearnet request
         try:
+            # unset socks proxy
+            socks.setdefaultproxy()
+
             res = br.open(BRIDGES_URL)
         except:
+            # Error
             print("0")
             quit()
 
