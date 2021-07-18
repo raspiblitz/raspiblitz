@@ -51,7 +51,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo cp -r /home/admin/blitz_web/build /var/www/public/ui
   sudo chown www-data:www-data -r /var/www/public/ui
 
-  echo "TODO: Implement"
   exit 1
 fi
 
