@@ -115,7 +115,7 @@ fi
 ###################
 if [ "$1" = "update" ]; then
 
-  echo "# Updaze Web API"
+  echo "# Update Web API"
   sudo systemctl stop blitzapi
   cd /home/admin/blitz_api
   git fetch
