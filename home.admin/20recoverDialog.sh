@@ -35,7 +35,7 @@ Write them down & store them in a safe place.
   if [ "$?" != "0" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "Please write down your Password C:\n${oldPasswordC}" 10 52
   else
-    dialog --backtitle "RaspiBlitz" --msgbox "OK - password C was set\nuse it to unlock your Lightning Wallet after restarts." 8 52
+    dialog --backtitle "RaspiBlitz" --msgbox "OK - password C was set\nuse it to unlock your Lightning Wallet after restarts." 6 52
   fi
 
 elif [ ${resetAlsoPasswordB} -gt 0 ]; then

@@ -141,33 +141,7 @@ if [ "$1" = "migration-umbrel" ]; then
 
   echo "# starting to rearrange the data drive for raspiblitz .."
 
-  # determine version
-  version=$(sudo cat /mnt/hdd/umbrel/info.json | jq -r '.version')
-  if [ "${version}" == "" ]; then
-    echo "err='not able to get version'"
-    exit 1
-  fi
-  versionMajor=$(echo "${version}" | cut -d "." -f1)
-  versionMiner=$(echo "${version}" | cut -d "." -f2)
-  versionPatch=$(echo "${version}" | cut -d "." -f3)
-  if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
-    echo "err='not able processing version'"
-    exit 1
-  fi
-
-  # since 0.3.9 umbrel uses a fixed/default password for lnd wallet (before it was the user set one)
-  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -lt 4 ] && [ ${versionPatch} -lt 9 ]; then
-    echo "# umbrel before 0.3.9 --> password c is old user set password"
-  else
-    echo "# umbrel 0.3.9 or higher --> password c is fixed 'moneyprintergobrrr'"
-    # set flag with standard password to be changed on final recovery setup
-    sudo touch /mnt/hdd/passwordc.flag
-    sudo chmod 777 /mnt/hdd/passwordc.flag
-    echo "moneyprintergobrrr" >> /mnt/hdd/passwordc.flag
-    sudo chown admin:admin /mnt/hdd/passwordc.flag
-  fi
-
-  # extract detailed data
+  # extract data
   nameNode=$(sudo jq -r '.name' /mnt/hdd/umbrel/db/user.json)
 
   # move bitcoin/blockchain & call function to migrate config

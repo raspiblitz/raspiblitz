@@ -9,7 +9,7 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 SCRIPT_DIR=$HOME_DIR/stacking-sats-kraken
 SCRIPT_NAME=stacksats.sh
-SCRIPT_VERSION=0.4.3
+SCRIPT_VERSION=0.4.2
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

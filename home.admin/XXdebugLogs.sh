@@ -71,10 +71,6 @@ echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
 sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
 echo ""
 
-echo "*** NGINX SYSTEMD STATUS ***"
-sudo systemctl status nginx -n2 --no-pager
-echo ""
-
 echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
