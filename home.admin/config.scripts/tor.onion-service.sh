@@ -12,6 +12,7 @@
 # vanguards --> use vanguards to protect from attacks to the service
 # credentials --> see your service credentials
 
+# TODO <OPTIONAL> [REQUIRED]
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Configure an Onion Service"
@@ -318,8 +319,11 @@ if [ "${1}" == "vanguards" ]; then
   if [ "${STATUS}" == "install" ]; then
     sudo rm -rf ${DATA_DIR}/vanguards
     echo "Installing necessary packages..."
-    # installing from git to retrieve the latest version (debian package is not updated frequently)
-    sudo git clone https://github.com/mikeperry-tor/vanguards
+    sudo -u ${OWNER_TOR_DATA_DIR} git clone https://github.com/mikeperry-tor/vanguards
+    cd vanguards || exit 1
+    # latest commit in https://github.com/mikeperry-tor/vanguards
+    COMMITHASH=1 # TODO, set commit hash
+    sudo -u ${OWNER_TOR_DATA_DIR} reset --hard ${COMMITHASH} || exit 1
     sudo mv vanguards ${DATA_DIR}/
     set_owner_permission
     sudo apt install -y python3-stem #python-stem vanguards
