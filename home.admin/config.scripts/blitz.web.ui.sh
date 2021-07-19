@@ -11,6 +11,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web UI"
   echo "blitz.web.ui.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
+  echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
   exit 1
 fi
@@ -56,6 +57,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown www-data:www-data -R /var/www/public
 
   exit 1
+fi
+
+###################
+# UPDATE
+###################
+if [ "$1" = "update" ]; then
+
+  echo "# Update Web API"
+  cd /home/admin/blitz_web
+  git fetch
+  git pull
+  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
+  ${NODEPATH}/yarn install
+  ${NODEPATH}/yarn build
+  sudo rm -r /var/www/public/* 2>/dev/null
+  sudo cp -r /home/admin/blitz_web/build/* /var/www/public
+  sudo chown www-data:www-data -R /var/www/public
+  echo "# blitzapi updates and restarted"
+  exit 0
+
 fi
 
 ###################

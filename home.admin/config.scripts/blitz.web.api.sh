@@ -8,6 +8,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
   echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
+  echo "blitz.web.api.sh update"
   echo "blitz.web.api.sh off"
   exit 1
 fi
