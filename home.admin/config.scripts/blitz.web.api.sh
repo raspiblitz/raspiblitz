@@ -42,6 +42,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
 
+  # TODO: check if that manual install is still needed in a future version
+  pip install sse_starlette
+
   # make it fixed on Bitcoin & Mainnet - the WebUI will start limited to this first
   echo "# CONFIG Web API Bitcoin"
   RPCUSER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
@@ -74,7 +77,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/admin/blitz_api
-ExecStart=python -m uvicorn main:app --reload --port 11111
+ExecStart=python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
 User=root
 Group=root
 Type=simple
@@ -98,10 +101,12 @@ WantedBy=multi-user.target
   # TODO: remove after experimental step
   sudo ufw allow 11111 comment 'WebAPI Develop'
 
-  # serve in nginx on default port 80 under root path "/api"
-  
-  
-  exit 1
+  # install info
+  echo "# the API should new be available under http://[LOCALHOST]/api and port 11111 for testing"
+  echo "# check for systemd:  sudo systemctl status blitzapi"
+  echo "# check for logs:     sudo journalctl -f -u blitzapi"
+
+  exit 0
 fi
 
 ###################

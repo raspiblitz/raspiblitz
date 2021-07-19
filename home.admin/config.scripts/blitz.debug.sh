@@ -101,6 +101,17 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
 echo ""
 
+echo "*** BLITZAPI SYSTEMD STATUS ***"
+sudo systemctl status blitzapi -n2 --no-pager
+echo ""
+
+echo "*** LAST BLITZAPI LOGS ***"
+echo "sudo journalctl -u blitzapi -b --no-pager -n20"
+sudo journalctl -u nginx -b --no-pager -n20
+echo "--> CHECK CONFIG: sudo nginx -t"
+sudo nginx -t
+echo ""
+
 if [ "${touchscreen}" = "" ] || [ "${touchscreen}" = "0" ]; then
   echo "- TOUCHSCREEN is OFF by config"
 else
