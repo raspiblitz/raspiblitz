@@ -9,8 +9,34 @@ CHECKSUM_linux_x64="ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b824
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install NodeJs $VERSION"
- echo "bonus.nodejs.sh [on|off]"
+ echo "bonus.nodejs.sh [on|off|info]"
  exit 1
+fi
+
+ # determine nodeJS VERSION and DISTRO
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -eq 1 ] ; then
+  DISTRO="linux-armv7l"
+  CHECKSUM="${CHECKSUM_linux_armv7l}"
+elif [ ${isAARCH64} -eq 1 ] ; then
+  DISTRO="linux-arm64"
+  CHECKSUM="${CHECKSUM_linux_arm64}"
+elif [ ${isX86_64} -eq 1 ] ; then
+  DISTRO="linux-x64"
+  CHECKSUM="${CHECKSUM_linux_x64}"
+elif [ ${#DISTRO} -eq 0 ]; then
+  echo "# FAIL: Was not able to determine architecture"
+  exit 1
+fi
+
+# info
+if [ "$1" = "info" ]; then
+  echo "NODEVERSION='${VERSION}'"
+  echo "NODEDISTRO='${DISTRO}'"
+  echo "NODEPATH='/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin'"
+  exit 0
 fi
 
 # switch on
@@ -20,34 +46,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if ! [ ${nodeJSInstalled} -eq 0 ]; then
     echo "nodeJS is already installed"
   else
-    # determine nodeJS VERSION and DISTRO
-    echo "Detect CPU architecture ..."
-    isARM=$(uname -m | grep -c 'arm')
-    isAARCH64=$(uname -m | grep -c 'aarch64')
-    isX86_64=$(uname -m | grep -c 'x86_64')
-        
-    if [ ${isARM} -eq 1 ] ; then
-      DISTRO="linux-armv7l"
-      CHECKSUM="${CHECKSUM_linux_armv7l}"
-    elif [ ${isAARCH64} -eq 1 ] ; then
-      DISTRO="linux-arm64"
-      CHECKSUM="${CHECKSUM_linux_arm64}"
-    elif [ ${isX86_64} -eq 1 ] ; then
-      DISTRO="linux-x64"
-      CHECKSUM="${CHECKSUM_linux_x64}"
-    elif [ ${#DISTRO} -eq 0 ]; then
-      echo "FAIL: Was not able to determine architecture"
-      exit 1
-    fi
+
+    # install latest nodejs
+    # https://github.com/nodejs/help/wiki/Installation
+    echo "*** Install NodeJS $VERSION-$DISTRO ***"
     echo "VERSION: ${VERSION}"
     echo "DISTRO: ${DISTRO}"
     echo "CHECKSUM: ${CHECKSUM}"
     echo ""
-  
-    # install latest nodejs
-    # https://github.com/nodejs/help/wiki/Installation
-    echo "*** Install NodeJS $VERSION-$DISTRO ***"
-  
+
     # download
     cd /home/admin/download
     wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
