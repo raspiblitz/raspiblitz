@@ -46,10 +46,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  source /etc/profile
+  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
   sudo npm install --global yarn
-  yarn install
-  yarn build
+  ${NODEPATH}/yarn install
+  ${NODEPATH}/yarn build
 
   sudo rm -r /var/www/public/* 2>/dev/null
   sudo cp -r /home/admin/blitz_web/build/* /var/www/public
