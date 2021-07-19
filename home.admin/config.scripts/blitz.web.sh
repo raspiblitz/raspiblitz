@@ -122,14 +122,6 @@ EOF
     echo "# exists /var/www/public/ui"
   fi
 
-  # if compiled code not available ... build fresh from github
-  if ! [ -d /var/www/public/ui ]; then
-      echo "# build webui from github ..."
-      sudo /home/admin/config.scripts/blitz.web.ui.sh on 
-  else
-    echo "# exists /var/www/public/ui"
-  fi
-
   if ! [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
 
     if [ -f /mnt/hdd/lnd/tls.cert ]; then
