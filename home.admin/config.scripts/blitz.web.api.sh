@@ -77,9 +77,9 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/admin/blitz_api
-ExecStart=python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
-User=root
-Group=root
+ExecStart=/usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
+User=admin
+Group=admin
 Type=simple
 Restart=always
 StandardOutput=journal
