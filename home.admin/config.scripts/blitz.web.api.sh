@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # TODO: On sd card install there might be no Bitcoin & Lightning confs - make sure backend runs without
-# TODO: make a `update-config` that will update Bitcoin & Lightning to the latest passwords & credentials
+# TODO: make a `build-config` that will update Bitcoin & Lightning to the latest passwords & credentials
+# TODO: run `build-config` as a prescript in systemd service
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
@@ -107,6 +108,23 @@ WantedBy=multi-user.target
   echo "# check for logs:     sudo journalctl -f -u blitzapi"
 
   exit 0
+fi
+
+###################
+# UPDATE
+###################
+if [ "$1" = "update" ]; then
+
+  echo "# Updaze Web API"
+  sudo systemctl stop blitzapi
+  cd /home/admin/blitz_api
+  git fetch
+  git pull
+  pip install -r requirements.txt
+  sudo systemctl start blitzapi
+  echo "# blitzapi updates and restarted"
+  exit 0
+
 fi
 
 ###################
