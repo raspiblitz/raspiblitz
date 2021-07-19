@@ -33,8 +33,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# INSTALL Web API ..."
+  sudo apt install -y redis
   sudo rm -r /home/admin/blitz_api 2>/dev/null
   cd /home/admin
+  # git clone https://github.com/fusion44/blitz_api.git /home/admin/blitz_api
   git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/admin/blitz_api
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
@@ -92,7 +94,12 @@ WantedBy=multi-user.target
 
   sudo systemctl enable blitzapi
   sudo systemctl start blitzapi
+
+  # TODO: remove after experimental step
   sudo ufw allow 11111 comment 'WebAPI Develop'
+
+  # serve in nginx on default port 80 under root path "/api"
+  
   
   exit 1
 fi
