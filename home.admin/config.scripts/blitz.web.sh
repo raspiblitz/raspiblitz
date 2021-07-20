@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: later on this script will be run on build sdcard - make sure that the self-signed tls cert get created fresh on every new RaspiBlitz
+
 source /mnt/hdd/raspiblitz.conf
 
 # command info
@@ -8,97 +10,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   printf "blitz.web.sh check \t\tprint operational nginx listen status (lsof)\n"
   printf "blitz.web.sh on \t\tturn on\n"
   printf "blitz.web.sh off \t\tturn off\n"
-  printf "blitz.web.sh listen localhost \tset port 443 to localhost only\n"
-  printf "blitz.web.sh listen any \tset port 443 to any\n"
   exit 1
 fi
-
-# using ${APOST} is a workaround to be able to use sed with '
-APOST=\'  # close tag for linters: '
-
-
-###################
-# FUNCTIONS
-###################
-function set_nginx_blitzweb_listen() {
-   # first parameter to function should be either "localhost" or "any"
-   listen_to=${1}
-
-   if [ -f "/etc/nginx/sites-available/blitzweb.conf" ]; then
-       if ! grep -Eq '^\s*#?\s*listen 127.0.0.1:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-           echo "Error: missing expected line for: lo:v4 https"
-           exit 1
-       else
-           if grep -Eq '^\s*#\s*listen 127.0.0.1:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-           #echo "found: lo:v4 https (disabled line)"
-               if [ ${listen_to} = "localhost" ]; then
-                   sudo sed -i -E 's/#\s*(listen 127.0.0.1:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           else
-               #echo "found: lo:v4 https (enabled line)"
-               if [ ${listen_to} = "any" ]; then
-                   sudo sed -i -E 's/(listen 127.0.0.1:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-          fi
-
-       fi
-
-       if ! grep -Eq '^\s*#?\s*listen \[::1\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-           echo "Error: missing expected line for: lo:v6 https"
-           exit 1
-       else
-           if grep -Eq '^\s*#\s*listen \[::1\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-               #echo "found: lo:v6 https (disabled line)"
-               if [ ${listen_to} = "localhost" ]; then
-                   sudo sed -i -E 's/#\s*(listen \[::1\]:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           else
-               #echo "found: lo:v6 https (enabled line)"
-               if [ ${listen_to} = "any" ]; then
-                   sudo sed -i -E 's/(listen \[::1\]:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           fi
-
-       fi
-
-       if ! grep -Eq '^\s*#?\s*listen 443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-           echo "Error: missing expected line for: any:v4 https"
-           exit 1
-       else
-           if grep -Eq '^\s*#\s*listen 443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-               #echo "found: any:v4 https (disabled line)"
-               if [ ${listen_to} = "any" ]; then
-                   sudo sed -i -E 's/#\s*(listen 443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           else
-               #echo "found: any:v4 https (enabled line)"
-               if [ ${listen_to} = "localhost" ]; then
-                   sudo sed -i -E 's/(listen 443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           fi
-
-       fi
-
-       if ! grep -Eq '^\s*#?\s*listen \[::\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-           echo "Error: missing expected line for: any:v6 https"
-           exit 1
-       else
-           if grep -Eq '^\s*#\s*listen \[::\]:443 ssl default_server;$' /etc/nginx/sites-available/blitzweb.conf; then
-               #echo "found: any:v6 https (disabled line)"
-               if [ ${listen_to} = "any" ]; then
-                   sudo sed -i -E 's/#\s*(listen \[::\]:443 ssl default_server;)/\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           else
-               #echo "found: any:v6 https (enabled line)"
-               if [ ${listen_to} = "localhost" ]; then
-                   sudo sed -i -E 's/(listen \[::\]:443 ssl default_server;)/#\1/g' /etc/nginx/sites-available/blitzweb.conf
-               fi
-           fi
-       fi
-   fi
-}
-
-
 
 ###################
 # CHECK
@@ -145,6 +58,7 @@ EOF
     sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
   fi
 
+  echo "# Checking dhparam.pem ..."
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
 
     # check if there is a user generated dhparam.pem on the HDD to use
@@ -162,6 +76,8 @@ EOF
       sudo cp /mnt/hdd/app-data/nginx/dhparam.pem /etc/ssl/certs/dhparam.pem
     fi
 
+  else
+    echo "# skip - dhparam.pem exists"
   fi
 
   sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
@@ -171,7 +87,10 @@ EOF
   sudo rm -f /var/www/html/index.nginx-debian.html
 
   if ! [ -f /etc/nginx/sites-available/public.conf ]; then
+    echo "# copy /etc/nginx/sites-available/public.conf"
     sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
+  else
+    echo "# exists /etc/nginx/sites-available/public.conf"
   fi
 
   if ! [ -d /var/www/letsencrypt/.well-known/acme-challenge ]; then
@@ -183,32 +102,38 @@ EOF
 
   # copy webroot
   if ! [ -d /var/www/public ]; then
+    echo "# copy /var/www/public"
     sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
     sudo chown www-data:www-data /var/www/public
+  else
+    echo "# exists /var/www/public"
   fi
 
   sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
 
   ### RaspiBlitz Webserver on HTTPS 443
 
-  # copy webroot
-  if ! [ -d /var/www/blitzweb ]; then
-      sudo cp -a /home/admin/assets/nginx/www_blitzweb/ /var/www/blitzweb
-      sudo chown www-data:www-data /var/www/blitzweb
+  # copy compiled webUI (TODO: do later)
+  if ! [ -d /var/www/public/ui ]; then
+      echo "# copy precompiled webui TODO: implement"
+      sudo cp -a /home/admin/blitz_web_compiled /var/www/public/ui
+      sudo chown www-data:www-data /var/www/public/ui
+  else
+    echo "# exists /var/www/public/ui"
   fi
 
-  # make sure jinja2 is installed and install j2cli
-  sudo apt-get install -y python3-jinja2
-  sudo -H python3 -m pip install j2cli
+  if ! [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
 
-  if [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
     if [ -f /mnt/hdd/lnd/tls.cert ]; then
       # use LND cert by default
+      echo "# use LND cert for: /mnt/hdd/app-data/nginx/tls.cert"
       sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
       sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
       sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
       sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
     else 
+      echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
+
       # create a self-signed cert if the LND cert is not present
       /home/admin/config.scripts/internet.selfsignedcert.sh   
   
@@ -221,21 +146,8 @@ EOF
       sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
                   /mnt/hdd/app-data/nginx/tor_tls.key
     fi
-  fi
-
-  # config
-  sudo cp /home/admin/assets/blitzweb.conf /etc/nginx/sites-available/blitzweb.conf
-  sudo ln -sf /etc/nginx/sites-available/blitzweb.conf /etc/nginx/sites-enabled/
-
-  if ! [ -f /etc/nginx/.htpasswd ]; then
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    echo "${PASSWORD_B}" | sudo htpasswd -c -i /etc/nginx/.htpasswd admin
-    sudo chown www-data:www-data /etc/nginx/.htpasswd
-    sudo chmod 640 /etc/nginx/.htpasswd
-
   else
-    sudo chown www-data:www-data /etc/nginx/.htpasswd
-    sudo chmod 640 /etc/nginx/.htpasswd
+    echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
   fi
 
   # restart NGINX
@@ -251,19 +163,6 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl stop nginx
   sudo systemctl disable nginx >/dev/null
-
-
-###################
-# LISTEN
-###################
-elif [ "$1" = "listen" ]; then
-
-  if [ "$2" = "localhost" ] || [ "$2" = "any" ]; then
-    echo "Setting NGINX to listen on: ${2}"
-    set_nginx_blitzweb_listen "${2}"
-  else
-    echo "# FAIL: parameter not known - run with -h for help"
-  fi
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
