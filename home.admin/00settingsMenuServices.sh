@@ -43,7 +43,7 @@ OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
 OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
-OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
+OPTIONS+=(h 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 OPTIONS+=(n 'Parallel Testnet services' ${testnet})
 OPTIONS+=(c 'C-lightning' ${cln})
@@ -247,7 +247,7 @@ else
 fi
 
 # CHANTOOLS process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${chantools}" != "${choice}" ]; then
   echo "chantools Setting changed .."
