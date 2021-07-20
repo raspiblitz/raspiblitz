@@ -371,6 +371,7 @@ if [ "${lightning}" == "cln" ]; then
   # OLD WALLET FROM SEEDWORDS
   elif [ "${seedWords}" != "" ]; then
 
+    echo "Restore CLN wallet from seedWords ..." >> ${logFile}
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
     # check if wallet really got created 
@@ -384,6 +385,8 @@ if [ "${lightning}" == "cln" ]; then
 
   # NEW WALLET
   else
+
+    echo "Generare new CLN wallet ..." >> ${logFile}
 
     # generate new wallet
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
