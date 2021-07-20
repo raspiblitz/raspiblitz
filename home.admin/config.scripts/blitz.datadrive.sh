@@ -83,7 +83,7 @@ if [ "$1" = "status" ]; then
     hdd=""
     sizeDataPartition=0
     OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
-    lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
+    lsblk -o NAME,SIZE -b | grep -P "[s|vn][dv][a-z][0-9]?" > .lsblk.tmp
     while read line; do
 
       # cut line info into different informations
