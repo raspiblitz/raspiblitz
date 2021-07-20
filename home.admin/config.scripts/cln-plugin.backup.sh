@@ -31,7 +31,7 @@ function install() {
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
   
-  if [ $($lightningcli_alias plugin list | grep -c "${plugin}") -eq 0 ];then
+  if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ];then
     echo "# Checking dependencies"
     sudo -u bitcoin pip install --user -r ${plugindir}/${plugin}/requirements.txt 1>/dev/null
       if [ $(echo $PATH | grep -c "/home/bitcoin/.local/bin") -eq 0 ]; then
@@ -44,6 +44,8 @@ function install() {
       sudo ln -s ${plugindir}/backup/backup.py \
                  /home/bitcoin/${netprefix}cln-plugins-enabled/
     fi
+  else
+    echo "# The ${plugin} plugin is already loaded"
   fi
 }
 

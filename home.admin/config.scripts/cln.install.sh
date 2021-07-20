@@ -132,8 +132,8 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   echo "# Add plugin-dir: /home/bitcoin/${netprefix}cln-plugins-enabled"
   echo "# Add plugin-dir: /home/bitcoin/cln-plugins-available"
   # note that the disk is mounted with noexec
-  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cln-plugins-enabled
-  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
+  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cln-plugins-enabled 2>/dev/null
+  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available 2>/dev/null
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
   echo "# Symlink to /home/bitcoin/"
