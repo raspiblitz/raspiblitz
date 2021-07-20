@@ -38,7 +38,7 @@ echo "# Using the settings for: ${network} ${CHAIN}"
 
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}cln=off" >> /mnt/hdd/raspiblitz.conf
+  echo "${netprefix}cln=off" | sudo tee -a /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 
