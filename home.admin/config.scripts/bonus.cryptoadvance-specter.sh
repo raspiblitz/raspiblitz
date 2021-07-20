@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.3.0"
+pinnedVersion="1.4.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -290,6 +290,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

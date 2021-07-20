@@ -56,6 +56,7 @@
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
 - [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
+- [How to SSH over Tor?](#how-to-ssh-over-tor)
 - [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
 - [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
 - [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
@@ -73,6 +74,7 @@
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+- [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 
 ---
 
@@ -186,7 +188,7 @@ If your RaspiBlitz is not working correctly and you like to get help from the co
 
 - SSH into your raspiblitz as admin user with your password A
 - If you see the menu - use CTRL+C to get to the terminal
-- To generate debug report run: `./XXdebugLogs.sh`
+- To generate debug report run: `debug`
 - Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
 
 *PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
@@ -233,7 +235,7 @@ If you still can SSH in and HDD is readable, we can try to rescue/export your LN
 To rescue/export your Lightning data from a RaspiBlitz (since v1.1):
 
 * SSH into your RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-export-gui`
 * follow the instructions of the script.
 
 This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfer the lnd-rescue file to your laptop. If the transfer was successful you can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
@@ -241,7 +243,7 @@ This will create a lnd-rescue file (ends on gz.tar) that contains all the data f
 Then to restore your old LND data and to recover your funds and channels:
 
 * SSH into your new RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-import-gui`
 * follow the instructions of the script.
 
 This script will offer you a way to transfer the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND then gets restarted for you, and after some time it should show you the status screen again with your old funds and channels.
@@ -413,13 +415,13 @@ For example if you want to make a build from the 'dev' branch you execute the fo
 
 If you fork the RaspiBlitz repo (much welcome) and you want to run that code on your RaspiBlitz, there are two ways to do that:
 
-* The quick way: For small changes in scripts, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `/home/admin/XXsyncScripts.sh`
+* The quick way: For small changes in scripts, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `patch`
 
 * The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
 
 `wget --no-cache https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false false [GITHUB-USERNAME] [BRANCH] lcd true true`
 
-If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
+If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `patch` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
 
 ## How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
 
@@ -450,7 +452,7 @@ git remote set-url origin [THE-URL-OF-YOUR-FORKED-REPO]
 
 Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz, you always just run:
 ```
-/home/admin/XXsyncScripts.sh BRANCH
+/home/admin/config.scripts/blitz.github.sh BRANCH
 ```
 
 So your workflow can go like this: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
@@ -471,14 +473,14 @@ cd /home/admin/raspiblitz
 git fetch origin pull/[PRNUMBER]/head:pr[PRNUMBER]
 git checkout pr[PRNUMBER]
 cd /home/admin
-./XXsyncScripts.sh -justinstall
+/home/admin/config.scripts/blitz.github.sh -justinstall
 ```
 
 Now you have the code of the PR active - depending on what scripts are changed you might need to reboot.
 
 To change back to the code:
 ```
-./XXsyncScripts.sh master
+/home/admin/config.scripts/blitz.github.sh master
 ```
 
 ## How to attach the RaspberryPi to the HDD?
@@ -539,7 +541,7 @@ Work notes for the process of producing a new SD card image release:
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
 * `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false true rootzoll [BRANCH] lcd true true`
 * Monitor/Check outputs for warnings/errors - install LCD
-* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
@@ -712,6 +714,21 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 
 If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
 
+## How to SSH over Tor?
+
+SSH is already encrypted, why would I want to use it with Tor?
+* Remote access when away from LAN.
+* Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
+
+Create Hidden Service:
+`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+
+SSH over Tor:
+`torsocks ssh admin@HiddenServiceAddress.onion`
+
+Get the address:
+`sudo cat /mnt/hdd/tor/ssh/hostname`
+
 ## How to setup port-forwarding with a SSH tunnel?
 
 To use a public server for port-forwarding thru a SSH tunnel you can use the following experimental script on the RaspiBlitz (since v1.2):
@@ -822,13 +839,13 @@ https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
 ## How do I fix a displayed Error in my Config?
 
 When the LCD display is telling you to do a config check:
-- go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
-- start reboot with command: './XXshutdown.sh reboot' 
+- go to the RaspiBlitz terminal (X on main menu) and run 'patch'
+- start reboot with command: 'restart' 
 - go to the RaspiBlitz terminal run the command: 'check'
 - now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
 - save config with: CTRL+o
 - exit nano editor with: CTRL+x
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 
 ## How to fix my upside down LCD after update?
 
@@ -929,5 +946,14 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - All minor-releases will basically all work with the same 'build_sdcard.sh' script so that the code could be updated by just calling 'patch'. Emergency updates on lnd & bitcoin may break this guideline, but basic structure & packaging should stay mostly consistent over a main-update version.
 - Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
 - Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
+
+
+# How do I find the IP address when running without a display?
+
+If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
+
+Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
+
+You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
 
 

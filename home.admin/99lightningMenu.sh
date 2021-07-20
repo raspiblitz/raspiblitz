@@ -28,7 +28,7 @@ if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnchannels "Lightning Channel List")
   OPTIONS+=(lnfwdreport "Lightning Forwarding Events Report")
   HEIGHT=$((HEIGHT+3))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+3))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+3))
 fi
 
 OPTIONS+=(NAME "Change Name/Alias of Node")
@@ -37,7 +37,7 @@ openChannels=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels")
   HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 OPTIONS+=(CASHOUT "Remove Funds from LND")

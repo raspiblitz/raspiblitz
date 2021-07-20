@@ -58,7 +58,7 @@ case $CHOICE in
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
-    sudo /home/admin/XXshutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
@@ -171,7 +171,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
     grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
-    bindIP=$(grep -c "rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat ${SERVICES_DATA_DIR}/bitcoin${BITCOINRPCPORT}/hostname)
 
@@ -239,7 +239,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           restartCore=1
         fi
         if [ $bindIP -eq 0 ]; then
-          echo "rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          echo "${chain}.rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then
@@ -286,7 +286,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           restartCore=1
         fi
         if [ $bindIP -gt 0 ]; then
-          sudo sed -i "/^rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
+          sudo sed -i "/^${chain}.rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then

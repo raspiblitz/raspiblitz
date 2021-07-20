@@ -138,7 +138,7 @@ if [ "$1" = "menu" ]; then
 The electrum system service is not running.
 Please check the following debug info.
       " 8 48
-    /home/admin/XXdebugLogs.sh
+    /home/admin/config.scripts/blitz.debug.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -404,10 +404,15 @@ ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --e
 User=electrs
 Group=electrs
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

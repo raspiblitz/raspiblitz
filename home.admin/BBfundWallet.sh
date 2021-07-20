@@ -4,41 +4,68 @@ clear
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
 if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
+
 # PRECHECK) check if chain is in sync
-chainOutSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": false' -c)
+if [ $LNTYPE = cln ];then
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
+  if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
+    chainOutSync=0
+  else
+    chainOutSync=1
+  fi
+elif [ $LNTYPE = lnd ];then
+  chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
+fi
 if [ ${chainOutSync} -eq 1 ]; then
-  echo "FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
-  echo ""
-  echo "PRESS ENTER to return to menu"
+  if [ $LNTYPE = cln ];then
+    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+  else
+    echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
+  fi
+  echo 
+  echo "# PRESS ENTER to return to menu"
   read key
   exit 1
+else
+  echo "# OK - the chain is synced"
 fi
 
 # execute command
-echo "calling lncli ... please wait"
-command="lncli --chain=${network} --network=${chain}net newaddress p2wkh"
+if [ $LNTYPE = cln ];then
+  command="$lightningcli_alias newaddr bech32"
+elif [ $LNTYPE = lnd ];then
+  command="$lncli_alias newaddress p2wkh"
+fi
+echo "# Calling:"
 echo "${command}"
+echo
 result=$($command)
 echo "$result"
 
 # on no result
 if [ ${#result} -eq 0 ]; then
-  echo "Empty result - sorry something went wrong - thats unusual."
-  echo ""
-  echo "PRESS ENTER to return to menu"
+  echo "# Empty result - sorry something went wrong - that is unusual."
+  echo
+  echo "# Press ENTER to return to menu"
   read key
   exit 1
 fi
- 
+
 # parse address from result
-address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+if [ $LNTYPE = cln ];then
+  address=$( echo "$result" | grep "bech32" | cut -d '"' -f4)
+elif [ $LNTYPE = lnd ];then
+  address=$( echo "$result" | grep "address" | cut -d '"' -f4)
+fi
 
 # prepare coin info
 coininfo="Bitcoin"
@@ -58,7 +85,7 @@ echo "generating QR code ... please wait"
 /home/admin/config.scripts/blitz.display.sh qr "$network:${address}"
 
 # dialog with instructions while QR code is shown on LCD
-whiptail --backtitle "Fund your on chain wallet" \
+whiptail --backtitle "Fund your onchain wallet" \
 	 --title "Send ${coininfo}" \
 	 --yes-button "DONE" \
 	 --no-button "Console QRcode" \
@@ -73,6 +100,11 @@ fi
 /home/admin/config.scripts/blitz.display.sh hide
 
 # follow up info
-whiptail --backtitle "Fund your on chain wallet" \
+if [ $LNTYPE = cln ];then
+  string="Wait for confirmations."
+elif [ $LNTYPE = lnd ];then
+  string="Wait for confirmations. \n\nYou can use info on LCD to check if funds have arrived. \n\nIf you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'"
+fi
+whiptail --backtitle "Fund your onchain wallet" \
        --title "What's next?" \
-       --msgbox "Wait for confirmations. \n\nYou can use info on LCD to check if funds have arrived. \n\nIf you want your lighting node to open channels automatically, activate the 'Autopilot' under 'Activate/Deactivate Services'" 0 0 
+       --msgbox "$string" 0 0 

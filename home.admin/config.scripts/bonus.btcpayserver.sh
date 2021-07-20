@@ -26,7 +26,7 @@ if [ "$1" = "status" ]; then
     isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
     echo "installed=${isInstalled}"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     echo "localIP='${localIP}'"
     echo "httpsPort='23001'"
     echo "publicIP='${publicIP}'"
@@ -378,6 +378,7 @@ Type=simple
 PIDFile=/run/nbxplorer/nbxplorer.pid
 Restart=on-failure
 
+# Hardening measures
 PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
@@ -459,6 +460,12 @@ Group=btcpay
 Type=simple
 PIDFile=/run/btcpayserver/btcpayserver.pid
 Restart=on-failure
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

@@ -256,6 +256,12 @@ User=mempool
 Restart=on-failure
 RestartSec=600
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 EOF

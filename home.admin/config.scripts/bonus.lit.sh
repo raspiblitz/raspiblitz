@@ -287,10 +287,15 @@ ExecStart=/usr/local/bin/litd
 User=lit
 Group=lit
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

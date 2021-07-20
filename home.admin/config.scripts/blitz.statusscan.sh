@@ -1,7 +1,16 @@
 #!/bin/bash
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=lnd
+fi
+
+source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -17,7 +26,7 @@ sudo mkdir /mnt/hdd/temp 2>/dev/null
 sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
 
 # localIP
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep -E -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 echo "localIP='${localip}'"
 
 # temp - no measurement in a VM
@@ -45,7 +54,7 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
+  $bitcoincli_alias getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
   # check if error on request
   blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
   bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
@@ -56,6 +65,13 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     bitcoinErrorFull=$(echo ${bitcoinError} | tr -d "'")
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
+
+    ###################################
+    # Get data from blockchain network
+    ###################################
+
+    source <(sudo -u bitcoin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "blockchainPeers=${peers}"
 
     ##############################
     # Get data from blockchaininfo
@@ -120,15 +136,15 @@ startcountLightning=$(cat /home/admin/systemd.lightning.log 2>/dev/null | grep -
 echo "startcountLightning=${startcountLightning}"
 
 # is LND running
-lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
+lndRunning=$(systemctl status ${netprefix}lnd.service 2>/dev/null | grep -c running)
 echo "lndActive=${lndRunning}"
 
 if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
   lndRPCReady=1
-  lndinfo=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>/mnt/hdd/temp/.lnd.error)
-
+  lndinfo=$($lncli_alias getinfo 2>/mnt/hdd/temp/.lnd.error)
+  
   # check if error on request
   lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
   lndErrorShort=''
@@ -252,6 +268,13 @@ if [ ${lndRunning} -eq 1 ]; then
 
 fi
 
+# is CLN running
+clnRunning=$(systemctl status ${netprefix}cln.service 2>/dev/null | grep -c running)
+echo "clnActive=${clnRunning}"
+if [ ${clnRunning} -eq 1 ]; then
+  echo "# TODO: cln status statistics"
+fi
+
 # touchscreen statistics
 if [ "${touchscreen}" == "1" ]; then
   echo "blitzTUIActive=1"
@@ -265,6 +288,9 @@ else
   echo "blitzTUIRestarts=0"
 fi
 
+# check if runnig in vagrant
+vagrant=$(df | grep -c "/vagrant")
+echo "vagrant=${vagrant}"
 
 # check if online if problem with other stuff 
 

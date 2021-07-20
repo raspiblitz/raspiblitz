@@ -212,7 +212,7 @@ The following additional information is available:
             time.sleep(3)
 
     # trigger restart of relevant services so they can pickup new environment
-    print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+    print("# restarting services to pickup new public url (please wait) ...")
     os.system("sudo systemctl restart sphinxrelay 2>/dev/null")
     time.sleep(8)
 
@@ -418,7 +418,7 @@ def main():
 
         # action after possibly new created bride
         if service_name == SERVICE_SPHINX:
-            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 

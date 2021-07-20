@@ -20,6 +20,8 @@ function usage() {
 verbose=0
 pause=12
 
+# this is used by touchscreen and command 'satus'
+# TODO: remove on v1.8
 while [[ "$1" == -* ]]; do
   case "$1" in
     -h|--help)
@@ -82,239 +84,29 @@ while :
     # CHECK BASIC DATA
     ###########################   
 
-    # get the local network IP to be displayed on the lCD
-    source <(sudo /home/admin/config.scripts/internet.sh status)
-
-    # waiting for IP in general
-    if [ ${#localip} -eq 0 ]; then
-      l1="Waiting for Network ...\n"
-      l2="Not able to get local IP.\n"
-      l3="LAN cable connected? WIFI lost?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "$l1$l2$l3" 5 40
-      sleep 3
-      continue
-    fi
-
-    # waiting for Internet connection
-    if [ ${online} -eq 0 ]; then
-      l1="Waiting for Internet ...\n"
-      l2="Local Network seems OK but no Internet.\n"
-      l3="Is router still online?\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2$l3" 5 45
-      sleep 3
-      continue
-    fi
-
     # get config info if already available (with state value)
     source ${infoFile}
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
+      source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
-    # reboot info
-    if [ "${state}" = "reboot" ]; then
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Reboot ..." 3 30
-      sleep 20
-      continue
-    fi
+    if [ "${setupPhase}" != "done" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
 
-    # shutdown info
-    if [ "${state}" = "shutdown" ]; then
-      dialog --backtitle "RaspiBlitz ${codeVersion}" --infobox "Waiting for Shutdown ..." 3 30
-      sleep 20
-      continue
-    fi
-
-    # waiting for DHCP in general
-    if [ "${state}" = "noDHCP" ]; then
-      l1="Waiting for DHCP ...\n"
-      l2="Not able to get local IP.\n"
-      l3="Check you router if constant.\n"
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${localip})" --infobox "$l1$l2$l3" 5 40
+      # show status info during boot & setup & repair on LCD
+      /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
       sleep 1
       continue
+
     fi
 
-    # if no information available from files - set default
-    if [ ${#setupStep} -eq 0 ]; then
-     setupStep=0
-    fi
-
-    # before setup even started
-    if [ ${setupStep} -eq 0 ]; then
-
-      # check for internet connection
-      online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
-      if [ ${online} -eq 0 ]; then
-        # re-test with other server
-        online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
-      fi
-      if [ ${online} -eq 0 ]; then
-        # re-test with other server
-        online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
-      fi
-
-      if [ ${online} -eq 0 ]; then
-        message="no internet connection"
-
-      # when in presync - get more info on progress
-      elif [ "${state}" = "presync" ]; then
-        blockchaininfo="$(sudo -u root bitcoin-cli --conf=/home/admin/assets/bitcoin.conf getblockchaininfo 2>/dev/null)"
-        message="starting"
-        if [ ${#blockchaininfo} -gt 0 ]; then
-          message="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
-          message=$(echo $message | awk '{printf( "%.2f%%", 100 * $1)}')
-        fi
-
-      # when old data - improve message
-      elif [ "${state}" = "sdtoosmall" ]; then
-          message="SDCARD TOO SMALL - min 16GB"
-
-      # when no HDD - improve message
-      elif [ "${state}" = "noHDD" ]; then
-          message="Connect external HDD/SSD"
-      fi
-      
-      # setup process has not started yet
-      l1="Login to your RaspiBlitz with:\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: raspiblitz\n"
-
-      if [ "${state}" = "recovering" ]; then
-        l1="Recovering please wait ..\n"
-      fi
-
-      boxwidth=$((${#localip} + 24))
-      sleep 3
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) - ${message}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 5
-      continue
-    fi
-
-    # check if recovering/upgrade is running
-    if [ "${state}" = "recovering" ]; then
-      if [ ${#message} -eq 0 ]; then
-        message="Setup in Progress"
-      fi
-      l1="Upgrade/Recover/Provision\n"
-      l2="---> ${message}\n"
-      l3="Please keep running until reboot."
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-    
-    # if freshly recovered 
-    recoveredInfoExists=$(sudo ls /home/admin/recover.flag 2>/dev/null | grep -c '.flag')
-    if [ ${recoveredInfoExists} -gt 0 ]; then
-      l1="FINAL RECOVER LOGIN NEEDED:\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: raspiblitz\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    # if re-indexing 
-    if [ "${state}" = "reindex" ]; then
-      l1="REINDEXING BLOCKCHAIN\n"
-      l2="To monitor & detect finish:\n"
-      l3="ssh admin@${localip}\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    # when setup is in progress - password has been changed
-    if [ ${setupStep} -lt 100 ]; then
-      l1="Login to your RaspiBlitz with:\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use your Password A\n"
-      boxwidth=$((${#localip} + 24))
-      sleep 3
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip} - Welcome (${setupStep})" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 7
-      continue
-    fi
-
-    ###########################
-    # DISPLAY AFTER SETUP
-    ###########################
-
-    if [ "${state}" = "repair" ]; then
-      l1="Repair Mode\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ "${state}" = "reboot" ]; then
-      l1="Reboot needed.\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ "${state}" = "retorrent" ]; then
-      l1="Repair Mode- TORRENT\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ "${state}" = "recopy" ]; then
-      l1="Repair Mode - COPY\n"
-      l2="ssh admin@${localip}\n"
-      l3="Use password: PasswordA\n"
-      boxwidth=$((${#localip} + 28))
-      dialog --backtitle "RaspiBlitz ${codeVersion} (${state}) ${setupStep} ${localip}" --infobox "$l1$l2$l3" 5 ${boxwidth}
-      sleep 3
-      continue
-    fi
-
-    if [ "${state}" = "copystation" ]; then
-      l1="COPY STATION MODE\n"
-      l2="${message}"
-      dialog --backtitle "RaspiBlitz ${codeVersion} ${localip}" --infobox "$l1$l2" 6 56
-      sleep 2
-      continue
-    fi
-
+    # TODO: ALSO SEPERATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
     # if LND is syncing or scanning
-    lndSynced=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
+    lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
     if [ ${lndSynced} -eq 0 ]; then
-      /home/admin/80scanLND.sh
-      sleep 20
-      continue
-    fi
-
-    # perform config check
-    configCheck=$(/home/admin/config.scripts/blitz.configcheck.py)
-    if [ $? -eq 0 ]; then
-      configValid=1
-      # echo "Config Valid!"
-    else
-      configValid=0
-      # echo "Config Not Valid!"
-      l1="POTENTIAL CONFIG ERROR FOUND\n"
-      l2="ssh admin@${localip}\n"
-      l3="use Password A\n"
-      l4="Run on Terminal command: check"
-      dialog --backtitle "RaspiBlitz ${codeVersion} cfg-err ${localip}" --infobox "$l1$l2$l3$l4" 6 50
-      sleep 20
+      /home/admin/setup.scripts/eventBlockchainSync.sh lcd
+      sleep 10
       continue
     fi
 
