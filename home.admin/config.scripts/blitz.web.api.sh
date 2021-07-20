@@ -51,7 +51,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
-  sed -i "s/^secret=.*/secret='${secret}'/g" ./.env
+  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
 
   # prepare systemd service
   echo "
@@ -63,10 +63,10 @@ After=network.target
 [Service]
 WorkingDirectory=/home/admin/blitz_api
 # before every start update the config with latest credentials/settings
-ExecStartPre=-sudo /home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=/usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
-User=admin
-Group=admin
+ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
+ExecStart=sudo -admin /usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
+User=root
+Group=root
 Type=simple
 Restart=always
 StandardOutput=journal
