@@ -207,6 +207,11 @@ if [ "${setupPhase}" == "setup" ]; then
   # FRESH SETUP
   if [ "${menuresult}" == "0" ]; then
 
+    # user needs to set all passwords (defaults)
+    echo "setPasswordA=1" >> $SETUPFILE
+    echo "setPasswordB=1" >> $SETUPFILE
+    echo "setPasswordC=1" >> $SETUPFILE
+
     ############################################
     # Setting Name for Node
 
@@ -289,14 +294,6 @@ if [ "${setupPhase}" == "setup" ]; then
     echo "hostname='${hostname}'" >> $CONFIGFILE
     echo "runBehindTor=on" >> $CONFIGFILE
   
-    # user needs to set all passwords
-    echo "setPasswordA=1" >> $SETUPFILE
-    echo "setPasswordB=1" >> $SETUPFILE
-    echo "setPasswordC=1" >> $SETUPFILE
-
-
-
-    
   fi
 
 fi
