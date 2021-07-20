@@ -380,22 +380,8 @@ wordone wordtweo wordthree ...
       fi
     done
 
-  # ask if seed was protected by password D
+  # dont ask for password D (seed password) because raspiblitz never had that option for cln
   passwordD=""
-  dialog --title "SEED PASSWORD" --yes-button "No extra Password" --no-button "Yes" --yesno "
-Are your seed words protected by an extra password?
-
-During wallet creation LND offers to set an extra password
-to protect the seed words. Most users did not set this.
-  " 11 65
-  if [ $? -eq 1 ]; then
-    sudo rm /var/cache/raspiblitz/.pass.tmp 2>/dev/null
-    sudo touch /var/cache/raspiblitz/.pass.tmp
-    sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
-    passwordD=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
-    sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
-  fi
 
   # writing result file data
   clear

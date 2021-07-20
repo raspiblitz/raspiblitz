@@ -23,10 +23,10 @@ if [ "${CHOICE}" == "NEW" ]; then
   sudo sed -i '/^setPasswordB=/d' $SETUPFILE
   sudo sed -i '/^setPasswordC=/d' $SETUPFILE
 
-  # mark all passwords to be set at the end
+  # mark all passwords to be set - passwordc wallet encryption not for cln 
   echo "setPasswordA=1" >> $SETUPFILE
   echo "setPasswordB=1" >> $SETUPFILE
-  echo "setPasswordC=1" >> $SETUPFILE
+  echo "setPasswordC=0" >> $SETUPFILE
 
 elif [ "${CHOICE}" == "OLD" ]; then
 
@@ -67,7 +67,7 @@ from your old node would be recommended.
         # when user wants to go back
         CHOICESUB=""
       else
-        # activate SEED input & SCB upload
+        # activate SEED input
         enterSEED=1
 
         # clear setup state from all fomer possible choices (previous loop)
@@ -78,7 +78,7 @@ from your old node would be recommended.
         # mark all passwords to be set at the end
         echo "setPasswordA=1" >> $SETUPFILE
         echo "setPasswordB=1" >> $SETUPFILE
-        echo "setPasswordC=1" >> $SETUPFILE
+        echo "setPasswordC=0" >> $SETUPFILE
 
       fi
 

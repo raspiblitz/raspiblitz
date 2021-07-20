@@ -293,6 +293,10 @@ if [ "${setupPhase}" == "setup" ]; then
     echo "setPasswordA=1" >> $SETUPFILE
     echo "setPasswordB=1" >> $SETUPFILE
     echo "setPasswordC=1" >> $SETUPFILE
+
+
+
+    
   fi
 
 fi
