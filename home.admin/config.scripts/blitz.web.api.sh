@@ -63,7 +63,7 @@ After=network.target
 [Service]
 WorkingDirectory=/home/admin/blitz_api
 # before every start update the config with latest credentials/settings
-ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
+ExecStartPre=-sudo /home/admin/config.scripts/blitz.web.api.sh update-config
 ExecStart=/usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
 User=admin
 Group=admin
@@ -121,6 +121,7 @@ if [ "$1" = "update-config" ]; then
   fi
   sed -i "s/^network=.*/network=mainnet/g" ./.env
   sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
+  sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
   sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
   sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
   
