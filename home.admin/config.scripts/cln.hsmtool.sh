@@ -184,6 +184,10 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
     (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword") | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 1>&2
   fi
+
+  echo "# Re-init the backup plugin with the new wallet"
+  /home/admin/config.scripts/cln-plugin.backup.sh on $CHAIN
+
   exit 0
   
 elif [ "$1" = "unlock" ]; then
