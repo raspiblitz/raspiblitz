@@ -109,9 +109,9 @@ if [ "$1" = "update-config" ]; then
   fi
 
   cd /home/admin/blitz_api
-  # make it fixed on Bitcoin & Mainnet for now - the WebUI will start limited to this first
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
+  echo "LAST EDITED (${dateStr})" >> ./.env
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
   if [ "${RPCUSER}" == "" ]; then
@@ -129,7 +129,7 @@ if [ "$1" = "update-config" ]; then
   if [ "${lightning}" == "lnd" ]; then
 
     echo "# CONFIG Web API Lightning --> LND"
-    tlsCert=$(sudo cat /mnt/hdd/lnd/tls.cert)
+    tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
     adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)
     sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
     sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
