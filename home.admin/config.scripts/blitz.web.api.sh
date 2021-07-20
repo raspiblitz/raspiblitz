@@ -111,7 +111,6 @@ if [ "$1" = "update-config" ]; then
   cd /home/admin/blitz_api
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  echo "\nLAST EDITED (${dateStr})" >> ./.env
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
   if [ "${RPCUSER}" == "" ]; then
