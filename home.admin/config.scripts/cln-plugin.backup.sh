@@ -40,8 +40,8 @@ function install() {
       fi
     sudo chmod +x ${plugindir}/${plugin}/${plugin}.py
     # symlink to the default plugin dir
-    if [ ! -L /home/bitcoin/${netprefix}cln-plugins-enabled/backup ];then
-      sudo ln -s ${plugindir}/backup \
+    if [ ! -L /home/bitcoin/${netprefix}cln-plugins-enabled/backup.py ];then
+      sudo ln -s ${plugindir}/backup/backup.py \
                  /home/bitcoin/${netprefix}cln-plugins-enabled/
     fi
   fi
@@ -51,6 +51,9 @@ if [ $1 = on ];then
   
   install
 
+  echo "# Stop the ${netprefix}lightningd.service"
+  sudo systemctl stop ${netprefix}lightningd
+  
   # don't overwrite old backup
   if [ -f /home/bitcoin/${netprefix}lightningd.sqlite3.backup ];then
     echo "# Backup the existing old backup on the SDcard"
@@ -66,6 +69,12 @@ if [ $1 = on ];then
     sudo -u bitcoin /home/bitcoin/${netprefix}cln-plugins-enabled/backup/backup-cli init\
       --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
+  fi
+
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start ${netprefix}lightningd
+    echo "# Started the ${netprefix}lightningd.service"
   fi
 
 elif [ $1 = off ];then

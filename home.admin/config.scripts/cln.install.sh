@@ -140,8 +140,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
-  echo "# Create /home/bitcoin/.lightning/${netprefix}config"
-  if [ ! -f /home/bitcoin/.lightning/${netprefix}config ];then
+  
+ 
+  echo "# Create ${CLNCONF}"
+  if [ ! -f ${CLNCONF} ];then
     echo "
 # lightningd configuration for ${network} ${CHAIN}
 
@@ -156,9 +158,9 @@ proxy=127.0.0.1:9050
 bind-addr=127.0.0.1:${portprefix}9736
 addr=statictor:127.0.0.1:9051/torport=${portprefix}9736
 always-use-proxy=true
-" | sudo tee /home/bitcoin/.lightning/${netprefix}config
+" | sudo tee ${CLNCONF}
   else
-    echo "# The file /home/bitcoin/.lightning/${netprefix}config is already present"
+    echo "# The file ${CLNCONF} is already present"
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
@@ -177,16 +179,15 @@ always-use-proxy=true
   echo "# Adding aliases"
   echo "\
 alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${netprefix}config\"
+ --conf=${CLNCONF}\"
 alias ${netprefix}cln=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=/home/bitcoin/.lightning/${netprefix}config\"
+ --conf=${CLNCONF}\"
 alias ${netprefix}clnlog=\"sudo\
  tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log\"
 alias ${netprefix}clnconf=\"sudo\
- nano /home/bitcoin/.lightning/${netprefix}config\"
+ nano ${CLNCONF}\"
 " | sudo tee -a /home/admin/_aliases
 
-  echo
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo   
   echo "# To activate the aliases reopen the terminal or use:"

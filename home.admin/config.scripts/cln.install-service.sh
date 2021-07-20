@@ -10,12 +10,11 @@ source /home/admin/raspiblitz.info
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cln <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
-if [ $(grep -c "^sparko" < /home/bitcoin/.lightning/${netprefix}config) -gt 0 ];then
+if [ $(sudo -u bitcoin cat ${CLNCONF} | grep -c "^sparko") -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cln-plugins-enabled/sparko ];then
-    echo "# The Sparko plugin is not present despite being configured"
+    echo "# The Sparko plugin is not present but in config"
     /home/admin/config.scripts/cln-plugin.sparko.sh on $CHAIN
   fi
-  sparkoStart="--plugin=/home/bitcoin/${netprefix}cln-plugins-enabled/sparko"
 fi
 
 if grep -Eq "${netprefix}clnEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
@@ -30,6 +29,7 @@ else
   passwordInput=""
   encryptedHSMoption=""
 fi
+
 sudo systemctl stop ${netprefix}lightningd
 sudo systemctl disable ${netprefix}lightningd
 echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
@@ -42,8 +42,7 @@ User=bitcoin
 Group=bitcoin
 Type=simple
 ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd\
- --conf=/home/bitcoin/.lightning/${netprefix}config\
- ${sparkoStart} ${encryptedHSMoption}'
+ --conf=${CLNCONF} ${encryptedHSMoption}'
 Restart=always
 TimeoutSec=120
 RestartSec=30

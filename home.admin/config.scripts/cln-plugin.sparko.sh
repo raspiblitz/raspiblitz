@@ -139,11 +139,6 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
     echo "# Sparko is already configured in the /home/bitcoin/.lightning/${netprefix}config"
   fi
 
-  ###################
-  # Systemd service #
-  ###################
-  /home/admin/config.scripts/cln.install-service.sh $CHAIN
-
   echo "# Allowing port ${portprefix}9000 through the firewall"
   sudo ufw allow "${portprefix}9000" comment "${netprefix}sparko"
 
@@ -153,10 +148,15 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
 
-  sleep 5
-  # show some logs
-  sudo tail -n100 /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko 
-  netstat -tulpn | grep "${portprefix}9000"
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    echo "# Restart the ${netprefix}lightningd.service to activate Sparko"
+    sudo systemctl restart ${netprefix}lightningd
+    sleep 5
+    # show some logs
+    sudo tail -n100 /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko 
+    netstat -tulpn | grep "${portprefix}9000"
+  fi
 
   echo "# Sparko was installed"
   echo "# Monitor with:"
@@ -172,9 +172,8 @@ if [ $1 = off ];then
   echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
   sudo sed -i "/^sparko/d" /home/bitcoin/.lightning/${netprefix}config
 
-  if [ -f /etc/systemd/system/multi-user.target.wants/slightningd.service ];then
-    /home/admin/config.scripts/cln.install-service.sh $CHAIN
-  fi
+  echo "# Restart the ${netprefix}lightningd.service to deactivate Sparko"
+  sudo systemctl restart ${netprefix}lightningd
 
   echo "# Deny port ${portprefix}9000 through the firewall"
   sudo ufw deny "${portprefix}9000"
@@ -189,4 +188,5 @@ if [ $1 = off ];then
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf
   echo "# Sparko was uninstalled"
+
 fi

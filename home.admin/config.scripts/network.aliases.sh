@@ -35,14 +35,6 @@ if [ $1 = getvars ];then
   fi
   echo "LNTYPE=${LNTYPE}"
 
-  # typeprefix is: "" | c
-  if [ $LNTYPE = cln ];then
-    typeprefix=c
-  elif [ $LNTYPE = lnd ];then
-    typeprefix=''
-  fi
-  echo "typeprefix=${typeprefix}"
-
   # from raspiblitz.conf or raspiblitz.info or defaults to main
   if [ ${#chain} -eq 0 ]; then
     chain=main
@@ -60,7 +52,12 @@ if [ $1 = getvars ];then
   # netprefix is:     "" | t | s
   # portprefix is:    "" | 1 | 3
   # L2rpcportmod is:   0 | 1 | 3   
-  if [ ${chain} = "test" ];then
+  if [ ${chain} = "main" ];then
+    netprefix=""
+    L1rpcportmod=""
+    L2rpcportmod=0
+    portprefix=""
+  elif [ ${chain} = "test" ];then
     netprefix="t"
     L1rpcportmod=1
     L2rpcportmod=1
@@ -70,23 +67,35 @@ if [ $1 = getvars ];then
     L1rpcportmod=3
     L2rpcportmod=3
     portprefix=3
-  elif [ ${chain} = "main" ];then
-    netprefix=""
-    L1rpcportmod=""
-    L2rpcportmod=0
-    portprefix=""
   fi
   echo "netprefix=${netprefix}"
   echo "portprefix=${portprefix}"
   echo "L2rpcportmod=${L2rpcportmod}"
+  
+  if [ $LNTYPE = cln ];then
+    # CLNETWORK is: bitcoin / signet / testnet
+    if [ $chain = main ];then
+      CLNETWORK=${network}
+    else
+      CLNETWORK=${chain}net
+    fi
+    echo "CLNETWORK=${CLNETWORK}"
 
-  # CLNETWORK is: bitcoin / signet / testnet
-  if [ $chain = main ];then
-    CLNETWORK=${network}
-  else
-    CLNETWORK=${chain}net
+    # CLNCONF is the path to the config
+    if [ ${CLNETWORK} = "bitcoin" ]; then
+      CLNCONF="/home/bitcoin/.lightning/config"
+    else
+      CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
+    fi
+    echo "CLNCONF=${CLNCONF}"
+    typeprefix=c
   fi
-  echo CLNETWORK=${CLNETWORK}
+
+  # typeprefix is: "" | c
+  if [ $LNTYPE = lnd ];then
+    typeprefix=''
+  fi
+  echo "typeprefix=${typeprefix}"
 
   # instead of all
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
