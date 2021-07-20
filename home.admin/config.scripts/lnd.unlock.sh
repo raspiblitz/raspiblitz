@@ -21,8 +21,9 @@ passwordC="$2"
 
 # check if wallet is already unlocked
 # echo "# checking LND wallet ... (can take some time)"
-walletLocked=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-macaroonsMissing=$(sudo -u bitcoin $lncli_alias --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
+lndError=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1)
+walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
+macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
 # if action sis just status
 if [ "${action}" == "status" ]; then
