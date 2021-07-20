@@ -152,10 +152,6 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   if [ "${state}" == "ready" ]; then
     echo "# Restart the ${netprefix}lightningd.service to activate Sparko"
     sudo systemctl restart ${netprefix}lightningd
-    sleep 5
-    # show some logs
-    sudo tail -n100 /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko 
-    netstat -tulpn | grep "${portprefix}9000"
   fi
 
   echo "# Sparko was installed"
