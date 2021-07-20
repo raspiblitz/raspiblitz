@@ -123,7 +123,7 @@ elif [ "${exportType}" = "btcpay" ]; then
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(hostname -I | awk '{print $1}')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
