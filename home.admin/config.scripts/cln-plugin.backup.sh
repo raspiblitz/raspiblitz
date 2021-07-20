@@ -66,7 +66,7 @@ if [ $1 = on ];then
   if [ ! -f /home/bitcoin/.lightning/${CLNETWORK}/backup.lock ];then
     # https://github.com/lightningd/plugins/tree/master/backup#setup
     echo "# Initialize the backup plugin"
-    sudo -u bitcoin /home/bitcoin/${netprefix}cln-plugins-enabled/backup/backup-cli init\
+    sudo -u bitcoin ${plugindir}/backup/backup-cli init\
       --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
   fi
@@ -106,7 +106,7 @@ elif [ $1 = restore ];then
     fi
   
     # restore
-    /home/bitcoin/${netprefix}cln-plugins-enabled/backup/backup-cli restore \
+    sudo -u bitcoin ${plugindir}/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
   
