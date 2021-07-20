@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+# restart the systemd `blitzapi` when credentials of lnd or bitcoind are changeing and it will
+# excute the `update-config` automatically before restarting
+
 # TODO: On sd card install there might be no Bitcoin & Lightning confs - make sure backend runs without
-# TODO: make a `update-config` that will update Bitcoin & Lightning to the latest passwords & credentials
-# TODO: run `update-config` as a prescript in systemd service
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
