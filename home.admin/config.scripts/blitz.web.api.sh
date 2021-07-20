@@ -132,8 +132,8 @@ if [ "$1" = "update-config" ]; then
     adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)
     sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
     sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-    sed -i "s/^lnd_macaroon=.*/lnd_macaroon='${adminMacaroon}'/g" ./.env
-    sed -i "s/^lnd_cert=.*/lnd_cert='${tlsCert}'/g" ./.env
+    sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
+    sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
 
   # configure CLN
   elif [ "${lightning}" == "cln" ]; then
