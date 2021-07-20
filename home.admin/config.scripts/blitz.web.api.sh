@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# main repo: https://github.com/fusion44/blitz_api
+
 # restart the systemd `blitzapi` when credentials of lnd or bitcoind are changeing and it will
 # excute the `update-config` automatically before restarting
 
