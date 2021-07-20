@@ -48,8 +48,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # TODO: check if that manual install is still needed in a future version
   pip install sse_starlette
 
-  # build the config
+  # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
+  secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
+  sed -i "s/^secret=.*/secret='${secret}'/g" ./.env
 
   # prepare systemd service
   echo "
@@ -99,12 +101,19 @@ fi
 ###################
 if [ "$1" = "update-config" ]; then
 
-  # make it fixed on Bitcoin & Mainnet for now - the WebUI will start limited to this first
+  # prepare configs data
+  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  if [ "${network}" = "" ]; then
+    network="bitcoin"
+    chain="main"
+  fi
 
+  cd /home/admin/blitz_api
+  # make it fixed on Bitcoin & Mainnet for now - the WebUI will start limited to this first
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  RPCUSER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-  RPCPASS=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+  RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
   if [ "${RPCUSER}" == "" ]; then
     RPCUSER="raspibolt"
   fi
@@ -116,13 +125,31 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
   sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
   
-  # add c-lightnign as soon as possible
-  echo "# CONFIG Web API Lightning"
-  tlsCert=$(sudo cat /mnt/hdd/lnd/tls.cert)
-  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)  sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
-  sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-  sed -i "s/^lnd_cert=.*/lnd_cert="${tlsCert}"/g" ./.env
-  sed -i "s/^lnd_macaroon=.*/lnd_macaroon="${adminMacaroon}"/g" ./.env
+  # configure LND
+  if [ "${lightning}" == "lnd" ]; then
+
+    echo "# CONFIG Web API Lightning --> LND"
+    tlsCert=$(sudo cat /mnt/hdd/lnd/tls.cert)
+    adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)  sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
+    sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
+    sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
+    sed -i "s/^lnd_cert=.*/lnd_cert="${tlsCert}"/g" ./.env
+    sed -i "s/^lnd_macaroon=.*/lnd_macaroon="${adminMacaroon}"/g" ./.env
+
+  # configure CLN
+  elif [ "${lightning}" == "cln" ]; then
+    
+    echo "# CONFIG Web API Lightning --> CLN"
+    sed -i "s/^ln_node=.*/ln_node=cln/g" ./.env
+    
+    # TODO: ADD C-Lightning config as soon as available
+    echo "# MISSING CLN CONFIG YET"
+
+  else
+    echo "# CONFIG Web API Lightning --> OFF"
+    sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+  fi
+
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
   exit 0
 
