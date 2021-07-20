@@ -166,10 +166,9 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     echo "# Running on ${chain}net"
     echo
     localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' |\
+    grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' |\
     awk -F. '{print $1"."$2"."$3".0/24"}')
-    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(hostname -I | awk '{print $1}')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
     bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
