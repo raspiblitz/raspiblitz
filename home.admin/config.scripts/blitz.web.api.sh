@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 # TODO: On sd card install there might be no Bitcoin & Lightning confs - make sure backend runs without
-# TODO: make a `build-config` that will update Bitcoin & Lightning to the latest passwords & credentials
-# TODO: run `build-config` as a prescript in systemd service
+# TODO: make a `update-config` that will update Bitcoin & Lightning to the latest passwords & credentials
+# TODO: run `update-config` as a prescript in systemd service
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
   echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
-  echo "blitz.web.api.sh update"
+  echo "blitz.web.api.sh update-config"
+  echo "blitz.web.api.sh update-code"
   echo "blitz.web.api.sh off"
   exit 1
 fi
@@ -47,28 +48,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # TODO: check if that manual install is still needed in a future version
   pip install sse_starlette
 
-  # make it fixed on Bitcoin & Mainnet - the WebUI will start limited to this first
-  echo "# CONFIG Web API Bitcoin"
-  RPCUSER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-  RPCPASS=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  if [ "${RPCUSER}" == "" ]; then
-    RPCUSER="raspibolt"
-  fi
-  if [ "${RPCPASS}" == "" ]; then
-    RPCPASS="passwordB"
-  fi
-  sed -i "s/^network=.*/network=mainnet/g" ./.env
-  sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
-  sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
-  sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-  
-  # add c-lightnign as soon as possible
-  echo "# CONFIG Web API Lightning"
-  tlsCert=$(sudo cat /mnt/hdd/lnd/tls.cert)
-  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)  sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
-  sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-  sed -i "s/^lnd_cert=.*/lnd_cert="${tlsCert}"/g" ./.env
-  sed -i "s/^lnd_macaroon=.*/lnd_macaroon="${adminMacaroon}"/g" ./.env
+  # build the config
+  /home/admin/config.scripts/blitz.web.api.sh update-config
 
   # prepare systemd service
   echo "
@@ -79,6 +60,8 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/admin/blitz_api
+# before every start update the config with latest credentials/settings
+ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
 ExecStart=/usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
 User=admin
 Group=admin
@@ -112,11 +95,45 @@ WantedBy=multi-user.target
 fi
 
 ###################
-# UPDATE
+# UPDATE CONFIG
 ###################
-if [ "$1" = "update" ]; then
+if [ "$1" = "update-config" ]; then
 
-  echo "# Update Web API"
+  # make it fixed on Bitcoin & Mainnet for now - the WebUI will start limited to this first
+
+  dateStr=$(date)
+  echo "# Update Web API CONFIG (${dateStr})"
+  RPCUSER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+  RPCPASS=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  if [ "${RPCUSER}" == "" ]; then
+    RPCUSER="raspibolt"
+  fi
+  if [ "${RPCPASS}" == "" ]; then
+    RPCPASS="passwordB"
+  fi
+  sed -i "s/^network=.*/network=mainnet/g" ./.env
+  sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
+  sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
+  sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
+  
+  # add c-lightnign as soon as possible
+  echo "# CONFIG Web API Lightning"
+  tlsCert=$(sudo cat /mnt/hdd/lnd/tls.cert)
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)  sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
+  sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
+  sed -i "s/^lnd_cert=.*/lnd_cert="${tlsCert}"/g" ./.env
+  sed -i "s/^lnd_macaroon=.*/lnd_macaroon="${adminMacaroon}"/g" ./.env
+  echo "# '.env' config updates - blitzapi maybe needs to be restarted"
+  exit 0
+
+fi
+
+###################
+# UPDATE CODE
+###################
+if [ "$1" = "update-code" ]; then
+
+  echo "# Update Web API CODE"
   sudo systemctl stop blitzapi
   cd /home/admin/blitz_api
   git fetch
@@ -127,6 +144,8 @@ if [ "$1" = "update" ]; then
   exit 0
 
 fi
+
+
 
 ###################
 # OFF / UNINSTALL
