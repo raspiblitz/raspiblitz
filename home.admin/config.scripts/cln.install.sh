@@ -143,7 +143,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   
  
   echo "# Create ${CLNCONF}"
-  if [ ! -f ${CLNCONF} ];then
+  if sudo ls ${CLNCONF};then
     echo "
 # lightningd configuration for ${network} ${CHAIN}
 

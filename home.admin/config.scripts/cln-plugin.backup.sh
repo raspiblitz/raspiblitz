@@ -34,7 +34,7 @@ function install() {
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ];then
     echo "# Checking dependencies"
     sudo -u bitcoin pip install --user -r ${plugindir}/${plugin}/requirements.txt 1>/dev/null
-      if [ $(echo $PATH | grep -c "/home/bitcoin/.local/bin") -eq 0 ]; then
+      if [ $(echo $PATH | grep -c "/home/bitcoin/.local/bin") -eq 0 ];then
         export PATH=$PATH:/home/bitcoin/.local/bin
         echo "PATH=\$PATH:/home/bitcoin/.local/bin" | sudo tee -a /etc/profile
       fi
@@ -65,7 +65,7 @@ if [ $1 = on ];then
   fi
 
   # init plugin
-  if [ ! -f /home/bitcoin/.lightning/${CLNETWORK}/backup.lock ];then
+  if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/backup.lock; then
     # https://github.com/lightningd/plugins/tree/master/backup#setup
     echo "# Initialize the backup plugin"
     sudo -u bitcoin ${plugindir}/backup/backup-cli init\
@@ -89,7 +89,7 @@ elif [ $1 = restore ];then
   install
 
   #look for a backup to restore
-  if [ -f /home/bitcoin/${netprefix}lightningd.sqlite3.backup ];then
+  if sudo ls /home/bitcoin/${netprefix}lightningd.sqlite3.backup; then
     
     sudo systemctl stop ${netprefix}lightningd
   
@@ -97,7 +97,7 @@ elif [ $1 = restore ];then
     # ./backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
     
     # make sure to not overwrite old database
-    if [ -f /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3 ];then
+    if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3;then
       now=$(date +"%Y_%m_%d_%H%M%S")
       echo "# Backup the existing old database on the disk"
       sudo cp /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3 \
@@ -117,7 +117,7 @@ elif [ $1 = restore ];then
 
 elif  [ $1 = backup-compact ];then
   
-  if [ -f /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3 ];then
+  if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3;then
     # https://github.com/lightningd/plugins/tree/master/backup#performing-backup-compaction
     echo "#  Running $lightning-cli backup-compact ..."
     $lightning-cli backup-compact
