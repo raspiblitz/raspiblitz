@@ -141,11 +141,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
   
- 
-  echo "# Create ${CLNCONF}"
-  if sudo ls ${CLNCONF};then
-    echo "
-# lightningd configuration for ${network} ${CHAIN}
+  if ! sudo ls ${CLNCONF};then
+    echo "# Create ${CLNCONF}"
+    echo "# lightningd configuration for ${network} ${CHAIN}
 
 network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
