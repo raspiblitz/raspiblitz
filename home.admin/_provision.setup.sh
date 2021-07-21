@@ -386,7 +386,7 @@ if [ "${lightning}" == "cln" ]; then
   # NEW WALLET
   else
 
-    echo "Generare new CLN wallet ..." >> ${logFile}
+    echo "Generate new CLN wallet ..." >> ${logFile}
 
     # generate new wallet
     source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
