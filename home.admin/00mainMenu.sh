@@ -186,7 +186,7 @@ fi
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 
-if [ "${lightning}" == "lnd" ]
+if [ "${lightning}" == "lnd" ]; then
   OPTIONS+=(LND "LND Wallet Options")
 fi
 
