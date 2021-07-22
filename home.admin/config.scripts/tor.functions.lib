@@ -54,6 +54,9 @@ PING_SERVER="debian.org"
 
 DISTRIBUTION=$(lsb_release -sc)
 
+# https://onion.debian.org
+# https://onion.torproject.org
+
 SOURCES_DEB_SECURITY_ONION="http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/"
 SOURCES_DEB_UPDATE_ONION="http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/"
 SOURCES_DEB_SECURITY_PLAIN="https://deb.debian.org/"
