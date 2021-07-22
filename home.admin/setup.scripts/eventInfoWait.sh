@@ -81,11 +81,27 @@ For shutdown use command: off
 
 elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+    if [ "${mode}" == "ssh" ]; then
+
+        # provision info when logged in
+        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Upgrade/Recover/Provision
+---> ${contentString}
+
+Run 'tail -f ./raspiblitz.log' in
+new terminal to follow install logs.
+" 9 40
+
+    else
+
+        # provision on LCD, etc
+        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Upgrade/Recover/Provision
 ---> ${contentString}
 Please keep running until done.
 " 7 40
+
+    fi
 
 elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then
 
