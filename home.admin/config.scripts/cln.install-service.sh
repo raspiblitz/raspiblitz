@@ -4,9 +4,6 @@
 # usage:
 # /home/admin/config.scripts/cln.install-service.sh $CHAIN
 
-source /mnt/hdd/raspiblitz.conf
-source /home/admin/raspiblitz.info
-
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cln <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
@@ -58,10 +55,10 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${netprefix}lightningd.service
+
 sudo systemctl daemon-reload
 sudo systemctl enable ${netprefix}lightningd
 echo "# Enabled the ${netprefix}lightningd.service"
-if [ "${state}" == "ready" ]; then
-  sudo systemctl start ${netprefix}lightningd
-  echo "# Started the ${netprefix}lightningd.service"
-fi
+
+sudo systemctl start ${netprefix}lightningd
+echo "# Started the ${netprefix}lightningd.service"
