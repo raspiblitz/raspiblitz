@@ -40,7 +40,7 @@ if [ ! -f ${blitzConfig} ]; then
 fi
 
 # check if cln config file exists
-if [ ! -f ${clnConfig} ]; then
+if sudo ls ${clnConfig}; then
  echo "FAIL - missing ${clnConfig}"
  exit 1
 fi

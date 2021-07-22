@@ -144,6 +144,11 @@ function decryptHSMsecret() {
 ########### 
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
+  # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
+  if ! sudo ls  /home/bitcoin/.lightning/bitcoin; then
+    sudo -u bitcoin mkdir -p /home/bitcoin/.lightning/bitcoin/
+  fi
+
   # check/delete existing wallet
   if [ "$1" = "new-force" ] || [ "$1" = "seed-force" ]; then
     echo "# deleting any old wallet ..."

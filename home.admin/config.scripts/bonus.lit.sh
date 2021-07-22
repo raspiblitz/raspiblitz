@@ -30,7 +30,7 @@ fi
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat ${SERVICES_DATA_DIR}/lit/hostname 2>/dev/null)
   fingerprint=$(sudo openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -383,3 +383,7 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
+<<<<<<< HEAD
+=======
+  
+>>>>>>> upstream/pre-1.7.1

@@ -33,7 +33,7 @@ This can take multiple hours.
   fi
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat ${SERVICES_DATA_DIR}/mempool/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
