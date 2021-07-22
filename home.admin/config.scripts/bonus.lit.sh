@@ -383,7 +383,3 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-<<<<<<< HEAD
-=======
-  
->>>>>>> upstream/pre-1.7.1
