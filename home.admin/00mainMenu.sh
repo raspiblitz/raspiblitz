@@ -185,9 +185,12 @@ fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
-OPTIONS+=(LND "LND Wallet Options")
 
-if [ "$cln" == "on" ]||[ $chain = test ]&&[ "$tcln" == "on" ]; then
+if [ "${lightning}" == "lnd" ]
+  OPTIONS+=(LND "LND Wallet Options")
+fi
+
+if [ "$cln" == "on" ] || [ $chain = test ] && [ "$tcln" == "on" ]; then
   OPTIONS+=(CLN "C-lightning Wallet Options")
   HEIGHT=$((HEIGHT+1))
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
