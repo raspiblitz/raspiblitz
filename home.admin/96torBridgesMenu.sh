@@ -48,7 +48,7 @@ j=0
 ######## FUNCTIONS ########
 
 # include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 # This function imports the configuration and makes some preparations
 read_config(){

@@ -29,7 +29,7 @@
 # Hopefully, this way the scripts stay short and clear.
 #
 # SYNTAX
-# . _tor.commands.sh
+# . config.scripts/tor.functions.lib
 #
 ##### SET VARIABLES ######
 #

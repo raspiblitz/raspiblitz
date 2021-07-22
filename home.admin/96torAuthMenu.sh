@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 # services default values
 if [ ${#sshTor} -eq 0 ]; then sshTor="off"; fi

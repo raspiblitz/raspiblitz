@@ -8,7 +8,7 @@
 # function: install keys & sources
 
 #include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 METHOD=$1
 if [ "${METHOD}" == "onion" ]; then
