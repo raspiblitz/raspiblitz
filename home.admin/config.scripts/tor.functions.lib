@@ -72,7 +72,7 @@ ROOT_TORRC="/etc/tor"
 TORRC="${ROOT_TORRC}/torrc"
 ROOT_DATA_DIR="/var/lib" #"/mnt/hdd"
 DATA_DIR="${ROOT_DATA_DIR}/tor"
-SERVICES_DATA_DIR="${DATA_DIR}/services"
+SERVICES_DATA_DIR="${DATA_DIR}"
 USER_DIR="/home/${USER}"
 SCRIPTS_DIR="${USER_DIR}/config.scripts"
 ONION_SERVICE_SCRIPT="${SCRIPTS_DIR}/tor.onion-service.sh"
@@ -175,6 +175,7 @@ restarting_tor()
   elif [ "${ACTION}" == "" ]; then
     echo -e "${RED}[+] Reloading tor!${NOCOLOR}"
     sudo pkill -sighup tor &
+    #sudo systemctl reload-or-restart tor@default ## reload if active, if failed or stopped, will restart
     echo -e "${RED}[+] DONE! Checking progress - please be patient!${NOCOLOR}"
     echo -e "   Received reload signal (hup). Reloading config and resetting internal state!"
   fi
