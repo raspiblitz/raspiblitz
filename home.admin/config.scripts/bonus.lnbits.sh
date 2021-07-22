@@ -14,7 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 #include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 # show info menu
 if [ "$1" = "menu" ]; then

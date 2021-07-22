@@ -46,7 +46,7 @@ fi
 
 
 # include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 if [ "${runBehindTor}" != "on" ]; then
   echo "ERROR: Tor is not configured"

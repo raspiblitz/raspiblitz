@@ -19,7 +19,7 @@ if [ $PGPsigner=guggero ];then
 fi
 
 #include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 # add default value to raspi config if needed
 if ! grep -Eq "^lit=" /mnt/hdd/raspiblitz.conf; then

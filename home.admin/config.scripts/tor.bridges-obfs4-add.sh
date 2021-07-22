@@ -31,7 +31,7 @@
 ######## FUNCTIONS ########
 
 # include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 ###### SET VARIABLES ######
 

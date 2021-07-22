@@ -12,7 +12,7 @@ fi
 sudo apt-get install -y qrencode 1>/dev/null 2>/dev/null
 
 #include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 #### PARAMETER
 

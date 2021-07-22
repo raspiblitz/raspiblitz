@@ -4,7 +4,7 @@ RTLVERSION="v0.11.0"
 # check and load raspiblitz config
 # to know which network is running
 #include lib
-. /home/admin/_tor.commands.sh
+. /home/admin/config.scripts/tor.functions.lib
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
