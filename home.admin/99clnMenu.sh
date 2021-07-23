@@ -60,27 +60,43 @@ case $CHOICE in
   SUMMARY)
       clear
       /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   PEERING)
       /home/admin/BBconnectPeer.sh cln $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   FUNDING)
       /home/admin/BBfundWallet.sh cln $CHAIN
+       echo "Press ENTER to return to main menu."
+      read key
       ;;
   CASHOUT)
       /home/admin/BBcashoutWallet.sh cln $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   CHANNEL)
       /home/admin/BBopenChannel.sh cln $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   SEND)
       /home/admin/BBpayInvoice.sh cln $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   RECEIVE)
       /home/admin/BBcreateInvoice.sh cln $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   NAME)
       sudo /home/admin/config.scripts/cln.setname.sh $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   SUEZ)
       clear
