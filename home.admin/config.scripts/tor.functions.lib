@@ -31,6 +31,9 @@
 # SYNTAX
 # . config.scripts/tor.functions.lib
 #
+# LAST TorBox commit applied
+# https://github.com/radio24/TorBox/commit/2ce64182537adf615d1bb8026d058ee9af88bc74
+
 ##### SET VARIABLES ######
 #
 #Set the the variables for the menu
