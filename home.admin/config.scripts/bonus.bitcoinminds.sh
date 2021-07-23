@@ -22,7 +22,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " BitcoinMinds.org Info" --msgbox "
-This service downloads both the website and the Bitcoin resources from its repository and runs a local server. This allows you to access the content from your local network.
+This service downloads the full BitcoinMinds.org website in your Raspiblitz, so you can access its interface and Bitcoin resources from your local network, regardless of the internet connection.
 Use the command 'bm' from the console to start the server.
 " 11 78
   exit 0

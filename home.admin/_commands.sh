@@ -277,7 +277,7 @@ function notifyme() {
 
 # command: bm
 # switch to the bitcoinminds user for the 'BitcoinMinds.org' in your local environment
-function pb() {
+function bm() {
   if [ $(grep -c "bitcoinminds=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo ""
     echo "# ***"
