@@ -721,7 +721,11 @@ fi
 # MAKE SURE SERVICES ARE RUNNING
 echo "Make sure main services are running .." >> ${logFile}
 sudo systemctl start ${network}d
-sudo systemctl start lnd
+if [ "${lightning}" == "lnd" ];then
+  sudo systemctl start lnd
+elif [ "${lightning}" == "cln" ];then
+  sudo systemctl start lightningd
+fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5
