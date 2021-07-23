@@ -58,6 +58,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   SUMMARY)
+      clear
       /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
       ;;
   PEERING)
