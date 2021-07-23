@@ -43,7 +43,7 @@ OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
-OPTIONS+=(v 'BitcoinMinds.org Local Environment' ${bitcoinminds})
+OPTIONS+=(v 'BitcoinMinds.org in Local' ${bitcoinminds})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -433,11 +433,11 @@ else
   echo "Whitepaper setting unchanged."
 fi
 
-# Bitcoin Minds process choice
+# BitcoinMinds process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${bitcoinminds}" != "${choice}" ]; then
-  echo "Bitcoin Minds setting changed."
+  echo "BitcoinMinds setting changed."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh ${choice}
   source /mnt/hdd/raspiblitz.conf
@@ -445,7 +445,7 @@ if [ "${bitcoinminds}" != "${choice}" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh menu
   fi
 else
-  echo "Bitcoin Minds setting unchanged."
+  echo "BitcoinMinds setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

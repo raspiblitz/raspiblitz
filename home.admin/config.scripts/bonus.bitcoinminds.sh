@@ -22,8 +22,8 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " BitcoinMinds.org Info" --msgbox "
-This service downloads the website and Bitcoin resources from its repository and runs a local 
-server, which allows you to access the content from your local network
+This service downloads both the website and the Bitcoin resources from its repository and runs a local server. This allows you to access the content from your local network.
+Use the command 'bm' from the console to start the server.
 " 11 78
   exit 0
 fi
@@ -53,12 +53,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# ***"
     echo ""
     sudo -u bitcoinminds git clone https://github.com/raulcano/bitcoinminds.git 2>/dev/null
+
+    echo ""
+    echo "# ***"
+    echo "# Installing packages ..."
+    echo "# ***"
+    echo ""
     cd /home/bitcoinminds/bitcoinminds/bitcoinminds-ui
     sudo -u bitcoinminds npm install
 
     echo ""
     echo "# ***"
-    echo "# Setting the autostart script for bitcoinminds"
+    echo "# Setting the autostart script for user bitcoinminds"
     echo "# ***"
     echo "
 cd /home/bitcoinminds/bitcoinminds/bitcoinminds-ui
@@ -71,7 +77,7 @@ npm run serve
    
     echo ""
     echo "# ***"
-    echo "# OK - Bitcoin Minds installed. Type 'bm' in the console to start the environment."
+    echo "# OK - BitcoinMinds installed. Type 'bm' in the console to start the environment."
     echo "# ***"
     echo ""
 
@@ -85,7 +91,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     
     echo ""
     echo "# ***"
-    echo "# Removing Bitcoin Minds..."
+    echo "# Removing BitcoinMinds..."
     echo "# ***"
     echo ""
     # setting value in raspi blitz config
@@ -96,11 +102,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     echo ""
     echo "# ***"
-    echo "# OK - Bitcoin Minds removed."
+    echo "# OK - BitcoinMinds removed."
     echo "# ***"
     echo ""
   else
-    echo "# Bitcoin Minds has not been installed yet."
+    echo "# BitcoinMinds has not been installed yet."
   fi
   exit 0
 fi
