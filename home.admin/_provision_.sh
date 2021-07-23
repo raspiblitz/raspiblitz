@@ -149,13 +149,10 @@ sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&
 sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
-sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
-sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-
 sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
+
 
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
