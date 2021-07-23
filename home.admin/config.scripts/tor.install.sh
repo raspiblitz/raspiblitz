@@ -259,10 +259,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo pip3 -r install ${USER_DIR}/tor.requirements.txt
 
   # install package just in case it was deinstalled
-  packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
-  if [ ${packageInstalled} -eq 0 ]; then
-    sudo apt install tor nyx torsocks -y
-  fi
+  sudo apt install tor nyx torsocks -y
 
   # create tor data directory if it not exist
   if [ ! -d "${DATA_DIR}" ]; then

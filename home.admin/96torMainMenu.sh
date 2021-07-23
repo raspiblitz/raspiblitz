@@ -244,7 +244,7 @@ case $CHOICE in
 
   # Counter measure
   CHANGE_CIRCUIT)
-    sudo -u ${OWNER_TOR_DATA_DIR} tor-prompt --run 'SIGNAL NEWNYM' -i 9051
+    sudo -u ${OWNER_TOR_DATA_DIR} tor-prompt --run 'SIGNAL NEWNYM'
     whiptail --msgbox "Done !!! Using new circuit" 10 30
     #trap "bash 96torMainMenu.sh; exit 0" SIGINT
     #sudo bash tor.newnym.sh

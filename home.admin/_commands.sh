@@ -115,9 +115,35 @@ function manage() {
   fi
 }
 
+# command: newnym
+function newnym(){
+  if [ "$(cat /home/joinmarket/joinin.conf 2>/dev/null | grep -c "runBehindTor=on")" -eq 1 ]; then
+    echo "# Changing Tor circuits..."
+    echo "# Savind old ID..."
+    oldID=$(curl --connect-timeout 15 --socks5-hostname 127.0.0.1:9050 ifconfig.me 2>/dev/null)
+    echo "# Requesting new identity ..."
+    sudo -u debian-tor tor-prompt --run 'SIGNAL NEWNYM'
+    sleep 3
+    echo "# Savind new ID..."
+    newID=$(curl --connect-timeout 15 --socks5-hostname 127.0.0.1:9050 ifconfig.me 2>/dev/null)
+    echo
+    if [ ${oldID} = ${newID} ]; then
+      echo "# !!! FAIL: Identity did not change. Read error message above."
+      echo "# Exiting for precaution."
+      exit 0
+    else
+      echo "# !!! SUCCESS"
+      echo "# Old id: " ${oldID}
+      echo "# New id: " ${newID}
+    fi
+  else
+    echo "# Not running behind Tor"
+  fi
+
 # command: torthistx
 function torthistx() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
+    newnym
     echo "Broadcasting transaction through Tor to Blockstreams API and into the network."
     curl --socks5-hostname localhost:9050 -d $1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx
   else

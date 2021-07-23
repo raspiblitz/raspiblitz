@@ -321,8 +321,7 @@ if [ "${1}" == "vanguards" ]; then
     echo "Installing necessary packages..."
     sudo -u ${OWNER_TOR_DATA_DIR} git clone https://github.com/mikeperry-tor/vanguards
     cd vanguards || exit 1
-    # latest commit in https://github.com/mikeperry-tor/vanguards
-    COMMITHASH=1 # TODO, set commit hash
+    COMMITHASH=10942de
     sudo -u ${OWNER_TOR_DATA_DIR} reset --hard ${COMMITHASH} || exit 1
     sudo mv vanguards ${DATA_DIR}/
     set_owner_permission
