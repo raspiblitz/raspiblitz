@@ -714,11 +714,29 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 
 If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
 
+## How to circumvent censorship
+
+Get familiarized with the Tor menu, plenty of configuration are set there and is easy to be used with informational texts.
+
+Fist, go to the Tor menu:
+
+* Through the Tor menu
+  * menu > tor > ssh over Tor
+
+* Read the options to circumvent censorship.
+  * Bridges
+  * Tor over VPN
+  * Bypass idle feature
+
+* The best, most secure and anoymous way of circumvention is using native Tor transports, such as bridges with pluggable transport. You can use 3 types of Bridges with PB in RasbiBlitz: obfs4, meek-azure and snowflake. Choose the optional that fits you after reading the Bridges readme through the menu.
+
+
 ## How to SSH over Tor?
 
 SSH is already encrypted, why would I want to use it with Tor?
 * Remote access when away from LAN.
 * Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
+* You can also create a hidden service for SSH using the Tor menu.
 
 Create Hidden Service:
 `bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`

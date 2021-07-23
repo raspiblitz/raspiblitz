@@ -183,48 +183,6 @@ echo "Building RaspiBlitz ..."
 echo ""
 sleep 3
 
-# INSTALL TOR
-echo "*** INSTALL TOR BY DEFAULT ***"
-echo ""
-sudo apt install -y dirmngr
-echo "*** Adding KEYS deb.torproject.org ***"
-# fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
-wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
-sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
-if [ ${torKeyAvailable} -eq 0 ]; then
-  echo "!!! FAIL: Was not able to import deb.torproject.org key"
-  exit 1
-fi
-echo "- OK key added"
-
-echo "*** Adding Tor Sources to sources.list ***"
-torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
-echo "torSourceListAvailable=${torSourceListAvailable}"  
-if [ ${torSourceListAvailable} -eq 0 ]; then
-  echo "- adding TOR sources ..."
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "- using https://deb.torproject.org/torproject.org buster"
-    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-  elif [ "${baseimage}" = "ubuntu" ]; then
-    echo "- using https://deb.torproject.org/torproject.org focal"
-    echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
-  else
-    echo "!!! FAIL: No Tor sources for os: ${baseimage}"
-    exit 1
-  fi
-  echo "- OK sources added"
-else
-  echo "TOR sources are available"
-fi
-
-echo "*** Install & Enable Tor ***"
-sudo apt update
-sudo apt install tor tor-arm torsocks -y
-echo ""
-
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
