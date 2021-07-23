@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Background:
 # https://medium.com/@lopp/how-to-run-bitcoin-as-a-tor-hidden-service-on-ubuntu-cff52d543756
 # https://bitcoin.stackexchange.com/questions/70069/how-can-i-setup-bitcoin-to-be-anonymous-with-tor
@@ -105,17 +106,6 @@ activateLndOverTor()
     echo "# LND service not found (yet) - try with 'tor.on.sh lndconf-on' again later"
   fi
 }
-
-
-# check and load raspiblitz config
-# to know which network is running
-if [ -f "${INFO}" ]; then
-  source ${INFO}
-fi
-
-if [ -f "${CONF}" ]; then
-  source ${CONF}
-fi
 
 torRunning=$(sudo systemctl --no-pager status tor@default | grep -c "Active: active")
 torFunctional=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
@@ -333,6 +323,36 @@ EOF
   echo "*** Enable Tor Service ***"
   sudo systemctl daemon-reload
   sudo systemctl enable tor@default
+  echo ""
+
+  # INSTALL TOR
+  echo "*** Adding KEYS Tor Project Organization keys for Debian packages ***"
+  torsocks wget -qO- ${SOURCES_TOR_UPDATE_ONION}/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+  sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+  torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
+  if [ ${torKeyAvailable} -eq 0 ]; then
+    echo "!!! FAIL: Was not able to import Tor Project Organization keys for Debian packages "
+    exit 1
+  fi
+  echo "- OK key added"
+
+  echo "*** Adding Tor Sources to sources.list ***"
+  torSourceListAvailable=$(sudo grep -c 'torproject.org' /etc/apt/sources.list.d/tor.list)
+  echo "torSourceListAvailable=${torSourceListAvailable}"  
+  if [ ${torSourceListAvailable} -eq 0 ]; then
+    echo "- adding TOR sources ..."
+      echo "- using: deb [arch=arm64] ${SOURCES_TOR_UPDATE_ONION}torproject.org ${DISTRIBUTION} main"
+      echo "deb [arch=arm64] ${SOURCES_TOR_UPDATE_ONION}torproject.org ${DISTRIBUTION} main" | sudo tee -a /etc/apt/sources.list.d/tor.list
+      echo "deb-src [arch=arm64] ${SOURCES_TOR_UPDATE_ONION}torproject.org ${DISTRIBUTION} main" | sudo tee -a /etc/apt/sources.list.d/tor.list
+    fi
+    echo "- OK sources added"
+  else
+    echo "Tor sources are available"
+  fi
+
+  echo "*** Install & Enable Tor ***"
+  sudo apt update
+  sudo apt install -y tor nyx torsocks obfs4proxy
   echo ""
 
   # ACTIVATE BITCOIN OVER Tor (function call)
