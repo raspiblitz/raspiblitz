@@ -624,7 +624,7 @@ After install, you will see a new `LIT` option in the SSH main menu - it will gi
 
 ![BTCPAY](pictures/btcpay.png)
 
-Find all details on how to use the BTCPay Server on your RaspiBlitz in this great tutorial: https://coincharge.io/en/raspiblitz-btcpay-server/
+Find all details on how to use the BTCPay Server on your RaspiBlitz in this great tutorial: https://coincharge.io/en/btcpay-server-on-the-raspiblitz/
 
 After install, you will see a new `BTCPAY` option in the SSH main menu - it will give you all the information you need to start using it.
 
