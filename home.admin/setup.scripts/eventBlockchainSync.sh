@@ -71,7 +71,7 @@ do
     elif [ "${lightning}" == "cln" ]; then
        # if CLN is active 
        # TODO: show a scan progress of C-Lightning
-       infoStr="${infoStr} \n ${actionString}"
+        infoStr="${infoStr} Lightning Progress  : TODO\n ${actionString}"
     else
        # if lightning is deactivated (leave line clear)
        infoStr="${infoStr} \n ${actionString}"
