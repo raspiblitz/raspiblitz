@@ -65,10 +65,10 @@ do
     # setting info string
     infoStr=" Blockchain Progress : ${syncProgress}\n"
     
-    if [ "${lightning}" != "lnd" ]; then
+    if [ "${lightning}" == "lnd" ]; then
        # if LND is active 
        infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
-    elif [ "${lightning}" != "cln" ]; then
+    elif [ "${lightning}" == "cln" ]; then
        # if CLN is active 
        # TODO: show a scan progress of C-Lightning
        infoStr="${infoStr} \n ${actionString}"
