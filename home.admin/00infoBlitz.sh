@@ -430,7 +430,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
   fi
 
 if [ "${lightning}" == "cln" ];then
-  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
+  LNline="C-LIGHTNING ${color_green}${ln_version}\n${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ];then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
