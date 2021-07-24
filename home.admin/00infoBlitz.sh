@@ -330,7 +330,7 @@ if [ "${lightning}" == "cln" ]; then
      cln_num_pending_channels="$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')" 2>/dev/null
      cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
      ln_channels_total=$((ln_channels_online+cln_num_pending_channels+cln_num_inactive_channels))
-     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
+     ln_baseInfo="${color_gray}Wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
@@ -395,7 +395,7 @@ elif [ "${lightning}" == "lnd" ];then
      if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
      ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
      ln_channels_total="$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert listchannels | jq '.[] | length')" 2>/dev/null
-     ln_baseInfo="${color_gray}Wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
+     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_walletbalance_wait}"
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
@@ -430,7 +430,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
   fi
 
 if [ "${lightning}" == "cln" ];then
-  LNline="C-LIGHTNING ${color_green}${ln_version}\n              ${ln_baseInfo}"
+  LNline="C-LIGHTNING ${color_green}${ln_version}\n               ${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ];then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
