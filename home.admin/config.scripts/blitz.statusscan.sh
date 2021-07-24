@@ -273,7 +273,7 @@ clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep 
 echo "clnActive=${clnRunning}"
 if [ ${clnRunning} -eq 1 ]; then
 
-  clnInfo=$(${netprefix}lightning-cli getinfo)
+  clnInfo=$(sudo -u bitcoin lightning-cli getinfo)
   clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
   echo "clnBlockHeight=${clnBlockHeight}"
   echo "# TODO: cln status statistics"
