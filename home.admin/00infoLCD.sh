@@ -102,9 +102,9 @@ while :
     fi
 
     # TODO: ALSO SEPERATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
-    # if LND is syncing or scanning
-    lndSynced=$($lncli_alias getinfo 2>/dev/null | jq -r '.synced_to_chain' | grep -c true)
-    if [ ${lndSynced} -eq 0 ]; then
+    # if lightning is syncing or scanning
+    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+    if [ "${syncedToChain}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 10
       continue
