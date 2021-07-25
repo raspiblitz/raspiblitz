@@ -160,9 +160,9 @@ fi
 webinterfaceInfo=""
 runningRTL=$(systemctl status ${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c active)
 if [ ${runningRTL} -eq 1 ]; then
-  if [ ${LNTYPE} = "cln" ]; then
+  if [ "${lightning}" == "cln" ]; then
     RTLHTTP=${portprefix}7000
-  elif [ ${LNTYPE} = "lnd" ];then
+  elif [ "${lightning}" == "lnd" ];then
     RTLHTTP=${portprefix}3000
   fi
   webinterfaceInfo="Web admin --> ${color_green}http://${local_ip}:${RTLHTTP}"
@@ -232,7 +232,7 @@ else
 fi
 
 # LIGHTNING NETWORK
-if [ ${LNTYPE} = "cln" ]; then
+if [ "${lightning}" == "cln" ]; then
  ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
  ln_baseInfo="-"
  ln_channelInfo="\n"
@@ -330,7 +330,7 @@ if [ ${LNTYPE} = "cln" ]; then
      cln_num_pending_channels="$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')" 2>/dev/null
      cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
      ln_channels_total=$((ln_channels_online+cln_num_pending_channels+cln_num_inactive_channels))
-     ln_baseInfo="${color_gray}wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
+     ln_baseInfo="${color_gray}Wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
      ln_peers="$(echo "${ln_getInfo}" | jq -r '.num_peers')" 2>/dev/null
      ln_channelInfo="${ln_channels_online}/${ln_channels_total} Channels ${ln_channelbalance} ${netprefix}sat${ln_channelbalance_pending}"
      ln_peersInfo="${color_green}${ln_peers} ${color_gray}peers"
@@ -343,7 +343,7 @@ if [ ${LNTYPE} = "cln" ]; then
    fi
  fi
 
-elif [ ${LNTYPE} = "lnd" ];then
+elif [ "${lightning}" == "lnd" ];then
  ln_baseInfo="-"
  ln_channelInfo="\n"
  ln_external="\n"
@@ -429,9 +429,9 @@ ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
   fi
 
-if [ $LNTYPE = "cln" ];then
-  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
-elif [ $LNTYPE = "lnd" ];then
+if [ "${lightning}" == "cln" ];then
+  LNline="C-LIGHTNING ${color_green}${ln_version}\n               ${ln_baseInfo}"
+elif [ "${lightning}"  == "lnd" ];then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
 

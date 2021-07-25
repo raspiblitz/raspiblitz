@@ -73,7 +73,7 @@ if [ "${network}" == "bitcoin" ]; then
             lightning="cln"
             ;;
         NONE)
-            lightning=""
+            lightning="none"
             ;;
         *)
             clear
