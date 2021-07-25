@@ -12,7 +12,7 @@
 # vanguards --> use vanguards to protect from attacks to the service
 # credentials --> see your service credentials
 
-# TODO <OPTIONAL> [REQUIRED]
+# TODO(nyxnor) <OPTIONAL> [REQUIRED]
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Configure an Onion Service"
@@ -324,6 +324,7 @@ if [ "${1}" == "vanguards" ]; then
     COMMITHASH=10942de
     sudo -u ${OWNER_TOR_DATA_DIR} reset --hard ${COMMITHASH} || exit 1
     sudo mv vanguards ${DATA_DIR}/
+    sudo cp ${DATA_DIR}/vanguards/vanguards-example.conf ${DATA_DIR}/vanguards/vanguards.conf
     set_owner_permission
     sudo apt install -y python3-stem #python-stem vanguards
     echo "Done"
@@ -356,7 +357,7 @@ After=network.target nss-lookup.target mnt-hdd.mount
 [Service]
 WorkingDirectory=${DATA_DIR}/vanguards
 ExecStart=/usr/bin/python3 src/vanguards.py --control_port ${CONTROL_PORT}
-Environment=VANGUARDS_CONFIG=${ROOT_TORRC}/vanguards.conf
+Environment=VANGUARDS_CONFIG=${DATA_DIR}/vanguards/vanguards.conf
 User=${OWNER_DATA_DIR}
 Group=${OWNER_DATA_DIR}
 Type=simple
