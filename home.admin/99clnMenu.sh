@@ -58,7 +58,10 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   SUMMARY)
+      clear
       /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   PEERING)
       /home/admin/BBconnectPeer.sh cln $CHAIN
@@ -86,7 +89,7 @@ case $CHOICE in
       if [ ! -f /home/bitcoin/suez/suez ];then
         /home/admin/config.scripts/bonus.suez.sh on
       fi
-      cd /home/bitcoin/suez || exit 1 
+      cd /home/bitcoin/suez || exit 0 
       sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
         --client=c-lightning \
         --client-args=--conf=/home/bitcoin/.lightning/${netprefix}config
@@ -110,3 +113,5 @@ case $CHOICE in
       read key
       ;;
 esac
+
+exit 0

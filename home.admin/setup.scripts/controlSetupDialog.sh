@@ -234,7 +234,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
     lightningWalletDone=0
     source ${SETUPFILE}
-    if [ "${lightning}" == "" ]; then lightningWalletDone=1; fi 
+    if [ "${lightning}" == "none" ]; then lightningWalletDone=1; fi 
     while [ "${lightningWalletDone}" == "0" ]
     do
 

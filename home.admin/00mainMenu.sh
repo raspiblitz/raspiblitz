@@ -185,13 +185,24 @@ fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
-OPTIONS+=(LND "LND Wallet Options")
 
-if [ "$cln" == "on" ]||[ $chain = test ]&&[ "$tcln" == "on" ]; then
-  OPTIONS+=(CLN "C-lightning Wallet Options")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+# if LND is main lightning
+if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(LND "LND Wallet Options")
 fi
+
+# if C-Lighthing is main lightning
+if [ "${lightning}" == "cln" ]; then
+# if CLN is main lightning
+  OPTIONS+=(CLN "C-lightning Wallet Options")
+fi
+
+# TODO: when more then one Lightning is active
+#if [ "$cln" == "on" ] || [ $chain = test ] && [ "$tcln" == "on" ]; then
+#  OPTIONS+=(CLN "C-lightning Wallet Options")
+#  HEIGHT=$((HEIGHT+1))
+#  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+#fi
 
 OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")

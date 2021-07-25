@@ -269,10 +269,19 @@ if [ ${lndRunning} -eq 1 ]; then
 fi
 
 # is CLN running
-clnRunning=$(systemctl status ${netprefix}cln.service 2>/dev/null | grep -c running)
+clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
 echo "clnActive=${clnRunning}"
 if [ ${clnRunning} -eq 1 ]; then
-  echo "# TODO: cln status statistics"
+  clnInfo=$(sudo -u bitcoin lightning-cli getinfo)
+  clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
+  scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)
+  echo "scanProgress=${scanProgress}"
+  clnBlockHeightPlusOne=$(expr $clnBlockHeight + 1)
+  if [ "${total}" == "${clnBlockHeight}" ] || [ "${total}" == "${clnBlockHeightPlusOne}" ]; then
+      echo "syncedToChain=1"
+  else
+      echo "syncedToChain=0"
+  fi
 fi
 
 # touchscreen statistics
