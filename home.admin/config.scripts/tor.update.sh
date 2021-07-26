@@ -1,109 +1,122 @@
 #!/bin/bash
 
-# 1 apt|git
-# 2 apt normal|source
-# 3 git normal|custom
-
-# TODO change this, you know what to do
-# this is wrong, need to finish this ASAP
-# function: install keys & sources
-
 #include lib
 . /home/admin/config.scripts/tor.functions.lib
 
-# Release Page of the Unofficial Tor repositories on GitHub
+# URLS
 TORURL="https://github.com/torproject/tor/releases"
+TORURL_DL_PARTIAL="https://github.com/torproject/tor/archive/refs/tags/tor"
 
-METHOD=$1
-if [ "${METHOD}" == "onion" ]; then
-  #check if tor is working, if not, plain
-  SOURCES=${SOURCES_TOR_UPDATE_ONION}
-else
-  SOURCES=${SOURCES_TOR_UPDATE_PLAIN}
-fi
+#Other variables
+LOOP_NUMBER=0
+RECOMPILE=0
+i=0
+n=0
+UPDATE_MODE=${1}
 
-# this makes sense to be used if the onion service changes domain.
-prepareTorSources(){
+###### DISPLAY THE MENU ######
+clear
 
-    # Prepare for Tor service
-    echo "*** INSTALL Tor REPO ***"
-    echo ""
+# BASIC MENU INFO
+HEIGHT=13 # add 6 to CHOICE_HEIGHT + MENU lines
+WIDTH=75
+BACKTITLE="Raspiblitz ${BRIDGESTRING}"
+TITLE=" Tor Update Methods "
+MENU=""    # adds lines to HEIGHT
+OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
+OPTIONS+=(APT_UPDATE "Update tor packages")
+OPTIONS+=(APT_SOURCE "Build tor from source repo")
+OPTIONS+=(GIT_SOURCE "Build tor from source git repo")
 
-    echo "*** Adding KEYS deb.torproject.org ***"
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}" / 3))
 
-    # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
-    # force update keys
-    wget -qO- ${SOURCES}/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
-    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --ok-label "Select" \
+                --cancel-label "Main menu" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
 
-    torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
-    echo "torKeyAvailable=${torKeyAvailable}"
-    if [ ${torKeyAvailable} -eq 0 ]; then
-      wget -qO- ${SOURCES}/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
-      sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-      echo "OK"
-    else
-      echo "Tor key is available"
-    fi
-    echo ""
+case $CHOICE in
 
-    if [ ! -f "/etc/apt/sources.list.d/tor.list" ]; then
-      echo "*** Adding Tor Sources ***"
-      echo "deb [arch=arm64] ${SOURCES}/torproject.org ${DISTRIBUTION} main" | sudo tee -a /etc/apt/sources.list.d/tor.list
-      echo "deb-src [arch=arm64] ${SOURCES}/torproject.org ${DISTRIBUTION} main" | sudo tee -a /etc/apt/sources.list.d/tor.list
-      echo "OK"
-    else
-      echo "Tor sources are available"
-    fi
-    echo ""
-}
-
-
-if [ "${2}" == "apt" ]; then
-
-  if [ "${3}" == "normal" ]; then
+  APT_UPDATE)
     sudo apt update -y
-    sudo apt install tor torsocks nyx obfsp4proxy
-  fi
+    sudo apt install $TOR_PKGS
+  ;;
 
-  if [ "${4}" == "source" ]; then
-    # as in https://2019.www.torproject.org/docs/debian#source
-    echo "# Install the dependencies"
-    sudo apt update
-    sudo apt install -y build-essential fakeroot devscripts
-    sudo apt build-dep -y tor deb.torproject.org-keyring
-    rm -rf ${USER_DIR}/download/debian-packages
-    mkdir -p ${USER_DIR}/download/debian-packages
-    cd ${USER_DIR}/download/debian-packages
-    echo "# Building Tor from the source code ..."
-    apt source tor
-    cd tor-*
-    debuild -rfakeroot -uc -us
-    cd ..
-    echo "# Stopping the tor.service before updating"
-    sudo systemctl stop tor
-    echo "# Update ..."
-    sudo dpkg -i tor_*.deb
-    echo "# Starting the tor.service "
-    sudo systemctl start tor
-    echo "# Installed $(tor --version)"
-    if [ $(systemctl status lnd | grep -c "active (running)") -gt 0 ];then
-      echo "# LND needs to restart"
+  APT_SOURCE)
+    clear
+    if [ -d ~/debian-packages ]; then sudo rm -r ~/debian-packages; fi
+    mkdir ~/debian-packages; cd ~/debian-packages
+    sudo apt-get -y update
+    sudo apt source tor
+    KERNEL_VERS=$(uname -s -r)
+    TOR_VERS=$(tor --version|head -n 1|rev|cut -c2-|rev|cut -d " " -f3)
+    SOURCE_VERS_NUMBER=$(ls -l|grep "^d"|grep -o "tor.*"|cut -d " " -f11-|sed s/tor-//g|sed s/.orig//g)
+    clear
+    if [ "$SOURCE_VERS_NUMBER" == "$TOR_VERS" ]; then
+      INPUT="\nThis are the versions of your current base system:\nKernel: $KERNEL_VERS\nTor:    $TOR_VERS (newest stable version!)\n\nThere is no new stable version of Tor around!\nWould you like to recompile Tor anyway?"
+      if (whiptail --defaultno --yesno "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX); then
+        RECOMPILE=1
+      else
+        RECOMPILE=0
+      fi
+    elif [ -z "$SOURCE_VERS_NUMBER" ]; then
+      INPUT="\nThis are the versions of your current base system:\nKernel: $KERNEL_VERS\nTor:    $TOR_VERS\n\nHowever, something went wrong! I couldn't download the Tor package. You may try it later or manually !!"
+      whiptail --title "Tor - INFO" --msgbox "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
+      RECOMPILE=0
+    else
+      if [ $LOOP_NUMBER = 1 ]; then
+        INPUT="\nThis are the versions of your current base system:\nKernel: $KERNEL_VERS\nTor:    $TOR_VERS\n\nWould you like to change/update to Tor version $SOURCE_VERS_NUMBER?"
+        if (whiptail --defaultno --yesno "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH_REDUX); then
+          RECOMPILE=1
+        else
+          RECOMPILE=0
+        fi
+      else
+        RECOMPILE=1
+      fi
+    fi
+    if [ $RECOMPILE = 1 ]; then
+      clear
+      echo -e "${RED}[+] Building Tor from source... ${NOCOLOR}"
+      # as in https://2019.www.torproject.org/docs/debian#source
+      echo "# Install the dependencies"
+      sudo apt update
+      sudo apt install -y build-essential fakeroot devscripts
+      sudo apt build-dep -y tor deb.torproject.org-keyring
+      sudo rm -rf ${USER_DIR}/download/debian-packages
+      mkdir -p ${USER_DIR}/download/debian-packages
+      cd ${USER_DIR}/download/debian-packages
+      echo "# Building Tor from the source code ..."
+      apt source tor
+      cd tor-*
+      debuild -rfakeroot -uc -us
+      cd ..
+      echo "# Stopping the tor@default.service before updating"
+      sudo systemctl stop tor@default
+      echo "# Update ..."
+      sudo dpkg -i tor_*.deb
+      cd
+      sudo rm -rf ${USER_DIR}/download/debian-packages
+      echo "# Starting the tor@default.service "
+      sudo systemctl restart tor@default
+      echo "# Installed $(tor --version)"
       sudo systemctl restart lnd
       sleep 10
+      echo "# Unlock LND wallet:"
       lncli unlock
+      return 1
     fi
+  ;;
 
-fi
-
-if [ "${2}" == "git" ]; then
-
-  # Select, compile and install Tor
-  if [ "$SELECT_TOR" = "--select-tor" ] ; then
-    clear
-    echo -e "${RED}[+]         Fetching possible tor versions... ${NOCOLOR}"
-    readarray -t torversion_datesorted < <(curl --silent $TORURL | grep "/torproject/tor/releases/tag/" | sed -e "s/<a href=\"\/torproject\/tor\/releases\/tag\/tor-//g" | sed -e "s/\">//g")
-
+  GIT_SOURCE)
+    # Release Page of the Unofficial Tor repositories on GitHub
+    echo -e "${RED}[+] Fetching possible tor versions... ${NOCOLOR}"
+    readarray -t torversion_datesorted < <(curl --silent $TORURL | grep "/torproject/tor/releases/tag/" | sed -e "s/<a href=\"\/torproject\/tor\/releases\/tag\/tor-//g" | sed -e "s/\">//g" | grep -v "-")
     #How many tor version did we fetch?
     if [ ${#torversion_datesorted[0]} = 0 ]; then number_torversion=0
     else
@@ -113,9 +126,8 @@ if [ "${2}" == "git" ]; then
       IFS=$'\n' torversion_versionsorted=($(sort -r <<< "${torversion_datesorted[*]}")); unset IFS
 
       #We will build a new array with only the relevant tor versions
-      while [ $i -lt $number_torversion ]
-      do
-        if [ $n = 0 ] ; then
+      while [ $i -lt $number_torversion ]; do
+        if [ $n = 0 ]; then
           torversion_versionsorted_new[0]=${torversion_versionsorted[0]}
           covered_version=$(cut -d '.' -f1-3 <<< ${torversion_versionsorted[0]})
           i=$(( $i + 1 ))
@@ -137,82 +149,58 @@ if [ "${2}" == "git" ]; then
       clear
       echo -e "${WHITE}Choose a tor version (alpha versions are not recommended!):${NOCOLOR}"
       echo ""
-      for (( i=0; i<$number_torversion; i++ ))
-      do
+      for (( i=0; i<$number_torversion; i++ )); do
         menuitem=$(( $i + 1 ))
         echo -e "${RED}$menuitem${NOCOLOR} - ${torversion_versionsorted_new[$i]}"
       done
       echo ""
-      read -r -p $'\e[1;37mWhich tor version (number) would you like to use? -> \e[0m'
+      read -r -p $'\e[1;37mWhich tor version (number) would you like to use (0 = EXIT)? -> \e[0m'
       echo
-      if [[ $REPLY =~ ^[1234567890]$ ]] ; then
-        CHOICE_TOR=$(( $REPLY - 1 ))
-      else number_torversion=0 ; fi
-
-      #Download and install
+      if [[ $REPLY =~ ^[1234567890]$ ]]; then
+        if [ $REPLY = 0 ]; then
+          number_torversion=0
+          return 0
+        else
+          CHOICE_TOR=$(( $REPLY - 1 ))
+          clear
+          echo -e "${RED}[+] Install necessary packages... ${NOCOLOR}"
+          sudo apt-get -y update
+          sudo apt-get -y install automake libevent-dev libssl-dev asciidoc-base
+          echo ""
+          echo -e "${RED}[+] Download the selected tor version...... ${NOCOLOR}"
+          version_string="$(<<< ${torversion_versionsorted_new[$CHOICE_TOR]} sed -e 's/ //g')"
+          download_tor_url="$TORURL_DL_PARTIAL-$version_string.tar.gz"
+          filename="tor-$version_string.tar.gz"
+          if [ -d ~/debian-packages ] ; then sudo rm -r ~/debian-packages ; fi
+          mkdir ~/debian-packages; cd ~/debian-packages
+          wget $download_tor_url
+          DLCHECK=$?
+          clear
+          if [ $DLCHECK -eq 0 ]; then
+            echo -e "${RED}[+] Sucessfully downloaded the selected tor version... ${NOCOLOR}"
+            tar xzf $filename
+            cd `ls -d */`
+            echo -e "${RED}[+] Starting configuring, compiling and installing... ${NOCOLOR}"
+            ./autogen.sh
+            ./configure
+            make
+            sudo make install
+            return 1
+          else number_torversion=0; fi
+        fi
+      else number_torversion=0; fi
+    fi
+    if [ $number_torversion = 0 ]; then
+      echo ""
+      echo -e "${WHITE}[!] Something didn't go as expected or you chose to exit!${NOCOLOR}"
+      echo -e "${WHITE}[!] Try it again or chose the DEFAULT installation procedure!${NOCOLOR}"
       clear
-      echo -e "${RED}[+]         Download the selected tor version...... ${NOCOLOR}"
-      version_string="$(<<< ${torversion_versionsorted_new[$CHOICE_TOR]} sed -e 's/ //g')"
-      download_tor_url="https://github.com/torproject/tor/archive/refs/tags/tor-$version_string.tar.gz"
-      filename="tor-$version_string.tar.gz"
-      mkdir ~/debian-packages; cd ~/debian-packages
-      wget $download_tor_url
-      clear
-      if [ $? -eq 0 ] ; then
-        echo -e "${RED}[+]         Sucessfully downloaded the selected tor version... ${NOCOLOR}"
-        tar xzf $filename
-        cd `ls -d */`
-        #The following packages are needed
-        sudo apt-get -y install automake libevent-dev libssl-dev asciidoc-base
-        echo -e "${RED}[+]         Installing additianal packages... ${NOCOLOR}"
-        clear
-        echo -e "${RED}[+]         Starting configuring, compiling and installing... ${NOCOLOR}"
-        ./autogen.sh
-        ./configure
-        make
-        sudo make install
-        cd
-        sudo rm -r ~/debian-packages
-      else number_torversion=0 ; fi
+      return 0
     fi
-    if [ $number_torversion = 0 ] ; then
-      echo -e "${WHITE}[!]         Something didn't go as expected!${NOCOLOR}"
-      echo -e "${WHITE}[!]         I will try to install the latest stable version.${NOCOLOR}"
-    fi
-  else number_torversion=0 ; fi
+  ;;
 
-  # Compile and install the latest stable Tor version
-  if [ $number_torversion = 0 ] ; then
-    mkdir ~/debian-packages; cd ~/debian-packages
-    apt source tor
-    sudo apt-get -y install fakeroot devscripts
-    #sudo apt-get -y install tor deb.torproject.org-keyring
-    #sudo apt-get -y upgrade tor deb.torproject.org-keyring
-    sudo apt-get -y build-dep tor deb.torproject.org-keyring
-    cd tor-*
-    sudo debuild -rfakeroot -uc -us
-    cd ..
-    sudo dpkg -i tor_*.deb
-    cd
-    sudo rm -r ~/debian-packages
-  fi
+  *)
+    clear
+    exit 0
 
-  if [ "${3}" == "normal" ]||[ "${3}" == "custom" ]; then
-    sudo apt-get install git build-essential automake libevent-dev libssl-dev zlib1g-dev
-    rm -rf ${USER_DIR}/download/debian-packages
-    mkdir -p ${USER_DIR}/download/debian-packages
-    cd ${USER_DIR}/download/debian-packages/
-    #git clone https://git.torproject.org/tor.git
-    git clone https://github.com/torproject/tor/
-    cd tor
-    if [ "${3}" == "custom" ]; then
-      git checkout $TAG
-    fi
-    sudo bash autogen.sh
-    #CPPFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib" \ ./configure
-    sudo bash configure --with-libevent-dir=/usr/local
-    sudo make
-    sudo make install
-  fi
-
-fi
+esac

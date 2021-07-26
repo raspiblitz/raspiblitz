@@ -68,6 +68,8 @@ SOURCES_DEB_UPDATE_PLAIN="https://deb.debian.org/"
 SOURCES_TOR_UPDATE_ONION="http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/"
 SOURCES_TOR_UPDATE_PLAIN="https://deb.torproject.org/"
 
+TOR_PKGS="tor torsocks obfs4proxy nyx apt-transport-tor"
+
 #Other variables
 DEFAULT_CONTROL_PORT=9051
 DEFAULT_SOCKS_PORT=9050

@@ -54,13 +54,6 @@ if [ "${runBehindTor}" != "on" ]; then
   exit 0
 fi
 
-set_owner_permission(){
-  sudo chown -R ${OWNER_TOR_DATA_DIR}:${OWNER_TOR_DATA_DIR} ${DATA_DIR}
-  sudo chown -R ${OWNER_TOR_CONF_DIR}:${OWNER_TOR_CONF_DIR} ${CONF_DIR}
-  sudo chmod 700 ${DATA_DIR}
-  sudo chmod 644 ${TORRC}
-}
-
 if [ "${1}" == "off" ]||[ "${1}" == "on" ]&&[ "${#2}" -gt 0 ]; then
   # add default value to raspi config if needed
   SERVICE=${2}

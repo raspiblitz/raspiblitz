@@ -446,7 +446,7 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.pyblock.sh update
     ;;
   TOR)
-    sudo /home/admin/config.scripts/tor.update.sh update  # TODO adjuts to git
+    sudo /home/admin/config.scripts/tor.update.sh
     ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update

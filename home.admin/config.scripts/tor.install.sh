@@ -248,7 +248,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # https://github.com/radio24/TorBox/blob/master/requirements.txt
   sudo pip3 -r install ${USER_DIR}/tor.requirements.txt
 
-  # TODO: ask if user want to configure Tor Bridges with Pluggable Transport before installin Tor
+  # TODO(nyxnor): ask if user want to configure Tor Bridges with Pluggable Transport before installin Tor
   # will use torrc.sample for default bridges. Bridges configured do not need to be used, user can select or add at will
   
   # install package just in case it was deinstalled
