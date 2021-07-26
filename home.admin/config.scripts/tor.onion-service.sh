@@ -12,12 +12,11 @@
 # vanguards --> use vanguards to protect from attacks to the service
 # credentials --> see your service credentials
 
-# TODO(nyxnor) <OPTIONAL> [REQUIRED]
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Configure an Onion Service"
   echo
-  echo "Usage: tor.onion-service.sh COMMAND <OPTION>"
+  echo "Usage: tor.onion-service.sh <COMMAND> [OPTION]"
   echo
   echo "Option:"
   echo
