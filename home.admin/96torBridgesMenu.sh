@@ -28,30 +28,18 @@
 # SYNTAX
 # ./96torBridgesMenu.sh
 #
-#
-###### SET VARIABLES ######
-#
-# SIZE OF THE MENU
-#
-# How many items do you have in the main menu?
-NO_ITEMS=13
-#
-# How many lines are only for decoration and spaces?
-NO_SPACER=4
-#
-#Set the the variables for the menu
-MENU_HEIGHT=$((8+NO_ITEMS+NO_SPACER))
-MENU_LIST_HEIGHT=$((NO_ITEMS+$NO_SPACER))
-
-#Other variables
-i=0
-j=0
 
 ###########################
 ######## FUNCTIONS ########
 
 # include lib
 . /home/admin/config.scripts/tor.functions.lib
+
+SOURCE_SCRIPT="${USER_DIR}/96torBridgesMenu"
+
+#Other variables
+i=0
+j=0
 
 # This function imports the configuration and makes some preparations
 read_config(){
@@ -110,7 +98,7 @@ case $CHOICE in
 
   # Informational
   README)
-    INPUT=$(cat text/help-bridges-text)
+    INPUT=$(cat ${USER_DIR}/text/help-bridges-text)
     if (whiptail --title "Tor - INFO (scroll down!)" --msgbox --scrolltext "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       clear
     fi
@@ -118,28 +106,28 @@ case $CHOICE in
 
   ACTIVATE)
     if [ "$MODE_MEEK" = "Bridge meek_lite " ] || [ "$MODE_SNOW" = "Bridge snowflake " ]; then
-      whiptail --title "Tor - INFO" --textbox text/no_meek-snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/no_meek-snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
     fi
     if [ $number_configured_bridges_total = 0 ]; then
-      INPUT=$(cat text/add-bridges-first-text)
+      INPUT=$(cat ${USER_DIR}/text/add-bridges-first-text)
       if (whiptail --title "Tor - INFO" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-        sudo bash config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 0
+        sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 0
       else
         deactivate_obfs4_bridges
-        trap "bash 96torBridgesMenu.sh; exit 0" EXIT
+        trap "bash ${USER_DIR}/96torBridgesMenu.sh; exit 0" EXIT
         exit 0
       fi
     fi
     if [ "$MODE_BRIDGES" != "UseBridges 1" ]; then
-      INPUT=$(cat text/activate-bridges-text)
+      INPUT=$(cat ${USER_DIR}/text/activate-bridges-text)
       if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-        sudo bash config.scripts/tor.bridges-obfs4-activate.sh
+        sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-activate.sh
       else
-        trap "bash 96torBridgesMenu.sh; exit 0" EXIT
+        trap "bash ${USER_DIR}/96torBridgesMenu.sh; exit 0" EXIT
         exit 0
       fi
     else
-      sudo bash config.scripts/tor.bridges-obfs4-activate.sh
+      sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-activate.sh
     fi
     read_config
   ;;
@@ -156,9 +144,9 @@ case $CHOICE in
         echo -e "${RED}[+] If you want to use OBFS4 bridges, you have to activate them first.${NOCOLOR}"
         sleep 5
       else
-        INPUT=$(cat text/deactivate-bridges-text)
+        INPUT=$(cat ${USER_DIR}/text/deactivate-bridges-text)
         if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-          sudo bash config.scripts/tor.bridges-obfs4-deactivate.sh
+          sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-deactivate.sh
           read_config
         fi
       fi
@@ -167,9 +155,9 @@ case $CHOICE in
 
   ADD)
     if [ "$MODE_MEEK" = "Bridge meek_lite " ] || [ "$MODE_SNOW" = "Bridge snowflake " ]; then
-      whiptail --title "Tor - INFO" --textbox text/no_meek-snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/no_meek-snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
     fi
-    sudo bash config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 1
+    sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-add.sh "$MODE_BRIDGES" 1
     read_config
   ;;
 
@@ -179,8 +167,8 @@ case $CHOICE in
       echo -e "${WHITE}[!] There are no configured OBFS4 bridges -> nothing to remove!${NOCOLOR}"
       sleep 5
     else
-      whiptail --title "Tor - INFO" --textbox text/remove-bridges-text $MENU_HEIGHT_25 $MENU_WIDTH
-      sudo bash config.scripts/tor.bridges-obfs4-remove.sh "$MODE_BRIDGES"
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/remove-bridges-text $MENU_HEIGHT_25 $MENU_WIDTH
+      sudo bash ${USER_DIR}/config.scripts/tor.bridges-obfs4-remove.sh "$MODE_BRIDGES"
       read_config
     fi
   ;;
@@ -208,7 +196,7 @@ case $CHOICE in
       echo -e "${RED}[+] Would you like to have more information on a specific bridge?${NOCOLOR}"
       echo -e "${RED}[+] Go to https://metrics.torproject.org/rs.html and search for the fingerprint${NOCOLOR}"
       echo " "
-      trap "bash 96torBridgesMenu.sh; exit 0" SIGINT
+      trap "bash ${USER_DIR}/96torBridgesMenu.sh; exit 0" SIGINT
       while [ $i -lt $number_configured_bridges_deactivated ]
       do
           bridge_address=$(cut -d ' ' -f3,4 <<< ${configured_bridges_deactivated[$i]})
@@ -233,7 +221,7 @@ case $CHOICE in
       echo -e "${RED}[+] Would you like to have more information on a specific bridge?${NOCOLOR}"
       echo -e "${RED}[+] Go to https://metrics.torproject.org/rs.html and search for the fingerprint${NOCOLOR}"
       echo " "
-      trap "bash 96torBridgesMenu.sh; exit 0" SIGINT
+      trap "bash ${USER_DIR}/96torBridgesMenu.sh; exit 0" SIGINT
       j=0
       while [ $j -lt $number_configured_bridges_activated ]
       do
@@ -264,17 +252,17 @@ case $CHOICE in
   # Other pb bridges types
   SNOWFLAKE)
     if [ "$MODE_MEEK" = "Bridge meek_lite " ] || [ "$MODE_OBFS4" = "Bridge obfs4 " ]; then
-      whiptail --title "Tor - INFO" --textbox text/no_meek-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/no_meek-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
     fi
-    sudo bash config.scripts/tor.bridges-snowflake.sh $SNOWSTRING $MEEKSTRING
+    sudo bash ${USER_DIR}/config.scripts/tor.bridges-snowflake.sh $SNOWSTRING $MEEKSTRING
     read_config
   ;;
 
   MEEK_AZURE)
     if [ "$MODE_OBFS4" = "Bridge obfs4 " ] || [ "$MODE_SNOW" = "Bridge snowflake " ]; then
-      whiptail --title "Tor - INFO" --textbox text/no_snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
+      whiptail --title "Tor - INFO" --textbox ${USER_DIR}/text/no_snow-please-text $MENU_HEIGHT_15 $MENU_WIDTH_REDUX
     fi
-    sudo bash config.scripts/tor.bridges-meek-azure.sh $MEEKSTRING $SNOWSTRING
+    sudo bash ${USER_DIR}/config.scripts/tor.bridges-meek-azure.sh $MEEKSTRING $SNOWSTRING
     read_config
   ;;
 
@@ -287,4 +275,4 @@ case $CHOICE in
 
 esac
 
-bash 96torBridgesMenu.sh
+bash ${USER_DIR}/96torBridgesMenu.sh

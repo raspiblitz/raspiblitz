@@ -17,8 +17,6 @@ if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 
-source ${CONF}
-
 OPTIONS=()
 
 # lnd

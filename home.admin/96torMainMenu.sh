@@ -179,25 +179,25 @@ case $CHOICE in
 
   # Checks
   CREDENTIALS)
-    trap "bash 96torMainMenu.sh; exit 0" SIGINT
-    bash 96torCredentialsMenu.sh
+    trap "bash ${USER_DIR}/96torMainMenu.sh; exit 0" SIGINT
+    bash ${USER_DIR}/96torCredentialsMenu.sh
   ;;
 
   NYX)
-    trap "bash 96torMainMenu.sh; exit 0" SIGINT
+    trap "bash ${USER_DIR}/96torMainMenu.sh; exit 0" SIGINT
     sudo -u ${OWNER_TOR_DATA_DIR} nyx
   ;;
 
 
   LOGS)
-      trap "bash 96torMainMenu.sh; exit 0" SIGINT
+      trap "bash ${USER_DIR}/96torMainMenu.sh; exit 0" SIGINT
       clear
       sudo journalctl -n 40 -fu tor@default
   ;;
 
   TORRC)
     set_owner_permission
-    if /home/admin/config.scripts/blitz.setconf.sh ${TORRC} ${OWNER_TOR_DATA_DIR}; then
+    if ${USER_DIR}/config.scripts/blitz.setconf.sh ${TORRC} ${OWNER_TOR_DATA_DIR}; then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
         --yesno "To apply the new settings Tor needs to reload.
@@ -213,14 +213,14 @@ case $CHOICE in
     ;;
 
   RELOAD)
-    INPUT=$(cat text/reload-tor-text)
+    INPUT=$(cat ${USER_DIR}/text/reload-tor-text)
     if (whiptail --title "TorBox - INFO" --defaultno --no-button "NO - DON'T RELOAD" --yes-button "YES - RELOAD" --yesno "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH); then
       restarting_tor ${SOURCE_SCRIPT}
     fi
   ;;
 
   RESTART)
-    INPUT=$(cat text/restart-tor-text)
+    INPUT=$(cat ${USER_DIR}/text/restart-tor-text)
     if (whiptail --title "TorBox - INFO" --defaultno --no-button "NO - DON'T (RE)START" --yes-button "YES - (RE)START" --yesno "$INPUT" $MENU_HEIGHT_15 $MENU_WIDTH); then
       restarting_tor ${SOURCE_SCRIPT} force
     fi
@@ -228,13 +228,13 @@ case $CHOICE in
 
   SSH_OVER_TOR)
     if [ "${sshTor}" == "off" ] ; then
-      INPUT=$(cat text/activate-ssh-over-tor-text)
+      INPUT=$(cat ${USER_DIR}/text/activate-ssh-over-tor-text)
       if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_20 $MENU_WIDTH_REDUX); then
         ${ONION_SERVICE_SCRIPT} on ssh 22 22
         sudo sed -i "s/^sshTor=.*/sshTor=on/g" ${CONF}
       fi
     else
-      INPUT=$(cat text/deactivate-ssh-over-tor-text)
+      INPUT=$(cat ${USER_DIR}/text/deactivate-ssh-over-tor-text)
       if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_20 $MENU_WIDTH_REDUX  ); then
         ${ONION_SERVICE_SCRIPT} off ssh
         sudo sed -i "s/^sshTor=.*/sshTor=off/g" ${CONF}
@@ -251,7 +251,7 @@ case $CHOICE in
   ;;
 
   CHANGE_GUARD)
-    INPUT=$(cat text/tor-reset-text)
+    INPUT=$(cat ${USER_DIR}/text/tor-reset-text)
     if (whiptail --title "Tor - INFO" --defaultno  --yesno "$INPUT" 18 $MENU_WIDTH); then
       clear
       echo -e "${RED}[+] Stopping Tor...${NOCOLOR}"
@@ -397,7 +397,7 @@ EOF
 
   VANGUARDS)
     vanguardsStatus=$(sudo systemctl is-active vanguards@default.service)
-    INPUT=$(cat text/vanguards-explanation-text)
+    INPUT=$(cat ${USER_DIR}/text/vanguards-explanation-text)
     if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
       CHOICE=$(whiptail --menu "Vanguards are: ${vanguardsStatus}" 16 80 6 \
               "INSTALL" "Install Vanguards" \
@@ -408,7 +408,7 @@ EOF
 
       if [ "$CHOICE" == " LOGS" ]; then
         clear
-        trap "bash 96torMainMenu.sh; exit 0" EXIT
+        trap "bash ${USER_DIR}/96torMainMenu.sh; exit 0" EXIT
         sudo journalctl -n 10 -fu vanguards@default.service
       elif [ "$CHOICE" == "INSTALL" ]; then
         clear
@@ -433,16 +433,16 @@ EOF
   ;;
 
   AUTH)
-    INPUT=$(cat text/onion-auth-text)
+    INPUT=$(cat ${USER_DIR}/text/onion-auth-text)
     if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-      bash 96torAuthMenu.sh
+      bash ${USER_DIR}/96torAuthMenu.sh
     fi
   ;;
 
   RENEW_ADDRESS)
-    INPUT=$(cat text/renew-address-text)
+    INPUT=$(cat ${USER_DIR}/text/renew-address-text)
     if (whiptail --title "Tor - INFO" --defaultno --no-button "NO" --yes-button "YES" --yesno "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH); then
-      bash 96torRenewAddressMenu.sh
+      bash ${USER_DIR}/96torRenewAddressMenu.sh
     fi
 
   ;;
@@ -477,27 +477,28 @@ All Tor packages can be upgrade via 'Menu > Update > Tor'
   ;;
 
   ONION)
-    INPUT=$(cat text/onion-explanation-tor-text)
+    INPUT=$(cat ${USER_DIR}/text/onion-explanation-tor-text)
     whiptail --title "Tor - INFO" --msgbox "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH
   ;;
 
   DISCLAIMERS)
-    INPUT=$(cat text/disclaimer-tor-text)
+    INPUT=$(cat ${USER_DIR}/text/disclaimer-tor-text)
     whiptail --title "Tor - INFO (scroll down)" --msgbox --scrolltext "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH
   ;;
 
   # Defend the open internet
   SUPPORT_TPO)
-    INPUT=$(cat text/support-tor-text)
+    INPUT=$(cat ${USER_DIR}/text/support-tor-text)
     whiptail --title "Tor - INFO" --msgbox "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH
   ;;
 
   SUPPORT_TORBOX)
-    INPUT=$(cat text/support-torbox-text)
+    INPUT=$(cat ${USER_DIR}/text/support-torbox-text)
     whiptail --title "Tor - INFO" --msgbox "$INPUT" $MENU_HEIGHT_25 $MENU_WIDTH
   ;;
 
   *)
+    clear
     exit 0
 
 esac

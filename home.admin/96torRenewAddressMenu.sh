@@ -25,7 +25,6 @@ if [ ${#mempoolExplorerOnionAuth} -eq 0 ]; then mempoolExplorerOnionAuth="off"; 
 if [ ${#thunderhubOnionAuth} -eq 0 ]; then thunderhubOnionAuth="off"; fi
 if [ ${#litOnionAuth} -eq 0 ]; then litOnionAuth="off"; fi
 
-source ${CONF}
 
 OPTIONS=()
 if [ "${network}" == "bitcoin" ]; then
