@@ -11,6 +11,10 @@ SCRIPT_DIR=$HOME_DIR/stacking-sats-kraken
 SCRIPT_NAME=stacksats.sh
 SCRIPT_VERSION=0.4.3
 
+# leave script but not terminal when sourcing this file
+caller=$(echo "$0"|rev|cut -d"/"|rev)
+if [ "$caller" = "bonus.stacking-sats-kraken.sh" ]; then return; fi
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch stacking-sats-kraken on or off"
@@ -39,7 +43,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME rm v$SCRIPT_VERSION.tar.gz
     cd stacking-sats-kraken
     sudo -u $USERNAME npm install
-    if ! [ $? -eq 0 ]; then
+    err="$?"
+    
+    # auto fix on found vulnerability
+    ## at the instance of `normalize-url` the script would not run through
+    if ! [ $err -eq 0 ]; then
+        sudo -u $USERNAME npm audit
+        err="$?"
+        if ! [ $err -eq 0 ]; then
+            sudo -u $USERNAME npm audit fix
+            err="$?"
+            exit 1
+        fi
+    fi
+    if ! [ $err -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
     fi
