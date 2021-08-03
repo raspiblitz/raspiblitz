@@ -93,6 +93,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo apt-get install -y sendxmpp
   fi
 
+  cat << EOF | sudo tee /homer/admin/.sendxmpprC >/dev/null
+# echo "Message" | sendxmpp -u user -p pass -j domain.tld -n receipient@domain.tld
+username: user
+jserver: domain.tld
+password: pass
+# port: 5222 # default is 5222
+tls: 1 # modern servers will not accept anything without TLS
+# verify: 1 # unknown value for off, use cli paramater -n if needed
+EOF
+
   # install mstmp if not already present
   if ! command -v msmtp >/dev/null; then
     [ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mtime -7)" ] && sudo apt-get update
