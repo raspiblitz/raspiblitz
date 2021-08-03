@@ -344,3 +344,16 @@ function whitepaper() {
   cd /home/admin/config.scripts
   ./bonus.whitepaper.sh on
 }
+
+# command: stack
+# call stackingSatsKraken for stacking or withdrawal, ommit when not enabled
+stack ()
+{
+  grep "stackingSatsKraken" /mnt/hdd/raspiblitz.conf | grep -i "=off" >/dev/null
+  if [ $? -eq 0 ]; then echo "stackingsats not enabled."; echo "to enable, run \`./config.scripts/bonus.stacking-sats-kraken.sh on\`."; return; fi
+  sudo -u stackingsats /home/stackingsats/stacking-sats-kraken/stacksats.sh "$1"
+}
+withdraw ()
+{
+  stack withdraw
+}
