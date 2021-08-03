@@ -23,6 +23,7 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -48,7 +49,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  OPTIONS+=(k 'Sparko' ${sphinxrelay})
+  OPTIONS+=(k 'Sparko' ${sparko})
 fi
 
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
