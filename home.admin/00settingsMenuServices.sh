@@ -50,7 +50,8 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  # none yet
+  # nothing yet 
+  echo ""
 fi
 
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
