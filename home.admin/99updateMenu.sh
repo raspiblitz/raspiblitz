@@ -21,7 +21,7 @@ No need to close channels or download blockchain again.
 Do you want to start the Update now?
       " 16 62
   if [ $? -eq 0 ]; then
-    exit 1
+    exit 0
   fi
 
   whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
@@ -69,7 +69,7 @@ and do you WANT TO START UPDATE NOW?
 OK. RaspiBlitz will NOT update now.
       " 7 39
     sudo systemctl start lnd
-    exit 1
+    exit 0
   fi
 
   clear
@@ -93,7 +93,7 @@ hotfix the code and might compromise your security.
 Do you want to Patch your RaspiBlitz now?
       " 18 58
   if [ $? -eq 0 ]; then
-    exit 1
+    exit 0
   fi
 }
 
@@ -128,10 +128,11 @@ patch()
         echo "REBOOT .."
         /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
+        exit 1
       else
         echo "SKIP REBOOT .."
+        exit 0
       fi
-      exit 1
       ;;
     REPO)
       clear
@@ -148,7 +149,7 @@ patch()
         fi
       fi
       patch
-      exit 1
+      exit 0
       ;;
     BRANCH)
       clear
@@ -165,7 +166,7 @@ patch()
         fi
       fi
       patch
-      exit 1
+      exit 0
       ;;
     PR)
       clear
@@ -186,7 +187,7 @@ patch()
           /home/admin/config.scripts/blitz.github.sh -justinstall
         fi
       fi
-      exit 1
+      exit 0
       ;;
   esac
 
@@ -212,7 +213,7 @@ lnd()
     VERIFIED)
       if [ ${lndUpdateInstalled} -eq 1 ]; then
         whiptail --title "ALREADY INSTALLED" --msgbox "The LND version ${lndUpdateVersion} is already installed." 8 30
-        exit 1
+        exit 0
       fi
       whiptail --title "OPTIONAL LND UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to LND v${lndUpdateVersion}:
 
@@ -222,7 +223,7 @@ Do you really want to update LND now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       # if loop is installed remove
       if [ "${loop}" == "on" ]; then
@@ -255,7 +256,7 @@ Do you really want to update LND now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       error=""
       source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh reckless)
@@ -296,7 +297,7 @@ bitcoinUpdate() {
       if [ ${bitcoinUpdateInstalled} -eq 1 ]; then
         whiptail --title "ALREADY INSTALLED" \
         --msgbox "The Bitcoin Core version ${bitcoinUpdateVersion} is already installed." 8 30
-        exit 1
+        exit 0
       fi
       whiptail --title "OPTIONAL Bitcoin Core update" --yes-button "Cancel" --no-button "Update" \
       --yesno "Info on updating to Bitcoin Core v${bitcoinVersion}:
@@ -308,7 +309,7 @@ Do you really want to update Bitcoin Core now?
       " 12 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
 
       error=""
@@ -332,7 +333,7 @@ Do you really want to update Bitcoin Core now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       error=""
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh reckless)

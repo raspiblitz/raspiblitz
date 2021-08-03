@@ -38,8 +38,9 @@ echo "stop electrs - please wait .."
 sudo systemctl stop electrs 2>/dev/null
 
 # stopping lnd
-echo "stop lnd - please wait .."
+echo "stop lightning - please wait .."
 sudo systemctl stop lnd 2>/dev/null
+sudo systemctl stop lightningd 2>/dev/null
 
 # stopping bitcoin (thru cli)
 echo "stop ${network}d (1) - please wait .."

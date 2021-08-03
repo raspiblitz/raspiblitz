@@ -34,7 +34,7 @@ if [ ${chainOutSync} -eq 1 ]; then
   echo 
   echo "# PRESS ENTER to return to menu"
   read key
-  exit 1
+  exit 0
 else
   echo "# OK - the chain is synced"
 fi

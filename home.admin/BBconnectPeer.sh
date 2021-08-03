@@ -32,7 +32,7 @@ if [ ${#_input} -eq 0 ]; then
   echo
   echo "no peer entered - returning to menu ..."
   sleep 2
-  exit 1
+  exit 0
 fi
 
 pubkey=$(echo "${_input}"|cut -d@ -f1)

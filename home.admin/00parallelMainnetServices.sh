@@ -37,10 +37,10 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
-  exit 1
+  exit 0
 elif [ ${dialogcancel} -eq 255 ]; then
   echo "ESC pressed"
-  exit 1
+  exit 0
 fi
 
 needsReboot=0

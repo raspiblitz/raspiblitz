@@ -118,7 +118,7 @@ case $CHOICE in
 
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
-    exit 1;
+    exit 0;
     ;;
   RESET-HDD)
     askBackupCopy
@@ -136,11 +136,11 @@ case $CHOICE in
     ;;
   DELETE-ELEC)
     /home/admin/config.scripts/bonus.electrs.sh off deleteindex
-    exit 1;
+    exit 0;
     ;;
   DELETE-INDEX)
     /home/admin/config.scripts/network.txindex.sh delete
-    exit 1;
+    exit 0;
     ;;
   COPY-SOURCE)
     /home/admin/config.scripts/blitz.copychain.sh source

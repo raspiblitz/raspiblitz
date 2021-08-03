@@ -36,7 +36,7 @@ if [ ${chainOutSync} -eq 1 ]; then
   echo 
   echo "# PRESS ENTER to return to menu"
   read key
-  exit 1
+  exit 0
 else
   echo "# OK - the chain is synced"
 fi
@@ -57,7 +57,7 @@ if [ ${confirmedBalance} -eq 0 ]; then
   echo
   echo "Press ENTER to return to main menu."
   read key
-  exit 1
+  exit 0
 fi
 
 # check number of connected peers
@@ -74,7 +74,7 @@ if [ ${numConnectedPeers} -eq 0 ]; then
   echo
   echo "Press ENTER to return to main menu."
   read key
-  exit 1
+  exit 0
 fi
 
 # let user pick a peer to open a channels with
@@ -109,7 +109,7 @@ if [ ${#pubKey} -eq 0 ]; then
   echo 
   echo "no channel selected - returning to menu ..."
   sleep 4
-  exit 1
+  exit 0
 fi
 
 # find out what is the minimum amount 
@@ -140,7 +140,7 @@ if [ ${#amount} -eq 0 ]; then
   echo
   echo "no valid amount entered - returning to menu ..."
   sleep 4
-  exit 1
+  exit 0
 fi
 
 # let user enter a confirmation target
@@ -154,7 +154,7 @@ if [ ${#conf_target} -eq 0 ]; then
   echo
   echo "no valid target entered - returning to menu ..."
   sleep 4
-  exit 1
+  exit 0
 fi
 
 # build command
