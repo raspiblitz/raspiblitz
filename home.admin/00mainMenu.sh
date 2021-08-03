@@ -77,6 +77,9 @@ fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
 fi
+if [ "${sparko}" == "on" ]; then
+  OPTIONS+=(SPARKO "Sparko Webwallet")
+fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
@@ -247,6 +250,9 @@ case $CHOICE in
             ;;
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
+            ;;
+        SPARKO)
+            /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu

@@ -145,6 +145,12 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   # hidden service to https://xx.onion
   /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}sparko 443 ${portprefix}9000
 
+  # add default value to raspi config if needed
+  if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
+    NEWENTRY="${netprefix}sparko=on"
+    sudo /bin/sh -c "echo '$NEWENTRY' >> /mnt/hdd/raspiblitz.conf" 
+  fi
+
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
 
