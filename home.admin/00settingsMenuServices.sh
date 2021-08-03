@@ -93,9 +93,9 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu ${lightning} mainnet
     else
-      l1="!!! FAIL on RTL install !!!"
+      l1="!!! FAIL on RTL ${lightning} install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on ${lightning} mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
