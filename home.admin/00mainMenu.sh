@@ -68,7 +68,7 @@ if [ "${rtlWebinterface}" == "on" ]; then
 fi
 
 # Put Activated Apps on top
-if [ "${rtlWebinterface}" == "on" ]; then
+if [ "${rtlWebinterface}" == "on" ] || [ "${crtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "RTL Web Node Manager")
 fi
 if [ "${BTCPayServer}" == "on" ]; then
@@ -237,7 +237,7 @@ case $CHOICE in
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
             ;;
         RTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu
+            /home/admin/config.scripts/bonus.rtl.sh menu ${lightning}
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
