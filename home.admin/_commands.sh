@@ -357,3 +357,14 @@ withdraw ()
 {
   stack withdraw
 }
+
+# command: xmpp
+# send message via xmpp to standard receipent with user from settings
+xmpp ()
+{
+  grep "notify=on" /mnt/hdd/raspiblitz.conf || { echo "notify is inactive"; return; } # assert when disabled
+  # grep -i "notifyMethod=xmpp" /mnt/hdd/raspiblitz.conf || { echo "Method is not XMPP"; return; } # assert when not xmpp
+  r=$(cat /mnt/hdd/raspiblitz.conf|grep -i notifyXMPPTo|cut -d"=" -f2) # fetch receipient
+  echo -e $(date +'%Y-%m-%d %H:%M %z')"\n"$(whoami)"@"$(hostname)":\n\n$@" | sendxmpp -n "${r}" # send message
+  test $? -eq 0 || { echo "error on sending XMPP message."; return 1; }
+}
