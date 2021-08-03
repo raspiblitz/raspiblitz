@@ -38,7 +38,7 @@ OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
 
 # just available for LND
 if [ "${lightning}" == "lnd" ]; then
-  OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
+  OPTIONS+=(r 'RTL LND Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
   OPTIONS+=(i 'LNbits' ${LNBits})
@@ -50,7 +50,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  OPTIONS+=(r 'RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(r 'RTL C-Lightning Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
 fi
 
