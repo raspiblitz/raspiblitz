@@ -8,6 +8,7 @@ source /mnt/hdd/raspiblitz.conf
 echo "services default values"
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
+if [ ${#crtlWebinterface} -eq 0 ]; then crtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
@@ -30,7 +31,6 @@ echo "run dialog ..."
 
 OPTIONS=()
 OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
-OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
 OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
@@ -38,6 +38,7 @@ OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
 
 # just available for LND
 if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
   OPTIONS+=(i 'LNbits' ${LNBits})
@@ -49,6 +50,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
+  OPTIONS+=(r 'RTL Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
 fi
 
@@ -82,14 +84,14 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice}
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} ${lightning} mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu
+      /home/admin/config.scripts/bonus.rtl.sh menu ${lightning} mainnet
     else
       l1="!!! FAIL on RTL install !!!"
       l2="Try manual install on terminal after reboot with:"
