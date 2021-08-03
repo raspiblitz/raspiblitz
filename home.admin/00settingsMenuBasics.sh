@@ -115,7 +115,7 @@ CHOICES=$(dialog \
           "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
-echo "done dialog"
+echo "done dialog (${CHOICE_HEIGHT})"
 clear
 
 # check if user canceled dialog
