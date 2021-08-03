@@ -212,8 +212,13 @@ echo "* RaspiBlitz Commandline"
 echo "* Here be dragons .. have fun :)"
 echo "***********************************"
 if [ "${setupPhase}" == "done" ]; then
-  echo "Bitcoin command line options: bitcoin-cli help"
-  echo "LND command line options: lncli -h"
+  echo "Bitcoin command line options: ${network}-cli help"
+  if [ "${lightning}" == "lnd" ]; then
+    echo "LND command line options: lncli -h"
+  fi
+  if [ "${lightning}" == "cln" ]; then
+    echo "C-Lightning command line options: lightning-cli help"
+  fi
 else
   echo "Your setup is not finished."
   echo "For setup logs: cat raspiblitz.log"
