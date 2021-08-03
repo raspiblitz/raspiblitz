@@ -107,7 +107,7 @@ if [ ${chain} = "main" ];then
   fi
 fi
 
-CHOICE_HEIGHT=$(("${#OPTIONS[@]}" / 3))
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
 CHOICES=$(dialog \
           --title ' Node Settings & Options ' \
           --checklist ' use spacebar to activate/de-activate ' \
