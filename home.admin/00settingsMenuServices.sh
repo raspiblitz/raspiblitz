@@ -48,8 +48,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  # nothing yet 
-  echo ""
+  OPTIONS+=(k 'Sparko' ${sphinxrelay})
 fi
 
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
@@ -443,6 +442,27 @@ else
   echo "Whitepaper setting unchanged."
 fi
 
+# sparko process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${sparko}" != "${choice}" ]; then
+  echo "# Sparko on mainnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cln-plugin.sparko.sh ${choice} mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+    else
+      l1="# !!! FAIL on Sparko on mainnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cln-plugin.sparko.sh on mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Sparko on mainnet Setting unchanged."
+fi
 
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
