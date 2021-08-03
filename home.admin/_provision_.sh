@@ -347,14 +347,34 @@ else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
 fi
 
-# RTL
+# RTL (LND)
 if [ "${rtlWebinterface}" = "on" ]; then
-    echo "Provisioning RTL - run config script" >> ${logFile}
+    echo "Provisioning RTL LND - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
     sudo systemctl disable RTL # will get enabled after recover dialog
 else
-    echo "Provisioning RTL - keep default" >> ${logFile}
+    echo "Provisioning RTL LND - keep default" >> ${logFile}
+fi
+
+# RTL (CLN)
+if [ "${crtlWebinterface}" = "on" ]; then
+    echo "Provisioning RTL CLN - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cln mainnet >> ${logFile} 2>&1
+    sudo systemctl disable cRTL # will get enabled after recover dialog
+else
+    echo "Provisioning RTL CLN - keep default" >> ${logFile}
+fi
+
+# SPARKO
+if [ "${sparko}" = "on" ]; then
+    echo "Provisioning Sparko - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cln-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
+    sudo systemctl disable cRTL # will get enabled after recover dialog
+else
+    echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
 
 #LOOP
