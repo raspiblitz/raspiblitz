@@ -376,52 +376,49 @@ fi
 HEIGHT=10 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=55
 CHOICE_HEIGHT=4 # 1 line / OPTIONS
-OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery"
-PATCH "Patch RaspiBlitz v${codeVersion}"
-LND "Interim LND Update Options"
-BITCOIN "Bitcoin Core Update Options"
-)
+OPTIONS=()
+OPTIONS+=(RELEASE "RaspiBlitz Release Update/Recovery")
+OPTIONS+=(PATCH "Patch RaspiBlitz v${codeVersion}")
+OPTIONS+=(BITCOIN "Bitcoin Core Update Options")
+
+if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(LND "Interim LND Update Options")
+fi
 
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
+
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
+HEIGHT=$((CHOICE_HEIGHT+6))  
 CHOICE=$(dialog --clear \
                 --backtitle "" \
                 --title "Update Options" \

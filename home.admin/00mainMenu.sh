@@ -177,8 +177,9 @@ OPTIONS+=(UPDATE "Check/Prepare RaspiBlitz Update")
 OPTIONS+=(REBOOT "Reboot RaspiBlitz")
 OPTIONS+=(OFF "PowerOff RaspiBlitz")
 
-HEIGHT=$(("${#OPTIONS[@]}"))
-CHOICE_HEIGHT=$(("${#OPTIONS[@]}" / 2))
+
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
